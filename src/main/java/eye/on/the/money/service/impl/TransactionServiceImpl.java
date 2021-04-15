@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -58,10 +59,20 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Transactional
-    public TransactionDTO createOrUpdateTransaction(Transaction transaction, User user, String currencyId, String coinId, Double amount) {
-        Currency currency = this.currencyRepository.findById(currencyId).orElseThrow(NoSuchElementException::new);
-        Coin coin = this.coinRepository.findById(coinId).orElseThrow(NoSuchElementException::new);
-        Payment payment = this.paymentService.createPayment(currency, amount);
-        return null;
+    public TransactionDTO createTransaction(TransactionDTO transactionDTO, User user) {
+        Currency currency = this.currencyRepository.findByName(transactionDTO.getCurrencyName()).orElseThrow(NoSuchElementException::new);
+        Coin coin = this.coinRepository.findByName(transactionDTO.getName()).orElseThrow(NoSuchElementException::new);
+        Payment payment = this.paymentService.createPayment(currency, transactionDTO.getAmount());
+
+        Transaction transaction = Transaction.builder()
+                .buySell(transactionDTO.getBuySell())
+                .transactionDate(transactionDTO.getTransactionDate())
+                .creationDate(new Date())
+                .coin(coin)
+                .payment(payment)
+                .user(user)
+                .build();
+        transaction = this.transactionRepository.save(transaction);
+        return this.convertToTransactionDTO(transaction);
     }
 }

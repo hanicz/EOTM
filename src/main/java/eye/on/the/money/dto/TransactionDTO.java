@@ -20,4 +20,5 @@ public class TransactionDTO {
     private Date transactionDate;
     private String name;
     private Double amount;
+    private String currencyName;
 }

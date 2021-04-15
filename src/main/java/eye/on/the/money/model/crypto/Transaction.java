@@ -12,6 +12,7 @@ import java.util.Date;
 @Entity
 @Getter
 @Setter
+@Builder
 @Slf4j
 @ToString
 @Table(name = "COIN_TRANSACTION")

@@ -1,0 +1,67 @@
+package eye.on.the.money.service.impl;
+
+import eye.on.the.money.dto.TransactionDTO;
+import eye.on.the.money.model.Currency;
+import eye.on.the.money.model.Payment;
+import eye.on.the.money.model.User;
+import eye.on.the.money.model.crypto.Coin;
+import eye.on.the.money.model.crypto.Transaction;
+import eye.on.the.money.repository.CoinRepository;
+import eye.on.the.money.repository.CurrencyRepository;
+import eye.on.the.money.repository.PaymentRepository;
+import eye.on.the.money.repository.TransactionRepository;
+import eye.on.the.money.service.PaymentService;
+import eye.on.the.money.service.TransactionService;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+public class TransactionServiceImpl implements TransactionService {
+
+    @Autowired
+    private TransactionRepository transactionRepository;
+
+    @Autowired
+    private PaymentService paymentService;
+
+    @Autowired
+    private CurrencyRepository currencyRepository;
+
+    @Autowired
+    private CoinRepository coinRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+    @Override
+    public List<TransactionDTO> getTransactionsByUserId(Long userId) {
+        return this.transactionRepository.findByUser_Id(userId).stream().map(this::convertToTransactionDTO).collect(Collectors.toList());
+    }
+
+    private TransactionDTO convertToTransactionDTO(Transaction transaction) {
+        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
+        TransactionDTO transactionDTO = modelMapper.map(transaction, TransactionDTO.class);
+        return transactionDTO;
+    }
+
+    @Override
+    public void deleteTransactionById(Long id) {
+        this.transactionRepository.deleteById(id);
+    }
+
+    @Transactional
+    public TransactionDTO createOrUpdateTransaction(Transaction transaction, User user, String currencyId, String coinId, Double amount) {
+        Currency currency = this.currencyRepository.findById(currencyId).orElseThrow(NoSuchElementException::new);
+        Coin coin = this.coinRepository.findById(coinId).orElseThrow(NoSuchElementException::new);
+        Payment payment = this.paymentService.createPayment(currency, amount);
+        return null;
+    }
+}

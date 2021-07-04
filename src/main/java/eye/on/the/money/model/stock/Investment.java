@@ -22,7 +22,7 @@ public class Investment {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    private Double quantity;
+    private Integer quantity;
     private String buySell;
     private Date creationDate;
     private Date transactionDate;
@@ -37,6 +37,6 @@ public class Investment {
     private Stock stock;
 
     @OneToOne
-    @JoinColumn(name = "stockpayment_id", nullable = false)
+    @JoinColumn(name = "stockPayment_id", nullable = false)
     private StockPayment stockPayment;
 }

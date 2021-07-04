@@ -23,11 +23,11 @@ public class TransactionController {
     @Autowired
     private TransactionService transactionService;
 
-    private static final Logger log = LoggerFactory.getLogger(EotmApplication.class);
+    private static final Logger log = LoggerFactory.getLogger(TransactionController.class);
 
     @GetMapping()
     public ResponseEntity<List<TransactionDTO>> getCoinTransactionsByUserId(@AuthenticationPrincipal User user){
-        log.debug("Test debug log");
+        log.trace("Enter getCoinTransactionsByUserId");
         return new ResponseEntity<List<TransactionDTO>>(this.transactionService.getTransactionsByUserId(user.getId()), HttpStatus.OK);
     }
 }

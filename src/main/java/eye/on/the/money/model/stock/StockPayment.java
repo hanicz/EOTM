@@ -22,7 +22,7 @@ public class StockPayment {
     private Long id;
     private Double amount;
 
-    @OneToOne(mappedBy = "investment")
+    @OneToOne(mappedBy = "stockPayment")
     @JsonIgnore
     private Investment investment;
 

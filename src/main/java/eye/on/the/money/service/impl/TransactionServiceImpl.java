@@ -47,8 +47,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private TransactionDTO convertToTransactionDTO(Transaction transaction) {
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
-        TransactionDTO transactionDTO = modelMapper.map(transaction, TransactionDTO.class);
-        return transactionDTO;
+        return modelMapper.map(transaction, TransactionDTO.class);
     }
 
     @Override

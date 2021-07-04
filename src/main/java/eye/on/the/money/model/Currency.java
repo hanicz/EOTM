@@ -1,6 +1,7 @@
 package eye.on.the.money.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eye.on.the.money.model.crypto.Payment;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,7 +13,7 @@ import java.util.Set;
 @Setter
 @Slf4j
 @ToString
-@Table(name = "CURRENCY")
+@Table(name = "EOTM_CURRENCY")
 @AllArgsConstructor
 @NoArgsConstructor
 public class Currency {

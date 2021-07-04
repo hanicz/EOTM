@@ -2,13 +2,12 @@ package eye.on.the.money.service.impl;
 
 import eye.on.the.money.dto.TransactionDTO;
 import eye.on.the.money.model.Currency;
-import eye.on.the.money.model.Payment;
+import eye.on.the.money.model.crypto.Payment;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.crypto.Coin;
 import eye.on.the.money.model.crypto.Transaction;
 import eye.on.the.money.repository.CoinRepository;
 import eye.on.the.money.repository.CurrencyRepository;
-import eye.on.the.money.repository.PaymentRepository;
 import eye.on.the.money.repository.TransactionRepository;
 import eye.on.the.money.service.PaymentService;
 import eye.on.the.money.service.TransactionService;
@@ -21,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service

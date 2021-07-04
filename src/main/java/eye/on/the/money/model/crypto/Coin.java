@@ -12,7 +12,7 @@ import java.util.Set;
 @Setter
 @Slf4j
 @ToString
-@Table(name = "COIN")
+@Table(name = "EOTM_COIN")
 @AllArgsConstructor
 @NoArgsConstructor
 public class Coin {

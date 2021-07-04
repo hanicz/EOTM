@@ -1,4 +1,4 @@
-package eye.on.the.money.model.crypto;
+package eye.on.the.money.model.stock;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import eye.on.the.money.model.User;
@@ -14,10 +14,10 @@ import java.util.Date;
 @Builder
 @Slf4j
 @ToString
-@Table(name = "EOTM_COIN_TRANSACTION")
+@Table(name = "EOTM_STOCK_INVESTMENT")
 @AllArgsConstructor
 @NoArgsConstructor
-public class Transaction {
+public class Investment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -25,7 +25,6 @@ public class Transaction {
     private Double quantity;
     private String buySell;
     private Date creationDate;
-    private String transactionString;
     private Date transactionDate;
 
     @ManyToOne
@@ -34,10 +33,10 @@ public class Transaction {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "coin_id", nullable = false)
-    private Coin coin;
+    @JoinColumn(name = "stock_id", nullable = false)
+    private Stock stock;
 
     @OneToOne
-    @JoinColumn(name = "payment_id", nullable = false)
-    private Payment payment;
+    @JoinColumn(name = "stockpayment_id", nullable = false)
+    private StockPayment stockPayment;
 }

@@ -1,7 +1,7 @@
-package eye.on.the.money.model;
+package eye.on.the.money.model.stock;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import eye.on.the.money.model.crypto.Transaction;
+import eye.on.the.money.model.Currency;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,19 +12,19 @@ import javax.persistence.*;
 @Builder
 @Slf4j
 @ToString
-@Table(name = "PAYMENT")
+@Table(name = "EOTM_STOCK_PAYMENT")
 @AllArgsConstructor
 @NoArgsConstructor
-public class Payment {
+public class StockPayment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private Double amount;
 
-    @OneToOne(mappedBy = "payment")
+    @OneToOne(mappedBy = "investment")
     @JsonIgnore
-    private Transaction transaction;
+    private Investment investment;
 
     @ManyToOne
     @JoinColumn(name = "currency_id", nullable = false)

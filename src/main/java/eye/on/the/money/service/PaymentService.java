@@ -1,7 +1,7 @@
 package eye.on.the.money.service;
 
 import eye.on.the.money.model.Currency;
-import eye.on.the.money.model.Payment;
+import eye.on.the.money.model.crypto.Payment;
 
 public interface PaymentService {
     public Payment createPayment(Currency currency, Double amount);

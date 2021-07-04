@@ -1,7 +1,6 @@
-package eye.on.the.money.model;
+package eye.on.the.money.model.stock;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import eye.on.the.money.model.crypto.Transaction;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,20 +12,18 @@ import java.util.Set;
 @Setter
 @Slf4j
 @ToString
-@Table(name = "EOTM_USER")
+@Table(name = "EOTM_STOCK")
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
-
+public class Stock {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-    private String email;
-    private String password;
+    private String id;
+    private String name;
+    private String shortName;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "stock")
     @JsonIgnore
     @ToString.Exclude
-    private Set<Transaction> transaction;
+    private Set<Investment> investment;
 }
-

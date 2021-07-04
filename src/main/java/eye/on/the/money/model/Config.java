@@ -12,7 +12,7 @@ import javax.persistence.Table;
 @Setter
 @Slf4j
 @ToString
-@Table(name = "CONFIG")
+@Table(name = "EOTM_CONFIG")
 @AllArgsConstructor
 @NoArgsConstructor
 public class Config {

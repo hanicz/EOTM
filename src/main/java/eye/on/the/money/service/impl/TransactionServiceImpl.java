@@ -1,6 +1,6 @@
 package eye.on.the.money.service.impl;
 
-import eye.on.the.money.dto.TransactionDTO;
+import eye.on.the.money.dto.out.TransactionDTO;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.crypto.Payment;
 import eye.on.the.money.model.User;

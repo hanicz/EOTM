@@ -1,6 +1,6 @@
 package eye.on.the.money.service.currency;
 
-import eye.on.the.money.dto.InvestmentDTO;
+import eye.on.the.money.dto.out.InvestmentDTO;
 
 import java.util.List;
 

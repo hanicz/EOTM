@@ -1,6 +1,5 @@
 package eye.on.the.money.repository;
 
-import eye.on.the.money.model.crypto.Transaction;
 import eye.on.the.money.model.stock.Investment;
 import org.springframework.data.repository.CrudRepository;
 

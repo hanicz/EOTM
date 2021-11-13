@@ -1,5 +1,6 @@
 package eye.on.the.money.dto;
 
+
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -11,13 +12,12 @@ import java.util.Date;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class TransactionDTO {
-    private Long transactionId;
-    private Double quantity;
+public class InvestmentDTO {
+    private Long investmentId;
+    private Integer quantity;
     private String buySell;
-    private String transactionString;
     private Date transactionDate;
-    private String name;
+    private String shortName;
     private Double amount;
-    private String currencyName;
+    private String currencyId;
 }

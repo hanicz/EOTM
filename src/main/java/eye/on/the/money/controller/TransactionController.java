@@ -1,6 +1,5 @@
 package eye.on.the.money.controller;
 
-import eye.on.the.money.EotmApplication;
 import eye.on.the.money.dto.TransactionDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.service.TransactionService;

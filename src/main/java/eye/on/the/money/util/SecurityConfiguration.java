@@ -39,7 +39,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .addFilter(new AuthenticationFilter(authenticationManager()))
                 .addFilter(new AuthorizationFilter(authenticationManager(), this.userService))
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        /*http.authorizeRequests()
+       /* http.authorizeRequests()
                 .antMatchers("/").permitAll()
                 .antMatchers("/h2-console/**").permitAll();
 

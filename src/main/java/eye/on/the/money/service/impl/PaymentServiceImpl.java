@@ -15,8 +15,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public Payment createPayment(Currency currency, Double amount) {
-        Payment payment = this.paymentRepository.save(Payment.builder().amount(amount).currency(currency).build());
-        return payment;
+        return this.paymentRepository.save(Payment.builder().amount(amount).currency(currency).build());
     }
 
     @Override

@@ -11,7 +11,7 @@ import java.util.Date;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class InvestmentIn {
+public class InvestmentQuery {
     private String currency;
     private String type;
     private Date transactionDateStart;

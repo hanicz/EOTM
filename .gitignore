@@ -21,3 +21,4 @@ target/
 
 ### SQL ###
 *.sql
+src/main/resources/data.sql

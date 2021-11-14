@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface CurrencyConverter {
     public void changeInvestmentsCurrency(List<InvestmentDTO> investments, String toCurrency);
+    public void changeLiveValueCurrency(List<InvestmentDTO> investments, String toCurrency);
 }

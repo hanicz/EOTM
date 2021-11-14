@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.exception.APIException;
-import eye.on.the.money.model.Credential;
 import eye.on.the.money.repository.ConfigRepository;
 import eye.on.the.money.repository.CredentialRepository;
 import eye.on.the.money.service.currency.CurrencyConverter;
@@ -45,10 +44,27 @@ public class CurrencyConverterImpl implements CurrencyConverter {
                 Double amount = investment.getAmount();
                 String URL = this.createURL(currencyAPI, secret, investment.getCurrencyId(), investment.getTransactionDate());
                 investment.setAmount(amount * this.callCurrencyAPI(URL, toCurrency, investment.getTransactionDate()));
-                investment.setCurrencyId(toCurrency);
             });
         }
 
+    }
+
+    @Override
+    public void changeLiveValueCurrency(List<InvestmentDTO> investments, String toCurrency) {
+        if (CurrencyConverterImpl.supportedCurrencies.contains(toCurrency)) {
+            String currencyAPI = this.configRepository.findById("freecurrencyapi").orElseThrow(NoSuchElementException::new).getConfigValue();
+            String secret = this.credentialRepository.findById("freecurrencyapi").orElseThrow(NoSuchElementException::new).getSecret();
+            investments.forEach(investment -> {
+                if (!investment.getCurrencyId().equals(toCurrency) && investment.getLiveValue() != null) {
+                    String URL = this.createURL(currencyAPI, secret, investment.getCurrencyId(), new Date());
+                    investment.setLiveValue(investment.getLiveValue() * this.callCurrencyAPI(URL, toCurrency, new Date()));
+                }
+                if (investment.getLiveValue() != null) {
+                    investment.setValueDiff(investment.getLiveValue() - investment.getAmount());
+                }
+                investment.setCurrencyId(toCurrency);
+            });
+        }
     }
 
     @Retryable(value = APIException.class, maxAttempts = 3)
@@ -70,7 +86,7 @@ public class CurrencyConverterImpl implements CurrencyConverter {
         }
     }
 
-    private String createURL(String url, String secret, String fromCurrency, Date investmentDate){
+    private String createURL(String url, String secret, String fromCurrency, Date investmentDate) {
         String date = CurrencyConverterImpl.dateFormat.format(investmentDate);
         return MessageFormat.format(
                 url + "historical?apikey={0}&base_currency={1}&date_from={2}&date_to={3}",

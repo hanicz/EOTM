@@ -13,6 +13,7 @@ import eye.on.the.money.repository.StockRepository;
 import eye.on.the.money.service.InvestmentService;
 import eye.on.the.money.service.StockPaymentService;
 import eye.on.the.money.service.currency.CurrencyConverter;
+import eye.on.the.money.service.currency.StockAPIService;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,9 @@ public class InvestmentServiceImpl implements InvestmentService {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private StockAPIService stockAPIService;
 
     @Override
     public List<InvestmentDTO> getInvestments(Long userId) {
@@ -83,14 +87,21 @@ public class InvestmentServiceImpl implements InvestmentService {
     @Override
     public List<InvestmentDTO> getCurrentHoldings(Long userId, InvestmentQuery query) {
         Map<String, InvestmentDTO> investmentMap = this.getCalculated(userId, query);
-        return (new ArrayList<InvestmentDTO>(investmentMap.values())).stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
+        List<InvestmentDTO> investmentDTOList = (new ArrayList<InvestmentDTO>(investmentMap.values()))
+                .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
+        this.stockAPIService.getLiveValue(investmentDTOList);
+        this.currencyConverter.changeLiveValueCurrency(investmentDTOList, query.getCurrency());
+        return investmentDTOList;
 
     }
 
     @Override
     public List<InvestmentDTO> getAllPositions(Long userId, InvestmentQuery query) {
         Map<String, InvestmentDTO> investmentMap = this.getCalculated(userId, query);
-        return (new ArrayList<InvestmentDTO>(investmentMap.values()));
+        return (new ArrayList<InvestmentDTO>(investmentMap.values())).stream().map(investment -> {
+            investment.setCurrencyId(query.getCurrency());
+            return investment;
+        }).collect(Collectors.toList());
 
     }
 
@@ -114,7 +125,7 @@ public class InvestmentServiceImpl implements InvestmentService {
 
     @Transactional
     @Override
-    public InvestmentDTO createInvestment(InvestmentDTO investmentDTO, User user){
+    public InvestmentDTO createInvestment(InvestmentDTO investmentDTO, User user) {
         Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
         Stock stock = this.stockRepository.findByShortName(investmentDTO.getShortName()).orElseThrow(NoSuchElementException::new);
         StockPayment stockPayment = this.stockPaymentService.createNewPayment(currency, investmentDTO.getAmount());

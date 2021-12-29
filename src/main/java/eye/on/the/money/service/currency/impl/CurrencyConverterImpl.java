@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eye.on.the.money.dto.out.InvestmentDTO;
+import eye.on.the.money.dto.out.TransactionDTO;
 import eye.on.the.money.exception.APIException;
 import eye.on.the.money.repository.ConfigRepository;
 import eye.on.the.money.repository.CredentialRepository;
@@ -36,6 +37,24 @@ public class CurrencyConverterImpl implements CurrencyConverter {
     private CredentialRepository credentialRepository;
 
     @Override
+    public void changeTransactionsCurrency(List<TransactionDTO> transactions, String toCurrency) {
+        if (CurrencyConverterImpl.supportedCurrencies.contains(toCurrency)) {
+            String currencyAPI = this.configRepository.findById("freecurrencyapi").orElseThrow(NoSuchElementException::new).getConfigValue();
+            String secret = this.credentialRepository.findById("freecurrencyapi").orElseThrow(NoSuchElementException::new).getSecret();
+            transactions.stream().filter(t -> t.getAmount() != 0.0).forEach(transaction -> {
+                if(!transaction.getCurrencyId().equals(toCurrency)){
+                    Double amount = transaction.getAmount();
+                    String URL = this.createURL(currencyAPI, secret, transaction.getCurrencyId(), transaction.getTransactionDate());
+                    transaction.setAmount(amount * this.callCurrencyAPI(URL, toCurrency, transaction.getTransactionDate()));
+                }
+                if (transaction.getLiveValue() != null) {
+                    transaction.setValueDiff(transaction.getLiveValue() - transaction.getAmount());
+                }
+            });
+        }
+    }
+
+    @Override
     public void changeInvestmentsCurrency(List<InvestmentDTO> investments, String toCurrency) {
         if (CurrencyConverterImpl.supportedCurrencies.contains(toCurrency)) {
             String currencyAPI = this.configRepository.findById("freecurrencyapi").orElseThrow(NoSuchElementException::new).getConfigValue();
@@ -46,7 +65,6 @@ public class CurrencyConverterImpl implements CurrencyConverter {
                 investment.setAmount(amount * this.callCurrencyAPI(URL, toCurrency, investment.getTransactionDate()));
             });
         }
-
     }
 
     @Override

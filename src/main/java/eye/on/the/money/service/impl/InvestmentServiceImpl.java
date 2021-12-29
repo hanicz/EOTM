@@ -49,12 +49,12 @@ public class InvestmentServiceImpl implements InvestmentService {
 
     @Override
     public List<InvestmentDTO> getInvestments(Long userId) {
-        return this.investmentRepository.findByUser_Id(userId).stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
+        return this.investmentRepository.findByUser_IdOrderByTransactionDate(userId).stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
     }
 
     @Override
     public List<InvestmentDTO> getInvestmentsByUserIdWConvCurr(Long userId, String currency) {
-        List<InvestmentDTO> investments = this.investmentRepository.findByUser_Id(userId).stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
+        List<InvestmentDTO> investments = this.investmentRepository.findByUser_IdOrderByTransactionDate(userId).stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
         this.currencyConverter.changeInvestmentsCurrency(investments, currency);
         return investments;
     }
@@ -92,7 +92,6 @@ public class InvestmentServiceImpl implements InvestmentService {
         this.stockAPIService.getLiveValue(investmentDTOList);
         this.currencyConverter.changeLiveValueCurrency(investmentDTOList, query.getCurrency());
         return investmentDTOList;
-
     }
 
     @Override
@@ -102,11 +101,10 @@ public class InvestmentServiceImpl implements InvestmentService {
             investment.setCurrencyId(query.getCurrency());
             return investment;
         }).collect(Collectors.toList());
-
     }
 
     private Map<String, InvestmentDTO> getCalculated(Long userId, InvestmentQuery query) {
-        List<InvestmentDTO> investments = this.investmentRepository.findByUser_Id(userId).stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
+        List<InvestmentDTO> investments = this.investmentRepository.findByUser_IdOrderByTransactionDate(userId).stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
         this.currencyConverter.changeInvestmentsCurrency(investments, query.getCurrency());
         Map<String, InvestmentDTO> investmentMap = new HashMap<>();
         for (InvestmentDTO i : investments) {

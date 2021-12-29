@@ -3,11 +3,10 @@ package eye.on.the.money.service.currency.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eye.on.the.money.dto.out.InvestmentDTO;
+import eye.on.the.money.dto.out.TransactionDTO;
 import eye.on.the.money.exception.APIException;
 import eye.on.the.money.repository.ConfigRepository;
-import eye.on.the.money.repository.CredentialRepository;
-import eye.on.the.money.service.currency.StockAPIService;
+import eye.on.the.money.service.currency.CryptoAPIService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,51 +17,46 @@ import org.springframework.web.client.RestTemplate;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Service
-public class StockAPIServiceImpl  implements StockAPIService {
-
-    @Autowired
-    private CredentialRepository credentialRepository;
+public class CryptoAPIServiceImpl implements CryptoAPIService {
 
     @Autowired
     private ConfigRepository configRepository;
 
     @Override
-    public void getLiveValue(List<InvestmentDTO> investmentDTOList){
-        String stockAPI = this.configRepository.findById("alphavantage").orElseThrow(NoSuchElementException::new).getConfigValue();
-        String secret = this.credentialRepository.findById("alphavantage").orElseThrow(NoSuchElementException::new).getSecret();
-        investmentDTOList.forEach(investmentDTO -> {
-            String URL = this.createURL(stockAPI, secret, investmentDTO.getShortName());
-            JsonNode liveValue = this.callStockAPI(URL);
-            if(liveValue != null) {
-                investmentDTO.setLiveValue(Double.parseDouble(liveValue.textValue()) * investmentDTO.getQuantity());
-            }
+    public void getLiveValue(List<TransactionDTO> transactionDTOList, String currency){
+        String cryptoAPI = this.configRepository.findById("coingecko").orElseThrow(NoSuchElementException::new).getConfigValue();
+        String ids = transactionDTOList.stream().map(TransactionDTO::getCoinId).collect(Collectors.joining(","));
+        String URL = this.createURL(cryptoAPI, ids, currency);
+        JsonNode root = this.callCryptoAPI(URL);
+        transactionDTOList.forEach(transactionDTO -> {
+            transactionDTO.setLiveValue(root.path(transactionDTO.getCoinId()).get(currency.toLowerCase()).doubleValue() * transactionDTO.getQuantity());
         });
     }
 
     @Retryable(value = APIException.class, maxAttempts = 3)
-    private JsonNode callStockAPI(String URL) {
+    private JsonNode callCryptoAPI(String URL) {
         RestTemplate restTemplate = new RestTemplate();
 
         ResponseEntity<String> response = restTemplate.getForEntity(URL, String.class);
         if (response.getStatusCode() == HttpStatus.OK) {
             try {
                 ObjectMapper mapper = new ObjectMapper();
-                JsonNode root = mapper.readTree(response.getBody());
-                return root.findValue("05. price");
+                return mapper.readTree(response.getBody());
             } catch (JsonProcessingException | NullPointerException e) {
                 e.printStackTrace();
                 throw new APIException("JSON process failed");
             }
         } else {
-            throw new APIException("Unable to reach currency API");
+            throw new APIException("Unable to reach crypto API");
         }
     }
 
-    private String createURL(String stockAPI, String secret, String symbol){
+    private String createURL(String cryptoAPI, String symbol, String currency){
         return MessageFormat.format(
-                stockAPI + "?function=GLOBAL_QUOTE&symbol={0}&apikey={1}",
-                symbol, secret);
+                cryptoAPI + "/simple/price?ids={0}&vs_currencies={1}",
+                symbol, currency);
     }
 }

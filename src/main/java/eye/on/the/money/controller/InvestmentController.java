@@ -29,6 +29,12 @@ public class InvestmentController {
         return new ResponseEntity<List<InvestmentDTO>>(this.investmentService.getInvestments(user.getId()), HttpStatus.OK);
     }
 
+    @PostMapping("/currency")
+    public ResponseEntity<List<InvestmentDTO>> getInvestmentsWCurr(@AuthenticationPrincipal User user, @RequestBody InvestmentQuery query) {
+        log.trace("Enter getInvestmentsWCurr");
+        return new ResponseEntity<List<InvestmentDTO>>(this.investmentService.getInvestmentsByUserIdWConvCurr(user.getId(), query.getCurrency()), HttpStatus.OK);
+    }
+
     @GetMapping("/type")
     public ResponseEntity<List<InvestmentDTO>> getInvestmentsByBuySell(@AuthenticationPrincipal User user, @RequestBody InvestmentQuery query) {
         log.trace("Enter getInvestmentsByBuySell");
@@ -47,13 +53,13 @@ public class InvestmentController {
         return new ResponseEntity<List<InvestmentDTO>>(this.investmentService.getInvestmentsByTypeAndDate(user.getId(), query), HttpStatus.OK);
     }
 
-    @GetMapping("/holding")
+     @PostMapping("/holding")
     public ResponseEntity<List<InvestmentDTO>> getHoldings(@AuthenticationPrincipal User user, @RequestBody InvestmentQuery query) {
         log.trace("Enter getHoldings");
         return new ResponseEntity<List<InvestmentDTO>>(this.investmentService.getCurrentHoldings(user.getId(), query), HttpStatus.OK);
     }
 
-    @GetMapping("/position")
+    @PostMapping("/position")
     public ResponseEntity<List<InvestmentDTO>> getPositions(@AuthenticationPrincipal User user, @RequestBody InvestmentQuery query) {
         log.trace("Enter getPositions");
         return new ResponseEntity<List<InvestmentDTO>>(this.investmentService.getAllPositions(user.getId(), query), HttpStatus.OK);

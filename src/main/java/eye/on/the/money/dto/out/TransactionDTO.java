@@ -17,7 +17,28 @@ public class TransactionDTO {
     private String buySell;
     private String transactionString;
     private Date transactionDate;
-    private String name;
+    private String symbol;
+    private String coinId;
     private Double amount;
-    private String currencyName;
+    private String currencyId;
+    private Double liveValue;
+    private Double valueDiff;
+
+    public TransactionDTO mergeTransactions(TransactionDTO other){
+        if(!this.getSymbol().equals(other.getSymbol()))
+            return this;
+
+        this.setAmount(this.getAmount() + other.getAmount());
+        this.setQuantity(this.getQuantity() + other.getQuantity());
+
+        if(this.getQuantity() > 0 && this.buySell.equals("S")){
+            this.buySell = "B";
+        }
+        return this;
+    }
+
+    public void negateAmountAndQuantity(){
+        this.amount = -this.amount;
+        this.quantity = -this.quantity;
+    }
 }

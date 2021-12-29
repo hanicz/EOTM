@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TransactionRepository extends CrudRepository<Transaction, Long> {
-    public List<Transaction> findByUser_Id(Long userId);
+    public List<Transaction> findByUser_IdOrderByTransactionDate(Long userId);
 
     public Optional<Transaction> findByIdAndUser_Id(Long id, Long userId);
 }

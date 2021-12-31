@@ -18,7 +18,7 @@ public class UserController {
     private UserServiceImpl userService;
 
     @PostMapping("/signup")
-    public ResponseEntity<HttpStatus> createNewPlan(@RequestBody User user) {
+    public ResponseEntity<HttpStatus> createNewUser(@RequestBody User user) {
         this.userService.signUp(user);
         return new ResponseEntity<>(HttpStatus.OK);
     }

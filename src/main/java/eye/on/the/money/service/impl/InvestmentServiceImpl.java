@@ -141,7 +141,9 @@ public class InvestmentServiceImpl implements InvestmentService {
         return this.convertToInvestmentDTO(investment);
     }
 
+    @Transactional
     @Override
-    public void deleteInvestmentById(Long id) {
+    public void deleteInvestmentById(List<Long> ids) {
+        this.investmentRepository.deleteByIdIn(ids);
     }
 }

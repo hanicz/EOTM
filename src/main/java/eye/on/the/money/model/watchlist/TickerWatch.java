@@ -1,31 +1,25 @@
-package eye.on.the.money.model.stock;
+package eye.on.the.money.model.watchlist;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import eye.on.the.money.model.User;
+import eye.on.the.money.model.stock.Stock;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
-import java.util.Date;
 
 @Entity
 @Getter
 @Setter
-@Builder
 @Slf4j
 @ToString
-@Table(name = "EOTM_STOCK_INVESTMENT")
+@Table(name = "EOTM_STOCK_WATCH")
 @AllArgsConstructor
 @NoArgsConstructor
-public class Investment {
-
+public class TickerWatch {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    private Integer quantity;
-    private String buySell;
-    private Date creationDate;
-    private Date transactionDate;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -35,8 +29,4 @@ public class Investment {
     @ManyToOne
     @JoinColumn(name = "stock_id", nullable = false)
     private Stock stock;
-
-    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true)
-    @JoinColumn(name = "stockPayment_id", nullable = false)
-    private StockPayment stockPayment;
 }

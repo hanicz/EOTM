@@ -3,6 +3,7 @@ package eye.on.the.money.service.currency.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eye.on.the.money.dto.out.ForexWatchDTO;
 import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.dto.out.TransactionDTO;
 import eye.on.the.money.exception.APIException;
@@ -16,6 +17,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
@@ -36,13 +38,18 @@ public class CurrencyConverterImpl implements CurrencyConverter {
     @Autowired
     private CredentialRepository credentialRepository;
 
+    @PostConstruct
+    public void init() {
+        CurrencyConverterImpl.dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
+
     @Override
     public void changeTransactionsCurrency(List<TransactionDTO> transactions, String toCurrency) {
         if (CurrencyConverterImpl.supportedCurrencies.contains(toCurrency)) {
             String currencyAPI = this.configRepository.findById("freecurrencyapi").orElseThrow(NoSuchElementException::new).getConfigValue();
             String secret = this.credentialRepository.findById("freecurrencyapi").orElseThrow(NoSuchElementException::new).getSecret();
             transactions.stream().filter(t -> t.getAmount() != 0.0).forEach(transaction -> {
-                if(!transaction.getCurrencyId().equals(toCurrency)){
+                if (!transaction.getCurrencyId().equals(toCurrency) && transaction.getLiveValue() == null) {
                     Double amount = transaction.getAmount();
                     String URL = this.createURL(currencyAPI, secret, transaction.getCurrencyId(), transaction.getTransactionDate());
                     transaction.setAmount(amount * this.callCurrencyAPI(URL, toCurrency, transaction.getTransactionDate()));
@@ -83,6 +90,18 @@ public class CurrencyConverterImpl implements CurrencyConverter {
                 investment.setCurrencyId(toCurrency);
             });
         }
+    }
+
+    @Override
+    public void changeForexWatchList(List<ForexWatchDTO> forexWatchList) {
+        String currencyAPI = this.configRepository.findById("freecurrencyapi").orElseThrow(NoSuchElementException::new).getConfigValue();
+        String secret = this.credentialRepository.findById("freecurrencyapi").orElseThrow(NoSuchElementException::new).getSecret();
+        forexWatchList.forEach(f -> {
+            if (CurrencyConverterImpl.supportedCurrencies.containsAll(Arrays.asList(f.getToCurrencyId(), f.getFromCurrencyId()))) {
+                String URL = this.createURL(currencyAPI, secret, f.getFromCurrencyId(), new Date());
+                f.setLiveValue(this.callCurrencyAPI(URL, f.getToCurrencyId(), new Date()));
+            }
+        });
     }
 
     @Retryable(value = APIException.class, maxAttempts = 3)

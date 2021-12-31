@@ -3,6 +3,7 @@ package eye.on.the.money.service.currency.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eye.on.the.money.dto.out.CryptoWatchDTO;
 import eye.on.the.money.dto.out.TransactionDTO;
 import eye.on.the.money.exception.APIException;
 import eye.on.the.money.repository.ConfigRepository;
@@ -33,6 +34,17 @@ public class CryptoAPIServiceImpl implements CryptoAPIService {
         JsonNode root = this.callCryptoAPI(URL);
         transactionDTOList.forEach(transactionDTO -> {
             transactionDTO.setLiveValue(root.path(transactionDTO.getCoinId()).get(currency.toLowerCase()).doubleValue() * transactionDTO.getQuantity());
+        });
+    }
+
+    @Override
+    public void getLiveValueForWatchList(List<CryptoWatchDTO> cryptoWatchDTOList, String currency){
+        String cryptoAPI = this.configRepository.findById("coingecko").orElseThrow(NoSuchElementException::new).getConfigValue();
+        String ids = cryptoWatchDTOList.stream().map(CryptoWatchDTO::getCoinId).collect(Collectors.joining(","));
+        String URL = this.createURL(cryptoAPI, ids, currency);
+        JsonNode root = this.callCryptoAPI(URL);
+        cryptoWatchDTOList.forEach(cryptoWatchDTO -> {
+            cryptoWatchDTO.setLiveValue(root.path(cryptoWatchDTO.getCoinId()).get(currency.toLowerCase()).doubleValue());
         });
     }
 

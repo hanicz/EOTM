@@ -16,12 +16,16 @@ import eye.on.the.money.service.PaymentService;
 import eye.on.the.money.service.TransactionService;
 import eye.on.the.money.service.currency.CryptoAPIService;
 import eye.on.the.money.service.currency.CurrencyConverter;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -86,9 +90,10 @@ public class TransactionServiceImpl implements TransactionService {
         return this.modelMapper.map(transaction, TransactionDTO.class);
     }
 
+    @Transactional
     @Override
-    public void deleteTransactionById(Long id) {
-        this.transactionRepository.deleteById(id);
+    public void deleteTransactionById(List<Long> ids) {
+        this.transactionRepository.deleteByIdIn(ids);
     }
 
     @Transactional
@@ -120,5 +125,26 @@ public class TransactionServiceImpl implements TransactionService {
             transactionMap.compute(t.getSymbol(), (key, value) -> (value == null) ? t : value.mergeTransactions(t));
         }
         return transactionMap;
+    }
+
+    @Override
+    public void getCSV(Long userId, Writer writer) {
+        List<TransactionDTO> transactionList =
+                this.transactionRepository.findByUser_IdOrderByTransactionDate(userId)
+                        .stream()
+                        .map(this::convertToTransactionDTO).
+                        collect(Collectors.toList());
+        try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
+            if(!transactionList.isEmpty()){
+                csvPrinter.printRecord("Transaction Id", "Quantity", "Type", "Transaction Date", "Symbol", "Amount", "Currency");
+            }
+            for (TransactionDTO t : transactionList) {
+                csvPrinter.printRecord(t.getTransactionId(), t.getQuantity(),
+                        t.getBuySell(), t.getTransactionDate(), t.getSymbol(),
+                        t.getAmount(), t.getCurrencyId());
+            }
+        } catch (IOException e) {
+
+        }
     }
 }

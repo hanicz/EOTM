@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eye.on.the.money.dto.out.InvestmentDTO;
+import eye.on.the.money.dto.out.StockWatchDTO;
 import eye.on.the.money.exception.APIException;
 import eye.on.the.money.repository.ConfigRepository;
 import eye.on.the.money.repository.CredentialRepository;
@@ -30,13 +31,26 @@ public class StockAPIServiceImpl  implements StockAPIService {
 
     @Override
     public void getLiveValue(List<InvestmentDTO> investmentDTOList){
-        String stockAPI = this.configRepository.findById("alphavantage").orElseThrow(NoSuchElementException::new).getConfigValue();
-        String secret = this.credentialRepository.findById("alphavantage").orElseThrow(NoSuchElementException::new).getSecret();
-        investmentDTOList.forEach(investmentDTO -> {
+        String stockAPI = this.configRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getConfigValue();
+        String secret = this.credentialRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getSecret();
+        investmentDTOList.stream().filter(i -> i.getCurrencyId().equals("USD")).forEach(investmentDTO -> {
             String URL = this.createURL(stockAPI, secret, investmentDTO.getShortName());
             JsonNode liveValue = this.callStockAPI(URL);
             if(liveValue != null) {
-                investmentDTO.setLiveValue(Double.parseDouble(liveValue.textValue()) * investmentDTO.getQuantity());
+                investmentDTO.setLiveValue(liveValue.doubleValue() * investmentDTO.getQuantity());
+            }
+        });
+    }
+
+    @Override
+    public void getStockWatchList(List<StockWatchDTO> stockWatchList){
+        String stockAPI = this.configRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getConfigValue();
+        String secret = this.credentialRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getSecret();
+        stockWatchList.forEach(stockWatchDTO -> {
+            String URL = this.createURL(stockAPI, secret, stockWatchDTO.getStockShortName());
+            JsonNode liveValue = this.callStockAPI(URL);
+            if(liveValue != null) {
+                stockWatchDTO.setLiveValue(liveValue.doubleValue());
             }
         });
     }
@@ -44,13 +58,12 @@ public class StockAPIServiceImpl  implements StockAPIService {
     @Retryable(value = APIException.class, maxAttempts = 3)
     private JsonNode callStockAPI(String URL) {
         RestTemplate restTemplate = new RestTemplate();
-
         ResponseEntity<String> response = restTemplate.getForEntity(URL, String.class);
         if (response.getStatusCode() == HttpStatus.OK) {
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode root = mapper.readTree(response.getBody());
-                return root.findValue("05. price");
+                return root.findValue("c");
             } catch (JsonProcessingException | NullPointerException e) {
                 e.printStackTrace();
                 throw new APIException("JSON process failed");
@@ -62,7 +75,7 @@ public class StockAPIServiceImpl  implements StockAPIService {
 
     private String createURL(String stockAPI, String secret, String symbol){
         return MessageFormat.format(
-                stockAPI + "?function=GLOBAL_QUOTE&symbol={0}&apikey={1}",
+                stockAPI + "/quote?symbol={0}&token={1}",
                 symbol, secret);
     }
 }

@@ -13,6 +13,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("investment")
@@ -69,5 +71,13 @@ public class InvestmentController {
     public ResponseEntity<InvestmentDTO> createInvestment(@AuthenticationPrincipal User user, @RequestBody InvestmentDTO investmentDTO){
         log.trace("Enter createInvestment");
         return new ResponseEntity<InvestmentDTO>(this.investmentService.createInvestment(investmentDTO, user), HttpStatus.CREATED);
+    }
+
+    @DeleteMapping()
+    public ResponseEntity<HttpStatus> deleteByIds(@AuthenticationPrincipal User user, @RequestParam  String ids) {
+        log.trace("Enter deleteByIds");
+        List<Long> idList = Stream.of(ids.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
+        this.investmentService.deleteInvestmentById(idList);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

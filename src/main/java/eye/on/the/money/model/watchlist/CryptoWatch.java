@@ -1,32 +1,25 @@
-package eye.on.the.money.model.crypto;
+package eye.on.the.money.model.watchlist;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import eye.on.the.money.model.User;
+import eye.on.the.money.model.crypto.Coin;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
-import java.util.Date;
 
 @Entity
 @Getter
 @Setter
-@Builder
 @Slf4j
 @ToString
-@Table(name = "EOTM_COIN_TRANSACTION")
+@Table(name = "EOTM_COIN_WATCH")
 @AllArgsConstructor
 @NoArgsConstructor
-public class Transaction {
-
+public class CryptoWatch {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    private Double quantity;
-    private String buySell;
-    private Date creationDate;
-    private String transactionString;
-    private Date transactionDate;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -36,8 +29,4 @@ public class Transaction {
     @ManyToOne
     @JoinColumn(name = "coin_id", nullable = false)
     private Coin coin;
-
-    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true)
-    @JoinColumn(name = "payment_id", nullable = false)
-    private Payment payment;
 }

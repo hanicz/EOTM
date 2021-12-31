@@ -57,8 +57,8 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
             if (user != null) {
                 User userInDb = this.userService.loadUserByEmail(user);
                 return new UsernamePasswordAuthenticationToken(userInDb, null, new ArrayList<>());
-            }else{
-                return  null;
+            } else {
+                return null;
             }
 
         }

@@ -1,7 +1,11 @@
 package eye.on.the.money.dto.out;
 
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Date;
@@ -23,20 +27,20 @@ public class InvestmentDTO {
     private Double liveValue;
     private Double valueDiff;
 
-    public InvestmentDTO mergeInvestments(InvestmentDTO other){
-        if(!this.getShortName().equals(other.getShortName()))
+    public InvestmentDTO mergeInvestments(InvestmentDTO other) {
+        if (!this.getShortName().equals(other.getShortName()))
             return this;
 
         this.setAmount(this.getAmount() + other.getAmount());
         this.setQuantity(this.getQuantity() + other.getQuantity());
 
-        if(this.getQuantity() > 0 && this.buySell.equals("S")){
+        if (this.getQuantity() > 0 && "S".equals(this.buySell)) {
             this.buySell = "B";
         }
         return this;
     }
 
-    public void negateAmountAndQuantity(){
+    public void negateAmountAndQuantity() {
         this.amount = -this.amount;
         this.quantity = -this.quantity;
     }

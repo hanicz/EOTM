@@ -2,7 +2,6 @@ package eye.on.the.money.service.impl;
 
 import eye.on.the.money.dto.in.InvestmentQuery;
 import eye.on.the.money.dto.out.InvestmentDTO;
-import eye.on.the.money.dto.out.TransactionDTO;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Investment;

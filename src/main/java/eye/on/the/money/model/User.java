@@ -2,7 +2,11 @@ package eye.on.the.money.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import eye.on.the.money.model.crypto.Transaction;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;

@@ -1,7 +1,6 @@
 package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.in.TransactionQuery;
-import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.dto.out.TransactionDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.service.TransactionService;
@@ -11,7 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -29,13 +35,13 @@ public class TransactionController {
     private TransactionService transactionService;
 
     @GetMapping()
-    public ResponseEntity<List<TransactionDTO>> getCoinTransactionsByUserId(@AuthenticationPrincipal User user){
+    public ResponseEntity<List<TransactionDTO>> getCoinTransactionsByUserId(@AuthenticationPrincipal User user) {
         log.trace("Enter getCoinTransactionsByUserId");
         return new ResponseEntity<List<TransactionDTO>>(this.transactionService.getTransactionsByUserId(user.getId()), HttpStatus.OK);
     }
 
     @PostMapping("/currency")
-    public ResponseEntity<List<TransactionDTO>> getCoinTransactionsByUserIdWCurr(@AuthenticationPrincipal User user,  @RequestBody TransactionQuery query){
+    public ResponseEntity<List<TransactionDTO>> getCoinTransactionsByUserIdWCurr(@AuthenticationPrincipal User user, @RequestBody TransactionQuery query) {
         log.trace("Enter getCoinTransactionsByUserIdWCurr");
         return new ResponseEntity<List<TransactionDTO>>(this.transactionService.getTransactionsByUserIdWConvCurr(user.getId(), query.getCurrency()), HttpStatus.OK);
     }
@@ -53,7 +59,7 @@ public class TransactionController {
     }
 
     @DeleteMapping()
-    public ResponseEntity<HttpStatus> deleteByIds(@AuthenticationPrincipal User user, @RequestParam  String ids) {
+    public ResponseEntity<HttpStatus> deleteByIds(@AuthenticationPrincipal User user, @RequestParam String ids) {
         log.trace("Enter deleteByIds");
         List<Long> idList = Stream.of(ids.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
         this.transactionService.deleteTransactionById(idList);
@@ -64,18 +70,18 @@ public class TransactionController {
     public void getCSV(@AuthenticationPrincipal User user, HttpServletResponse servletResponse) throws IOException {
         log.trace("Enter getCSV");
         servletResponse.setContentType("text/csv");
-        servletResponse.addHeader("Content-Disposition","attachment; filename=\"transactions.csv\"");
+        servletResponse.addHeader("Content-Disposition", "attachment; filename=\"transactions.csv\"");
         this.transactionService.getCSV(user.getId(), servletResponse.getWriter());
     }
 
     @PostMapping
-    public ResponseEntity<TransactionDTO> createTransaction(@AuthenticationPrincipal User user, @RequestBody TransactionDTO transactionDTO){
+    public ResponseEntity<TransactionDTO> createTransaction(@AuthenticationPrincipal User user, @RequestBody TransactionDTO transactionDTO) {
         log.trace("Enter createTransaction");
         return new ResponseEntity<TransactionDTO>(this.transactionService.createTransaction(transactionDTO, user), HttpStatus.CREATED);
     }
 
     @PutMapping
-    public ResponseEntity<TransactionDTO> updateTransaction(@AuthenticationPrincipal User user, @RequestBody TransactionDTO transactionDTO){
+    public ResponseEntity<TransactionDTO> updateTransaction(@AuthenticationPrincipal User user, @RequestBody TransactionDTO transactionDTO) {
         log.trace("Enter updateTransaction");
         return new ResponseEntity<TransactionDTO>(this.transactionService.updateTransaction(transactionDTO, user), HttpStatus.CREATED);
     }

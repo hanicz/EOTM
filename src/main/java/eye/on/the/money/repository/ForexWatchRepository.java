@@ -1,6 +1,5 @@
 package eye.on.the.money.repository;
 
-import eye.on.the.money.model.watchlist.CryptoWatch;
 import eye.on.the.money.model.watchlist.ForexWatch;
 import org.springframework.data.repository.CrudRepository;
 

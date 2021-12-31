@@ -14,4 +14,7 @@ public class StockWatchDTO {
     private Double liveValue;
     private String stockShortName;
     private String stockName;
+    private String currencyId;
+    private Double change;
+    private Double pChange;
 }

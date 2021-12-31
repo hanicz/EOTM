@@ -14,4 +14,6 @@ public class ForexWatchDTO {
     private Double liveValue;
     private String fromCurrencyId;
     private String toCurrencyId;
+    private Double change;
+    private Double pChange;
 }

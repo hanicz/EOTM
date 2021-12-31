@@ -15,4 +15,5 @@ public class CryptoWatchDTO {
     private String symbol;
     private Double liveValue;
     private String name;
+    private Double change;
 }

@@ -2,6 +2,7 @@ package eye.on.the.money.service.impl;
 
 import eye.on.the.money.dto.in.InvestmentQuery;
 import eye.on.the.money.dto.out.InvestmentDTO;
+import eye.on.the.money.dto.out.TransactionDTO;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Investment;
@@ -14,12 +15,16 @@ import eye.on.the.money.service.InvestmentService;
 import eye.on.the.money.service.StockPaymentService;
 import eye.on.the.money.service.currency.CurrencyConverter;
 import eye.on.the.money.service.currency.StockAPIService;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -145,5 +150,26 @@ public class InvestmentServiceImpl implements InvestmentService {
     @Override
     public void deleteInvestmentById(List<Long> ids) {
         this.investmentRepository.deleteByIdIn(ids);
+    }
+
+    @Override
+    public void getCSV(Long userId, Writer writer) {
+        List<InvestmentDTO> investmentList =
+                this.investmentRepository.findByUser_IdOrderByTransactionDate(userId)
+                        .stream()
+                        .map(this::convertToInvestmentDTO).
+                        collect(Collectors.toList());
+        try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
+            if(!investmentList.isEmpty()){
+                csvPrinter.printRecord("Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Amount", "Currency");
+            }
+            for (InvestmentDTO i : investmentList) {
+                csvPrinter.printRecord(i.getInvestmentId(), i.getQuantity(),
+                        i.getBuySell(), i.getTransactionDate(), i.getShortName(),
+                        i.getAmount(), i.getCurrencyId());
+            }
+        } catch (IOException e) {
+
+        }
     }
 }

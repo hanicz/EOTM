@@ -27,10 +27,10 @@ public class CryptoAPIServiceImpl implements CryptoAPIService {
     private ConfigRepository configRepository;
 
     @Override
-    public void getLiveValue(List<TransactionDTO> transactionDTOList, String currency){
+    public void getLiveValue(List<TransactionDTO> transactionDTOList, String currency) {
         String cryptoAPI = this.configRepository.findById("coingecko").orElseThrow(NoSuchElementException::new).getConfigValue();
         String ids = transactionDTOList.stream().map(TransactionDTO::getCoinId).collect(Collectors.joining(","));
-        String URL = this.createURL(cryptoAPI, ids, currency);
+        String URL = this.createURL(cryptoAPI, ids, currency, Boolean.FALSE);
         JsonNode root = this.callCryptoAPI(URL);
         transactionDTOList.forEach(transactionDTO -> {
             transactionDTO.setLiveValue(root.path(transactionDTO.getCoinId()).get(currency.toLowerCase()).doubleValue() * transactionDTO.getQuantity());
@@ -38,13 +38,14 @@ public class CryptoAPIServiceImpl implements CryptoAPIService {
     }
 
     @Override
-    public void getLiveValueForWatchList(List<CryptoWatchDTO> cryptoWatchDTOList, String currency){
+    public void getLiveValueForWatchList(List<CryptoWatchDTO> cryptoWatchDTOList, String currency) {
         String cryptoAPI = this.configRepository.findById("coingecko").orElseThrow(NoSuchElementException::new).getConfigValue();
         String ids = cryptoWatchDTOList.stream().map(CryptoWatchDTO::getCoinId).collect(Collectors.joining(","));
-        String URL = this.createURL(cryptoAPI, ids, currency);
+        String URL = this.createURL(cryptoAPI, ids, currency, Boolean.TRUE);
         JsonNode root = this.callCryptoAPI(URL);
         cryptoWatchDTOList.forEach(cryptoWatchDTO -> {
             cryptoWatchDTO.setLiveValue(root.path(cryptoWatchDTO.getCoinId()).get(currency.toLowerCase()).doubleValue());
+            cryptoWatchDTO.setChange(root.path(cryptoWatchDTO.getCoinId()).get(currency.toLowerCase() + "_24h_change").doubleValue());
         });
     }
 
@@ -66,9 +67,9 @@ public class CryptoAPIServiceImpl implements CryptoAPIService {
         }
     }
 
-    private String createURL(String cryptoAPI, String symbol, String currency){
+    private String createURL(String cryptoAPI, String symbol, String currency, Boolean change) {
         return MessageFormat.format(
-                cryptoAPI + "/simple/price?ids={0}&vs_currencies={1}",
-                symbol, currency);
+                cryptoAPI + "/simple/price?ids={0}&vs_currencies={1}&include_24hr_change={2}",
+                symbol, currency, change.toString());
     }
 }

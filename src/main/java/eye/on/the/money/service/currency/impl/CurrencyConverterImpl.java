@@ -48,11 +48,18 @@ public class CurrencyConverterImpl implements CurrencyConverter {
         if (CurrencyConverterImpl.supportedCurrencies.contains(toCurrency)) {
             String currencyAPI = this.configRepository.findById("freecurrencyapi").orElseThrow(NoSuchElementException::new).getConfigValue();
             String secret = this.credentialRepository.findById("freecurrencyapi").orElseThrow(NoSuchElementException::new).getSecret();
+            Map<String, JsonNode> currencyMemory = new HashMap<>();
             transactions.stream().filter(t -> t.getAmount() != 0.0).forEach(transaction -> {
                 if (!transaction.getCurrencyId().equals(toCurrency) && transaction.getLiveValue() == null) {
                     Double amount = transaction.getAmount();
-                    String URL = this.createURL(currencyAPI, secret, transaction.getCurrencyId(), transaction.getTransactionDate());
-                    transaction.setAmount(amount * this.callCurrencyAPI(URL, toCurrency, transaction.getTransactionDate()));
+                    String URL = this.createURL(currencyAPI, secret, transaction.getCurrencyId(),
+                            transaction.getTransactionDate(), transaction.getTransactionDate(), "historical");
+
+                    JsonNode data = this.checkMemory(transaction.getCurrencyId() + CurrencyConverterImpl.dateFormat.format(transaction.getTransactionDate()),
+                            currencyMemory, URL);
+                    transaction.setAmount(amount *
+                            data.get(CurrencyConverterImpl.dateFormat.format(transaction.getTransactionDate()))
+                                    .get(toCurrency).doubleValue());
                 }
                 if (transaction.getLiveValue() != null) {
                     transaction.setValueDiff(transaction.getLiveValue() - transaction.getAmount());
@@ -66,10 +73,16 @@ public class CurrencyConverterImpl implements CurrencyConverter {
         if (CurrencyConverterImpl.supportedCurrencies.contains(toCurrency)) {
             String currencyAPI = this.configRepository.findById("freecurrencyapi").orElseThrow(NoSuchElementException::new).getConfigValue();
             String secret = this.credentialRepository.findById("freecurrencyapi").orElseThrow(NoSuchElementException::new).getSecret();
+            Map<String, JsonNode> currencyMemory = new HashMap<>();
             investments.stream().filter(i -> !i.getCurrencyId().equals(toCurrency)).forEach(investment -> {
                 Double amount = investment.getAmount();
-                String URL = this.createURL(currencyAPI, secret, investment.getCurrencyId(), investment.getTransactionDate());
-                investment.setAmount(amount * this.callCurrencyAPI(URL, toCurrency, investment.getTransactionDate()));
+                String URL = this.createURL(currencyAPI, secret, investment.getCurrencyId(), investment.getTransactionDate(),
+                        investment.getTransactionDate(), "historical");
+                JsonNode data = this.checkMemory(investment.getCurrencyId() + CurrencyConverterImpl.dateFormat.format(investment.getTransactionDate()),
+                        currencyMemory, URL);
+                investment.setAmount(amount *
+                        data.get(CurrencyConverterImpl.dateFormat.format(investment.getTransactionDate()))
+                                .get(toCurrency).doubleValue());
             });
         }
     }
@@ -79,10 +92,12 @@ public class CurrencyConverterImpl implements CurrencyConverter {
         if (CurrencyConverterImpl.supportedCurrencies.contains(toCurrency)) {
             String currencyAPI = this.configRepository.findById("freecurrencyapi").orElseThrow(NoSuchElementException::new).getConfigValue();
             String secret = this.credentialRepository.findById("freecurrencyapi").orElseThrow(NoSuchElementException::new).getSecret();
+            Map<String, JsonNode> currencyMemory = new HashMap<>();
             investments.forEach(investment -> {
                 if (!investment.getCurrencyId().equals(toCurrency) && investment.getLiveValue() != null) {
-                    String URL = this.createURL(currencyAPI, secret, investment.getCurrencyId(), new Date());
-                    investment.setLiveValue(investment.getLiveValue() * this.callCurrencyAPI(URL, toCurrency, new Date()));
+                    String URL = this.createURL(currencyAPI, secret, investment.getCurrencyId(), new Date(), new Date(), "latest");
+                    JsonNode data = this.checkMemory(investment.getCurrencyId(), currencyMemory, URL);
+                    investment.setLiveValue(investment.getLiveValue() * data.get(toCurrency).doubleValue());
                 }
                 if (investment.getLiveValue() != null) {
                     investment.setValueDiff(investment.getLiveValue() - investment.getAmount());
@@ -96,16 +111,35 @@ public class CurrencyConverterImpl implements CurrencyConverter {
     public void changeForexWatchList(List<ForexWatchDTO> forexWatchList) {
         String currencyAPI = this.configRepository.findById("freecurrencyapi").orElseThrow(NoSuchElementException::new).getConfigValue();
         String secret = this.credentialRepository.findById("freecurrencyapi").orElseThrow(NoSuchElementException::new).getSecret();
+        Date yesterday = new Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000);
+        Map<String, JsonNode> currencyMemory = new HashMap<>();
         forexWatchList.forEach(f -> {
             if (CurrencyConverterImpl.supportedCurrencies.containsAll(Arrays.asList(f.getToCurrencyId(), f.getFromCurrencyId()))) {
-                String URL = this.createURL(currencyAPI, secret, f.getFromCurrencyId(), new Date());
-                f.setLiveValue(this.callCurrencyAPI(URL, f.getToCurrencyId(), new Date()));
+                String URL = this.createURL(currencyAPI, secret, f.getFromCurrencyId(), yesterday, new Date(), "historical");
+                JsonNode data = this.checkMemory(f.getFromCurrencyId(), currencyMemory, URL);
+
+                Double liveValue = data.get(CurrencyConverterImpl.dateFormat.format(new Date())).get(f.getToCurrencyId()).doubleValue();
+                Double yesterdayValue = data.get(CurrencyConverterImpl.dateFormat.format(yesterday)).get(f.getToCurrencyId()).doubleValue();
+                f.setLiveValue(liveValue);
+                f.setChange(yesterdayValue - liveValue);
+                f.setPChange((yesterdayValue - liveValue) / yesterdayValue * 100);
             }
         });
     }
 
+    private JsonNode checkMemory(String key, Map<String, JsonNode> memory, String URL){
+        JsonNode data;
+        if (memory.containsKey(key)) {
+            data = memory.get(key);
+        } else {
+            data = this.callCurrencyAPI(URL);
+            memory.put(key, data);
+        }
+        return data;
+    }
+
     @Retryable(value = APIException.class, maxAttempts = 3)
-    private Double callCurrencyAPI(String URL, String toCurrency, Date investmentDate) {
+    private JsonNode callCurrencyAPI(String URL) {
         RestTemplate restTemplate = new RestTemplate();
 
         ResponseEntity<String> response = restTemplate.getForEntity(URL, String.class);
@@ -113,8 +147,7 @@ public class CurrencyConverterImpl implements CurrencyConverter {
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode root = mapper.readTree(response.getBody());
-                JsonNode name = root.path("data").get(CurrencyConverterImpl.dateFormat.format(investmentDate)).get(toCurrency);
-                return name.doubleValue();
+                return root.path("data");
             } catch (JsonProcessingException | NullPointerException e) {
                 throw new APIException("JSON process failed");
             }
@@ -123,10 +156,11 @@ public class CurrencyConverterImpl implements CurrencyConverter {
         }
     }
 
-    private String createURL(String url, String secret, String fromCurrency, Date investmentDate) {
-        String date = CurrencyConverterImpl.dateFormat.format(investmentDate);
+    private String createURL(String url, String secret, String fromCurrency, Date from, Date to, String type) {
+        String dateFrom = CurrencyConverterImpl.dateFormat.format(from);
+        String dateTo = CurrencyConverterImpl.dateFormat.format(to);
         return MessageFormat.format(
-                url + "historical?apikey={0}&base_currency={1}&date_from={2}&date_to={3}",
-                secret, fromCurrency, date, date);
+                url + "{4}?apikey={0}&base_currency={1}&date_from={2}&date_to={3}",
+                secret, fromCurrency, dateFrom, dateTo, type);
     }
 }

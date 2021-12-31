@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -79,5 +81,13 @@ public class InvestmentController {
         List<Long> idList = Stream.of(ids.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
         this.investmentService.deleteInvestmentById(idList);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/csv")
+    public void getCSV(@AuthenticationPrincipal User user, HttpServletResponse servletResponse) throws IOException {
+        log.trace("Enter getCSV");
+        servletResponse.setContentType("text/csv");
+        servletResponse.addHeader("Content-Disposition","attachment; filename=\"investments.csv\"");
+        this.investmentService.getCSV(user.getId(), servletResponse.getWriter());
     }
 }

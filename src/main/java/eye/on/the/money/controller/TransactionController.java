@@ -62,7 +62,7 @@ public class TransactionController {
 
     @GetMapping("/csv")
     public void getCSV(@AuthenticationPrincipal User user, HttpServletResponse servletResponse) throws IOException {
-        log.trace("Enter getCoinTransactionsByUserId");
+        log.trace("Enter getCSV");
         servletResponse.setContentType("text/csv");
         servletResponse.addHeader("Content-Disposition","attachment; filename=\"transactions.csv\"");
         this.transactionService.getCSV(user.getId(), servletResponse.getWriter());

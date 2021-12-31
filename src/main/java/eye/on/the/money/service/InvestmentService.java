@@ -4,6 +4,7 @@ import eye.on.the.money.dto.in.InvestmentQuery;
 import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.model.User;
 
+import java.io.Writer;
 import java.util.List;
 
 public interface InvestmentService {
@@ -16,4 +17,5 @@ public interface InvestmentService {
     public List<InvestmentDTO> getCurrentHoldings(Long userId, InvestmentQuery query);
     public List<InvestmentDTO> getAllPositions(Long userId, InvestmentQuery query);
     public InvestmentDTO createInvestment(InvestmentDTO investmentDTO, User user);
+    public void getCSV(Long userId, Writer writer);
 }

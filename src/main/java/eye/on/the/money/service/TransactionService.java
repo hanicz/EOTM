@@ -2,6 +2,7 @@ package eye.on.the.money.service;
 
 import eye.on.the.money.dto.in.TransactionQuery;
 import eye.on.the.money.dto.out.TransactionDTO;
+import eye.on.the.money.model.User;
 
 import java.io.Writer;
 import java.util.List;
@@ -14,4 +15,6 @@ public interface TransactionService {
     public List<TransactionDTO> getAllPositions(Long userId, TransactionQuery query);
     public List<TransactionDTO> getCurrentHoldings(Long userId, TransactionQuery query);
     public void getCSV(Long userId, Writer writer);
+    public TransactionDTO createTransaction(TransactionDTO transactionDTO, User user);
+    public TransactionDTO updateTransaction(TransactionDTO transactionDTO, User user);
 }

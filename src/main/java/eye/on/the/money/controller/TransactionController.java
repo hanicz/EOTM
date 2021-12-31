@@ -67,4 +67,16 @@ public class TransactionController {
         servletResponse.addHeader("Content-Disposition","attachment; filename=\"transactions.csv\"");
         this.transactionService.getCSV(user.getId(), servletResponse.getWriter());
     }
+
+    @PostMapping
+    public ResponseEntity<TransactionDTO> createTransaction(@AuthenticationPrincipal User user, @RequestBody TransactionDTO transactionDTO){
+        log.trace("Enter createTransaction");
+        return new ResponseEntity<TransactionDTO>(this.transactionService.createTransaction(transactionDTO, user), HttpStatus.CREATED);
+    }
+
+    @PutMapping
+    public ResponseEntity<TransactionDTO> updateTransaction(@AuthenticationPrincipal User user, @RequestBody TransactionDTO transactionDTO){
+        log.trace("Enter updateTransaction");
+        return new ResponseEntity<TransactionDTO>(this.transactionService.updateTransaction(transactionDTO, user), HttpStatus.CREATED);
+    }
 }

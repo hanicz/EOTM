@@ -90,4 +90,10 @@ public class InvestmentController {
         servletResponse.addHeader("Content-Disposition","attachment; filename=\"investments.csv\"");
         this.investmentService.getCSV(user.getId(), servletResponse.getWriter());
     }
+
+    @PutMapping
+    public ResponseEntity<InvestmentDTO> updateInvestment(@AuthenticationPrincipal User user, @RequestBody InvestmentDTO investmentDTO){
+        log.trace("Enter updateInvestment");
+        return new ResponseEntity<InvestmentDTO>(this.investmentService.updateInvestment(investmentDTO, user), HttpStatus.CREATED);
+    }
 }

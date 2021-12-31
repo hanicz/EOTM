@@ -18,4 +18,5 @@ public interface InvestmentService {
     public List<InvestmentDTO> getAllPositions(Long userId, InvestmentQuery query);
     public InvestmentDTO createInvestment(InvestmentDTO investmentDTO, User user);
     public void getCSV(Long userId, Writer writer);
+    public InvestmentDTO updateInvestment(InvestmentDTO investmentDTO, User user);
 }

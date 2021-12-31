@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public interface InvestmentRepository extends CrudRepository<Investment, String> {
+public interface InvestmentRepository extends CrudRepository<Investment, Long> {
     public List<Investment> findByUser_IdOrderByTransactionDate(Long userId);
     public List<Investment> findByUser_IdAndBuySell(Long userId, String buySell);
     public List<Investment> findByUser_IdAndTransactionDateBetween(Long userId, Date transactionDateStart, Date transactionDateEnd);

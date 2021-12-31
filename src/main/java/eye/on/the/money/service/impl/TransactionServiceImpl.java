@@ -97,20 +97,42 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Transactional
+    @Override
     public TransactionDTO createTransaction(TransactionDTO transactionDTO, User user) {
-        Currency currency = this.currencyRepository.findByName(transactionDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
-        Coin coin = this.coinRepository.findByName(transactionDTO.getSymbol()).orElseThrow(NoSuchElementException::new);
+        Currency currency = this.currencyRepository.findById(transactionDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
+        Coin coin = this.coinRepository.findBySymbol(transactionDTO.getSymbol()).orElseThrow(NoSuchElementException::new);
         Payment payment = this.paymentService.createPayment(currency, transactionDTO.getAmount());
 
         Transaction transaction = Transaction.builder()
                 .buySell(transactionDTO.getBuySell())
                 .transactionDate(transactionDTO.getTransactionDate())
+                .transactionString(transactionDTO.getTransactionString())
+                .quantity(transactionDTO.getQuantity())
                 .creationDate(new Date())
                 .coin(coin)
                 .payment(payment)
                 .user(user)
                 .build();
         transaction = this.transactionRepository.save(transaction);
+        return this.convertToTransactionDTO(transaction);
+    }
+
+    @Transactional
+    @Override
+    public TransactionDTO updateTransaction(TransactionDTO transactionDTO, User user) {
+        Currency currency = this.currencyRepository.findById(transactionDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
+        Coin coin = this.coinRepository.findBySymbol(transactionDTO.getSymbol()).orElseThrow(NoSuchElementException::new);
+        Transaction transaction = this.transactionRepository.findById(transactionDTO.getTransactionId()).orElseThrow(NoSuchElementException::new);
+        Payment payment = transaction.getPayment();
+
+        transaction.setBuySell(transactionDTO.getBuySell());
+        transaction.setTransactionString(transactionDTO.getTransactionString());
+        transaction.setTransactionDate(transactionDTO.getTransactionDate());
+        transaction.setQuantity(transactionDTO.getQuantity());
+        transaction.setCoin(coin);
+        payment.setAmount(transactionDTO.getAmount());
+        payment.setCurrency(currency);
+
         return this.convertToTransactionDTO(transaction);
     }
 

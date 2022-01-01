@@ -15,15 +15,23 @@ import eye.on.the.money.service.StockPaymentService;
 import eye.on.the.money.service.currency.CurrencyConverter;
 import eye.on.the.money.service.currency.StockAPIService;
 import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -177,7 +185,7 @@ public class InvestmentServiceImpl implements InvestmentService {
                         .map(this::convertToInvestmentDTO).
                         collect(Collectors.toList());
         try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
-            if(!investmentList.isEmpty()){
+            if (!investmentList.isEmpty()) {
                 csvPrinter.printRecord("Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Amount", "Currency");
             }
             for (InvestmentDTO i : investmentList) {
@@ -186,7 +194,46 @@ public class InvestmentServiceImpl implements InvestmentService {
                         i.getAmount(), i.getCurrencyId());
             }
         } catch (IOException e) {
+            throw new RuntimeException("fail to create CSV file: " + e.getMessage());
+        }
+    }
 
+    @Transactional
+    @Override
+    public void processCSV(User user, MultipartFile file) {
+        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+             CSVParser csvParser = new CSVParser(fileReader, CSVFormat.Builder.create()
+                     .setHeader("Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Amount", "Currency")
+                     .setSkipHeaderRecord(true)
+                     .setDelimiter(",")
+                     .setTrim(true)
+                     .setIgnoreHeaderCase(true)
+                     .build())) {
+
+            Iterable<CSVRecord> csvRecords = csvParser.getRecords();
+            for (CSVRecord csvRecord : csvRecords) {
+                Date transactionDate = new SimpleDateFormat("yyyy-MM-dd").parse(csvRecord.get("Transaction Date"));
+
+                InvestmentDTO investment = InvestmentDTO.builder()
+                        .buySell(csvRecord.get("Type"))
+                        .transactionDate(transactionDate)
+                        .amount(Double.parseDouble(csvRecord.get("Amount")))
+                        .quantity(Integer.parseInt(csvRecord.get("Quantity")))
+                        .currencyId(csvRecord.get("Currency"))
+                        .shortName(csvRecord.get("Short Name"))
+                        .build();
+
+                if (!("").equals(csvRecord.get("Investment Id")) &&
+                        this.investmentRepository.findById(Long.parseLong(csvRecord.get("Investment Id"))).isPresent()) {
+                    investment.setInvestmentId(Long.parseLong(csvRecord.get("Investment Id")));
+                    this.updateInvestment(investment, user);
+                } else {
+                    this.createInvestment(investment, user);
+                }
+
+            }
+        } catch (IOException | ParseException e) {
+            throw new RuntimeException("fail to parse CSV file: " + e.getMessage());
         }
     }
 }

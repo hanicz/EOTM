@@ -1,16 +1,13 @@
 package eye.on.the.money.dto.out;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Date;
 
 @Getter
 @Setter
+@Builder
 @Slf4j
 @ToString
 @AllArgsConstructor

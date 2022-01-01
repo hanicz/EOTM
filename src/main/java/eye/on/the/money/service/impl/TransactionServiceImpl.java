@@ -15,15 +15,25 @@ import eye.on.the.money.service.TransactionService;
 import eye.on.the.money.service.currency.CryptoAPIService;
 import eye.on.the.money.service.currency.CurrencyConverter;
 import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -155,7 +165,7 @@ public class TransactionServiceImpl implements TransactionService {
                         .map(this::convertToTransactionDTO).
                         collect(Collectors.toList());
         try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
-            if(!transactionList.isEmpty()){
+            if (!transactionList.isEmpty()) {
                 csvPrinter.printRecord("Transaction Id", "Quantity", "Type", "Transaction Date", "Symbol", "Amount", "Currency");
             }
             for (TransactionDTO t : transactionList) {
@@ -164,7 +174,47 @@ public class TransactionServiceImpl implements TransactionService {
                         t.getAmount(), t.getCurrencyId());
             }
         } catch (IOException e) {
+            throw new RuntimeException("fail to crate CSV file: " + e.getMessage());
+        }
+    }
 
+    @Transactional
+    @Override
+    public void processCSV(User user, MultipartFile file) {
+        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+             CSVParser csvParser = new CSVParser(fileReader, CSVFormat.Builder.create()
+                     .setHeader("Transaction Id", "Quantity", "Type", "Transaction Date", "Symbol", "Amount", "Currency")
+                     .setSkipHeaderRecord(true)
+                     .setDelimiter(",")
+                     .setTrim(true)
+                     .setIgnoreHeaderCase(true)
+                     .build())) {
+
+            Iterable<CSVRecord> csvRecords = csvParser.getRecords();
+            for (CSVRecord csvRecord : csvRecords) {
+                Date transactionDate = new SimpleDateFormat("yyyy-MM-dd").parse(csvRecord.get("Transaction Date"));
+
+                TransactionDTO transaction = TransactionDTO.builder()
+                        .buySell(csvRecord.get("Type"))
+                        .transactionDate(transactionDate)
+                        .amount(Double.parseDouble(csvRecord.get("Amount")))
+                        .quantity(Double.parseDouble(csvRecord.get("Quantity")))
+                        .currencyId(csvRecord.get("Currency"))
+                        .symbol(csvRecord.get("Symbol"))
+                        .build();
+
+                if (!("").equals(csvRecord.get("Transaction Id")) &&
+                        this.transactionRepository.findById(Long.parseLong(csvRecord.get("Transaction Id"))).isPresent()) {
+                    transaction.setTransactionId(Long.parseLong(csvRecord.get("Transaction Id")));
+                    this.updateTransaction(transaction, user);
+                } else {
+                    transaction.setTransactionId(Long.parseLong(csvRecord.get("Transaction Id")));
+                    this.createTransaction(transaction, user);
+                }
+
+            }
+        } catch (IOException | ParseException e) {
+            throw new RuntimeException("fail to parse CSV file: " + e.getMessage());
         }
     }
 }

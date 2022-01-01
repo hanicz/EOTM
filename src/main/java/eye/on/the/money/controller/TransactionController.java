@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -83,6 +84,13 @@ public class TransactionController {
     @PutMapping
     public ResponseEntity<TransactionDTO> updateTransaction(@AuthenticationPrincipal User user, @RequestBody TransactionDTO transactionDTO) {
         log.trace("Enter updateTransaction");
-        return new ResponseEntity<TransactionDTO>(this.transactionService.updateTransaction(transactionDTO, user), HttpStatus.CREATED);
+        return new ResponseEntity<TransactionDTO>(this.transactionService.updateTransaction(transactionDTO, user), HttpStatus.OK);
+    }
+
+    @PostMapping("/process/csv")
+    public ResponseEntity<HttpStatus> processCSV(@AuthenticationPrincipal User user, @RequestParam("file") MultipartFile file) throws IOException {
+        log.trace("Enter processCSV");
+        this.transactionService.processCSV(user, file);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }

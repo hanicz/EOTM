@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -102,5 +103,12 @@ public class InvestmentController {
     public ResponseEntity<InvestmentDTO> updateInvestment(@AuthenticationPrincipal User user, @RequestBody InvestmentDTO investmentDTO) {
         log.trace("Enter updateInvestment");
         return new ResponseEntity<InvestmentDTO>(this.investmentService.updateInvestment(investmentDTO, user), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/process/csv")
+    public ResponseEntity<HttpStatus> processCSV(@AuthenticationPrincipal User user, @RequestParam("file") MultipartFile file) throws IOException {
+        log.trace("Enter processCSV");
+        this.investmentService.processCSV(user, file);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }

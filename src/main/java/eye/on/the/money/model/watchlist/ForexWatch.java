@@ -1,7 +1,7 @@
 package eye.on.the.money.model.watchlist;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import eye.on.the.money.model.Currency;
+import eye.on.the.money.model.forex.Currency;
 import eye.on.the.money.model.User;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;

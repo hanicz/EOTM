@@ -2,7 +2,7 @@ package eye.on.the.money.service.impl;
 
 import eye.on.the.money.dto.in.TransactionQuery;
 import eye.on.the.money.dto.out.TransactionDTO;
-import eye.on.the.money.model.Currency;
+import eye.on.the.money.model.forex.Currency;
 import eye.on.the.money.model.crypto.Payment;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.crypto.Coin;
@@ -209,7 +209,6 @@ public class TransactionServiceImpl implements TransactionService {
                     transaction.setTransactionId(Long.parseLong(csvRecord.get("Transaction Id")));
                     this.createTransaction(transaction, user);
                 }
-
             }
         } catch (IOException | ParseException e) {
             throw new RuntimeException("fail to parse CSV file: " + e.getMessage());

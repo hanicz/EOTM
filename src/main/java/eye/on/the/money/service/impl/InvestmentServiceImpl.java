@@ -2,7 +2,7 @@ package eye.on.the.money.service.impl;
 
 import eye.on.the.money.dto.in.InvestmentQuery;
 import eye.on.the.money.dto.out.InvestmentDTO;
-import eye.on.the.money.model.Currency;
+import eye.on.the.money.model.forex.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Investment;
 import eye.on.the.money.model.stock.Stock;
@@ -230,7 +230,6 @@ public class InvestmentServiceImpl implements InvestmentService {
                 } else {
                     this.createInvestment(investment, user);
                 }
-
             }
         } catch (IOException | ParseException e) {
             throw new RuntimeException("fail to parse CSV file: " + e.getMessage());

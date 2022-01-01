@@ -1,4 +1,4 @@
-package eye.on.the.money.model;
+package eye.on.the.money.model.forex;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import eye.on.the.money.model.crypto.Payment;

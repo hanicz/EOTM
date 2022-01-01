@@ -11,7 +11,7 @@
     <groupId>eye.on.the.money</groupId>
     <artifactId>EOTM</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
     <name>EOTM</name>
     <description>Project for crypto and stock tracking</description>
 

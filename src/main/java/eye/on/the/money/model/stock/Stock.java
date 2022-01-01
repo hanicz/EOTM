@@ -17,7 +17,6 @@ import java.util.Set;
 @NoArgsConstructor
 public class Stock {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private String id;
     private String name;
     private String shortName;

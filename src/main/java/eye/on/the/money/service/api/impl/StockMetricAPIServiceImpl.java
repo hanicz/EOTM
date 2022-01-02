@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eye.on.the.money.exception.APIException;
-import eye.on.the.money.model.news.News;
 import eye.on.the.money.model.stock.Metric;
 import eye.on.the.money.model.stock.Profile;
 import eye.on.the.money.repository.ConfigRepository;
@@ -18,8 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -57,7 +54,7 @@ public class StockMetricAPIServiceImpl implements StockMetricAPIService {
         ResponseEntity<?> response = this.callStockMetricAPI(URL, String.class);
         try {
             ObjectMapper mapper = new ObjectMapper();
-            JsonNode metric = mapper.readTree((String)response.getBody()).path("metric");
+            JsonNode metric = mapper.readTree((String) response.getBody()).path("metric");
             return mapper.treeToValue(metric, Metric.class);
         } catch (JsonProcessingException | NullPointerException e) {
             throw new APIException("JSON process failed");

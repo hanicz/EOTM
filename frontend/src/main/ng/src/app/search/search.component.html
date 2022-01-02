@@ -4,20 +4,36 @@
         <div class="flex flex-row-reverse flex-wrap">
             <div class="flex align-items-center justify-content-center">
                 <p-dropdown [options]="stocks" optionLabel="shortName" optionValue="shortName"
-                    (onChange)="stockChanged($event)" [(ngModel)]="selectedTicker" placeholder="Select a Ticker"></p-dropdown>
+                    (onChange)="stockChanged($event)" [(ngModel)]="selectedTicker" placeholder="Select a Ticker">
+                </p-dropdown>
             </div>
         </div>
         <div class="grid pt-3" *ngIf="!(selectedTicker == undefined)">
             <div class="col-7 col-offset-1">
-                <p-selectButton [options]="options" [disabled]="selectedTicker == undefined" [(ngModel)]="selectedOption" optionLabel="label" optionValue="value" (onChange)="getCandleData()"></p-selectButton>
+                <p-selectButton [options]="options" [disabled]="selectedTicker == undefined"
+                    [(ngModel)]="selectedOption" optionLabel="label" optionValue="value" (onChange)="getCandleData()">
+                </p-selectButton>
                 <div>
                     <apx-chart #chart [series]="chartOptions.series" [chart]="chartOptions.chart"
-                        [xaxis]="chartOptions.xaxis" [yaxis]="chartOptions.yaxis" [title]="chartOptions.title" [noData]="chartOptions.noData"
-                        [tooltip]="chartOptions.tooltip">
+                        [xaxis]="chartOptions.xaxis" [yaxis]="chartOptions.yaxis" [title]="chartOptions.title"
+                        [noData]="chartOptions.noData" [tooltip]="chartOptions.tooltip">
                     </apx-chart>
                 </div>
             </div>
             <div class="col-3 col-offset-1">
+                <div class="flex flex-wrap justify-content-between pb-2">
+                    <div class="flex align-items-start">
+                        <p-tag styleClass="mr-2" severity="info"
+                            value="{{startPrice | currency : profile.currency : 'symbol' : '0.0-1'}}"></p-tag>
+                        <p-tag styleClass="mr-2" severity="info"
+                            value="{{endPrice | currency : profile.currency : 'symbol' : '0.0-1'}}">
+                        </p-tag>
+                        <p-tag styleClass="mr-2" [severity]="(difference > 0) ? 'success':'danger'"
+                            value="{{difference | currency : profile.currency : 'symbol' : '0.0-1'}}"></p-tag>
+                        <p-tag [severity]="(percentage > 0) ? 'success':'danger'"
+                            value="{{(percentage | number : '0.0-1') + '%'}}"></p-tag>
+                    </div>
+                </div>
                 <div class="flex flex-wrap justify-content-between border-bottom-1 border-top-1">
                     <div class="flex align-items-start">Name</div>
                     <div class="flex align-items-end">{{profile.name}}</div>
@@ -39,10 +55,6 @@
                     <div class="flex align-items-end">{{profile.ipo | date:'mediumDate' }}</div>
                 </div>
                 <div class="flex flex-wrap justify-content-between border-bottom-1">
-                    <div class="flex align-items-start">Currency</div>
-                    <div class="flex align-items-end">{{profile.currency}}</div>
-                </div>
-                <div class="flex flex-wrap justify-content-between border-bottom-1">
                     <div class="flex align-items-start">Market Cap.</div>
                     <div class="flex align-items-end">{{profile.marketCapitalization / 1000 | currency :
                         profile.currency : 'symbol' : '0.0-2'}}B</div>
@@ -53,7 +65,8 @@
                 </div>
                 <div class="flex flex-wrap justify-content-between border-bottom-1">
                     <div class="flex align-items-start">WebUrl</div>
-                    <div class="flex align-items-end"><a href="{{profile.weburl}}" target="_blank" style="color: inherit; text-decoration: inherit;">{{profile.weburl}}</a></div>
+                    <div class="flex align-items-end"><a href="{{profile.weburl}}" target="_blank"
+                            style="color: inherit; text-decoration: inherit;">{{profile.weburl}}</a></div>
                 </div>
                 <div class="flex flex-wrap justify-content-between border-bottom-1">
                     <div class="flex align-items-start">Peers</div>

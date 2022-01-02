@@ -40,6 +40,10 @@ export class SearchComponent implements OnInit {
   options: any[];
   selectedOption = 3;
   selectedTicker: any;
+  startPrice = 0;
+  endPrice = 0;
+  percentage = 0;
+  difference = 0;
 
   @ViewChild("chart") chart: ChartComponent | any;
   public chartOptions: Partial<ChartOptions> | any;
@@ -148,5 +152,10 @@ export class SearchComponent implements OnInit {
       volumeChartData.push({ x: new Date(this.candle.t[i] * 1000).toLocaleDateString("en-US"), y: this.candle.v[i] / 10000000 })
     }
     this.chart.updateSeries([{ name: 'Price', data: chartData, type: 'candlestick' }, { name: 'Volume', data: volumeChartData, type: 'column' }], false);
+    
+    this.startPrice = this.candle.c[0];
+    this.endPrice = this.candle.c[this.candle.c.length - 1];
+    this.difference = this.endPrice - this.startPrice;
+    this.percentage = this.difference / this.startPrice * 100;
   }
 }

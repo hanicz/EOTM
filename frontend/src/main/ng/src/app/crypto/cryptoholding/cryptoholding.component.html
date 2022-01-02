@@ -18,16 +18,18 @@
             </td>
             <td>{{transaction.quantity | number : '0.0-4'}}</td>
             <td>{{transaction.amount | currency : globals.cryptoCurrency : 'symbol' : '0.0-2'}}</td>
-            <td>{{transaction.amount / transaction.quantity | currency : globals.cryptoCurrency : 'symbol' : '0.0-3'}}</td>
+            <td>{{transaction.amount / transaction.quantity | currency : globals.cryptoCurrency : 'symbol' : '0.0-3'}}
+            </td>
             <td>{{transaction.liveValue | currency : globals.cryptoCurrency : 'symbol' : '0.0-2'}}</td>
-            <td>{{transaction.liveValue / transaction.quantity | currency : globals.cryptoCurrency : 'symbol' : '0.0-3'}}</td>
+            <td>{{transaction.liveValue / transaction.quantity | currency : globals.cryptoCurrency : 'symbol' :
+                '0.0-3'}}</td>
             <td>
-                <p-tag styleClass="p-mr-2" severity="success" *ngIf="transaction.valueDiff > 0" value="{{transaction.valueDiff | currency : globals.cryptoCurrency : 'symbol' : '0.0-2'}}"></p-tag>
-                <p-tag styleClass="p-mr-2" severity="danger" *ngIf="transaction.valueDiff < 0" value="{{transaction.valueDiff | currency : globals.cryptoCurrency : 'symbol' : '0.0-2'}}"></p-tag>
+                <p-tag styleClass="p-mr-2" [severity]="(transaction.valueDiff > 0) ? 'success':'danger'"
+                    value="{{transaction.valueDiff | currency : globals.cryptoCurrency : 'symbol' : '0.0-2'}}"></p-tag>
             </td>
             <td>
-                <p-tag styleClass="p-mr-2" severity="success" *ngIf="transaction.valueDiff > 0" value="{{(transaction.valueDiff / transaction.amount * 100 | number : '0.0-1') + '%'}}"></p-tag>
-                <p-tag styleClass="p-mr-2" severity="danger" *ngIf="transaction.valueDiff < 0" value="{{(transaction.valueDiff / transaction.amount * 100 | number : '0.0-1') + '%'}}"></p-tag>
+                <p-tag styleClass="p-mr-2" [severity]="(transaction.valueDiff > 0) ? 'success':'danger'"
+                    value="{{(transaction.valueDiff / transaction.amount * 100 | number : '0.0-1') + '%'}}"></p-tag>
             </td>
         </tr>
     </ng-template>

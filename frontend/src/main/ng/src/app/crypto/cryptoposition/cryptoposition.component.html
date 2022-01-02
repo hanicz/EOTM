@@ -22,9 +22,8 @@
                 <span *ngIf="transaction.quantity > 0">{{(transaction.amount / transaction.quantity) | currency : globals.cryptoCurrency : 'symbol' : '0.0-3'}}</span>
             </td>
             <td>
-                <p-tag styleClass="p-mr-2" severity="primary" *ngIf="transaction.quantity > 0"
-                    value="{{transaction.quantity | number: '0.0-4'}}"></p-tag>
-                <p-tag styleClass="p-mr-2" severity="warning" *ngIf="transaction.quantity == 0" value="Closed"></p-tag>
+                <p-tag styleClass="p-mr-2" [severity]="(transaction.quantity > 0) ? 'primary':'warning'"
+                    value="{{(transaction.quantity > 0) ? (transaction.quantity | number: '0.0-4') : 'Closed'}}"></p-tag>
             </td>
             <td>
                 <p-tag styleClass="p-mr-2" severity="success" *ngIf="transaction.quantity == 0 && transaction.amount < 0"

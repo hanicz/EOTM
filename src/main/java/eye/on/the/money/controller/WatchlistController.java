@@ -12,10 +12,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -30,7 +31,9 @@ public class WatchlistController {
     @GetMapping("/crypto/{currency}")
     public ResponseEntity<List<CryptoWatchDTO>> getCryptoWatchList(@AuthenticationPrincipal User user, @PathVariable String currency) {
         log.trace("Enter getCryptoWatchList");
-        return new ResponseEntity<List<CryptoWatchDTO>>(this.watchlistService.getCryptoWatchlistByUserId(user.getId(), currency), HttpStatus.OK);
+        List<CryptoWatchDTO> cryptoWatchList = this.watchlistService.getCryptoWatchlistByUserId(user.getId(), currency);
+        cryptoWatchList.sort(Collections.reverseOrder());
+        return new ResponseEntity<List<CryptoWatchDTO>>(cryptoWatchList, HttpStatus.OK);
     }
 
     @GetMapping("/forex")

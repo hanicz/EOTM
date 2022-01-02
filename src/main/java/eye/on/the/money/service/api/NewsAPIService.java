@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface NewsAPIService {
     public List<News> getNews(String category);
+    public List<News> getCompanyNews(String symbol);
 }

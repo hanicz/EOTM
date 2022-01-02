@@ -1,4 +1,4 @@
-package eye.on.the.money.service.currency.impl;
+package eye.on.the.money.service.api.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -6,9 +6,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.dto.out.StockWatchDTO;
 import eye.on.the.money.exception.APIException;
+import eye.on.the.money.model.stock.CandleQuote;
 import eye.on.the.money.repository.ConfigRepository;
 import eye.on.the.money.repository.CredentialRepository;
-import eye.on.the.money.service.currency.StockAPIService;
+import eye.on.the.money.service.api.StockAPIService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.text.MessageFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -56,6 +58,22 @@ public class StockAPIServiceImpl implements StockAPIService {
         });
     }
 
+    @Override
+    public CandleQuote getCandleQuoteByShortName(String shortname, int months) {
+        String stockAPI = this.configRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getConfigValue();
+        String secret = this.credentialRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getSecret();
+        Long monthEpoch = new Date(System.currentTimeMillis() - months * 30L * 24 * 60 * 60 * 1000).getTime() / 1000;
+        String URL = MessageFormat.format(stockAPI + "/stock/candle?symbol={0}&resolution=D&from={1}&to={2}&token={3}",
+                shortname, String.valueOf(monthEpoch), String.valueOf(new Date().getTime() / 1000), secret);
+        JsonNode root = this.callStockAPI(URL);
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.treeToValue(root, CandleQuote.class);
+        } catch (JsonProcessingException | NullPointerException e) {
+            throw new APIException("JSON process failed");
+        }
+    }
+
     @Retryable(value = APIException.class, maxAttempts = 3)
     private JsonNode callStockAPI(String URL) {
         RestTemplate restTemplate = new RestTemplate();
@@ -63,8 +81,7 @@ public class StockAPIServiceImpl implements StockAPIService {
         if (response.getStatusCode() == HttpStatus.OK) {
             try {
                 ObjectMapper mapper = new ObjectMapper();
-                JsonNode root = mapper.readTree(response.getBody());
-                return root;
+                return mapper.readTree(response.getBody());
             } catch (JsonProcessingException | NullPointerException e) {
                 e.printStackTrace();
                 throw new APIException("JSON process failed");

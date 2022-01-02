@@ -1,4 +1,4 @@
-package eye.on.the.money.service.currency;
+package eye.on.the.money.service.api;
 
 import eye.on.the.money.dto.out.ForexWatchDTO;
 import eye.on.the.money.dto.out.InvestmentDTO;

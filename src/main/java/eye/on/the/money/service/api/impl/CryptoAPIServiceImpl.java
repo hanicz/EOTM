@@ -1,4 +1,4 @@
-package eye.on.the.money.service.currency.impl;
+package eye.on.the.money.service.api.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -7,7 +7,7 @@ import eye.on.the.money.dto.out.CryptoWatchDTO;
 import eye.on.the.money.dto.out.TransactionDTO;
 import eye.on.the.money.exception.APIException;
 import eye.on.the.money.repository.ConfigRepository;
-import eye.on.the.money.service.currency.CryptoAPIService;
+import eye.on.the.money.service.api.CryptoAPIService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

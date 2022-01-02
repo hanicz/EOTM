@@ -21,10 +21,10 @@
             <plugin>
                 <groupId>com.github.eirslett</groupId>
                 <artifactId>frontend-maven-plugin</artifactId>
-                <version>1.12.0</version>
+                <version>1.12.1</version>
                 <configuration>
-                    <nodeVersion>v17.1.0</nodeVersion>
-                    <npmVersion>8.1.4</npmVersion>
+                    <nodeVersion>v17.3.0</nodeVersion>
+                    <npmVersion>8.3.0</npmVersion>
                     <workingDirectory>src/main/ng/</workingDirectory>
                 </configuration>
                 <executions>

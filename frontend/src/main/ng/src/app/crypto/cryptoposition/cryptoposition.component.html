@@ -1,0 +1,37 @@
+<p-table #dt1 [value]="transactions" responsiveLayout="scroll" styleClass="p-datatable-striped" [autoLayout]="true"
+    sortField="amount" [sortOrder]=-1>
+    <ng-template pTemplate="header">
+        <tr>
+            <th>Symbol</th>
+            <th pSortableColumn="amount">Total Spent <p-sortIcon field="amount"></p-sortIcon>
+            </th>
+            <th>Average</th>
+            <th>Position</th>
+            <th>Profit</th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-transaction>
+        <tr>
+            <td>
+                <p-tag class="mr-2" severity="primary" value="{{transaction.symbol}}"></p-tag>
+            </td>
+            <td>
+                <span *ngIf="transaction.quantity > 0">{{transaction.amount | currency : globals.cryptoCurrency : 'symbol' : '0.0-2'}}</span>
+            </td>
+            <td>
+                <span *ngIf="transaction.quantity > 0">{{(transaction.amount / transaction.quantity) | currency : globals.cryptoCurrency : 'symbol' : '0.0-3'}}</span>
+            </td>
+            <td>
+                <p-tag styleClass="p-mr-2" severity="primary" *ngIf="transaction.quantity > 0"
+                    value="{{transaction.quantity | number: '0.0-4'}}"></p-tag>
+                <p-tag styleClass="p-mr-2" severity="warning" *ngIf="transaction.quantity == 0" value="Closed"></p-tag>
+            </td>
+            <td>
+                <p-tag styleClass="p-mr-2" severity="success" *ngIf="transaction.quantity == 0 && transaction.amount < 0"
+                    value="{{myMath.abs(transaction.amount) | currency : globals.cryptoCurrency : 'symbol' : '0.0-2'}}"></p-tag>
+                <p-tag styleClass="p-mr-2" severity="danger" *ngIf="transaction.quantity == 0 && transaction.amount > 0"
+                    value="{{transaction.amount | currency : globals.cryptoCurrency : 'symbol' : '0.0-2'}}"></p-tag>
+            </td>
+        </tr>
+    </ng-template>
+</p-table>

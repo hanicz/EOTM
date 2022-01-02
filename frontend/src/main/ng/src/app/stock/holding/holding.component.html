@@ -1,0 +1,32 @@
+<p-table [value]="investments" styleClass="p-datatable-striped" responsiveLayout="scroll">
+    <ng-template pTemplate="header">
+        <tr>
+            <th>Stock Name</th>
+            <th>Quantity</th>
+            <th>Spent</th>
+            <th>Average</th>
+            <th>Worth</th>
+            <th>Price</th>
+            <th>Profit</th>
+            <th>%</th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-investment>
+        <tr>
+            <td>{{investment.shortName}}</td>
+            <td>{{investment.quantity}}</td>
+            <td>{{investment.amount | currency : globals.stockCurrency : 'symbol' : '0.0-2'}}</td>
+            <td>{{investment.amount / investment.quantity | currency : globals.stockCurrency : 'symbol' : '0.0-3'}}</td>
+            <td>{{investment.liveValue | currency : globals.stockCurrency : 'symbol' : '0.0-2'}}</td>
+            <td>{{investment.liveValue / investment.quantity | currency : globals.stockCurrency : 'symbol' : '0.0-3'}}</td>
+            <td>
+                <p-tag styleClass="p-mr-2" severity="success" *ngIf="investment.valueDiff > 0" value="{{investment.valueDiff | currency : globals.stockCurrency : 'symbol' : '0.0-2'}}"></p-tag>
+                <p-tag styleClass="p-mr-2" severity="danger" *ngIf="investment.valueDiff < 0" value="{{investment.valueDiff | currency : globals.stockCurrency : 'symbol' : '0.0-2'}}"></p-tag>
+            </td>
+            <td>
+                <p-tag styleClass="p-mr-2" severity="success" *ngIf="investment.valueDiff > 0" value="{{(investment.valueDiff / investment.amount * 100 | number : '0.0-1') + '%'}}"></p-tag>
+                <p-tag styleClass="p-mr-2" severity="danger" *ngIf="investment.valueDiff < 0" value="{{(investment.valueDiff / investment.amount * 100 | number : '0.0-1') + '%'}}"></p-tag>
+            </td>
+        </tr>
+    </ng-template>
+</p-table>

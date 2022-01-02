@@ -1,0 +1,58 @@
+<div class="shadow-5">
+    <p-toolbar styleClass="p-1">
+        <ng-template pTemplate="left">
+            <h4 class="text-white p-0 m-0 pl-1">Watchlist</h4>
+        </ng-template>
+        <ng-template pTemplate="right">
+            <p-button icon="fas fa-plus" styleClass="p-button-success w-2rem h-2rem"></p-button>
+        </ng-template>
+    </p-toolbar>
+    <p-accordion>
+        <p-accordionTab header="Stock" [selected]="false" styleClass="p-0 m-0" class="p-0 m-0">
+            <p-table #dt1 [value]="stockWatchList" responsiveLayout="scroll" styleClass="p-datatable-sm"
+                [autoLayout]="true">
+                <ng-template pTemplate="body" let-stockWatch>
+                    <tr>
+                        <td>
+                            <p-tag severity="primary" value="{{stockWatch.stockShortName}}"></p-tag>
+                        </td>
+                        <td class="text-sm" [ngStyle]="{'color': (stockWatch.change > 0) ? '#a6fa7e' : (stockWatch.change === 0) ? '#999999' : '#fa5858'}">{{stockWatch.liveValue | currency : stockWatch.currencyId : 'symbol' : '0.0-2'}}</td>
+                        <td class="text-sm" [ngStyle]="{'color': (stockWatch.change > 0) ? '#a6fa7e' : (stockWatch.change === 0) ? '#999999' : '#fa5858'}">{{stockWatch.change | number : '0.0-2'}}</td>
+                        <td class="text-sm" [ngStyle]="{'color': (stockWatch.change > 0) ? '#a6fa7e' : (stockWatch.change === 0) ? '#999999' : '#fa5858'}">{{stockWatch.pchange | number : '0.0-2'}}%</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-accordionTab>
+        <p-accordionTab header="Crypto" [selected]="true">
+            <p-table #dt1 [value]="cryptoWatchList" responsiveLayout="scroll" styleClass="p-datatable-sm"
+                [autoLayout]="true">
+                <ng-template pTemplate="body" let-cryptoWatch>
+                    <tr>
+                        <td>
+                            <p-tag severity="warning" value="{{cryptoWatch.symbol}}"></p-tag>
+                        </td>
+                        <td class="text-xs">{{cryptoWatch.name}}</td>
+                        <td class="text-sm" [ngStyle]="{'color': (cryptoWatch.change > 0) ? '#a6fa7e' : (cryptoWatch.change === 0) ? '#999999' : '#fa5858'}">{{cryptoWatch.liveValue | currency : 'EUR' : 'symbol' : '0.0-2'}}</td>
+                        <td class="text-sm" [ngStyle]="{'color': (cryptoWatch.change > 0) ? '#a6fa7e' : (cryptoWatch.change === 0) ? '#999999' : '#fa5858'}">{{cryptoWatch.change | number : '0.0-2'}}%</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-accordionTab>
+        <p-accordionTab header="Forex" [selected]="false">
+            <p-table #dt1 [value]="forexWatchList" responsiveLayout="scroll" styleClass="p-datatable-sm"
+                [autoLayout]="true">
+                <ng-template pTemplate="body" let-forexWatch>
+                    <tr>
+                        <td>
+                            <p-tag severity="info" value="{{forexWatch.fromCurrencyId + forexWatch.toCurrencyId}}"></p-tag>
+                        </td>
+                        <td></td>
+                        <td class="text-sm" [ngStyle]="{'color': (forexWatch.change > 0) ? '#a6fa7e' : (forexWatch.change === 0) ? '#999999' : '#fa5858'}">{{forexWatch.liveValue | currency : forexWatch.toCurrencyId : 'symbol' : '0.0-2'}}</td>
+                        <td class="text-sm" [ngStyle]="{'color': (forexWatch.change > 0) ? '#a6fa7e' : (forexWatch.change === 0) ? '#999999' : '#fa5858'}">{{forexWatch.change | number : '0.0-2'}}</td>
+                        <td class="text-sm" [ngStyle]="{'color': (forexWatch.change > 0) ? '#a6fa7e' : (forexWatch.change === 0) ? '#999999' : '#fa5858'}">{{forexWatch.pchange | number : '0.0-2'}}%</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-accordionTab>
+    </p-accordion>
+</div>

@@ -1,0 +1,111 @@
+<div class="shadow-5">
+    <menu class="pl-0 mb-0"></menu>
+    <p-panel header="Lookup">
+        <div class="flex flex-row-reverse flex-wrap">
+            <div class="flex align-items-center justify-content-center">
+                <p-dropdown [options]="stocks" optionLabel="shortName" optionValue="shortName"
+                    (onChange)="stockChanged($event)" [(ngModel)]="selectedTicker" placeholder="Select a Ticker"></p-dropdown>
+            </div>
+        </div>
+        <div class="grid pt-3" *ngIf="!(selectedTicker == undefined)">
+            <div class="col-7 col-offset-1">
+                <p-selectButton [options]="options" [disabled]="selectedTicker == undefined" [(ngModel)]="selectedOption" optionLabel="label" optionValue="value" (onChange)="getCandleData()"></p-selectButton>
+                <div>
+                    <apx-chart #chart [series]="chartOptions.series" [chart]="chartOptions.chart"
+                        [xaxis]="chartOptions.xaxis" [yaxis]="chartOptions.yaxis" [title]="chartOptions.title" [noData]="chartOptions.noData"
+                        [tooltip]="chartOptions.tooltip">
+                    </apx-chart>
+                </div>
+            </div>
+            <div class="col-3 col-offset-1">
+                <div class="flex flex-wrap justify-content-between border-bottom-1 border-top-1">
+                    <div class="flex align-items-start">Name</div>
+                    <div class="flex align-items-end">{{profile.name}}</div>
+                </div>
+                <div class="flex flex-wrap justify-content-between border-bottom-1">
+                    <div class="flex align-items-start">Ticker</div>
+                    <div class="flex align-items-end">{{profile.ticker}}</div>
+                </div>
+                <div class="flex flex-wrap justify-content-between border-bottom-1">
+                    <div class="flex align-items-start">Market</div>
+                    <div class="flex align-items-end">{{profile.exchange}}</div>
+                </div>
+                <div class="flex flex-wrap justify-content-between border-bottom-1">
+                    <div class="flex align-items-start">Industry</div>
+                    <div class="flex align-items-end">{{profile.finnhubIndustry}}</div>
+                </div>
+                <div class="flex flex-wrap justify-content-between border-bottom-1">
+                    <div class="flex align-items-start">IPO</div>
+                    <div class="flex align-items-end">{{profile.ipo | date:'mediumDate' }}</div>
+                </div>
+                <div class="flex flex-wrap justify-content-between border-bottom-1">
+                    <div class="flex align-items-start">Currency</div>
+                    <div class="flex align-items-end">{{profile.currency}}</div>
+                </div>
+                <div class="flex flex-wrap justify-content-between border-bottom-1">
+                    <div class="flex align-items-start">Market Cap.</div>
+                    <div class="flex align-items-end">{{profile.marketCapitalization / 1000 | currency :
+                        profile.currency : 'symbol' : '0.0-2'}}B</div>
+                </div>
+                <div class="flex flex-wrap justify-content-between border-bottom-1">
+                    <div class="flex align-items-start">Outstanding Shares</div>
+                    <div class="flex align-items-end">{{profile.shareOutstanding / 1000 | number : '0.0-1'}}B</div>
+                </div>
+                <div class="flex flex-wrap justify-content-between border-bottom-1">
+                    <div class="flex align-items-start">WebUrl</div>
+                    <div class="flex align-items-end"><a href="{{profile.weburl}}" target="_blank" style="color: inherit; text-decoration: inherit;">{{profile.weburl}}</a></div>
+                </div>
+                <div class="flex flex-wrap justify-content-between border-bottom-1">
+                    <div class="flex align-items-start">Peers</div>
+                    <div class="flex align-items-end">
+                        <div *ngFor="let peer of profile.peers" class="text-xs">
+                            {{peer}},
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-wrap justify-content-between border-bottom-1 border-top-1">
+                    <div class="flex align-items-start">Avg Vol (10D)</div>
+                    <div class="flex align-items-end">{{metric.tenDayAverageTradingVolume | number : '0.0-1'}}M</div>
+                </div>
+                <div class="flex flex-wrap justify-content-between border-bottom-1 border-top-1">
+                    <div class="flex align-items-start">Avg Vol (3M)</div>
+                    <div class="flex align-items-end">{{metric.threeMonthAverageTradingVolume / 30 | number : '0.0-1'}}M
+                    </div>
+                </div>
+                <div class="flex flex-wrap justify-content-between border-bottom-1 border-top-1">
+                    <div class="flex align-items-start">52 Week H/L</div>
+                    <div class="flex align-items-end">{{(metric.yearHigh | number : '0.0-1') + ' - ' + (metric.yearLow |
+                        number : '0.0-1')}}</div>
+                </div>
+                <div class="flex flex-wrap justify-content-between border-bottom-1 border-top-1">
+                    <div class="flex align-items-start">H/L Date</div>
+                    <div class="flex align-items-end">{{(metric.yearHighDate | date:'mediumDate') + ' - ' +
+                        (metric.yearLowDate | date:'mediumDate')}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="text-white">
+            <div class="grid justify-content-center pt-3">
+                <div *ngFor="let new of news"
+                    class="col-5 shadow-5 mr-3 mb-3 border-blue-100 surface-overlay border-1 border-round"
+                    style="background-color: #343e4d;">
+                    <a href="{{new.url}}" target="_blank" style="color: inherit; text-decoration: inherit;">
+                        <div class="grid">
+                            <div class="col-2 col-offset-1 font-italic">{{new.datetime * 1000 | date: 'yyyy-MM-dd'}}
+                            </div>
+                            <div class="col-1 col-offset-7 text-sm">{{new.source}}</div>
+                        </div>
+                        <div class="grid">
+                            <div class="col-11 col-offset-1 font-bold">{{new.headline}}</div>
+                        </div>
+                        <div class="grid">
+                            <div class="col-2 col-offset-1"><img alt="" height="80" src="{{new.image}}"></div>
+                            <div class="col-6 col-offset-2 text-sm">{{(new.summary.length > 250) ? (new.summary | slice:
+                                0:250) + '...' : new.summary }}</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </p-panel>
+</div>

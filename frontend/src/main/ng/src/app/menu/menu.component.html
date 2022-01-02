@@ -1,0 +1,15 @@
+<p-menubar [model]="items">
+    <ng-template pTemplate="start">
+        <h2 class="mt-0 mb-0">Eye OTM <i class="fas fa-search-dollar"></i></h2>
+    </ng-template>
+    <ng-template pTemplate="end">
+        <div class="flex flex-row flex-wrap">
+            <label class="pt-2 mr-1" for="cryptoDropdown">Crypto</label>
+            <p-dropdown inputId="cryptoDropdown" [options]="globals.currencies" [(ngModel)]="selectedCrypto"
+                optionLabel="label" optionValue="value" (onChange)="changedCrypto()"></p-dropdown>
+            <label class="pt-2 mr-1 ml-1" for="stockDropdown">Stock</label>
+            <p-dropdown inputId="stockDropdown" [options]="globals.currencies" [(ngModel)]="selectedStock"
+                optionLabel="label" optionValue="value" (onChange)="changedStock()"></p-dropdown>
+        </div>
+    </ng-template>
+</p-menubar>

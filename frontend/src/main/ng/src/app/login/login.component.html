@@ -1,0 +1,23 @@
+<p-toast position="bottom-center"></p-toast>
+<div class="loginContainer shadow-3 text-center">
+    <div class="fluid">
+        <h1 class="mt-0">EyeOTM <i class="pi pi-chart-line" style="font-size: 1.5rem"></i></h1>
+        <div class="field pb-2">
+            <input id="username" type="text" pInputText [(ngModel)]="user.email" placeholder="Email"
+                [formControl]="emailControl">
+        </div>
+        <div class="field">
+            <input id="password" type="password" placeholder="Password" pInputText [(ngModel)]="user.password"
+                [formControl]="passwordControl">
+        </div>
+        <div class="field">
+            <button pButton pRipple type="button" class="p-button-info mr-2" (click)="login()">Login<i
+                    class="pi pi-lock-open ml-1"></i></button>
+            <button pButton pRipple type="button" class="p-button-secondary">Register<i
+                    class="pi pi-user-plus ml-1"></i></button>
+        </div>
+    </div>
+    <div class="field">
+        <p class="message">Forgot your password? <a routerLink="/reset">Reset password</a></p>
+    </div>
+</div>

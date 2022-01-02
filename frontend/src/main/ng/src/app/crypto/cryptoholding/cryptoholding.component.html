@@ -1,0 +1,34 @@
+<p-table [value]="transactions" styleClass="p-datatable-striped" responsiveLayout="scroll">
+    <ng-template pTemplate="header">
+        <tr>
+            <th>Symbol</th>
+            <th>Quantity</th>
+            <th>Spent</th>
+            <th>Average</th>
+            <th>Worth</th>
+            <th>Price</th>
+            <th>Profit</th>
+            <th>%</th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-transaction>
+        <tr>
+            <td>
+                <p-tag class="mr-2" severity="primary" value="{{transaction.symbol}}"></p-tag>
+            </td>
+            <td>{{transaction.quantity | number : '0.0-4'}}</td>
+            <td>{{transaction.amount | currency : globals.cryptoCurrency : 'symbol' : '0.0-2'}}</td>
+            <td>{{transaction.amount / transaction.quantity | currency : globals.cryptoCurrency : 'symbol' : '0.0-3'}}</td>
+            <td>{{transaction.liveValue | currency : globals.cryptoCurrency : 'symbol' : '0.0-2'}}</td>
+            <td>{{transaction.liveValue / transaction.quantity | currency : globals.cryptoCurrency : 'symbol' : '0.0-3'}}</td>
+            <td>
+                <p-tag styleClass="p-mr-2" severity="success" *ngIf="transaction.valueDiff > 0" value="{{transaction.valueDiff | currency : globals.cryptoCurrency : 'symbol' : '0.0-2'}}"></p-tag>
+                <p-tag styleClass="p-mr-2" severity="danger" *ngIf="transaction.valueDiff < 0" value="{{transaction.valueDiff | currency : globals.cryptoCurrency : 'symbol' : '0.0-2'}}"></p-tag>
+            </td>
+            <td>
+                <p-tag styleClass="p-mr-2" severity="success" *ngIf="transaction.valueDiff > 0" value="{{(transaction.valueDiff / transaction.amount * 100 | number : '0.0-1') + '%'}}"></p-tag>
+                <p-tag styleClass="p-mr-2" severity="danger" *ngIf="transaction.valueDiff < 0" value="{{(transaction.valueDiff / transaction.amount * 100 | number : '0.0-1') + '%'}}"></p-tag>
+            </td>
+        </tr>
+    </ng-template>
+</p-table>

@@ -44,6 +44,7 @@ export class SearchComponent implements OnInit {
   endPrice = 0;
   percentage = 0;
   difference = 0;
+  volume = 0;
 
   @ViewChild("chart") chart: ChartComponent | any;
   public chartOptions: Partial<ChartOptions> | any;
@@ -157,5 +158,6 @@ export class SearchComponent implements OnInit {
     this.endPrice = this.candle.c[this.candle.c.length - 1];
     this.difference = this.endPrice - this.startPrice;
     this.percentage = this.difference / this.startPrice * 100;
+    this.volume = this.candle.v[this.candle.c.length - 1] / 1000000;
   }
 }

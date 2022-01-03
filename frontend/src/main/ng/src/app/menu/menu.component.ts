@@ -44,6 +44,11 @@ export class MenuComponent implements OnInit {
         routerLink: ['/crypto']
       },
       {
+        label: 'Forex',
+        icon: 'fas fa-euro-sign',
+        routerLink: ['/forex']
+      },
+      {
         label: 'Lookup',
         icon: 'fas fa-search',
         routerLink: ['/search']

@@ -7,8 +7,8 @@
             <p-button icon="fas fa-plus" styleClass="p-button-success w-2rem h-2rem"></p-button>
         </ng-template>
     </p-toolbar>
-    <p-accordion>
-        <p-accordionTab header="Stock" [selected]="false" styleClass="p-0 m-0" class="p-0 m-0">
+    <p-accordion [multiple]="true">
+        <p-accordionTab header="Stock" [selected]="true" styleClass="p-0 m-0" class="p-0 m-0">
             <p-table #dt1 [value]="stockWatchList" responsiveLayout="scroll" styleClass="p-datatable-sm"
                 [autoLayout]="true">
                 <ng-template pTemplate="body" let-stockWatch>

@@ -6,6 +6,7 @@ import { StockComponent } from './stock/stock.component';
 import { CryptoComponent } from './crypto/crypto.component';
 import { WatchlistComponent } from './watchlist/watchlist.component';
 import { SearchComponent } from './search/search.component';
+import { ForexComponent } from './forex/forex.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -15,6 +16,7 @@ const routes: Routes = [
   { path: 'crypto', component: CryptoComponent },
   { path: 'watchlist', component: WatchlistComponent },
   { path: 'search', component: SearchComponent },
+  { path: 'forex', component: ForexComponent }
 ];
 
 @NgModule({

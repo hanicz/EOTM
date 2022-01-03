@@ -45,6 +45,7 @@ import { CardModule } from 'primeng/card';
 import { SelectButtonModule } from 'primeng/selectbutton';
 
 import { NgApexchartsModule } from 'ng-apexcharts';
+import { ForexComponent } from './forex/forex.component';
 
 
 @NgModule({
@@ -62,7 +63,8 @@ import { NgApexchartsModule } from 'ng-apexcharts';
     CryptopositionComponent,
     CryptoholdingComponent,
     WatchlistComponent,
-    SearchComponent
+    SearchComponent,
+    ForexComponent
   ],
   imports: [
     BrowserModule,

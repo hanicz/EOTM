@@ -9,32 +9,21 @@ import { NewsService } from '../service/news.service';
 })
 export class HomeComponent implements OnInit {
 
-  generalNews: News[] = [];
-  forexNews: News[] = [];
-  cryptoNews: News[] = [];
+  selectedType = 'category/general';
+  options: any[];
 
   constructor(private newsService: NewsService) {
-    this.fetchData();
+    this.options = [
+      { label: 'General', value: 'category/general' },
+      { label: 'Forex', value: 'category/forex' },
+      { label: 'Crypto', value: 'category/crypto' }
+    ];
   }
 
   ngOnInit(): void {
   }
 
-  fetchData() {
-    this.newsService.getNews("general").subscribe({
-      next: (data) => {
-        this.generalNews = data;
-      }
-    });
-    this.newsService.getNews("forex").subscribe({
-      next: (data) => {
-        this.forexNews = data;
-      }
-    });
-    this.newsService.getNews("crypto").subscribe({
-      next: (data) => {
-        this.cryptoNews = data;
-      }
-    });
+  typeChanged() {
+
   }
 }

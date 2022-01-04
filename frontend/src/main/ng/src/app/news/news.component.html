@@ -1,0 +1,23 @@
+<div class="text-white">
+    <div class="grid justify-content-center pt-3">
+        <div *ngFor="let new of news"
+            class="col-5 shadow-5 mr-3 mb-3 border-blue-100 surface-overlay border-1 border-round"
+            style="background-color: #343e4d;">
+            <a href="{{new.url}}" target="_blank" style="color: inherit; text-decoration: inherit;">
+                <div class="grid">
+                    <div class="col-2 col-offset-1 font-italic">{{new.datetime * 1000 | date: 'yyyy-MM-dd'}}
+                    </div>
+                    <div class="col-1 col-offset-7 text-sm">{{new.source}}</div>
+                </div>
+                <div class="grid">
+                    <div class="col-11 col-offset-1 font-bold">{{new.headline}}</div>
+                </div>
+                <div class="grid">
+                    <div class="col-2 col-offset-1"><img alt="" height="80" src="{{new.image}}"></div>
+                    <div class="col-6 col-offset-2 text-sm">{{(new.summary.length > 250) ? (new.summary | slice:
+                        0:250) + '...' : new.summary }}</div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>

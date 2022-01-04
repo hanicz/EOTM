@@ -47,6 +47,7 @@ import { CardModule } from 'primeng/card';
 import { SelectButtonModule } from 'primeng/selectbutton';
 
 import { NgApexchartsModule } from 'ng-apexcharts';
+import { NewsComponent } from './news/news.component';
 
 
 @NgModule({
@@ -66,7 +67,8 @@ import { NgApexchartsModule } from 'ng-apexcharts';
     WatchlistComponent,
     SearchComponent,
     ForexComponent,
-    DividendComponent
+    DividendComponent,
+    NewsComponent
   ],
   imports: [
     BrowserModule,

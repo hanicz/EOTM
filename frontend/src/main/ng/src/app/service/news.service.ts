@@ -16,7 +16,7 @@ export class NewsService {
   constructor(private http: HttpClient) { }
 
   getNews(category: string) {
-    const url = `${this.newsUrl}/category/${category}`;
+    const url = `${this.newsUrl}/${category}`;
     return this.http.get<News[]>(url, {
       headers: this.helper.getHeadersWithToken()
     });

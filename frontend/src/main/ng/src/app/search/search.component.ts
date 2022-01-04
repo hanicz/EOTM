@@ -40,6 +40,7 @@ export class SearchComponent implements OnInit {
   options: any[];
   selectedOption = 3;
   selectedTicker: any;
+  newsType = '';
   startPrice = 0;
   endPrice = 0;
   percentage = 0;
@@ -127,11 +128,8 @@ export class SearchComponent implements OnInit {
       }
     });
 
-    this.newsService.getCompanyNews(this.selectedTicker).subscribe({
-      next: (data) => {
-        this.news = data;
-      }
-    });
+    this.newsType = `company/${this.selectedTicker}`;
+
     this.getCandleData();
   }
 

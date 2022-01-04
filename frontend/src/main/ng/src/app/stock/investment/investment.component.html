@@ -50,9 +50,10 @@
             <th>Type</th>
             <th>Quantity</th>
             <th>Spent</th>
-            <th>Unit</th>
+            <th>Average</th>
             <th>Date</th>
             <th>Currency</th>
+            <th>Fee</th>
             <th></th>
         </tr>
     </ng-template>
@@ -68,9 +69,10 @@
             </td>
             <td>{{investment.quantity}}</td>
             <td>{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}</td>
-            <td>{{(investment.amount / investment.quantity) | number : '0.0-3'}}</td>
+            <td>{{(investment.amount / investment.quantity) | currency : investment.currencyId : 'symbol' : '0.0-3'}}</td>
             <td>{{investment.transactionDate | date:'mediumDate'}}</td>
             <td>{{investment.currencyId}}</td>
+            <td>{{investment.fee}}</td>
             <td>
                 <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-info mr-1"
                     (click)="editInvestment(investment)"></button>
@@ -115,6 +117,10 @@
         <div class="p-field p-col-4 p-md-4">
             <label for="date">Date</label>
             <input type="text" pInputText id="date" placeholder="YYYY-MM-DD" [(ngModel)]="investment.transactionDate" />
+        </div>
+        <div class="p-field">
+            <label for="fee">Fee</label>
+            <input type="number" pInputText id="fee" [(ngModel)]="investment.fee" />
         </div>
     </ng-template>
 

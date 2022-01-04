@@ -27,6 +27,7 @@ public class Transaction {
     private Date creationDate;
     private String transactionString;
     private Date transactionDate;
+    private Double fee;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

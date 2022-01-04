@@ -9,4 +9,5 @@ export interface Transaction {
     currencyId: string;
     liveValue?: number;
     valueDiff?: number;
+    fee: number;
 }

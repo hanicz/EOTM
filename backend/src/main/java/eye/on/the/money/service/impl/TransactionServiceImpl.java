@@ -118,7 +118,9 @@ public class TransactionServiceImpl implements TransactionService {
                 .coin(coin)
                 .payment(payment)
                 .user(user)
+                .fee(transactionDTO.getFee())
                 .build();
+
         transaction = this.transactionRepository.save(transaction);
         return this.convertToTransactionDTO(transaction);
     }
@@ -136,6 +138,7 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setTransactionDate(transactionDTO.getTransactionDate());
         transaction.setQuantity(transactionDTO.getQuantity());
         transaction.setCoin(coin);
+        transaction.setFee(transactionDTO.getFee());
         payment.setAmount(transactionDTO.getAmount());
         payment.setCurrency(currency);
 
@@ -164,12 +167,12 @@ public class TransactionServiceImpl implements TransactionService {
                         collect(Collectors.toList());
         try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
             if (!transactionList.isEmpty()) {
-                csvPrinter.printRecord("Transaction Id", "Quantity", "Type", "Transaction Date", "Symbol", "Amount", "Currency");
+                csvPrinter.printRecord("Transaction Id", "Quantity", "Type", "Transaction Date", "Symbol", "Amount", "Currency", "Fee");
             }
             for (TransactionDTO t : transactionList) {
                 csvPrinter.printRecord(t.getTransactionId(), t.getQuantity(),
                         t.getBuySell(), t.getTransactionDate(), t.getSymbol(),
-                        t.getAmount(), t.getCurrencyId());
+                        t.getAmount(), t.getCurrencyId(), t.getFee());
             }
         } catch (IOException e) {
             throw new RuntimeException("fail to crate CSV file: " + e.getMessage());
@@ -181,7 +184,7 @@ public class TransactionServiceImpl implements TransactionService {
     public void processCSV(User user, MultipartFile file) {
         try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
              CSVParser csvParser = new CSVParser(fileReader, CSVFormat.Builder.create()
-                     .setHeader("Transaction Id", "Quantity", "Type", "Transaction Date", "Symbol", "Amount", "Currency")
+                     .setHeader("Transaction Id", "Quantity", "Type", "Transaction Date", "Symbol", "Amount", "Currency", "Fee")
                      .setSkipHeaderRecord(true)
                      .setDelimiter(",")
                      .setTrim(true)
@@ -199,6 +202,7 @@ public class TransactionServiceImpl implements TransactionService {
                         .quantity(Double.parseDouble(csvRecord.get("Quantity")))
                         .currencyId(csvRecord.get("Currency"))
                         .symbol(csvRecord.get("Symbol"))
+                        .fee(Double.parseDouble(csvRecord.get("Fee")))
                         .build();
 
                 if (!("").equals(csvRecord.get("Transaction Id")) &&

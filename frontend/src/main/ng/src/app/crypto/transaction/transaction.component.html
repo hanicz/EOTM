@@ -5,9 +5,10 @@
         <button pButton pRipple icon="pi pi-trash" class="p-button-danger"
             [disabled]="!selectedTransactions || !selectedTransactions.length" (click)="deleteClicked()"></button>
     </ng-template>
- 
+
     <ng-template pTemplate="right">
-        <p-fileUpload mode="basic" #fileUpload accept=".csv" [customUpload]="true" label="Import" chooseLabel="Import" class="mr-2 p-d-inline-block" (uploadHandler)="onUpload($event)">
+        <p-fileUpload mode="basic" #fileUpload accept=".csv" [customUpload]="true" label="Import" chooseLabel="Import"
+            class="mr-2 p-d-inline-block" (uploadHandler)="onUpload($event)">
         </p-fileUpload>
         <button pButton pRipple label="Export" icon="pi pi-upload" class="p-button-info" (click)="download()"></button>
     </ng-template>
@@ -52,10 +53,11 @@
             <th>Type</th>
             <th>Quantity</th>
             <th>Spent</th>
-            <th>Unit</th>
+            <th>Average</th>
             <th>Date</th>
             <th>Currency</th>
-            <th>Edit</th>
+            <th>Fee</th>
+            <th></th>
         </tr>
     </ng-template>
     <ng-template pTemplate="body" let-transaction>
@@ -81,6 +83,7 @@
             </td>
             <td>{{transaction.transactionDate | date:'mediumDate'}}</td>
             <td>{{transaction.currencyId}}</td>
+            <td>{{transaction.fee}}</td>
             <td>
                 <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-info mr-1"
                     (click)="editTransaction(transaction)"></button>
@@ -105,8 +108,7 @@
         </div>
         <div class="p-field">
             <label for="currency">Type</label>
-            <p-dropdown  [options]="statuses" [(ngModel)]="transaction.buySell"
-                placeholder="Any">
+            <p-dropdown [options]="statuses" [(ngModel)]="transaction.buySell" placeholder="Any">
                 <ng-template let-option pTemplate="item">
 
                     <p-tag styleClass="p-mr-2" severity="info" *ngIf="option.label === 'BUY'" value="BUY">
@@ -128,8 +130,12 @@
         </div>
         <div class="p-field p-col-4 p-md-4">
             <label for="date">Date</label>
-            <input type="text" pInputText id="date" placeholder="YYYY-MM-DD" [(ngModel)]="transaction.transactionDate"
-                />
+            <input type="text" pInputText id="date" placeholder="YYYY-MM-DD"
+                [(ngModel)]="transaction.transactionDate" />
+        </div>
+        <div class="p-field">
+            <label for="fee">Fee</label>
+            <input type="number" pInputText id="fee" [(ngModel)]="transaction.fee" />
         </div>
     </ng-template>
 

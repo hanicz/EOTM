@@ -2,6 +2,7 @@ package eye.on.the.money.model.stock;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import eye.on.the.money.model.User;
+import eye.on.the.money.model.forex.Currency;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,30 +15,28 @@ import java.util.Date;
 @Builder
 @Slf4j
 @ToString
-@Table(name = "EOTM_STOCK_INVESTMENT")
+@Table(name = "EOTM_STOCK_DIVIDEND")
 @AllArgsConstructor
 @NoArgsConstructor
-public class Investment {
+public class Dividend {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Integer quantity;
-    private String buySell;
-    private Date creationDate;
-    private Date transactionDate;
-    private Double fee;
+    private Double amount;
+    private Date dividendDate;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "currency_id", nullable = false)
     @JsonIgnore
-    private User user;
+    private Currency currency;
 
     @ManyToOne
     @JoinColumn(name = "stock_id", nullable = false)
     private Stock stock;
 
-    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true)
-    @JoinColumn(name = "stockPayment_id", nullable = false)
-    private StockPayment stockPayment;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
+    private User user;
 }

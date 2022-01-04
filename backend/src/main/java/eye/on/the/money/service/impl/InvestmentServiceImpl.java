@@ -148,6 +148,7 @@ public class InvestmentServiceImpl implements InvestmentService {
                 .quantity(investmentDTO.getQuantity())
                 .stock(stock)
                 .stockPayment(stockPayment)
+                .fee(investmentDTO.getFee())
                 .build();
         investment = this.investmentRepository.save(investment);
         return this.convertToInvestmentDTO(investment);
@@ -165,6 +166,7 @@ public class InvestmentServiceImpl implements InvestmentService {
         investment.setTransactionDate(investmentDTO.getTransactionDate());
         investment.setQuantity(investmentDTO.getQuantity());
         investment.setStock(stock);
+        investment.setFee(investmentDTO.getFee());
         stockPayment.setAmount(investmentDTO.getAmount());
         stockPayment.setCurrency(currency);
 
@@ -186,12 +188,12 @@ public class InvestmentServiceImpl implements InvestmentService {
                         collect(Collectors.toList());
         try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
             if (!investmentList.isEmpty()) {
-                csvPrinter.printRecord("Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Amount", "Currency");
+                csvPrinter.printRecord("Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Amount", "Currency", "Fee");
             }
             for (InvestmentDTO i : investmentList) {
                 csvPrinter.printRecord(i.getInvestmentId(), i.getQuantity(),
                         i.getBuySell(), i.getTransactionDate(), i.getShortName(),
-                        i.getAmount(), i.getCurrencyId());
+                        i.getAmount(), i.getCurrencyId(), i.getFee());
             }
         } catch (IOException e) {
             throw new RuntimeException("fail to create CSV file: " + e.getMessage());
@@ -203,7 +205,7 @@ public class InvestmentServiceImpl implements InvestmentService {
     public void processCSV(User user, MultipartFile file) {
         try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
              CSVParser csvParser = new CSVParser(fileReader, CSVFormat.Builder.create()
-                     .setHeader("Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Amount", "Currency")
+                     .setHeader("Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Amount", "Currency", "Fee")
                      .setSkipHeaderRecord(true)
                      .setDelimiter(",")
                      .setTrim(true)
@@ -221,6 +223,7 @@ public class InvestmentServiceImpl implements InvestmentService {
                         .quantity(Integer.parseInt(csvRecord.get("Quantity")))
                         .currencyId(csvRecord.get("Currency"))
                         .shortName(csvRecord.get("Short Name"))
+                        .fee(Double.parseDouble(csvRecord.get("Fee")))
                         .build();
 
                 if (!("").equals(csvRecord.get("Investment Id")) &&

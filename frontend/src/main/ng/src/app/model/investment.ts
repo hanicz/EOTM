@@ -8,4 +8,5 @@ export interface Investment {
     currencyId: string;
     liveValue?: number;
     valueDiff?: number;
+    fee: number;
 }

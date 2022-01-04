@@ -14,7 +14,7 @@ public interface InvestmentService {
     public List<InvestmentDTO> getInvestmentsByBuySell(Long userId, InvestmentQuery query);
     public List<InvestmentDTO> getInvestmentsByDate(Long userId, InvestmentQuery query);
     public List<InvestmentDTO> getInvestmentsByTypeAndDate(Long userId, InvestmentQuery query);
-    public void deleteInvestmentById(List<Long> ids);
+    public void deleteInvestmentById(User user, List<Long> ids);
     public List<InvestmentDTO> getCurrentHoldings(Long userId, InvestmentQuery query);
     public List<InvestmentDTO> getAllPositions(Long userId, InvestmentQuery query);
     public InvestmentDTO createInvestment(InvestmentDTO investmentDTO, User user);

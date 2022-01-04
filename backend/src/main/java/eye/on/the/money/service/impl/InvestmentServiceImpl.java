@@ -159,7 +159,7 @@ public class InvestmentServiceImpl implements InvestmentService {
     public InvestmentDTO updateInvestment(InvestmentDTO investmentDTO, User user) {
         Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
         Stock stock = this.stockRepository.findByShortName(investmentDTO.getShortName()).orElseThrow(NoSuchElementException::new);
-        Investment investment = this.investmentRepository.findById(investmentDTO.getInvestmentId()).orElseThrow(NoSuchElementException::new);
+        Investment investment = this.investmentRepository.findByIdAndUser_Id(investmentDTO.getInvestmentId(), user.getId()).orElseThrow(NoSuchElementException::new);
         StockPayment stockPayment = investment.getStockPayment();
 
         investment.setBuySell(investmentDTO.getBuySell());
@@ -175,8 +175,8 @@ public class InvestmentServiceImpl implements InvestmentService {
 
     @Transactional
     @Override
-    public void deleteInvestmentById(List<Long> ids) {
-        this.investmentRepository.deleteByIdIn(ids);
+    public void deleteInvestmentById(User user, List<Long> ids) {
+        this.investmentRepository.deleteByUser_IdAndIdIn(user.getId(), ids);
     }
 
     @Override
@@ -227,7 +227,7 @@ public class InvestmentServiceImpl implements InvestmentService {
                         .build();
 
                 if (!("").equals(csvRecord.get("Investment Id")) &&
-                        this.investmentRepository.findById(Long.parseLong(csvRecord.get("Investment Id"))).isPresent()) {
+                        this.investmentRepository.findByIdAndUser_Id(Long.parseLong(csvRecord.get("Investment Id")), user.getId()).isPresent()) {
                     investment.setInvestmentId(Long.parseLong(csvRecord.get("Investment Id")));
                     this.updateInvestment(investment, user);
                 } else {

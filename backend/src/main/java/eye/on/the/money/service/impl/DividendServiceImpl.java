@@ -80,7 +80,7 @@ public class DividendServiceImpl implements DividendService {
     public DividendDTO updateDividend(DividendDTO dividendDTO, User user) {
         Currency currency = this.currencyRepository.findById(dividendDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
         Stock stock = this.stockRepository.findByShortName(dividendDTO.getShortName()).orElseThrow(NoSuchElementException::new);
-        Dividend dividend = this.dividendRepository.findById(dividendDTO.getDividendId()).orElseThrow(NoSuchElementException::new);
+        Dividend dividend = this.dividendRepository.findByIdAndUser_Id(dividendDTO.getDividendId(), user.getId()).orElseThrow(NoSuchElementException::new);
 
         dividend.setDividendDate(dividendDTO.getDividendDate());
         dividend.setCurrency(currency);
@@ -92,8 +92,8 @@ public class DividendServiceImpl implements DividendService {
 
     @Transactional
     @Override
-    public void deleteDividendById(List<Long> ids) {
-        this.dividendRepository.deleteByIdIn(ids);
+    public void deleteDividendById(List<Long> ids, User user) {
+        this.dividendRepository.deleteByUser_idAndIdIn(user.getId(), ids);
     }
 
     @Override
@@ -141,7 +141,7 @@ public class DividendServiceImpl implements DividendService {
                         .build();
 
                 if (!("").equals(csvRecord.get("Dividend Id")) &&
-                        this.dividendRepository.findById(Long.parseLong(csvRecord.get("Dividend Id"))).isPresent()) {
+                        this.dividendRepository.findByIdAndUser_Id(Long.parseLong(csvRecord.get("Dividend Id")), user.getId()).isPresent()) {
                     dividend.setDividendId(Long.parseLong(csvRecord.get("Dividend Id")));
                     this.updateDividend(dividend, user);
                 } else {

@@ -80,7 +80,7 @@ public class InvestmentController {
     public ResponseEntity<HttpStatus> deleteByIds(@AuthenticationPrincipal User user, @RequestParam String ids) {
         log.trace("Enter deleteByIds");
         List<Long> idList = Stream.of(ids.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
-        this.investmentService.deleteInvestmentById(idList);
+        this.investmentService.deleteInvestmentById(user, idList);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

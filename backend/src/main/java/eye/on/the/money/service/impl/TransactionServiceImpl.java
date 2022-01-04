@@ -98,8 +98,8 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Transactional
     @Override
-    public void deleteTransactionById(List<Long> ids) {
-        this.transactionRepository.deleteByIdIn(ids);
+    public void deleteTransactionById(User user, List<Long> ids) {
+        this.transactionRepository.deleteByUser_IdAndIdIn(user.getId(), ids);
     }
 
     @Transactional
@@ -130,7 +130,7 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionDTO updateTransaction(TransactionDTO transactionDTO, User user) {
         Currency currency = this.currencyRepository.findById(transactionDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
         Coin coin = this.coinRepository.findBySymbol(transactionDTO.getSymbol()).orElseThrow(NoSuchElementException::new);
-        Transaction transaction = this.transactionRepository.findById(transactionDTO.getTransactionId()).orElseThrow(NoSuchElementException::new);
+        Transaction transaction = this.transactionRepository.findByIdAndUser_Id(transactionDTO.getTransactionId(), user.getId()).orElseThrow(NoSuchElementException::new);
         Payment payment = transaction.getPayment();
 
         transaction.setBuySell(transactionDTO.getBuySell());
@@ -206,7 +206,7 @@ public class TransactionServiceImpl implements TransactionService {
                         .build();
 
                 if (!("").equals(csvRecord.get("Transaction Id")) &&
-                        this.transactionRepository.findById(Long.parseLong(csvRecord.get("Transaction Id"))).isPresent()) {
+                        this.transactionRepository.findByIdAndUser_Id(Long.parseLong(csvRecord.get("Transaction Id")), user.getId()).isPresent()) {
                     transaction.setTransactionId(Long.parseLong(csvRecord.get("Transaction Id")));
                     this.updateTransaction(transaction, user);
                 } else {

@@ -63,7 +63,7 @@ public class TransactionController {
     public ResponseEntity<HttpStatus> deleteByIds(@AuthenticationPrincipal User user, @RequestParam String ids) {
         log.trace("Enter deleteByIds");
         List<Long> idList = Stream.of(ids.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
-        this.transactionService.deleteTransactionById(idList);
+        this.transactionService.deleteTransactionById(user, idList);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

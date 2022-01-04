@@ -43,7 +43,7 @@ public class DividendController {
     public ResponseEntity<HttpStatus> deleteByIds(@AuthenticationPrincipal User user, @RequestParam String ids) {
         log.trace("Enter deleteByIds");
         List<Long> idList = Stream.of(ids.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
-        this.dividendService.deleteDividendById(idList);
+        this.dividendService.deleteDividendById(idList, user);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

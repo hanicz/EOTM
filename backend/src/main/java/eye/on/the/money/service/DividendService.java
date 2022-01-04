@@ -11,7 +11,7 @@ public interface DividendService {
     public List<DividendDTO> getDividends(Long userId);
     public DividendDTO createDividend(DividendDTO dividendDTO, User user);
     public DividendDTO updateDividend(DividendDTO dividendDTO, User user);
-    public void deleteDividendById(List<Long> ids);
+    public void deleteDividendById(List<Long> ids, User user);
     public void processCSV(User user, MultipartFile file);
     public void getCSV(Long userId, Writer writer);
 }

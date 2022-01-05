@@ -1,17 +1,17 @@
 <div class="shadow-5">
     <menu class="pl-0 mb-0"></menu>
     <p-panel header="Lookup">
-        <div class="flex flex-row-reverse flex-wrap">
+        <div class="flex flex-row flex-wrap">
             <div class="flex align-items-center justify-content-center">
                 <p-dropdown [options]="stocks" optionLabel="shortName" optionValue="shortName"
-                    (onChange)="stockChanged($event)" [(ngModel)]="selectedTicker" placeholder="Select a Ticker">
+                    (onChange)="stockChanged($event)" [(ngModel)]="globals.selectedStock" placeholder="Select a Ticker">
                 </p-dropdown>
             </div>
         </div>
-        <div class="grid pt-3" *ngIf="!(selectedTicker == undefined)">
+        <div class="grid pt-3" *ngIf="globals.selectedStock != ''">
             <div class="col-7 col-offset-1">
-                <p-selectButton [options]="options" [disabled]="selectedTicker == undefined"
-                    [(ngModel)]="selectedOption" optionLabel="label" optionValue="value" (onChange)="getCandleData()">
+                <p-selectButton [options]="options" [(ngModel)]="selectedOption" optionLabel="label" optionValue="value"
+                    (onChange)="getCandleData()">
                 </p-selectButton>
                 <div class="border-orange-100 surface-overlay border-1 border-round">
                     <apx-chart #chart [series]=" chartOptions.series" [chart]="chartOptions.chart"

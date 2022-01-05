@@ -12,7 +12,7 @@
             <p-table #dt1 [value]="stockWatchList" responsiveLayout="scroll" styleClass="p-datatable-sm"
                 [autoLayout]="true">
                 <ng-template pTemplate="body" let-stockWatch>
-                    <tr>
+                    <tr (click)="stockSelected(stockWatch.stockShortName)" style="cursor: pointer;">
                         <td>
                             <p-tag severity="info" value="{{stockWatch.stockShortName}}">
                             </p-tag>

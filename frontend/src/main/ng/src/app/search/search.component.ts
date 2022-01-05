@@ -6,6 +6,7 @@ import { Profile } from '../model/profile';
 import { Stock } from '../model/stock';
 import { MetricService } from '../service/metric.service';
 import { StockService } from '../service/stock.service';
+import { Globals } from '../util/global';
 
 import {
   ChartComponent,
@@ -38,20 +39,21 @@ export class SearchComponent implements OnInit {
   candle: Candle = {} as Candle;
   options: any[];
   selectedOption = 3;
-  selectedTicker: any;
   newsType = '';
   startPrice = 0;
   endPrice = 0;
   percentage = 0;
   difference = 0;
   volume = 0;
+  globals: Globals;
 
   @ViewChild("chart") chart: ChartComponent | any;
   public chartOptions: Partial<ChartOptions> | any;
 
-  constructor(private stockService: StockService,
+  constructor(private stockService: StockService, globals: Globals,
     private metricService: MetricService) {
 
+    this.globals = globals;
     this.options = [
       { label: '1 month', value: 1 },
       { label: '3 months', value: 3 },
@@ -113,6 +115,10 @@ export class SearchComponent implements OnInit {
         custom: this.getTooltip
       }
     };
+
+    if(globals.selectedStock != ''){
+      this.stockChanged(undefined);
+    }
   }
 
   ngOnInit(): void {
@@ -136,25 +142,26 @@ export class SearchComponent implements OnInit {
   }
 
   stockChanged(event: any) {
-    this.metricService.getMetrics(this.selectedTicker).subscribe({
+    console.log('changed');
+    this.metricService.getMetrics(this.globals.selectedStock).subscribe({
       next: (data) => {
         this.metric = data;
       }
     });
 
-    this.metricService.getProfile(this.selectedTicker).subscribe({
+    this.metricService.getProfile(this.globals.selectedStock).subscribe({
       next: (data) => {
         this.profile = data;
       }
     });
 
-    this.newsType = `company/${this.selectedTicker}`;
+    this.newsType = `company/${this.globals.selectedStock}`;
 
     this.getCandleData();
   }
 
   getCandleData() {
-    this.stockService.getCandleData(this.selectedTicker, this.selectedOption).subscribe({
+    this.stockService.getCandleData(this.globals.selectedStock, this.selectedOption).subscribe({
       next: (data) => {
         this.candle = data;
         this.createChart();

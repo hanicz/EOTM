@@ -3,6 +3,9 @@ import { Subject } from 'rxjs';
 
 @Injectable()
 export class Globals {
+
+    selectedStock = '';
+
     cryptoCurrency: string = 'EUR';
     cryptoCurrencyChange: Subject<string> = new Subject<string>();
 

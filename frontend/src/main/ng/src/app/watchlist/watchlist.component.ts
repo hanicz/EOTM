@@ -4,6 +4,8 @@ import { ForexWatch } from '../model/forexwatch';
 import { StockWatch } from '../model/stockwatch';
 import { WatchlistService } from '../service/watchlist.service';
 import { interval, Subscription } from 'rxjs';
+import { Globals } from '../util/global';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-watchlist',
@@ -16,8 +18,10 @@ export class WatchlistComponent implements OnInit {
   forexWatchList: ForexWatch[] = [];
   cryptoWatchList: CryptoWatch[] = [];
   subscription: Subscription;
+  globals: Globals;
 
-  constructor(private watchlistService: WatchlistService) {
+  constructor(private watchlistService: WatchlistService, globals: Globals, private router: Router) {
+    this.globals = globals;
     this.fetchData();
 
     const interv = interval(60000);
@@ -45,4 +49,8 @@ export class WatchlistComponent implements OnInit {
     });
   }
 
+  stockSelected(stock: string) {
+    this.globals.selectedStock = stock;
+    this.router.navigate(['./search']);
+  }
 }

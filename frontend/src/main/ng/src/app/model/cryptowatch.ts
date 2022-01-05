@@ -5,4 +5,5 @@ export interface CryptoWatch {
     symbol: string;
     name: string;
     change: number;
+    url: string;
 }

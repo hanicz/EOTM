@@ -31,11 +31,11 @@
 
                                 <p-tag styleClass="p-mr-2" severity="info" *ngIf="option.label === 'BUY'" value="BUY">
                                 </p-tag>
-                                <p-tag styleClass="p-mr-2" severity="success" *ngIf="option.label === 'SELL'"
+                                <p-tag styleClass="p-mr-2" severity="warning" *ngIf="option.label === 'SELL'"
                                     value="SELL"></p-tag>
-                                <p-tag styleClass="p-mr-2" severity="warning" *ngIf="option.label === 'REDEMPTION'"
+                                <p-tag styleClass="p-mr-2" severity="success" *ngIf="option.label === 'REDEMPTION'"
                                     value="REDEMPTION"></p-tag>
-                                <p-tag styleClass="p-mr-2" severity="primary" *ngIf="option.label === 'EARN'"
+                                <p-tag styleClass="p-mr-2" severity="success" *ngIf="option.label === 'EARN'"
                                     value="EARN"></p-tag>
                             </ng-template>
                         </p-dropdown>
@@ -66,15 +66,19 @@
                 <p-tableCheckbox [value]="transaction"></p-tableCheckbox>
             </td>
             <td>
-                <p-tag severity="primary" value="{{transaction.symbol}}"></p-tag>
+                <div class="flex align-items-center">
+                    <p-image *ngIf="transaction.url != null" src="{{transaction.url}}" alt="Image" width="15"
+                        class="mr-1"></p-image>
+                    {{transaction.symbol}}
+                </div>
             </td>
             <td>
                 <p-tag styleClass="p-mr-2" severity="info" *ngIf="transaction.buySell === 'B'" value="BUY"></p-tag>
-                <p-tag styleClass="p-mr-2" severity="success" *ngIf="transaction.buySell === 'S'" value="SELL">
+                <p-tag styleClass="p-mr-2" severity="warning" *ngIf="transaction.buySell === 'S'" value="SELL">
                 </p-tag>
-                <p-tag styleClass="p-mr-2" severity="warning" *ngIf="transaction.buySell === 'R'" value="REDEMPTION">
+                <p-tag styleClass="p-mr-2" severity="success" *ngIf="transaction.buySell === 'R'" value="REDEMPTION">
                 </p-tag>
-                <p-tag styleClass="p-mr-2" severity="primary" *ngIf="transaction.buySell === 'E'" value="EARN">
+                <p-tag styleClass="p-mr-2" severity="success" *ngIf="transaction.buySell === 'E'" value="EARN">
                 </p-tag>
             </td>
             <td>{{transaction.quantity | number : '0.0-4'}}</td>
@@ -113,10 +117,10 @@
 
                     <p-tag styleClass="p-mr-2" severity="info" *ngIf="option.label === 'BUY'" value="BUY">
                     </p-tag>
-                    <p-tag styleClass="p-mr-2" severity="success" *ngIf="option.label === 'SELL'" value="SELL"></p-tag>
-                    <p-tag styleClass="p-mr-2" severity="warning" *ngIf="option.label === 'REDEMPTION'"
+                    <p-tag styleClass="p-mr-2" severity="warning" *ngIf="option.label === 'SELL'" value="SELL"></p-tag>
+                    <p-tag styleClass="p-mr-2" severity="success" *ngIf="option.label === 'REDEMPTION'"
                         value="REDEMPTION"></p-tag>
-                    <p-tag styleClass="p-mr-2" severity="primary" *ngIf="option.label === 'EARN'" value="EARN"></p-tag>
+                    <p-tag styleClass="p-mr-2" severity="success" *ngIf="option.label === 'EARN'" value="EARN"></p-tag>
                 </ng-template>
             </p-dropdown>
         </div>

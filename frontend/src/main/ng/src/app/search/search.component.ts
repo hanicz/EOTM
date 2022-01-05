@@ -5,7 +5,6 @@ import { News } from '../model/news';
 import { Profile } from '../model/profile';
 import { Stock } from '../model/stock';
 import { MetricService } from '../service/metric.service';
-import { NewsService } from '../service/news.service';
 import { StockService } from '../service/stock.service';
 
 import {
@@ -51,15 +50,14 @@ export class SearchComponent implements OnInit {
   public chartOptions: Partial<ChartOptions> | any;
 
   constructor(private stockService: StockService,
-    private metricService: MetricService,
-    private newsService: NewsService) {
+    private metricService: MetricService) {
 
     this.options = [
-      {label: '1 month', value: 1},
-      {label: '3 months', value: 3},
-      {label: '6 months', value: 6},
-      {label: '9 months', value: 9},
-      {label: '12 months', value: 12},
+      { label: '1 month', value: 1 },
+      { label: '3 months', value: 3 },
+      { label: '6 months', value: 6 },
+      { label: '9 months', value: 9 },
+      { label: '12 months', value: 12 },
     ];
 
     this.stockService.getAllStocks().subscribe({
@@ -72,7 +70,16 @@ export class SearchComponent implements OnInit {
       chart: {
         type: 'candlestick',
         toolbar: {
-          show: false
+          show: true,
+          tools: {
+            download: false,
+            selection: false,
+            zoom: false,
+            zoomin: false,
+            zoomout: false,
+            pan: false,
+            reset: false,
+          },
         },
         selection: {
           enabled: false
@@ -98,21 +105,34 @@ export class SearchComponent implements OnInit {
       noData: {
         text: 'Waiting...'
       },
-      yaxis: {
-        labels: {
-          show: true
-        }
-      },
       tooltip: {
         enabled: true,
         theme: 'dark',
         shared: true,
-        intersect: false
+        intersect: false,
+        custom: this.getTooltip
       }
     };
   }
 
   ngOnInit(): void {
+  }
+
+  getTooltip({ series, seriesIndex, dataPointIndex, w }: any) {
+    const o = w.globals.seriesCandleO[0][dataPointIndex]
+    const h = w.globals.seriesCandleH[0][dataPointIndex]
+    const l = w.globals.seriesCandleL[0][dataPointIndex]
+    const c = w.globals.seriesCandleC[0][dataPointIndex]
+    const v = series[1][dataPointIndex];
+    return (
+      '<div class="card p-2">' +
+      '<div>Open: <span class="font-bold">' + o.toFixed(2) + '</span></div>' +
+      '<div>High: <span class="font-bold">' + h.toFixed(2) + '</span></div>' +
+      '<div>Low: <span class="font-bold">' + l.toFixed(2) + '</span></div>' +
+      '<div>Close: <span class="font-bold">' + c.toFixed(2) + '</span></div>' +
+      '<div>Volume: <span class="font-bold">' + v.toFixed(1) + ' M' + '</span></div>' +
+      '</div>'
+    )
   }
 
   stockChanged(event: any) {
@@ -148,10 +168,27 @@ export class SearchComponent implements OnInit {
     for (let i = 0; i < this.candle.c.length; i++) {
       let xy = { x: new Date(this.candle.t[i] * 1000).toLocaleDateString("en-US"), y: [this.candle.o[i], this.candle.h[i], this.candle.l[i], this.candle.c[i]] }
       chartData.push(xy);
-      volumeChartData.push({ x: new Date(this.candle.t[i] * 1000).toLocaleDateString("en-US"), y: this.candle.v[i] / 10000000 })
+      volumeChartData.push({ x: new Date(this.candle.t[i] * 1000).toLocaleDateString("en-US"), y: this.candle.v[i] / 1000000 })
     }
+    this.chart.updateOptions({
+      yaxis: [{
+        labels: {
+          show: true,
+          formatter: function (value: any) {
+            return value + ' $';
+          }
+        }
+      },
+      {
+        max: this.candle.v[this.candle.c.length - 2] / 100000,
+        labels: {
+          show: false,
+        }
+      }
+      ]
+    });
     this.chart.updateSeries([{ name: 'Price', data: chartData, type: 'candlestick' }, { name: 'Volume', data: volumeChartData, type: 'column' }], false);
-    
+
     this.startPrice = this.candle.c[0];
     this.endPrice = this.candle.c[this.candle.c.length - 1];
     this.difference = this.endPrice - this.startPrice;

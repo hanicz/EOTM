@@ -1,7 +1,7 @@
 <div class="shadow-5">
     <p-toolbar styleClass="p-1">
         <ng-template pTemplate="left">
-            <h4 class="text-white p-0 m-0 pl-1">Watchlist</h4>
+            <h4 class="p-0 m-0 pl-1">Watchlist</h4>
         </ng-template>
         <ng-template pTemplate="right">
             <p-button icon="fas fa-plus" styleClass="p-button-success w-2rem h-2rem"></p-button>
@@ -14,11 +14,18 @@
                 <ng-template pTemplate="body" let-stockWatch>
                     <tr>
                         <td>
-                            <p-tag severity="primary" value="{{stockWatch.stockShortName}}"></p-tag>
+                            <p-tag severity="info" value="{{stockWatch.stockShortName}}">
+                            </p-tag>
                         </td>
-                        <td class="text-sm" [ngStyle]="{'color': (stockWatch.change > 0) ? '#a6fa7e' : (stockWatch.change === 0) ? '#999999' : '#fa5858'}">{{stockWatch.liveValue | currency : stockWatch.currencyId : 'symbol' : '0.0-2'}}</td>
-                        <td class="text-sm" [ngStyle]="{'color': (stockWatch.change > 0) ? '#a6fa7e' : (stockWatch.change === 0) ? '#999999' : '#fa5858'}">{{stockWatch.change | number : '0.0-2'}}</td>
-                        <td class="text-sm" [ngStyle]="{'color': (stockWatch.change > 0) ? '#a6fa7e' : (stockWatch.change === 0) ? '#999999' : '#fa5858'}">{{stockWatch.pchange | number : '0.0-2'}}%</td>
+                        <td class="text-sm font-bold"
+                            [ngStyle]="{'color': (stockWatch.change > 0) ? '#008002' : (stockWatch.change === 0) ? '#999999' : '#910101'}">
+                            {{stockWatch.liveValue | currency : stockWatch.currencyId : 'symbol' : '0.0-2'}}</td>
+                        <td class="text-sm font-bold"
+                            [ngStyle]="{'color': (stockWatch.change > 0) ? '#008002' : (stockWatch.change === 0) ? '#999999' : '#910101'}">
+                            {{stockWatch.change | number : '0.0-2'}}</td>
+                        <td class="text-sm font-bold"
+                            [ngStyle]="{'color': (stockWatch.change > 0) ? '#008002' : (stockWatch.change === 0) ? '#999999' : '#910101'}">
+                            {{stockWatch.pchange | number : '0.0-2'}}%</td>
                     </tr>
                 </ng-template>
             </p-table>
@@ -28,12 +35,19 @@
                 [autoLayout]="true">
                 <ng-template pTemplate="body" let-cryptoWatch>
                     <tr>
-                        <td>
-                            <p-tag severity="warning" value="{{cryptoWatch.symbol}}"></p-tag>
+                        <td class="text-xs">
+                            <div class="flex align-items-center">
+                                <p-image *ngIf="cryptoWatch.url != null" src="{{cryptoWatch.url}}" alt="Image"
+                                    width="15" class="mr-1"></p-image>
+                                {{cryptoWatch.name}}
+                            </div>
                         </td>
-                        <td class="text-xs">{{cryptoWatch.name}}</td>
-                        <td class="text-sm" [ngStyle]="{'color': (cryptoWatch.change > 0) ? '#a6fa7e' : (cryptoWatch.change === 0) ? '#999999' : '#fa5858'}">{{cryptoWatch.liveValue | currency : 'EUR' : 'symbol' : '0.0-2'}}</td>
-                        <td class="text-sm" [ngStyle]="{'color': (cryptoWatch.change > 0) ? '#a6fa7e' : (cryptoWatch.change === 0) ? '#999999' : '#fa5858'}">{{cryptoWatch.change | number : '0.0-2'}}%</td>
+                        <td class="text-sm font-bold"
+                            [ngStyle]="{'color': (cryptoWatch.change > 0) ? '#008002' : (cryptoWatch.change === 0) ? '#999999' : '#910101'}">
+                            {{cryptoWatch.liveValue | currency : 'EUR' : 'symbol' : '0.0-2'}}</td>
+                        <td class="text-sm font-bold"
+                            [ngStyle]="{'color': (cryptoWatch.change > 0) ? '#008002' : (cryptoWatch.change === 0) ? '#999999' : '#910101'}">
+                            {{cryptoWatch.change | number : '0.0-2'}}%</td>
                     </tr>
                 </ng-template>
             </p-table>
@@ -44,12 +58,19 @@
                 <ng-template pTemplate="body" let-forexWatch>
                     <tr>
                         <td>
-                            <p-tag severity="info" value="{{forexWatch.fromCurrencyId + forexWatch.toCurrencyId}}"></p-tag>
+                            <p-tag severity="info" value="{{forexWatch.fromCurrencyId + forexWatch.toCurrencyId}}">
+                            </p-tag>
                         </td>
                         <td></td>
-                        <td class="text-sm" [ngStyle]="{'color': (forexWatch.change > 0) ? '#a6fa7e' : (forexWatch.change === 0) ? '#999999' : '#fa5858'}">{{forexWatch.liveValue | currency : forexWatch.toCurrencyId : 'symbol' : '0.0-2'}}</td>
-                        <td class="text-sm" [ngStyle]="{'color': (forexWatch.change > 0) ? '#a6fa7e' : (forexWatch.change === 0) ? '#999999' : '#fa5858'}">{{forexWatch.change | number : '0.0-2'}}</td>
-                        <td class="text-sm" [ngStyle]="{'color': (forexWatch.change > 0) ? '#a6fa7e' : (forexWatch.change === 0) ? '#999999' : '#fa5858'}">{{forexWatch.pchange | number : '0.0-2'}}%</td>
+                        <td class="text-sm font-bold"
+                            [ngStyle]="{'color': (forexWatch.change > 0) ? '#008002' : (forexWatch.change === 0) ? '#999999' : '#910101'}">
+                            {{forexWatch.liveValue | currency : forexWatch.toCurrencyId : 'symbol' : '0.0-2'}}</td>
+                        <td class="text-sm font-bold"
+                            [ngStyle]="{'color': (forexWatch.change > 0) ? '#008002' : (forexWatch.change === 0) ? '#999999' : '#910101'}">
+                            {{forexWatch.change | number : '0.0-2'}}</td>
+                        <td class="text-sm font-bold"
+                            [ngStyle]="{'color': (forexWatch.change > 0) ? '#008002' : (forexWatch.change === 0) ? '#999999' : '#910101'}">
+                            {{forexWatch.pchange | number : '0.0-2'}}%</td>
                     </tr>
                 </ng-template>
             </p-table>

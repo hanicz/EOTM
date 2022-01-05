@@ -25,6 +25,7 @@ public class TransactionDTO {
     private Double liveValue;
     private Double valueDiff;
     private Double fee;
+    private String url;
 
     public TransactionDTO mergeTransactions(TransactionDTO other) {
         if (!this.getSymbol().equals(other.getSymbol()))

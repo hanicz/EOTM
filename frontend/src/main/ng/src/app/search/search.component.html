@@ -13,8 +13,8 @@
                 <p-selectButton [options]="options" [disabled]="selectedTicker == undefined"
                     [(ngModel)]="selectedOption" optionLabel="label" optionValue="value" (onChange)="getCandleData()">
                 </p-selectButton>
-                <div>
-                    <apx-chart #chart [series]="chartOptions.series" [chart]="chartOptions.chart"
+                <div class="border-orange-100 surface-overlay border-1 border-round">
+                    <apx-chart #chart [series]=" chartOptions.series" [chart]="chartOptions.chart"
                         [xaxis]="chartOptions.xaxis" [yaxis]="chartOptions.yaxis" [title]="chartOptions.title"
                         [noData]="chartOptions.noData" [tooltip]="chartOptions.tooltip">
                     </apx-chart>
@@ -76,25 +76,31 @@
                         </div>
                     </div>
                 </div>
-                <div class="flex flex-wrap justify-content-between border-bottom-1 border-top-1">
+                <div class="flex flex-wrap justify-content-between border-bottom-1">
                     <div class="flex align-items-start">Volume</div>
                     <div class="flex align-items-end">{{volume | number : '0.0-1'}}M</div>
                 </div>
-                <div class="flex flex-wrap justify-content-between border-bottom-1 border-top-1">
+                <div class="flex flex-wrap justify-content-between border-bottom-1">
                     <div class="flex align-items-start">Avg Vol (10D)</div>
                     <div class="flex align-items-end">{{metric.tenDayAverageTradingVolume | number : '0.0-1'}}M</div>
                 </div>
-                <div class="flex flex-wrap justify-content-between border-bottom-1 border-top-1">
+                <div class="flex flex-wrap justify-content-between border-bottom-1">
                     <div class="flex align-items-start">Avg Vol (3M)</div>
                     <div class="flex align-items-end">{{metric.threeMonthAverageTradingVolume / 30 | number : '0.0-1'}}M
                     </div>
                 </div>
-                <div class="flex flex-wrap justify-content-between border-bottom-1 border-top-1">
-                    <div class="flex align-items-start">52 Week H/L</div>
-                    <div class="flex align-items-end">{{(metric.yearHigh | number : '0.0-1') + ' - ' + (metric.yearLow |
-                        number : '0.0-1')}}</div>
+                <div class="flex flex-wrap justify-content-between border-bottom-1">
+                    <div class="flex align-items-center">52 Week H/L</div>
+                    <div class="flex align-items-end">
+                        <p-tag styleClass="mr-1 mt-1 mb-1" severity="success"
+                            value="{{metric.yearHigh | number : '0.0-1'}}">
+                        </p-tag>
+                        <p-tag styleClass="ml-2 mt-1 mb-1" severity="danger"
+                            value="{{metric.yearLow | number : '0.0-1'}}">
+                        </p-tag>
+                    </div>
                 </div>
-                <div class="flex flex-wrap justify-content-between border-bottom-1 border-top-1">
+                <div class="flex flex-wrap justify-content-between border-bottom-1">
                     <div class="flex align-items-start">H/L Date</div>
                     <div class="flex align-items-end">{{(metric.yearHighDate | date:'mediumDate') + ' - ' +
                         (metric.yearLowDate | date:'mediumDate')}}</div>

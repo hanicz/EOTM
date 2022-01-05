@@ -16,6 +16,7 @@ public class CryptoWatchDTO implements Comparable<CryptoWatchDTO> {
     private Double liveValue;
     private String name;
     private Double change;
+    private String url;
 
     @Override
     public int compareTo(CryptoWatchDTO cw) {

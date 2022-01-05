@@ -13,7 +13,11 @@
     <ng-template pTemplate="body" let-transaction>
         <tr>
             <td>
-                <p-tag class="mr-2" severity="primary" value="{{transaction.symbol}}"></p-tag>
+                <div class="flex align-items-center">
+                    <p-image *ngIf="transaction.url != null" src="{{transaction.url}}" alt="Image" width="15"
+                        class="mr-1"></p-image>
+                    {{transaction.symbol}}
+                </div>
             </td>
             <td>
                 <span *ngIf="transaction.quantity > 0">{{transaction.amount | currency : globals.cryptoCurrency : 'symbol' : '0.0-2'}}</span>
@@ -22,7 +26,7 @@
                 <span *ngIf="transaction.quantity > 0">{{(transaction.amount / transaction.quantity) | currency : globals.cryptoCurrency : 'symbol' : '0.0-3'}}</span>
             </td>
             <td>
-                <p-tag styleClass="p-mr-2" [severity]="(transaction.quantity > 0) ? 'primary':'warning'"
+                <p-tag styleClass="p-mr-2" [severity]="(transaction.quantity > 0) ? 'info':'warning'"
                     value="{{(transaction.quantity > 0) ? (transaction.quantity | number: '0.0-4') : 'Closed'}}"></p-tag>
             </td>
             <td>

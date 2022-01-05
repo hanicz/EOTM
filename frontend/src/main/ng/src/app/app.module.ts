@@ -45,6 +45,7 @@ import { AccordionModule } from 'primeng/accordion';
 import { InputMaskModule } from 'primeng/inputmask';
 import { CardModule } from 'primeng/card';
 import { SelectButtonModule } from 'primeng/selectbutton';
+import { ImageModule } from 'primeng/image';
 
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { NewsComponent } from './news/news.component';
@@ -97,7 +98,8 @@ import { NewsComponent } from './news/news.component';
     InputMaskModule,
     CardModule,
     NgApexchartsModule,
-    SelectButtonModule
+    SelectButtonModule,
+    ImageModule
   ],
   providers: [MessageService, Globals],
   bootstrap: [AppComponent]

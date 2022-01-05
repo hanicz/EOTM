@@ -10,4 +10,5 @@ export interface Transaction {
     liveValue?: number;
     valueDiff?: number;
     fee: number;
+    url: string;
 }

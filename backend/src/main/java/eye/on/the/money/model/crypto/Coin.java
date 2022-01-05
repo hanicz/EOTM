@@ -29,6 +29,7 @@ public class Coin {
     private String id;
     private String name;
     private String symbol;
+    private String url;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "coin")
     @JsonIgnore

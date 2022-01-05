@@ -1,5 +1,5 @@
 .loginContainer{
-    background-color: rgb(42, 50, 61);
+    background-color: white;
     padding: 2%;
     max-width: 20%;
     margin-top: 15%;
@@ -10,19 +10,9 @@
   loginContainer > * {
     width: 100%;
   }
-  
-  .loginContainer .message {
-    margin: 15px 0 0;
-    color: #b3b3b3;
-    font-size: 12px;
-  }
-  .loginContainer .message a {
-    color: #339dcf;
-    text-decoration: none;
-  }
 
   .loginContainer h1 {
-    color: white;
+    color: black;
     font-weight: lighter;
   }
 

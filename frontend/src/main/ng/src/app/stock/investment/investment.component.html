@@ -32,7 +32,7 @@
 
                                 <p-tag styleClass="p-mr-2" severity="info" *ngIf="option.label === 'BUY'" value="BUY">
                                 </p-tag>
-                                <p-tag styleClass="p-mr-2" severity="success" *ngIf="option.label === 'SELL'"
+                                <p-tag styleClass="p-mr-2" severity="warning" *ngIf="option.label === 'SELL'"
                                     value="SELL"></p-tag>
                             </ng-template>
                         </p-dropdown>
@@ -65,7 +65,7 @@
             <td>{{investment.shortName}}</td>
             <td>
                 <p-tag styleClass="p-mr-2" severity="info" *ngIf="investment.buySell === 'B'" value="BUY"></p-tag>
-                <p-tag styleClass="p-mr-2" severity="success" *ngIf="investment.buySell === 'S'" value="SELL"></p-tag>
+                <p-tag styleClass="p-mr-2" severity="warning" *ngIf="investment.buySell === 'S'" value="SELL"></p-tag>
             </td>
             <td>{{investment.quantity}}</td>
             <td>{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}</td>
@@ -102,7 +102,7 @@
 
                     <p-tag styleClass="p-mr-2" severity="info" *ngIf="option.label === 'BUY'" value="BUY">
                     </p-tag>
-                    <p-tag styleClass="p-mr-2" severity="success" *ngIf="option.label === 'SELL'" value="SELL"></p-tag>
+                    <p-tag styleClass="p-mr-2" severity="warning" *ngIf="option.label === 'SELL'" value="SELL"></p-tag>
                 </ng-template>
             </p-dropdown>
         </div>

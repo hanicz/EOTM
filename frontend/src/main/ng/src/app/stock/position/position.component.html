@@ -18,8 +18,8 @@
                 <span *ngIf="investment.quantity > 0">{{(investment.amount / investment.quantity) | currency : globals.stockCurrency : 'symbol' : '0.0-3'}}</span>
              </td>
             <td>
-                <p-tag styleClass="p-mr-2" severity="success" *ngIf="investment.quantity > 0" value="{{investment.quantity}}"></p-tag>
-                <p-tag styleClass="p-mr-2" severity="info" *ngIf="investment.quantity == 0" value="Closed"></p-tag>
+                <p-tag styleClass="p-mr-2" [severity]="(investment.quantity > 0) ? 'info':'warning'"
+                    value="{{(investment.quantity > 0) ? (investment.quantity | number: '0.0-4') : 'Closed'}}"></p-tag>
             </td>
             <td>
                 <p-tag styleClass="p-mr-2" severity="success" *ngIf="investment.quantity == 0 && investment.amount < 0" value="{{myMath.abs(investment.amount) | currency : globals.stockCurrency : 'symbol' : '0.0-2'}}"></p-tag>

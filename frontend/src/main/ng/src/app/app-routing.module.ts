@@ -7,9 +7,10 @@ import { CryptoComponent } from './crypto/crypto.component';
 import { WatchlistComponent } from './watchlist/watchlist.component';
 import { SearchComponent } from './search/search.component';
 import { ForexComponent } from './forex/forex.component';
+import { LandingComponent } from './landing/landing.component';
 
 const routes: Routes = [
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: '', component: LandingComponent },
   { path: 'login', component: LoginComponent },
   { path: 'home', component: HomeComponent },
   { path: 'stock', component: StockComponent },

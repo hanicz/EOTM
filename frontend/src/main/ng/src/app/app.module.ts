@@ -49,6 +49,7 @@ import { ImageModule } from 'primeng/image';
 
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { NewsComponent } from './news/news.component';
+import { LandingComponent } from './landing/landing.component';
 
 
 @NgModule({
@@ -69,7 +70,8 @@ import { NewsComponent } from './news/news.component';
     SearchComponent,
     ForexComponent,
     DividendComponent,
-    NewsComponent
+    NewsComponent,
+    LandingComponent
   ],
   imports: [
     BrowserModule,

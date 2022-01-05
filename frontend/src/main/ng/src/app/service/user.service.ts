@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { User } from '../model/user';
+import { ResourceHelper } from '../util/servicehelper';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
@@ -9,12 +10,14 @@ import { environment } from '../../environments/environment';
 })
 export class UserService {
 
+  private helper = new ResourceHelper();
+
   private headers = new HttpHeaders({
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   });
 
-  private userUrl = `${environment.API_URL}/resources/user`;
+  private userUrl = `${environment.API_URL}/user`;
 
   constructor(private http: HttpClient) { }
 
@@ -24,8 +27,14 @@ export class UserService {
       headers: this.headers,
       withCredentials: true,
       observe: 'response'
-    }).pipe(tap (response => {
+    }).pipe(tap(response => {
       localStorage.setItem('token', <string>response.headers.get('token'));
     }));
+  }
+
+  validateToken() {
+    return this.http.get(this.userUrl, {
+      headers: this.helper.getHeadersWithToken(),
+    });
   }
 }

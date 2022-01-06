@@ -7,7 +7,8 @@
     </ng-template>
 
     <ng-template pTemplate="right">
-        <p-fileUpload mode="basic" #fileUpload accept=".csv" [customUpload]="true" label="Import" chooseLabel="Import" class="mr-2 p-d-inline-block" (uploadHandler)="onUpload($event)">
+        <p-fileUpload mode="basic" #fileUpload accept=".csv" [customUpload]="true" label="Import" chooseLabel="Import"
+            class="mr-2 p-d-inline-block" (uploadHandler)="onUpload($event)">
         </p-fileUpload>
         <button pButton pRipple label="Export" icon="pi pi-upload" class="p-button-info" (click)="download()"></button>
     </ng-template>
@@ -69,15 +70,16 @@
             </td>
             <td>{{investment.quantity}}</td>
             <td>{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}</td>
-            <td>{{(investment.amount / investment.quantity) | currency : investment.currencyId : 'symbol' : '0.0-3'}}</td>
+            <td>{{(investment.amount / investment.quantity) | currency : investment.currencyId : 'symbol' : '0.0-3'}}
+            </td>
             <td>{{investment.transactionDate | date:'mediumDate'}}</td>
             <td>{{investment.currencyId}}</td>
             <td>{{investment.fee}}</td>
             <td>
-                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-info mr-1"
-                    (click)="editInvestment(investment)"></button>
-                <button pButton pRipple icon="pi pi-times" class="p-button-rounded p-button-danger"
-                    (click)="deleteByIds(investment.investmentId)"></button>
+                <button pButton pRipple type="button" icon="pi pi-pencil" (click)="editInvestment(investment)"
+                    class="p-button-rounded p-button-text mr-1 p-button-info"></button>
+                <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(investment.investmentId)"
+                    class="p-button-rounded p-button-text ml-2 p-button-danger"></button>
             </td>
         </tr>
     </ng-template>

@@ -22,14 +22,14 @@ export class StockService {
     return this.http.get<Stock[]>(url, {
       headers: this.helper.getHeadersWithToken()
     });
-  }
+  };
 
   getCandleData(shortName: string, month: number) {
     const url = `${environment.API_URL}/stock/candle/${shortName}/${month}`;
     return this.http.get<Candle>(url, {
       headers: this.helper.getHeadersWithToken()
     });
-  }
+  };
 
   getHolding(currency: string) {
     var data = { "currency": currency }

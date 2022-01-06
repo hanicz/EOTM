@@ -11,6 +11,7 @@ import javax.persistence.*;
 @Entity
 @Getter
 @Setter
+@Builder
 @Slf4j
 @ToString
 @Table(name = "EOTM_COIN_WATCH")

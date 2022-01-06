@@ -16,6 +16,13 @@ export class CryptoService {
 
   constructor(private http: HttpClient) { }
 
+  getAllCrypto() {
+    const url = `${environment.API_URL}/coin`;
+    return this.http.get<Crypto[]>(url, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  };
+
   getTransactions() {
     const url = `${this.transactionUrl}`;
     return this.http.get<Transaction[]>(url, {
@@ -68,7 +75,7 @@ export class CryptoService {
     });
   }
 
-  uploadCSV(file: File){
+  uploadCSV(file: File) {
     const formData = new FormData();
     formData.append('file', file, 'file.csv')
     const url = `${this.transactionUrl}/process/csv`;

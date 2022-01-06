@@ -116,7 +116,7 @@ export class SearchComponent implements OnInit {
       }
     };
 
-    if(globals.selectedStock != ''){
+    if (globals.selectedStock != '') {
       this.stockChanged(undefined);
     }
   }
@@ -178,6 +178,13 @@ export class SearchComponent implements OnInit {
       volumeChartData.push({ x: new Date(this.candle.t[i] * 1000).toLocaleDateString("en-US"), y: this.candle.v[i] / 1000000 })
     }
     this.chart.updateOptions({
+      legend: {
+        show: false
+      },
+      dataLabels: {
+        enabled: false
+      },
+      colors: ["#999999"],
       yaxis: [{
         labels: {
           show: true,

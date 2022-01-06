@@ -4,7 +4,8 @@
             <h4 class="p-0 m-0 pl-1">Watchlist</h4>
         </ng-template>
         <ng-template pTemplate="right">
-            <p-button icon="fas fa-plus" styleClass="p-button-success w-2rem h-2rem"></p-button>
+            <button pButton pRipple type="button" icon="pi pi-pencil" (click)="showDialog()"
+                class="p-button-rounded p-button-text ml-2 p-button-info"></button>
         </ng-template>
     </p-toolbar>
     <p-accordion [multiple]="true">
@@ -31,14 +32,14 @@
             </p-table>
         </p-accordionTab>
         <p-accordionTab header="Crypto" [selected]="true">
-            <p-table #dt1 [value]="cryptoWatchList" responsiveLayout="scroll" styleClass="p-datatable-sm"
+            <p-table #dt2 [value]="cryptoWatchList" responsiveLayout="scroll" styleClass="p-datatable-sm"
                 [autoLayout]="true">
                 <ng-template pTemplate="body" let-cryptoWatch>
                     <tr>
                         <td class="text-xs">
                             <div class="flex align-items-center">
-                                <p-image *ngIf="cryptoWatch.url != null" src="{{cryptoWatch.url}}" alt="Image"
-                                    width="15" class="mr-1"></p-image>
+                                <p-image *ngIf="cryptoWatch.url != null" src="{{cryptoWatch.url}}" width="15"
+                                    class="mr-1"></p-image>
                                 {{cryptoWatch.name}}
                             </div>
                         </td>
@@ -53,7 +54,7 @@
             </p-table>
         </p-accordionTab>
         <p-accordionTab header="Forex" [selected]="false">
-            <p-table #dt1 [value]="forexWatchList" responsiveLayout="scroll" styleClass="p-datatable-sm"
+            <p-table #dt3 [value]="forexWatchList" responsiveLayout="scroll" styleClass="p-datatable-sm"
                 [autoLayout]="true">
                 <ng-template pTemplate="body" let-forexWatch>
                     <tr>
@@ -77,3 +78,57 @@
         </p-accordionTab>
     </p-accordion>
 </div>
+
+<p-dialog [(visible)]="display" [breakpoints]="{'960px': '75vw', '640px': '100vw'}"
+    [style]="{width: '25vw', height: '30vw'}" [draggable]="false" [resizable]="false">
+    <p-tabView>
+        <p-tabPanel header="Stock" [selected]="true">
+            <p-table #dt4 [value]="stocks" responsiveLayout="scroll" [autoLayout]="true" styleClass="p-datatable-sm">
+                <ng-template pTemplate="body" let-stock>
+                    <tr>
+                        <td>
+                            <button pButton pRipple *ngIf="!(checkStockContain(stock.shortName))" type="button"
+                                icon="fas fa-plus" (click)="createStockWatch(stock.id)"
+                                class="p-button-rounded p-button-text ml-2 p-button-success"></button>
+                            <button pButton pRipple *ngIf="checkStockContain(stock.shortName)" type="button"
+                                icon="pi pi-times" (click)="deleteStockWatch(stock.shortName)"
+                                class="p-button-rounded p-button-text ml-2 p-button-danger"></button>
+                        </td>
+                        <td>
+                            <p-tag severity="info" value="{{stock.shortName}}">
+                            </p-tag>
+                        </td>
+                        <td>{{stock.name}}</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-tabPanel>
+        <p-tabPanel header="Crypto">
+            <p-table #dt5 [value]="cryptos" responsiveLayout="scroll" [autoLayout]="true" styleClass="p-datatable-sm">
+                <ng-template pTemplate="body" let-crypto>
+                    <tr>
+                        <td>
+                            <button pButton pRipple *ngIf="!(checkCryptoContain(crypto.name))" type="button"
+                                icon="fas fa-plus" (click)="createCryptoWatch(crypto.id)"
+                                class="p-button-rounded p-button-text ml-2 p-button-success"></button>
+                            <button pButton pRipple *ngIf="checkCryptoContain(crypto.name)" type="button"
+                                icon="pi pi-times" (click)="deleteCryptoWatch(crypto.name)"
+                                class="p-button-rounded p-button-text ml-2 p-button-danger"></button>
+                        </td>
+                        <td>
+                            <p-tag severity="info" value="{{crypto.symbol}}">
+                            </p-tag>
+                        </td>
+                        <td>
+                            <div class="flex align-items-center">
+                                <p-image *ngIf="crypto.url != null" src="{{crypto.url}}" width="15" class="mr-1">
+                                </p-image>
+                                {{crypto.name}}
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-tabPanel>
+    </p-tabView>
+</p-dialog>

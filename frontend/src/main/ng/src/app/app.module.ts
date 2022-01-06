@@ -23,6 +23,8 @@ import { WatchlistComponent } from './watchlist/watchlist.component';
 import { SearchComponent } from './search/search.component';
 import { ForexComponent } from './forex/forex.component';
 import { DividendComponent } from './stock/dividend/dividend.component';
+import { NewsComponent } from './news/news.component';
+import { LandingComponent } from './landing/landing.component';
 
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
@@ -48,8 +50,6 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { ImageModule } from 'primeng/image';
 
 import { NgApexchartsModule } from 'ng-apexcharts';
-import { NewsComponent } from './news/news.component';
-import { LandingComponent } from './landing/landing.component';
 
 
 @NgModule({

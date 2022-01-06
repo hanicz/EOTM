@@ -37,4 +37,18 @@ export class WatchlistService {
       headers: this.helper.getHeadersWithToken()
     });
   };
+
+  deleteWatch(path: string) {
+    const url = `${this.watchListUrl}${path}`;
+    return this.http.delete(url, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  };
+
+  createWatch(path: string) {
+    const url = `${this.watchListUrl}${path}`;
+    return this.http.post(url, {},{
+      headers: this.helper.getHeadersWithToken()
+    });
+  };
 }

@@ -38,8 +38,8 @@
                     <tr>
                         <td class="text-xs">
                             <div class="flex align-items-center">
-                                <p-image *ngIf="cryptoWatch.url != null" src="{{cryptoWatch.url}}" width="15"
-                                    class="mr-1"></p-image>
+                                <p-image src="{{'../../../assets/image/' + cryptoWatch.symbol + '.svg'}}" width="15"
+                        class="mr-1"></p-image>
                                 {{cryptoWatch.name}}
                             </div>
                         </td>
@@ -121,8 +121,8 @@
                         </td>
                         <td>
                             <div class="flex align-items-center">
-                                <p-image *ngIf="crypto.url != null" src="{{crypto.url}}" width="15" class="mr-1">
-                                </p-image>
+                                <p-image src="{{'../../../assets/image/' + crypto.symbol + '.svg'}}" width="15"
+                                    class="mr-1"></p-image>
                                 {{crypto.name}}
                             </div>
                         </td>

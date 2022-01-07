@@ -67,7 +67,7 @@
             </td>
             <td>
                 <div class="flex align-items-center">
-                    <p-image *ngIf="transaction.url != null" src="{{transaction.url}}" alt="Image" width="15"
+                    <p-image src="{{'../../../assets/image/' + transaction.symbol + '.svg'}}" width="15"
                         class="mr-1"></p-image>
                     {{transaction.symbol}}
                 </div>

@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { StockService } from '../service/stock.service';
 import { Stock } from '../model/stock';
 import { CryptoService } from '../service/crypto.service';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-watchlist',
@@ -25,6 +26,7 @@ export class WatchlistComponent implements OnInit {
   subscription: Subscription;
   globals: Globals;
   display: boolean = false;
+  assetUrl: string;
 
 
   constructor(private watchlistService: WatchlistService,
@@ -33,6 +35,7 @@ export class WatchlistComponent implements OnInit {
     private stockService: StockService,
     private cryptoService: CryptoService) {
 
+    this.assetUrl = environment.assets_url;
     this.globals = globals;
     this.fetchData();
 

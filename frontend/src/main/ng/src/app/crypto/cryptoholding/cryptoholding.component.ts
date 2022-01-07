@@ -2,6 +2,7 @@ import { Component, OnInit, Output, EventEmitter  } from '@angular/core';
 import { Transaction } from '../../model/transaction';
 import { CryptoService } from '../../service/crypto.service';
 import { Globals } from '../../util/global';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-cryptoholding',
@@ -13,10 +14,11 @@ export class CryptoholdingComponent implements OnInit {
   transactions: Transaction[] = [];
   @Output() dataLoaded = new EventEmitter<Transaction[]>();
   globals: Globals;
+  assetUrl: string;
 
   constructor(private cryptoService: CryptoService, globals: Globals) {
     this.globals = globals;
-
+    this.assetUrl = environment.assets_url;
     this.fetchData();
     globals.cryptoCurrencyChange.subscribe(value => {
       this.fetchData();

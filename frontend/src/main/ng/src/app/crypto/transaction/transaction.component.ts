@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { Transaction } from '../../model/transaction';
 import { CryptoService } from '../../service/crypto.service';
 import { Globals } from '../../util/global';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-transaction',
@@ -17,11 +18,12 @@ export class TransactionComponent implements OnInit {
   transactionDialog: boolean = false;
   transaction: Transaction = {} as Transaction;
   @ViewChild('fileUpload') fileUpload: any;
+  assetUrl: string;
 
   constructor(private cryptoService: CryptoService, globals: Globals) {
     this.currencies = globals.currencies;
     this.statuses = globals.statuses;
-
+    this.assetUrl = environment.assets_url;
     this.fetchData();
   }
 

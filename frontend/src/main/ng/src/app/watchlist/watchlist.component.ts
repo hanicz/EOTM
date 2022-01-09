@@ -18,7 +18,6 @@ import { environment } from '../../environments/environment';
 })
 export class WatchlistComponent implements OnInit {
 
-  stockWatchList: StockWatch[] = [];
   forexWatchList: ForexWatch[] = [];
   cryptoWatchList: CryptoWatch[] = [];
   stocks: Stock[] = [];
@@ -44,6 +43,9 @@ export class WatchlistComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.globals.stockWatchEvent.subscribe(e => {
+      this.fetchData();
+    });
   }
 
   private fetchData = () => {
@@ -59,7 +61,7 @@ export class WatchlistComponent implements OnInit {
   private fetchStockWatchList() {
     this.watchlistService.getStockWatchList().subscribe({
       next: (data) => {
-        this.stockWatchList = data;
+        this.globals.stockWatchList = data;
       }
     });
   }
@@ -74,6 +76,7 @@ export class WatchlistComponent implements OnInit {
 
   stockSelected(stock: string) {
     this.globals.selectedStock = stock;
+    this.globals.stockSelectedEvent.emit();
     this.router.navigate(['./search']);
   }
 
@@ -94,7 +97,7 @@ export class WatchlistComponent implements OnInit {
   }
 
   checkStockContain(shortName: string) {
-    return this.stockWatchList.some(s => s.stockShortName === shortName)
+    return this.globals.stockWatchList.some(s => s.stockShortName === shortName)
   }
 
   checkCryptoContain(name: string) {
@@ -102,7 +105,7 @@ export class WatchlistComponent implements OnInit {
   }
 
   deleteStockWatch(shortName: string) {
-    let id = this.stockWatchList.find(s => s.stockShortName === shortName);
+    let id = this.globals.stockWatchList.find(s => s.stockShortName === shortName);
     this.deleteWatch(`/stock/${id?.tickerWatchId}`);
   }
 

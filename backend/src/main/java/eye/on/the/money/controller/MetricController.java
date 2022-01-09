@@ -3,6 +3,7 @@ package eye.on.the.money.controller;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Metric;
 import eye.on.the.money.model.stock.Profile;
+import eye.on.the.money.model.stock.Recommendation;
 import eye.on.the.money.service.MetricService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("metric")
@@ -34,5 +37,11 @@ public class MetricController {
     public ResponseEntity<Metric> getMetricBySymbol(@AuthenticationPrincipal User user, @PathVariable String symbol) {
         log.trace("Enter getMetricBySymbol");
         return new ResponseEntity<Metric>(this.metricService.getMetricBySymbol(symbol), HttpStatus.OK);
+    }
+
+    @GetMapping("/recommendation/{symbol}")
+    public ResponseEntity<List<Recommendation>> getRecommendations(@AuthenticationPrincipal User user, @PathVariable String symbol) {
+        log.trace("Enter getRecommendations");
+        return new ResponseEntity<List<Recommendation>>(this.metricService.getRecommendations(symbol), HttpStatus.OK);
     }
 }

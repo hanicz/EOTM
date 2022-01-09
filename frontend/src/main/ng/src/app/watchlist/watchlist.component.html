@@ -10,7 +10,7 @@
     </p-toolbar>
     <p-accordion [multiple]="true">
         <p-accordionTab header="Stock" [selected]="true" styleClass="p-0 m-0" class="p-0 m-0">
-            <p-table #dt1 [value]="stockWatchList" responsiveLayout="scroll" styleClass="p-datatable-sm"
+            <p-table #dt1 [value]="globals.stockWatchList" responsiveLayout="scroll" styleClass="p-datatable-sm"
                 [autoLayout]="true">
                 <ng-template pTemplate="body" let-stockWatch>
                     <tr (click)="stockSelected(stockWatch.stockShortName)" style="cursor: pointer;">
@@ -38,8 +38,7 @@
                     <tr>
                         <td class="text-xs">
                             <div class="flex align-items-center">
-                                <p-image src="{{assetUrl + cryptoWatch.symbol + '.svg'}}" width="15"
-                        class="mr-1"></p-image>
+                                <p-image src="{{assetUrl + cryptoWatch.symbol + '.svg'}}" width="15" class="mr-1"></p-image>
                                 {{cryptoWatch.name}}
                             </div>
                         </td>
@@ -121,8 +120,7 @@
                         </td>
                         <td>
                             <div class="flex align-items-center">
-                                <p-image src="{{assetUrl + crypto.symbol + '.svg'}}" width="15"
-                                    class="mr-1"></p-image>
+                                <p-image src="{{assetUrl + crypto.symbol + '.svg'}}" width="15" class="mr-1"></p-image>
                                 {{crypto.name}}
                             </div>
                         </td>

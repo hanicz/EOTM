@@ -1,16 +1,21 @@
-import { Injectable } from '@angular/core';
+import { Injectable, EventEmitter, Output } from '@angular/core';
 import { Subject } from 'rxjs';
+import { StockWatch } from '../model/stockwatch';
 
 @Injectable()
 export class Globals {
 
     selectedStock = '';
+    @Output() stockSelectedEvent = new EventEmitter<any>();
 
     cryptoCurrency: string = 'EUR';
     cryptoCurrencyChange: Subject<string> = new Subject<string>();
 
     stockCurrency: string = 'USD';
     stockCurrencyChange: Subject<string> = new Subject<string>();
+
+    stockWatchList: StockWatch[] = [];
+    @Output() stockWatchEvent = new EventEmitter<any>();
 
     currencies = [
         { label: 'Euro', value: 'EUR' },

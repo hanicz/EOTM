@@ -7,6 +7,7 @@ import { Stock } from '../model/stock';
 import { MetricService } from '../service/metric.service';
 import { StockService } from '../service/stock.service';
 import { Globals } from '../util/global';
+import { WatchlistService } from '../service/watchlist.service';
 
 import {
   ChartComponent,
@@ -16,6 +17,8 @@ import {
   ApexTitleSubtitle,
   ApexTooltip
 } from "ng-apexcharts";
+import { StockWatch } from '../model/stockwatch';
+import { Recommendation } from '../model/recommendation';
 
 export type ChartOptions = {
   series: ApexAxisChartSeries;
@@ -32,26 +35,33 @@ export type ChartOptions = {
 })
 export class SearchComponent implements OnInit {
 
+  globals: Globals;
+
   stocks: Stock[] = [];
+  news: News[] = [];
+  options: any[];
+  recommendations: Recommendation[] = [];
+
   profile: Profile = {} as Profile;
   metric: Metric = {} as Metric;
-  news: News[] = [];
   candle: Candle = {} as Candle;
-  options: any[];
+
   selectedOption = 3;
-  newsType = '';
   startPrice = 0;
   endPrice = 0;
   percentage = 0;
   difference = 0;
   volume = 0;
-  globals: Globals;
+
+  newsType = '';
 
   @ViewChild("chart") chart: ChartComponent | any;
   public chartOptions: Partial<ChartOptions> | any;
+  @ViewChild("recChart") recChart: ChartComponent | any;
+  public recChartOptions: Partial<ChartOptions> | any;
 
   constructor(private stockService: StockService, globals: Globals,
-    private metricService: MetricService) {
+    private metricService: MetricService, private watchlistService: WatchlistService) {
 
     this.globals = globals;
     this.options = [
@@ -95,7 +105,7 @@ export class SearchComponent implements OnInit {
       },
       series: [],
       title: {
-        text: 'Ticker Chart',
+        text: 'Candlestick chart',
         align: 'left'
       },
       xaxis: {
@@ -116,12 +126,47 @@ export class SearchComponent implements OnInit {
       }
     };
 
+    this.recChartOptions = {
+      series: [],
+      chart: {
+        type: 'bar',
+        height: 135,
+        stacked: true,
+        toolbar: {
+          show: true,
+          tools: {
+            download: false,
+            selection: false,
+            zoom: false,
+            zoomin: false,
+            zoomout: false,
+            pan: false,
+            reset: false,
+          },
+        }
+      },
+      yaxis: {
+        labels: {
+          show: false
+        }
+      },
+      plotOptions: {
+        bar: {
+          horizontal: false,
+          borderRadius: 10
+        },
+      }
+    };
+
     if (globals.selectedStock != '') {
       this.stockChanged(undefined);
     }
   }
 
   ngOnInit(): void {
+    this.globals.stockSelectedEvent.subscribe(e => {
+      this.stockChanged(undefined);
+    });
   }
 
   getTooltip({ series, seriesIndex, dataPointIndex, w }: any) {
@@ -141,8 +186,14 @@ export class SearchComponent implements OnInit {
     )
   }
 
+  getColor({ series, seriesIndex, dataPointIndex, w }: any) {
+    if (w.globals.seriesCandleO[0][dataPointIndex] > w.globals.seriesCandleC[0][dataPointIndex]) {
+      return "#ffc0c0";
+    }
+    return "#a8e0a8";
+  }
+
   stockChanged(event: any) {
-    console.log('changed');
     this.metricService.getMetrics(this.globals.selectedStock).subscribe({
       next: (data) => {
         this.metric = data;
@@ -152,6 +203,13 @@ export class SearchComponent implements OnInit {
     this.metricService.getProfile(this.globals.selectedStock).subscribe({
       next: (data) => {
         this.profile = data;
+      }
+    });
+
+    this.metricService.getRecommendations(this.globals.selectedStock).subscribe({
+      next: (data) => {
+        this.recommendations = data;
+        this.createRecChart();
       }
     });
 
@@ -170,8 +228,8 @@ export class SearchComponent implements OnInit {
   }
 
   createChart() {
-    var chartData = [];
-    var volumeChartData = [];
+    let chartData = [];
+    let volumeChartData = [];
     for (let i = 0; i < this.candle.c.length; i++) {
       let xy = { x: new Date(this.candle.t[i] * 1000).toLocaleDateString("en-US"), y: [this.candle.o[i], this.candle.h[i], this.candle.l[i], this.candle.c[i]] }
       chartData.push(xy);
@@ -184,7 +242,10 @@ export class SearchComponent implements OnInit {
       dataLabels: {
         enabled: false
       },
-      colors: ["#999999"],
+      colors: [this.getColor],
+      stroke: {
+        width: [2, 0]
+      },
       yaxis: [{
         labels: {
           show: true,
@@ -208,5 +269,76 @@ export class SearchComponent implements OnInit {
     this.difference = this.endPrice - this.startPrice;
     this.percentage = this.difference / this.startPrice * 100;
     this.volume = this.candle.v[this.candle.c.length - 1] / 1000000;
+  }
+
+  checkStockContain() {
+    return this.globals.stockWatchList.some(s => s.stockShortName === this.globals.selectedStock);
+  }
+
+  addToWatchList() {
+    let stockId = this.stocks.find(s => s.shortName === this.globals.selectedStock)?.id;
+    this.watchlistService.createWatch(`/stock/${stockId}`).subscribe({
+      next: () => {
+        this.globals.stockWatchEvent.emit();
+      }
+    });
+  }
+
+  removeFromWatchList() {
+    let id = this.globals.stockWatchList.find(s => s.stockShortName === this.globals.selectedStock);
+    this.watchlistService.deleteWatch(`/stock/${id?.tickerWatchId}`).subscribe({
+      next: () => {
+        this.globals.stockWatchEvent.emit();
+      }
+    });
+  }
+
+  createRecChart() {
+    let sellArray: number[] = [];
+    let strongSellArray: number[] = [];
+    let holdArray: number[] = [];
+    let buyArray: number[] = [];
+    let strongBuyArray: number[] = [];
+    let categories: Date[] = [];
+    this.recommendations.forEach((recommendation) => {
+      sellArray.push(recommendation.sell);
+      strongSellArray.push(recommendation.strongSell);
+      holdArray.push(recommendation.hold);
+      buyArray.push(recommendation.buy);
+      strongBuyArray.push(recommendation.strongBuy);
+      categories.push(recommendation.period);
+    });
+
+    let chartData = [
+      {
+        name: 'Strong Sell',
+        data: strongSellArray
+      },
+      {
+        name: 'Sell',
+        data: sellArray
+      },
+      {
+        name: 'Hold',
+        data: holdArray
+      },
+      {
+        name: 'Buy',
+        data: buyArray
+      },
+      {
+        name: 'Strong Buy',
+        data: strongBuyArray
+      }
+    ];
+
+    this.recChart.updateOptions({
+      colors: ["#c11f01", "#ff2700", "#f0ff00", "#36ff00", "#2ac600"],
+      xaxis: {
+        type: 'datetime',
+        categories: categories,
+      },
+    });
+    this.recChart.updateSeries(chartData, false);
   }
 }

@@ -22,6 +22,7 @@ public class Metric {
     private Date yearHighDate;
     private Double yearLow;
     private Date yearLowDate;
+    private Double peInclExtraTTM;
 
     @JsonProperty("tenDayAverageTradingVolume")
     public Double getTenDayAverageTradingVolume() {
@@ -81,5 +82,13 @@ public class Metric {
     @JsonProperty("52WeekLowDate")
     public void setYearLowDate(Date yearLowDate) {
         this.yearLowDate = yearLowDate;
+    }
+
+    public Double getPeInclExtraTTM() {
+        return peInclExtraTTM;
+    }
+
+    public void setPeInclExtraTTM(Double peInclExtraTTM) {
+        this.peInclExtraTTM = peInclExtraTTM;
     }
 }

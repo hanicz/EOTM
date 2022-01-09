@@ -5,4 +5,5 @@ export interface Metric {
     yearHighDate: Date;
     yearLow: number;
     yearLowDate: Date;
+    peInclExtraTTM: number;
 }

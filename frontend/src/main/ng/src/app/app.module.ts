@@ -48,6 +48,7 @@ import { InputMaskModule } from 'primeng/inputmask';
 import { CardModule } from 'primeng/card';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { ImageModule } from 'primeng/image';
+import { ChipModule } from 'primeng/chip';
 
 import { NgApexchartsModule } from 'ng-apexcharts';
 
@@ -101,7 +102,8 @@ import { NgApexchartsModule } from 'ng-apexcharts';
     CardModule,
     NgApexchartsModule,
     SelectButtonModule,
-    ImageModule
+    ImageModule,
+    ChipModule
   ],
   providers: [MessageService, Globals],
   bootstrap: [AppComponent]

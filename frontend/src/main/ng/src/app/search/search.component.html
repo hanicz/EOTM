@@ -1,112 +1,152 @@
 <div class="shadow-5">
     <menu class="pl-0 mb-0"></menu>
     <p-panel header="Lookup">
-        <div class="flex flex-row flex-wrap">
+        <div class="flex flex-row flex-wrap ml-5">
             <div class="flex align-items-center justify-content-center">
                 <p-dropdown [options]="stocks" optionLabel="shortName" optionValue="shortName"
                     (onChange)="stockChanged($event)" [(ngModel)]="globals.selectedStock" placeholder="Select a Ticker">
                 </p-dropdown>
             </div>
         </div>
-        <div class="grid pt-3" *ngIf="globals.selectedStock != ''">
-            <div class="col-7 col-offset-1">
-                <p-selectButton [options]="options" [(ngModel)]="selectedOption" optionLabel="label" optionValue="value"
-                    (onChange)="getCandleData()">
-                </p-selectButton>
-                <div class="border-orange-100 surface-overlay border-1 border-round">
-                    <apx-chart #chart [series]=" chartOptions.series" [chart]="chartOptions.chart"
-                        [xaxis]="chartOptions.xaxis" [yaxis]="chartOptions.yaxis" [title]="chartOptions.title"
-                        [noData]="chartOptions.noData" [tooltip]="chartOptions.tooltip">
-                    </apx-chart>
-                </div>
-            </div>
-            <div class="col-3 col-offset-1">
-                <div class="flex flex-wrap justify-content-between pb-2">
-                    <div class="flex align-items-start">
-                        <p-tag styleClass="mr-2" severity="info"
-                            value="{{startPrice | currency : profile.currency : 'symbol' : '0.0-1'}}"></p-tag>
-                        <p-tag styleClass="mr-2" severity="info"
-                            value="{{endPrice | currency : profile.currency : 'symbol' : '0.0-1'}}">
-                        </p-tag>
-                        <p-tag styleClass="mr-2" [severity]="(difference > 0) ? 'success':'danger'"
-                            value="{{difference | currency : profile.currency : 'symbol' : '0.0-1'}}"></p-tag>
-                        <p-tag [severity]="(percentage > 0) ? 'success':'danger'"
-                            value="{{(percentage | number : '0.0-1') + '%'}}"></p-tag>
-                    </div>
-                </div>
-                <div class="flex flex-wrap justify-content-between border-bottom-1 border-top-1">
-                    <div class="flex align-items-start">Name</div>
-                    <div class="flex align-items-end">{{profile.name}}</div>
-                </div>
-                <div class="flex flex-wrap justify-content-between border-bottom-1">
-                    <div class="flex align-items-start">Ticker</div>
-                    <div class="flex align-items-end">{{profile.ticker}}</div>
-                </div>
-                <div class="flex flex-wrap justify-content-between border-bottom-1">
-                    <div class="flex align-items-start">Market</div>
-                    <div class="flex align-items-end">{{profile.exchange}}</div>
-                </div>
-                <div class="flex flex-wrap justify-content-between border-bottom-1">
-                    <div class="flex align-items-start">Industry</div>
-                    <div class="flex align-items-end">{{profile.finnhubIndustry}}</div>
-                </div>
-                <div class="flex flex-wrap justify-content-between border-bottom-1">
-                    <div class="flex align-items-start">IPO</div>
-                    <div class="flex align-items-end">{{profile.ipo | date:'mediumDate' }}</div>
-                </div>
-                <div class="flex flex-wrap justify-content-between border-bottom-1">
-                    <div class="flex align-items-start">Market Cap.</div>
-                    <div class="flex align-items-end">{{profile.marketCapitalization / 1000 | currency :
-                        profile.currency : 'symbol' : '0.0-2'}}B</div>
-                </div>
-                <div class="flex flex-wrap justify-content-between border-bottom-1">
-                    <div class="flex align-items-start">Outstanding Shares</div>
-                    <div class="flex align-items-end">{{profile.shareOutstanding / 1000 | number : '0.0-1'}}B</div>
-                </div>
-                <div class="flex flex-wrap justify-content-between border-bottom-1">
-                    <div class="flex align-items-start">WebUrl</div>
-                    <div class="flex align-items-end"><a href="{{profile.weburl}}" target="_blank"
-                            style="color: inherit; text-decoration: inherit;">{{profile.weburl}}</a></div>
-                </div>
-                <div class="flex flex-wrap justify-content-between border-bottom-1">
-                    <div class="flex align-items-start">Peers</div>
-                    <div class="flex align-items-end">
-                        <div *ngFor="let peer of profile.peers" class="text-xs">
-                            {{peer}},
+        <div *ngIf="globals.selectedStock != ''">
+            <div class="grid ml-5 mr-5 mt-3">
+                <div class="col-12 pb-0">
+                    <div class="flex flex-wrap justify-content-between">
+                        <div>
+                            <div class="flex flex-wrap text-sm align-items-center">
+
+                                <div class="flex align-items-start mr-2">
+                                    <p-tag value="{{profile.ticker}}" [rounded]="true"></p-tag>
+                                </div>
+                                |
+                                <div class="flex align-items-start ml-2">{{profile.exchange}}</div>
+                            </div>
+                            <div class="flex flex-wrap mt-1">
+                                <div class="flex align-items-start font-bold">{{profile.name}}</div>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap mt-1">
+                            <button pButton pRipple type="button" *ngIf="!(checkStockContain())" icon="far fa-bookmark"
+                                label="Add to Watchlist" class="p-button-outlined p-button-secondary"
+                                (click)="addToWatchList()"></button>
+                            <button pButton pRipple *ngIf="checkStockContain()" type="button" icon="pi pi-times"
+                                (click)="removeFromWatchList()" label="Remove from Watchlist"
+                                class="p-button-outlined p-button-danger"></button>
                         </div>
                     </div>
                 </div>
-                <div class="flex flex-wrap justify-content-between border-bottom-1">
-                    <div class="flex align-items-start">Volume</div>
-                    <div class="flex align-items-end">{{volume | number : '0.0-1'}}M</div>
-                </div>
-                <div class="flex flex-wrap justify-content-between border-bottom-1">
-                    <div class="flex align-items-start">Avg Vol (10D)</div>
-                    <div class="flex align-items-end">{{metric.tenDayAverageTradingVolume | number : '0.0-1'}}M</div>
-                </div>
-                <div class="flex flex-wrap justify-content-between border-bottom-1">
-                    <div class="flex align-items-start">Avg Vol (3M)</div>
-                    <div class="flex align-items-end">{{metric.threeMonthAverageTradingVolume / 30 | number : '0.0-1'}}M
-                    </div>
-                </div>
-                <div class="flex flex-wrap justify-content-between border-bottom-1">
-                    <div class="flex align-items-center">52 Week H/L</div>
-                    <div class="flex align-items-end">
-                        <p-tag styleClass="mr-1 mt-1 mb-1" severity="success"
-                            value="{{metric.yearHigh | number : '0.0-1'}}">
-                        </p-tag>
-                        <p-tag styleClass="ml-2 mt-1 mb-1" severity="danger"
-                            value="{{metric.yearLow | number : '0.0-1'}}">
-                        </p-tag>
-                    </div>
-                </div>
-                <div class="flex flex-wrap justify-content-between border-bottom-1">
-                    <div class="flex align-items-start">H/L Date</div>
-                    <div class="flex align-items-end">{{(metric.yearHighDate | date:'mediumDate') + ' - ' +
-                        (metric.yearLowDate | date:'mediumDate')}}</div>
+            </div>
+            <div class="grid ml-5 mr-5">
+                <div class="col-12 pb-0">
+                    <p-divider></p-divider>
                 </div>
             </div>
+            <div class="grid ml-5 mr-5">
+                <div class="col-8">
+                    <div class="flex flex-wrap justify-content-between pb-2">
+                        <p-selectButton [options]="options" [(ngModel)]="selectedOption" optionLabel="label"
+                            optionValue="value" (onChange)="getCandleData()">
+                        </p-selectButton>
+                        <div class="flex align-items-center">
+                            <p-tag styleClass="mr-2" severity="info"
+                                value="{{(startPrice | currency : profile.currency : 'symbol' : '0.0-1') + ' - ' + (endPrice | currency : profile.currency : 'symbol' : '0.0-1')}}">
+                            </p-tag>
+                            <p-tag styleClass="mr-2" [severity]="(difference > 0) ? 'success':'danger'"
+                                value="{{difference | currency : profile.currency : 'symbol' : '0.0-1'}}"></p-tag>
+                            <p-tag [severity]="(percentage > 0) ? 'success':'danger'"
+                                value="{{(percentage | number : '0.0-1') + '%'}}"></p-tag>
+                        </div>
+                    </div>
+                    <div class="border-orange-100 border-1 border-round">
+                        <apx-chart #chart [series]=" chartOptions.series" [chart]="chartOptions.chart"
+                            [xaxis]="chartOptions.xaxis" [yaxis]="chartOptions.yaxis" [title]="chartOptions.title"
+                            [noData]="chartOptions.noData" [tooltip]="chartOptions.tooltip">
+                        </apx-chart>
+                    </div>
+                </div>
+                <div class="col-1">
+                    <p-divider layout="vertical"></p-divider>
+                </div>
+                <div class="col-3">
+                    <div class="flex flex-wrap justify-content-between border-bottom-1">
+                        <div class="flex align-items-start">Industry</div>
+                        <div class="flex align-items-end">{{profile.finnhubIndustry}}</div>
+                    </div>
+                    <div class="flex flex-wrap justify-content-between border-bottom-1">
+                        <div class="flex align-items-start">IPO</div>
+                        <div class="flex align-items-end">{{profile.ipo | date:'mediumDate' }}</div>
+                    </div>
+                    <div class="flex flex-wrap justify-content-between border-bottom-1">
+                        <div class="flex align-items-start">Market Cap.</div>
+                        <div class="flex align-items-end">{{profile.marketCapitalization / 1000 | currency :
+                            profile.currency : 'symbol' : '0.0-2'}}B</div>
+                    </div>
+                    <div class="flex flex-wrap justify-content-between border-bottom-1">
+                        <div class="flex align-items-start">Outstanding Shares</div>
+                        <div class="flex align-items-end">{{profile.shareOutstanding / 1000 | number : '0.0-1'}}B</div>
+                    </div>
+                    <div class="flex flex-wrap justify-content-between border-bottom-1">
+                        <div class="flex align-items-start">WebUrl</div>
+                        <div class="flex align-items-end"><a href="{{profile.weburl}}" target="_blank"
+                                style="color: inherit; text-decoration: inherit;">{{profile.weburl}}</a></div>
+                    </div>
+                    <div class="flex flex-wrap justify-content-between border-bottom-1">
+                        <div class="flex align-items-start">Peers</div>
+                        <div class="flex align-items-end">
+                            <div *ngFor="let peer of profile.peers" class="text-xs">
+                                {{peer}},
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap justify-content-between border-bottom-1">
+                        <div class="flex align-items-start">P/E (TTM)</div>
+                        <div class="flex align-items-end">{{metric.peInclExtraTTM | number : '0.0-2'}}</div>
+                    </div>
+                    <div class="flex flex-wrap justify-content-between border-bottom-1">
+                        <div class="flex align-items-start">Volume</div>
+                        <div class="flex align-items-end">{{volume | number : '0.0-1'}}M</div>
+                    </div>
+                    <div class="flex flex-wrap justify-content-between border-bottom-1">
+                        <div class="flex align-items-start">Avg Vol (10D)</div>
+                        <div class="flex align-items-end">{{metric.tenDayAverageTradingVolume | number : '0.0-1'}}M
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap justify-content-between border-bottom-1">
+                        <div class="flex align-items-start">Avg Vol (3M)</div>
+                        <div class="flex align-items-end">{{metric.threeMonthAverageTradingVolume / 30 | number :
+                            '0.0-1'}}M
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap justify-content-between border-bottom-1">
+                        <div class="flex align-items-center">52 Week H/L</div>
+                        <div class="flex align-items-end">
+                            <p-tag styleClass="mr-1 mt-1 mb-1" severity="success"
+                                value="{{metric.yearHigh | number : '0.0-1'}}">
+                            </p-tag>
+                            <p-tag styleClass="ml-2 mt-1 mb-1" severity="danger"
+                                value="{{metric.yearLow | number : '0.0-1'}}">
+                            </p-tag>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap justify-content-between border-bottom-1">
+                        <div class="flex align-items-start">H/L Date</div>
+                        <div class="flex align-items-end">{{(metric.yearHighDate | date:'mediumDate') + ' - ' +
+                            (metric.yearLowDate | date:'mediumDate')}}</div>
+                    </div>
+                    <div class="border-orange-100 border-1 border-round mt-1">
+                        <apx-chart #recChart [series]=" recChartOptions.series" [chart]="recChartOptions.chart"
+                            [xaxis]="recChartOptions.xaxis" [yaxis]="recChartOptions.yaxis" [title]="recChartOptions.title"
+                            [noData]="recChartOptions.noData" [tooltip]="recChartOptions.tooltip">
+                        </apx-chart>
+                    </div>
+                </div>
+            </div>
+            <div class="grid ml-5 mr-5">
+                <div class="col-12">
+                    <p-divider></p-divider>
+                </div>
+            </div>
+            <app-news [type]="newsType"></app-news>
         </div>
-        <app-news [type]="newsType"></app-news>
     </p-panel>
 </div>

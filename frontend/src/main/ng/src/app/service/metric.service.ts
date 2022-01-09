@@ -4,6 +4,7 @@ import { Profile } from '../model/profile';
 import { Metric } from '../model/metric';
 import { ResourceHelper } from '../util/servicehelper';
 import { environment } from '../../environments/environment';
+import { Recommendation } from '../model/recommendation';
 
 @Injectable({
   providedIn: 'root'
@@ -29,4 +30,11 @@ export class MetricService {
       headers: this.helper.getHeadersWithToken()
     });
   };
+
+  getRecommendations(symbol: string) {
+    const url = `${this.newsUrl}/recommendation/${symbol}`;
+    return this.http.get<Recommendation[]>(url, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  }
 }

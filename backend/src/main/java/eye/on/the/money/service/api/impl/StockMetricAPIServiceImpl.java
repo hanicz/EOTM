@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eye.on.the.money.exception.APIException;
 import eye.on.the.money.model.stock.Metric;
 import eye.on.the.money.model.stock.Profile;
+import eye.on.the.money.model.stock.Recommendation;
 import eye.on.the.money.repository.ConfigRepository;
 import eye.on.the.money.repository.CredentialRepository;
 import eye.on.the.money.service.api.StockMetricAPIService;
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -59,6 +62,15 @@ public class StockMetricAPIServiceImpl implements StockMetricAPIService {
         } catch (JsonProcessingException | NullPointerException e) {
             throw new APIException("JSON process failed");
         }
+    }
+
+    @Override
+    public List<Recommendation> getRecommendations(String symbol) {
+        String metricAPI = this.configRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getConfigValue();
+        String secret = this.credentialRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getSecret();
+        String URL = MessageFormat.format(metricAPI + "/stock/recommendation?symbol={0}&token={1}", symbol, secret);
+        ResponseEntity<?> response = this.callStockMetricAPI(URL, Recommendation[].class);
+        return Arrays.asList((Recommendation[]) response.getBody());
     }
 
     @Retryable(value = APIException.class, maxAttempts = 3)

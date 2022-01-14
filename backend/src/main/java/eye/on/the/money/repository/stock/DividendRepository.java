@@ -1,4 +1,4 @@
-package eye.on.the.money.repository;
+package eye.on.the.money.repository.stock;
 
 import eye.on.the.money.model.stock.Dividend;
 import org.springframework.data.repository.CrudRepository;

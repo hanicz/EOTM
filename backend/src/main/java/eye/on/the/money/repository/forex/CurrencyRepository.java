@@ -1,4 +1,4 @@
-package eye.on.the.money.repository;
+package eye.on.the.money.repository.forex;
 
 import eye.on.the.money.model.forex.Currency;
 import org.springframework.data.repository.CrudRepository;

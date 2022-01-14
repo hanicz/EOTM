@@ -2,7 +2,7 @@ package eye.on.the.money.service.impl;
 
 import eye.on.the.money.model.forex.Currency;
 import eye.on.the.money.model.crypto.Payment;
-import eye.on.the.money.repository.PaymentRepository;
+import eye.on.the.money.repository.crypto.PaymentRepository;
 import eye.on.the.money.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

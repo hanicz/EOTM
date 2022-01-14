@@ -51,6 +51,9 @@ import { ImageModule } from 'primeng/image';
 import { ChipModule } from 'primeng/chip';
 
 import { NgApexchartsModule } from 'ng-apexcharts';
+import { EtfComponent } from './etf/etf.component';
+import { EtfinvestmentComponent } from './etf/etfinvestment/etfinvestment.component';
+import { EtfholdingComponent } from './etf/etfholding/etfholding.component';
 
 
 @NgModule({
@@ -72,7 +75,10 @@ import { NgApexchartsModule } from 'ng-apexcharts';
     ForexComponent,
     DividendComponent,
     NewsComponent,
-    LandingComponent
+    LandingComponent,
+    EtfComponent,
+    EtfinvestmentComponent,
+    EtfholdingComponent
   ],
   imports: [
     BrowserModule,

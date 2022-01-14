@@ -22,7 +22,7 @@ public class ETF {
     private String name;
     private String shortName;
     private String exchange;
-    private Double eodValue;
+    private Double liveValue;
     private Date eodDate;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "etf")

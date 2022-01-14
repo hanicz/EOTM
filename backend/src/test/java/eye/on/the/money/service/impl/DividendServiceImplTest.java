@@ -3,7 +3,7 @@ package eye.on.the.money.service.impl;
 import eye.on.the.money.EotmApplication;
 import eye.on.the.money.dto.out.DividendDTO;
 import eye.on.the.money.model.stock.Dividend;
-import eye.on.the.money.repository.DividendRepository;
+import eye.on.the.money.repository.stock.DividendRepository;
 import eye.on.the.money.service.DividendService;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;

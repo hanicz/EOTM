@@ -1,4 +1,4 @@
-package eye.on.the.money.repository;
+package eye.on.the.money.repository.crypto;
 
 import eye.on.the.money.model.crypto.Transaction;
 import org.springframework.data.repository.CrudRepository;

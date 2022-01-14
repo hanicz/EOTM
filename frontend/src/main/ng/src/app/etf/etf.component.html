@@ -1,0 +1,48 @@
+<div class="shadow-5">
+    <menu class="pl-0 mb-0"></menu>
+    <p-panel header="ETF Portfolio">
+        <div class="card">
+            <div class="flex flex-row flex-wrap card-container">
+                <div class="flex mr-5">
+                    <div>Total Spent: <b>{{totalSpent | currency : globals.etfCurrency : 'symbol' : '0.0-2'}}</b>
+                    </div>
+                </div>
+                <div class="flex mr-5">
+                    <div>Total Worth: <b>{{totalWorth | currency : globals.etfCurrency : 'symbol' : '0.0-2'}}</b>
+                    </div>
+                </div>
+                <div class="flex mr-5">
+                    <div>Profit:
+                        <p-tag styleClass="p-mr-2" severity="success" *ngIf="diffy > 0"
+                            value="{{diffy | currency : globals.etfCurrency : 'symbol' : '0.0-2'}}"></p-tag>
+                        <p-tag styleClass="p-mr-2" severity="danger" *ngIf="diffy < 0"
+                            value="{{diffy | currency : globals.etfCurrency : 'symbol' : '0.0-2'}}"></p-tag>
+                    </div>
+                </div>
+                <div class="flex">
+                    <div>Percentage:
+                        <p-tag styleClass="p-mr-2" severity="success" *ngIf="diffy > 0"
+                            value="{{(percentage | number : '0.0-1') + '%'}}">
+                        </p-tag>
+                        <p-tag styleClass="p-mr-2" severity="danger" *ngIf="diffy < 0"
+                            value="{{(percentage | number : '0.0-1') + '%'}}">
+                        </p-tag>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p-divider></p-divider>
+        <p-tabView>
+            <p-tabPanel header="Holdings">
+                <app-etfholding (dataLoaded)="loadData($event)"></app-etfholding>
+            </p-tabPanel>
+            <p-tabPanel header="Positions">
+            </p-tabPanel>
+            <p-tabPanel header="Transactions">
+                <app-etfinvestment></app-etfinvestment>
+            </p-tabPanel>
+            <p-tabPanel header="Dividends">
+            </p-tabPanel>
+        </p-tabView>
+    </p-panel>
+</div>

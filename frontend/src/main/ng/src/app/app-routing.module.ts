@@ -8,6 +8,7 @@ import { WatchlistComponent } from './watchlist/watchlist.component';
 import { SearchComponent } from './search/search.component';
 import { ForexComponent } from './forex/forex.component';
 import { LandingComponent } from './landing/landing.component';
+import { EtfComponent } from './etf/etf.component';
 
 const routes: Routes = [
   { path: '', component: LandingComponent },
@@ -17,7 +18,8 @@ const routes: Routes = [
   { path: 'crypto', component: CryptoComponent },
   { path: 'watchlist', component: WatchlistComponent },
   { path: 'search', component: SearchComponent },
-  { path: 'forex', component: ForexComponent }
+  { path: 'forex', component: ForexComponent },
+  { path: 'etf', component: EtfComponent },
 ];
 
 @NgModule({

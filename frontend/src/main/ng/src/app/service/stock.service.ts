@@ -32,7 +32,7 @@ export class StockService {
   };
 
   getHolding(currency: string) {
-    var data = { "currency": currency }
+    let data = { "currency": currency }
     const url = `${this.investmentUrl}/holding`;
     return this.http.post<Investment[]>(url, JSON.stringify(data), {
       headers: this.helper.getHeadersWithToken()
@@ -40,7 +40,7 @@ export class StockService {
   };
 
   getPositions(currency: string) {
-    var data = { "currency": currency }
+    let data = { "currency": currency }
     const url = `${this.investmentUrl}/position`;
     return this.http.post<Investment[]>(url, JSON.stringify(data), {
       headers: this.helper.getHeadersWithToken()

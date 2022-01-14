@@ -14,9 +14,8 @@
                 [autoLayout]="true">
                 <ng-template pTemplate="body" let-stockWatch>
                     <tr (click)="stockSelected(stockWatch.stockShortName)" style="cursor: pointer;">
-                        <td>
-                            <p-tag severity="info" value="{{stockWatch.stockShortName}}">
-                            </p-tag>
+                        <td class="text-sm">
+                            {{stockWatch.stockShortName}}
                         </td>
                         <td class="text-sm font-bold"
                             [ngStyle]="{'color': (stockWatch.change > 0) ? '#008002' : (stockWatch.change === 0) ? '#999999' : '#910101'}">

@@ -2,7 +2,7 @@ package eye.on.the.money.service.impl;
 
 import eye.on.the.money.model.stock.CandleQuote;
 import eye.on.the.money.model.stock.Stock;
-import eye.on.the.money.repository.StockRepository;
+import eye.on.the.money.repository.stock.StockRepository;
 import eye.on.the.money.service.StockService;
 import eye.on.the.money.service.api.StockAPIService;
 import org.springframework.beans.factory.annotation.Autowired;

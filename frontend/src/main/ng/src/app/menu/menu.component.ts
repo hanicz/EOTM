@@ -13,6 +13,7 @@ export class MenuComponent implements OnInit {
   items: MenuItem[] = [];
   selectedCrypto: string = "EUR";
   selectedStock: string = "USD";
+  selectedETF: string = "EUR";
 
   constructor(private router: Router, globals: Globals) {
     this.globals = globals;
@@ -24,6 +25,10 @@ export class MenuComponent implements OnInit {
 
   changedStock() {
     this.globals.changeStockCurrency(this.selectedStock);
+  }
+
+  changedETF() {
+    this.globals.changeETFCurrency(this.selectedETF);
   }
 
   ngOnInit(): void {
@@ -44,8 +49,9 @@ export class MenuComponent implements OnInit {
         routerLink: ['/crypto']
       },
       {
-        label: 'Forex',
-        icon: 'fas fa-euro-sign'
+        label: 'ETF',
+        icon: 'fas fa-chart-line',
+        routerLink: ['/etf']
       },
       {
         label: 'Lookup',

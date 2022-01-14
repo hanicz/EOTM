@@ -14,6 +14,9 @@ export class Globals {
     stockCurrency: string = 'USD';
     stockCurrencyChange: Subject<string> = new Subject<string>();
 
+    etfCurrency: string = 'EUR';
+    etfCurrencyChange: Subject<string> = new Subject<string>();
+
     stockWatchList: StockWatch[] = [];
     @Output() stockWatchEvent = new EventEmitter<any>();
 
@@ -38,6 +41,10 @@ export class Globals {
         this.cryptoCurrencyChange.subscribe((value) => {
             this.cryptoCurrency = value;
         });
+
+        this.etfCurrencyChange.subscribe((value) => {
+            this.etfCurrency = value;
+        });
     }
 
     changeStockCurrency(value: string) {
@@ -46,5 +53,9 @@ export class Globals {
 
     changeCryptoCurrency(value: string) {
         this.cryptoCurrencyChange.next(value);
+    }
+
+    changeETFCurrency(value: string) {
+        this.etfCurrencyChange.next(value);
     }
 }

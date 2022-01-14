@@ -1,20 +1,20 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { Globals } from '../../util/global';
-import { Investment } from '../../model/investment';
-import { StockService } from '../../service/stock.service';
+import { ETFInvestment } from 'src/app/model/etfinvestment';
+import { EtfService } from 'src/app/service/etf.service';
 
 @Component({
-  selector: 'app-holding',
-  templateUrl: './holding.component.html',
-  styleUrls: ['./holding.component.css']
+  selector: 'app-etfholding',
+  templateUrl: './etfholding.component.html',
+  styleUrls: ['./etfholding.component.css']
 })
-export class HoldingComponent implements OnInit {
+export class EtfholdingComponent implements OnInit {
 
-  investments: Investment[] = [];
-  @Output() dataLoaded = new EventEmitter<Investment[]>();
+  investments: ETFInvestment[] = [];
+  @Output() dataLoaded = new EventEmitter<ETFInvestment[]>();
   globals: Globals;
 
-  constructor(private stockService: StockService, globals: Globals) {
+  constructor(private etfService: EtfService, globals: Globals) {
     this.globals = globals;
 
     this.fetchData();
@@ -27,7 +27,7 @@ export class HoldingComponent implements OnInit {
   }
 
   private fetchData(): void {
-    this.stockService.getHolding(this.globals.stockCurrency).subscribe({
+    this.etfService.getHolding(this.globals.etfCurrency).subscribe({
       next: (data) => {
         this.investments = data;
         this.dataLoaded.emit(this.investments);

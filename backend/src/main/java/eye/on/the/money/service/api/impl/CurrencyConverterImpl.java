@@ -3,6 +3,7 @@ package eye.on.the.money.service.api.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eye.on.the.money.dto.out.ETFInvestmentDTO;
 import eye.on.the.money.dto.out.ForexWatchDTO;
 import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.dto.out.TransactionDTO;
@@ -80,9 +81,34 @@ public class CurrencyConverterImpl implements CurrencyConverter {
                         investment.getTransactionDate(), "historical");
                 JsonNode data = this.checkMemory(investment.getCurrencyId() + CurrencyConverterImpl.dateFormat.format(investment.getTransactionDate()),
                         currencyMemory, URL);
+
                 investment.setAmount(amount *
                         data.get(CurrencyConverterImpl.dateFormat.format(investment.getTransactionDate()))
                                 .get(toCurrency).doubleValue());
+            });
+        }
+    }
+
+    @Override
+    public void changeETFCurrency(List<ETFInvestmentDTO> investments, String toCurrency) {
+        if (CurrencyConverterImpl.supportedCurrencies.contains(toCurrency)) {
+            String currencyAPI = this.configRepository.findById("freecurrencyapi").orElseThrow(NoSuchElementException::new).getConfigValue();
+            String secret = this.credentialRepository.findById("freecurrencyapi").orElseThrow(NoSuchElementException::new).getSecret();
+            Map<String, JsonNode> currencyMemory = new HashMap<>();
+            investments.stream().filter(i -> !i.getCurrencyId().equals(toCurrency)).forEach(investment -> {
+                Double amount = investment.getAmount();
+                String URL = this.createURL(currencyAPI, secret, investment.getCurrencyId(), investment.getTransactionDate(),
+                        investment.getTransactionDate(), "historical");
+                JsonNode data = this.checkMemory(investment.getCurrencyId() + CurrencyConverterImpl.dateFormat.format(investment.getTransactionDate()),
+                        currencyMemory, URL);
+                investment.setAmount(amount *
+                        data.get(CurrencyConverterImpl.dateFormat.format(investment.getTransactionDate()))
+                                .get(toCurrency).doubleValue());
+
+                URL = this.createURL(currencyAPI, secret, investment.getCurrencyId(), new Date(), new Date(), "latest");
+                data = this.checkMemory(investment.getCurrencyId() + CurrencyConverterImpl.dateFormat.format(new Date()), currencyMemory, URL);
+                investment.setLiveValue(investment.getLiveValue() * investment.getQuantity() * data.get(toCurrency).doubleValue());
+                investment.setValueDiff(investment.getLiveValue() - investment.getAmount());
             });
         }
     }

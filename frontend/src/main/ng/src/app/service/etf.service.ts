@@ -29,4 +29,41 @@ export class EtfService {
       headers: this.helper.getHeadersWithToken()
     });
   };
+
+  getPositions(currency: string) {
+    let data = { "currency": currency }
+    const url = `${this.etfUrl}/position`;
+    return this.http.post<ETFInvestment[]>(url, JSON.stringify(data), {
+      headers: this.helper.getHeadersWithToken()
+    });
+  };
+
+  deleteByIds(ids: string) {
+    const url = `${this.etfUrl}?ids=${ids}`;
+    return this.http.delete(url, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  }
+
+  download() {
+    const url = `${this.etfUrl}/csv`;
+    return this.http.get(url, {
+      headers: this.helper.getHeadersWithToken(),
+      responseType: 'blob'
+    });
+  }
+
+  create(investment: ETFInvestment) {
+    const url = `${this.etfUrl}`;
+    return this.http.post<ETFInvestment>(url, JSON.stringify(investment), {
+      headers: this.helper.getHeadersWithToken(),
+    });
+  }
+
+  update(investment: ETFInvestment) {
+    const url = `${this.etfUrl}`;
+    return this.http.put<ETFInvestment>(url, JSON.stringify(investment), {
+      headers: this.helper.getHeadersWithToken(),
+    });
+  }
 }

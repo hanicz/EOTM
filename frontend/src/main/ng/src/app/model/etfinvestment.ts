@@ -4,6 +4,7 @@ export interface ETFInvestment {
     buySell: string;
     transactionDate: Date;
     shortName: string;
+    exchange: string;
     amount: number;
     currencyId: string;
     liveValue?: number;

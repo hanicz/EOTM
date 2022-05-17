@@ -25,6 +25,7 @@ public class ETFInvestmentDTO {
     private Double valueDiff;
     private Date eodDate;
     private Double fee;
+    private String exchange;
 
     public ETFInvestmentDTO mergeInvestments(ETFInvestmentDTO other) {
         if (!this.getShortName().equals(other.getShortName()))
@@ -32,6 +33,8 @@ public class ETFInvestmentDTO {
 
         this.setAmount(this.getAmount() + other.getAmount());
         this.setQuantity(this.getQuantity() + other.getQuantity());
+        this.setLiveValue(this.getLiveValue() + other.getLiveValue());
+        this.setValueDiff(this.getValueDiff() + other.getValueDiff());
 
         if (this.getQuantity() > 0 && "S".equals(this.buySell)) {
             this.buySell = "B";

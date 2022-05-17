@@ -12,11 +12,10 @@ import java.util.Date;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class DividendDTO {
-    private Long dividendId;
+public class ETFDividendDTO {
+    private Long id;
     private Double amount;
     private Date dividendDate;
     private String shortName;
     private String currencyId;
-    private String exchange;
 }

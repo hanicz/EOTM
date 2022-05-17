@@ -11,5 +11,7 @@ public interface ETFRepository extends CrudRepository<ETF, String> {
 
     public Optional<ETF> findByShortName(String shortName);
 
+    public Optional<ETF> findByShortNameAndExchange(String shortName, String exhange);
+
     public List<ETF> findAllByOrderByShortNameAsc();
 }

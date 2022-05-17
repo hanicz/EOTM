@@ -54,6 +54,7 @@ import { NgApexchartsModule } from 'ng-apexcharts';
 import { EtfComponent } from './etf/etf.component';
 import { EtfinvestmentComponent } from './etf/etfinvestment/etfinvestment.component';
 import { EtfholdingComponent } from './etf/etfholding/etfholding.component';
+import { EtfpositionComponent } from './etf/etfposition/etfposition.component';
 
 
 @NgModule({
@@ -78,7 +79,8 @@ import { EtfholdingComponent } from './etf/etfholding/etfholding.component';
     LandingComponent,
     EtfComponent,
     EtfinvestmentComponent,
-    EtfholdingComponent
+    EtfholdingComponent,
+    EtfpositionComponent
   ],
   imports: [
     BrowserModule,

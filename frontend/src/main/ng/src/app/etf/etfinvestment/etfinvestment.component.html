@@ -63,7 +63,7 @@
             <td>
                 <p-tableCheckbox [value]="investment"></p-tableCheckbox>
             </td>
-            <td>{{investment.shortName}}</td>
+            <td>{{(investment.shortName) + '.' + (investment.exchange)}}</td>
             <td>
                 <p-tag styleClass="p-mr-2" severity="info" *ngIf="investment.buySell === 'B'" value="BUY"></p-tag>
                 <p-tag styleClass="p-mr-2" severity="warning" *ngIf="investment.buySell === 'S'" value="SELL"></p-tag>
@@ -78,7 +78,7 @@
             <td>
                 <button pButton pRipple type="button" icon="pi pi-pencil" (click)="editInvestment(investment)"
                     class="p-button-rounded p-button-text mr-1 p-button-info"></button>
-                <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(investment.investmentId)"
+                <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(investment.id)"
                     class="p-button-rounded p-button-text ml-2 p-button-danger"></button>
             </td>
         </tr>
@@ -91,6 +91,10 @@
         <div class="p-field">
             <label for="name">Name</label>
             <input type="text" pInputText id="name" [(ngModel)]="investment.shortName" />
+        </div>
+        <div class="p-field">
+            <label for="exchange">Exchange</label>
+            <input type="text" pInputText id="exchange" [(ngModel)]="investment.exchange" />
         </div>
         <div class="p-field">
             <label for="currency">Currency</label>

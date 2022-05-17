@@ -13,7 +13,7 @@
     </ng-template>
     <ng-template pTemplate="body" let-investment>
         <tr>
-            <td>{{investment.shortName}}</td>
+            <td>{{(investment.shortName) + '.' + (investment.exchange)}}</td>
             <td>{{investment.quantity}}</td>
             <td>{{investment.amount | currency : globals.etfCurrency : 'symbol' : '0.0-2'}}</td>
             <td>{{investment.amount / investment.quantity | currency : globals.etfCurrency : 'symbol' : '0.0-3'}}</td>

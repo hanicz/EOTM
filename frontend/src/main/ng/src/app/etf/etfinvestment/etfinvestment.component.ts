@@ -66,42 +66,42 @@ export class EtfinvestmentComponent implements OnInit {
   }
 
   deleteByIds(ids: string) {
-    /*this.stockService.deleteByIds(ids).subscribe({
+    this.etfService.deleteByIds(ids).subscribe({
       next: () => {
         this.selectedInvestments = [];
         this.fetchData();
       }
-    });*/
+    });
   }
 
   download() {
-   /* this.stockService.download().subscribe({
+    this.etfService.download().subscribe({
       next: (data) => {
-        let fileName = 'investments.csv';
+        let fileName = 'etfinvestments.csv';
         let a = document.createElement('a');
         a.href = window.URL.createObjectURL(data as Blob);
         a.download = fileName;
         a.click();
       }
-    });*/
+    });
   }
 
   saveInvestment() {
-   /* if (this.investment.investmentId === undefined) {
-      this.stockService.create(this.investment).subscribe({
+    if (this.investment.id === undefined) {
+      this.etfService.create(this.investment).subscribe({
         next: () => {
           this.fetchData();
           this.investmentDialog = false;
         }
       });
     } else {
-      this.stockService.update(this.investment).subscribe({
+      this.etfService.update(this.investment).subscribe({
         next: () => {
           this.fetchData();
           this.investmentDialog = false;
         }
       });
-    }*/
+    }
   }
 
   onUpload(event: any) {

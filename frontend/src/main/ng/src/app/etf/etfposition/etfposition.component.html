@@ -1,0 +1,30 @@
+<p-table [value]="investments" responsiveLayout="scroll" styleClass="p-datatable-striped" sortField="quantity" [sortOrder]=-1 >
+    <ng-template pTemplate="header">
+        <tr>
+            <th>Stock Name</th>
+            <th>Total Spent</th>
+            <th>Average</th>
+            <th pSortableColumn="quantity">Position <p-sortIcon field="quantity"></p-sortIcon></th>
+            <th>Profit</th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-investment>
+        <tr>
+            <td>{{(investment.shortName) + '.' + (investment.exchange)}}</td>
+            <td>
+               <span *ngIf="investment.quantity > 0">{{investment.amount | currency : globals.etfCurrency : 'symbol' : '0.0-2'}}</span>
+            </td>
+            <td>
+                <span *ngIf="investment.quantity > 0">{{(investment.amount / investment.quantity) | currency : globals.etfCurrency : 'symbol' : '0.0-3'}}</span>
+             </td>
+            <td>
+                <p-tag styleClass="p-mr-2" [severity]="(investment.quantity > 0) ? 'info':'warning'"
+                    value="{{(investment.quantity > 0) ? (investment.quantity | number: '0.0-4') : 'Closed'}}"></p-tag>
+            </td>
+            <td>
+                <p-tag styleClass="p-mr-2" severity="success" *ngIf="investment.quantity == 0 && investment.amount < 0" value="{{myMath.abs(investment.amount) | currency : globals.etfCurrency : 'symbol' : '0.0-2'}}"></p-tag>
+                <p-tag styleClass="p-mr-2" severity="danger" *ngIf="investment.quantity == 0 && investment.amount > 0" value="{{investment.amount | currency : globals.etfCurrency : 'symbol' : '0.0-2'}}"></p-tag>
+            </td>
+        </tr>
+    </ng-template>
+</p-table>

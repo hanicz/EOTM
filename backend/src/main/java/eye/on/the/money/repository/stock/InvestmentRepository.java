@@ -14,4 +14,5 @@ public interface InvestmentRepository extends CrudRepository<Investment, Long> {
     public List<Investment> findByUser_IdAndBuySellAndTransactionDateBetween(Long userId, String buySell, Date transactionDateStart, Date transactionDateEnd);
     public Optional<Investment> findByIdAndUser_Id(Long id, Long userId);
     public void deleteByUser_IdAndIdIn(Long userId, List<Long> ids);
+    public List<Investment> findByUser_IdAndIdIn(Long userId, List<Long> idList);
 }

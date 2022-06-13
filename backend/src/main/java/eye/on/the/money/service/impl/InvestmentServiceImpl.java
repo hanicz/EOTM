@@ -65,6 +65,12 @@ public class InvestmentServiceImpl implements InvestmentService {
     }
 
     @Override
+    public List<InvestmentDTO> getInvestmentsByTypeAndDate(Long userId, String buySell, Date from, Date to) {
+        return this.investmentRepository.findByUser_IdAndBuySellAndTransactionDateBetween(userId, buySell, from, to)
+                .stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
+    }
+
+    @Override
     public List<InvestmentDTO> getInvestmentsByUserIdWConvCurr(Long userId, String currency) {
         List<InvestmentDTO> investments = this.investmentRepository.findByUser_IdOrderByTransactionDate(userId).stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
         this.currencyConverter.changeInvestmentsCurrency(investments, currency);

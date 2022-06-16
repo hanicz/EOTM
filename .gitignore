@@ -77,4 +77,4 @@ Thumbs.db
 node
 
 # logs
-/logs
+logs/

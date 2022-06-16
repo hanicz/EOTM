@@ -4,6 +4,7 @@ import eye.on.the.money.dto.in.InvestmentQuery;
 import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.service.InvestmentService;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +22,11 @@ import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("investment")
+@Slf4j
 public class InvestmentController {
 
     @Autowired
     private InvestmentService investmentService;
-
-    private static final Logger log = LoggerFactory.getLogger(InvestmentController.class);
 
     @GetMapping()
     public ResponseEntity<List<InvestmentDTO>> getAllInvestments(@AuthenticationPrincipal User user) {

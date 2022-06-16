@@ -38,6 +38,7 @@ export class SearchComponent implements OnInit {
   globals: Globals;
 
   stocks: Stock[] = [];
+  symbols: Symbol[] = [];
   news: News[] = [];
   options: any[];
   recommendations: Recommendation[] = [];
@@ -75,6 +76,12 @@ export class SearchComponent implements OnInit {
     this.stockService.getAllStocks().subscribe({
       next: (data) => {
         this.stocks = data;
+      }
+    });
+
+    this.stockService.getAllSymbols().subscribe({
+      next: (data) => {
+        this.symbols = data;
       }
     });
 

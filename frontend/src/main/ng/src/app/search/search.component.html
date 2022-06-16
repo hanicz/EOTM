@@ -1,10 +1,10 @@
 <div class="shadow-5">
     <menu class="pl-0 mb-0"></menu>
     <p-panel header="Lookup">
-        <div class="flex flex-row flex-wrap ml-5">
-            <div class="flex align-items-center justify-content-center">
-                <p-dropdown [options]="stocks" optionLabel="shortName" optionValue="shortName"
-                    (onChange)="stockChanged($event)" [(ngModel)]="globals.selectedStock" placeholder="Select a Ticker">
+        <div class="grid">
+            <div class="col-4 ml-4">
+                <p-dropdown class="searchDropdown" [options]="symbols" optionLabel="description" optionValue="symbol" [virtualScroll]="true" [itemSize]="31" [filter]="true"
+                    (onChange)="stockChanged($event)" [(ngModel)]="globals.selectedStock" placeholder="Select a Ticker" style="width: 30rem;">
                 </p-dropdown>
             </div>
         </div>

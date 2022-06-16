@@ -7,6 +7,7 @@ import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.dto.out.StockWatchDTO;
 import eye.on.the.money.exception.APIException;
 import eye.on.the.money.model.stock.CandleQuote;
+import eye.on.the.money.model.stock.Symbol;
 import eye.on.the.money.repository.ConfigRepository;
 import eye.on.the.money.repository.CredentialRepository;
 import eye.on.the.money.service.api.StockAPIService;
@@ -18,9 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.text.MessageFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 @Service
 public class StockAPIServiceImpl implements StockAPIService {
@@ -69,6 +68,20 @@ public class StockAPIServiceImpl implements StockAPIService {
         try {
             ObjectMapper mapper = new ObjectMapper();
             return mapper.treeToValue(root, CandleQuote.class);
+        } catch (JsonProcessingException | NullPointerException e) {
+            throw new APIException("JSON process failed");
+        }
+    }
+
+    @Override
+    public List<Symbol> getAllSymbols(){
+        String stockAPI = this.configRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getConfigValue();
+        String secret = this.credentialRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getSecret();
+        String URL = MessageFormat.format(stockAPI + "/stock/symbol?exchange=US&token={0}", secret);
+        JsonNode root = this.callStockAPI(URL);
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return Arrays.asList(mapper.treeToValue(root, Symbol[].class));
         } catch (JsonProcessingException | NullPointerException e) {
             throw new APIException("JSON process failed");
         }

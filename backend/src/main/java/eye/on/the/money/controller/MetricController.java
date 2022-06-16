@@ -5,6 +5,7 @@ import eye.on.the.money.model.stock.Metric;
 import eye.on.the.money.model.stock.Profile;
 import eye.on.the.money.model.stock.Recommendation;
 import eye.on.the.money.service.MetricService;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +21,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("metric")
+@Slf4j
 public class MetricController {
-
-    private static final Logger log = LoggerFactory.getLogger(MetricController.class);
 
     @Autowired
     private MetricService metricService;

@@ -24,6 +24,13 @@ export class StockService {
     });
   };
 
+  getAllSymbols() {
+    const url = `${environment.API_URL}/stock/symbols`;
+    return this.http.get<Symbol[]>(url, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  };
+
   getCandleData(shortName: string, month: number) {
     const url = `${environment.API_URL}/stock/candle/${shortName}/${month}`;
     return this.http.get<Candle>(url, {

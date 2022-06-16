@@ -4,6 +4,7 @@ import eye.on.the.money.dto.in.TransactionQuery;
 import eye.on.the.money.dto.out.TransactionDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.service.TransactionService;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +29,8 @@ import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("transaction")
+@Slf4j
 public class TransactionController {
-
-    private static final Logger log = LoggerFactory.getLogger(TransactionController.class);
 
     @Autowired
     private TransactionService transactionService;

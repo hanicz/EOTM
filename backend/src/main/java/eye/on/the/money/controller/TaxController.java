@@ -1,6 +1,7 @@
 package eye.on.the.money.controller;
 
 import eye.on.the.money.service.TaxService;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +17,8 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("tax")
+@Slf4j
 public class TaxController {
-    private static final Logger log = LoggerFactory.getLogger(TaxController.class);
 
     @Autowired
     private TaxService taxService;

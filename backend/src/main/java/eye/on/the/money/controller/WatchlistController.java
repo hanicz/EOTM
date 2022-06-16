@@ -5,6 +5,7 @@ import eye.on.the.money.dto.out.ForexWatchDTO;
 import eye.on.the.money.dto.out.StockWatchDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.service.WatchlistService;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +19,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("watchlist")
+@Slf4j
 public class WatchlistController {
-
-    private static final Logger log = LoggerFactory.getLogger(WatchlistController.class);
 
     @Autowired
     private WatchlistService watchlistService;

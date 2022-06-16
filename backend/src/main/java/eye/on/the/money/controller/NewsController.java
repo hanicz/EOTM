@@ -3,6 +3,7 @@ package eye.on.the.money.controller;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.news.News;
 import eye.on.the.money.service.api.NewsAPIService;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +19,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("news")
+@Slf4j
 public class NewsController {
 
     @Autowired
     private NewsAPIService newsAPIService;
-
-    private static final Logger log = LoggerFactory.getLogger(NewsController.class);
 
     @GetMapping("category/{category}")
     public ResponseEntity<List<News>> getGeneralNews(@AuthenticationPrincipal User user, @PathVariable String category) {

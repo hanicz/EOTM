@@ -11,17 +11,19 @@ import eye.on.the.money.model.stock.Symbol;
 import eye.on.the.money.repository.ConfigRepository;
 import eye.on.the.money.repository.CredentialRepository;
 import eye.on.the.money.service.api.StockAPIService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.text.MessageFormat;
 import java.util.*;
 
 @Service
+@Slf4j
 public class StockAPIServiceImpl implements StockAPIService {
 
     @Autowired
@@ -31,7 +33,9 @@ public class StockAPIServiceImpl implements StockAPIService {
     private ConfigRepository configRepository;
 
     @Override
+    @Retryable(value = APIException.class, maxAttempts = 3)
     public void getLiveValue(List<InvestmentDTO> investmentDTOList) {
+        log.trace("Enter getLiveValue");
         String stockAPI = this.configRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getConfigValue();
         String secret = this.credentialRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getSecret();
         investmentDTOList.stream().filter(i -> i.getCurrencyId().equals("USD")).forEach(investmentDTO -> {
@@ -44,7 +48,9 @@ public class StockAPIServiceImpl implements StockAPIService {
     }
 
     @Override
+    @Retryable(value = APIException.class, maxAttempts = 3)
     public void getStockWatchList(List<StockWatchDTO> stockWatchList) {
+        log.trace("Enter getStockWatchList");
         String stockAPI = this.configRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getConfigValue();
         String secret = this.credentialRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getSecret();
         stockWatchList.forEach(stockWatchDTO -> {
@@ -58,7 +64,9 @@ public class StockAPIServiceImpl implements StockAPIService {
     }
 
     @Override
+    @Retryable(value = APIException.class, maxAttempts = 3)
     public CandleQuote getCandleQuoteByShortName(String shortname, int months) {
+        log.trace("Enter getCandleQuoteByShortName");
         String stockAPI = this.configRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getConfigValue();
         String secret = this.credentialRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getSecret();
         Long monthEpoch = new Date(System.currentTimeMillis() - months * 30L * 24 * 60 * 60 * 1000).getTime() / 1000;
@@ -74,7 +82,9 @@ public class StockAPIServiceImpl implements StockAPIService {
     }
 
     @Override
-    public List<Symbol> getAllSymbols(){
+    @Retryable(value = APIException.class, maxAttempts = 3)
+    public List<Symbol> getAllSymbols() {
+        log.trace("Enter getAllSymbols");
         String stockAPI = this.configRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getConfigValue();
         String secret = this.credentialRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getSecret();
         String URL = MessageFormat.format(stockAPI + "/stock/symbol?exchange=US&token={0}", secret);
@@ -87,19 +97,18 @@ public class StockAPIServiceImpl implements StockAPIService {
         }
     }
 
-    @Retryable(value = APIException.class, maxAttempts = 3)
     private JsonNode callStockAPI(String URL) {
+        log.trace("Enter callStockAPI");
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response = restTemplate.getForEntity(URL, String.class);
-        if (response.getStatusCode() == HttpStatus.OK) {
-            try {
-                ObjectMapper mapper = new ObjectMapper();
-                return mapper.readTree(response.getBody());
-            } catch (JsonProcessingException | NullPointerException e) {
-                e.printStackTrace();
-                throw new APIException("JSON process failed");
-            }
-        } else {
+        try {
+            ResponseEntity<String> response = restTemplate.getForEntity(URL, String.class);
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readTree(response.getBody());
+        } catch (JsonProcessingException | NullPointerException e) {
+            log.error("JSON process failed");
+            throw new APIException("JSON process failed");
+        } catch (RestClientException e) {
+            log.error("Unable to reach currency API: " + e.getMessage());
             throw new APIException("Unable to reach currency API");
         }
     }

@@ -6,11 +6,12 @@ import eye.on.the.money.model.etf.ETFResponse;
 import eye.on.the.money.repository.ConfigRepository;
 import eye.on.the.money.repository.CredentialRepository;
 import eye.on.the.money.service.api.ETFAPIService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.text.MessageFormat;
@@ -21,6 +22,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class ETFAPIServiceImpl implements ETFAPIService {
 
     @Autowired
@@ -30,7 +32,9 @@ public class ETFAPIServiceImpl implements ETFAPIService {
     private ConfigRepository configRepository;
 
     @Override
+    @Retryable(value = APIException.class, maxAttempts = 3)
     public void updateETFPrices(List<ETF> etfList) {
+        log.trace("Enter updateETFPrices");
         String etfAPI = this.configRepository.findById("eod").orElseThrow(NoSuchElementException::new).getConfigValue();
         String secret = this.credentialRepository.findById("eod").orElseThrow(NoSuchElementException::new).getSecret();
         String symbols = etfList.stream()
@@ -58,6 +62,7 @@ public class ETFAPIServiceImpl implements ETFAPIService {
     }
 
     private boolean isUpdateRequired(Date lastUpdateDate) {
+        log.trace("Enter isUpdateRequired");
         Instant instant1 = lastUpdateDate.toInstant();
         Instant instant2 = new Date().toInstant();
 
@@ -72,22 +77,29 @@ public class ETFAPIServiceImpl implements ETFAPIService {
         return false;
     }
 
-    @Retryable(value = APIException.class, maxAttempts = 3)
     private Map<String, ETFResponse> callETFAPI(String URL) {
+        log.trace("Enter callETFAPI");
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<ETFResponse[]> response = restTemplate.getForEntity(URL, ETFResponse[].class);
-        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-            Map<String, ETFResponse> etfMap = new HashMap<>();
-            for (ETFResponse etf : response.getBody()) {
-                etfMap.put(etf.getCode(), etf);
+        try {
+            ResponseEntity<ETFResponse[]> response = restTemplate.getForEntity(URL, ETFResponse[].class);
+            if (response.getBody() != null) {
+                Map<String, ETFResponse> etfMap = new HashMap<>();
+                for (ETFResponse etf : response.getBody()) {
+                    etfMap.put(etf.getCode(), etf);
+                }
+                return etfMap;
+            } else {
+                log.error("Empty response from ETF API");
+                throw new APIException("Empty response from EOD API");
             }
-            return etfMap;
-        } else {
-            throw new APIException("Unable to reach EOD API");
+        } catch (RestClientException e) {
+            log.error("Unable to reach ETF API: " + e.getMessage());
+            throw new APIException("Unable to reach ETF API");
         }
     }
 
     private String createURL(String etfAPI, String secret, String symbol, String symbols) {
+        log.trace("Enter createURL");
         return MessageFormat.format(
                 etfAPI + "/real-time/{0}?&api_token={1}&s={2}&fmt=json",
                 symbol, secret, symbols);

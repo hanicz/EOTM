@@ -12,6 +12,7 @@ import java.util.Date;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode
 public class DividendDTO {
     private Long dividendId;
     private Double amount;

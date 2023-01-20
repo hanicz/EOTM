@@ -9,5 +9,5 @@ jobs:
           name: Build
           command: mvn -B -DskipTests clean package
       - store_artifacts:
-          path: backend/target/*.jar
+          path: backend/target/backend-0.0.1-SNAPSHOT.jar
 

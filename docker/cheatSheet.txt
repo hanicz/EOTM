@@ -1,0 +1,14 @@
+#Build for other platform (set experimental to true in settings)
+docker buildx build --load --platform linux/arm/v7 -t thanicz/rpi .
+
+#Save image locally
+docker save --output rpi.tar docker.io/thanicz/rpi:lastest
+
+#Run
+docker-compose up
+
+#Existing containers
+docker ps
+
+#Bash into container
+docker exec -it <container_id> bash

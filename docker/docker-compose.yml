@@ -1,0 +1,29 @@
+#docker-compose.yml
+version: '3'
+
+services:
+  app:
+    image: 'thanicz/rpi:latest'
+    ports:
+      - 8080:8080
+    build:
+      context: .
+    container_name: app
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/eotmdb
+      - SPRING_DATASOURCE_USERNAME=eotmdb
+      - SPRING_DATASOURCE_PASSWORD=..
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - EOTM_KEY=..
+          
+  db:
+    image: 'arm32v7/postgres:15-bullseye'
+    container_name: db
+    environment:
+      - POSTGRES_USER=eotmdb
+      - POSTGRES_PASSWORD=..
+      - POSTGRES_DB=eotmdb
+    volumes:
+       - ./postgres-data:/var/lib/postgresql/data

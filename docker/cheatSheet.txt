@@ -6,6 +6,9 @@ sudo apt install docker-compose -y
 #Build for other platform (set experimental to true in settings)
 docker buildx build --load --platform linux/arm/v7 -t thanicz/rpi .
 
+#Digital ocean
+docker buildx build --load --platform linux/amd64 -t thanicz/do .
+
 #Save image locally
 docker save --output rpi.tar docker.io/thanicz/rpi:lastest
 

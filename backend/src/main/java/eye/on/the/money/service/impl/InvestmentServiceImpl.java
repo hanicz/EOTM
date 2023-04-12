@@ -14,6 +14,7 @@ import eye.on.the.money.service.InvestmentService;
 import eye.on.the.money.service.StockPaymentService;
 import eye.on.the.money.service.api.CurrencyConverter;
 import eye.on.the.money.service.api.StockAPIService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -36,6 +37,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class InvestmentServiceImpl implements InvestmentService {
 
     @Autowired
@@ -231,12 +233,14 @@ public class InvestmentServiceImpl implements InvestmentService {
                         .shortName(csvRecord.get("Short Name"))
                         .fee(Double.parseDouble(csvRecord.get("Fee")))
                         .build();
-
+                log.trace(investment.toString());
                 if (!("").equals(csvRecord.get("Investment Id")) &&
                         this.investmentRepository.findByIdAndUser_Id(Long.parseLong(csvRecord.get("Investment Id")), user.getId()).isPresent()) {
                     investment.setInvestmentId(Long.parseLong(csvRecord.get("Investment Id")));
+                    log.trace("Update investment " + investment.toString());
                     this.updateInvestment(investment, user);
                 } else {
+                    log.trace("Create investment " + investment.toString());
                     this.createInvestment(investment, user);
                 }
             }

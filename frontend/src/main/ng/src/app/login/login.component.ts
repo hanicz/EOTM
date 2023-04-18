@@ -2,7 +2,7 @@ import { Component, OnInit, HostListener } from '@angular/core';
 import { User } from '../model/user';
 import { UserService } from '../service/user.service';
 import { Router } from '@angular/router';
-import { FormControl, Validators } from '@angular/forms';
+import { UntypedFormControl, Validators } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 
 @Component({
@@ -14,8 +14,8 @@ export class LoginComponent {
 
   user = new User();
 
-  emailControl = new FormControl('', [Validators.required, Validators.email]);
-  passwordControl = new FormControl('', [Validators.required]);
+  emailControl = new UntypedFormControl('', [Validators.required, Validators.email]);
+  passwordControl = new UntypedFormControl('', [Validators.required]);
 
 
   constructor(private userService: UserService,

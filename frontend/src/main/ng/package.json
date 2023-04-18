@@ -22,8 +22,8 @@
     "apexcharts": "^3.39.0",
     "ng-apexcharts": "^1.7.5",
     "primeflex": "^3.1.0",
-    "primeicons": "^5.0.0",
-    "primeng": "^15.3.0",
+    "primeicons": "^6.0.1",
+    "primeng": "^14.0.0",
     "rxjs": "~7.4.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.11.4"

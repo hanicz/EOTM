@@ -1,5 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
-html { background-color: #fffaf5; }
+html { background-color: #9b9a9a; }
 
 .p-accordion .p-accordion-content {
     padding: 0 !important;
@@ -7,3 +7,7 @@ html { background-color: #fffaf5; }
 
 .p-datepicker { padding: 0px; }
 .p-datepicker {  height: 20px;width: 25px; }
+
+menu {
+    margin-top: 0px;
+}

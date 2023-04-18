@@ -1,3 +1,12 @@
 SSH:
 Generate new key with puttygen
 Add public key to sudo nano ~/.ssh/authorized_keys
+
+Logs:
+--Ufw
+sudo tail /var/log/ufw.log
+
+--Invalid user
+sudo grep "Invalid user" /var/log/auth.log
+
+sudo iptables -S | grep f2b

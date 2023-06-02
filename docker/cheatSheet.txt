@@ -7,13 +7,18 @@ sudo apt install docker-compose -y
 docker buildx build --load --platform linux/arm/v7 -t thanicz/rpi .
 
 #Digital ocean
-docker buildx build --load --platform linux/amd64 -t thanicz/do .
+docker login
+docker buildx build --load --platform linux/amd64 -t thanicz/do:2 .
+docker push thanicz/do:2
+docker pull thanicz/do:2
+docker images rm {id}
 
 #Save image locally
 docker save --output rpi.tar docker.io/thanicz/rpi:lastest
 
 #Run
 docker-compose up
+docker-compose up -d //run in background
 
 #Existing containers
 docker ps

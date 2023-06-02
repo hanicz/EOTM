@@ -201,8 +201,6 @@ export class SearchComponent implements OnInit {
   }
 
   stockChanged(event: any) {
-    console.log(event);
-    console.log(this.globals.selectedStock);
     this.metricService.getMetrics(this.globals.selectedStock).subscribe({
       next: (data) => {
         this.metric = data;

@@ -3,7 +3,7 @@ package eye.on.the.money.controller;
 import eye.on.the.money.dto.in.TransactionQuery;
 import eye.on.the.money.dto.out.TransactionDTO;
 import eye.on.the.money.model.User;
-import eye.on.the.money.service.TransactionService;
+import eye.on.the.money.service.crypto.TransactionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

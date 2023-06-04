@@ -3,10 +3,7 @@ package eye.on.the.money.service.api.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eye.on.the.money.dto.out.ETFInvestmentDTO;
-import eye.on.the.money.dto.out.ForexWatchDTO;
-import eye.on.the.money.dto.out.InvestmentDTO;
-import eye.on.the.money.dto.out.TransactionDTO;
+import eye.on.the.money.dto.out.*;
 import eye.on.the.money.exception.APIException;
 import eye.on.the.money.repository.ConfigRepository;
 import eye.on.the.money.repository.CredentialRepository;
@@ -144,6 +141,23 @@ public class CurrencyConverterImpl implements CurrencyConverter {
                 f.setLiveValue(liveValue);
                 f.setChange(yesterdayValue - liveValue);
                 f.setPChange((yesterdayValue - liveValue) / yesterdayValue * 100);
+            }
+        });
+    }
+
+    @Override
+    public void changeLiveValueCurrencyForForexTransactions(List<ForexTransactionDTO> forexTransactions) {
+        String currencyAPI = this.configRepository.findById("exchangerate").orElseThrow(NoSuchElementException::new).getConfigValue();
+        Map<String, JsonNode> currencyMemory = new HashMap<>();
+        forexTransactions.forEach(forexTransaction -> {
+            String URL = this.createURL(currencyAPI, forexTransaction.getToCurrencyId(), new Date(), new Date(), "timeseries");
+            JsonNode data = this.checkMemory(forexTransaction.getToCurrencyId(), currencyMemory, URL);
+            Double changeRate = data.get(CurrencyConverterImpl.dateFormat.format(new Date())).get(forexTransaction.getFromCurrencyId()).doubleValue();
+            forexTransaction.setLiveValue(forexTransaction.getToAmount() * changeRate);
+
+            if (forexTransaction.getLiveValue() != null) {
+                forexTransaction.setValueDiff(forexTransaction.getLiveValue() - forexTransaction.getFromAmount());
+                forexTransaction.setLiveChangeRate(changeRate);
             }
         });
     }

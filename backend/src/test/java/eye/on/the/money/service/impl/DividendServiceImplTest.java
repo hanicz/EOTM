@@ -6,7 +6,7 @@ import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Dividend;
 import eye.on.the.money.repository.UserRepository;
 import eye.on.the.money.repository.stock.DividendRepository;
-import eye.on.the.money.service.DividendService;
+import eye.on.the.money.service.stock.DividendService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;

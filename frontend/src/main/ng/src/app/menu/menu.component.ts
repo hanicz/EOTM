@@ -40,7 +40,7 @@ export class MenuComponent implements OnInit {
       },
       {
         label: 'Stock',
-        icon: 'fas fa-exchange-alt',
+        icon: 'fa-solid fa-arrow-trend-up',
         routerLink: ['/stock']
       },
       {
@@ -52,6 +52,11 @@ export class MenuComponent implements OnInit {
         label: 'ETF',
         icon: 'fas fa-chart-line',
         routerLink: ['/etf']
+      },
+      {
+        label: 'Forex',
+        icon: 'fa-solid fa-coins',
+        routerLink: ['/forex']
       },
       {
         label: 'Lookup',

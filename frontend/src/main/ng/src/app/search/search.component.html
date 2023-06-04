@@ -4,7 +4,7 @@
         <div class="grid">
             <div class="col-4 ml-4">
                 <p-dropdown class="searchDropdown" [options]="symbols" optionLabel="description" optionValue="symbol" [virtualScroll]="true" [itemSize]="31" [filter]="true"
-                    (onChange)="stockChanged($event)" [(ngModel)]="globals.selectedStock" placeholder="Select a Ticker">
+                    (onChange)="stockChanged($event)" [(ngModel)]="globals.selectedStock" placeholder="Select a Ticker" [style]="{'width':'100%'}">
                 </p-dropdown>
             </div>
         </div>

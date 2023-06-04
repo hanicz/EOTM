@@ -1,0 +1,127 @@
+<p-toolbar styleClass="p-mb-4">
+    <ng-template pTemplate="left">
+        <button pButton pRipple label="New" icon="pi pi-plus" class="p-button-success mr-2"
+            (click)="openNew()"></button>
+        <button pButton pRipple icon="pi pi-trash" class="p-button-danger"
+            [disabled]="!selectedForexTransactions || !selectedForexTransactions.length" (click)="deleteClicked()"></button>
+    </ng-template>
+
+    <ng-template pTemplate="right">
+        <p-fileUpload mode="basic" #fileUpload accept=".csv" [customUpload]="true" label="Import" chooseLabel="Import"
+            class="mr-2 p-d-inline-block" (uploadHandler)="onUpload($event)">
+        </p-fileUpload>
+        <button pButton pRipple label="Export" icon="pi pi-upload" class="p-button-info" (click)="download()"></button>
+    </ng-template>
+</p-toolbar>
+<p-table #dt1 [value]="forexTransactions" responsiveLayout="scroll" styleClass="p-datatable-striped" [autoLayout]="true"
+    [(selection)]="selectedForexTransactions">
+
+    <ng-template pTemplate="caption">
+        <div class="flex justify-content-between flex-wrap">
+            <div class="flex flex-row flex-wrap">
+                <span class="mr-2">
+                    <input pInputText type="text"
+                        (input)="dt1.filter($any($event.target)?.value, 'fromCurrencyId', 'contains')"
+                        [value]="$any(dt1.filters['fromCurrencyId'])?.value" placeholder="Search by Currency"
+                        class="p-column-filter">
+                </span>
+                <p-columnFilter field="buySell" matchMode="equals" [showMenu]="false">
+                    <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                        <p-dropdown [ngModel]="value" [options]="statuses" (onChange)="filter($any($event)?.value)"
+                            placeholder="Any">
+                            <ng-template let-option pTemplate="item">
+
+                                <p-tag styleClass="p-mr-2" severity="info" *ngIf="option.label === 'BUY'" value="BUY">
+                                </p-tag>
+                                <p-tag styleClass="p-mr-2" severity="warning" *ngIf="option.label === 'SELL'"
+                                    value="SELL"></p-tag>
+                            </ng-template>
+                        </p-dropdown>
+                    </ng-template>
+                </p-columnFilter>
+            </div>
+        </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+        <tr>
+            <th style="width: 3rem">
+                <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+            </th>
+            <th>From</th>
+            <th>To</th>
+            <th>Type</th>
+            <th>Spent</th>
+            <th>Got</th>
+            <th>Rate</th>
+            <th>Date</th>
+            <th></th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-forexTransaction>
+        <tr>
+            <td>
+                <p-tableCheckbox [value]="forexTransaction"></p-tableCheckbox>
+            </td>
+            <td>{{forexTransaction.fromCurrencyId}}</td>
+            <td>{{forexTransaction.toCurrencyId}}</td>
+            <td>
+                <p-tag styleClass="p-mr-2" severity="info" *ngIf="forexTransaction.buySell === 'B'" value="BUY"></p-tag>
+                <p-tag styleClass="p-mr-2" severity="warning" *ngIf="forexTransaction.buySell === 'S'" value="SELL"></p-tag>
+            </td>
+            <td>{{forexTransaction.fromAmount | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}</td>
+            <td>{{forexTransaction.toAmount | currency : forexTransaction.toCurrencyId : 'symbol' : '0.0-2'}}</td>
+            <td>{{forexTransaction.changeRate | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}
+            </td>
+            <td>{{forexTransaction.transactionDate | date:'mediumDate'}}</td>
+            <td>
+                <button pButton pRipple type="button" icon="pi pi-pencil" (click)="editForexTransaction(forexTransaction)"
+                    class="p-button-rounded p-button-text mr-1 p-button-info"></button>
+                <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(forexTransaction.forexTransactionId)"
+                    class="p-button-rounded p-button-text ml-2 p-button-danger"></button>
+            </td>
+        </tr>
+    </ng-template>
+</p-table>
+
+<p-dialog [(visible)]="forexDialog" [style]="{width: '50vw'}" header="Forex Transaction Details" [modal]="true"
+    styleClass="p-fluid">
+    <ng-template pTemplate="content">
+        <div class="p-field">
+            <label for="name">From</label>
+            <input type="text" pInputText id="from" [(ngModel)]="forexTransaction.fromCurrencyId" />
+        </div>
+        <div class="p-field">
+            <label for="exchange">To</label>
+            <input type="text" pInputText id="to" [(ngModel)]="forexTransaction.toCurrencyId" />
+        </div>
+        <div class="p-field">
+            <label for="currency">Type</label>
+            <p-dropdown [options]="statuses" [(ngModel)]="forexTransaction.buySell" placeholder="Any">
+                <ng-template let-option pTemplate="item">
+
+                    <p-tag styleClass="p-mr-2" severity="info" *ngIf="option.label === 'BUY'" value="BUY">
+                    </p-tag>
+                    <p-tag styleClass="p-mr-2" severity="warning" *ngIf="option.label === 'SELL'" value="SELL"></p-tag>
+                </ng-template>
+            </p-dropdown>
+        </div>
+        <div class="p-field">
+            <label for="amount">Spent</label>
+            <input type="number" pInputText id="fromAmount" [(ngModel)]="forexTransaction.fromAmount" />
+        </div>
+        <div class="p-field">
+            <label for="amount">Got</label>
+            <input type="number" pInputText id="toAmount" [(ngModel)]="forexTransaction.toAmount" />
+        </div>
+        <div class="p-field p-col-4 p-md-4">
+            <label for="date">Date</label>
+            <input type="text" pInputText id="date" placeholder="YYYY-MM-DD" [(ngModel)]="forexTransaction.transactionDate" />
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+        <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text"
+            (click)="saveForexTransaction()"></button>
+    </ng-template>
+</p-dialog>

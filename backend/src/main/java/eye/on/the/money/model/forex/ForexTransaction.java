@@ -1,6 +1,7 @@
 package eye.on.the.money.model.forex;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ public class ForexTransaction {
     private Double toAmount;
     private Date transactionDate;
     private String buySell;
+    private Double changeRate;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

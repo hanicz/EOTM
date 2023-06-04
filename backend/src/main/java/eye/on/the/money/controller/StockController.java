@@ -4,7 +4,7 @@ import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.CandleQuote;
 import eye.on.the.money.model.stock.Stock;
 import eye.on.the.money.model.stock.Symbol;
-import eye.on.the.money.service.StockService;
+import eye.on.the.money.service.stock.StockService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

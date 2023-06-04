@@ -4,7 +4,7 @@ package eye.on.the.money.controller;
 import eye.on.the.money.dto.in.InvestmentQuery;
 import eye.on.the.money.dto.out.ETFInvestmentDTO;
 import eye.on.the.money.model.User;
-import eye.on.the.money.service.ETFInvestmentService;
+import eye.on.the.money.service.etf.ETFInvestmentService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

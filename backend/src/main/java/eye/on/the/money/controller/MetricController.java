@@ -4,7 +4,7 @@ import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Metric;
 import eye.on.the.money.model.stock.Profile;
 import eye.on.the.money.model.stock.Recommendation;
-import eye.on.the.money.service.MetricService;
+import eye.on.the.money.service.stock.MetricService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

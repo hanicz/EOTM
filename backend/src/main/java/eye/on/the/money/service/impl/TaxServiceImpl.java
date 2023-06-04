@@ -2,11 +2,11 @@ package eye.on.the.money.service.impl;
 
 import eye.on.the.money.dto.in.TaxEntry;
 import eye.on.the.money.dto.out.InvestmentDTO;
-import eye.on.the.money.model.forex.Currency;
+import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.tax.MNBRate;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.tax.MNBRateRepository;
-import eye.on.the.money.service.InvestmentService;
+import eye.on.the.money.service.stock.InvestmentService;
 import eye.on.the.money.service.TaxService;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;

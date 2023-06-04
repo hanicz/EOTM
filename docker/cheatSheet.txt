@@ -8,10 +8,11 @@ docker buildx build --load --platform linux/arm/v7 -t thanicz/rpi .
 
 #Digital ocean
 docker login
-docker buildx build --load --platform linux/amd64 -t thanicz/do:2 .
-docker push thanicz/do:2
-docker pull thanicz/do:2
-docker images rm {id}
+docker buildx build --load --platform linux/amd64 -t thanicz/do:3 .
+docker push thanicz/do:3
+docker pull thanicz/do:3
+docker image rm {id}
+Modify docker-compose.yml with new tag
 
 #Save image locally
 docker save --output rpi.tar docker.io/thanicz/rpi:lastest

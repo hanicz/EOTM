@@ -2,7 +2,7 @@ package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.out.DividendDTO;
 import eye.on.the.money.model.User;
-import eye.on.the.money.service.DividendService;
+import eye.on.the.money.service.stock.DividendService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

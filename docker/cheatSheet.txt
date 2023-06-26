@@ -8,9 +8,10 @@ docker buildx build --load --platform linux/arm/v7 -t thanicz/rpi .
 
 #Digital ocean
 docker login
-docker buildx build --load --platform linux/amd64 -t thanicz/do:3 .
-docker push thanicz/do:3
-docker pull thanicz/do:3
+docker buildx build --load --platform linux/amd64 -t thanicz/do:4 .
+docker push thanicz/do:4
+docker pull thanicz/do:4
+docker images
 docker image rm {id}
 Modify docker-compose.yml with new tag
 
@@ -27,3 +28,11 @@ docker ps
 #Bash into container
 docker exec -it <container_id> bash
 psql -d <db_name> -U <user>
+
+
+#Renew certbot
+allow 80 on digitalOcean UI
+sudo ufw allow 80
+sudo certbot renew
+sudo ufw deny 80
+deny 80 on digitalOcean UI

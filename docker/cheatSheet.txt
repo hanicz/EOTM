@@ -36,3 +36,4 @@ sudo ufw allow 80
 sudo certbot renew
 sudo ufw deny 80
 deny 80 on digitalOcean UI
+add new cert files to nginx.conf

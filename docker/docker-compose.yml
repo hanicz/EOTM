@@ -3,7 +3,7 @@ version: '3'
 
 services:
   app:
-    image: 'thanicz/rpi:latest'
+    image: 'thanicz/do:4'
     ports:
       - 8080:8080
     build:
@@ -14,16 +14,40 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/eotmdb
       - SPRING_DATASOURCE_USERNAME=eotmdb
-      - SPRING_DATASOURCE_PASSWORD=..
+      - SPRING_DATASOURCE_PASSWORD=.
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      - EOTM_KEY=..
-          
+      - EOTM_KEY=.
+
   db:
-    image: 'arm32v7/postgres:15-bullseye'
+    image: 'amd64/postgres:15-bullseye'
     container_name: db
     environment:
       - POSTGRES_USER=eotmdb
-      - POSTGRES_PASSWORD=..
+      - POSTGRES_PASSWORD=.
       - POSTGRES_DB=eotmdb
     volumes:
        - ./postgres-data:/var/lib/postgresql/data
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: no
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - /etc/letsencrypt:/etc/letsencrypt
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - app
+    links:
+      - app
+  teamspeak:
+    image: teamspeak:latest
+    environment:
+      - TS3SERVER_LICENSE=accept
+    volumes:
+      - $PWD/data:/data:rw
+    ports:
+      - '9987:9987/udp'
+      - '30033:30033'
+      - '10011:10011'

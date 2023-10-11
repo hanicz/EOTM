@@ -9,8 +9,7 @@ import eye.on.the.money.repository.ConfigRepository;
 import eye.on.the.money.repository.CredentialRepository;
 import eye.on.the.money.service.api.CurrencyConverter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -31,7 +30,6 @@ public class CurrencyConverterImpl implements CurrencyConverter {
 
     @Autowired
     private ConfigRepository configRepository;
-
 
     @Autowired
     private CredentialRepository credentialRepository;
@@ -175,9 +173,16 @@ public class CurrencyConverterImpl implements CurrencyConverter {
 
     @Retryable(value = APIException.class, maxAttempts = 3)
     private JsonNode callCurrencyAPI(String URL) {
+        String apikey = this.credentialRepository.findById("exchange").orElseThrow(NoSuchElementException::new).getSecret();
         RestTemplate restTemplate = new RestTemplate();
 
-        ResponseEntity<String> response = restTemplate.getForEntity(URL, String.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("apikey", apikey);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.GET, entity, String.class);
+
         if (response.getStatusCode() == HttpStatus.OK) {
             try {
                 ObjectMapper mapper = new ObjectMapper();

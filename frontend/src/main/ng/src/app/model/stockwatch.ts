@@ -6,4 +6,5 @@ export interface StockWatch {
     currencyId: string;
     change: number;
     pchange: number;
+    stockExchange: string;
 }

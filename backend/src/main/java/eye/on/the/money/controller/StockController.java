@@ -1,9 +1,7 @@
 package eye.on.the.money.controller;
 
 import eye.on.the.money.model.User;
-import eye.on.the.money.model.stock.CandleQuote;
-import eye.on.the.money.model.stock.Stock;
-import eye.on.the.money.model.stock.Symbol;
+import eye.on.the.money.model.stock.*;
 import eye.on.the.money.service.stock.StockService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +29,16 @@ public class StockController {
         return new ResponseEntity<List<Stock>>(this.stockService.getAllStocks(), HttpStatus.OK);
     }
 
-    @GetMapping("symbols")
-    public ResponseEntity<List<Symbol>> getAllSymbols(@AuthenticationPrincipal User user) {
+    @GetMapping("symbols/{exchange}")
+    public ResponseEntity<List<Symbol>> getAllSymbols(@AuthenticationPrincipal User user, @PathVariable String exchange) {
         log.trace("Enter getAllSymbols");
-        return new ResponseEntity<List<Symbol>>(this.stockService.getAllSymbols(), HttpStatus.OK);
+        return new ResponseEntity<List<Symbol>>(this.stockService.getAllSymbols(exchange), HttpStatus.OK);
+    }
+
+    @GetMapping("exchanges")
+    public ResponseEntity<List<Exchange>> getAllExchanges(@AuthenticationPrincipal User user) {
+        log.trace("Enter getAllExchanges");
+        return new ResponseEntity<List<Exchange>>(this.stockService.getAllExchanges(), HttpStatus.OK);
     }
 
     @GetMapping("candle/{shortName}/{months}")

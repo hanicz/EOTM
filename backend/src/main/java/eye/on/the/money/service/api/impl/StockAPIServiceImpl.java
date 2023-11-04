@@ -1,12 +1,14 @@
 package eye.on.the.money.service.api.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.dto.out.StockWatchDTO;
 import eye.on.the.money.exception.APIException;
-import eye.on.the.money.model.stock.CandleQuote;
+import eye.on.the.money.model.stock.EODCandleQuote;
+import eye.on.the.money.model.stock.Exchange;
 import eye.on.the.money.model.stock.Symbol;
 import eye.on.the.money.repository.ConfigRepository;
 import eye.on.the.money.repository.CredentialRepository;
@@ -19,8 +21,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
+import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -31,6 +38,8 @@ public class StockAPIServiceImpl implements StockAPIService {
 
     @Autowired
     private ConfigRepository configRepository;
+
+    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
     @Retryable(value = APIException.class, maxAttempts = 3)
@@ -51,31 +60,57 @@ public class StockAPIServiceImpl implements StockAPIService {
     @Retryable(value = APIException.class, maxAttempts = 3)
     public void getStockWatchList(List<StockWatchDTO> stockWatchList) {
         log.trace("Enter getStockWatchList");
-        String stockAPI = this.configRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getConfigValue();
-        String secret = this.credentialRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getSecret();
-        stockWatchList.forEach(stockWatchDTO -> {
-            String URL = this.createURL(stockAPI, secret, stockWatchDTO.getStockShortName());
-            JsonNode liveValue = this.callStockAPI(URL);
-            stockWatchDTO.setLiveValue(liveValue.findValue("c").doubleValue());
-            stockWatchDTO.setChange(liveValue.findValue("d").doubleValue());
-            stockWatchDTO.setPChange(liveValue.findValue("dp").doubleValue());
-            stockWatchDTO.setCurrencyId("USD");
-        });
+        String stockAPI = this.configRepository.findById("eod").orElseThrow(NoSuchElementException::new).getConfigValue();
+        String secret = this.credentialRepository.findById("eod").orElseThrow(NoSuchElementException::new).getSecret();
+        String joinedList = stockWatchList.stream().map(s -> (s.getStockShortName() + "." + s.getStockExchange())).collect(Collectors.joining(","));
+        String URL = MessageFormat.format(stockAPI + "/real-time/stock/?api_token={0}&fmt=json&s={1}", secret, joinedList);
+
+        JsonNode responseBody = this.callStockAPI(URL);
+        for (JsonNode stock : responseBody) {
+            Optional<StockWatchDTO> stockWatchDTO = stockWatchList.stream().filter
+                    (s -> (s.getStockShortName() + "." + s.getStockExchange()).equals(stock.findValue("code").textValue())).findFirst();
+            if (stockWatchDTO.isEmpty()) continue;
+
+            stockWatchDTO.get().setLiveValue(stock.findValue("close").doubleValue());
+            stockWatchDTO.get().setChange(stock.findValue("change").doubleValue());
+            stockWatchDTO.get().setPChange(stock.findValue("change_p").doubleValue());
+            stockWatchDTO.get().setCurrencyId("USD");
+        }
     }
 
     @Override
     @Retryable(value = APIException.class, maxAttempts = 3)
-    public CandleQuote getCandleQuoteByShortName(String shortname, int months) {
+    public List<EODCandleQuote> getCandleQuoteByShortName(String shortname, int months) {
         log.trace("Enter getCandleQuoteByShortName");
-        String stockAPI = this.configRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getConfigValue();
-        String secret = this.credentialRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getSecret();
-        Long monthEpoch = new Date(System.currentTimeMillis() - months * 30L * 24 * 60 * 60 * 1000).getTime() / 1000;
-        String URL = MessageFormat.format(stockAPI + "/stock/candle?symbol={0}&resolution=D&from={1}&to={2}&token={3}",
-                shortname, String.valueOf(monthEpoch), String.valueOf(new Date().getTime() / 1000), secret);
+        String stockAPI = this.configRepository.findById("eod").orElseThrow(NoSuchElementException::new).getConfigValue();
+        String secret = this.credentialRepository.findById("eod").orElseThrow(NoSuchElementException::new).getSecret();
+        String from = (months <= 60) ? "&from=" + dateFormat.format(Date.from(ZonedDateTime.now().minusMonths(months).toInstant())) : "";
+        String period = (months > 23) ? ((months > 60) ? "m" : "w") : "d";
+        String URL = MessageFormat.format(stockAPI + "/eod/{0}?api_token={1}&fmt=json&period={2}{3}",
+                shortname, secret, period, from);
+
         JsonNode root = this.callStockAPI(URL);
         try {
             ObjectMapper mapper = new ObjectMapper();
-            return mapper.treeToValue(root, CandleQuote.class);
+            return mapper.readerFor(new TypeReference<List<EODCandleQuote>>() {
+            }).readValue(root);
+        } catch (NullPointerException | IOException e) {
+            throw new APIException("JSON process failed. " + e.getMessage());
+        }
+    }
+
+    @Override
+    @Retryable(value = APIException.class, maxAttempts = 3)
+    public List<Symbol> getAllSymbols(String exchange) {
+        log.trace("Enter getAllSymbols");
+        String stockAPI = this.configRepository.findById("eod").orElseThrow(NoSuchElementException::new).getConfigValue();
+        String secret = this.credentialRepository.findById("eod").orElseThrow(NoSuchElementException::new).getSecret();
+        String URL = MessageFormat.format(stockAPI + "/exchange-symbol-list/{0}?api_token={1}&fmt=json", exchange, secret);
+
+        JsonNode root = this.callStockAPI(URL);
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return Arrays.asList(mapper.treeToValue(root, Symbol[].class));
         } catch (JsonProcessingException | NullPointerException e) {
             throw new APIException("JSON process failed");
         }
@@ -83,15 +118,16 @@ public class StockAPIServiceImpl implements StockAPIService {
 
     @Override
     @Retryable(value = APIException.class, maxAttempts = 3)
-    public List<Symbol> getAllSymbols() {
-        log.trace("Enter getAllSymbols");
-        String stockAPI = this.configRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getConfigValue();
-        String secret = this.credentialRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getSecret();
-        String URL = MessageFormat.format(stockAPI + "/stock/symbol?exchange=US&token={0}", secret);
+    public List<Exchange> getAllExchanges() {
+        log.trace("Enter getAllExchanges");
+        String stockAPI = this.configRepository.findById("eod").orElseThrow(NoSuchElementException::new).getConfigValue();
+        String secret = this.credentialRepository.findById("eod").orElseThrow(NoSuchElementException::new).getSecret();
+        String URL = MessageFormat.format(stockAPI + "/exchanges-list?api_token={0}&fmt=json", secret);
+
         JsonNode root = this.callStockAPI(URL);
         try {
             ObjectMapper mapper = new ObjectMapper();
-            return Arrays.asList(mapper.treeToValue(root, Symbol[].class));
+            return Arrays.asList(mapper.treeToValue(root, Exchange[].class));
         } catch (JsonProcessingException | NullPointerException e) {
             throw new APIException("JSON process failed");
         }
@@ -109,7 +145,7 @@ public class StockAPIServiceImpl implements StockAPIService {
             throw new APIException("JSON process failed");
         } catch (RestClientException e) {
             log.error("Unable to reach currency API: " + e.getMessage());
-            throw new APIException("Unable to reach currency API");
+            throw new APIException("Unable to reach currency API. " + e.getMessage());
         }
     }
 

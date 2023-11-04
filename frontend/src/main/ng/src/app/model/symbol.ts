@@ -1,4 +1,5 @@
 export interface Symbol {
-    description: string;
-    symbol: string;
+    name: string;
+    code: string;
+    type: string;
 }

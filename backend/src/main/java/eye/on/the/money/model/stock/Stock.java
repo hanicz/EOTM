@@ -20,6 +20,7 @@ public class Stock {
     private String id;
     private String name;
     private String shortName;
+    private String exchange;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "stock")
     @JsonIgnore

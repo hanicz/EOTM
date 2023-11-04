@@ -2,8 +2,13 @@
     <menu class="pl-0 mb-0"></menu>
     <p-panel header="Lookup">
         <div class="grid">
+            <div class="col-2 ml-4">
+                <p-dropdown class="searchDropdown" [options]="exchanges" optionLabel="Name" optionValue="Code" [virtualScroll]="true" [itemSize]="31" [filter]="true"
+                    (onChange)="exchangeChanged($event)" [(ngModel)]="globals.selectedExchange" placeholder="Select an Exchange" [style]="{'width':'100%'}">
+                </p-dropdown>
+            </div>
             <div class="col-4 ml-4">
-                <p-dropdown class="searchDropdown" [options]="symbols" optionLabel="description" optionValue="symbol" [virtualScroll]="true" [itemSize]="31" [filter]="true"
+                <p-dropdown class="searchDropdown" [options]="symbols" optionLabel="Name" optionValue="Code" [virtualScroll]="true" [itemSize]="31" [filter]="true"
                     (onChange)="stockChanged($event)" [(ngModel)]="globals.selectedStock" placeholder="Select a Ticker" [style]="{'width':'100%'}">
                 </p-dropdown>
             </div>

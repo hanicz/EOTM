@@ -5,6 +5,8 @@ import { ResourceHelper } from '../util/servicehelper';
 import { environment } from '../../environments/environment';
 import { Stock } from '../model/stock';
 import { Candle } from '../model/candle';
+import { Symbol } from '../model/symbol';
+import { Exchange } from '../model/exchange';
 
 @Injectable({
   providedIn: 'root'
@@ -24,15 +26,22 @@ export class StockService {
     });
   };
 
-  getAllSymbols() {
-    const url = `${environment.API_URL}/stock/symbols`;
+  getAllSymbols(exchange: string) {
+    const url = `${environment.API_URL}/stock/symbols/${exchange}`;
     return this.http.get<Symbol[]>(url, {
       headers: this.helper.getHeadersWithToken()
     });
   };
 
-  getCandleData(shortName: string, month: number) {
-    const url = `${environment.API_URL}/stock/candle/${shortName}/${month}`;
+  getAllExchanges() {
+    const url = `${environment.API_URL}/stock/exchanges`;
+    return this.http.get<Exchange[]>(url, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  };
+
+  getCandleData(shortName: string, exchange: string, month: number) {
+    const url = `${environment.API_URL}/stock/candle/${shortName}.${exchange}/${month}`;
     return this.http.get<Candle>(url, {
       headers: this.helper.getHeadersWithToken()
     });

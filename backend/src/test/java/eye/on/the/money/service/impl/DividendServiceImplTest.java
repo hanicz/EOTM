@@ -129,7 +129,7 @@ class DividendServiceImplTest {
         this.dividendService.getCSV(this.user.getId(), writer);
         assertAll(
                 () -> assertTrue(writer.toString().contains("Dividend Id,Amount,Dividend Date,Short Name,Currency")),
-                () -> assertTrue(writer.toString().contains("1,225.0,2021-06-03 00:00:00.0,MTELEKOM,HUF"))
+                () -> assertTrue(writer.toString().contains("1,225.0,2021-06-03 00:00:00.0,MTEL,HUF"))
         );
     }
 
@@ -147,6 +147,7 @@ class DividendServiceImplTest {
                 .dividendDate(new SimpleDateFormat("yyyy-MM-dd").parse("2021-07-03"))
                 .shortName("CRSR")
                 .currencyId("EUR")
+                .exchange("US")
                 .build();
     }
 }

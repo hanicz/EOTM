@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Date;
+
 @Slf4j
 @Getter
 @Setter
@@ -11,11 +13,16 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CandleQuote {
-    private Double[] c;
-    private Double[] h;
-    private Double[] l;
-    private Double[] o;
-    private Long[] t;
-    private Long[] v;
+public class EODCandleQuote {
+
+    private Double close;
+    private Double high;
+    private Double low;
+    private Double open;
+    private Date date;
+    private Long volume;
+
+    public boolean sameSize() {
+        return true;
+    }
 }

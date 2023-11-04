@@ -8,6 +8,8 @@ import { MetricService } from '../service/metric.service';
 import { StockService } from '../service/stock.service';
 import { Globals } from '../util/global';
 import { WatchlistService } from '../service/watchlist.service';
+import { Symbol } from '../model/symbol';
+import { Exchange } from '../model/exchange';
 
 import {
   ChartComponent,
@@ -17,7 +19,6 @@ import {
   ApexTitleSubtitle,
   ApexTooltip
 } from "ng-apexcharts";
-import { StockWatch } from '../model/stockwatch';
 import { Recommendation } from '../model/recommendation';
 
 export type ChartOptions = {
@@ -39,6 +40,7 @@ export class SearchComponent implements OnInit {
 
   stocks: Stock[] = [];
   symbols: Symbol[] = [];
+  exchanges: Exchange[] = [];
   news: News[] = [];
   options: any[];
   recommendations: Recommendation[] = [];
@@ -47,7 +49,7 @@ export class SearchComponent implements OnInit {
   metric: Metric = {} as Metric;
   candle: Candle = {} as Candle;
 
-  selectedOption = 3;
+  selectedOption = 6;
   startPrice = 0;
   endPrice = 0;
   percentage = 0;
@@ -66,11 +68,12 @@ export class SearchComponent implements OnInit {
 
     this.globals = globals;
     this.options = [
-      { label: '1 month', value: 1 },
-      { label: '3 months', value: 3 },
-      { label: '6 months', value: 6 },
-      { label: '9 months', value: 9 },
-      { label: '12 months', value: 12 },
+      { label: '1 M', value: 1 },
+      { label: '6 M', value: 6 },
+      { label: '1 Y', value: 12 },
+      { label: '2 Y', value: 24 },
+      { label: '5 Y', value: 60 },
+      { label: 'All', value: 100 },
     ];
 
     this.stockService.getAllStocks().subscribe({
@@ -79,9 +82,9 @@ export class SearchComponent implements OnInit {
       }
     });
 
-    this.stockService.getAllSymbols().subscribe({
+    this.stockService.getAllExchanges().subscribe({
       next: (data) => {
-        this.symbols = data;
+        this.exchanges = data;
       }
     });
 
@@ -225,8 +228,16 @@ export class SearchComponent implements OnInit {
     this.getCandleData();
   }
 
+  exchangeChanged(event: any) {
+    this.stockService.getAllSymbols(this.globals.selectedExchange).subscribe({
+      next: (data) => {
+        this.symbols = data;
+      }
+    });
+  }
+
   getCandleData() {
-    this.stockService.getCandleData(this.globals.selectedStock, this.selectedOption).subscribe({
+    this.stockService.getCandleData(this.globals.selectedStock, this.globals.selectedExchange, this.selectedOption).subscribe({
       next: (data) => {
         this.candle = data;
         this.createChart();
@@ -238,9 +249,9 @@ export class SearchComponent implements OnInit {
     let chartData = [];
     let volumeChartData = [];
     for (let i = 0; i < this.candle.c.length; i++) {
-      let xy = { x: new Date(this.candle.t[i] * 1000).toLocaleDateString("en-US"), y: [this.candle.o[i], this.candle.h[i], this.candle.l[i], this.candle.c[i]] }
+      let xy = { x: new Date(this.candle.t[i]).toLocaleDateString("en-US"), y: [this.candle.o[i], this.candle.h[i], this.candle.l[i], this.candle.c[i]] }
       chartData.push(xy);
-      volumeChartData.push({ x: new Date(this.candle.t[i] * 1000).toLocaleDateString("en-US"), y: this.candle.v[i] / 1000000 })
+      volumeChartData.push({ x: new Date(this.candle.t[i]).toLocaleDateString("en-US"), y: this.candle.v[i] / 1000000 })
     }
     this.chart.updateOptions({
       legend: {

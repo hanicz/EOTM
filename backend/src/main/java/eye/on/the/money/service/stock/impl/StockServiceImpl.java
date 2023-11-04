@@ -1,8 +1,6 @@
 package eye.on.the.money.service.stock.impl;
 
-import eye.on.the.money.model.stock.CandleQuote;
-import eye.on.the.money.model.stock.Stock;
-import eye.on.the.money.model.stock.Symbol;
+import eye.on.the.money.model.stock.*;
 import eye.on.the.money.repository.stock.StockRepository;
 import eye.on.the.money.service.stock.StockService;
 import eye.on.the.money.service.api.StockAPIService;
@@ -29,19 +27,38 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-    public List<Symbol> getAllSymbols() {
+    public List<Symbol> getAllSymbols(String exchange) {
         log.trace("Enter getAllSymbols");
-        return this.stockAPIService.getAllSymbols();
+        return this.stockAPIService.getAllSymbols(exchange);
+    }
+
+    @Override
+    public List<Exchange> getAllExchanges() {
+        log.trace("Enter getAllExchanges");
+        return this.stockAPIService.getAllExchanges();
     }
 
     @Override
     public CandleQuote getCandleQuoteByShortName(String shortName, int months) {
         log.trace("Enter getCandleQuoteByShortName");
-        CandleQuote cq = this.stockAPIService.getCandleQuoteByShortName(shortName, months);
-        if (!cq.sameSize()) {
-            log.error("CandleQuote size is not the same as expected");
-            throw new RuntimeException("Invalid candle data");
+        List<EODCandleQuote> eodList = this.stockAPIService.getCandleQuoteByShortName(shortName, months);
+
+        Double[] c = new Double[eodList.size()];
+        Double[] o = new Double[eodList.size()];
+        Double[] l = new Double[eodList.size()];
+        Double[] h = new Double[eodList.size()];
+        Long[] v = new Long[eodList.size()];
+        Long[] t = new Long[eodList.size()];
+
+        for (int i = 0; i < eodList.size(); i++) {
+            c[i] = eodList.get(i).getClose();
+            o[i] = eodList.get(i).getOpen();
+            l[i] = eodList.get(i).getLow();
+            h[i] = eodList.get(i).getHigh();
+            v[i] = eodList.get(i).getVolume();
+            t[i] = eodList.get(i).getDate().getTime();
         }
-        return cq;
+
+        return new CandleQuote(c, h, l, o, t, v);
     }
 }

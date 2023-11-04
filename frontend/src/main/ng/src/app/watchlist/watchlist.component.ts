@@ -74,8 +74,9 @@ export class WatchlistComponent implements OnInit {
     });
   }
 
-  stockSelected(stock: string) {
-    this.globals.selectedStock = stock;
+  stockSelected(stock: StockWatch) {
+    this.globals.selectedExchange = stock.stockExchange;
+    this.globals.selectedStock = stock.stockShortName;
     this.globals.stockSelectedEvent.emit();
     this.router.navigate(['./search']);
   }

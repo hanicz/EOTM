@@ -8,6 +8,9 @@ export class Globals {
     selectedStock = '';
     @Output() stockSelectedEvent = new EventEmitter<any>();
 
+    selectedExchange = '';
+    @Output() exchangeSelectedEvent = new EventEmitter<any>();
+
     cryptoCurrency: string = 'EUR';
     cryptoCurrencyChange: Subject<string> = new Subject<string>();
 

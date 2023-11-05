@@ -18,4 +18,5 @@ public class ETFDividendDTO {
     private Date dividendDate;
     private String shortName;
     private String currencyId;
+    private String exchange;
 }

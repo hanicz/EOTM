@@ -10,7 +10,6 @@ import java.util.List;
 public interface ETFInvestmentService {
     public List<ETFInvestmentDTO> getETFInvestments(Long userId);
     public List<ETFInvestmentDTO> getCurrentETFHoldings(Long userId, InvestmentQuery query);
-    public void updateETFPrices();
     public void deleteInvestmentById(User user, List<Long> ids);
     public List<ETFInvestmentDTO> getAllPositions(Long userId, InvestmentQuery query);
     public ETFInvestmentDTO createInvestment(ETFInvestmentDTO investmentDTO, User user);

@@ -27,6 +27,10 @@ export class WatchlistComponent implements OnInit {
   display: boolean = false;
   assetUrl: string;
 
+  forexLoading: boolean = false;
+  stockLoading: boolean = false;
+  cryptoLoading: boolean = false;
+
 
   constructor(private watchlistService: WatchlistService,
     globals: Globals,
@@ -49,10 +53,12 @@ export class WatchlistComponent implements OnInit {
   }
 
   private fetchData = () => {
+    this.forexLoading = this.cryptoLoading = this.stockLoading = true;
     this.fetchCryptoWatchList();
     this.fetchStockWatchList();
     this.watchlistService.getForexWatchList().subscribe({
       next: (data) => {
+        this.forexLoading = false;
         this.forexWatchList = data;
       }
     });
@@ -61,6 +67,7 @@ export class WatchlistComponent implements OnInit {
   private fetchStockWatchList() {
     this.watchlistService.getStockWatchList().subscribe({
       next: (data) => {
+        this.stockLoading = false;
         this.globals.stockWatchList = data;
       }
     });
@@ -69,6 +76,7 @@ export class WatchlistComponent implements OnInit {
   private fetchCryptoWatchList() {
     this.watchlistService.getCryptoWatchList("EUR").subscribe({
       next: (data) => {
+        this.cryptoLoading = false;
         this.cryptoWatchList = data;
       }
     });

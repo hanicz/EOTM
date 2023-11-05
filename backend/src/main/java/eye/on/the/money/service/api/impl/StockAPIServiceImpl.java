@@ -45,15 +45,19 @@ public class StockAPIServiceImpl implements StockAPIService {
     @Retryable(value = APIException.class, maxAttempts = 3)
     public void getLiveValue(List<InvestmentDTO> investmentDTOList) {
         log.trace("Enter getLiveValue");
-        String stockAPI = this.configRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getConfigValue();
-        String secret = this.credentialRepository.findById("finnhub").orElseThrow(NoSuchElementException::new).getSecret();
-        investmentDTOList.stream().filter(i -> i.getCurrencyId().equals("USD")).forEach(investmentDTO -> {
-            String URL = this.createURL(stockAPI, secret, investmentDTO.getShortName());
-            JsonNode liveValue = this.callStockAPI(URL).findValue("c");
-            if (liveValue != null) {
-                investmentDTO.setLiveValue(liveValue.doubleValue() * investmentDTO.getQuantity());
-            }
-        });
+        String stockAPI = this.configRepository.findById("eod").orElseThrow(NoSuchElementException::new).getConfigValue();
+        String secret = this.credentialRepository.findById("eod").orElseThrow(NoSuchElementException::new).getSecret();
+        String joinedList = investmentDTOList.stream().map(i -> (i.getShortName() + "." + i.getExchange())).collect(Collectors.joining(","));
+        String URL = MessageFormat.format(stockAPI + "/real-time/stock/?api_token={0}&fmt=json&s={1}", secret, joinedList);
+
+        JsonNode responseBody = this.callStockAPI(URL);
+        for (JsonNode stock : responseBody) {
+            Optional<InvestmentDTO> investmentDTO = investmentDTOList.stream().filter
+                    (i -> (i.getShortName() + "." + i.getExchange()).equals(stock.findValue("code").textValue())).findFirst();
+            if (investmentDTO.isEmpty()) continue;
+            investmentDTO.get().setLiveValue(stock.findValue("close").doubleValue() * investmentDTO.get().getQuantity());
+            investmentDTO.get().setValueDiff(investmentDTO.get().getLiveValue() - investmentDTO.get().getAmount());
+        }
     }
 
     @Override
@@ -144,8 +148,8 @@ public class StockAPIServiceImpl implements StockAPIService {
             log.error("JSON process failed");
             throw new APIException("JSON process failed");
         } catch (RestClientException e) {
-            log.error("Unable to reach currency API: " + e.getMessage());
-            throw new APIException("Unable to reach currency API. " + e.getMessage());
+            log.error("Unable to reach stock API: " + e.getMessage());
+            throw new APIException("Unable to reach stock API. " + e.getMessage());
         }
     }
 

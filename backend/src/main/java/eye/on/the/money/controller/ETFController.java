@@ -35,14 +35,12 @@ public class ETFController {
     @PostMapping("/holding")
     public ResponseEntity<List<ETFInvestmentDTO>> getETFHoldings(@AuthenticationPrincipal User user, @RequestBody InvestmentQuery query) {
         log.trace("Enter getETFHoldings");
-        this.etfInvestmentService.updateETFPrices();
         return new ResponseEntity<List<ETFInvestmentDTO>>(this.etfInvestmentService.getCurrentETFHoldings(user.getId(), query), HttpStatus.OK);
     }
 
     @PostMapping("/position")
     public ResponseEntity<List<ETFInvestmentDTO>> getPositions(@AuthenticationPrincipal User user, @RequestBody InvestmentQuery query) {
         log.trace("Enter getPositions");
-        this.etfInvestmentService.updateETFPrices();
         return new ResponseEntity<List<ETFInvestmentDTO>>(this.etfInvestmentService.getAllPositions(user.getId(), query), HttpStatus.OK);
     }
 

@@ -13,15 +13,15 @@
     </ng-template>
     <ng-template pTemplate="body" let-investment>
         <tr>
-            <td>{{(investment.shortName) + '.' + (investment.exchange)}}</td>
+            <td>{{investment.shortName}}.{{investment.exchange}}</td>
             <td>{{investment.quantity}}</td>
-            <td>{{investment.amount | currency : globals.etfCurrency : 'symbol' : '0.0-2'}}</td>
-            <td>{{investment.amount / investment.quantity | currency : globals.etfCurrency : 'symbol' : '0.0-3'}}</td>
-            <td>{{investment.liveValue | currency : globals.etfCurrency : 'symbol' : '0.0-2'}}</td>
-            <td>{{investment.liveValue / investment.quantity | currency : globals.etfCurrency : 'symbol' : '0.0-3'}}</td>
+            <td>{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}</td>
+            <td>{{investment.amount / investment.quantity | currency : investment.currencyId : 'symbol' : '0.0-3'}}</td>
+            <td>{{investment.liveValue | currency : investment.currencyId : 'symbol' : '0.0-2'}}</td>
+            <td>{{investment.liveValue / investment.quantity | currency : investment.currencyId : 'symbol' : '0.0-3'}}</td>
             <td>
-                <p-tag styleClass="p-mr-2" severity="success" *ngIf="investment.valueDiff > 0" value="{{investment.valueDiff | currency : globals.etfCurrency : 'symbol' : '0.0-2'}}"></p-tag>
-                <p-tag styleClass="p-mr-2" severity="danger" *ngIf="investment.valueDiff < 0" value="{{investment.valueDiff | currency : globals.etfCurrency : 'symbol' : '0.0-2'}}"></p-tag>
+                <p-tag styleClass="p-mr-2" severity="success" *ngIf="investment.valueDiff > 0" value="{{investment.valueDiff | currency : investment.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
+                <p-tag styleClass="p-mr-2" severity="danger" *ngIf="investment.valueDiff < 0" value="{{investment.valueDiff | currency : investment.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
             </td>
             <td>
                 <p-tag styleClass="p-mr-2" severity="success" *ngIf="investment.valueDiff > 0" value="{{(investment.valueDiff / investment.amount * 100 | number : '0.0-1') + '%'}}"></p-tag>

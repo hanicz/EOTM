@@ -23,7 +23,6 @@ public class ETFInvestmentDTO {
     private String currencyId;
     private Double liveValue;
     private Double valueDiff;
-    private Date eodDate;
     private Double fee;
     private String exchange;
 

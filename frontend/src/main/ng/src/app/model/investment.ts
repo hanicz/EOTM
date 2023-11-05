@@ -9,4 +9,5 @@ export interface Investment {
     liveValue?: number;
     valueDiff?: number;
     fee: number;
+    exchange: string;
 }

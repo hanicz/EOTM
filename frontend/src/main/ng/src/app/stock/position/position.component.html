@@ -10,20 +10,20 @@
     </ng-template>
     <ng-template pTemplate="body" let-investment>
         <tr>
-            <td>{{investment.shortName}}</td>
+            <td>{{investment.shortName}}.{{investment.exchange}}</td>
             <td>
-               <span *ngIf="investment.quantity > 0">{{investment.amount | currency : globals.stockCurrency : 'symbol' : '0.0-2'}}</span>
+               <span *ngIf="investment.quantity > 0">{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}</span>
             </td>
             <td>
-                <span *ngIf="investment.quantity > 0">{{(investment.amount / investment.quantity) | currency : globals.stockCurrency : 'symbol' : '0.0-3'}}</span>
+                <span *ngIf="investment.quantity > 0">{{(investment.amount / investment.quantity) | currency : investment.currencyId : 'symbol' : '0.0-3'}}</span>
              </td>
             <td>
                 <p-tag styleClass="p-mr-2" [severity]="(investment.quantity > 0) ? 'info':'warning'"
                     value="{{(investment.quantity > 0) ? (investment.quantity | number: '0.0-4') : 'Closed'}}"></p-tag>
             </td>
             <td>
-                <p-tag styleClass="p-mr-2" severity="success" *ngIf="investment.quantity == 0 && investment.amount < 0" value="{{myMath.abs(investment.amount) | currency : globals.stockCurrency : 'symbol' : '0.0-2'}}"></p-tag>
-                <p-tag styleClass="p-mr-2" severity="danger" *ngIf="investment.quantity == 0 && investment.amount > 0" value="{{investment.amount | currency : globals.stockCurrency : 'symbol' : '0.0-2'}}"></p-tag>
+                <p-tag styleClass="p-mr-2" severity="success" *ngIf="investment.quantity == 0 && investment.amount < 0" value="{{myMath.abs(investment.amount) | currency : investment.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
+                <p-tag styleClass="p-mr-2" severity="danger" *ngIf="investment.quantity == 0 && investment.amount > 0" value="{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
             </td>
         </tr>
     </ng-template>

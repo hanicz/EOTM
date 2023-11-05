@@ -5,7 +5,6 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
-import java.util.Date;
 import java.util.Set;
 
 @Entity
@@ -22,8 +21,6 @@ public class ETF {
     private String name;
     private String shortName;
     private String exchange;
-    private Double liveValue;
-    private Date eodDate;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "etf")
     @JsonIgnore

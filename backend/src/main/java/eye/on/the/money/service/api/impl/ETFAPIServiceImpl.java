@@ -1,8 +1,10 @@
 package eye.on.the.money.service.api.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import eye.on.the.money.dto.out.ETFInvestmentDTO;
 import eye.on.the.money.exception.APIException;
-import eye.on.the.money.model.etf.ETF;
-import eye.on.the.money.model.etf.ETFResponse;
 import eye.on.the.money.repository.ConfigRepository;
 import eye.on.the.money.repository.CredentialRepository;
 import eye.on.the.money.service.api.ETFAPIService;
@@ -15,9 +17,6 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.text.MessageFormat;
-import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,75 +32,36 @@ public class ETFAPIServiceImpl implements ETFAPIService {
 
     @Override
     @Retryable(value = APIException.class, maxAttempts = 3)
-    public void updateETFPrices(List<ETF> etfList) {
-        log.trace("Enter updateETFPrices");
+    public void getLiveValue(List<ETFInvestmentDTO> investmentDTOList) {
+        log.trace("Enter getLiveValue");
         String etfAPI = this.configRepository.findById("eod").orElseThrow(NoSuchElementException::new).getConfigValue();
         String secret = this.credentialRepository.findById("eod").orElseThrow(NoSuchElementException::new).getSecret();
-        String symbols = etfList.stream()
-                .filter(etf -> this.isUpdateRequired(etf.getEodDate()))
-                .map(etf -> etf.getShortName() + "." + etf.getExchange())
-                .collect(Collectors.joining(","));
+        String joinedList = investmentDTOList.stream().map(i -> (i.getShortName() + "." + i.getExchange())).collect(Collectors.joining(","));
+        String URL = MessageFormat.format(etfAPI + "/real-time/etf/?api_token={0}&fmt=json&s={1}", secret, joinedList);
 
-        if (symbols.isBlank() || symbols.isEmpty()) {
-            return;
+        JsonNode responseBody = this.callETFAPI(URL);
+        for (JsonNode etf : responseBody) {
+            Optional<ETFInvestmentDTO> etfInvestmentDTO = investmentDTOList.stream().filter
+                    (i -> (i.getShortName() + "." + i.getExchange()).equals(etf.findValue("code").textValue())).findFirst();
+            if (etfInvestmentDTO.isEmpty()) continue;
+            etfInvestmentDTO.get().setLiveValue(etf.findValue("close").doubleValue() * etfInvestmentDTO.get().getQuantity());
+            etfInvestmentDTO.get().setValueDiff(etfInvestmentDTO.get().getLiveValue() - etfInvestmentDTO.get().getAmount());
         }
-
-        int symbolIndex = symbols.indexOf(",");
-        String symbol = symbols;
-        if (symbolIndex != -1) {
-            symbol = symbol.substring(0, symbolIndex);
-        }
-        String URL = this.createURL(etfAPI, secret, symbol, symbols);
-        Map<String, ETFResponse> etfMap = this.callETFAPI(URL);
-
-        etfList.stream().filter(etf -> this.isUpdateRequired(etf.getEodDate())).forEach(etf -> {
-            ETFResponse etfResponse = etfMap.get(etf.getShortName() + "." + etf.getExchange());
-            etf.setLiveValue(etfResponse.getClose());
-            etf.setEodDate(new Date());
-        });
     }
 
-    private boolean isUpdateRequired(Date lastUpdateDate) {
-        log.trace("Enter isUpdateRequired");
-        Instant instant1 = lastUpdateDate.toInstant();
-        Instant instant2 = new Date().toInstant();
-
-        if (!instant1.truncatedTo(ChronoUnit.DAYS).equals(instant2.truncatedTo(ChronoUnit.DAYS))) {
-            return true;
-        }
-
-        if (instant2.atZone(ZoneOffset.UTC).getHour() >= 18 && instant1.atZone(ZoneOffset.UTC).getHour() < 18) {
-            return true;
-        }
-
-        return false;
-    }
-
-    private Map<String, ETFResponse> callETFAPI(String URL) {
+    private JsonNode callETFAPI(String URL) {
         log.trace("Enter callETFAPI");
         RestTemplate restTemplate = new RestTemplate();
         try {
-            ResponseEntity<ETFResponse[]> response = restTemplate.getForEntity(URL, ETFResponse[].class);
-            if (response.getBody() != null) {
-                Map<String, ETFResponse> etfMap = new HashMap<>();
-                for (ETFResponse etf : response.getBody()) {
-                    etfMap.put(etf.getCode(), etf);
-                }
-                return etfMap;
-            } else {
-                log.error("Empty response from ETF API");
-                throw new APIException("Empty response from EOD API");
-            }
+            ResponseEntity<String> response = restTemplate.getForEntity(URL, String.class);
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readTree(response.getBody());
+        } catch (JsonProcessingException | NullPointerException e) {
+            log.error("JSON process failed");
+            throw new APIException("JSON process failed");
         } catch (RestClientException e) {
             log.error("Unable to reach ETF API: " + e.getMessage());
-            throw new APIException("Unable to reach ETF API");
+            throw new APIException("Unable to reach ETF API. " + e.getMessage());
         }
-    }
-
-    private String createURL(String etfAPI, String secret, String symbol, String symbols) {
-        log.trace("Enter createURL");
-        return MessageFormat.format(
-                etfAPI + "/real-time/{0}?&api_token={1}&s={2}&fmt=json",
-                symbol, secret, symbols);
     }
 }

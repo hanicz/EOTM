@@ -73,59 +73,22 @@ public class InvestmentServiceImpl implements InvestmentService {
     }
 
     @Override
-    public List<InvestmentDTO> getInvestmentsByUserIdWConvCurr(Long userId, String currency) {
-        List<InvestmentDTO> investments = this.investmentRepository.findByUser_IdOrderByTransactionDate(userId).stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
-        this.currencyConverter.changeInvestmentsCurrency(investments, currency);
-        return investments;
-    }
-
-    @Override
-    public List<InvestmentDTO> getInvestmentsByBuySell(Long userId, InvestmentQuery query) {
-        List<InvestmentDTO> investments = this.investmentRepository.findByUser_IdAndBuySell(userId, query.getType())
-                .stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
-        this.currencyConverter.changeInvestmentsCurrency(investments, query.getCurrency());
-        return investments;
-    }
-
-    @Override
-    public List<InvestmentDTO> getInvestmentsByDate(Long userId, InvestmentQuery query) {
-        List<InvestmentDTO> investments = this.investmentRepository.findByUser_IdAndTransactionDateBetween(userId, query.getTransactionDateStart(), query.getTransactionDateEnd())
-                .stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
-        this.currencyConverter.changeInvestmentsCurrency(investments, query.getCurrency());
-        return investments;
-    }
-
-    @Override
-    public List<InvestmentDTO> getInvestmentsByTypeAndDate(Long userId, InvestmentQuery query) {
-        List<InvestmentDTO> investments =
-                this.investmentRepository.findByUser_IdAndBuySellAndTransactionDateBetween(userId, query.getType(), query.getTransactionDateStart(), query.getTransactionDateEnd())
-                        .stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
-        this.currencyConverter.changeInvestmentsCurrency(investments, query.getCurrency());
-        return investments;
-    }
-
-    @Override
     public List<InvestmentDTO> getCurrentHoldings(Long userId, InvestmentQuery query) {
         Map<String, InvestmentDTO> investmentMap = this.getCalculated(userId, query);
         List<InvestmentDTO> investmentDTOList = (new ArrayList<InvestmentDTO>(investmentMap.values()))
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
         this.stockAPIService.getLiveValue(investmentDTOList);
-        this.currencyConverter.changeLiveValueCurrency(investmentDTOList, query.getCurrency());
         return investmentDTOList;
     }
 
     @Override
     public List<InvestmentDTO> getAllPositions(Long userId, InvestmentQuery query) {
         Map<String, InvestmentDTO> investmentMap = this.getCalculated(userId, query);
-        return (new ArrayList<InvestmentDTO>(investmentMap.values())).stream().map(investment -> {
-            investment.setCurrencyId(query.getCurrency());
-            return investment;
-        }).collect(Collectors.toList());
+        return new ArrayList<>((new ArrayList<InvestmentDTO>(investmentMap.values())));
     }
 
     private Map<String, InvestmentDTO> getCalculated(Long userId, InvestmentQuery query) {
         List<InvestmentDTO> investments = this.investmentRepository.findByUser_IdOrderByTransactionDate(userId).stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
-        this.currencyConverter.changeInvestmentsCurrency(investments, query.getCurrency());
         Map<String, InvestmentDTO> investmentMap = new HashMap<>();
         for (InvestmentDTO i : investments) {
             if (i.getBuySell().equals("S")) {

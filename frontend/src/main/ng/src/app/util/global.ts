@@ -29,6 +29,7 @@ export class Globals {
         { label: 'Forint', value: 'HUF' }
     ];
 
+    
     statuses = [
         { label: 'BUY', value: 'B' },
         { label: 'SELL', value: 'S' },

@@ -63,7 +63,7 @@
             <td>
                 <p-tableCheckbox [value]="investment"></p-tableCheckbox>
             </td>
-            <td>{{investment.shortName}}</td>
+            <td>{{investment.shortName}}.{{investment.exchange}}</td>
             <td>
                 <p-tag styleClass="p-mr-2" severity="info" *ngIf="investment.buySell === 'B'" value="BUY"></p-tag>
                 <p-tag styleClass="p-mr-2" severity="warning" *ngIf="investment.buySell === 'S'" value="SELL"></p-tag>

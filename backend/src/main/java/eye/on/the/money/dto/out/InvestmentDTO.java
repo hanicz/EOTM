@@ -19,6 +19,7 @@ public class InvestmentDTO {
     private String buySell;
     private Date transactionDate;
     private String shortName;
+    private String exchange;
     private Double amount;
     private String currencyId;
     private Double liveValue;

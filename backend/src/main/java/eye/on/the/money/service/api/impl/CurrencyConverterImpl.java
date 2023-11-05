@@ -8,10 +8,12 @@ import eye.on.the.money.exception.APIException;
 import eye.on.the.money.repository.ConfigRepository;
 import eye.on.the.money.repository.CredentialRepository;
 import eye.on.the.money.service.api.CurrencyConverter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
+@Slf4j
 public class CurrencyConverterImpl implements CurrencyConverter {
 
     private static final Set<String> supportedCurrencies = Stream.of("EUR", "USD", "HUF").collect(Collectors.toCollection(HashSet::new));
@@ -64,100 +67,41 @@ public class CurrencyConverterImpl implements CurrencyConverter {
     }
 
     @Override
-    public void changeInvestmentsCurrency(List<InvestmentDTO> investments, String toCurrency) {
-        if (CurrencyConverterImpl.supportedCurrencies.contains(toCurrency)) {
-            String currencyAPI = this.configRepository.findById("exchangerate").orElseThrow(NoSuchElementException::new).getConfigValue();
-            Map<String, JsonNode> currencyMemory = new HashMap<>();
-            investments.stream().filter(i -> !i.getCurrencyId().equals(toCurrency)).forEach(investment -> {
-                Double amount = investment.getAmount();
-                String URL = this.createURL(currencyAPI, investment.getCurrencyId(), investment.getTransactionDate(),
-                        investment.getTransactionDate(), "timeseries");
-                JsonNode data = this.checkMemory(investment.getCurrencyId() + CurrencyConverterImpl.dateFormat.format(investment.getTransactionDate()),
-                        currencyMemory, URL);
+    public void forexWatchList(List<ForexWatchDTO> forexWatchList) {
+        log.trace("Enter changeForexWatchList");
+        String currencyAPI = this.configRepository.findById("eod").orElseThrow(NoSuchElementException::new).getConfigValue();
+        String secret = this.credentialRepository.findById("eod").orElseThrow(NoSuchElementException::new).getSecret();
+        String joinedList = forexWatchList.stream().map(f -> (f.getFromCurrencyId() + f.getToCurrencyId() + ".FOREX")).collect(Collectors.joining(","));
+        String URL = MessageFormat.format(currencyAPI + "/real-time/forex/?api_token={0}&fmt=json&s={1}", secret, joinedList);
 
-                investment.setAmount(amount *
-                        data.get(CurrencyConverterImpl.dateFormat.format(investment.getTransactionDate()))
-                                .get(toCurrency).doubleValue());
-            });
+        JsonNode responseBody = this.callCurrAPI(URL);
+        for (JsonNode forex : responseBody) {
+            Optional<ForexWatchDTO> forexWatchDTO = forexWatchList.stream().filter
+                    (f -> (f.getFromCurrencyId() + f.getToCurrencyId() + ".FOREX").equals(forex.findValue("code").textValue())).findFirst();
+            if (forexWatchDTO.isEmpty()) continue;
+            forexWatchDTO.get().setLiveValue(forex.findValue("close").doubleValue());
+            forexWatchDTO.get().setChange(forex.findValue("change").doubleValue() * -1);
+            forexWatchDTO.get().setPChange(forex.findValue("change_p").doubleValue() * -1);
         }
-    }
-
-    @Override
-    public void changeETFCurrency(List<ETFInvestmentDTO> investments, String toCurrency) {
-        if (CurrencyConverterImpl.supportedCurrencies.contains(toCurrency)) {
-            String currencyAPI = this.configRepository.findById("exchangerate").orElseThrow(NoSuchElementException::new).getConfigValue();
-            Map<String, JsonNode> currencyMemory = new HashMap<>();
-            investments.stream().filter(i -> !i.getCurrencyId().equals(toCurrency)).forEach(investment -> {
-                Double amount = investment.getAmount();
-                String URL = this.createURL(currencyAPI, investment.getCurrencyId(), investment.getTransactionDate(),
-                        investment.getTransactionDate(), "timeseries");
-                JsonNode data = this.checkMemory(investment.getCurrencyId() + CurrencyConverterImpl.dateFormat.format(investment.getTransactionDate()),
-                        currencyMemory, URL);
-                investment.setAmount(amount *
-                        data.get(CurrencyConverterImpl.dateFormat.format(investment.getTransactionDate()))
-                                .get(toCurrency).doubleValue());
-
-                URL = this.createURL(currencyAPI, investment.getCurrencyId(), new Date(), new Date(), "timeseries");
-                data = this.checkMemory(investment.getCurrencyId() + CurrencyConverterImpl.dateFormat.format(new Date()), currencyMemory, URL);
-                investment.setLiveValue(investment.getLiveValue() * investment.getQuantity() * data.get(toCurrency).doubleValue());
-                investment.setValueDiff(investment.getLiveValue() - investment.getAmount());
-            });
-        }
-    }
-
-    @Override
-    public void changeLiveValueCurrency(List<InvestmentDTO> investments, String toCurrency) {
-        if (CurrencyConverterImpl.supportedCurrencies.contains(toCurrency)) {
-            String currencyAPI = this.configRepository.findById("exchangerate").orElseThrow(NoSuchElementException::new).getConfigValue();
-            Map<String, JsonNode> currencyMemory = new HashMap<>();
-            investments.forEach(investment -> {
-                if (!investment.getCurrencyId().equals(toCurrency) && investment.getLiveValue() != null) {
-                    String URL = this.createURL(currencyAPI, investment.getCurrencyId(), new Date(), new Date(), "timeseries");
-                    JsonNode data = this.checkMemory(investment.getCurrencyId(), currencyMemory, URL);
-                    investment.setLiveValue(investment.getLiveValue() * data.get(CurrencyConverterImpl.dateFormat.format(new Date())).get(toCurrency).doubleValue());
-                }
-                if (investment.getLiveValue() != null) {
-                    investment.setValueDiff(investment.getLiveValue() - investment.getAmount());
-                }
-                investment.setCurrencyId(toCurrency);
-            });
-        }
-    }
-
-    @Override
-    public void changeForexWatchList(List<ForexWatchDTO> forexWatchList) {
-        String currencyAPI = this.configRepository.findById("exchangerate").orElseThrow(NoSuchElementException::new).getConfigValue();
-        Date yesterday = new Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000);
-        Map<String, JsonNode> currencyMemory = new HashMap<>();
-        forexWatchList.forEach(f -> {
-            if (CurrencyConverterImpl.supportedCurrencies.containsAll(Arrays.asList(f.getToCurrencyId(), f.getFromCurrencyId()))) {
-                String URL = this.createURL(currencyAPI, f.getFromCurrencyId(), yesterday, new Date(), "timeseries");
-                JsonNode data = this.checkMemory(f.getFromCurrencyId(), currencyMemory, URL);
-
-                Double liveValue = data.get(CurrencyConverterImpl.dateFormat.format(new Date())).get(f.getToCurrencyId()).doubleValue();
-                Double yesterdayValue = data.get(CurrencyConverterImpl.dateFormat.format(yesterday)).get(f.getToCurrencyId()).doubleValue();
-                f.setLiveValue(liveValue);
-                f.setChange(yesterdayValue - liveValue);
-                f.setPChange((yesterdayValue - liveValue) / yesterdayValue * 100);
-            }
-        });
     }
 
     @Override
     public void changeLiveValueCurrencyForForexTransactions(List<ForexTransactionDTO> forexTransactions) {
-        String currencyAPI = this.configRepository.findById("exchangerate").orElseThrow(NoSuchElementException::new).getConfigValue();
-        Map<String, JsonNode> currencyMemory = new HashMap<>();
-        forexTransactions.forEach(forexTransaction -> {
-            String URL = this.createURL(currencyAPI, forexTransaction.getToCurrencyId(), new Date(), new Date(), "timeseries");
-            JsonNode data = this.checkMemory(forexTransaction.getToCurrencyId(), currencyMemory, URL);
-            Double changeRate = data.get(CurrencyConverterImpl.dateFormat.format(new Date())).get(forexTransaction.getFromCurrencyId()).doubleValue();
-            forexTransaction.setLiveValue(forexTransaction.getToAmount() * changeRate);
+        log.trace("Enter changeForexWatchList");
+        String currencyAPI = this.configRepository.findById("eod").orElseThrow(NoSuchElementException::new).getConfigValue();
+        String secret = this.credentialRepository.findById("eod").orElseThrow(NoSuchElementException::new).getSecret();
+        String joinedList = forexTransactions.stream().map(f -> (f.getToCurrencyId() + f.getFromCurrencyId() + ".FOREX")).collect(Collectors.joining(","));
+        String URL = MessageFormat.format(currencyAPI + "/real-time/forex/?api_token={0}&fmt=json&s={1}", secret, joinedList);
 
-            if (forexTransaction.getLiveValue() != null) {
-                forexTransaction.setValueDiff(forexTransaction.getLiveValue() - forexTransaction.getFromAmount());
-                forexTransaction.setLiveChangeRate(changeRate);
-            }
-        });
+        JsonNode responseBody = this.callCurrAPI(URL);
+        for (JsonNode forex : responseBody) {
+            Optional<ForexTransactionDTO> forexTransactionDTO = forexTransactions.stream().filter
+                    (f -> (f.getToCurrencyId() + f.getFromCurrencyId() + ".FOREX").equals(forex.findValue("code").textValue())).findFirst();
+            if (forexTransactionDTO.isEmpty()) continue;
+            forexTransactionDTO.get().setLiveValue(forex.findValue("close").doubleValue() * forexTransactionDTO.get().getToAmount());
+            forexTransactionDTO.get().setLiveChangeRate(forex.findValue("close").doubleValue());
+            forexTransactionDTO.get().setValueDiff(forexTransactionDTO.get().getLiveValue() - forexTransactionDTO.get().getFromAmount());
+        }
     }
 
     private JsonNode checkMemory(String key, Map<String, JsonNode> memory, String URL) {
@@ -193,6 +137,22 @@ public class CurrencyConverterImpl implements CurrencyConverter {
             }
         } else {
             throw new APIException("Unable to reach currency API");
+        }
+    }
+
+    private JsonNode callCurrAPI(String URL) {
+        log.trace("Enter callCurrAPI");
+        RestTemplate restTemplate = new RestTemplate();
+        try {
+            ResponseEntity<String> response = restTemplate.getForEntity(URL, String.class);
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readTree(response.getBody());
+        } catch (JsonProcessingException | NullPointerException e) {
+            log.error("JSON process failed");
+            throw new APIException("JSON process failed");
+        } catch (RestClientException e) {
+            log.error("Unable to reach currency API: " + e.getMessage());
+            throw new APIException("Unable to reach currency API. " + e.getMessage());
         }
     }
 

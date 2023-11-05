@@ -75,7 +75,7 @@ public class WatchListServiceImpl implements WatchlistService {
     @Override
     public List<ForexWatchDTO> getForexWatchlistByUserId(Long userId) {
         List<ForexWatchDTO> forexList = this.forexWatchRepository.findByUser_Id(userId).stream().map(this::convertToForexDTO).collect(Collectors.toList());
-        this.currencyConverter.changeForexWatchList(forexList);
+        this.currencyConverter.forexWatchList(forexList);
         return forexList;
     }
 

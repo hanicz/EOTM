@@ -44,7 +44,7 @@
             <td>
                 <p-tableCheckbox [value]="dividend"></p-tableCheckbox>
             </td>
-            <td>{{dividend.shortName}}</td>
+            <td>{{dividend.shortName}}.{{dividend.exchange}}</td>
             <td>{{dividend.amount | currency : dividend.currencyId : 'symbol' : '0.0-2'}}</td>
             <td>{{dividend.dividendDate | date:'mediumDate'}}</td>
             <td>

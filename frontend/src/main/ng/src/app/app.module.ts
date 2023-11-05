@@ -49,6 +49,8 @@ import { CardModule } from 'primeng/card';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { ImageModule } from 'primeng/image';
 import { ChipModule } from 'primeng/chip';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { SkeletonModule } from 'primeng/skeleton';
 
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { EtfComponent } from './etf/etf.component';
@@ -117,7 +119,9 @@ import { ForexholdingComponent } from './forex/forexholding/forexholding.compone
     NgApexchartsModule,
     SelectButtonModule,
     ImageModule,
-    ChipModule
+    ChipModule,
+    ProgressSpinnerModule,
+    SkeletonModule
   ],
   providers: [MessageService, Globals],
   bootstrap: [AppComponent]

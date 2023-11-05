@@ -64,8 +64,11 @@ public class ETFInvestmentServiceImpl implements ETFInvestmentService {
     @Override
     public List<ETFInvestmentDTO> getCurrentETFHoldings(Long userId, InvestmentQuery query) {
         Map<String, ETFInvestmentDTO> investmentMap = this.getCalculated(userId, query);
-        return (new ArrayList<ETFInvestmentDTO>(investmentMap.values()))
+        List<ETFInvestmentDTO> etfInvestmentDTOList = (new ArrayList<ETFInvestmentDTO>(investmentMap.values()))
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
+        this.etfapiService.getLiveValue(etfInvestmentDTOList);
+
+        return etfInvestmentDTOList;
     }
 
     @Override
@@ -76,13 +79,7 @@ public class ETFInvestmentServiceImpl implements ETFInvestmentService {
 
     private Map<String, ETFInvestmentDTO> getCalculated(Long userId, InvestmentQuery query) {
         List<ETFInvestmentDTO> investments = this.etfInvestmentRepository.findByUser_IdOrderByTransactionDate(userId).stream().map(this::convertToETFInvestmentDTO).collect(Collectors.toList());
-        for(ETFInvestmentDTO i : investments){
-            if(i.getCurrencyId().equals(query.getCurrency())){
-                i.setLiveValue(i.getLiveValue() * i.getQuantity());
-                i.setValueDiff(i.getLiveValue() - i.getAmount());
-            }
-        }
-        this.currencyConverter.changeETFCurrency(investments, query.getCurrency());
+
         Map<String, ETFInvestmentDTO> investmentMap = new HashMap<>();
         for (ETFInvestmentDTO i : investments) {
             if (i.getBuySell().equals("S")) {
@@ -93,12 +90,6 @@ public class ETFInvestmentServiceImpl implements ETFInvestmentService {
         return investmentMap;
     }
 
-    @Transactional
-    @Override
-    public void updateETFPrices() {
-        List<ETF> etfList = this.etfRepository.findAllByOrderByShortNameAsc();
-        this.etfapiService.updateETFPrices(etfList);
-    }
 
     @Transactional
     @Override

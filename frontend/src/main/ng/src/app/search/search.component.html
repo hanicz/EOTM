@@ -4,7 +4,7 @@
         <div class="grid">
             <div class="col-2 ml-4">
                 <p-dropdown class="searchDropdown" [options]="exchanges" optionLabel="Name" optionValue="Code" [virtualScroll]="true" [itemSize]="31" [filter]="true"
-                    (onChange)="exchangeChanged($event)" [(ngModel)]="globals.selectedExchange" placeholder="Select an Exchange" [style]="{'width':'100%'}">
+                    (onChange)="exchangeChanged($event)" [(ngModel)]="globals.selectedExchange" placeholder="Select an Exchange" [style]="{'width':'100%'}" [dropdownIcon]="'pi pi-spinner pi-spin'">
                 </p-dropdown>
             </div>
             <div class="col-4 ml-4">

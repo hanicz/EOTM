@@ -32,30 +32,6 @@ public class InvestmentController {
         return new ResponseEntity<List<InvestmentDTO>>(this.investmentService.getInvestments(user.getId()), HttpStatus.OK);
     }
 
-    @PostMapping("/currency")
-    public ResponseEntity<List<InvestmentDTO>> getInvestmentsWCurr(@AuthenticationPrincipal User user, @RequestBody InvestmentQuery query) {
-        log.trace("Enter getInvestmentsWCurr");
-        return new ResponseEntity<List<InvestmentDTO>>(this.investmentService.getInvestmentsByUserIdWConvCurr(user.getId(), query.getCurrency()), HttpStatus.OK);
-    }
-
-    @GetMapping("/type")
-    public ResponseEntity<List<InvestmentDTO>> getInvestmentsByBuySell(@AuthenticationPrincipal User user, @RequestBody InvestmentQuery query) {
-        log.trace("Enter getInvestmentsByBuySell");
-        return new ResponseEntity<List<InvestmentDTO>>(this.investmentService.getInvestmentsByBuySell(user.getId(), query), HttpStatus.OK);
-    }
-
-    @GetMapping("/date")
-    public ResponseEntity<List<InvestmentDTO>> getInvestmentsByDate(@AuthenticationPrincipal User user, @RequestBody InvestmentQuery query) {
-        log.trace("Enter getInvestmentsByDate");
-        return new ResponseEntity<List<InvestmentDTO>>(this.investmentService.getInvestmentsByDate(user.getId(), query), HttpStatus.OK);
-    }
-
-    @GetMapping("/typeAndDate")
-    public ResponseEntity<List<InvestmentDTO>> getInvestmentsByTypeAndDate(@AuthenticationPrincipal User user, @RequestBody InvestmentQuery query) {
-        log.trace("Enter getInvestmentsByTypeAndDate");
-        return new ResponseEntity<List<InvestmentDTO>>(this.investmentService.getInvestmentsByTypeAndDate(user.getId(), query), HttpStatus.OK);
-    }
-
     @PostMapping("/holding")
     public ResponseEntity<List<InvestmentDTO>> getHoldings(@AuthenticationPrincipal User user, @RequestBody InvestmentQuery query) {
         log.trace("Enter getHoldings");

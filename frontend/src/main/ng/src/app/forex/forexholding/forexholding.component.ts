@@ -14,6 +14,8 @@ export class ForexholdingComponent {
   @Output() dataLoaded = new EventEmitter<ForexTransaction[]>();
   globals: Globals;
 
+  transactionsLoading: boolean = true;
+
   constructor(private forexService: ForexService, globals: Globals) {
     this.globals = globals;
 
@@ -29,6 +31,7 @@ export class ForexholdingComponent {
   private fetchData(): void {
     this.forexService.getHolding().subscribe({
       next: (data) => {
+        this.transactionsLoading = false;
         this.forexTransactions = data;
         this.dataLoaded.emit(this.forexTransactions);
       },

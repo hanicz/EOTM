@@ -1,4 +1,31 @@
-<p-table [value]="investments" styleClass="p-datatable-striped" responsiveLayout="scroll">
+<p-table [value]="[{}]" styleClass="p-datatable-striped" responsiveLayout="scroll" *ngIf="investmentsLoading">
+    <ng-template pTemplate="header">
+        <tr>
+            <th>Stock Name</th>
+            <th>Quantity</th>
+            <th>Spent</th>
+            <th>Average</th>
+            <th>Worth</th>
+            <th>Price</th>
+            <th>Profit</th>
+            <th>%</th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body">
+        <tr *ngFor="let item of [].constructor(4);">
+            <td><p-skeleton></p-skeleton></td>
+            <td><p-skeleton></p-skeleton></td>
+            <td><p-skeleton></p-skeleton></td>
+            <td><p-skeleton></p-skeleton></td>
+            <td><p-skeleton></p-skeleton></td>
+            <td><p-skeleton></p-skeleton></td>
+            <td><p-skeleton></p-skeleton></td>
+            <td><p-skeleton></p-skeleton></td>
+        </tr>
+    </ng-template>
+</p-table>
+
+<p-table [value]="investments" styleClass="p-datatable-striped" responsiveLayout="scroll" *ngIf="!investmentsLoading">
     <ng-template pTemplate="header">
         <tr>
             <th>Stock Name</th>
@@ -18,14 +45,19 @@
             <td>{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}</td>
             <td>{{investment.amount / investment.quantity | currency : investment.currencyId : 'symbol' : '0.0-3'}}</td>
             <td>{{investment.liveValue | currency : investment.currencyId : 'symbol' : '0.0-2'}}</td>
-            <td>{{investment.liveValue / investment.quantity | currency : investment.currencyId : 'symbol' : '0.0-3'}}</td>
-            <td>
-                <p-tag styleClass="p-mr-2" severity="success" *ngIf="investment.valueDiff > 0" value="{{investment.valueDiff | currency : investment.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
-                <p-tag styleClass="p-mr-2" severity="danger" *ngIf="investment.valueDiff < 0" value="{{investment.valueDiff | currency : investment.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
+            <td>{{investment.liveValue / investment.quantity | currency : investment.currencyId : 'symbol' : '0.0-3'}}
             </td>
             <td>
-                <p-tag styleClass="p-mr-2" severity="success" *ngIf="investment.valueDiff > 0" value="{{(investment.valueDiff / investment.amount * 100 | number : '0.0-1') + '%'}}"></p-tag>
-                <p-tag styleClass="p-mr-2" severity="danger" *ngIf="investment.valueDiff < 0" value="{{(investment.valueDiff / investment.amount * 100 | number : '0.0-1') + '%'}}"></p-tag>
+                <p-tag styleClass="p-mr-2" severity="success" *ngIf="investment.valueDiff > 0"
+                    value="{{investment.valueDiff | currency : investment.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
+                <p-tag styleClass="p-mr-2" severity="danger" *ngIf="investment.valueDiff < 0"
+                    value="{{investment.valueDiff | currency : investment.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
+            </td>
+            <td>
+                <p-tag styleClass="p-mr-2" severity="success" *ngIf="investment.valueDiff > 0"
+                    value="{{(investment.valueDiff / investment.amount * 100 | number : '0.0-1') + '%'}}"></p-tag>
+                <p-tag styleClass="p-mr-2" severity="danger" *ngIf="investment.valueDiff < 0"
+                    value="{{(investment.valueDiff / investment.amount * 100 | number : '0.0-1') + '%'}}"></p-tag>
             </td>
         </tr>
     </ng-template>

@@ -8,7 +8,7 @@ import eye.on.the.money.model.stock.Symbol;
 
 import java.util.List;
 
-public interface StockAPIService {
+public interface EODAPIService {
     public void getLiveValue(List<InvestmentDTO> investmentDTOList);
     public void getStockWatchList(List<StockWatchDTO> stockWatchList);
     public List<EODCandleQuote> getCandleQuoteByShortName(String shortname, int months);

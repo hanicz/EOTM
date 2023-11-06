@@ -81,26 +81,35 @@ public class WatchListServiceImpl implements WatchlistService {
 
     @Transactional
     @Override
-    public void deleteStockWatchById(Long userid, Long id){
+    public void deleteStockWatchById(Long userid, Long id) {
         this.stockWatchRepository.deleteByIdAndUser_Id(id, userid);
     }
 
     @Transactional
     @Override
-    public void deleteCryptoWatchById(Long userid, Long id){
+    public void deleteCryptoWatchById(Long userid, Long id) {
         this.cryptoWatchRepository.deleteByIdAndUser_Id(id, userid);
     }
 
     @Transactional
     @Override
-    public void deleteForexWatchById(Long userid, Long id){
+    public void deleteForexWatchById(Long userid, Long id) {
         this.forexWatchRepository.deleteByIdAndUser_Id(id, userid);
     }
 
     @Transactional
     @Override
-    public StockWatchDTO createNewStockWatch(User user, String stockId){
-        Stock stock = this.stockRepository.findById(stockId).orElseThrow(NoSuchElementException::new);
+    public StockWatchDTO createNewStockWatch(User user, Stock wStock) {
+        Stock stock = this.stockRepository.findById(wStock.getShortName().toLowerCase()).orElseGet(() -> {
+                    Stock newStock = Stock.builder()
+                            .id(wStock.getShortName().toLowerCase())
+                            .exchange(wStock.getExchange())
+                            .shortName(wStock.getShortName().toUpperCase())
+                            .name(wStock.getName())
+                            .build();
+                    return this.stockRepository.save(newStock);
+                }
+        );
 
         TickerWatch tickerWatch = TickerWatch.builder().stock(stock).user(user).build();
         this.stockWatchRepository.save(tickerWatch);
@@ -109,7 +118,7 @@ public class WatchListServiceImpl implements WatchlistService {
 
     @Transactional
     @Override
-    public CryptoWatchDTO createNewCryptoWatch(User user, String coinId){
+    public CryptoWatchDTO createNewCryptoWatch(User user, String coinId) {
         Coin coin = this.coinRepository.findById(coinId).orElseThrow(NoSuchElementException::new);
 
         CryptoWatch cryptoWatch = CryptoWatch.builder().coin(coin).user(user).build();

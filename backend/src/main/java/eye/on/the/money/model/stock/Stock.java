@@ -11,6 +11,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Slf4j
+@Builder
 @ToString
 @Table(name = "EOTM_STOCK")
 @AllArgsConstructor

@@ -14,6 +14,8 @@ export class HoldingComponent implements OnInit {
   @Output() dataLoaded = new EventEmitter<Investment[]>();
   globals: Globals;
 
+  investmentsLoading: boolean = true;
+
   constructor(private stockService: StockService, globals: Globals) {
     this.globals = globals;
 
@@ -29,6 +31,7 @@ export class HoldingComponent implements OnInit {
   private fetchData(): void {
     this.stockService.getHolding(this.globals.stockCurrency).subscribe({
       next: (data) => {
+        this.investmentsLoading = false;
         this.investments = data;
         this.dataLoaded.emit(this.investments);
       },

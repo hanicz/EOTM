@@ -1,4 +1,31 @@
-<p-table [value]="forexTransactions" styleClass="p-datatable-striped" responsiveLayout="scroll">
+<p-table [value]="[{}]" styleClass="p-datatable-striped" responsiveLayout="scroll" *ngIf="transactionsLoading">
+    <ng-template pTemplate="header">
+        <tr>
+            <th>From</th>
+            <th>To</th>
+            <th>Spent</th>
+            <th>Worth</th>
+            <th>Rate</th>
+            <th>Live Rate</th>
+            <th>Profit</th>
+            <th>%</th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-forexTransaction>
+        <tr *ngFor="let item of [].constructor(4);">
+            <td><p-skeleton></p-skeleton></td>
+            <td><p-skeleton></p-skeleton></td>
+            <td><p-skeleton></p-skeleton></td>
+            <td><p-skeleton></p-skeleton></td>
+            <td><p-skeleton></p-skeleton></td>
+            <td><p-skeleton></p-skeleton></td>
+            <td><p-skeleton></p-skeleton></td>
+            <td><p-skeleton></p-skeleton></td>
+        </tr>
+    </ng-template>
+</p-table>
+
+<p-table [value]="forexTransactions" styleClass="p-datatable-striped" responsiveLayout="scroll" *ngIf="!transactionsLoading">
     <ng-template pTemplate="header">
         <tr>
             <th>From</th>

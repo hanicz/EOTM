@@ -14,6 +14,8 @@ export class EtfholdingComponent implements OnInit {
   @Output() dataLoaded = new EventEmitter<ETFInvestment[]>();
   globals: Globals;
 
+  investmentsLoading: boolean = true;
+
   constructor(private etfService: EtfService, globals: Globals) {
     this.globals = globals;
 
@@ -29,6 +31,7 @@ export class EtfholdingComponent implements OnInit {
   private fetchData(): void {
     this.etfService.getHolding(this.globals.etfCurrency).subscribe({
       next: (data) => {
+        this.investmentsLoading = false;
         this.investments = data;
         this.dataLoaded.emit(this.investments);
       },

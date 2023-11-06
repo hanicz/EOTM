@@ -1,5 +1,5 @@
 export interface Symbol {
-    name: string;
-    code: string;
-    type: string;
+    Name: string;
+    Code: string;
+    Type: string;
 }

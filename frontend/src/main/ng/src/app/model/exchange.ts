@@ -1,5 +1,5 @@
 export interface Exchange {
-    name: string;
-    code: string;
-    currency: string;
+    Name: string;
+    Code: string;
+    Currency: string;
 }

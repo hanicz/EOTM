@@ -15,6 +15,7 @@ export class CryptoholdingComponent implements OnInit {
   @Output() dataLoaded = new EventEmitter<Transaction[]>();
   globals: Globals;
   assetUrl: string;
+  transactionsLoading: boolean = true;
 
   constructor(private cryptoService: CryptoService, globals: Globals) {
     this.globals = globals;
@@ -31,6 +32,7 @@ export class CryptoholdingComponent implements OnInit {
   private fetchData(): void {
     this.cryptoService.getHoldings(this.globals.cryptoCurrency).subscribe({
       next: (data) => {
+        this.transactionsLoading = false;
         this.transactions = data;
         this.dataLoaded.emit(this.transactions);
       },

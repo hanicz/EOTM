@@ -4,6 +4,7 @@ import eye.on.the.money.dto.out.CryptoWatchDTO;
 import eye.on.the.money.dto.out.ForexWatchDTO;
 import eye.on.the.money.dto.out.StockWatchDTO;
 import eye.on.the.money.model.User;
+import eye.on.the.money.model.stock.Stock;
 import eye.on.the.money.service.WatchlistService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,10 +65,10 @@ public class WatchlistController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PostMapping("/stock/{stockId}")
-    public ResponseEntity<StockWatchDTO> createStockWatch(@AuthenticationPrincipal User user, @PathVariable String stockId) {
+    @PostMapping("/stock")
+    public ResponseEntity<StockWatchDTO> createStockWatch(@AuthenticationPrincipal User user, @RequestBody Stock wStock) {
         log.trace("Enter createStockWatch");
-        return new ResponseEntity<StockWatchDTO>(this.watchlistService.createNewStockWatch(user, stockId), HttpStatus.OK);
+        return new ResponseEntity<StockWatchDTO>(this.watchlistService.createNewStockWatch(user, wStock), HttpStatus.OK);
     }
 
     @PostMapping("/crypto/{coinId}")

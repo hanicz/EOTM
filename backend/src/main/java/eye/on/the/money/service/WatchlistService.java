@@ -4,6 +4,7 @@ import eye.on.the.money.dto.out.CryptoWatchDTO;
 import eye.on.the.money.dto.out.ForexWatchDTO;
 import eye.on.the.money.dto.out.StockWatchDTO;
 import eye.on.the.money.model.User;
+import eye.on.the.money.model.stock.Stock;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ public interface WatchlistService {
 
     public void deleteForexWatchById(Long userid, Long id);
 
-    public StockWatchDTO createNewStockWatch(User user, String stockId);
+    public StockWatchDTO createNewStockWatch(User user, Stock wStock);
 
     public CryptoWatchDTO createNewCryptoWatch(User user, String coinId);
 }

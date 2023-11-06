@@ -1,27 +1,48 @@
 <div>
     <div class="grid justify-content-center pt-3">
-        
-        
-        <div *ngFor="let new of news"
-            class="col-5 shadow-5 mr-3 mb-3 border-orange-100 surface-overlay border-1 border-round"
-            style="background-color: #fffaf5;">
-            <a href="{{new.url}}" target="_blank" style="color: inherit; text-decoration: inherit;">
+        <ng-template [ngIf]="newsLoading">
+            <div *ngFor="let item of [].constructor(4);"
+                class="col-5 shadow-5 mr-3 mb-3 border-orange-100 surface-overlay border-1 border-round"
+                style="background-color: #fffaf5;">
                 <div class="grid">
-                    <div class="col-2 col-offset-1 font-italic">{{new.datetime * 1000 | date: 'yyyy-MM-dd'}}
+                    <div class="col-2 col-offset-1"><p-skeleton></p-skeleton></div>
+                    <div class="col-2 col-offset-6"><p-skeleton></p-skeleton></div>
+                    <div class="col-10 col-offset-1"><p-skeleton
+                            styleClass="mb-2"></p-skeleton><p-skeleton></p-skeleton>
                     </div>
-                    <div class="col-1 col-offset-7 text-sm">{{new.source}}</div>
-                </div>
-                <div class="grid">
-                    <div class="col-11 col-offset-1 font-bold">{{new.headline}}</div>
-                </div>
-                <div class="grid">
-                    <div class="col-2 col-offset-1">
-                        <p-image *ngIf="new.image != undefined && new.image != ''" src="{{new.image}}"  height="80" width="150"></p-image>
+                    <div class="col-3 col-offset-1"><p-skeleton height="80px"></p-skeleton></div>
+                    <div class="col-6 col-offset-1">
+                        <p-skeleton styleClass="mb-2"></p-skeleton>
+                        <p-skeleton styleClass="mb-2"></p-skeleton>
+                        <p-skeleton styleClass="mb-2"></p-skeleton>
                     </div>
-                    <div class="col-6 col-offset-2 text-sm">{{(new.summary.length > 250) ? (new.summary | slice:
-                        0:250) + '...' : new.summary }}</div>
                 </div>
-            </a>
-        </div>
+            </div>
+        </ng-template>
+
+        <ng-template [ngIf]="!newsLoading">
+            <div *ngFor="let new of news"
+                class="col-5 shadow-5 mr-3 mb-3 border-orange-100 surface-overlay border-1 border-round"
+                style="background-color: #fffaf5;">
+                <a href="{{new.url}}" target="_blank" style="color: inherit; text-decoration: inherit;">
+                    <div class="grid">
+                        <div class="col-2 col-offset-1 font-italic">{{new.datetime * 1000 | date: 'yyyy-MM-dd'}}
+                        </div>
+                        <div class="col-1 col-offset-7 text-sm">{{new.source}}</div>
+                    </div>
+                    <div class="grid">
+                        <div class="col-11 col-offset-1 font-bold">{{new.headline}}</div>
+                    </div>
+                    <div class="grid">
+                        <div class="col-2 col-offset-1">
+                            <p-image *ngIf="new.image != undefined && new.image != ''" src="{{new.image}}" height="80"
+                                width="150"></p-image>
+                        </div>
+                        <div class="col-6 col-offset-2 text-sm">{{(new.summary.length > 250) ? (new.summary | slice:
+                            0:250) + '...' : new.summary }}</div>
+                    </div>
+                </a>
+            </div>
+        </ng-template>
     </div>
 </div>

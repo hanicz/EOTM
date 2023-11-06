@@ -58,6 +58,9 @@ export class SearchComponent implements OnInit {
 
   newsType = '';
 
+  exchangesLoading: boolean = true;
+  stocksLoading: boolean = false;
+
   @ViewChild("chart") chart: ChartComponent | any;
   public chartOptions: Partial<ChartOptions> | any;
   @ViewChild("recChart") recChart: ChartComponent | any;
@@ -84,6 +87,7 @@ export class SearchComponent implements OnInit {
 
     this.stockService.getAllExchanges().subscribe({
       next: (data) => {
+        this.exchangesLoading = false;
         this.exchanges = data;
       }
     });
@@ -229,8 +233,10 @@ export class SearchComponent implements OnInit {
   }
 
   exchangeChanged(event: any) {
+    this.stocksLoading = true;
     this.stockService.getAllSymbols(this.globals.selectedExchange).subscribe({
       next: (data) => {
+        this.stocksLoading = false;
         this.symbols = data;
       }
     });

@@ -12,7 +12,7 @@ import eye.on.the.money.model.stock.Exchange;
 import eye.on.the.money.model.stock.Symbol;
 import eye.on.the.money.repository.ConfigRepository;
 import eye.on.the.money.repository.CredentialRepository;
-import eye.on.the.money.service.api.StockAPIService;
+import eye.on.the.money.service.api.EODAPIService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class StockAPIServiceImpl implements StockAPIService {
+public class EODAPIServiceImpl implements EODAPIService {
 
     @Autowired
     private CredentialRepository credentialRepository;

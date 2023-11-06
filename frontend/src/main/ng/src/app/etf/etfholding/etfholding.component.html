@@ -1,4 +1,31 @@
-<p-table [value]="investments" styleClass="p-datatable-striped" responsiveLayout="scroll">
+<p-table [value]="[{}]" styleClass="p-datatable-striped" responsiveLayout="scroll" *ngIf="investmentsLoading">
+    <ng-template pTemplate="header">
+        <tr>
+            <th>ETF Name</th>
+            <th>Quantity</th>
+            <th>Spent</th>
+            <th>Average</th>
+            <th>Worth</th>
+            <th>Price</th>
+            <th>Profit</th>
+            <th>%</th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body">
+        <tr *ngFor="let item of [].constructor(4);">
+            <td><p-skeleton></p-skeleton></td>
+            <td><p-skeleton></p-skeleton></td>
+            <td><p-skeleton></p-skeleton></td>
+            <td><p-skeleton></p-skeleton></td>
+            <td><p-skeleton></p-skeleton></td>
+            <td><p-skeleton></p-skeleton></td>
+            <td><p-skeleton></p-skeleton></td>
+            <td><p-skeleton></p-skeleton></td>
+        </tr>
+    </ng-template>
+</p-table>
+
+<p-table [value]="investments" styleClass="p-datatable-striped" responsiveLayout="scroll" *ngIf="!investmentsLoading">
     <ng-template pTemplate="header">
         <tr>
             <th>ETF Name</th>

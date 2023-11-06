@@ -12,6 +12,8 @@ export class NewsComponent implements OnInit {
   news: News[] = [];
   @Input() type = '';
 
+  newsLoading: boolean = true;
+
   constructor(private newsService: NewsService) {
   }
 
@@ -19,9 +21,11 @@ export class NewsComponent implements OnInit {
   }
 
   ngOnChanges() {
+    this.newsLoading = true;
     if (this.type != undefined && this.type != '') {
       this.newsService.getNews(this.type).subscribe({
         next: (data) => {
+          this.newsLoading = false;
           this.news = data;
         }
       });

@@ -10,6 +10,8 @@ import { StockService } from '../service/stock.service';
 import { Stock } from '../model/stock';
 import { CryptoService } from '../service/crypto.service';
 import { environment } from '../../environments/environment';
+import { Symbol } from '../model/symbol';
+import { Exchange } from '../model/exchange';
 
 @Component({
   selector: 'app-watchlist',
@@ -22,14 +24,20 @@ export class WatchlistComponent implements OnInit {
   cryptoWatchList: CryptoWatch[] = [];
   stocks: Stock[] = [];
   cryptos: Crypto[] = [];
+  symbols: Symbol[] = [];
+  exchanges: Exchange[] = [];
   subscription: Subscription;
   globals: Globals;
   display: boolean = false;
   assetUrl: string;
+  selectedStock: Symbol = {} as Symbol;
+  selectedExchange: Exchange = {} as Exchange;
 
   forexLoading: boolean = false;
   stockLoading: boolean = false;
   cryptoLoading: boolean = false;
+  exchangesLoading: boolean = true;
+  stocksLoading: boolean = false;
 
 
   constructor(private watchlistService: WatchlistService,
@@ -41,6 +49,14 @@ export class WatchlistComponent implements OnInit {
     this.assetUrl = environment.assets_url;
     this.globals = globals;
     this.fetchData();
+
+    this.stockService.getAllExchanges().subscribe({
+      next: (data) => {
+        this.exchangesLoading = false;
+        this.exchanges = data;
+      }
+    });
+    
 
     const interv = interval(60000);
     this.subscription = interv.subscribe(this.fetchData);
@@ -105,21 +121,26 @@ export class WatchlistComponent implements OnInit {
     });
   }
 
-  checkStockContain(shortName: string) {
-    return this.globals.stockWatchList.some(s => s.stockShortName === shortName)
+  checkStockContain() {
+    return this.globals.stockWatchList.some(s => s.stockShortName === this.selectedStock.Code)
   }
 
   checkCryptoContain(name: string) {
     return this.cryptoWatchList.some(c => c.name === name)
   }
 
-  deleteStockWatch(shortName: string) {
-    let id = this.globals.stockWatchList.find(s => s.stockShortName === shortName);
+  deleteStockWatch() {
+    let id = this.globals.stockWatchList.find(s => s.stockShortName === this.selectedStock.Code);
     this.deleteWatch(`/stock/${id?.tickerWatchId}`);
   }
 
-  createStockWatch(id: string) {
-    this.createWatch(`/stock/${id}`);
+  createStockWatch() {
+    this.watchlistService.createNewStockWatch(this.selectedStock, this.selectedExchange).subscribe({
+      next: () => {
+        this.display = false;
+        this.fetchData();
+      }
+    });
   }
 
   deleteCryptoWatch(name: string) {
@@ -145,6 +166,16 @@ export class WatchlistComponent implements OnInit {
       next: () => {
         this.display = false;
         this.fetchData();
+      }
+    });
+  }
+
+  exchangeChanged(event: any) {
+    this.stocksLoading = true;
+    this.stockService.getAllSymbols(this.selectedExchange.Code).subscribe({
+      next: (data) => {
+        this.stocksLoading = false;
+        this.symbols = data;
       }
     });
   }

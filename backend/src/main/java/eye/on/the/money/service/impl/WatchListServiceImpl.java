@@ -16,8 +16,7 @@ import eye.on.the.money.repository.watchlist.ForexWatchRepository;
 import eye.on.the.money.repository.watchlist.StockWatchRepository;
 import eye.on.the.money.service.WatchlistService;
 import eye.on.the.money.service.api.CryptoAPIService;
-import eye.on.the.money.service.api.CurrencyConverter;
-import eye.on.the.money.service.api.StockAPIService;
+import eye.on.the.money.service.api.EODAPIService;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +43,7 @@ public class WatchListServiceImpl implements WatchlistService {
     private CryptoAPIService cryptoAPIService;
 
     @Autowired
-    private StockAPIService stockAPIService;
+    private EODAPIService eodAPIService;
 
     @Autowired
     private StockRepository stockRepository;
@@ -54,9 +53,6 @@ public class WatchListServiceImpl implements WatchlistService {
 
     @Autowired
     private ModelMapper modelMapper;
-
-    @Autowired
-    private CurrencyConverter currencyConverter;
 
     @Override
     public List<CryptoWatchDTO> getCryptoWatchlistByUserId(Long userId, String currency) {
@@ -68,14 +64,14 @@ public class WatchListServiceImpl implements WatchlistService {
     @Override
     public List<StockWatchDTO> getStockWatchlistByUserId(Long userId) {
         List<StockWatchDTO> stockList = this.stockWatchRepository.findByUser_IdOrderByStockShortName(userId).stream().map(this::convertToStockWatchDTO).collect(Collectors.toList());
-        this.stockAPIService.getStockWatchList(stockList);
+        this.eodAPIService.getStockWatchList(stockList);
         return stockList;
     }
 
     @Override
     public List<ForexWatchDTO> getForexWatchlistByUserId(Long userId) {
         List<ForexWatchDTO> forexList = this.forexWatchRepository.findByUser_Id(userId).stream().map(this::convertToForexDTO).collect(Collectors.toList());
-        this.currencyConverter.forexWatchList(forexList);
+        this.eodAPIService.getForexWatchList(forexList);
         return forexList;
     }
 

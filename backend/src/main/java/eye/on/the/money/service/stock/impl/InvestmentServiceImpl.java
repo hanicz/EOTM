@@ -10,10 +10,9 @@ import eye.on.the.money.model.stock.StockPayment;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.stock.InvestmentRepository;
 import eye.on.the.money.repository.stock.StockRepository;
+import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.stock.InvestmentService;
 import eye.on.the.money.service.stock.StockPaymentService;
-import eye.on.the.money.service.api.CurrencyConverter;
-import eye.on.the.money.service.api.StockAPIService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -44,9 +43,6 @@ public class InvestmentServiceImpl implements InvestmentService {
     private InvestmentRepository investmentRepository;
 
     @Autowired
-    private CurrencyConverter currencyConverter;
-
-    @Autowired
     private StockRepository stockRepository;
 
     @Autowired
@@ -59,7 +55,7 @@ public class InvestmentServiceImpl implements InvestmentService {
     private ModelMapper modelMapper;
 
     @Autowired
-    private StockAPIService stockAPIService;
+    private EODAPIService eodAPIService;
 
     @Override
     public List<InvestmentDTO> getInvestments(Long userId) {
@@ -77,14 +73,14 @@ public class InvestmentServiceImpl implements InvestmentService {
         Map<String, InvestmentDTO> investmentMap = this.getCalculated(userId, query);
         List<InvestmentDTO> investmentDTOList = (new ArrayList<InvestmentDTO>(investmentMap.values()))
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
-        this.stockAPIService.getLiveValue(investmentDTOList);
+        this.eodAPIService.getLiveValue(investmentDTOList);
         return investmentDTOList;
     }
 
     @Override
     public List<InvestmentDTO> getAllPositions(Long userId, InvestmentQuery query) {
         Map<String, InvestmentDTO> investmentMap = this.getCalculated(userId, query);
-        return new ArrayList<>((new ArrayList<InvestmentDTO>(investmentMap.values())));
+        return new ArrayList<>((new ArrayList<>(investmentMap.values())));
     }
 
     private Map<String, InvestmentDTO> getCalculated(Long userId, InvestmentQuery query) {

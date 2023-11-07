@@ -6,6 +6,5 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface StockAlertRepository extends CrudRepository<StockAlert, Long> {
-
-    List<StockAlert> findByUser_Id(Long userId);
+    List<StockAlert> findAll();
 }

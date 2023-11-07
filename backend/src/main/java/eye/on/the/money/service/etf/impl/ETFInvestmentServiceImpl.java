@@ -10,10 +10,9 @@ import eye.on.the.money.model.Currency;
 import eye.on.the.money.repository.etf.ETFInvestmentRepository;
 import eye.on.the.money.repository.etf.ETFRepository;
 import eye.on.the.money.repository.forex.CurrencyRepository;
+import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.etf.ETFInvestmentService;
 import eye.on.the.money.service.etf.ETFPaymentService;
-import eye.on.the.money.service.api.CurrencyConverter;
-import eye.on.the.money.service.api.ETFAPIService;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.modelmapper.ModelMapper;
@@ -40,10 +39,7 @@ public class ETFInvestmentServiceImpl implements ETFInvestmentService {
     private CurrencyRepository currencyRepository;
 
     @Autowired
-    private ETFAPIService etfapiService;
-
-    @Autowired
-    private CurrencyConverter currencyConverter;
+    private EODAPIService eodAPIService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -66,7 +62,7 @@ public class ETFInvestmentServiceImpl implements ETFInvestmentService {
         Map<String, ETFInvestmentDTO> investmentMap = this.getCalculated(userId, query);
         List<ETFInvestmentDTO> etfInvestmentDTOList = (new ArrayList<ETFInvestmentDTO>(investmentMap.values()))
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
-        this.etfapiService.getLiveValue(etfInvestmentDTOList);
+        this.eodAPIService.getETFLiveValue(etfInvestmentDTOList);
 
         return etfInvestmentDTOList;
     }

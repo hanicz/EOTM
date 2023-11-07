@@ -2,8 +2,8 @@ package eye.on.the.money.service.stock.impl;
 
 import eye.on.the.money.model.stock.*;
 import eye.on.the.money.repository.stock.StockRepository;
+import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.stock.StockService;
-import eye.on.the.money.service.api.StockAPIService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ public class StockServiceImpl implements StockService {
     private StockRepository stockRepository;
 
     @Autowired
-    private StockAPIService stockAPIService;
+    private EODAPIService eodAPIService;
 
     @Override
     public List<Stock> getAllStocks() {
@@ -29,19 +29,19 @@ public class StockServiceImpl implements StockService {
     @Override
     public List<Symbol> getAllSymbols(String exchange) {
         log.trace("Enter getAllSymbols");
-        return this.stockAPIService.getAllSymbols(exchange);
+        return this.eodAPIService.getAllSymbols(exchange);
     }
 
     @Override
     public List<Exchange> getAllExchanges() {
         log.trace("Enter getAllExchanges");
-        return this.stockAPIService.getAllExchanges();
+        return this.eodAPIService.getAllExchanges();
     }
 
     @Override
     public CandleQuote getCandleQuoteByShortName(String shortName, int months) {
         log.trace("Enter getCandleQuoteByShortName");
-        List<EODCandleQuote> eodList = this.stockAPIService.getCandleQuoteByShortName(shortName, months);
+        List<EODCandleQuote> eodList = this.eodAPIService.getCandleQuoteByShortName(shortName, months);
 
         Double[] c = new Double[eodList.size()];
         Double[] o = new Double[eodList.size()];

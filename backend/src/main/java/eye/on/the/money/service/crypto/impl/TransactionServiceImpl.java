@@ -13,7 +13,6 @@ import eye.on.the.money.repository.crypto.TransactionRepository;
 import eye.on.the.money.service.crypto.PaymentService;
 import eye.on.the.money.service.crypto.TransactionService;
 import eye.on.the.money.service.api.CryptoAPIService;
-import eye.on.the.money.service.api.CurrencyConverter;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -40,54 +39,41 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Autowired
     private TransactionRepository transactionRepository;
-
     @Autowired
     private PaymentService paymentService;
-
     @Autowired
     private CurrencyRepository currencyRepository;
-
-    @Autowired
-    private CurrencyConverter currencyConverter;
-
     @Autowired
     private CoinRepository coinRepository;
-
     @Autowired
     private ModelMapper modelMapper;
-
     @Autowired
     private CryptoAPIService cryptoAPIService;
 
     @Override
     public List<TransactionDTO> getTransactionsByUserId(Long userId) {
-        return this.transactionRepository.findByUser_IdOrderByTransactionDate(userId).stream().map(this::convertToTransactionDTO).collect(Collectors.toList());
+        return this.transactionRepository.findByUser_IdOrderByTransactionDate(userId).stream()
+                .map(this::convertToTransactionDTO).collect(Collectors.toList());
     }
 
     @Override
     public List<TransactionDTO> getTransactionsByUserIdWConvCurr(Long userId, String currency) {
-        List<TransactionDTO> transactions =
-                this.transactionRepository.findByUser_IdOrderByTransactionDate(userId).stream().map(this::convertToTransactionDTO).collect(Collectors.toList());
-        this.currencyConverter.changeTransactionsCurrency(transactions, currency);
-        return transactions;
+        return this.transactionRepository.findByUser_IdOrderByTransactionDate(userId).stream()
+                        .map(this::convertToTransactionDTO).collect(Collectors.toList());
     }
 
     @Override
     public List<TransactionDTO> getAllPositions(Long userId, TransactionQuery query) {
-        Map<String, TransactionDTO> transactionMap = this.getCalculated(userId, query);
-        return (new ArrayList<>(transactionMap.values())).stream().map(transaction -> {
-            transaction.setCurrencyId(query.getCurrency());
-            return transaction;
-        }).collect(Collectors.toList());
+        Map<String, TransactionDTO> transactionMap = this.getCalculated(userId);
+        return new ArrayList<>((new ArrayList<>(transactionMap.values())));
     }
 
     @Override
     public List<TransactionDTO> getCurrentHoldings(Long userId, TransactionQuery query) {
-        Map<String, TransactionDTO> transactionMap = this.getCalculated(userId, query);
+        Map<String, TransactionDTO> transactionMap = this.getCalculated(userId);
         List<TransactionDTO> transactionDTOList = (new ArrayList<>(transactionMap.values()))
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
         this.cryptoAPIService.getLiveValue(transactionDTOList, query.getCurrency());
-        this.currencyConverter.changeTransactionsCurrency(transactionDTOList, query.getCurrency());
         return transactionDTOList;
     }
 
@@ -145,9 +131,9 @@ public class TransactionServiceImpl implements TransactionService {
         return this.convertToTransactionDTO(transaction);
     }
 
-    private Map<String, TransactionDTO> getCalculated(Long userId, TransactionQuery query) {
-        List<TransactionDTO> transactions = this.transactionRepository.findByUser_IdOrderByTransactionDate(userId).stream().map(this::convertToTransactionDTO).collect(Collectors.toList());
-        this.currencyConverter.changeTransactionsCurrency(transactions, query.getCurrency());
+    private Map<String, TransactionDTO> getCalculated(Long userId) {
+        List<TransactionDTO> transactions = this.transactionRepository.findByUser_IdOrderByTransactionDate(userId).stream()
+                .map(this::convertToTransactionDTO).collect(Collectors.toList());
         Map<String, TransactionDTO> transactionMap = new HashMap<>();
         for (TransactionDTO t : transactions) {
             if (t.getBuySell().equals("S")) {

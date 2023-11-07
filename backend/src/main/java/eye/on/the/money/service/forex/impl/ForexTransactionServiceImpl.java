@@ -6,7 +6,7 @@ import eye.on.the.money.model.User;
 import eye.on.the.money.model.forex.ForexTransaction;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.forex.ForexTransactionRepository;
-import eye.on.the.money.service.api.CurrencyConverter;
+import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.forex.ForexTransactionService;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -30,7 +30,7 @@ public class ForexTransactionServiceImpl implements ForexTransactionService {
     private ModelMapper modelMapper;
 
     @Autowired
-    private CurrencyConverter currencyConverter;
+    private EODAPIService eodAPIService;
 
     @Override
     public List<ForexTransactionDTO> getForexTransactionsByUserId(Long userId) {
@@ -91,7 +91,7 @@ public class ForexTransactionServiceImpl implements ForexTransactionService {
     public List<ForexTransactionDTO> getAllForexHoldings(Long userId) {
         Map<String, ForexTransactionDTO> forexTransactionMap = this.getCalculated(userId);
         List<ForexTransactionDTO> forexTransactions = new ArrayList<>(forexTransactionMap.values());
-        this.currencyConverter.changeLiveValueCurrencyForForexTransactions(forexTransactions);
+        this.eodAPIService.changeLiveValueCurrencyForForexTransactions(forexTransactions);
         return forexTransactions;
     }
 

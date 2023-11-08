@@ -1,6 +1,7 @@
 package eye.on.the.money.alert;
 
-import eye.on.the.money.dto.out.InvestmentDTO;
+import com.fasterxml.jackson.databind.JsonNode;
+import eye.on.the.money.mail.impl.EmailServiceImpl;
 import eye.on.the.money.model.alert.StockAlert;
 import eye.on.the.money.repository.alert.StockAlertRepository;
 import eye.on.the.money.service.api.EODAPIService;
@@ -9,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -22,19 +25,56 @@ public class AlertService {
     @Autowired
     private EODAPIService eodAPIService;
 
+    @Autowired
+    private EmailServiceImpl emailServiceImpl;
+
     @Scheduled(fixedDelay = 100000)
-    public void scheduleFixedDelayTask() {
-
+    public void checkAlerts() {
+        log.trace("Enter");
         List<StockAlert> alertList = this.stockAlertRepository.findAll();
+        String joinedList = alertList.stream().map(StockAlert::getStock).collect(Collectors.toSet())
+                .stream().map(s -> (s.getShortName() + "." + s.getExchange())).collect(Collectors.joining(","));
 
-        List<InvestmentDTO> stocks = alertList.stream().map(StockAlert::getStock).collect(Collectors.toSet())
-                .stream().map(s -> InvestmentDTO.builder().shortName(s.getShortName()).exchange(s.getExchange()).quantity(1).amount(1.0).build())
-                .collect(Collectors.toList());
+        JsonNode responseBody = this.eodAPIService.getLiveValue(joinedList, "/real-time/stock/?api_token={0}&fmt=json&s={1}");
+        Map<String, JsonNode> stockMap = new HashMap<>();
 
-        this.eodAPIService.getLiveValue(stocks);
+        for (JsonNode stock : responseBody) {
+            stockMap.put(stock.findValue("code").textValue(), stock);
+        }
+        this.sendAlerts(alertList, stockMap);
+    }
 
-        for(StockAlert sa : alertList) {
-
+    private void sendAlerts(List<StockAlert> alertList, Map<String, JsonNode> stockMap) {
+        for (StockAlert alert : alertList) {
+            String ticker = alert.getStock().getShortName() + "." + alert.getStock().getExchange();
+            switch (alert.getType()) {
+                case "PERCENT_OVER":
+                    if (stockMap.get(ticker).findValue("change").asDouble() >= alert.getValuePoint()) {
+                        this.emailServiceImpl.sendMail(alert.getUser().getEmail(), ticker + " is over " + alert.getValuePoint() + "%");
+                        this.stockAlertRepository.delete(alert);
+                    }
+                    break;
+                case "PERCENT_UNDER":
+                    if (stockMap.get(ticker).findValue("change").asDouble() <= alert.getValuePoint()) {
+                        this.emailServiceImpl.sendMail(alert.getUser().getEmail(), ticker + " is under " + alert.getValuePoint() + "%");
+                        this.stockAlertRepository.delete(alert);
+                    }
+                    break;
+                case "PRICE_OVER":
+                    if (stockMap.get(ticker).findValue("close").asDouble() >= alert.getValuePoint()) {
+                        this.emailServiceImpl.sendMail(alert.getUser().getEmail(), ticker + " is over " + alert.getValuePoint() + "price point");
+                        this.stockAlertRepository.delete(alert);
+                    }
+                    break;
+                case "PRICE_UNDER":
+                    if (stockMap.get(ticker).findValue("close").asDouble() <= alert.getValuePoint()) {
+                        this.emailServiceImpl.sendMail(alert.getUser().getEmail(), ticker + " is under " + alert.getValuePoint() + "price point");
+                        this.stockAlertRepository.delete(alert);
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

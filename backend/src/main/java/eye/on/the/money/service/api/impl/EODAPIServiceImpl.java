@@ -3,7 +3,6 @@ package eye.on.the.money.service.api.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import eye.on.the.money.dto.out.*;
 import eye.on.the.money.exception.APIException;
 import eye.on.the.money.model.stock.EODCandleQuote;
 import eye.on.the.money.model.stock.Exchange;
@@ -21,7 +20,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -32,87 +30,9 @@ public class EODAPIServiceImpl extends APIService implements EODAPIService {
 
     @Override
     @Retryable(value = APIException.class, maxAttempts = 3)
-    public void getLiveValue(List<InvestmentDTO> investmentDTOList) {
+    public JsonNode getLiveValue(String tickerList, String path) {
         log.trace("Enter");
-        String joinedList = investmentDTOList.stream().map(i -> (i.getShortName() + "." + i.getExchange())).collect(Collectors.joining(","));
-
-        JsonNode responseBody = this.callStockAPI(this.createURL(EODAPIServiceImpl.API, "/real-time/stock/?api_token={0}&fmt=json&s={1}", joinedList));
-        for (JsonNode stock : responseBody) {
-            Optional<InvestmentDTO> investmentDTO = investmentDTOList.stream().filter
-                    (i -> (i.getShortName() + "." + i.getExchange()).equals(stock.findValue("code").textValue())).findFirst();
-            if (investmentDTO.isEmpty()) continue;
-            investmentDTO.get().setLiveValue(stock.findValue("close").doubleValue() * investmentDTO.get().getQuantity());
-            investmentDTO.get().setValueDiff(investmentDTO.get().getLiveValue() - investmentDTO.get().getAmount());
-        }
-    }
-
-    @Override
-    @Retryable(value = APIException.class, maxAttempts = 3)
-    public void getETFLiveValue(List<ETFInvestmentDTO> investmentDTOList) {
-        log.trace("Enter");
-        String joinedList = investmentDTOList.stream().map(i -> (i.getShortName() + "." + i.getExchange())).collect(Collectors.joining(","));
-
-        JsonNode responseBody = this.callStockAPI(this.createURL(EODAPIServiceImpl.API, "/real-time/etf/?api_token={0}&fmt=json&s={1}", joinedList));
-        for (JsonNode etf : responseBody) {
-            Optional<ETFInvestmentDTO> etfInvestmentDTO = investmentDTOList.stream().filter
-                    (i -> (i.getShortName() + "." + i.getExchange()).equals(etf.findValue("code").textValue())).findFirst();
-            if (etfInvestmentDTO.isEmpty()) continue;
-            etfInvestmentDTO.get().setLiveValue(etf.findValue("close").doubleValue() * etfInvestmentDTO.get().getQuantity());
-            etfInvestmentDTO.get().setValueDiff(etfInvestmentDTO.get().getLiveValue() - etfInvestmentDTO.get().getAmount());
-        }
-    }
-
-    @Override
-    @Retryable(value = APIException.class, maxAttempts = 3)
-    public void getStockWatchList(List<StockWatchDTO> stockWatchList) {
-        log.trace("Enter");
-        String joinedList = stockWatchList.stream().map(s -> (s.getStockShortName() + "." + s.getStockExchange())).collect(Collectors.joining(","));
-
-        JsonNode responseBody = this.callStockAPI(this.createURL(EODAPIServiceImpl.API, "/real-time/stock/?api_token={0}&fmt=json&s={1}", joinedList));
-        for (JsonNode stock : responseBody) {
-            Optional<StockWatchDTO> stockWatchDTO = stockWatchList.stream().filter
-                    (s -> (s.getStockShortName() + "." + s.getStockExchange()).equals(stock.findValue("code").textValue())).findFirst();
-            if (stockWatchDTO.isEmpty()) continue;
-
-            stockWatchDTO.get().setLiveValue(stock.findValue("close").doubleValue());
-            stockWatchDTO.get().setChange(stock.findValue("change").doubleValue());
-            stockWatchDTO.get().setPChange(stock.findValue("change_p").doubleValue());
-            stockWatchDTO.get().setCurrencyId("USD");
-        }
-    }
-
-    @Override
-    @Retryable(value = APIException.class, maxAttempts = 3)
-    public void getForexWatchList(List<ForexWatchDTO> forexWatchList) {
-        log.trace("Enter");
-        String joinedList = forexWatchList.stream().map(f -> (f.getFromCurrencyId() + f.getToCurrencyId() + ".FOREX")).collect(Collectors.joining(","));
-
-        JsonNode responseBody = this.callStockAPI(this.createURL(EODAPIServiceImpl.API, "/real-time/forex/?api_token={0}&fmt=json&s={1}", joinedList));
-        for (JsonNode forex : responseBody) {
-            Optional<ForexWatchDTO> forexWatchDTO = forexWatchList.stream().filter
-                    (f -> (f.getFromCurrencyId() + f.getToCurrencyId() + ".FOREX").equals(forex.findValue("code").textValue())).findFirst();
-            if (forexWatchDTO.isEmpty()) continue;
-            forexWatchDTO.get().setLiveValue(forex.findValue("close").doubleValue());
-            forexWatchDTO.get().setChange(forex.findValue("change").doubleValue() * -1);
-            forexWatchDTO.get().setPChange(forex.findValue("change_p").doubleValue() * -1);
-        }
-    }
-
-    @Override
-    @Retryable(value = APIException.class, maxAttempts = 3)
-    public void changeLiveValueCurrencyForForexTransactions(List<ForexTransactionDTO> forexTransactions) {
-        log.trace("Enter");
-        String joinedList = forexTransactions.stream().map(f -> (f.getToCurrencyId() + f.getFromCurrencyId() + ".FOREX")).collect(Collectors.joining(","));
-
-        JsonNode responseBody = this.callStockAPI(this.createURL(EODAPIServiceImpl.API, "/real-time/forex/?api_token={0}&fmt=json&s={1}", joinedList));
-        for (JsonNode forex : responseBody) {
-            Optional<ForexTransactionDTO> forexTransactionDTO = forexTransactions.stream().filter
-                    (f -> (f.getToCurrencyId() + f.getFromCurrencyId() + ".FOREX").equals(forex.findValue("code").textValue())).findFirst();
-            if (forexTransactionDTO.isEmpty()) continue;
-            forexTransactionDTO.get().setLiveValue(forex.findValue("close").doubleValue() * forexTransactionDTO.get().getToAmount());
-            forexTransactionDTO.get().setLiveChangeRate(forex.findValue("close").doubleValue());
-            forexTransactionDTO.get().setValueDiff(forexTransactionDTO.get().getLiveValue() - forexTransactionDTO.get().getFromAmount());
-        }
+        return this.callStockAPI(this.createURL(EODAPIServiceImpl.API, path, tickerList));
     }
 
     @Override

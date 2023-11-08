@@ -1,5 +1,6 @@
 package eye.on.the.money.service.etf.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.in.InvestmentQuery;
 import eye.on.the.money.dto.out.ETFInvestmentDTO;
 import eye.on.the.money.model.User;
@@ -62,8 +63,17 @@ public class ETFInvestmentServiceImpl implements ETFInvestmentService {
         Map<String, ETFInvestmentDTO> investmentMap = this.getCalculated(userId, query);
         List<ETFInvestmentDTO> etfInvestmentDTOList = (new ArrayList<ETFInvestmentDTO>(investmentMap.values()))
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
-        this.eodAPIService.getETFLiveValue(etfInvestmentDTOList);
+        String joinedList = etfInvestmentDTOList.stream().map(i -> (i.getShortName() + "." + i.getExchange())).collect(Collectors.joining(","));
 
+        JsonNode responseBody = this.eodAPIService.getLiveValue(joinedList, "/real-time/etf/?api_token={0}&fmt=json&s={1}");
+
+        for (JsonNode etf : responseBody) {
+            Optional<ETFInvestmentDTO> etfInvestmentDTO = etfInvestmentDTOList.stream().filter
+                    (i -> (i.getShortName() + "." + i.getExchange()).equals(etf.findValue("code").textValue())).findFirst();
+            if (etfInvestmentDTO.isEmpty()) continue;
+            etfInvestmentDTO.get().setLiveValue(etf.findValue("close").doubleValue() * etfInvestmentDTO.get().getQuantity());
+            etfInvestmentDTO.get().setValueDiff(etfInvestmentDTO.get().getLiveValue() - etfInvestmentDTO.get().getAmount());
+        }
         return etfInvestmentDTOList;
     }
 

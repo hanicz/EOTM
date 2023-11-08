@@ -1,5 +1,6 @@
 package eye.on.the.money.service.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.out.CryptoWatchDTO;
 import eye.on.the.money.dto.out.ForexWatchDTO;
 import eye.on.the.money.dto.out.StockWatchDTO;
@@ -25,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,22 +58,49 @@ public class WatchListServiceImpl implements WatchlistService {
 
     @Override
     public List<CryptoWatchDTO> getCryptoWatchlistByUserId(Long userId, String currency) {
-        List<CryptoWatchDTO> cryptoList = this.cryptoWatchRepository.findByUser_IdOrderByCoin_Symbol(userId).stream().map(this::convertToCryptoWatchDTO).collect(Collectors.toList());
+        List<CryptoWatchDTO> cryptoList = this.cryptoWatchRepository.findByUser_IdOrderByCoin_Symbol(userId).stream()
+                .map(this::convertToCryptoWatchDTO).collect(Collectors.toList());
         this.cryptoAPIService.getLiveValueForWatchList(cryptoList, currency);
         return cryptoList;
     }
 
     @Override
     public List<StockWatchDTO> getStockWatchlistByUserId(Long userId) {
-        List<StockWatchDTO> stockList = this.stockWatchRepository.findByUser_IdOrderByStockShortName(userId).stream().map(this::convertToStockWatchDTO).collect(Collectors.toList());
-        this.eodAPIService.getStockWatchList(stockList);
+        List<StockWatchDTO> stockList = this.stockWatchRepository.findByUser_IdOrderByStockShortName(userId).stream()
+                .map(this::convertToStockWatchDTO).collect(Collectors.toList());
+        String joinedList = stockList.stream().map(s -> (s.getStockShortName() + "." + s.getStockExchange())).collect(Collectors.joining(","));
+        JsonNode responseBody = this.eodAPIService.getLiveValue(joinedList, "/real-time/stock/?api_token={0}&fmt=json&s={1}");
+
+        for (JsonNode stock : responseBody) {
+            Optional<StockWatchDTO> stockWatchDTO = stockList.stream().filter
+                    (s -> (s.getStockShortName() + "." + s.getStockExchange()).equals(stock.findValue("code").textValue())).findFirst();
+            if (stockWatchDTO.isEmpty()) continue;
+
+            stockWatchDTO.get().setLiveValue(stock.findValue("close").doubleValue());
+            stockWatchDTO.get().setChange(stock.findValue("change").doubleValue());
+            stockWatchDTO.get().setPChange(stock.findValue("change_p").doubleValue());
+            stockWatchDTO.get().setCurrencyId("USD");
+        }
+
         return stockList;
     }
 
     @Override
     public List<ForexWatchDTO> getForexWatchlistByUserId(Long userId) {
-        List<ForexWatchDTO> forexList = this.forexWatchRepository.findByUser_Id(userId).stream().map(this::convertToForexDTO).collect(Collectors.toList());
-        this.eodAPIService.getForexWatchList(forexList);
+        List<ForexWatchDTO> forexList = this.forexWatchRepository.findByUser_Id(userId).stream()
+                .map(this::convertToForexDTO).collect(Collectors.toList());
+        String joinedList = forexList.stream().map(f -> (f.getFromCurrencyId() + f.getToCurrencyId() + ".FOREX")).collect(Collectors.joining(","));
+        JsonNode responseBody = this.eodAPIService.getLiveValue(joinedList, "/real-time/forex/?api_token={0}&fmt=json&s={1}");
+
+        for (JsonNode forex : responseBody) {
+            Optional<ForexWatchDTO> forexWatchDTO = forexList.stream().filter
+                    (f -> (f.getFromCurrencyId() + f.getToCurrencyId() + ".FOREX").equals(forex.findValue("code").textValue())).findFirst();
+            if (forexWatchDTO.isEmpty()) continue;
+            forexWatchDTO.get().setLiveValue(forex.findValue("close").doubleValue());
+            forexWatchDTO.get().setChange(forex.findValue("change").doubleValue() * -1);
+            forexWatchDTO.get().setPChange(forex.findValue("change_p").doubleValue() * -1);
+        }
+
         return forexList;
     }
 

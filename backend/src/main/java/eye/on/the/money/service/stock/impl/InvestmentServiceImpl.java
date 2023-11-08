@@ -1,5 +1,6 @@
 package eye.on.the.money.service.stock.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.in.InvestmentQuery;
 import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.model.Currency;
@@ -41,19 +42,14 @@ public class InvestmentServiceImpl implements InvestmentService {
 
     @Autowired
     private InvestmentRepository investmentRepository;
-
     @Autowired
     private StockRepository stockRepository;
-
     @Autowired
     private CurrencyRepository currencyRepository;
-
     @Autowired
     private StockPaymentService stockPaymentService;
-
     @Autowired
     private ModelMapper modelMapper;
-
     @Autowired
     private EODAPIService eodAPIService;
 
@@ -73,7 +69,18 @@ public class InvestmentServiceImpl implements InvestmentService {
         Map<String, InvestmentDTO> investmentMap = this.getCalculated(userId, query);
         List<InvestmentDTO> investmentDTOList = (new ArrayList<InvestmentDTO>(investmentMap.values()))
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
-        this.eodAPIService.getLiveValue(investmentDTOList);
+        String joinedList = investmentDTOList.stream().map(i -> (i.getShortName() + "." + i.getExchange())).collect(Collectors.joining(","));
+
+        JsonNode responseBody = this.eodAPIService.getLiveValue(joinedList, "/real-time/stock/?api_token={0}&fmt=json&s={1}");
+
+        for (JsonNode stock : responseBody) {
+            Optional<InvestmentDTO> investmentDTO = investmentDTOList.stream().filter
+                    (i -> (i.getShortName() + "." + i.getExchange()).equals(stock.findValue("code").textValue())).findFirst();
+            if (investmentDTO.isEmpty()) continue;
+            investmentDTO.get().setLiveValue(stock.findValue("close").doubleValue() * investmentDTO.get().getQuantity());
+            investmentDTO.get().setValueDiff(investmentDTO.get().getLiveValue() - investmentDTO.get().getAmount());
+        }
+
         return investmentDTOList;
     }
 

@@ -1,5 +1,6 @@
 package eye.on.the.money.service.forex.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.out.ForexTransactionDTO;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
@@ -91,7 +92,18 @@ public class ForexTransactionServiceImpl implements ForexTransactionService {
     public List<ForexTransactionDTO> getAllForexHoldings(Long userId) {
         Map<String, ForexTransactionDTO> forexTransactionMap = this.getCalculated(userId);
         List<ForexTransactionDTO> forexTransactions = new ArrayList<>(forexTransactionMap.values());
-        this.eodAPIService.changeLiveValueCurrencyForForexTransactions(forexTransactions);
+        String joinedList = forexTransactions.stream().map(f -> (f.getToCurrencyId() + f.getFromCurrencyId() + ".FOREX")).collect(Collectors.joining(","));
+
+        JsonNode responseBody = this.eodAPIService.getLiveValue(joinedList, "/real-time/forex/?api_token={0}&fmt=json&s={1}");
+        for (JsonNode forex : responseBody) {
+            Optional<ForexTransactionDTO> forexTransactionDTO = forexTransactions.stream().filter
+                    (f -> (f.getToCurrencyId() + f.getFromCurrencyId() + ".FOREX").equals(forex.findValue("code").textValue())).findFirst();
+            if (forexTransactionDTO.isEmpty()) continue;
+            forexTransactionDTO.get().setLiveValue(forex.findValue("close").doubleValue() * forexTransactionDTO.get().getToAmount());
+            forexTransactionDTO.get().setLiveChangeRate(forex.findValue("close").doubleValue());
+            forexTransactionDTO.get().setValueDiff(forexTransactionDTO.get().getLiveValue() - forexTransactionDTO.get().getFromAmount());
+        }
+
         return forexTransactions;
     }
 

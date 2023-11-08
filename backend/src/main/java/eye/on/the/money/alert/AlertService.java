@@ -32,6 +32,7 @@ public class AlertService {
     public void checkAlerts() {
         log.trace("Enter");
         List<StockAlert> alertList = this.stockAlertRepository.findAll();
+        if(alertList.isEmpty()) return;
         String joinedList = alertList.stream().map(StockAlert::getStock).collect(Collectors.toSet())
                 .stream().map(s -> (s.getShortName() + "." + s.getExchange())).collect(Collectors.joining(","));
 

@@ -6,6 +6,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface TaxService {
-    public void loadRatesFromXLS(MultipartFile file);
-    public void doTaxByYear(Long userId, Integer year, List<TaxEntry> taxEntries);
+    void loadRatesFromXLS(MultipartFile file);
+    void doTaxByYear(Long userId, Integer year, List<TaxEntry> taxEntries);
 }

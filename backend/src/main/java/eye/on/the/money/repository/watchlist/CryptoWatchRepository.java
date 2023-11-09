@@ -6,6 +6,6 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface CryptoWatchRepository extends CrudRepository<CryptoWatch, Long> {
-    public List<CryptoWatch> findByUser_IdOrderByCoin_Symbol(Long userId);
-    public void deleteByIdAndUser_Id(Long id, Long userId);
+    List<CryptoWatch> findByUser_IdOrderByCoin_Symbol(Long userId);
+    void deleteByIdAndUser_Id(Long id, Long userId);
 }

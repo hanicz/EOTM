@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface StockRepository extends CrudRepository<Stock, String> {
-    public Optional<Stock> findByName(String name);
-    public Optional<Stock> findByShortName(String shortName);
-    public List<Stock> findAllByOrderByShortNameAsc();
+    Optional<Stock> findByName(String name);
+    Optional<Stock> findByShortName(String shortName);
+    List<Stock> findAllByOrderByShortNameAsc();
 }

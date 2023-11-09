@@ -7,5 +7,5 @@ import java.util.Date;
 import java.util.Optional;
 
 public interface MNBRateRepository extends CrudRepository<MNBRate, Long> {
-    public Optional<MNBRate> findByCurrency_IdAndRateDate(String currencyId, Date rateDate);
+    Optional<MNBRate> findByCurrency_IdAndRateDate(String currencyId, Date rateDate);
 }

@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 @Component
 @Slf4j
-public class AlertService {
+public class AlertScheduler {
 
     @Autowired
     private StockAlertRepository stockAlertRepository;
@@ -28,7 +28,7 @@ public class AlertService {
     @Autowired
     private EmailServiceImpl emailServiceImpl;
 
-    @Scheduled(fixedDelay = 100000)
+    @Scheduled(fixedDelay = 300000)
     public void checkAlerts() {
         log.trace("Enter");
         List<StockAlert> alertList = this.stockAlertRepository.findAll();

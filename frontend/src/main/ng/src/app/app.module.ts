@@ -60,6 +60,8 @@ import { EtfpositionComponent } from './etf/etfposition/etfposition.component';
 import { EtfdividendComponent } from './etf/etfdividend/etfdividend.component';
 import { ForextransactionComponent } from './forex/forextransaction/forextransaction.component';
 import { ForexholdingComponent } from './forex/forexholding/forexholding.component';
+import { AlertComponent } from './alert/alert.component';
+import { AlertTypePipe } from './util/pipe';
 
 
 @NgModule({
@@ -88,7 +90,9 @@ import { ForexholdingComponent } from './forex/forexholding/forexholding.compone
     EtfpositionComponent,
     EtfdividendComponent,
     ForextransactionComponent,
-    ForexholdingComponent
+    ForexholdingComponent,
+    AlertComponent,
+    AlertTypePipe
   ],
   imports: [
     BrowserModule,

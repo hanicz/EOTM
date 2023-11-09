@@ -28,7 +28,7 @@ public abstract class APIService {
         Object[] array = Stream.concat(Stream.of(secret), Stream.of(params)).toArray();
 
         String URL = MessageFormat.format(stockAPI + path, array);
-        log.trace(URL);
+        log.debug(URL);
         return URL;
     }
 }

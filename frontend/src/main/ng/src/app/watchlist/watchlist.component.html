@@ -23,7 +23,8 @@
             <p-table #dt1 [value]="globals.stockWatchList" responsiveLayout="scroll" styleClass="p-datatable-sm"
                 [autoLayout]="true" *ngIf="!stockLoading">
                 <ng-template pTemplate="body" let-stockWatch>
-                    <tr (click)="stockSelected(stockWatch)" style="cursor: pointer;">
+                    <tr (click)="stockSelected(stockWatch)" style="cursor: pointer;" 
+                    [ngClass]="{'row-over': (stockWatch.change > 0), 'row-under': (stockWatch.change < 0) }">
                         <td class="text-sm">
                             {{stockWatch.stockShortName}}
                         </td>
@@ -54,7 +55,7 @@
             <p-table #dt2 [value]="cryptoWatchList" responsiveLayout="scroll" styleClass="p-datatable-sm"
                 [autoLayout]="true" *ngIf="!cryptoLoading">
                 <ng-template pTemplate="body" let-cryptoWatch>
-                    <tr>
+                    <tr [ngClass]="{'row-over': (cryptoWatch.change > 0), 'row-under': (cryptoWatch.change < 0) }">
                         <td class="text-xs">
                             <div class="flex align-items-center">
                                 <p-image src="{{assetUrl + cryptoWatch.symbol + '.svg'}}" width="15"
@@ -86,7 +87,7 @@
             <p-table #dt3 [value]="forexWatchList" responsiveLayout="scroll" styleClass="p-datatable-sm"
                 [autoLayout]="true" *ngIf="!forexLoading">
                 <ng-template pTemplate="body" let-forexWatch>
-                    <tr>
+                    <tr [ngClass]="{'row-over': (forexWatch.change > 0), 'row-under': (forexWatch.change < 0) }">
                         <td>
                             <p-tag severity="info" value="{{forexWatch.fromCurrencyId + forexWatch.toCurrencyId}}">
                             </p-tag>

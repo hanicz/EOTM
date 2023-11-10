@@ -31,9 +31,8 @@ export class AlertService {
     });
   };
 
-  createNewStockAlert(symbol: Symbol, exchange: Exchange) {
+  createNewStockAlert(data: any) {
     const url = `${this.watchListUrl}`;
-    let data = {shortName: symbol.Code, name: symbol.Name, exchange: exchange.Code}
     return this.http.post(url, data,{
       headers: this.helper.getHeadersWithToken()
     });

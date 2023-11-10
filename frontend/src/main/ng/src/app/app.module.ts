@@ -62,6 +62,7 @@ import { ForextransactionComponent } from './forex/forextransaction/forextransac
 import { ForexholdingComponent } from './forex/forexholding/forexholding.component';
 import { AlertComponent } from './alert/alert.component';
 import { AlertTypePipe } from './util/pipe';
+import { InputNumberModule } from 'primeng/inputnumber';
 
 
 @NgModule({
@@ -125,7 +126,8 @@ import { AlertTypePipe } from './util/pipe';
     ImageModule,
     ChipModule,
     ProgressSpinnerModule,
-    SkeletonModule
+    SkeletonModule,
+    InputNumberModule
   ],
   providers: [MessageService, Globals],
   bootstrap: [AppComponent]

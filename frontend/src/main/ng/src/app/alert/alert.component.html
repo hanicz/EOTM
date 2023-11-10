@@ -1,8 +1,11 @@
 <div class="shadow-5">
     <menu class="pl-0 mb-0"></menu>
     <p-panel header="Alerts">
-        <button pButton pRipple type="button" class="p-button-rounded p-button-raised p-button-text ml-2 mb-2 p-button-success">Create</button>
-        <p-table [value]="[{}]" styleClass="p-datatable-striped p-datatable-sm" responsiveLayout="scroll" *ngIf="alertsLoading">
+        <button pButton pRipple type="button"
+            class="p-button-rounded p-button-raised p-button-text ml-2 mb-2 p-button-success"
+            (click)="showDialog()">Create</button>
+        <p-table [value]="[{}]" styleClass="p-datatable-striped p-datatable-sm" responsiveLayout="scroll"
+            *ngIf="alertsLoading">
             <ng-template pTemplate="header">
                 <tr>
                     <th>Ticker</th>
@@ -22,7 +25,8 @@
             </ng-template>
         </p-table>
 
-        <p-table [value]="stockAlerts" styleClass="p-datatable-striped" responsiveLayout="scroll" *ngIf="!alertsLoading">
+        <p-table [value]="stockAlerts" styleClass="p-datatable-striped" responsiveLayout="scroll"
+            *ngIf="!alertsLoading">
             <ng-template pTemplate="header">
                 <tr>
                     <th>Ticker</th>
@@ -33,7 +37,8 @@
                 </tr>
             </ng-template>
             <ng-template pTemplate="body" let-alert>
-                <tr [ngClass]="{'row-over': alert.type.indexOf('OVER') > 0, 'row-under': alert.type.indexOf('UNDER') > 0 }">
+                <tr
+                    [ngClass]="{'row-over': alert.type.indexOf('OVER') > 0, 'row-under': alert.type.indexOf('UNDER') > 0 }">
                     <td>
                         <p-tag severity="info" value="{{alert.shortName}}.{{alert.exchange}}">
                         </p-tag>
@@ -42,9 +47,45 @@
                     <td>{{alert.type | alertTypePipe}}</td>
                     <td [ngStyle]="{'color': (alert.type.indexOf('OVER') > 0) ? '#008002' : '#910101'}">
                         {{alert.valuePoint}}</td>
-                    <td><i style="cursor: pointer; color: red" (click)="deleteAlert(alert)" class="pi pi-times"></i></td>
+                    <td><i style="cursor: pointer; color: red" (click)="deleteAlert(alert)" class="pi pi-times"></i>
+                    </td>
                 </tr>
             </ng-template>
         </p-table>
     </p-panel>
 </div>
+
+<p-dialog [(visible)]="displayDialog" [breakpoints]="{'960px': '75vw', '640px': '100vw'}"
+    [style]="{width: '25vw', height: '30vw'}" [draggable]="false" [resizable]="false">
+    <div class="grid">
+        <div class="col-12">
+            <p-dropdown class="searchDropdown" [options]="exchanges" optionLabel="Name" [virtualScroll]="true"
+                [itemSize]="31" [filter]="true" (onChange)="exchangeChanged($event)" [(ngModel)]="selectedExchange"
+                placeholder="Select an Exchange" [style]="{'width':'100%'}"
+                [dropdownIcon]="exchangesLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+            </p-dropdown>
+        </div>
+        <div class="col-12">
+            <p-dropdown class="searchDropdown" [options]="symbols" optionLabel="Name" [virtualScroll]="true"
+                [itemSize]="31" [filter]="true" [(ngModel)]="selectedStock" placeholder="Select a Ticker"
+                [style]="{'width':'100%'}"
+                [dropdownIcon]="stocksLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+            </p-dropdown>
+        </div>
+        <div class="col-12">
+            <p-dropdown class="searchDropdown" [options]="types" [(ngModel)]="selectedType" optionLabel="name" optionValue="code" [style]="{'width':'100%'}"
+                placeholder="Select a Type"></p-dropdown>
+        </div>
+        <div class="col-6 mt-2">
+            <span class="p-float-label">
+                <p-inputNumber [(ngModel)]="valuePoint" inputId="valuePoint" mode="decimal" [minFractionDigits]="0"
+                    [maxFractionDigits]="2"> </p-inputNumber>
+                <label htmlFor="valuePoint">Number</label>
+            </span>
+        </div>
+        <div class="col-1 col-offset-3 mt-2">
+            <button pButton pRipple type="button" icon="fas fa-plus" (click)="createAlert()"
+                class="p-button-rounded p-button-text ml-2 p-button-success">Create</button>
+        </div>
+    </div>
+</p-dialog>

@@ -9,6 +9,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Slf4j
+@Builder
 @ToString
 @Table(name = "EOTM_USER")
 @AllArgsConstructor

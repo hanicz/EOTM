@@ -18,8 +18,10 @@ public abstract class APIService {
     private CredentialRepository credentialRepository;
     @Autowired
     private ConfigRepository configRepository;
-    protected final RestTemplate restTemplate = new RestTemplate();
-    protected final ObjectMapper mapper = new ObjectMapper();
+    @Autowired
+    protected RestTemplate restTemplate;
+    @Autowired
+    protected ObjectMapper mapper;
 
     protected String createURL(String api, String path, String... params) {
         log.trace("Enter");

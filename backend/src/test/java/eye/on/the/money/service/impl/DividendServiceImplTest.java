@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.StringWriter;
@@ -27,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = EotmApplication.class)
+@ActiveProfiles("test")
 class DividendServiceImplTest {
 
     @Autowired
@@ -42,26 +44,25 @@ class DividendServiceImplTest {
 
     @BeforeEach
     public void init() {
-        this.user = this.userRepository.findById(1L).get();
+        this.user = this.userRepository.findByEmail("test@test.test");
     }
 
     @Test
     public void getDividends() {
-        List<DividendDTO> dividends = this.dividendService.getDividends(1L);
+        List<DividendDTO> dividends = this.dividendService.getDividends(this.user.getId());
         List<Dividend> dividendsActual = this.dividendRepository.findByUser_IdOrderByDividendDate(1L);
         assertEquals(dividendsActual.size(), dividends.size());
     }
 
     @Test
     public void getDividends_NoResult() {
-        List<DividendDTO> dividends = this.dividendService.getDividends(100L);
+        List<DividendDTO> dividends = this.dividendService.getDividends(10000L);
         assertEquals(0, dividends.size());
     }
 
     @Test
     public void createDividend() throws ParseException {
         DividendDTO dividendDTO = this.getDividendDTO();
-        dividendDTO.setDividendId(null);
         DividendDTO created = this.dividendService.createDividend(dividendDTO, this.user);
         dividendDTO.setDividendId(created.getDividendId());
         assertEquals(dividendDTO, created);
@@ -86,8 +87,10 @@ class DividendServiceImplTest {
     @Test
     public void updateDividend() throws ParseException {
         DividendDTO dividendDTO = this.getDividendDTO();
-        DividendDTO updated = this.dividendService.updateDividend(dividendDTO, this.user);
-        assertEquals(dividendDTO, updated);
+        DividendDTO created = this.dividendService.createDividend(dividendDTO, this.user);
+        created.setAmount(111.0);
+        DividendDTO updated = this.dividendService.updateDividend(created, this.user);
+        assertEquals(created, updated);
     }
 
     @Test
@@ -129,7 +132,7 @@ class DividendServiceImplTest {
         this.dividendService.getCSV(this.user.getId(), writer);
         assertAll(
                 () -> assertTrue(writer.toString().contains("Dividend Id,Amount,Dividend Date,Short Name,Currency")),
-                () -> assertTrue(writer.toString().contains("1,225.0,2021-06-03 00:00:00.0,MTEL,HUF"))
+                () -> assertTrue(writer.toString().contains("1,225.0,2021-06-03 00:00:00.0,CRSR,HUF"))
         );
     }
 

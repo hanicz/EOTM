@@ -7,7 +7,7 @@ jobs:
       - checkout
       - run:
           name: Build
-          command: mvn -B -DskipTests clean package
+          command: mvn -B clean package
       - store_artifacts:
           path: backend/target/backend-0.0.1-SNAPSHOT.jar
 

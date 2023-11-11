@@ -17,8 +17,10 @@ export class InvestmentComponent implements OnInit {
   investmentDialog: boolean = false;
   investment: Investment = {} as Investment;
   @ViewChild('fileUpload') fileUpload: any;
+  globals: Globals;
 
   constructor(private stockService: StockService, globals: Globals) {
+    this.globals = globals;
     this.currencies = globals.currencies;
 
     this.statuses = [

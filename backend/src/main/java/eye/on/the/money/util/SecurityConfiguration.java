@@ -61,4 +61,5 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(this.userService).passwordEncoder(this.passwordEncoder);
     }
+
 }

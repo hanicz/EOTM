@@ -40,7 +40,14 @@
     </ng-template>
     <ng-template pTemplate="body" let-investment>
         <tr>
-            <td>{{investment.shortName}}.{{investment.exchange}}</td>
+            <td>
+                <div class="flex align-items-center">
+                    <p-image
+                        src="https://eodhd.com/img/logos/{{investment.exchange}}/{{investment.shortName}}.png"
+                        width="15" class="mr-1" (onImageError)="globals.errorHandler($event)"></p-image>
+                        {{investment.shortName}}.{{investment.exchange}}
+                </div>
+            </td>
             <td>{{investment.quantity}}</td>
             <td>{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}</td>
             <td>{{investment.amount / investment.quantity | currency : investment.currencyId : 'symbol' : '0.0-3'}}</td>

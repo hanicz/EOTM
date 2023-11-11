@@ -63,7 +63,13 @@
             <td>
                 <p-tableCheckbox [value]="investment"></p-tableCheckbox>
             </td>
-            <td>{{investment.shortName}}.{{investment.exchange}}</td>
+            <td>
+                <div class="flex align-items-center">
+                    <p-image src="https://eodhd.com/img/logos/{{investment.exchange}}/{{investment.shortName}}.png"
+                        width="15" class="mr-1" (onImageError)="globals.errorHandler($event)"></p-image>
+                    {{investment.shortName}}.{{investment.exchange}}
+                </div>
+            </td>
             <td>
                 <p-tag styleClass="p-mr-2" severity="info" *ngIf="investment.buySell === 'B'" value="BUY"></p-tag>
                 <p-tag styleClass="p-mr-2" severity="warning" *ngIf="investment.buySell === 'S'" value="SELL"></p-tag>

@@ -3,15 +3,17 @@
     <p-panel header="Lookup">
         <div class="grid">
             <div class="col-2 ml-4">
-                <p-dropdown class="searchDropdown" [options]="exchanges" optionLabel="Name" optionValue="Code" [virtualScroll]="true" [itemSize]="31" [filter]="true"
-                    (onChange)="exchangeChanged($event)" [(ngModel)]="globals.selectedExchange" placeholder="Select an Exchange" 
-                    [style]="{'width':'100%'}" [dropdownIcon]="exchangesLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+                <p-dropdown class="searchDropdown" [options]="exchanges" optionLabel="Name" optionValue="Code"
+                    [virtualScroll]="true" [itemSize]="31" [filter]="true" (onChange)="exchangeChanged($event)"
+                    [(ngModel)]="globals.selectedExchange" placeholder="Select an Exchange" [style]="{'width':'100%'}"
+                    [dropdownIcon]="exchangesLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
                 </p-dropdown>
             </div>
             <div class="col-4 ml-4">
-                <p-dropdown class="searchDropdown" [options]="symbols" optionLabel="Name" optionValue="Code" [virtualScroll]="true" [itemSize]="31" [filter]="true"
-                    (onChange)="stockChanged($event)" [(ngModel)]="globals.selectedStock" placeholder="Select a Ticker" 
-                    [style]="{'width':'100%'}" [dropdownIcon]="stocksLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+                <p-dropdown class="searchDropdown" [options]="symbols" optionLabel="Name" optionValue="Code"
+                    [virtualScroll]="true" [itemSize]="31" [filter]="true" (onChange)="stockChanged($event)"
+                    [(ngModel)]="globals.selectedStock" placeholder="Select a Ticker" [style]="{'width':'100%'}"
+                    [dropdownIcon]="stocksLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
                 </p-dropdown>
             </div>
         </div>
@@ -23,7 +25,12 @@
                             <div class="flex flex-wrap text-sm align-items-center">
 
                                 <div class="flex align-items-start mr-2">
-                                    <p-tag value="{{profile.ticker}}" [rounded]="true"></p-tag>
+                                    <p-tag value="{{profile.ticker}}" [rounded]="true">
+                                        <p-image
+                                            src="https://eodhd.com/img/logos/{{globals.selectedExchange}}/{{globals.selectedStock}}.png"
+                                            width="20" class="mr-1 mt-1 ml-1"
+                                            (onImageError)="globals.errorHandler($event)"></p-image>
+                                    </p-tag>
                                 </div>
                                 |
                                 <div class="flex align-items-start ml-2">{{profile.exchange}}</div>
@@ -128,7 +135,7 @@
                     </div>
                     <div class="flex flex-wrap justify-content-between border-bottom-1">
                         <div class="flex align-items-start">Avg Vol (3M)</div>
-                        <div class="flex align-items-end">{{metric.threeMonthAverageTradingVolume / 30 | number :
+                        <div class="flex align-items-end">{{metric.threeMonthAverageTradingVolume | number :
                             '0.0-1'}}M
                         </div>
                     </div>

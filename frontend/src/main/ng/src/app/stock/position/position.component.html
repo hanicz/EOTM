@@ -10,7 +10,14 @@
     </ng-template>
     <ng-template pTemplate="body" let-investment>
         <tr>
-            <td>{{investment.shortName}}.{{investment.exchange}}</td>
+            <td>
+                <div class="flex align-items-center">
+                    <p-image
+                        src="https://eodhd.com/img/logos/{{investment.exchange}}/{{investment.shortName}}.png"
+                        width="15" class="mr-1" (onImageError)="globals.errorHandler($event)"></p-image>
+                        {{investment.shortName}}.{{investment.exchange}}
+                </div>
+            </td>
             <td>
                <span *ngIf="investment.quantity > 0">{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}</span>
             </td>

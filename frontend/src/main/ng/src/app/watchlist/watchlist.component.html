@@ -23,10 +23,15 @@
             <p-table #dt1 [value]="globals.stockWatchList" responsiveLayout="scroll" styleClass="p-datatable-sm"
                 [autoLayout]="true" *ngIf="!stockLoading">
                 <ng-template pTemplate="body" let-stockWatch>
-                    <tr (click)="stockSelected(stockWatch)" style="cursor: pointer;" 
-                    [ngClass]="{'row-over': (stockWatch.change > 0), 'row-under': (stockWatch.change < 0) }">
+                    <tr (click)="stockSelected(stockWatch)" style="cursor: pointer;"
+                        [ngClass]="{'row-over': (stockWatch.change > 0), 'row-under': (stockWatch.change < 0) }">
                         <td class="text-sm">
-                            {{stockWatch.stockShortName}}
+                            <div class="flex align-items-center">
+                                <p-image
+                                    src="https://eodhd.com/img/logos/{{stockWatch.stockExchange}}/{{stockWatch.stockShortName}}.png"
+                                    width="15" class="mr-1" (onImageError)="globals.errorHandler($event)"></p-image>
+                                {{stockWatch.stockShortName}}
+                            </div>
                         </td>
                         <td class="text-sm font-bold"
                             [ngStyle]="{'color': (stockWatch.change > 0) ? '#008002' : (stockWatch.change === 0) ? '#999999' : '#910101'}">
@@ -131,11 +136,13 @@
                 </div>
                 <div class="col-2 col-offset-5">
                     <button pButton pRipple type="button" icon="fas fa-plus" (click)="createStockWatch()"
-                        class="p-button-rounded p-button-text ml-2 p-button-success" *ngIf="!checkStockContain() && selectedStock.Code != undefined">Add</button>
+                        class="p-button-rounded p-button-text ml-2 p-button-success"
+                        *ngIf="!checkStockContain() && selectedStock.Code != undefined">Add</button>
                 </div>
                 <div class="col-2 col-offset-5">
                     <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteStockWatch()"
-                        class="p-button-rounded p-button-text ml-2 p-button-danger" *ngIf="checkStockContain()">Delete</button>
+                        class="p-button-rounded p-button-text ml-2 p-button-danger"
+                        *ngIf="checkStockContain()">Delete</button>
                 </div>
             </div>
         </p-tabPanel>

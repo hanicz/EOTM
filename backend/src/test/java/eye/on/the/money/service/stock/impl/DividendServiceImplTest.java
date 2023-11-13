@@ -1,4 +1,4 @@
-package eye.on.the.money.service.impl;
+package eye.on.the.money.service.stock.impl;
 
 import eye.on.the.money.EotmApplication;
 import eye.on.the.money.dto.out.DividendDTO;
@@ -9,11 +9,9 @@ import eye.on.the.money.repository.stock.DividendRepository;
 import eye.on.the.money.service.stock.DividendService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.StringWriter;
 import java.io.Writer;
@@ -26,7 +24,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = EotmApplication.class)
 @ActiveProfiles("test")
 class DividendServiceImplTest {

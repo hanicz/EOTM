@@ -1,7 +1,6 @@
 package eye.on.the.money.service.api.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.exception.APIException;
 import eye.on.the.money.model.stock.EODCandleQuote;
@@ -19,7 +18,9 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -43,8 +44,7 @@ public class EODAPIServiceImpl extends APIService implements EODAPIService {
         String period = (months > 23) ? ((months > 60) ? "m" : "w") : "d";
         JsonNode root = this.callStockAPI(this.createURL(EODAPIServiceImpl.API, "/eod/{1}?api_token={0}&fmt=json&period={2}{3}", shortname, period, from));
         try {
-            return this.mapper.readerFor(new TypeReference<List<EODCandleQuote>>() {
-            }).readValue(root);
+            return Arrays.asList(this.mapper.treeToValue(root, EODCandleQuote[].class));
         } catch (NullPointerException | IOException e) {
             throw new APIException("JSON process failed. " + e.getMessage());
         }
@@ -58,7 +58,7 @@ public class EODAPIServiceImpl extends APIService implements EODAPIService {
         try {
             return Arrays.asList(this.mapper.treeToValue(root, Symbol[].class));
         } catch (JsonProcessingException | NullPointerException e) {
-            throw new APIException("JSON process failed");
+            throw new APIException("Symbol JSON process failed");
         }
     }
 
@@ -70,7 +70,7 @@ public class EODAPIServiceImpl extends APIService implements EODAPIService {
         try {
             return Arrays.asList(this.mapper.treeToValue(root, Exchange[].class));
         } catch (JsonProcessingException | NullPointerException e) {
-            throw new APIException("JSON process failed");
+            throw new APIException("Exchange JSON process failed");
         }
     }
 
@@ -84,7 +84,7 @@ public class EODAPIServiceImpl extends APIService implements EODAPIService {
             throw new APIException("JSON process failed");
         } catch (RestClientException e) {
             log.error("Unable to reach stock API: " + e.getMessage());
-            throw new APIException("Unable to reach stock API. " + e.getMessage());
+            throw new APIException("Unable to reach stock API.");
         }
     }
 }

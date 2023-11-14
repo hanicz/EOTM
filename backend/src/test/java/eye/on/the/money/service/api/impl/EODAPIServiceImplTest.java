@@ -147,7 +147,7 @@ class EODAPIServiceImplTest {
     }
 
     @Test
-    public void invalidJson() throws URISyntaxException, JsonProcessingException {
+    public void invalidJson() throws URISyntaxException {
         String json = "not JSON";
         this.mockServer.expect(ExpectedCount.times(3),
                         requestTo(new URI("https://eodhost.com/real-time/stock/?api_token=token&fmt=json&s=AMD.US")))

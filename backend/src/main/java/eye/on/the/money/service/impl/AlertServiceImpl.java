@@ -39,9 +39,9 @@ public class AlertServiceImpl implements AlertService {
 
     @Transactional
     @Override
-    public void deleteStockAlert(Long userid, Long id) {
+    public boolean deleteStockAlert(Long userid, Long id) {
         log.trace("Enter");
-        this.stockAlertRepository.deleteByIdAndUser_Id(id, userid);
+        return this.stockAlertRepository.deleteByIdAndUser_Id(id, userid) > 0;
     }
 
     @Transactional

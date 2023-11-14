@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface AlertService {
     List<StockAlertDTO> getAllStockAlerts(Long userId);
-    void deleteStockAlert(Long userid, Long id);
+    boolean deleteStockAlert(Long userid, Long id);
     StockAlertDTO createNewStockAlert(User user, StockAlertDTO stockAlert);
 }

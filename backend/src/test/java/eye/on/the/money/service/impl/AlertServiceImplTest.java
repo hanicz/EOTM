@@ -15,6 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @SpringBootTest(classes = EotmApplication.class)
 @ActiveProfiles("test")
 public class AlertServiceImplTest {
@@ -39,12 +43,37 @@ public class AlertServiceImplTest {
     }
 
     @Test
+    public void getAllStockAlerts() {
+        List<StockAlert> alertsInDB = this.stockAlertRepository.findByUser_IdOrderByStockShortName(this.user.getId());
+        List<StockAlertDTO> alertsResponse = this.alertService.getAllStockAlerts(this.user.getId());
+
+        Assertions.assertEquals(alertsInDB.stream().map(this::convertToStockAlertDTO).collect(Collectors.toList()), alertsResponse);
+    }
+
+    @Test
     public void createNewStockAlert() {
         StockAlertDTO sDTO = this.getStockAlertDTO();
         StockAlertDTO createdDTO = this.alertService.createNewStockAlert(this.user, sDTO);
+        sDTO.setId(createdDTO.getId());
         StockAlert expected = this.stockAlertRepository.findById(createdDTO.getId()).get();
 
-        Assertions.assertEquals(this.convertToStockAlertDTO(expected), createdDTO);
+        Assertions.assertEquals(this.convertToStockAlertDTO(expected), sDTO);
+    }
+
+    @Test
+    public void deleteStockAlert() {
+        Optional<StockAlert> beforeDelete = this.stockAlertRepository.findById(1L);
+        var deleted = this.alertService.deleteStockAlert(1L, this.user.getId());
+        Optional<StockAlert> afterDelete = this.stockAlertRepository.findById(1L);
+
+        Assertions.assertTrue(deleted);
+        Assertions.assertTrue(beforeDelete.isPresent());
+        Assertions.assertTrue(afterDelete.isEmpty());
+    }
+
+    @Test
+    public void deleteStockAlertNotFound() {
+        Assertions.assertFalse(this.alertService.deleteStockAlert(1L, 200L));
     }
 
     private StockAlertDTO getStockAlertDTO() {

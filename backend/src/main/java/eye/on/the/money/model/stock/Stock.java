@@ -12,6 +12,7 @@ import java.util.Set;
 @Setter
 @Slf4j
 @Builder
+@EqualsAndHashCode
 @ToString
 @Table(name = "EOTM_STOCK")
 @AllArgsConstructor
@@ -26,5 +27,6 @@ public class Stock {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "stock")
     @JsonIgnore
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Set<Investment> investment;
 }

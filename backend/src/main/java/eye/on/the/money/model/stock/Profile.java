@@ -9,6 +9,8 @@ import java.util.List;
 @Getter
 @Setter
 @Slf4j
+@Builder
+@EqualsAndHashCode
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor

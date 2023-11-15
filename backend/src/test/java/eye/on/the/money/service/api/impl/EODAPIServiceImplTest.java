@@ -39,7 +39,6 @@ class EODAPIServiceImplTest {
     private RestTemplate restTemplate;
     @Autowired
     private EODAPIServiceImpl eodAPIService;
-
     private MockRestServiceServer mockServer;
     private final ObjectMapper mapper = new ObjectMapper();
 

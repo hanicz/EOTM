@@ -9,6 +9,8 @@ import java.util.Date;
 @Slf4j
 @Getter
 @Setter
+@Builder
+@EqualsAndHashCode
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor

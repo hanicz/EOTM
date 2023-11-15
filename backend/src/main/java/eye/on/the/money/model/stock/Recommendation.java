@@ -9,6 +9,8 @@ import java.util.Date;
 @Setter
 @Slf4j
 @ToString
+@Builder
+@EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
 public class Recommendation {

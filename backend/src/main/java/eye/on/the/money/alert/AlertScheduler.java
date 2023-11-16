@@ -1,7 +1,7 @@
 package eye.on.the.money.alert;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import eye.on.the.money.mail.impl.EmailServiceImpl;
+import eye.on.the.money.mail.EmailService;
 import eye.on.the.money.model.alert.StockAlert;
 import eye.on.the.money.repository.alert.StockAlertRepository;
 import eye.on.the.money.service.api.EODAPIService;
@@ -26,7 +26,7 @@ public class AlertScheduler {
     private EODAPIService eodAPIService;
 
     @Autowired
-    private EmailServiceImpl emailServiceImpl;
+    private EmailService emailServiceImpl;
 
     @Scheduled(fixedDelay = 300000)
     public void checkAlerts() {
@@ -63,13 +63,13 @@ public class AlertScheduler {
                     break;
                 case "PRICE_OVER":
                     if (stockMap.get(ticker).findValue("close").asDouble() >= alert.getValuePoint()) {
-                        this.emailServiceImpl.sendMail(alert.getUser().getEmail(), ticker + " is over " + alert.getValuePoint() + "price point");
+                        this.emailServiceImpl.sendMail(alert.getUser().getEmail(), ticker + " is over " + alert.getValuePoint() + " price point");
                         this.stockAlertRepository.delete(alert);
                     }
                     break;
                 case "PRICE_UNDER":
                     if (stockMap.get(ticker).findValue("close").asDouble() <= alert.getValuePoint()) {
-                        this.emailServiceImpl.sendMail(alert.getUser().getEmail(), ticker + " is under " + alert.getValuePoint() + "price point");
+                        this.emailServiceImpl.sendMail(alert.getUser().getEmail(), ticker + " is under " + alert.getValuePoint() + " price point");
                         this.stockAlertRepository.delete(alert);
                     }
                     break;

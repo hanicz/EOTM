@@ -23,8 +23,4 @@ public class EODCandleQuote {
     private Double open;
     private Date date;
     private Long volume;
-
-    public boolean sameSize() {
-        return true;
-    }
 }

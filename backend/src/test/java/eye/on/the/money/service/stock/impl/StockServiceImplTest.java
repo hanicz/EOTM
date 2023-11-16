@@ -1,9 +1,7 @@
 package eye.on.the.money.service.stock.impl;
 
 import eye.on.the.money.EotmApplication;
-import eye.on.the.money.model.stock.Exchange;
-import eye.on.the.money.model.stock.Stock;
-import eye.on.the.money.model.stock.Symbol;
+import eye.on.the.money.model.stock.*;
 import eye.on.the.money.repository.stock.StockRepository;
 import eye.on.the.money.service.api.EODAPIService;
 import org.junit.jupiter.api.Assertions;
@@ -16,8 +14,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -39,7 +40,7 @@ class StockServiceImplTest {
         List<Stock> stocks = this.stockRepository.findAllByOrderByShortNameAsc();
         List<Stock> result = this.stockService.getAllStocks();
 
-        Assertions.assertEquals(stocks, result);
+        assertEquals(stocks, result);
     }
 
     @Test
@@ -53,7 +54,7 @@ class StockServiceImplTest {
 
         List<Symbol> result = this.stockService.getAllSymbols("exchange");
 
-        Assertions.assertEquals(symbols, result);
+        assertEquals(symbols, result);
     }
 
     @Test
@@ -67,11 +68,28 @@ class StockServiceImplTest {
 
         List<Exchange> result = this.stockService.getAllExchanges();
 
-        Assertions.assertEquals(exchanges, result);
+        assertEquals(exchanges, result);
     }
 
     @Test
     public void getCandleQuoteByShortName() {
+        List<EODCandleQuote> eodList = new ArrayList<>();
+        eodList.add(EODCandleQuote.builder().close(1.0).date(new Date()).high(5.0).low(0.2).open(3.5).volume(5123123L).build());
+        eodList.add(EODCandleQuote.builder().close(2.0).date(new Date()).high(532.0).low(0.9).open(323.5).volume(5123L).build());
+        eodList.add(EODCandleQuote.builder().close(3.0).date(new Date()).high(51.0).low(301.4).open(13.8).volume(7234L).build());
+        eodList.add(EODCandleQuote.builder().close(4.0).date(new Date()).high(55.0).low(200.0).open(553.5).volume(94123L).build());
+        eodList.add(EODCandleQuote.builder().close(5.0).date(new Date()).high(25.0).low(100.0).open(37.5).volume(7213L).build());
 
+        when(this.eodAPIService.getCandleQuoteByShortName("shortName", 1)).thenReturn(eodList);
+
+        CandleQuote cq = this.stockService.getCandleQuoteByShortName("shortName", 1);
+
+        Assertions.assertAll("Assert all cq arrays",
+                () -> assertArrayEquals(eodList.stream().map(EODCandleQuote::getHigh).toArray(Double[]::new), cq.getH()),
+                () -> assertArrayEquals(eodList.stream().map(EODCandleQuote::getLow).toArray(Double[]::new), cq.getL()),
+                () -> assertArrayEquals(eodList.stream().map(EODCandleQuote::getClose).toArray(Double[]::new), cq.getC()),
+                () -> assertArrayEquals(eodList.stream().map(EODCandleQuote::getVolume).toArray(Long[]::new), cq.getV()),
+                () -> assertArrayEquals(eodList.stream().map(EODCandleQuote::getOpen).toArray(Double[]::new), cq.getO()),
+                () -> assertArrayEquals(eodList.stream().map(ecq -> ecq.getDate().getTime()).toArray(Long[]::new), cq.getT()));
     }
 }

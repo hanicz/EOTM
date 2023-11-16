@@ -9,8 +9,14 @@ jobs:
           name: Build
           command: mvn clean package
       - store_test_results:
-          path: target/surefire-reports
+          path: backend/target/surefire-reports
       - store_artifacts:
-          path: backend/target/backend-0.0.1-SNAPSHOT
+          path: backend/target/backend-0.0.1-SNAPSHOT.jar
+      - store_artifacts:
+          path: backend/target/site/jacoco
+          destination: test_coverage
+      - store_artifacts:
+          path: backend/target/checkstyle-result.xml
+          destination: checkstyle
       
 

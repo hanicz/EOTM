@@ -5,7 +5,7 @@
     <parent>
         <artifactId>EOTM</artifactId>
         <groupId>eye.on.the.money</groupId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>1.6</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -212,5 +212,6 @@
 				</executions>
 			</plugin>
 		</plugins>
+		<finalName>EOTM</finalName>
 	</build>
 </project>

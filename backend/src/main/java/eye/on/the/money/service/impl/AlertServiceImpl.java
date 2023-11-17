@@ -7,6 +7,7 @@ import eye.on.the.money.model.stock.Stock;
 import eye.on.the.money.repository.alert.StockAlertRepository;
 import eye.on.the.money.repository.stock.StockRepository;
 import eye.on.the.money.service.AlertService;
+import eye.on.the.money.service.stock.StockService;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -23,10 +24,10 @@ public class AlertServiceImpl implements AlertService {
 
     @Autowired
     private StockAlertRepository stockAlertRepository;
-
     @Autowired
     private StockRepository stockRepository;
-
+    @Autowired
+    private StockService stockService;
     @Autowired
     private ModelMapper modelMapper;
 
@@ -48,22 +49,11 @@ public class AlertServiceImpl implements AlertService {
     @Override
     public StockAlertDTO createNewStockAlert(User user, StockAlertDTO stockAlertDTO) {
         log.trace("Enter");
-        Stock stock = this.stockRepository.findById(stockAlertDTO.getShortName().toLowerCase()).orElseGet(() -> {
-                    log.debug("Stock missing, creating new.");
-                    Stock newStock = Stock.builder()
-                            .id(stockAlertDTO.getShortName().toLowerCase())
-                            .exchange(stockAlertDTO.getExchange())
-                            .shortName(stockAlertDTO.getShortName().toUpperCase())
-                            .name(stockAlertDTO.getName())
-                            .build();
-                    log.debug("New stock created: " + newStock.toString());
-                    return this.stockRepository.save(newStock);
-                }
-        );
+        Stock stock = this.stockService.getOrCreateStock(stockAlertDTO.getShortName(), stockAlertDTO.getExchange(), stockAlertDTO.getName());
 
         StockAlert stockAlert = StockAlert.builder().stock(stock).user(user).type(stockAlertDTO.getType()).valuePoint(stockAlertDTO.getValuePoint()).build();
         this.stockAlertRepository.save(stockAlert);
-        log.trace("New alert created " + stockAlert.toString());
+        log.debug("New alert created " + stockAlert);
         return this.convertToStockAlertDTO(stockAlert);
     }
 

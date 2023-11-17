@@ -2,6 +2,8 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { Investment } from '../../model/investment';
 import { StockService } from '../../service/stock.service';
 import { Globals } from '../../util/global';
+import { Exchange } from 'src/app/model/exchange';
+import { Symbol } from 'src/app/model/symbol';
 
 @Component({
   selector: 'app-investment',
@@ -18,6 +20,12 @@ export class InvestmentComponent implements OnInit {
   investment: Investment = {} as Investment;
   @ViewChild('fileUpload') fileUpload: any;
   globals: Globals;
+  symbols: Symbol[] = [];
+  exchanges: Exchange[] = [];
+  exchangesLoading: boolean = true;
+  stocksLoading: boolean = false;
+  selectedStock: Symbol = {} as Symbol;
+  selectedExchange: Exchange = {} as Exchange;
 
   constructor(private stockService: StockService, globals: Globals) {
     this.globals = globals;
@@ -27,6 +35,13 @@ export class InvestmentComponent implements OnInit {
       { label: 'BUY', value: 'B' },
       { label: 'SELL', value: 'S' }
     ];
+
+    this.stockService.getAllExchanges().subscribe({
+      next: (data) => {
+        this.exchangesLoading = false;
+        this.exchanges = data;
+      }
+    });
 
     this.fetchData();
   }
@@ -89,6 +104,9 @@ export class InvestmentComponent implements OnInit {
   }
 
   saveInvestment() {
+    this.investment.name = this.selectedStock.Name;
+    this.investment.shortName = this.selectedStock.Code;
+    this.investment.exchange = this.selectedExchange.Code;
     if (this.investment.investmentId === undefined) {
       this.stockService.create(this.investment).subscribe({
         next: () => {
@@ -115,5 +133,15 @@ export class InvestmentComponent implements OnInit {
         }
       });
     }
+  }
+
+  exchangeChanged(event: any) {
+    this.stocksLoading = true;
+    this.stockService.getAllSymbols(this.selectedExchange.Code).subscribe({
+      next: (data) => {
+        this.stocksLoading = false;
+        this.symbols = data;
+      }
+    });
   }
 }

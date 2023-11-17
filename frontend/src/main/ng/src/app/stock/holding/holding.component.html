@@ -9,10 +9,12 @@
             <th>Price</th>
             <th>Profit</th>
             <th>%</th>
+            <th>Alerts</th>
         </tr>
     </ng-template>
     <ng-template pTemplate="body">
         <tr *ngFor="let item of [].constructor(4);">
+            <td><p-skeleton></p-skeleton></td>
             <td><p-skeleton></p-skeleton></td>
             <td><p-skeleton></p-skeleton></td>
             <td><p-skeleton></p-skeleton></td>
@@ -36,6 +38,7 @@
             <th>Price</th>
             <th>Profit</th>
             <th>%</th>
+            <th>Alerts</th>
         </tr>
     </ng-template>
     <ng-template pTemplate="body" let-investment>
@@ -65,6 +68,10 @@
                     value="{{(investment.valueDiff / investment.amount * 100 | number : '0.0-1') + '%'}}"></p-tag>
                 <p-tag styleClass="p-mr-2" severity="danger" *ngIf="investment.valueDiff < 0"
                     value="{{(investment.valueDiff / investment.amount * 100 | number : '0.0-1') + '%'}}"></p-tag>
+            </td>
+            <td>
+                <p-tag (click)="alertClicked(investment, 0.05)" class="cursor-pointer" severity="success" value="5%"></p-tag>
+                <p-tag (click)="alertClicked(investment, 0.1)" class="ml-2 cursor-pointer" severity="success" value="10%"></p-tag>
             </td>
         </tr>
     </ng-template>

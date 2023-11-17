@@ -13,4 +13,5 @@ public interface EODAPIService {
     public List<EODCandleQuote> getCandleQuoteByShortName(String shortname, int months);
     public List<Symbol> getAllSymbols(String exchange);
     public List<Exchange> getAllExchanges();
+    public JsonNode getLiveValueForSingle(String ticker, String path);
 }

@@ -1,5 +1,6 @@
 package eye.on.the.money.service.stock.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.model.stock.*;
 import eye.on.the.money.repository.stock.StockRepository;
 import eye.on.the.money.service.api.EODAPIService;
@@ -8,7 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
@@ -19,6 +23,8 @@ public class StockServiceImpl implements StockService {
 
     @Autowired
     private EODAPIService eodAPIService;
+
+    private final SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
 
     @Override
     public List<Stock> getAllStocks() {
@@ -43,12 +49,17 @@ public class StockServiceImpl implements StockService {
         log.trace("Enter getCandleQuoteByShortName");
         List<EODCandleQuote> eodList = this.eodAPIService.getCandleQuoteByShortName(shortName, months);
 
-        Double[] c = new Double[eodList.size()];
-        Double[] o = new Double[eodList.size()];
-        Double[] l = new Double[eodList.size()];
-        Double[] h = new Double[eodList.size()];
-        Long[] v = new Long[eodList.size()];
-        Long[] t = new Long[eodList.size()];
+        JsonNode responseBody = this.eodAPIService.getLiveValueForSingle(shortName, "/real-time/{1}/?api_token={0}&fmt=json&");
+        boolean sameDay = this.fmt.format(eodList.get(eodList.size() -1 ).getDate())
+                .equals(this.fmt.format(new Date(TimeUnit.SECONDS.toMillis(responseBody.findValue("timestamp").longValue()))));
+        int arraySize = sameDay ? eodList.size() : eodList.size() + 1;
+
+        Double[] c = new Double[arraySize];
+        Double[] o = new Double[arraySize];
+        Double[] l = new Double[arraySize];
+        Double[] h = new Double[arraySize];
+        Long[] v = new Long[arraySize];
+        Long[] t = new Long[arraySize];
 
         for (int i = 0; i < eodList.size(); i++) {
             c[i] = eodList.get(i).getClose();
@@ -59,6 +70,29 @@ public class StockServiceImpl implements StockService {
             t[i] = eodList.get(i).getDate().getTime();
         }
 
+        if(!sameDay) {
+            c[eodList.size()] = responseBody.findValue("close").doubleValue();
+            o[eodList.size()] = responseBody.findValue("open").doubleValue();
+            l[eodList.size()] = responseBody.findValue("low").doubleValue();
+            h[eodList.size()] = responseBody.findValue("high").doubleValue();
+            v[eodList.size()] = responseBody.findValue("volume").longValue();
+            t[eodList.size()] = TimeUnit.SECONDS.toMillis(responseBody.findValue("timestamp").longValue());
+        }
+
         return new CandleQuote(c, h, l, o, t, v);
+    }
+
+    @Override
+    public Stock getOrCreateStock(String shortName, String exchange, String name) {
+        return this.stockRepository.findById(shortName.toLowerCase()).orElseGet(() -> {
+                    Stock newStock = Stock.builder()
+                            .id(shortName.toLowerCase())
+                            .exchange(exchange)
+                            .shortName(shortName.toUpperCase())
+                            .name(name)
+                            .build();
+                    return this.stockRepository.save(newStock);
+                }
+        );
     }
 }

@@ -10,4 +10,5 @@ export interface Investment {
     valueDiff?: number;
     fee: number;
     exchange: string;
+    name: string;
 }

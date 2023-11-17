@@ -2,6 +2,7 @@ import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { Globals } from '../../util/global';
 import { Investment } from '../../model/investment';
 import { StockService } from '../../service/stock.service';
+import { AlertService } from 'src/app/service/alert.service';
 
 @Component({
   selector: 'app-holding',
@@ -16,7 +17,7 @@ export class HoldingComponent implements OnInit {
 
   investmentsLoading: boolean = true;
 
-  constructor(private stockService: StockService, globals: Globals) {
+  constructor(private stockService: StockService, globals: Globals, private alertService: AlertService) {
     this.globals = globals;
 
     this.fetchData();
@@ -37,6 +38,17 @@ export class HoldingComponent implements OnInit {
       },
       error: (error) => {
         console.log(error);
+      }
+    });
+  }
+
+  alertClicked(investment: Investment, modulo: number){
+    let average = investment.amount / investment.quantity;
+    let data = {shortName: investment.shortName, exchange: investment.exchange, type: 'PRICE_OVER', valuePoint: average + average * modulo, name: investment.name}
+
+    this.alertService.createNewStockAlert(data).subscribe({
+      next: (data) => {
+        
       }
     });
   }

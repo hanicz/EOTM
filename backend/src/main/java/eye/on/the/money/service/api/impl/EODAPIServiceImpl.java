@@ -38,6 +38,13 @@ public class EODAPIServiceImpl extends APIService implements EODAPIService {
 
     @Override
     @Retryable(value = APIException.class, maxAttempts = 3)
+    public JsonNode getLiveValueForSingle(String ticker, String path) {
+        log.trace("Enter");
+        return this.callStockAPI(this.createURL(EODAPIServiceImpl.API, path, ticker));
+    }
+
+    @Override
+    @Retryable(value = APIException.class, maxAttempts = 3)
     public List<EODCandleQuote> getCandleQuoteByShortName(String shortname, int months) {
         log.trace("Enter");
         String from = (months <= 60) ? "&from=" + this.dateFormat.format(Date.from(ZonedDateTime.now().minusMonths(months).toInstant())) : "";

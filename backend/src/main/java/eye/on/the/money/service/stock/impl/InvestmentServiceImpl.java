@@ -14,6 +14,7 @@ import eye.on.the.money.repository.stock.StockRepository;
 import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.stock.InvestmentService;
 import eye.on.the.money.service.stock.StockPaymentService;
+import eye.on.the.money.service.stock.StockService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -52,6 +53,8 @@ public class InvestmentServiceImpl implements InvestmentService {
     private ModelMapper modelMapper;
     @Autowired
     private EODAPIService eodAPIService;
+    @Autowired
+    private StockService stockService;
 
     @Override
     public List<InvestmentDTO> getInvestments(Long userId) {
@@ -111,7 +114,7 @@ public class InvestmentServiceImpl implements InvestmentService {
     @Override
     public InvestmentDTO createInvestment(InvestmentDTO investmentDTO, User user) {
         Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
-        Stock stock = this.stockRepository.findByShortName(investmentDTO.getShortName()).orElseThrow(NoSuchElementException::new);
+        Stock stock = this.stockService.getOrCreateStock(investmentDTO.getShortName(), investmentDTO.getExchange(), investmentDTO.getName());
         StockPayment stockPayment = this.stockPaymentService.createNewPayment(currency, investmentDTO.getAmount());
 
         Investment investment = Investment.builder()
@@ -132,7 +135,7 @@ public class InvestmentServiceImpl implements InvestmentService {
     @Override
     public InvestmentDTO updateInvestment(InvestmentDTO investmentDTO, User user) {
         Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
-        Stock stock = this.stockRepository.findByShortName(investmentDTO.getShortName()).orElseThrow(NoSuchElementException::new);
+        Stock stock = this.stockService.getOrCreateStock(investmentDTO.getShortName(), investmentDTO.getExchange(), investmentDTO.getName());
         Investment investment = this.investmentRepository.findByIdAndUser_Id(investmentDTO.getInvestmentId(), user.getId()).orElseThrow(NoSuchElementException::new);
         StockPayment stockPayment = investment.getStockPayment();
 

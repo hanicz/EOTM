@@ -25,6 +25,7 @@ public class InvestmentDTO {
     private Double liveValue;
     private Double valueDiff;
     private Double fee;
+    private String name;
 
     public InvestmentDTO mergeInvestments(InvestmentDTO other) {
         if (!this.getShortName().equals(other.getShortName()))

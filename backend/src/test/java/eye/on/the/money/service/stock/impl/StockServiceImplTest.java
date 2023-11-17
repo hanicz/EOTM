@@ -1,5 +1,7 @@
 package eye.on.the.money.service.stock.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eye.on.the.money.EotmApplication;
 import eye.on.the.money.model.stock.*;
 import eye.on.the.money.repository.stock.StockRepository;
@@ -16,6 +18,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,6 +37,8 @@ class StockServiceImplTest {
 
     @Autowired
     private StockServiceImpl stockService;
+
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
     public void getAllStocks() {
@@ -72,7 +77,7 @@ class StockServiceImplTest {
     }
 
     @Test
-    public void getCandleQuoteByShortName() {
+    public void getCandleQuoteByShortName() throws JsonProcessingException {
         List<EODCandleQuote> eodList = new ArrayList<>();
         eodList.add(EODCandleQuote.builder().close(1.0).date(new Date()).high(5.0).low(0.2).open(3.5).volume(5123123L).build());
         eodList.add(EODCandleQuote.builder().close(2.0).date(new Date()).high(532.0).low(0.9).open(323.5).volume(5123L).build());
@@ -81,6 +86,8 @@ class StockServiceImplTest {
         eodList.add(EODCandleQuote.builder().close(5.0).date(new Date()).high(25.0).low(100.0).open(37.5).volume(7213L).build());
 
         when(this.eodAPIService.getCandleQuoteByShortName("shortName", 1)).thenReturn(eodList);
+        when(this.eodAPIService.getLiveValueForSingle("shortName", "/real-time/{1}/?api_token={0}&fmt=json&"))
+                .thenReturn(mapper.readTree("{\"code\":\"AMD.US\",\"timestamp\":" + TimeUnit.MILLISECONDS.toSeconds(new Date().getTime()) + ",\"gmtoffset\":0,\"open\":119.64,\"high\":119.97,\"low\":118.82,\"close\":119.7044,\"volume\":5094170,\"previousClose\":119.83,\"change\":-0.1256,\"change_p\":-0.1048}"));
 
         CandleQuote cq = this.stockService.getCandleQuoteByShortName("shortName", 1);
 

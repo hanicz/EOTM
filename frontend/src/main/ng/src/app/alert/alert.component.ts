@@ -81,7 +81,7 @@ export class AlertComponent implements OnInit {
   }
 
   createAlert() {
-    let data = {shortName: this.selectedStock.Code, exchange: this.selectedExchange.Code, type: this.selectedType, valuePoint: this.valuePoint}
+    let data = {shortName: this.selectedStock.Code, exchange: this.selectedExchange.Code, type: this.selectedType, valuePoint: this.valuePoint, name: this.selectedStock.Name}
 
     this.alertService.createNewStockAlert(data).subscribe({
       next: (data) => {

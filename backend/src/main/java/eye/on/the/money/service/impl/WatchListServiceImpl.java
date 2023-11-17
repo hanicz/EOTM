@@ -18,6 +18,7 @@ import eye.on.the.money.repository.watchlist.StockWatchRepository;
 import eye.on.the.money.service.WatchlistService;
 import eye.on.the.money.service.api.CryptoAPIService;
 import eye.on.the.money.service.api.EODAPIService;
+import eye.on.the.money.service.stock.StockService;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +56,9 @@ public class WatchListServiceImpl implements WatchlistService {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private StockService stockService;
 
     @Override
     public List<CryptoWatchDTO> getCryptoWatchlistByUserId(Long userId, String currency) {
@@ -125,16 +129,7 @@ public class WatchListServiceImpl implements WatchlistService {
     @Transactional
     @Override
     public StockWatchDTO createNewStockWatch(User user, Stock wStock) {
-        Stock stock = this.stockRepository.findById(wStock.getShortName().toLowerCase()).orElseGet(() -> {
-                    Stock newStock = Stock.builder()
-                            .id(wStock.getShortName().toLowerCase())
-                            .exchange(wStock.getExchange())
-                            .shortName(wStock.getShortName().toUpperCase())
-                            .name(wStock.getName())
-                            .build();
-                    return this.stockRepository.save(newStock);
-                }
-        );
+        Stock stock = this.stockService.getOrCreateStock(wStock.getShortName(), wStock.getExchange(), wStock.getName());
 
         TickerWatch tickerWatch = TickerWatch.builder().stock(stock).user(user).build();
         this.stockWatchRepository.save(tickerWatch);

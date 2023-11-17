@@ -9,4 +9,6 @@ public interface StockService {
     public CandleQuote getCandleQuoteByShortName(String shortName, int months);
     public List<Symbol> getAllSymbols(String exchange);
     public List<Exchange> getAllExchanges();
+
+    public Stock getOrCreateStock(String shortName, String exchange, String name);
 }

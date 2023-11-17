@@ -95,8 +95,18 @@
     styleClass="p-fluid">
     <ng-template pTemplate="content">
         <div class="p-field">
-            <label for="name">Name</label>
-            <input type="text" pInputText id="name" [(ngModel)]="investment.shortName" />
+            <p-dropdown class="searchDropdown" [options]="exchanges" optionLabel="Name" [virtualScroll]="true"
+                [itemSize]="31" [filter]="true" (onChange)="exchangeChanged($event)" [(ngModel)]="selectedExchange"
+                placeholder="Select an Exchange" [style]="{'width':'100%'}"
+                [dropdownIcon]="exchangesLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+            </p-dropdown>
+        </div>
+        <div class="p-field">
+            <p-dropdown class="searchDropdown" [options]="symbols" optionLabel="Name" [virtualScroll]="true"
+                [itemSize]="31" [filter]="true" [(ngModel)]="selectedStock" placeholder="Select a Ticker"
+                [style]="{'width':'100%'}"
+                [dropdownIcon]="stocksLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+            </p-dropdown>
         </div>
         <div class="p-field">
             <label for="currency">Currency</label>

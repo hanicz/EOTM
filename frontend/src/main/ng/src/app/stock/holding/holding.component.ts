@@ -44,7 +44,7 @@ export class HoldingComponent implements OnInit {
 
   alertClicked(investment: Investment, modulo: number){
     let average = investment.amount / investment.quantity;
-    let data = {shortName: investment.shortName, exchange: investment.exchange, type: 'PRICE_OVER', valuePoint: average + average * modulo, name: investment.name}
+    let data = {shortName: investment.shortName, exchange: investment.exchange, type: 'PRICE_OVER', valuePoint: (average + average * modulo).toFixed(2), name: investment.name}
 
     this.alertService.createNewStockAlert(data).subscribe({
       next: (data) => {

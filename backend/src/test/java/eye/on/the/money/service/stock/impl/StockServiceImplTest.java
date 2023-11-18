@@ -18,6 +18,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -77,13 +78,8 @@ class StockServiceImplTest {
     }
 
     @Test
-    public void getCandleQuoteByShortName() throws JsonProcessingException {
-        List<EODCandleQuote> eodList = new ArrayList<>();
-        eodList.add(EODCandleQuote.builder().close(1.0).date(new Date()).high(5.0).low(0.2).open(3.5).volume(5123123L).build());
-        eodList.add(EODCandleQuote.builder().close(2.0).date(new Date()).high(532.0).low(0.9).open(323.5).volume(5123L).build());
-        eodList.add(EODCandleQuote.builder().close(3.0).date(new Date()).high(51.0).low(301.4).open(13.8).volume(7234L).build());
-        eodList.add(EODCandleQuote.builder().close(4.0).date(new Date()).high(55.0).low(200.0).open(553.5).volume(94123L).build());
-        eodList.add(EODCandleQuote.builder().close(5.0).date(new Date()).high(25.0).low(100.0).open(37.5).volume(7213L).build());
+    public void getCandleQuoteByShortNameSameDay() throws JsonProcessingException {
+        List<EODCandleQuote> eodList = this.geteodList();
 
         when(this.eodAPIService.getCandleQuoteByShortName("shortName", 1)).thenReturn(eodList);
         when(this.eodAPIService.getLiveValueForSingle("shortName", "/real-time/{1}/?api_token={0}&fmt=json&"))
@@ -98,5 +94,56 @@ class StockServiceImplTest {
                 () -> assertArrayEquals(eodList.stream().map(EODCandleQuote::getVolume).toArray(Long[]::new), cq.getV()),
                 () -> assertArrayEquals(eodList.stream().map(EODCandleQuote::getOpen).toArray(Double[]::new), cq.getO()),
                 () -> assertArrayEquals(eodList.stream().map(ecq -> ecq.getDate().getTime()).toArray(Long[]::new), cq.getT()));
+    }
+
+    @Test
+    public void getCandleQuoteByShortNameNotSameDay() throws JsonProcessingException {
+        List<EODCandleQuote> eodList = this.geteodList();
+
+        when(this.eodAPIService.getCandleQuoteByShortName("shortName", 1)).thenReturn(eodList);
+        when(this.eodAPIService.getLiveValueForSingle("shortName", "/real-time/{1}/?api_token={0}&fmt=json&"))
+                .thenReturn(mapper.readTree("{\"code\":\"AMD.US\",\"timestamp\": 1700255640,\"gmtoffset\":0,\"open\":119.64,\"high\":119.97,\"low\":118.82,\"close\":119.7044,\"volume\":5094170,\"previousClose\":119.83,\"change\":-0.1256,\"change_p\":-0.1048}"));
+
+        CandleQuote cq = this.stockService.getCandleQuoteByShortName("shortName", 1);
+
+        eodList.add(EODCandleQuote.builder().close(119.7044).date(new Date(TimeUnit.SECONDS.toMillis(1700255640))).high(119.97).low(118.82).open(119.64).volume(5094170L).build());
+
+        Assertions.assertAll("Assert all cq arrays",
+                () -> assertArrayEquals(eodList.stream().map(EODCandleQuote::getHigh).toArray(Double[]::new), cq.getH()),
+                () -> assertArrayEquals(eodList.stream().map(EODCandleQuote::getLow).toArray(Double[]::new), cq.getL()),
+                () -> assertArrayEquals(eodList.stream().map(EODCandleQuote::getClose).toArray(Double[]::new), cq.getC()),
+                () -> assertArrayEquals(eodList.stream().map(EODCandleQuote::getVolume).toArray(Long[]::new), cq.getV()),
+                () -> assertArrayEquals(eodList.stream().map(EODCandleQuote::getOpen).toArray(Double[]::new), cq.getO()),
+                () -> assertArrayEquals(eodList.stream().map(ecq -> ecq.getDate().getTime()).toArray(Long[]::new), cq.getT()));
+    }
+
+    @Test
+    public void getOrCreateStockExist() {
+        Stock expected = this.stockRepository.findById("crsr").get();
+        Stock result = this.stockService.getOrCreateStock("crsr", "US", "Corsair Gaming Inc");
+
+        Assertions.assertEquals(expected, result);
+    }
+
+    @Test
+    public void getOrCreateStockNew() {
+        Optional<Stock> empty = this.stockRepository.findById("new");
+        Stock result = this.stockService.getOrCreateStock("new", "US", "New Stock Test");
+
+        Stock expected = this.stockRepository.findById("new").get();
+
+        Assertions.assertTrue(empty.isEmpty());
+        Assertions.assertEquals(expected, result);
+    }
+
+    private List<EODCandleQuote> geteodList(){
+        List<EODCandleQuote> eodList = new ArrayList<>();
+        eodList.add(EODCandleQuote.builder().close(1.0).date(new Date()).high(5.0).low(0.2).open(3.5).volume(5123123L).build());
+        eodList.add(EODCandleQuote.builder().close(2.0).date(new Date()).high(532.0).low(0.9).open(323.5).volume(5123L).build());
+        eodList.add(EODCandleQuote.builder().close(3.0).date(new Date()).high(51.0).low(301.4).open(13.8).volume(7234L).build());
+        eodList.add(EODCandleQuote.builder().close(4.0).date(new Date()).high(55.0).low(200.0).open(553.5).volume(94123L).build());
+        eodList.add(EODCandleQuote.builder().close(5.0).date(new Date()).high(25.0).low(100.0).open(37.5).volume(7213L).build());
+
+        return eodList;
     }
 }

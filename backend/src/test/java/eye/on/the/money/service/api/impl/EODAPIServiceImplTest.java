@@ -48,7 +48,7 @@ class EODAPIServiceImplTest {
     }
 
     @Test
-    public void getLiveValue() throws URISyntaxException, JsonProcessingException {
+    public void getLiveValue() throws URISyntaxException {
         String json = "{\"json\":\"json\"}";
         this.mockServer.expect(ExpectedCount.once(),
                         requestTo(new URI("https://eodhost.com/real-time/stock/?api_token=token&fmt=json&s=AMD.US")))
@@ -58,6 +58,21 @@ class EODAPIServiceImplTest {
                         .body(json));
 
         JsonNode response = this.eodAPIService.getLiveValue("AMD.US", "/real-time/stock/?api_token={0}&fmt=json&s={1}");
+        this.mockServer.verify();
+        Assertions.assertEquals(json, response.toString());
+    }
+
+    @Test
+    public void getLiveValueForSingle() throws URISyntaxException {
+        String json = "{\"json\":\"json\"}";
+        this.mockServer.expect(ExpectedCount.once(),
+                        requestTo(new URI("https://eodhost.com/real-time/AMD.US/?api_token=token&fmt=json")))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withStatus(HttpStatus.OK)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(json));
+
+        JsonNode response = this.eodAPIService.getLiveValue("AMD.US", "/real-time/{1}/?api_token={0}&fmt=json");
         this.mockServer.verify();
         Assertions.assertEquals(json, response.toString());
     }

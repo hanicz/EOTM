@@ -48,7 +48,6 @@ export class HoldingComponent implements OnInit {
 
     this.alertService.createNewStockAlert(data).subscribe({
       next: (data) => {
-        
       }
     });
   }

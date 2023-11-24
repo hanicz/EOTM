@@ -1,11 +1,7 @@
 package eye.on.the.money.model.crypto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.Entity;
@@ -22,6 +18,7 @@ import java.util.Set;
 @ToString
 @Table(name = "EOTM_COIN")
 @AllArgsConstructor
+@EqualsAndHashCode
 @NoArgsConstructor
 public class Coin {
 
@@ -33,5 +30,6 @@ public class Coin {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "coin")
     @JsonIgnore
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Set<Transaction> transaction;
 }

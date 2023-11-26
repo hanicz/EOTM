@@ -28,6 +28,7 @@ public class AlertScheduler {
     @Autowired
     private EmailService emailServiceImpl;
 
+
     @Scheduled(fixedDelay = 300000)
     public void checkAlerts() {
         log.trace("Enter");
@@ -50,13 +51,14 @@ public class AlertScheduler {
             String ticker = alert.getStock().getShortName() + "." + alert.getStock().getExchange();
             switch (alert.getType()) {
                 case "PERCENT_OVER":
-                    if (stockMap.get(ticker).findValue("change").asDouble() >= alert.getValuePoint()) {
+                    if (stockMap.get(ticker).findValue("change_p").asDouble() >= alert.getValuePoint()) {
+                        System.out.println();
                         this.emailServiceImpl.sendMail(alert.getUser().getEmail(), ticker + " is over " + alert.getValuePoint() + "%");
                         this.stockAlertRepository.delete(alert);
                     }
                     break;
                 case "PERCENT_UNDER":
-                    if (stockMap.get(ticker).findValue("change").asDouble() <= alert.getValuePoint()) {
+                    if (stockMap.get(ticker).findValue("change_p").asDouble() <= alert.getValuePoint()) {
                         this.emailServiceImpl.sendMail(alert.getUser().getEmail(), ticker + " is under " + alert.getValuePoint() + "%");
                         this.stockAlertRepository.delete(alert);
                     }

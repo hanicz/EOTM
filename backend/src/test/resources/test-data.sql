@@ -30,8 +30,3 @@ INSERT INTO EOTM_CREDENTIAL (NAME,SECRET) VALUES ('email_user', 'user'),
 ('email_password', 'password'),
 ('eod', 'token'),
 ('finnhub', 'token');
-
---Test alerts
-INSERT INTO EOTM_STOCK_ALERT (USER_ID, STOCK_ID, TYPE, VALUE_POINT) VALUES (1, 'crsr', 'PERCENT_OVER', 3.0),
-(1, 'crsr', 'PERCENT_UNDER', -3.0),
-(1, 'crsr', 'PRICE_UNDER', 34.5);

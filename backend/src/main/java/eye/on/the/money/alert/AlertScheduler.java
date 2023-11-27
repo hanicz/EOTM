@@ -52,7 +52,6 @@ public class AlertScheduler {
             switch (alert.getType()) {
                 case "PERCENT_OVER":
                     if (stockMap.get(ticker).findValue("change_p").asDouble() >= alert.getValuePoint()) {
-                        System.out.println();
                         this.emailServiceImpl.sendMail(alert.getUser().getEmail(), ticker + " is over " + alert.getValuePoint() + "%");
                         this.stockAlertRepository.delete(alert);
                     }

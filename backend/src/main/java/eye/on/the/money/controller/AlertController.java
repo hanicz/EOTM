@@ -23,7 +23,7 @@ public class AlertController {
     @GetMapping()
     public ResponseEntity<List<StockAlertDTO>> getAlerts(@AuthenticationPrincipal User user) {
         log.trace("Enter");
-        return new ResponseEntity<List<StockAlertDTO>>(this.alertService.getAllStockAlerts(user.getId()), HttpStatus.OK);
+        return new ResponseEntity<>(this.alertService.getAllStockAlerts(user.getId()), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
@@ -36,6 +36,6 @@ public class AlertController {
     @PostMapping()
     public ResponseEntity<StockAlertDTO> createStockAlert(@AuthenticationPrincipal User user, @RequestBody StockAlertDTO stockAlertDTO) {
         log.trace("Enter");
-        return new ResponseEntity<StockAlertDTO>(this.alertService.createNewStockAlert(user, stockAlertDTO), HttpStatus.OK);
+        return new ResponseEntity<>(this.alertService.createNewStockAlert(user, stockAlertDTO), HttpStatus.OK);
     }
 }

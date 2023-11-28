@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eye.on.the.money.EotmApplication;
 import eye.on.the.money.exception.APIException;
+import eye.on.the.money.model.stock.EODCandleQuote;
 import eye.on.the.money.model.stock.Exchange;
 import eye.on.the.money.model.stock.Symbol;
 import org.junit.jupiter.api.Assertions;
@@ -23,7 +24,11 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
@@ -41,10 +46,11 @@ class EODAPIServiceImplTest {
     private EODAPIServiceImpl eodAPIService;
     private MockRestServiceServer mockServer;
     private final ObjectMapper mapper = new ObjectMapper();
+    private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     @BeforeEach
     public void init() {
-        this.mockServer = MockRestServiceServer.createServer(restTemplate);
+        this.mockServer = MockRestServiceServer.createServer(this.restTemplate);
     }
 
     @Test
@@ -97,7 +103,7 @@ class EODAPIServiceImplTest {
     }
 
     @Test
-    public void getAllSymbolsWrongJsonObject() throws URISyntaxException, JsonProcessingException {
+    public void getAllSymbolsWrongJsonObject() throws URISyntaxException {
         String json = "{\"json\":\"json\"}";
 
         this.mockServer.expect(ExpectedCount.times(3),
@@ -139,7 +145,7 @@ class EODAPIServiceImplTest {
     }
 
     @Test
-    public void getAllExchangesWrongJsonObject() throws URISyntaxException, JsonProcessingException {
+    public void getAllExchangesWrongJsonObject() throws URISyntaxException {
         String json = "{\"json\":\"json\"}";
 
         this.mockServer.expect(ExpectedCount.times(3),
@@ -183,7 +189,7 @@ class EODAPIServiceImplTest {
     }
 
     @Test
-    public void clientException() throws URISyntaxException, JsonProcessingException {
+    public void clientException() throws URISyntaxException {
         this.mockServer.expect(ExpectedCount.times(3),
                         requestTo(new URI("https://eodhost.com/real-time/stock/?api_token=token&fmt=json&s=AMD.US")))
                 .andExpect(method(HttpMethod.GET))
@@ -199,5 +205,102 @@ class EODAPIServiceImplTest {
         String actualMessage = e.getMessage();
 
         Assertions.assertEquals(expectedMessage, actualMessage);
+    }
+
+    @Test
+    public void getCandleQuoteByShortName5Years() throws URISyntaxException, JsonProcessingException {
+        List<EODCandleQuote> candles = this.getCandles();
+
+        this.mockServer.expect(ExpectedCount.once(),
+                        requestTo(new URI("https://eodhost.com/eod/AMD.US?api_token=token&fmt=json&period=m")))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withStatus(HttpStatus.OK)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(this.mapper.writeValueAsString(candles)));
+
+        List<EODCandleQuote> result = this.eodAPIService.getCandleQuoteByShortName("AMD.US", 61);
+        this.mockServer.verify();
+        Assertions.assertEquals(candles, result);
+    }
+
+    @Test
+    public void getCandleQuoteByShortName2Years() throws URISyntaxException, JsonProcessingException {
+        List<EODCandleQuote> candles = this.getCandles();
+
+        String from = this.dateFormat.format(Date.from(ZonedDateTime.now().minusMonths(24).toInstant()));
+
+        this.mockServer.expect(ExpectedCount.once(),
+                        requestTo(new URI("https://eodhost.com/eod/AMD.US?api_token=token&fmt=json&period=w&from=" + from)))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withStatus(HttpStatus.OK)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(this.mapper.writeValueAsString(candles)));
+
+        List<EODCandleQuote> result = this.eodAPIService.getCandleQuoteByShortName("AMD.US", 24);
+        this.mockServer.verify();
+        Assertions.assertEquals(candles, result);
+    }
+
+    @Test
+    public void getCandleQuoteByShortName1Year() throws URISyntaxException, JsonProcessingException {
+        List<EODCandleQuote> candles = this.getCandles();
+
+        String from = this.dateFormat.format(Date.from(ZonedDateTime.now().minusMonths(12).toInstant()));
+
+        this.mockServer.expect(ExpectedCount.once(),
+                        requestTo(new URI("https://eodhost.com/eod/AMD.US?api_token=token&fmt=json&period=d&from=" + from)))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withStatus(HttpStatus.OK)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(this.mapper.writeValueAsString(candles)));
+
+        List<EODCandleQuote> result = this.eodAPIService.getCandleQuoteByShortName("AMD.US", 12);
+        this.mockServer.verify();
+        Assertions.assertEquals(candles, result);
+    }
+
+    @Test
+    public void getCandleQuoteByShortName6Months() throws URISyntaxException, JsonProcessingException {
+        List<EODCandleQuote> candles = this.getCandles();
+
+        String from = this.dateFormat.format(Date.from(ZonedDateTime.now().minusMonths(6).toInstant()));
+
+        this.mockServer.expect(ExpectedCount.once(),
+                        requestTo(new URI("https://eodhost.com/eod/AMD.US?api_token=token&fmt=json&period=d&from=" + from)))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withStatus(HttpStatus.OK)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(this.mapper.writeValueAsString(candles)));
+
+        List<EODCandleQuote> result = this.eodAPIService.getCandleQuoteByShortName("AMD.US", 6);
+        this.mockServer.verify();
+        Assertions.assertEquals(candles, result);
+    }
+
+    @Test
+    public void getCandleQuoteByShortName1Month() throws URISyntaxException, JsonProcessingException {
+        List<EODCandleQuote> candles = this.getCandles();
+
+        String from = this.dateFormat.format(Date.from(ZonedDateTime.now().minusMonths(1).toInstant()));
+
+        this.mockServer.expect(ExpectedCount.once(),
+                        requestTo(new URI("https://eodhost.com/eod/AMD.US?api_token=token&fmt=json&period=d&from=" + from)))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withStatus(HttpStatus.OK)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(this.mapper.writeValueAsString(candles)));
+
+        List<EODCandleQuote> result = this.eodAPIService.getCandleQuoteByShortName("AMD.US", 1);
+        this.mockServer.verify();
+        Assertions.assertEquals(candles, result);
+    }
+
+    private List<EODCandleQuote> getCandles() {
+        List<EODCandleQuote> candles = new ArrayList<>();
+        candles.add(EODCandleQuote.builder().volume(1L).open(1.0).low(2.0).high(5.0).date(new Date()).close(55.5).build());
+        candles.add(EODCandleQuote.builder().volume(62134L).open(1.7).low(2.0).high(4.9).date(new Date()).close(64.5).build());
+        candles.add(EODCandleQuote.builder().volume(1231L).open(1.22).low(25.1).high(95.3).date(new Date()).close(51.5).build());
+
+        return candles;
     }
 }

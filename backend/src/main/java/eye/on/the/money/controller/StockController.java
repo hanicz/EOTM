@@ -1,13 +1,14 @@
 package eye.on.the.money.controller;
 
-import eye.on.the.money.model.User;
-import eye.on.the.money.model.stock.*;
+import eye.on.the.money.model.stock.CandleQuote;
+import eye.on.the.money.model.stock.Exchange;
+import eye.on.the.money.model.stock.Stock;
+import eye.on.the.money.model.stock.Symbol;
 import eye.on.the.money.service.stock.StockService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,26 +25,26 @@ public class StockController {
     private StockService stockService;
 
     @GetMapping()
-    public ResponseEntity<List<Stock>> getAllStocks(@AuthenticationPrincipal User user) {
+    public ResponseEntity<List<Stock>> getAllStocks() {
         log.trace("Enter getAllStocks");
-        return new ResponseEntity<List<Stock>>(this.stockService.getAllStocks(), HttpStatus.OK);
+        return new ResponseEntity<>(this.stockService.getAllStocks(), HttpStatus.OK);
     }
 
     @GetMapping("symbols/{exchange}")
-    public ResponseEntity<List<Symbol>> getAllSymbols(@AuthenticationPrincipal User user, @PathVariable String exchange) {
+    public ResponseEntity<List<Symbol>> getAllSymbols(@PathVariable String exchange) {
         log.trace("Enter getAllSymbols");
-        return new ResponseEntity<List<Symbol>>(this.stockService.getAllSymbols(exchange), HttpStatus.OK);
+        return new ResponseEntity<>(this.stockService.getAllSymbols(exchange), HttpStatus.OK);
     }
 
     @GetMapping("exchanges")
-    public ResponseEntity<List<Exchange>> getAllExchanges(@AuthenticationPrincipal User user) {
+    public ResponseEntity<List<Exchange>> getAllExchanges() {
         log.trace("Enter getAllExchanges");
-        return new ResponseEntity<List<Exchange>>(this.stockService.getAllExchanges(), HttpStatus.OK);
+        return new ResponseEntity<>(this.stockService.getAllExchanges(), HttpStatus.OK);
     }
 
     @GetMapping("candle/{shortName}/{months}")
-    public ResponseEntity<CandleQuote> getCandleQuoteByShortName(@AuthenticationPrincipal User user, @PathVariable String shortName, @PathVariable int months) {
+    public ResponseEntity<CandleQuote> getCandleQuoteByShortName(@PathVariable String shortName, @PathVariable int months) {
         log.trace("Enter getCandleQuoteByShortName");
-        return new ResponseEntity<CandleQuote>(this.stockService.getCandleQuoteByShortName(shortName, months), HttpStatus.OK);
+        return new ResponseEntity<>(this.stockService.getCandleQuoteByShortName(shortName, months), HttpStatus.OK);
     }
 }

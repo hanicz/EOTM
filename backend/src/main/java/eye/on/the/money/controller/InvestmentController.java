@@ -29,25 +29,25 @@ public class InvestmentController {
     @GetMapping()
     public ResponseEntity<List<InvestmentDTO>> getAllInvestments(@AuthenticationPrincipal User user) {
         log.trace("Enter getStockInvestmentsByUserId");
-        return new ResponseEntity<List<InvestmentDTO>>(this.investmentService.getInvestments(user.getId()), HttpStatus.OK);
+        return new ResponseEntity<>(this.investmentService.getInvestments(user.getId()), HttpStatus.OK);
     }
 
     @PostMapping("/holding")
     public ResponseEntity<List<InvestmentDTO>> getHoldings(@AuthenticationPrincipal User user, @RequestBody InvestmentQuery query) {
         log.trace("Enter getHoldings");
-        return new ResponseEntity<List<InvestmentDTO>>(this.investmentService.getCurrentHoldings(user.getId(), query), HttpStatus.OK);
+        return new ResponseEntity<>(this.investmentService.getCurrentHoldings(user.getId(), query), HttpStatus.OK);
     }
 
     @PostMapping("/position")
     public ResponseEntity<List<InvestmentDTO>> getPositions(@AuthenticationPrincipal User user, @RequestBody InvestmentQuery query) {
         log.trace("Enter getPositions");
-        return new ResponseEntity<List<InvestmentDTO>>(this.investmentService.getAllPositions(user.getId(), query), HttpStatus.OK);
+        return new ResponseEntity<>(this.investmentService.getAllPositions(user.getId(), query), HttpStatus.OK);
     }
 
     @PostMapping
     public ResponseEntity<InvestmentDTO> createInvestment(@AuthenticationPrincipal User user, @RequestBody InvestmentDTO investmentDTO) {
         log.trace("Enter createInvestment");
-        return new ResponseEntity<InvestmentDTO>(this.investmentService.createInvestment(investmentDTO, user), HttpStatus.CREATED);
+        return new ResponseEntity<>(this.investmentService.createInvestment(investmentDTO, user), HttpStatus.CREATED);
     }
 
     @DeleteMapping()
@@ -69,7 +69,7 @@ public class InvestmentController {
     @PutMapping
     public ResponseEntity<InvestmentDTO> updateInvestment(@AuthenticationPrincipal User user, @RequestBody InvestmentDTO investmentDTO) {
         log.trace("Enter updateInvestment");
-        return new ResponseEntity<InvestmentDTO>(this.investmentService.updateInvestment(investmentDTO, user), HttpStatus.CREATED);
+        return new ResponseEntity<>(this.investmentService.updateInvestment(investmentDTO, user), HttpStatus.CREATED);
     }
 
     @PostMapping("/process/csv")

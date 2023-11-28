@@ -29,25 +29,25 @@ public class ETFController {
     @GetMapping()
     public ResponseEntity<List<ETFInvestmentDTO>> getAllETFInvestments(@AuthenticationPrincipal User user) {
         log.trace("Enter getAllETFInvestments");
-        return new ResponseEntity<List<ETFInvestmentDTO>>(this.etfInvestmentService.getETFInvestments(user.getId()), HttpStatus.OK);
+        return new ResponseEntity<>(this.etfInvestmentService.getETFInvestments(user.getId()), HttpStatus.OK);
     }
 
     @PostMapping("/holding")
     public ResponseEntity<List<ETFInvestmentDTO>> getETFHoldings(@AuthenticationPrincipal User user, @RequestBody InvestmentQuery query) {
         log.trace("Enter getETFHoldings");
-        return new ResponseEntity<List<ETFInvestmentDTO>>(this.etfInvestmentService.getCurrentETFHoldings(user.getId(), query), HttpStatus.OK);
+        return new ResponseEntity<>(this.etfInvestmentService.getCurrentETFHoldings(user.getId(), query), HttpStatus.OK);
     }
 
     @PostMapping("/position")
     public ResponseEntity<List<ETFInvestmentDTO>> getPositions(@AuthenticationPrincipal User user, @RequestBody InvestmentQuery query) {
         log.trace("Enter getPositions");
-        return new ResponseEntity<List<ETFInvestmentDTO>>(this.etfInvestmentService.getAllPositions(user.getId(), query), HttpStatus.OK);
+        return new ResponseEntity<>(this.etfInvestmentService.getAllPositions(user.getId(), query), HttpStatus.OK);
     }
 
     @PostMapping
     public ResponseEntity<ETFInvestmentDTO> createInvestment(@AuthenticationPrincipal User user, @RequestBody ETFInvestmentDTO investmentDTO) {
         log.trace("Enter createInvestment");
-        return new ResponseEntity<ETFInvestmentDTO>(this.etfInvestmentService.createInvestment(investmentDTO, user), HttpStatus.CREATED);
+        return new ResponseEntity<>(this.etfInvestmentService.createInvestment(investmentDTO, user), HttpStatus.CREATED);
     }
 
     @DeleteMapping()
@@ -69,6 +69,6 @@ public class ETFController {
     @PutMapping
     public ResponseEntity<ETFInvestmentDTO> updateInvestment(@AuthenticationPrincipal User user, @RequestBody ETFInvestmentDTO investmentDTO) {
         log.trace("Enter updateInvestment");
-        return new ResponseEntity<ETFInvestmentDTO>(this.etfInvestmentService.updateInvestment(investmentDTO, user), HttpStatus.CREATED);
+        return new ResponseEntity<>(this.etfInvestmentService.updateInvestment(investmentDTO, user), HttpStatus.CREATED);
     }
 }

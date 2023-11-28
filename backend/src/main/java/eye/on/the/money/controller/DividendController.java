@@ -29,13 +29,13 @@ public class DividendController {
     @GetMapping()
     public ResponseEntity<List<DividendDTO>> getAllDividends(@AuthenticationPrincipal User user) {
         log.trace("Enter getAllDividends");
-        return new ResponseEntity<List<DividendDTO>>(this.dividendService.getDividends(user.getId()), HttpStatus.OK);
+        return new ResponseEntity<>(this.dividendService.getDividends(user.getId()), HttpStatus.OK);
     }
 
     @PostMapping
     public ResponseEntity<DividendDTO> createDividend(@AuthenticationPrincipal User user, @RequestBody DividendDTO dividendDTO) {
         log.trace("Enter createDividend");
-        return new ResponseEntity<DividendDTO>(this.dividendService.createDividend(dividendDTO, user), HttpStatus.CREATED);
+        return new ResponseEntity<>(this.dividendService.createDividend(dividendDTO, user), HttpStatus.CREATED);
     }
 
     @DeleteMapping()
@@ -57,7 +57,7 @@ public class DividendController {
     @PutMapping
     public ResponseEntity<DividendDTO> updateDividend(@AuthenticationPrincipal User user, @RequestBody DividendDTO dividendDTO) {
         log.trace("Enter updateDividend");
-        return new ResponseEntity<DividendDTO>(this.dividendService.updateDividend(dividendDTO, user), HttpStatus.CREATED);
+        return new ResponseEntity<>(this.dividendService.updateDividend(dividendDTO, user), HttpStatus.CREATED);
     }
 
     @PostMapping("/process/csv")

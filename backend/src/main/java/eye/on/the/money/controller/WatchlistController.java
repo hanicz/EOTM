@@ -29,19 +29,19 @@ public class WatchlistController {
         log.trace("Enter");
         List<CryptoWatchDTO> cryptoWatchList = this.watchlistService.getCryptoWatchlistByUserId(user.getId(), currency);
         cryptoWatchList.sort(Collections.reverseOrder());
-        return new ResponseEntity<List<CryptoWatchDTO>>(cryptoWatchList, HttpStatus.OK);
+        return new ResponseEntity<>(cryptoWatchList, HttpStatus.OK);
     }
 
     @GetMapping("/forex")
     public ResponseEntity<List<ForexWatchDTO>> getForexWatchList(@AuthenticationPrincipal User user) {
         log.trace("Enter");
-        return new ResponseEntity<List<ForexWatchDTO>>(this.watchlistService.getForexWatchlistByUserId(user.getId()), HttpStatus.OK);
+        return new ResponseEntity<>(this.watchlistService.getForexWatchlistByUserId(user.getId()), HttpStatus.OK);
     }
 
     @GetMapping("/stock")
     public ResponseEntity<List<StockWatchDTO>> getStockWatchList(@AuthenticationPrincipal User user) {
         log.trace("Enter");
-        return new ResponseEntity<List<StockWatchDTO>>(this.watchlistService.getStockWatchlistByUserId(user.getId()), HttpStatus.OK);
+        return new ResponseEntity<>(this.watchlistService.getStockWatchlistByUserId(user.getId()), HttpStatus.OK);
     }
 
     @DeleteMapping("/crypto/{id}")
@@ -68,12 +68,12 @@ public class WatchlistController {
     @PostMapping("/stock")
     public ResponseEntity<StockWatchDTO> createStockWatch(@AuthenticationPrincipal User user, @RequestBody Stock wStock) {
         log.trace("Enter");
-        return new ResponseEntity<StockWatchDTO>(this.watchlistService.createNewStockWatch(user, wStock), HttpStatus.OK);
+        return new ResponseEntity<>(this.watchlistService.createNewStockWatch(user, wStock), HttpStatus.OK);
     }
 
     @PostMapping("/crypto/{coinId}")
     public ResponseEntity<CryptoWatchDTO> createCryptoWatch(@AuthenticationPrincipal User user, @PathVariable String coinId) {
         log.trace("Enter");
-        return new ResponseEntity<CryptoWatchDTO>(this.watchlistService.createNewCryptoWatch(user, coinId), HttpStatus.OK);
+        return new ResponseEntity<>(this.watchlistService.createNewCryptoWatch(user, coinId), HttpStatus.OK);
     }
 }

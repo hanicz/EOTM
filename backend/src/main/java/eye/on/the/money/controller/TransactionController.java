@@ -36,25 +36,25 @@ public class TransactionController {
     @GetMapping()
     public ResponseEntity<List<TransactionDTO>> getCoinTransactionsByUserId(@AuthenticationPrincipal User user) {
         log.trace("Enter getCoinTransactionsByUserId");
-        return new ResponseEntity<List<TransactionDTO>>(this.transactionService.getTransactionsByUserId(user.getId()), HttpStatus.OK);
+        return new ResponseEntity<>(this.transactionService.getTransactionsByUserId(user.getId()), HttpStatus.OK);
     }
 
     @PostMapping("/currency")
     public ResponseEntity<List<TransactionDTO>> getCoinTransactionsByUserIdWCurr(@AuthenticationPrincipal User user, @RequestBody TransactionQuery query) {
         log.trace("Enter getCoinTransactionsByUserIdWCurr");
-        return new ResponseEntity<List<TransactionDTO>>(this.transactionService.getTransactionsByUserIdWConvCurr(user.getId(), query.getCurrency()), HttpStatus.OK);
+        return new ResponseEntity<>(this.transactionService.getTransactionsByUserIdWConvCurr(user.getId(), query.getCurrency()), HttpStatus.OK);
     }
 
     @PostMapping("/position")
     public ResponseEntity<List<TransactionDTO>> getAllPositions(@AuthenticationPrincipal User user, @RequestBody TransactionQuery query) {
         log.trace("Enter getAllPositions");
-        return new ResponseEntity<List<TransactionDTO>>(this.transactionService.getAllPositions(user.getId(), query), HttpStatus.OK);
+        return new ResponseEntity<>(this.transactionService.getAllPositions(user.getId(), query), HttpStatus.OK);
     }
 
     @PostMapping("/holding")
     public ResponseEntity<List<TransactionDTO>> getAllHoldings(@AuthenticationPrincipal User user, @RequestBody TransactionQuery query) {
         log.trace("Enter getAllHoldings");
-        return new ResponseEntity<List<TransactionDTO>>(this.transactionService.getCurrentHoldings(user.getId(), query), HttpStatus.OK);
+        return new ResponseEntity<>(this.transactionService.getCurrentHoldings(user.getId(), query), HttpStatus.OK);
     }
 
     @DeleteMapping()
@@ -76,13 +76,13 @@ public class TransactionController {
     @PostMapping
     public ResponseEntity<TransactionDTO> createTransaction(@AuthenticationPrincipal User user, @RequestBody TransactionDTO transactionDTO) {
         log.trace("Enter createTransaction");
-        return new ResponseEntity<TransactionDTO>(this.transactionService.createTransaction(transactionDTO, user), HttpStatus.CREATED);
+        return new ResponseEntity<>(this.transactionService.createTransaction(transactionDTO, user), HttpStatus.CREATED);
     }
 
     @PutMapping
     public ResponseEntity<TransactionDTO> updateTransaction(@AuthenticationPrincipal User user, @RequestBody TransactionDTO transactionDTO) {
         log.trace("Enter updateTransaction");
-        return new ResponseEntity<TransactionDTO>(this.transactionService.updateTransaction(transactionDTO, user), HttpStatus.OK);
+        return new ResponseEntity<>(this.transactionService.updateTransaction(transactionDTO, user), HttpStatus.OK);
     }
 
     @PostMapping("/process/csv")

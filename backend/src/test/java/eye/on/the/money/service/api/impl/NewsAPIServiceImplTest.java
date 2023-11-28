@@ -46,7 +46,7 @@ class NewsAPIServiceImplTest {
 
     @BeforeEach
     public void init() {
-        this.mockServer = MockRestServiceServer.createServer(restTemplate);
+        this.mockServer = MockRestServiceServer.createServer(this.restTemplate);
     }
 
     @Test

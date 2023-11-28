@@ -26,12 +26,12 @@ public class NewsController {
     @GetMapping("category/{category}")
     public ResponseEntity<List<News>> getGeneralNews(@AuthenticationPrincipal User user, @PathVariable String category) {
         log.trace("Enter getNews");
-        return new ResponseEntity<List<News>>(this.newsAPIService.getNews(category), HttpStatus.OK);
+        return new ResponseEntity<>(this.newsAPIService.getNews(category), HttpStatus.OK);
     }
 
     @GetMapping("company/{symbol}")
     public ResponseEntity<List<News>> getCompanyNews(@AuthenticationPrincipal User user, @PathVariable String symbol) {
         log.trace("Enter getCompanyNews");
-        return new ResponseEntity<List<News>>(this.newsAPIService.getCompanyNews(symbol), HttpStatus.OK);
+        return new ResponseEntity<>(this.newsAPIService.getCompanyNews(symbol), HttpStatus.OK);
     }
 }

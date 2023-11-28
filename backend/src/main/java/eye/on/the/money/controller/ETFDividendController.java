@@ -28,13 +28,13 @@ public class ETFDividendController {
     @GetMapping()
     public ResponseEntity<List<ETFDividendDTO>> getAllETFDividends(@AuthenticationPrincipal User user) {
         log.trace("Enter getAllETFDividends");
-        return new ResponseEntity<List<ETFDividendDTO>>(this.etfDividendService.getDividends(user.getId()), HttpStatus.OK);
+        return new ResponseEntity<>(this.etfDividendService.getDividends(user.getId()), HttpStatus.OK);
     }
 
     @PostMapping
     public ResponseEntity<ETFDividendDTO> createDividend(@AuthenticationPrincipal User user, @RequestBody ETFDividendDTO dividendDTO) {
         log.trace("Enter createDividend");
-        return new ResponseEntity<ETFDividendDTO>(this.etfDividendService.createETFDividend(dividendDTO, user), HttpStatus.CREATED);
+        return new ResponseEntity<>(this.etfDividendService.createETFDividend(dividendDTO, user), HttpStatus.CREATED);
     }
 
     @DeleteMapping()
@@ -56,7 +56,7 @@ public class ETFDividendController {
     @PutMapping
     public ResponseEntity<ETFDividendDTO> updateETFDividend(@AuthenticationPrincipal User user, @RequestBody ETFDividendDTO dividendDTO) {
         log.trace("Enter updateETFDividend");
-        return new ResponseEntity<ETFDividendDTO>(this.etfDividendService.updateETFDividend(dividendDTO, user), HttpStatus.CREATED);
+        return new ResponseEntity<>(this.etfDividendService.updateETFDividend(dividendDTO, user), HttpStatus.CREATED);
     }
 
     @PostMapping("/process/csv")

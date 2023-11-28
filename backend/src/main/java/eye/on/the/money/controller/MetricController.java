@@ -28,18 +28,18 @@ public class MetricController {
     @GetMapping("/profile/{symbol}")
     public ResponseEntity<Profile> getProfileBySymbol(@AuthenticationPrincipal User user, @PathVariable String symbol) {
         log.trace("Enter getProfileBySymbol");
-        return new ResponseEntity<Profile>(this.metricService.getProfileBySymbol(symbol), HttpStatus.OK);
+        return new ResponseEntity<>(this.metricService.getProfileBySymbol(symbol), HttpStatus.OK);
     }
 
     @GetMapping("/metric/{symbol}")
     public ResponseEntity<Metric> getMetricBySymbol(@AuthenticationPrincipal User user, @PathVariable String symbol) {
         log.trace("Enter getMetricBySymbol");
-        return new ResponseEntity<Metric>(this.metricService.getMetricBySymbol(symbol), HttpStatus.OK);
+        return new ResponseEntity<>(this.metricService.getMetricBySymbol(symbol), HttpStatus.OK);
     }
 
     @GetMapping("/recommendation/{symbol}")
     public ResponseEntity<List<Recommendation>> getRecommendations(@AuthenticationPrincipal User user, @PathVariable String symbol) {
         log.trace("Enter getRecommendations");
-        return new ResponseEntity<List<Recommendation>>(this.metricService.getRecommendations(symbol), HttpStatus.OK);
+        return new ResponseEntity<>(this.metricService.getRecommendations(symbol), HttpStatus.OK);
     }
 }

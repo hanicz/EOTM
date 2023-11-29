@@ -54,32 +54,7 @@ public class StockServiceImpl implements StockService {
                 .equals(this.fmt.format(new Date(TimeUnit.SECONDS.toMillis(responseBody.findValue("timestamp").longValue()))));
         int arraySize = sameDay ? eodList.size() : eodList.size() + 1;
 
-        Double[] c = new Double[arraySize];
-        Double[] o = new Double[arraySize];
-        Double[] l = new Double[arraySize];
-        Double[] h = new Double[arraySize];
-        Long[] v = new Long[arraySize];
-        Long[] t = new Long[arraySize];
-
-        for (int i = 0; i < eodList.size(); i++) {
-            c[i] = eodList.get(i).getClose();
-            o[i] = eodList.get(i).getOpen();
-            l[i] = eodList.get(i).getLow();
-            h[i] = eodList.get(i).getHigh();
-            v[i] = eodList.get(i).getVolume();
-            t[i] = eodList.get(i).getDate().getTime();
-        }
-
-        if(!sameDay) {
-            c[eodList.size()] = responseBody.findValue("close").doubleValue();
-            o[eodList.size()] = responseBody.findValue("open").doubleValue();
-            l[eodList.size()] = responseBody.findValue("low").doubleValue();
-            h[eodList.size()] = responseBody.findValue("high").doubleValue();
-            v[eodList.size()] = responseBody.findValue("volume").longValue();
-            t[eodList.size()] = TimeUnit.SECONDS.toMillis(responseBody.findValue("timestamp").longValue());
-        }
-
-        return new CandleQuote(c, h, l, o, t, v);
+        return CandleQuote.createFromEODResponse(arraySize, eodList, sameDay ? null : responseBody);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package eye.on.the.money.model.news;
 
+import eye.on.the.money.util.Generated;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
+@Generated
 public class News {
     private Long id;
     private String category;

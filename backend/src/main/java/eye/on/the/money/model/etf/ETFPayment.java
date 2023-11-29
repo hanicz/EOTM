@@ -2,6 +2,7 @@ package eye.on.the.money.model.etf;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import eye.on.the.money.model.Currency;
+import eye.on.the.money.util.Generated;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,6 +16,7 @@ import javax.persistence.*;
 @Table(name = "EOTM_ETF_PAYMENT")
 @AllArgsConstructor
 @NoArgsConstructor
+@Generated
 public class ETFPayment {
 
     @Id

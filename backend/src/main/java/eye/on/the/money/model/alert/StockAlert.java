@@ -3,6 +3,7 @@ package eye.on.the.money.model.alert;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Stock;
+import eye.on.the.money.util.Generated;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,6 +18,7 @@ import javax.persistence.*;
 @Table(name = "EOTM_STOCK_ALERT")
 @AllArgsConstructor
 @NoArgsConstructor
+@Generated
 public class StockAlert {
 
     @Id

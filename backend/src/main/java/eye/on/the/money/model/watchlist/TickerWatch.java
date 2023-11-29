@@ -3,6 +3,7 @@ package eye.on.the.money.model.watchlist;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Stock;
+import eye.on.the.money.util.Generated;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,6 +18,7 @@ import javax.persistence.*;
 @Table(name = "EOTM_STOCK_WATCH")
 @AllArgsConstructor
 @NoArgsConstructor
+@Generated
 public class TickerWatch {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

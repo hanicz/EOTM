@@ -1,6 +1,7 @@
 package eye.on.the.money.model.etf;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import eye.on.the.money.util.Generated;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Generated
 public class ETFResponse {
     private String code;
     private Double close;

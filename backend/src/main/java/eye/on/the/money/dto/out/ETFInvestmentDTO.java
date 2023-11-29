@@ -10,6 +10,7 @@ import java.util.Date;
 @Builder
 @Slf4j
 @ToString
+@EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
 public class ETFInvestmentDTO {

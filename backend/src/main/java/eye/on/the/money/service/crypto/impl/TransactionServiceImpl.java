@@ -57,12 +57,6 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<TransactionDTO> getTransactionsByUserIdWConvCurr(Long userId, String currency) {
-        return this.transactionRepository.findByUser_IdOrderByTransactionDate(userId).stream()
-                        .map(this::convertToTransactionDTO).collect(Collectors.toList());
-    }
-
-    @Override
     public List<TransactionDTO> getAllPositions(Long userId, TransactionQuery query) {
         Map<String, TransactionDTO> transactionMap = this.getCalculated(userId);
         return new ArrayList<>((new ArrayList<>(transactionMap.values())));

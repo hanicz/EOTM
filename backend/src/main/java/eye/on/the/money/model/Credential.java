@@ -1,5 +1,6 @@
 package eye.on.the.money.model;
 
+import eye.on.the.money.util.Generated;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,6 +20,7 @@ import javax.persistence.Table;
 @Table(name = "EOTM_CREDENTIAL")
 @AllArgsConstructor
 @NoArgsConstructor
+@Generated
 public class Credential {
     @Id
     private String name;

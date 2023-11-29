@@ -39,12 +39,6 @@ public class TransactionController {
         return new ResponseEntity<>(this.transactionService.getTransactionsByUserId(user.getId()), HttpStatus.OK);
     }
 
-    @PostMapping("/currency")
-    public ResponseEntity<List<TransactionDTO>> getCoinTransactionsByUserIdWCurr(@AuthenticationPrincipal User user, @RequestBody TransactionQuery query) {
-        log.trace("Enter getCoinTransactionsByUserIdWCurr");
-        return new ResponseEntity<>(this.transactionService.getTransactionsByUserIdWConvCurr(user.getId(), query.getCurrency()), HttpStatus.OK);
-    }
-
     @PostMapping("/position")
     public ResponseEntity<List<TransactionDTO>> getAllPositions(@AuthenticationPrincipal User user, @RequestBody TransactionQuery query) {
         log.trace("Enter getAllPositions");

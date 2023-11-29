@@ -3,6 +3,7 @@ package eye.on.the.money.model.forex;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
+import eye.on.the.money.util.Generated;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,6 +19,7 @@ import java.util.Date;
 @Table(name = "EOTM_FOREX_TRANSACTION")
 @AllArgsConstructor
 @NoArgsConstructor
+@Generated
 public class ForexTransaction {
 
     @Id

@@ -3,6 +3,7 @@ package eye.on.the.money.model.watchlist;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.crypto.Coin;
+import eye.on.the.money.util.Generated;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,6 +18,7 @@ import javax.persistence.*;
 @Table(name = "EOTM_COIN_WATCH")
 @AllArgsConstructor
 @NoArgsConstructor
+@Generated
 public class CryptoWatch {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

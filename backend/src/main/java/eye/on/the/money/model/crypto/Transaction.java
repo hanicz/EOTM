@@ -2,6 +2,7 @@ package eye.on.the.money.model.crypto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import eye.on.the.money.model.User;
+import eye.on.the.money.util.Generated;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,6 +18,7 @@ import java.util.Date;
 @Table(name = "EOTM_COIN_TRANSACTION")
 @AllArgsConstructor
 @NoArgsConstructor
+@Generated
 public class Transaction {
 
     @Id

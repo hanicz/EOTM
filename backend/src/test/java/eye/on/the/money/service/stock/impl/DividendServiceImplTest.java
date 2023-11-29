@@ -6,7 +6,6 @@ import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Dividend;
 import eye.on.the.money.repository.UserRepository;
 import eye.on.the.money.repository.stock.DividendRepository;
-import eye.on.the.money.service.stock.DividendService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +31,7 @@ class DividendServiceImplTest {
     private DividendRepository dividendRepository;
 
     @Autowired
-    private DividendService dividendService;
+    private DividendServiceImpl dividendService;
 
     @Autowired
     private UserRepository userRepository;

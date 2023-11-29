@@ -1,6 +1,7 @@
 package eye.on.the.money.model.stock;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eye.on.the.money.util.Generated;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,6 +18,7 @@ import java.util.Set;
 @Table(name = "EOTM_STOCK")
 @AllArgsConstructor
 @NoArgsConstructor
+@Generated
 public class Stock {
     @Id
     private String id;

@@ -57,7 +57,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<TransactionDTO> getAllPositions(Long userId, TransactionQuery query) {
+    public List<TransactionDTO> getAllPositions(Long userId) {
         Map<String, TransactionDTO> transactionMap = this.getCalculated(userId);
         return new ArrayList<>((new ArrayList<>(transactionMap.values())));
     }

@@ -30,10 +30,9 @@ export class CryptoService {
     });
   };
 
-  getPositions(currency: string) {
-    var data = { "currency": currency }
+  getPositions() {
     const url = `${this.transactionUrl}/position`;
-    return this.http.post<Transaction[]>(url, JSON.stringify(data), {
+    return this.http.post<Transaction[]>(url, {
       headers: this.helper.getHeadersWithToken()
     });
   };

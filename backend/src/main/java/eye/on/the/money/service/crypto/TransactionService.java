@@ -12,7 +12,7 @@ public interface TransactionService {
 
     public List<TransactionDTO> getTransactionsByUserId(Long userId);
     public void deleteTransactionById(User user, List<Long> ids);
-    public List<TransactionDTO> getAllPositions(Long userId, TransactionQuery query);
+    public List<TransactionDTO> getAllPositions(Long userId);
     public List<TransactionDTO> getCurrentHoldings(Long userId, TransactionQuery query);
     public void getCSV(Long userId, Writer writer);
     public TransactionDTO createTransaction(TransactionDTO transactionDTO, User user);

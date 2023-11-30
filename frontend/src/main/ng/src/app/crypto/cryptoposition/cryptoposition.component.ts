@@ -29,7 +29,7 @@ export class CryptopositionComponent implements OnInit {
   }
 
   private fetchData(): void {
-    this.cryptoService.getPositions(this.globals.cryptoCurrency).subscribe({
+    this.cryptoService.getPositions().subscribe({
       next: (data) => {
         this.transactions = data;
       },

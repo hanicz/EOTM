@@ -12,16 +12,25 @@ INSERT INTO EOTM_STOCK (ID,NAME,SHORT_NAME,EXCHANGE) VALUES ('crsr', 'Corsair Ga
 
 --Test coins
 INSERT INTO EOTM_COIN (ID,NAME,SYMBOL) VALUES ('polkadot', 'Polkadot', 'DOT')
-,('bitcoin', 'Bitcoin', 'BTC');
+,('bitcoin', 'Bitcoin', 'BTC')
+,('cardano', 'Cardano', 'ADA');
 
 --Test coin payments
 INSERT INTO EOTM_COIN_PAYMENT (AMOUNT,CURRENCY_ID) VALUES (156.80, 'EUR'),
-(100, 'EUR');
+(100, 'EUR'),
+(200.44, 'EUR'),
+(10.87, 'EUR'),
+(1000.87, 'EUR'),
+(2032.11, 'EUR');
 
 --Test coin transactions
 INSERT INTO EOTM_COIN_TRANSACTION (BUY_SELL,CREATION_DATE,QUANTITY,TRANSACTION_STRING,COIN_ID,PAYMENT_ID,USER_ID,TRANSACTION_DATE,FEE) VALUES
 ('B',CURRENT_TIMESTAMP(),4.98,'ttt','polkadot',1,1,{ts '2021-05-20 05:00:00.00'},3.2),
-('B',CURRENT_TIMESTAMP(),98.5,'ttt','bitcoin',2,1,{ts '2021-05-07 05:00:00.00'},0);
+('B',CURRENT_TIMESTAMP(),98.5,'ttt','bitcoin',2,1,{ts '2021-05-07 05:00:00.00'},0),
+('S',CURRENT_TIMESTAMP(),4.0,'ttt','polkadot',3,1,{ts '2021-05-20 05:00:00.00'},3.2),
+('S',CURRENT_TIMESTAMP(),11.1,'ttt','bitcoin',4,1,{ts '2021-05-20 05:00:00.00'},3.2),
+('B',CURRENT_TIMESTAMP(),100.23,'ttt','cardano',5,1,{ts '2021-05-07 05:00:00.00'},0),
+('S',CURRENT_TIMESTAMP(),100.23,'ttt','cardano',6,1,{ts '2021-05-20 05:00:00.00'},0);
 
 --Test dividends
 INSERT INTO EOTM_STOCK_DIVIDEND (USER_ID, STOCK_ID, CURRENCY_ID, AMOUNT, DIVIDEND_DATE) VALUES (1, 'crsr', 'HUF', 225, {ts '2021-06-03 00:00:00.00'});

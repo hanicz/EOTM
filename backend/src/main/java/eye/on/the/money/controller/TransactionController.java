@@ -40,9 +40,9 @@ public class TransactionController {
     }
 
     @PostMapping("/position")
-    public ResponseEntity<List<TransactionDTO>> getAllPositions(@AuthenticationPrincipal User user, @RequestBody TransactionQuery query) {
+    public ResponseEntity<List<TransactionDTO>> getAllPositions(@AuthenticationPrincipal User user) {
         log.trace("Enter getAllPositions");
-        return new ResponseEntity<>(this.transactionService.getAllPositions(user.getId(), query), HttpStatus.OK);
+        return new ResponseEntity<>(this.transactionService.getAllPositions(user.getId()), HttpStatus.OK);
     }
 
     @PostMapping("/holding")

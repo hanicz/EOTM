@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = EotmApplication.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
-class CoinControllerTest {
+class CoinControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;

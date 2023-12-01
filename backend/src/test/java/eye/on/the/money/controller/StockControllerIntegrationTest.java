@@ -37,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = EotmApplication.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
-class StockControllerTest {
+class StockControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;

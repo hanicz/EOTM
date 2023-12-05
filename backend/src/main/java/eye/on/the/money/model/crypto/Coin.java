@@ -17,6 +17,7 @@ import java.util.Set;
 @Setter
 @Slf4j
 @ToString
+@Builder
 @Table(name = "EOTM_COIN")
 @AllArgsConstructor
 @EqualsAndHashCode

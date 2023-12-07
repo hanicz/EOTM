@@ -55,7 +55,7 @@ public class ETFController {
         log.trace("Enter deleteByIds");
         List<Long> idList = Stream.of(ids.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
         this.etfInvestmentService.deleteInvestmentById(user, idList);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping("/csv")

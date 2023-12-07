@@ -10,6 +10,7 @@ import java.util.Date;
 @Getter
 @Setter
 @Slf4j
+@Builder
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor

@@ -12,6 +12,7 @@ import java.util.Date;
 @Slf4j
 @ToString
 @AllArgsConstructor
+@EqualsAndHashCode
 @NoArgsConstructor
 public class InvestmentDTO {
     private Long investmentId;

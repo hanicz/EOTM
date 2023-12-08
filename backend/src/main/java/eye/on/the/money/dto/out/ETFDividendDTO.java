@@ -13,6 +13,7 @@ import java.util.Date;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode
 @Generated
 public class ETFDividendDTO {
     private Long id;

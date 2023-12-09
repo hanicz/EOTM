@@ -56,7 +56,7 @@ public class TransactionController {
         log.trace("Enter deleteByIds");
         List<Long> idList = Stream.of(ids.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
         this.transactionService.deleteTransactionById(user, idList);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping("/csv")

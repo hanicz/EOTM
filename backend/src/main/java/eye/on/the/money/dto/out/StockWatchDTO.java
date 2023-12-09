@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 @ToString
 @Builder
 @AllArgsConstructor
+@EqualsAndHashCode
 @NoArgsConstructor
 @Generated
 public class StockWatchDTO {

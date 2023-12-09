@@ -48,21 +48,21 @@ public class WatchlistController {
     public ResponseEntity<HttpStatus> deleteCryptoWatch(@AuthenticationPrincipal User user, @PathVariable Long id) {
         log.trace("Enter");
         this.watchlistService.deleteCryptoWatchById(user.getId(), id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping("/stock/{id}")
     public ResponseEntity<HttpStatus> deleteStockWatch(@AuthenticationPrincipal User user, @PathVariable Long id) {
         log.trace("Enter");
         this.watchlistService.deleteStockWatchById(user.getId(), id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping("/forex/{id}")
     public ResponseEntity<HttpStatus> deleteForexWatch(@AuthenticationPrincipal User user, @PathVariable Long id) {
         log.trace("Enter");
         this.watchlistService.deleteForexWatchById(user.getId(), id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/stock")

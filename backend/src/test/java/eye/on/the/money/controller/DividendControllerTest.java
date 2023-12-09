@@ -54,14 +54,14 @@ class DividendControllerTest {
         DividendDTO dividendDTO = DividendDTO.builder().dividendId(1L).exchange("e1").dividendDate(new Date()).amount(55.1).currencyId("c1").shortName("s1").build();
         when(this.dividendService.createDividend(dividendDTO, this.user)).thenReturn(dividendDTO);
 
-        Assertions.assertEquals(dividendDTO, this.dividendController.createDividend(user, dividendDTO).getBody());
+        Assertions.assertEquals(dividendDTO, this.dividendController.createDividend(this.user, dividendDTO).getBody());
     }
 
     @Test
     public void deleteByIds() {
         doNothing().when(this.dividendService).deleteDividendById(any(), any());
 
-        Assertions.assertEquals(HttpStatus.OK, this.dividendController.deleteByIds(user, "1,2,3").getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, this.dividendController.deleteByIds(this.user, "1,2,3").getStatusCode());
     }
 
     @Test
@@ -69,7 +69,7 @@ class DividendControllerTest {
         HttpServletResponse httpSR = new MockHttpServletResponse();
 
         doNothing().when(this.dividendService).getCSV(any(), any());
-        this.dividendController.getCSV(user, httpSR);
+        this.dividendController.getCSV(this.user, httpSR);
 
         verify(this.dividendService, times(1)).getCSV(any(), any());
     }
@@ -79,15 +79,15 @@ class DividendControllerTest {
         DividendDTO dividendDTO = DividendDTO.builder().dividendId(1L).exchange("e1").dividendDate(new Date()).amount(55.1).currencyId("c1").shortName("s1").build();
         when(this.dividendService.updateDividend(dividendDTO, this.user)).thenReturn(dividendDTO);
 
-        Assertions.assertEquals(dividendDTO, this.dividendController.updateDividend(user, dividendDTO).getBody());
+        Assertions.assertEquals(dividendDTO, this.dividendController.updateDividend(this.user, dividendDTO).getBody());
     }
 
     @Test
     public void processCSV() throws IOException {
         MultipartFile mpf = new MockMultipartFile("mpf", "mpf.csv", MediaType.TEXT_PLAIN_VALUE, "content".getBytes());
 
-        doNothing().when(this.dividendService).processCSV(user, mpf);
+        doNothing().when(this.dividendService).processCSV(this.user, mpf);
 
-        Assertions.assertEquals(HttpStatus.CREATED, this.dividendController.processCSV(user, mpf).getStatusCode());
+        Assertions.assertEquals(HttpStatus.CREATED, this.dividendController.processCSV(this.user, mpf).getStatusCode());
     }
 }

@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 @Builder
 @ToString
 @AllArgsConstructor
+@EqualsAndHashCode
 @NoArgsConstructor
 public class CryptoWatchDTO implements Comparable<CryptoWatchDTO> {
     private Long cryptoWatchId;

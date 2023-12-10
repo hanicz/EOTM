@@ -113,7 +113,7 @@ public class DividendServiceImpl implements DividendService {
                         d.getCurrencyId());
             }
         } catch (IOException e) {
-            throw new RuntimeException("fail to create CSV file: " + e.getMessage());
+            throw new RuntimeException("Failed to create CSV file: " + e.getMessage());
         }
     }
 
@@ -149,7 +149,7 @@ public class DividendServiceImpl implements DividendService {
                 }
             }
         } catch (IOException | ParseException e) {
-            throw new RuntimeException("fail to parse CSV file: " + e.getMessage());
+            throw new RuntimeException("Failed to parse CSV file: " + e.getMessage());
         }
     }
 }

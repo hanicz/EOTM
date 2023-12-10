@@ -6,11 +6,17 @@ import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Dividend;
 import eye.on.the.money.repository.UserRepository;
 import eye.on.the.money.repository.stock.DividendRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.StringWriter;
 import java.io.Writer;
@@ -20,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -38,6 +45,8 @@ class DividendServiceImplTest {
 
     private User user;
 
+    private final ModelMapper modelMapper = new ModelMapper();
+
     @BeforeEach
     public void init() {
         this.user = this.userRepository.findByEmail("test@test.test");
@@ -47,7 +56,9 @@ class DividendServiceImplTest {
     public void getDividends() {
         List<DividendDTO> dividends = this.dividendService.getDividends(this.user.getId());
         List<Dividend> dividendsActual = this.dividendRepository.findByUser_IdOrderByDividendDate(1L);
-        assertEquals(dividendsActual.size(), dividends.size());
+
+        Assertions.assertIterableEquals(dividendsActual.stream()
+                .map(this::convertToDividendDTO).collect(Collectors.toList()), dividends);
     }
 
     @Test
@@ -126,9 +137,10 @@ class DividendServiceImplTest {
     public void getCSV() {
         Writer writer = new StringWriter();
         this.dividendService.getCSV(this.user.getId(), writer);
+        System.out.println(writer.toString());
         assertAll(
                 () -> assertTrue(writer.toString().contains("Dividend Id,Amount,Dividend Date,Short Name,Currency")),
-                () -> assertTrue(writer.toString().contains("1,225.0,2021-06-03 00:00:00.0,CRSR,HUF"))
+                () -> assertTrue(writer.toString().contains("2,225.0,2021-08-03 00:00:00.0,CRSR,HUF"))
         );
     }
 
@@ -137,6 +149,41 @@ class DividendServiceImplTest {
         Writer writer = new StringWriter();
         this.dividendService.getCSV(0L, writer);
         assertTrue(writer.toString().isEmpty());
+    }
+
+    @Test
+    public void processCSV_Update() {
+        String csvContent = "Dividend Id,Amount,Dividend Date,Short Name,Currency\n1,250.0,2021-06-03 00:00:00.0,CRSR,HUF";
+        MultipartFile mpf = new MockMultipartFile("file", "file.csv", MediaType.TEXT_PLAIN_VALUE, csvContent.getBytes());
+
+        this.dividendService.processCSV(this.user, mpf);
+
+        Dividend updatedDividend = this.dividendRepository.findById(1L).get();
+
+        Assertions.assertEquals(250.0, updatedDividend.getAmount());
+    }
+
+    @Test
+    public void processCSV_Create() {
+        String csvContent = "Dividend Id,Amount,Dividend Date,Short Name,Currency\n,299.0,2021-06-03 00:00:00.0,INTC,USD";
+        MultipartFile mpf = new MockMultipartFile("file", "file.csv", MediaType.TEXT_PLAIN_VALUE, csvContent.getBytes());
+
+        this.dividendService.processCSV(this.user, mpf);
+
+        List<Dividend> dividends = this.dividendRepository.findByUser_IdOrderByDividendDate(this.user.getId());
+
+        Optional<Dividend> createdDividend = dividends.stream().filter(d -> d.getAmount() == 299.0 && d.getStock().getId().equals("intc")).findAny();
+
+        Assertions.assertTrue(createdDividend.isPresent());
+    }
+
+    @Test
+    public void processCSV_Exc() {
+        String csvContent = "EXCEPTION,1\n3,EXC,333\n64";
+        MultipartFile mpf = new MockMultipartFile("file", "file.csv", MediaType.TEXT_PLAIN_VALUE, csvContent.getBytes());
+
+        assertThrows(RuntimeException.class,
+                () -> this.dividendService.processCSV(this.user, mpf));
     }
 
     private DividendDTO getDividendDTO() throws ParseException {
@@ -148,5 +195,10 @@ class DividendServiceImplTest {
                 .currencyId("EUR")
                 .exchange("US")
                 .build();
+    }
+
+    private DividendDTO convertToDividendDTO(Dividend dividend) {
+        this.modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
+        return this.modelMapper.map(dividend, DividendDTO.class);
     }
 }

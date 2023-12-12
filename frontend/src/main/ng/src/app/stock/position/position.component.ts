@@ -27,7 +27,7 @@ export class PositionComponent implements OnInit {
   }
 
   private fetchData(): void {
-    this.stockService.getPositions((this.globals.stockCurrency)).subscribe({
+    this.stockService.getPositions().subscribe({
       next: (data) => {
         this.investments = data;
       },

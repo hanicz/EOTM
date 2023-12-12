@@ -22,18 +22,16 @@ export class EtfService {
     });
   };
 
-  getHolding(currency: string) {
-    let data = { "currency": currency }
+  getHolding() {
     const url = `${this.etfUrl}/holding`;
-    return this.http.post<ETFInvestment[]>(url, JSON.stringify(data), {
+    return this.http.post<ETFInvestment[]>(url, {
       headers: this.helper.getHeadersWithToken()
     });
   };
 
-  getPositions(currency: string) {
-    let data = { "currency": currency }
+  getPositions() {
     const url = `${this.etfUrl}/position`;
-    return this.http.post<ETFInvestment[]>(url, JSON.stringify(data), {
+    return this.http.post<ETFInvestment[]>(url, {
       headers: this.helper.getHeadersWithToken()
     });
   };

@@ -1,7 +1,6 @@
 package eye.on.the.money.service.etf.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import eye.on.the.money.dto.in.InvestmentQuery;
 import eye.on.the.money.dto.out.ETFInvestmentDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.etf.ETF;
@@ -59,9 +58,9 @@ public class ETFInvestmentServiceImpl implements ETFInvestmentService {
     }
 
     @Override
-    public List<ETFInvestmentDTO> getCurrentETFHoldings(Long userId, InvestmentQuery query) {
-        Map<String, ETFInvestmentDTO> investmentMap = this.getCalculated(userId, query);
-        List<ETFInvestmentDTO> etfInvestmentDTOList = (new ArrayList<ETFInvestmentDTO>(investmentMap.values()))
+    public List<ETFInvestmentDTO> getCurrentETFHoldings(Long userId) {
+        Map<String, ETFInvestmentDTO> investmentMap = this.getCalculated(userId);
+        List<ETFInvestmentDTO> etfInvestmentDTOList = (new ArrayList<>(investmentMap.values()))
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
         String joinedList = etfInvestmentDTOList.stream().map(i -> (i.getShortName() + "." + i.getExchange())).collect(Collectors.joining(","));
 
@@ -78,12 +77,12 @@ public class ETFInvestmentServiceImpl implements ETFInvestmentService {
     }
 
     @Override
-    public List<ETFInvestmentDTO> getAllPositions(Long userId, InvestmentQuery query) {
-        Map<String, ETFInvestmentDTO> investmentMap = this.getCalculated(userId, query);
-        return (new ArrayList<ETFInvestmentDTO>(investmentMap.values()));
+    public List<ETFInvestmentDTO> getAllPositions(Long userId) {
+        Map<String, ETFInvestmentDTO> investmentMap = this.getCalculated(userId);
+        return (new ArrayList<>(investmentMap.values()));
     }
 
-    private Map<String, ETFInvestmentDTO> getCalculated(Long userId, InvestmentQuery query) {
+    private Map<String, ETFInvestmentDTO> getCalculated(Long userId) {
         List<ETFInvestmentDTO> investments = this.etfInvestmentRepository.findByUser_IdOrderByTransactionDate(userId).stream().map(this::convertToETFInvestmentDTO).collect(Collectors.toList());
 
         Map<String, ETFInvestmentDTO> investmentMap = new HashMap<>();

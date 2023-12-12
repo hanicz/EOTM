@@ -1,6 +1,5 @@
 package eye.on.the.money.controller;
 
-import eye.on.the.money.dto.in.InvestmentQuery;
 import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.service.stock.InvestmentService;
@@ -49,22 +48,20 @@ class InvestmentControllerTest {
 
     @Test
     public void getHoldings() {
-        InvestmentQuery query = InvestmentQuery.builder().currency("eur").build();
         List<InvestmentDTO> iDTO = this.createInvestmentList();
 
-        when(this.investmentService.getCurrentHoldings(this.user.getId(), query)).thenReturn(iDTO);
+        when(this.investmentService.getCurrentHoldings(this.user.getId())).thenReturn(iDTO);
 
-        Assertions.assertIterableEquals(iDTO, this.investmentController.getHoldings(this.user, query).getBody());
+        Assertions.assertIterableEquals(iDTO, this.investmentController.getHoldings(this.user).getBody());
     }
 
     @Test
     public void getPositions() {
-        InvestmentQuery query = InvestmentQuery.builder().currency("eur").build();
         List<InvestmentDTO> iDTO = this.createInvestmentList();
 
-        when(this.investmentService.getAllPositions(this.user.getId(), query)).thenReturn(iDTO);
+        when(this.investmentService.getAllPositions(this.user.getId())).thenReturn(iDTO);
 
-        Assertions.assertIterableEquals(iDTO, this.investmentController.getPositions(this.user, query).getBody());
+        Assertions.assertIterableEquals(iDTO, this.investmentController.getPositions(this.user).getBody());
     }
 
     @Test

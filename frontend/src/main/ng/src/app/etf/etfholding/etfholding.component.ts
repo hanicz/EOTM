@@ -29,7 +29,7 @@ export class EtfholdingComponent implements OnInit {
   }
 
   private fetchData(): void {
-    this.etfService.getHolding(this.globals.etfCurrency).subscribe({
+    this.etfService.getHolding().subscribe({
       next: (data) => {
         this.investmentsLoading = false;
         this.investments = data;

@@ -1,6 +1,5 @@
 package eye.on.the.money.controller;
 
-import eye.on.the.money.dto.in.InvestmentQuery;
 import eye.on.the.money.dto.out.ETFInvestmentDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.service.etf.ETFInvestmentService;
@@ -46,22 +45,20 @@ class ETFControllerTest {
 
     @Test
     public void getETFHoldings() {
-        InvestmentQuery query = InvestmentQuery.builder().currency("eur").build();
         List<ETFInvestmentDTO> eiDTO = this.createETFList();
 
-        when(this.etfInvestmentService.getCurrentETFHoldings(this.user.getId(), query)).thenReturn(eiDTO);
+        when(this.etfInvestmentService.getCurrentETFHoldings(this.user.getId())).thenReturn(eiDTO);
 
-        Assertions.assertIterableEquals(eiDTO, this.etfController.getETFHoldings(this.user, query).getBody());
+        Assertions.assertIterableEquals(eiDTO, this.etfController.getETFHoldings(this.user).getBody());
     }
 
     @Test
     public void getPositions() {
-        InvestmentQuery query = InvestmentQuery.builder().currency("eur").build();
         List<ETFInvestmentDTO> eiDTO = this.createETFList();
 
-        when(this.etfInvestmentService.getAllPositions(this.user.getId(), query)).thenReturn(eiDTO);
+        when(this.etfInvestmentService.getAllPositions(this.user.getId())).thenReturn(eiDTO);
 
-        Assertions.assertIterableEquals(eiDTO, this.etfController.getPositions(this.user, query).getBody());
+        Assertions.assertIterableEquals(eiDTO, this.etfController.getPositions(this.user).getBody());
     }
 
     @Test

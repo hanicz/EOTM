@@ -1,7 +1,6 @@
 package eye.on.the.money.controller;
 
 
-import eye.on.the.money.dto.in.InvestmentQuery;
 import eye.on.the.money.dto.out.ETFInvestmentDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.service.etf.ETFInvestmentService;
@@ -33,15 +32,15 @@ public class ETFController {
     }
 
     @PostMapping("/holding")
-    public ResponseEntity<List<ETFInvestmentDTO>> getETFHoldings(@AuthenticationPrincipal User user, @RequestBody InvestmentQuery query) {
+    public ResponseEntity<List<ETFInvestmentDTO>> getETFHoldings(@AuthenticationPrincipal User user) {
         log.trace("Enter getETFHoldings");
-        return new ResponseEntity<>(this.etfInvestmentService.getCurrentETFHoldings(user.getId(), query), HttpStatus.OK);
+        return new ResponseEntity<>(this.etfInvestmentService.getCurrentETFHoldings(user.getId()), HttpStatus.OK);
     }
 
     @PostMapping("/position")
-    public ResponseEntity<List<ETFInvestmentDTO>> getPositions(@AuthenticationPrincipal User user, @RequestBody InvestmentQuery query) {
+    public ResponseEntity<List<ETFInvestmentDTO>> getPositions(@AuthenticationPrincipal User user) {
         log.trace("Enter getPositions");
-        return new ResponseEntity<>(this.etfInvestmentService.getAllPositions(user.getId(), query), HttpStatus.OK);
+        return new ResponseEntity<>(this.etfInvestmentService.getAllPositions(user.getId()), HttpStatus.OK);
     }
 
     @PostMapping

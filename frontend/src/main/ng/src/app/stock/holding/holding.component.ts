@@ -30,7 +30,7 @@ export class HoldingComponent implements OnInit {
   }
 
   private fetchData(): void {
-    this.stockService.getHolding(this.globals.stockCurrency).subscribe({
+    this.stockService.getHolding().subscribe({
       next: (data) => {
         this.investmentsLoading = false;
         this.investments = data;

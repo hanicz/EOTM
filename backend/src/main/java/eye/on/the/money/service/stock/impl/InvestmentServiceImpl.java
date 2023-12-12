@@ -1,7 +1,6 @@
 package eye.on.the.money.service.stock.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import eye.on.the.money.dto.in.InvestmentQuery;
 import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
@@ -68,9 +67,9 @@ public class InvestmentServiceImpl implements InvestmentService {
     }
 
     @Override
-    public List<InvestmentDTO> getCurrentHoldings(Long userId, InvestmentQuery query) {
-        Map<String, InvestmentDTO> investmentMap = this.getCalculated(userId, query);
-        List<InvestmentDTO> investmentDTOList = (new ArrayList<InvestmentDTO>(investmentMap.values()))
+    public List<InvestmentDTO> getCurrentHoldings(Long userId) {
+        Map<String, InvestmentDTO> investmentMap = this.getCalculated(userId);
+        List<InvestmentDTO> investmentDTOList = (new ArrayList<>(investmentMap.values()))
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
         String joinedList = investmentDTOList.stream().map(i -> (i.getShortName() + "." + i.getExchange())).collect(Collectors.joining(","));
 
@@ -88,12 +87,12 @@ public class InvestmentServiceImpl implements InvestmentService {
     }
 
     @Override
-    public List<InvestmentDTO> getAllPositions(Long userId, InvestmentQuery query) {
-        Map<String, InvestmentDTO> investmentMap = this.getCalculated(userId, query);
+    public List<InvestmentDTO> getAllPositions(Long userId) {
+        Map<String, InvestmentDTO> investmentMap = this.getCalculated(userId);
         return new ArrayList<>((new ArrayList<>(investmentMap.values())));
     }
 
-    private Map<String, InvestmentDTO> getCalculated(Long userId, InvestmentQuery query) {
+    private Map<String, InvestmentDTO> getCalculated(Long userId) {
         List<InvestmentDTO> investments = this.investmentRepository.findByUser_IdOrderByTransactionDate(userId).stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
         Map<String, InvestmentDTO> investmentMap = new HashMap<>();
         for (InvestmentDTO i : investments) {

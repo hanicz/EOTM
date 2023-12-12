@@ -23,8 +23,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(classes = EotmApplication.class)
 @ActiveProfiles("test")
@@ -49,8 +54,8 @@ class InvestmentServiceImplTest {
     private ModelMapper modelMapper;
     @Autowired
     private UserRepository userRepository;
-
     private User user;
+    double epsilon = 0.000001d;
 
     @BeforeEach
     public void init() {
@@ -63,6 +68,49 @@ class InvestmentServiceImplTest {
         List<Investment> investments = this.investmentRepository.findByUser_IdOrderByTransactionDate(this.user.getId());
 
         Assertions.assertIterableEquals(investments.stream().map(this::convertToInvestmentDTO).collect(Collectors.toList()), result);
+    }
+
+    @Test
+    public void getInvestmentsByTypeAndDate() {
+        Date from = Date.from(LocalDate.parse("2020-01-01").atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+        Date to = new Date();
+        List<InvestmentDTO> result = this.investmentService.getInvestmentsByTypeAndDate(this.user.getId(), "B", from, to);
+        List<Investment> investments = this.investmentRepository.findByUser_IdAndBuySellAndTransactionDateBetween(this.user.getId(), "B", from, to);
+
+        Assertions.assertIterableEquals(investments.stream().map(this::convertToInvestmentDTO).collect(Collectors.toList()), result);
+    }
+
+    @Test
+    public void getAllPositions() {
+        List<InvestmentDTO> result = this.investmentService.getAllPositions(this.user.getId());
+        InvestmentDTO testObject = result.stream().filter(iDTO -> "CRSR".equals(iDTO.getShortName())).findAny().get();
+
+        Assertions.assertAll("Assert all merged values",
+                () -> assertEquals("B", testObject.getBuySell()),
+                () -> assertEquals(0, testObject.getQuantity()),
+                () -> assertEquals(-100.0, testObject.getAmount(), this.epsilon));
+    }
+
+    @Test
+    public void getAllPositions2() {
+        List<InvestmentDTO> result = this.investmentService.getAllPositions(this.user.getId());
+        InvestmentDTO testObject = result.stream().filter(iDTO -> "AMD".equals(iDTO.getShortName())).findAny().get();
+
+        Assertions.assertAll("Assert all merged values",
+                () -> assertEquals("B", testObject.getBuySell()),
+                () -> assertEquals(36, testObject.getQuantity()),
+                () -> assertEquals(-189.9, testObject.getAmount(), this.epsilon));
+    }
+
+    @Test
+    public void getAllPositions3() {
+        List<InvestmentDTO> result = this.investmentService.getAllPositions(this.user.getId());
+        InvestmentDTO testObject = result.stream().filter(iDTO -> "INTC".equals(iDTO.getShortName())).findAny().get();
+
+        Assertions.assertAll("Assert all merged values",
+                () -> assertEquals("B", testObject.getBuySell()),
+                () -> assertEquals(2, testObject.getQuantity()),
+                () -> assertEquals(43.77, testObject.getAmount(), this.epsilon));
     }
 
     private InvestmentDTO convertToInvestmentDTO(Investment investment) {

@@ -1,6 +1,5 @@
 package eye.on.the.money.controller;
 
-import eye.on.the.money.dto.in.InvestmentQuery;
 import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.service.stock.InvestmentService;
@@ -33,15 +32,15 @@ public class InvestmentController {
     }
 
     @PostMapping("/holding")
-    public ResponseEntity<List<InvestmentDTO>> getHoldings(@AuthenticationPrincipal User user, @RequestBody InvestmentQuery query) {
+    public ResponseEntity<List<InvestmentDTO>> getHoldings(@AuthenticationPrincipal User user) {
         log.trace("Enter getHoldings");
-        return new ResponseEntity<>(this.investmentService.getCurrentHoldings(user.getId(), query), HttpStatus.OK);
+        return new ResponseEntity<>(this.investmentService.getCurrentHoldings(user.getId()), HttpStatus.OK);
     }
 
     @PostMapping("/position")
-    public ResponseEntity<List<InvestmentDTO>> getPositions(@AuthenticationPrincipal User user, @RequestBody InvestmentQuery query) {
+    public ResponseEntity<List<InvestmentDTO>> getPositions(@AuthenticationPrincipal User user) {
         log.trace("Enter getPositions");
-        return new ResponseEntity<>(this.investmentService.getAllPositions(user.getId(), query), HttpStatus.OK);
+        return new ResponseEntity<>(this.investmentService.getAllPositions(user.getId()), HttpStatus.OK);
     }
 
     @PostMapping

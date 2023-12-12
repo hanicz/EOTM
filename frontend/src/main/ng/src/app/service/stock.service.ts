@@ -47,18 +47,16 @@ export class StockService {
     });
   };
 
-  getHolding(currency: string) {
-    let data = { "currency": currency }
+  getHolding() {
     const url = `${this.investmentUrl}/holding`;
-    return this.http.post<Investment[]>(url, JSON.stringify(data), {
+    return this.http.post<Investment[]>(url, {
       headers: this.helper.getHeadersWithToken()
     });
   };
 
-  getPositions(currency: string) {
-    let data = { "currency": currency }
+  getPositions() {
     const url = `${this.investmentUrl}/position`;
-    return this.http.post<Investment[]>(url, JSON.stringify(data), {
+    return this.http.post<Investment[]>(url, {
       headers: this.helper.getHeadersWithToken()
     });
   };

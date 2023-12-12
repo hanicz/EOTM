@@ -27,7 +27,7 @@ export class EtfpositionComponent implements OnInit {
   }
 
   private fetchData(): void {
-    this.etfService.getPositions(this.globals.etfCurrency).subscribe({
+    this.etfService.getPositions().subscribe({
       next: (data) => {
         this.investments = data;
       },

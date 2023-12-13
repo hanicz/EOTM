@@ -2,8 +2,12 @@ package eye.on.the.money.alert;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.mail.EmailService;
+import eye.on.the.money.model.alert.CryptoAlert;
 import eye.on.the.money.model.alert.StockAlert;
+import eye.on.the.money.model.crypto.Coin;
+import eye.on.the.money.repository.alert.CryptoAlertRepository;
 import eye.on.the.money.repository.alert.StockAlertRepository;
+import eye.on.the.money.service.api.CryptoAPIService;
 import eye.on.the.money.service.api.EODAPIService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +25,12 @@ public class AlertScheduler {
 
     @Autowired
     private StockAlertRepository stockAlertRepository;
-
+    @Autowired
+    private CryptoAlertRepository cryptoAlertRepository;
     @Autowired
     private EODAPIService eodAPIService;
-
+    @Autowired
+    private CryptoAPIService cryptoAPIService;
     @Autowired
     private EmailService emailServiceImpl;
 
@@ -32,9 +38,9 @@ public class AlertScheduler {
     @Scheduled(fixedDelay = 300000)
     public void checkAlerts() {
         log.trace("Enter");
-        List<StockAlert> alertList = this.stockAlertRepository.findAll();
-        if (alertList.isEmpty()) return;
-        String joinedList = alertList.stream().map(StockAlert::getStock).collect(Collectors.toSet())
+        List<StockAlert> stockAlertList = this.stockAlertRepository.findAll();
+        if (stockAlertList.isEmpty()) return;
+        String joinedList = stockAlertList.stream().map(StockAlert::getStock).collect(Collectors.toSet())
                 .stream().map(s -> (s.getShortName() + "." + s.getExchange())).collect(Collectors.joining(","));
 
         JsonNode responseBody = this.eodAPIService.getLiveValue(joinedList, "/real-time/stock/?api_token={0}&fmt=json&s={1}");
@@ -43,10 +49,26 @@ public class AlertScheduler {
         for (JsonNode stock : responseBody) {
             stockMap.put(stock.findValue("code").textValue(), stock);
         }
-        this.sendAlerts(alertList, stockMap);
+        this.sendAlerts(stockAlertList, stockMap);
+        log.trace("Exit");
+    }
+
+    private void checkCryptoAlerts() {
+        log.trace("Enter");
+        List<CryptoAlert> cryptoAlerts = this.cryptoAlertRepository.findAll();
+        if (cryptoAlerts.isEmpty()) return;
+        String ids = cryptoAlerts.stream().map(CryptoAlert::getCoin).collect(Collectors.toSet())
+                .stream().map(Coin::getId).collect(Collectors.joining(","));
+
+        JsonNode responseBody = this.cryptoAPIService.getLiveValueForCoins("eur", ids);
+
+        Map<String, JsonNode> coinMap = new HashMap<>();
+
+
     }
 
     private void sendAlerts(List<StockAlert> alertList, Map<String, JsonNode> stockMap) {
+        log.trace("Enter");
         for (StockAlert alert : alertList) {
             String ticker = alert.getStock().getShortName() + "." + alert.getStock().getExchange();
             switch (alert.getType()) {
@@ -78,5 +100,6 @@ public class AlertScheduler {
                     break;
             }
         }
+        log.trace("Exit");
     }
 }

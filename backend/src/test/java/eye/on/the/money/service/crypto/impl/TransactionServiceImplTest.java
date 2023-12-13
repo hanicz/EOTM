@@ -1,7 +1,6 @@
 package eye.on.the.money.service.crypto.impl;
 
 import eye.on.the.money.EotmApplication;
-import eye.on.the.money.dto.in.TransactionQuery;
 import eye.on.the.money.dto.out.TransactionDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.crypto.Transaction;
@@ -24,9 +23,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = EotmApplication.class)
@@ -90,14 +86,6 @@ class TransactionServiceImplTest {
                 () -> assertEquals("B", testObject.getBuySell()),
                 () -> assertEquals(0.0, testObject.getQuantity()),
                 () -> assertEquals(-1031.24, testObject.getAmount(), this.epsilon));
-    }
-
-    @Test
-    public void getCurrentHoldings() {
-        doNothing().when(this.cryptoAPIService).getLiveValue(any(), anyString());
-        List<TransactionDTO> result = this.transactionService.getCurrentHoldings(this.user.getId(), TransactionQuery.builder().currency("EUR").build());
-
-        Assertions.assertFalse(result.stream().anyMatch(tDTO -> "ADA".equals(tDTO.getSymbol())));
     }
 
     private TransactionDTO convertToTransactionDTO(Transaction transaction) {

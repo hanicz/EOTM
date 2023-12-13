@@ -113,6 +113,17 @@ class InvestmentServiceImplTest {
                 () -> assertEquals(43.77, testObject.getAmount(), this.epsilon));
     }
 
+    @Test
+    public void getCurrentHoldings() {
+        List<InvestmentDTO> result = this.investmentService.getAllPositions(this.user.getId());
+        InvestmentDTO testObject = result.stream().filter(iDTO -> "CRSR".equals(iDTO.getShortName())).findAny().get();
+
+        Assertions.assertAll("Assert all merged values",
+                () -> assertEquals("B", testObject.getBuySell()),
+                () -> assertEquals(0, testObject.getQuantity()),
+                () -> assertEquals(-100.0, testObject.getAmount(), this.epsilon));
+    }
+
     private InvestmentDTO convertToInvestmentDTO(Investment investment) {
         this.modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
         return this.modelMapper.map(investment, InvestmentDTO.class);

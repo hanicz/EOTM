@@ -64,7 +64,15 @@ public class WatchListServiceImpl implements WatchlistService {
     public List<CryptoWatchDTO> getCryptoWatchlistByUserId(Long userId, String currency) {
         List<CryptoWatchDTO> cryptoList = this.cryptoWatchRepository.findByUser_IdOrderByCoin_Symbol(userId).stream()
                 .map(this::convertToCryptoWatchDTO).collect(Collectors.toList());
-        this.cryptoAPIService.getLiveValueForWatchList(cryptoList, currency);
+
+        String ids = cryptoList.stream().map(CryptoWatchDTO::getCoinId).collect(Collectors.joining(","));
+        JsonNode root = this.cryptoAPIService.getLiveValueForCoins(currency, ids);
+
+        cryptoList.forEach(cryptoWatchDTO -> {
+            cryptoWatchDTO.setLiveValue(root.path(cryptoWatchDTO.getCoinId()).get(currency.toLowerCase()).doubleValue());
+            cryptoWatchDTO.setChange(root.path(cryptoWatchDTO.getCoinId()).get(currency.toLowerCase() + "_24h_change").doubleValue());
+        });
+
         return cryptoList;
     }
 

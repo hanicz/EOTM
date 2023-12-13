@@ -1,5 +1,6 @@
 package eye.on.the.money.service.crypto.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.in.TransactionQuery;
 import eye.on.the.money.dto.out.TransactionDTO;
 import eye.on.the.money.model.Currency;
@@ -67,7 +68,14 @@ public class TransactionServiceImpl implements TransactionService {
         Map<String, TransactionDTO> transactionMap = this.getCalculated(userId);
         List<TransactionDTO> transactionDTOList = (new ArrayList<>(transactionMap.values()))
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
-        this.cryptoAPIService.getLiveValue(transactionDTOList, query.getCurrency());
+        String ids = transactionDTOList.stream().map(TransactionDTO::getCoinId).collect(Collectors.joining(","));
+        JsonNode root = this.cryptoAPIService.getLiveValueForCoins(query.getCurrency(), ids);
+
+        transactionDTOList.forEach(transactionDTO -> {
+            transactionDTO.setLiveValue(root.path(transactionDTO.getCoinId()).get(query.getCurrency().toLowerCase()).doubleValue() * transactionDTO.getQuantity());
+            transactionDTO.setValueDiff(transactionDTO.getLiveValue() - transactionDTO.getAmount());
+        });
+
         return transactionDTOList;
     }
 

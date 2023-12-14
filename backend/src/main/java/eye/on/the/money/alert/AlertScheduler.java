@@ -15,6 +15,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -61,10 +62,30 @@ public class AlertScheduler {
                 .stream().map(Coin::getId).collect(Collectors.joining(","));
 
         JsonNode responseBody = this.cryptoAPIService.getLiveValueForCoins("eur", ids);
-
+        Iterator<Map.Entry<String, JsonNode>> fields = responseBody.fields();
         Map<String, JsonNode> coinMap = new HashMap<>();
 
 
+        while(fields.hasNext()) {
+            Map.Entry<String, JsonNode> field = fields.next();
+            coinMap.put(field.getKey(), field.getValue());
+        }
+
+    }
+
+    private void checkStockAlerts() {
+        List<StockAlert> stockAlertList = this.stockAlertRepository.findAll();
+        if (stockAlertList.isEmpty()) return;
+        String joinedList = stockAlertList.stream().map(StockAlert::getStock).collect(Collectors.toSet())
+                .stream().map(s -> (s.getShortName() + "." + s.getExchange())).collect(Collectors.joining(","));
+
+        JsonNode responseBody = this.eodAPIService.getLiveValue(joinedList, "/real-time/stock/?api_token={0}&fmt=json&s={1}");
+        Map<String, JsonNode> stockMap = new HashMap<>();
+
+        for (JsonNode stock : responseBody) {
+            stockMap.put(stock.findValue("code").textValue(), stock);
+        }
+        this.sendAlerts(stockAlertList, stockMap);
     }
 
     private void sendAlerts(List<StockAlert> alertList, Map<String, JsonNode> stockMap) {

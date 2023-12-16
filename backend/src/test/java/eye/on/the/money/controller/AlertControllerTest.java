@@ -48,7 +48,7 @@ class AlertControllerTest {
     public void deleteAlert() {
         when(this.alertService.deleteStockAlert(anyLong(), anyLong())).thenReturn(true);
 
-        ResponseEntity<HttpStatus> result = this.alertController.deleteAlert(User.builder().id(1L).build(), 1L);
+        ResponseEntity<HttpStatus> result = this.alertController.deleteStockAlert(User.builder().id(1L).build(), 1L);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
     }
@@ -57,7 +57,7 @@ class AlertControllerTest {
     public void deleteAlert404() {
         when(this.alertService.deleteStockAlert(anyLong(), anyLong())).thenReturn(false);
 
-        ResponseEntity<HttpStatus> result = this.alertController.deleteAlert(User.builder().id(1L).build(), 1L);
+        ResponseEntity<HttpStatus> result = this.alertController.deleteStockAlert(User.builder().id(1L).build(), 1L);
 
         assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
     }

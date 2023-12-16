@@ -24,4 +24,5 @@ public class CommonAlert {
     @JsonIgnore
     @ToString.Exclude
     private User user;
+    private String alertType;
 }

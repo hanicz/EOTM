@@ -27,7 +27,7 @@ public class AlertController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<HttpStatus> deleteAlert(@AuthenticationPrincipal User user, @PathVariable Long id) {
+    public ResponseEntity<HttpStatus> deleteStockAlert(@AuthenticationPrincipal User user, @PathVariable Long id) {
         log.trace("Enter");
         var isDeleted = this.alertService.deleteStockAlert(user.getId(), id);
         return new ResponseEntity<>(isDeleted ? HttpStatus.OK : HttpStatus.NOT_FOUND);

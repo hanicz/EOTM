@@ -32,7 +32,7 @@ export class CryptoService {
 
   getPositions() {
     const url = `${this.transactionUrl}/position`;
-    return this.http.post<Transaction[]>(url, {
+    return this.http.get<Transaction[]>(url, {
       headers: this.helper.getHeadersWithToken()
     });
   };

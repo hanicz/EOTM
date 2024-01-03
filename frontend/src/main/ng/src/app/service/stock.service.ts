@@ -49,14 +49,14 @@ export class StockService {
 
   getHolding() {
     const url = `${this.investmentUrl}/holding`;
-    return this.http.post<Investment[]>(url, {
+    return this.http.get<Investment[]>(url, {
       headers: this.helper.getHeadersWithToken()
     });
   };
 
   getPositions() {
     const url = `${this.investmentUrl}/position`;
-    return this.http.post<Investment[]>(url, {
+    return this.http.get<Investment[]>(url, {
       headers: this.helper.getHeadersWithToken()
     });
   };

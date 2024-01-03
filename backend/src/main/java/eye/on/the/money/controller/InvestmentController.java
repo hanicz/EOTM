@@ -31,13 +31,13 @@ public class InvestmentController {
         return new ResponseEntity<>(this.investmentService.getInvestments(user.getId()), HttpStatus.OK);
     }
 
-    @PostMapping("/holding")
+    @GetMapping("/holding")
     public ResponseEntity<List<InvestmentDTO>> getHoldings(@AuthenticationPrincipal User user) {
         log.trace("Enter getHoldings");
         return new ResponseEntity<>(this.investmentService.getCurrentHoldings(user.getId()), HttpStatus.OK);
     }
 
-    @PostMapping("/position")
+    @GetMapping("/position")
     public ResponseEntity<List<InvestmentDTO>> getPositions(@AuthenticationPrincipal User user) {
         log.trace("Enter getPositions");
         return new ResponseEntity<>(this.investmentService.getAllPositions(user.getId()), HttpStatus.OK);

@@ -24,14 +24,14 @@ export class EtfService {
 
   getHolding() {
     const url = `${this.etfUrl}/holding`;
-    return this.http.post<ETFInvestment[]>(url, {
+    return this.http.get<ETFInvestment[]>(url, {
       headers: this.helper.getHeadersWithToken()
     });
   };
 
   getPositions() {
     const url = `${this.etfUrl}/position`;
-    return this.http.post<ETFInvestment[]>(url, {
+    return this.http.get<ETFInvestment[]>(url, {
       headers: this.helper.getHeadersWithToken()
     });
   };

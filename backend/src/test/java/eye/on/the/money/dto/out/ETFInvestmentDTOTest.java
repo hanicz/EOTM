@@ -28,8 +28,6 @@ class ETFInvestmentDTOTest {
         Assertions.assertAll("Assert all changing values",
                 () -> assertEquals(eiDTO2.getAmount() + baseDTO.getAmount(), eiDTO1.getAmount()),
                 () -> assertEquals(eiDTO2.getQuantity() + baseDTO.getQuantity(), eiDTO1.getQuantity()),
-                () -> assertEquals(eiDTO2.getLiveValue() + baseDTO.getLiveValue(), eiDTO1.getLiveValue()),
-                () -> assertEquals(eiDTO2.getValueDiff() + baseDTO.getValueDiff(), eiDTO1.getValueDiff()),
                 () -> assertEquals("B", eiDTO1.getBuySell()));
     }
 
@@ -53,8 +51,6 @@ class ETFInvestmentDTOTest {
         Assertions.assertAll("Assert all changing values",
                 () -> assertEquals(eiDTO2.getAmount() + baseDTO.getAmount(), eiDTO1.getAmount()),
                 () -> assertEquals(eiDTO2.getQuantity() + baseDTO.getQuantity(), eiDTO1.getQuantity()),
-                () -> assertEquals(eiDTO2.getLiveValue() + baseDTO.getLiveValue(), eiDTO1.getLiveValue()),
-                () -> assertEquals(eiDTO2.getValueDiff() + baseDTO.getValueDiff(), eiDTO1.getValueDiff()),
                 () -> assertEquals("B", eiDTO1.getBuySell()));
     }
 

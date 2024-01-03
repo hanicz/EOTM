@@ -39,7 +39,7 @@ public class TransactionController {
         return new ResponseEntity<>(this.transactionService.getTransactionsByUserId(user.getId()), HttpStatus.OK);
     }
 
-    @PostMapping("/position")
+    @GetMapping("/position")
     public ResponseEntity<List<TransactionDTO>> getAllPositions(@AuthenticationPrincipal User user) {
         log.trace("Enter getAllPositions");
         return new ResponseEntity<>(this.transactionService.getAllPositions(user.getId()), HttpStatus.OK);

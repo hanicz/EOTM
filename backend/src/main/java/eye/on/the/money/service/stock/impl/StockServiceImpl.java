@@ -7,7 +7,9 @@ import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.stock.StockService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -38,6 +40,12 @@ public class StockServiceImpl implements StockService {
     public List<Symbol> getAllSymbols(String exchange) {
         log.trace("Enter getAllSymbols");
         return this.eodAPIService.getAllSymbols(exchange);
+    }
+
+    @CacheEvict(value = {"symbols", "exchanges"}, allEntries = true)
+    @Scheduled(fixedRateString = "${cache.stockTTL}")
+    public void evictStockRelatedCache() {
+        log.trace("Evict stock related cache");
     }
 
     @Override

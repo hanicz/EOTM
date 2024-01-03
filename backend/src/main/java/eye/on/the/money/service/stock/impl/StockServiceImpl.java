@@ -7,6 +7,7 @@ import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.stock.StockService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -33,12 +34,14 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
+    @Cacheable("symbols")
     public List<Symbol> getAllSymbols(String exchange) {
         log.trace("Enter getAllSymbols");
         return this.eodAPIService.getAllSymbols(exchange);
     }
 
     @Override
+    @Cacheable("exchanges")
     public List<Exchange> getAllExchanges() {
         log.trace("Enter getAllExchanges");
         return this.eodAPIService.getAllExchanges();

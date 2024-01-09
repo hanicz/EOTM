@@ -31,7 +31,7 @@ public class EmailServiceImpl implements EmailService {
         smp.setText(message);
         smp.setFrom(this.credentialRepository.findById("email_user").orElseThrow(NoSuchElementException::new).getSecret());
 
-        log.trace("Send alert to " + sendTo + " with message: " + message);
+        log.trace("Send alert to {} with message: {}", sendTo, message);
         this.javaMailSender.send(smp);
     }
 }

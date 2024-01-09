@@ -112,7 +112,7 @@ public class AlertScheduler {
     private void sendAlerts(List<CommonAlert> alertList) {
         log.trace("Enter");
         alertList.parallelStream().forEach(alert -> {
-            log.trace("Checking alert: " + alert.toString());
+            log.trace("Checking alert: {}", alert);
             switch (alert.getType()) {
                 case "PERCENT_OVER":
                     if (alert.getActualChange() >= alert.getValuePoint()) {
@@ -137,7 +137,7 @@ public class AlertScheduler {
                 default:
                     break;
             }
-            log.trace("Alert checked with id: " + alert.getId());
+            log.trace("Alert checked with id: {}", alert.getId());
         });
         log.trace("Exit");
     }

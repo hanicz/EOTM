@@ -53,7 +53,7 @@ public class NewsAPIServiceImpl extends APIService implements NewsAPIService {
                 throw new APIException("Empty response from news API");
             }
         } catch (RestClientException e) {
-            log.error("Unable to reach news API: " + e.getMessage());
+            log.error("Unable to reach news API: {}", e.getMessage());
             throw new APIException("Unable to reach news API");
         }
     }

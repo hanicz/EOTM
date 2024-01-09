@@ -51,7 +51,7 @@ public class StockMetricAPIServiceImpl extends APIService implements StockMetric
             JsonNode metric = this.mapper.readTree((String) response.getBody()).path("metric");
             return this.mapper.treeToValue(metric, Metric.class);
         } catch (JsonProcessingException | NullPointerException e) {
-            log.error("JSON process failed. " + e.getMessage());
+            log.error("JSON process failed. {}", e.getMessage());
             throw new APIException("JSON process failed");
         }
     }
@@ -75,7 +75,7 @@ public class StockMetricAPIServiceImpl extends APIService implements StockMetric
                 throw new APIException("Empty response from metric API");
             }
         } catch (RestClientException e) {
-            log.error("Unable to reach metric API: " + e.getMessage());
+            log.error("Unable to reach metric API: {}", e.getMessage());
             throw new APIException("Unable to reach metric API");
         }
     }

@@ -53,7 +53,7 @@ public class AlertServiceImpl implements AlertService {
 
         StockAlert stockAlert = StockAlert.builder().stock(stock).user(user).type(stockAlertDTO.getType()).valuePoint(stockAlertDTO.getValuePoint()).build();
         this.stockAlertRepository.save(stockAlert);
-        log.debug("New alert created " + stockAlert);
+        log.debug("New alert created {}", stockAlert);
         return this.convertToStockAlertDTO(stockAlert);
     }
 

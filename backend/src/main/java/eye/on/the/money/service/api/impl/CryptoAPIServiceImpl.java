@@ -33,7 +33,7 @@ public class CryptoAPIServiceImpl extends APIService implements CryptoAPIService
             log.error("JSON process failed");
             throw new APIException("JSON process failed");
         } catch (RestClientException e) {
-            log.error("Unable to reach crypto API: " + e.getMessage());
+            log.error("Unable to reach crypto API: {}", e.getMessage());
             throw new APIException("Unable to reach crypto API");
         }
     }

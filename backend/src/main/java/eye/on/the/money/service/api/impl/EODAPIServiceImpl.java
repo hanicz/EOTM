@@ -90,7 +90,7 @@ public class EODAPIServiceImpl extends APIService implements EODAPIService {
             log.error("JSON process failed");
             throw new APIException("JSON process failed");
         } catch (RestClientException e) {
-            log.error("Unable to reach stock API: " + e.getMessage());
+            log.error("Unable to reach stock API: {}", e.getMessage());
             throw new APIException("Unable to reach stock API.");
         }
     }

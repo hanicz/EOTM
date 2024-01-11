@@ -20,14 +20,14 @@ public class UserController {
 
     @PostMapping("/signup")
     public ResponseEntity<HttpStatus> createNewUser(@RequestBody User user) {
-        log.trace("Enter createNewUser");
+        log.trace("Enter");
         this.userService.signUp(user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping()
     public ResponseEntity<HttpStatus> validatingToken(@AuthenticationPrincipal User user) {
-        log.trace("Enter validatingToken");
+        log.trace("Enter");
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

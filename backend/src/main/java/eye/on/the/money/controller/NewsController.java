@@ -23,13 +23,13 @@ public class NewsController {
 
     @GetMapping("category/{category}")
     public ResponseEntity<List<News>> getGeneralNews(@PathVariable String category) {
-        log.trace("Enter getNews");
+        log.trace("Enter");
         return new ResponseEntity<>(this.newsAPIService.getNews(category), HttpStatus.OK);
     }
 
     @GetMapping("company/{symbol}")
     public ResponseEntity<List<News>> getCompanyNews(@PathVariable String symbol) {
-        log.trace("Enter getCompanyNews");
+        log.trace("Enter");
         return new ResponseEntity<>(this.newsAPIService.getCompanyNews(symbol), HttpStatus.OK);
     }
 }

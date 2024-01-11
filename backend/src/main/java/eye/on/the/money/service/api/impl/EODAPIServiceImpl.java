@@ -84,8 +84,11 @@ public class EODAPIServiceImpl extends APIService implements EODAPIService {
     private JsonNode callStockAPI(String URL) {
         log.trace("Enter");
         try {
+            log.debug("Call to {}", URL);
             ResponseEntity<String> response = this.restTemplate.getForEntity(URL, String.class);
-            return this.mapper.readTree(response.getBody());
+            String responseBody = response.getBody();
+            log.debug("Response: {}", responseBody);
+            return this.mapper.readTree(responseBody);
         } catch (JsonProcessingException | NullPointerException e) {
             log.error("JSON process failed");
             throw new APIException("JSON process failed");

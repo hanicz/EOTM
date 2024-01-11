@@ -22,7 +22,7 @@ public class CoinController {
 
     @GetMapping()
     public ResponseEntity<List<Coin>> getAllCoins() {
-        log.trace("Enter getAllCoins");
+        log.trace("Enter");
         return new ResponseEntity<>(this.coinService.getAllCoins(), HttpStatus.OK);
     }
 }

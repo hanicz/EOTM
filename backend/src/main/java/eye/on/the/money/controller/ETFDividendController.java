@@ -27,19 +27,19 @@ public class ETFDividendController {
 
     @GetMapping()
     public ResponseEntity<List<ETFDividendDTO>> getAllETFDividends(@AuthenticationPrincipal User user) {
-        log.trace("Enter getAllETFDividends");
+        log.trace("Enter");
         return new ResponseEntity<>(this.etfDividendService.getDividends(user.getId()), HttpStatus.OK);
     }
 
     @PostMapping
     public ResponseEntity<ETFDividendDTO> createDividend(@AuthenticationPrincipal User user, @RequestBody ETFDividendDTO dividendDTO) {
-        log.trace("Enter createDividend");
+        log.trace("Enter");
         return new ResponseEntity<>(this.etfDividendService.createETFDividend(dividendDTO, user), HttpStatus.CREATED);
     }
 
     @DeleteMapping()
     public ResponseEntity<HttpStatus> deleteByIds(@AuthenticationPrincipal User user, @RequestParam String ids) {
-        log.trace("Enter deleteByIds");
+        log.trace("Enter");
         List<Long> idList = Stream.of(ids.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
         this.etfDividendService.deleteETFDividendById(idList, user);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -47,7 +47,7 @@ public class ETFDividendController {
 
     @GetMapping("/csv")
     public void getCSV(@AuthenticationPrincipal User user, HttpServletResponse servletResponse) throws IOException {
-        log.trace("Enter getCSV");
+        log.trace("Enter");
         servletResponse.setContentType("text/csv");
         servletResponse.addHeader("Content-Disposition", "attachment; filename=\"dividends.csv\"");
         this.etfDividendService.getCSV(user.getId(), servletResponse.getWriter());
@@ -55,13 +55,13 @@ public class ETFDividendController {
 
     @PutMapping
     public ResponseEntity<ETFDividendDTO> updateETFDividend(@AuthenticationPrincipal User user, @RequestBody ETFDividendDTO dividendDTO) {
-        log.trace("Enter updateETFDividend");
+        log.trace("Enter");
         return new ResponseEntity<>(this.etfDividendService.updateETFDividend(dividendDTO, user), HttpStatus.CREATED);
     }
 
     @PostMapping("/process/csv")
     public ResponseEntity<HttpStatus> processCSV(@AuthenticationPrincipal User user, @RequestParam("file") MultipartFile file) throws IOException {
-        log.trace("Enter processCSV");
+        log.trace("Enter");
         this.etfDividendService.processCSV(user, file);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }

@@ -26,25 +26,25 @@ public class StockController {
 
     @GetMapping()
     public ResponseEntity<List<Stock>> getAllStocks() {
-        log.trace("Enter getAllStocks");
+        log.trace("Enter");
         return new ResponseEntity<>(this.stockService.getAllStocks(), HttpStatus.OK);
     }
 
     @GetMapping("symbols/{exchange}")
     public ResponseEntity<List<Symbol>> getAllSymbols(@PathVariable String exchange) {
-        log.trace("Enter getAllSymbols");
+        log.trace("Enter");
         return new ResponseEntity<>(this.stockService.getAllSymbols(exchange), HttpStatus.OK);
     }
 
     @GetMapping("exchanges")
     public ResponseEntity<List<Exchange>> getAllExchanges() {
-        log.trace("Enter getAllExchanges");
+        log.trace("Enter");
         return new ResponseEntity<>(this.stockService.getAllExchanges(), HttpStatus.OK);
     }
 
     @GetMapping("candle/{shortName}/{months}")
     public ResponseEntity<CandleQuote> getCandleQuoteByShortName(@PathVariable String shortName, @PathVariable int months) {
-        log.trace("Enter getCandleQuoteByShortName");
+        log.trace("Enter");
         return new ResponseEntity<>(this.stockService.getCandleQuoteByShortName(shortName, months), HttpStatus.OK);
     }
 }

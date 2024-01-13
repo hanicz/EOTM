@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { Router } from '@angular/router';
 import { Globals } from '../util/global';
+import { User } from '../model/user';
+import { UserService } from '../service/user.service';
 
 @Component({
   selector: 'menu',
@@ -14,9 +16,16 @@ export class MenuComponent implements OnInit {
   selectedCrypto: string = "EUR";
   selectedStock: string = "USD";
   selectedETF: string = "EUR";
+  user: User = {} as User;
 
-  constructor(private router: Router, globals: Globals) {
+  constructor(private router: Router, globals: Globals, private userService: UserService) {
     this.globals = globals;
+    
+    this.userService.getUserEmail().subscribe({
+      next: (data) => {
+        this.user = data;
+      }
+    });
   }
 
   changedCrypto() {

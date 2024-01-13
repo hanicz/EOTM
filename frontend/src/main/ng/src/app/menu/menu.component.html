@@ -13,9 +13,10 @@
             <label class="pt-2 mr-1 ml-1" for="etfDropdown">ETF</label>
             <p-dropdown inputId="etfDropdown" [options]="globals.currencies" [(ngModel)]="selectedETF"
                 optionLabel="label" optionValue="value" (onChange)="changedETF()"></p-dropdown>
-
-            <button pButton pRipple type="button" icon="pi pi-sign-out" (click)="logOut()"
-                class="p-button-rounded p-button-text ml-2"></button>
+            <div class="flex text-sm ml-2 align-items-center">{{user.email}}
+                <button pButton pRipple type="button" icon="pi pi-sign-out" (click)="logOut()"
+                    class="p-button-rounded p-button-text"></button>
+            </div>
         </div>
     </ng-template>
 </p-menubar>

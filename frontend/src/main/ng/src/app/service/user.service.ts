@@ -32,6 +32,13 @@ export class UserService {
     }));
   }
 
+  getUserEmail() {
+    const url = `${this.userUrl}/me`;
+    return this.http.get<User>(url, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  };
+
   validateToken() {
     return this.http.get(this.userUrl, {
       headers: this.helper.getHeadersWithToken(),

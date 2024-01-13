@@ -30,4 +30,10 @@ public class UserController {
         log.trace("Enter");
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<String> getUserEmail(@AuthenticationPrincipal User user) {
+        log.trace("Enter");
+        return new ResponseEntity<>("{ \"email\": \"" + user.getEmail() + "\" }", HttpStatus.OK);
+    }
 }

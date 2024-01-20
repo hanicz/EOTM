@@ -1,7 +1,6 @@
 package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.out.InvestmentDTO;
-import eye.on.the.money.model.User;
 import eye.on.the.money.service.stock.InvestmentService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;

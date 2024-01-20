@@ -1,4 +1,4 @@
-FROM amd64/adoptopenjdk:11-jre-hotspot
+FROM amd64/openjdk:21-ea-25-jdk
 ARG JAR_FILE=*.jar
 COPY ${JAR_FILE} EOTM.jar
 EXPOSE 8080

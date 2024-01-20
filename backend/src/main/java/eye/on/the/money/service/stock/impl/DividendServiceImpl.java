@@ -1,8 +1,8 @@
 package eye.on.the.money.service.stock.impl;
 
 import eye.on.the.money.dto.out.DividendDTO;
-import eye.on.the.money.model.User;
 import eye.on.the.money.model.Currency;
+import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Dividend;
 import eye.on.the.money.model.stock.Stock;
 import eye.on.the.money.repository.forex.CurrencyRepository;
@@ -17,7 +17,6 @@ import org.apache.commons.csv.CSVRecord;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;

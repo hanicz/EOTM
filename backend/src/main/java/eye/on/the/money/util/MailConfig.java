@@ -2,15 +2,11 @@ package eye.on.the.money.util;
 
 import eye.on.the.money.repository.CredentialRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.beans.factory.annotation.Value;
-
-import java.util.NoSuchElementException;
-import java.util.Properties;
 
 @Configuration
 public class MailConfig {

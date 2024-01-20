@@ -3,7 +3,6 @@ package eye.on.the.money.controller;
 import eye.on.the.money.dto.out.CryptoWatchDTO;
 import eye.on.the.money.dto.out.ForexWatchDTO;
 import eye.on.the.money.dto.out.StockWatchDTO;
-import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Stock;
 import eye.on.the.money.service.WatchlistService;
 import lombok.extern.slf4j.Slf4j;

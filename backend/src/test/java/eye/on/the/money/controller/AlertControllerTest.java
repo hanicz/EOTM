@@ -18,6 +18,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
@@ -37,25 +38,25 @@ class AlertControllerTest {
         alerts.add(StockAlertDTO.builder().name("n2").shortName("sn2").valuePoint(0.2).type("t2").exchange("e2").id(1L).build());
         alerts.add(StockAlertDTO.builder().name("n3").shortName("sn3").valuePoint(0.3).type("t3").exchange("e3").id(1L).build());
 
-        when(this.alertService.getAllStockAlerts(anyLong())).thenReturn(alerts);
+        when(this.alertService.getAllStockAlerts(anyString())).thenReturn(alerts);
 
-        ResponseEntity<List<StockAlertDTO>> result = this.alertController.getAlerts(User.builder().id(1L).build());
+        ResponseEntity<List<StockAlertDTO>> result = this.alertController.getAlerts(User.builder().id(1L).email("email").build());
 
         Assertions.assertIterableEquals(result.getBody(), alerts);
     }
 
     @Test
     public void deleteAlert() {
-        when(this.alertService.deleteStockAlert(anyLong(), anyLong())).thenReturn(true);
+        when(this.alertService.deleteStockAlert(anyString(), anyLong())).thenReturn(true);
 
-        ResponseEntity<HttpStatus> result = this.alertController.deleteStockAlert(User.builder().id(1L).build(), 1L);
+        ResponseEntity<HttpStatus> result = this.alertController.deleteStockAlert(User.builder().id(1L).email("email").build(), 1L);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
     }
 
     @Test
     public void deleteAlert404() {
-        when(this.alertService.deleteStockAlert(anyLong(), anyLong())).thenReturn(false);
+        when(this.alertService.deleteStockAlert(anyString(), anyLong())).thenReturn(false);
 
         ResponseEntity<HttpStatus> result = this.alertController.deleteStockAlert(User.builder().id(1L).build(), 1L);
 

@@ -54,8 +54,8 @@ class DividendServiceImplTest {
 
     @Test
     public void getDividends() {
-        List<DividendDTO> dividends = this.dividendService.getDividends(this.user.getId());
-        List<Dividend> dividendsActual = this.dividendRepository.findByUser_IdOrderByDividendDate(1L);
+        List<DividendDTO> dividends = this.dividendService.getDividends(this.user.getUsername());
+        List<Dividend> dividendsActual = this.dividendRepository.findByUserEmailOrderByDividendDate("test@test.test");
 
         Assertions.assertIterableEquals(dividendsActual.stream()
                 .map(this::convertToDividendDTO).collect(Collectors.toList()), dividends);
@@ -63,14 +63,14 @@ class DividendServiceImplTest {
 
     @Test
     public void getDividends_NoResult() {
-        List<DividendDTO> dividends = this.dividendService.getDividends(10000L);
+        List<DividendDTO> dividends = this.dividendService.getDividends("nouseremail");
         assertEquals(0, dividends.size());
     }
 
     @Test
     public void createDividend() throws ParseException {
         DividendDTO dividendDTO = this.getDividendDTO();
-        DividendDTO created = this.dividendService.createDividend(dividendDTO, this.user);
+        DividendDTO created = this.dividendService.createDividend(dividendDTO, this.user.getUsername());
         dividendDTO.setDividendId(created.getDividendId());
         assertEquals(dividendDTO, created);
     }
@@ -80,7 +80,7 @@ class DividendServiceImplTest {
         DividendDTO dividendDTO = this.getDividendDTO();
         dividendDTO.setShortName("NONEXISTING");
         assertThrows(NoSuchElementException.class,
-                () -> this.dividendService.createDividend(dividendDTO, this.user));
+                () -> this.dividendService.createDividend(dividendDTO, this.user.getUsername()));
     }
 
     @Test
@@ -88,15 +88,15 @@ class DividendServiceImplTest {
         DividendDTO dividendDTO = this.getDividendDTO();
         dividendDTO.setCurrencyId("NONEXISTING");
         assertThrows(NoSuchElementException.class,
-                () -> this.dividendService.createDividend(dividendDTO, this.user));
+                () -> this.dividendService.createDividend(dividendDTO, this.user.getUsername()));
     }
 
     @Test
     public void updateDividend() throws ParseException {
         DividendDTO dividendDTO = this.getDividendDTO();
-        DividendDTO created = this.dividendService.createDividend(dividendDTO, this.user);
+        DividendDTO created = this.dividendService.createDividend(dividendDTO, this.user.getUsername());
         created.setAmount(111.0);
-        DividendDTO updated = this.dividendService.updateDividend(created, this.user);
+        DividendDTO updated = this.dividendService.updateDividend(created, this.user.getUsername());
         assertEquals(created, updated);
     }
 
@@ -105,7 +105,7 @@ class DividendServiceImplTest {
         DividendDTO dividendDTO = this.getDividendDTO();
         dividendDTO.setShortName("NONEXISTING");
         assertThrows(NoSuchElementException.class,
-                () -> this.dividendService.updateDividend(dividendDTO, this.user));
+                () -> this.dividendService.updateDividend(dividendDTO, this.user.getUsername()));
     }
 
     @Test
@@ -113,7 +113,7 @@ class DividendServiceImplTest {
         DividendDTO dividendDTO = this.getDividendDTO();
         dividendDTO.setCurrencyId("NONEXISTING");
         assertThrows(NoSuchElementException.class,
-                () -> this.dividendService.updateDividend(dividendDTO, this.user));
+                () -> this.dividendService.updateDividend(dividendDTO, this.user.getUsername()));
     }
 
     @Test
@@ -121,14 +121,14 @@ class DividendServiceImplTest {
         DividendDTO dividendDTO = this.getDividendDTO();
         dividendDTO.setDividendId(0L);
         assertThrows(NoSuchElementException.class,
-                () -> this.dividendService.updateDividend(dividendDTO, this.user));
+                () -> this.dividendService.updateDividend(dividendDTO, this.user.getUsername()));
     }
 
     @Test
     public void deleteDividendById() {
         List<Long> ids = new ArrayList<>();
         ids.add(1L);
-        this.dividendService.deleteDividendById(ids, this.user);
+        this.dividendService.deleteDividendById(ids, this.user.getUsername());
         Optional<Dividend> dividend = this.dividendRepository.findById(1L);
         assertFalse(dividend.isPresent());
     }
@@ -136,7 +136,7 @@ class DividendServiceImplTest {
     @Test
     public void getCSV() {
         Writer writer = new StringWriter();
-        this.dividendService.getCSV(this.user.getId(), writer);
+        this.dividendService.getCSV(this.user.getUsername(), writer);
         System.out.println(writer.toString());
         assertAll(
                 () -> assertTrue(writer.toString().contains("Dividend Id,Amount,Dividend Date,Short Name,Currency")),
@@ -147,7 +147,7 @@ class DividendServiceImplTest {
     @Test
     public void getCSV_Empty() {
         Writer writer = new StringWriter();
-        this.dividendService.getCSV(0L, writer);
+        this.dividendService.getCSV("nouseremail", writer);
         assertTrue(writer.toString().isEmpty());
     }
 
@@ -156,7 +156,7 @@ class DividendServiceImplTest {
         String csvContent = "Dividend Id,Amount,Dividend Date,Short Name,Currency\n1,250.0,2021-06-03 00:00:00.0,CRSR,HUF";
         MultipartFile mpf = new MockMultipartFile("file", "file.csv", MediaType.TEXT_PLAIN_VALUE, csvContent.getBytes());
 
-        this.dividendService.processCSV(this.user, mpf);
+        this.dividendService.processCSV(this.user.getUsername(), mpf);
 
         Dividend updatedDividend = this.dividendRepository.findById(1L).get();
 
@@ -168,9 +168,9 @@ class DividendServiceImplTest {
         String csvContent = "Dividend Id,Amount,Dividend Date,Short Name,Currency\n,299.0,2021-06-03 00:00:00.0,INTC,USD";
         MultipartFile mpf = new MockMultipartFile("file", "file.csv", MediaType.TEXT_PLAIN_VALUE, csvContent.getBytes());
 
-        this.dividendService.processCSV(this.user, mpf);
+        this.dividendService.processCSV(this.user.getUsername(), mpf);
 
-        List<Dividend> dividends = this.dividendRepository.findByUser_IdOrderByDividendDate(this.user.getId());
+        List<Dividend> dividends = this.dividendRepository.findByUserEmailOrderByDividendDate(this.user.getUsername());
 
         Optional<Dividend> createdDividend = dividends.stream().filter(d -> d.getAmount() == 299.0 && d.getStock().getId().equals("intc")).findAny();
 
@@ -183,7 +183,7 @@ class DividendServiceImplTest {
         MultipartFile mpf = new MockMultipartFile("file", "file.csv", MediaType.TEXT_PLAIN_VALUE, csvContent.getBytes());
 
         assertThrows(RuntimeException.class,
-                () -> this.dividendService.processCSV(this.user, mpf));
+                () -> this.dividendService.processCSV(this.user.getUsername(), mpf));
     }
 
     private DividendDTO getDividendDTO() throws ParseException {

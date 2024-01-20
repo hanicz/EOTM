@@ -44,8 +44,8 @@ public class AlertServiceImplTest {
 
     @Test
     public void getAllStockAlerts() {
-        List<StockAlert> alertsInDB = this.stockAlertRepository.findByUser_IdOrderByStockShortName(this.user.getId());
-        List<StockAlertDTO> alertsResponse = this.alertService.getAllStockAlerts(this.user.getId());
+        List<StockAlert> alertsInDB = this.stockAlertRepository.findByUserEmailOrderByStockShortName(this.user.getUsername());
+        List<StockAlertDTO> alertsResponse = this.alertService.getAllStockAlerts(this.user.getUsername());
 
         Assertions.assertEquals(alertsInDB.stream().map(this::convertToStockAlertDTO).collect(Collectors.toList()), alertsResponse);
     }
@@ -63,7 +63,7 @@ public class AlertServiceImplTest {
     @Test
     public void deleteStockAlert() {
         Optional<StockAlert> beforeDelete = this.stockAlertRepository.findById(1L);
-        var deleted = this.alertService.deleteStockAlert(1L, this.user.getId());
+        var deleted = this.alertService.deleteStockAlert("test@test.test", this.user.getId());
         Optional<StockAlert> afterDelete = this.stockAlertRepository.findById(1L);
 
         Assertions.assertTrue(deleted);
@@ -73,7 +73,7 @@ public class AlertServiceImplTest {
 
     @Test
     public void deleteStockAlertNotFound() {
-        Assertions.assertFalse(this.alertService.deleteStockAlert(1L, 200L));
+        Assertions.assertFalse(this.alertService.deleteStockAlert("test@test.test", 200L));
     }
 
     private StockAlertDTO getStockAlertDTO() {

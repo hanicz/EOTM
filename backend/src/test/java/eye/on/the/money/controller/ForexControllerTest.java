@@ -30,13 +30,13 @@ class ForexControllerTest {
     @InjectMocks
     private ForexController forexController;
 
-    private final User user = User.builder().id(1L).build();
+    private final User user = User.builder().id(1L).email("email").build();
 
     @Test
     public void getForexTransactionsByUserId() {
         List<ForexTransactionDTO> ftDTO = new ArrayList<>();
 
-        when(this.forexTransactionService.getForexTransactionsByUserId(this.user.getId())).thenReturn(ftDTO);
+        when(this.forexTransactionService.getForexTransactionsByUserId("email")).thenReturn(ftDTO);
 
         Assertions.assertIterableEquals(ftDTO, this.forexController.getForexTransactionsByUserId(this.user).getBody());
     }
@@ -45,7 +45,7 @@ class ForexControllerTest {
     public void getForexHoldings() {
         List<ForexTransactionDTO> ftDTO = new ArrayList<>();
 
-        when(this.forexTransactionService.getAllForexHoldings(this.user.getId())).thenReturn(ftDTO);
+        when(this.forexTransactionService.getAllForexHoldings("email")).thenReturn(ftDTO);
 
         Assertions.assertIterableEquals(ftDTO, this.forexController.getForexHoldings(this.user).getBody());
     }
@@ -62,7 +62,7 @@ class ForexControllerTest {
         ForexTransactionDTO ftDTO = ForexTransactionDTO.builder().toAmount(1.0).fromAmount(3.0).transactionDate(new Date())
                 .buySell("b").changeRate(55.6).liveChangeRate(66.7).liveValue(100.1).valueDiff(5.6).fromCurrencyId("eur").toCurrencyId("usd").build();
 
-        when(this.forexTransactionService.createForexTransaction(ftDTO, this.user)).thenReturn(ftDTO);
+        when(this.forexTransactionService.createForexTransaction(ftDTO, "email")).thenReturn(ftDTO);
 
         Assertions.assertEquals(ftDTO, this.forexController.createTransaction(this.user, ftDTO).getBody());
     }
@@ -72,7 +72,7 @@ class ForexControllerTest {
         ForexTransactionDTO ftDTO = ForexTransactionDTO.builder().toAmount(1.0).fromAmount(3.0).transactionDate(new Date())
                 .buySell("b").changeRate(55.6).liveChangeRate(66.7).liveValue(100.1).valueDiff(5.6).fromCurrencyId("eur").toCurrencyId("usd").build();
 
-        when(this.forexTransactionService.updateForexTransaction(ftDTO, this.user)).thenReturn(ftDTO);
+        when(this.forexTransactionService.updateForexTransaction(ftDTO, "email")).thenReturn(ftDTO);
 
         Assertions.assertEquals(ftDTO, this.forexController.updateTransaction(this.user, ftDTO).getBody());
     }

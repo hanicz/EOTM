@@ -64,8 +64,8 @@ class InvestmentServiceImplTest {
 
     @Test
     public void getInvestments() {
-        List<InvestmentDTO> result = this.investmentService.getInvestments(this.user.getId());
-        List<Investment> investments = this.investmentRepository.findByUser_IdOrderByTransactionDate(this.user.getId());
+        List<InvestmentDTO> result = this.investmentService.getInvestments(this.user.getUsername());
+        List<Investment> investments = this.investmentRepository.findByUserEmailOrderByTransactionDate(this.user.getUsername());
 
         Assertions.assertIterableEquals(investments.stream().map(this::convertToInvestmentDTO).collect(Collectors.toList()), result);
     }
@@ -74,15 +74,15 @@ class InvestmentServiceImplTest {
     public void getInvestmentsByTypeAndDate() {
         Date from = Date.from(LocalDate.parse("2020-01-01").atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
         Date to = new Date();
-        List<InvestmentDTO> result = this.investmentService.getInvestmentsByTypeAndDate(this.user.getId(), "B", from, to);
-        List<Investment> investments = this.investmentRepository.findByUser_IdAndBuySellAndTransactionDateBetween(this.user.getId(), "B", from, to);
+        List<InvestmentDTO> result = this.investmentService.getInvestmentsByTypeAndDate(this.user.getUsername(), "B", from, to);
+        List<Investment> investments = this.investmentRepository.findByUserEmailAndBuySellAndTransactionDateBetween(this.user.getUsername(), "B", from, to);
 
         Assertions.assertIterableEquals(investments.stream().map(this::convertToInvestmentDTO).collect(Collectors.toList()), result);
     }
 
     @Test
     public void getAllPositions() {
-        List<InvestmentDTO> result = this.investmentService.getAllPositions(this.user.getId());
+        List<InvestmentDTO> result = this.investmentService.getAllPositions(this.user.getUsername());
         InvestmentDTO testObject = result.stream().filter(iDTO -> "CRSR".equals(iDTO.getShortName())).findAny().get();
 
         Assertions.assertAll("Assert all merged values",
@@ -93,7 +93,7 @@ class InvestmentServiceImplTest {
 
     @Test
     public void getAllPositions2() {
-        List<InvestmentDTO> result = this.investmentService.getAllPositions(this.user.getId());
+        List<InvestmentDTO> result = this.investmentService.getAllPositions(this.user.getUsername());
         InvestmentDTO testObject = result.stream().filter(iDTO -> "AMD".equals(iDTO.getShortName())).findAny().get();
 
         Assertions.assertAll("Assert all merged values",
@@ -104,7 +104,7 @@ class InvestmentServiceImplTest {
 
     @Test
     public void getAllPositions3() {
-        List<InvestmentDTO> result = this.investmentService.getAllPositions(this.user.getId());
+        List<InvestmentDTO> result = this.investmentService.getAllPositions(this.user.getUsername());
         InvestmentDTO testObject = result.stream().filter(iDTO -> "INTC".equals(iDTO.getShortName())).findAny().get();
 
         Assertions.assertAll("Assert all merged values",
@@ -115,7 +115,7 @@ class InvestmentServiceImplTest {
 
     @Test
     public void getCurrentHoldings() {
-        List<InvestmentDTO> result = this.investmentService.getAllPositions(this.user.getId());
+        List<InvestmentDTO> result = this.investmentService.getAllPositions(this.user.getUsername());
         InvestmentDTO testObject = result.stream().filter(iDTO -> "CRSR".equals(iDTO.getShortName())).findAny().get();
 
         Assertions.assertAll("Assert all merged values",

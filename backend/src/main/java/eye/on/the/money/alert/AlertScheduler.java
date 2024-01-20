@@ -59,7 +59,7 @@ public class AlertScheduler {
             coinMap.put(field.getKey(), field.getValue());
         }
 
-        List<CommonAlert> commonAlerts = new ArrayList<>();
+        List<CommonAlert> commonAlerts = Collections.synchronizedList(new ArrayList<>());
 
         cryptoAlerts.parallelStream().forEach(alert -> {
             commonAlerts.add(CommonAlert.builder()
@@ -91,7 +91,7 @@ public class AlertScheduler {
             stockMap.put(stock.findValue("code").textValue(), stock);
         }
 
-        List<CommonAlert> commonAlerts = new ArrayList<>();
+        List<CommonAlert> commonAlerts = Collections.synchronizedList(new ArrayList<>());
 
         stockAlertList.parallelStream().forEach(alert -> {
             String ticker = alert.getStock().getShortName() + "." + alert.getStock().getExchange();

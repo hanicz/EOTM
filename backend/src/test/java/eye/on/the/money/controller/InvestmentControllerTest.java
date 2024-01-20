@@ -3,6 +3,7 @@ package eye.on.the.money.controller;
 import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.service.stock.InvestmentService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +17,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -35,13 +35,13 @@ class InvestmentControllerTest {
     @InjectMocks
     private InvestmentController investmentController;
 
-    private final User user = User.builder().id(1L).build();
+    private final User user = User.builder().id(1L).email("email").build();
 
     @Test
     public void getAllInvestments() {
         List<InvestmentDTO> iDTO = this.createInvestmentList();
 
-        when(this.investmentService.getInvestments(this.user.getId())).thenReturn(iDTO);
+        when(this.investmentService.getInvestments("email")).thenReturn(iDTO);
 
         Assertions.assertIterableEquals(iDTO, this.investmentController.getAllInvestments(this.user).getBody());
     }
@@ -50,7 +50,7 @@ class InvestmentControllerTest {
     public void getHoldings() {
         List<InvestmentDTO> iDTO = this.createInvestmentList();
 
-        when(this.investmentService.getCurrentHoldings(this.user.getId())).thenReturn(iDTO);
+        when(this.investmentService.getCurrentHoldings("email")).thenReturn(iDTO);
 
         Assertions.assertIterableEquals(iDTO, this.investmentController.getHoldings(this.user).getBody());
     }
@@ -59,7 +59,7 @@ class InvestmentControllerTest {
     public void getPositions() {
         List<InvestmentDTO> iDTO = this.createInvestmentList();
 
-        when(this.investmentService.getAllPositions(this.user.getId())).thenReturn(iDTO);
+        when(this.investmentService.getAllPositions("email")).thenReturn(iDTO);
 
         Assertions.assertIterableEquals(iDTO, this.investmentController.getPositions(this.user).getBody());
     }
@@ -69,7 +69,7 @@ class InvestmentControllerTest {
         InvestmentDTO iDTO = InvestmentDTO.builder().buySell("b").amount(3213.0).fee(7.8).quantity(33).name("n1")
                 .exchange("e1").shortName("s1").transactionDate(new Date()).currencyId("eur").liveValue(674.1).valueDiff(4.0).build();
 
-        when(this.investmentService.createInvestment(iDTO, this.user)).thenReturn(iDTO);
+        when(this.investmentService.createInvestment(iDTO, "email")).thenReturn(iDTO);
 
         Assertions.assertEquals(iDTO, this.investmentController.createInvestment(this.user, iDTO).getBody());
     }
@@ -96,7 +96,7 @@ class InvestmentControllerTest {
         InvestmentDTO iDTO = InvestmentDTO.builder().investmentId(1L).buySell("b").amount(3213.0).fee(7.8).quantity(33).name("n1")
                 .exchange("e1").shortName("s1").transactionDate(new Date()).currencyId("eur").liveValue(674.1).valueDiff(4.0).build();
 
-        when(this.investmentService.updateInvestment(iDTO, this.user)).thenReturn(iDTO);
+        when(this.investmentService.updateInvestment(iDTO, "email")).thenReturn(iDTO);
 
         Assertions.assertEquals(iDTO, this.investmentController.updateInvestment(this.user, iDTO).getBody());
     }
@@ -105,7 +105,7 @@ class InvestmentControllerTest {
     public void processCSV() throws IOException {
         MultipartFile mpf = new MockMultipartFile("mpf", "mpf.csv", MediaType.TEXT_PLAIN_VALUE, "content".getBytes());
 
-        doNothing().when(this.investmentService).processCSV(user, mpf);
+        doNothing().when(this.investmentService).processCSV("email", mpf);
 
         Assertions.assertEquals(HttpStatus.CREATED, this.investmentController.processCSV(user, mpf).getStatusCode());
     }

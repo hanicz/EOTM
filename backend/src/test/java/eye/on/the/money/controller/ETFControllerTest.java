@@ -3,6 +3,7 @@ package eye.on.the.money.controller;
 import eye.on.the.money.dto.out.ETFInvestmentDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.service.etf.ETFInvestmentService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +14,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -32,13 +32,13 @@ class ETFControllerTest {
     @InjectMocks
     private ETFController etfController;
 
-    private final User user = User.builder().id(1L).build();
+    private final User user = User.builder().id(1L).email("email").build();
 
     @Test
     public void getAllETFInvestments() {
         List<ETFInvestmentDTO> eiDTO = this.createETFList();
 
-        when(this.etfInvestmentService.getETFInvestments(this.user.getId())).thenReturn(eiDTO);
+        when(this.etfInvestmentService.getETFInvestments("email")).thenReturn(eiDTO);
 
         Assertions.assertIterableEquals(eiDTO, this.etfController.getAllETFInvestments(this.user).getBody());
     }
@@ -47,7 +47,7 @@ class ETFControllerTest {
     public void getETFHoldings() {
         List<ETFInvestmentDTO> eiDTO = this.createETFList();
 
-        when(this.etfInvestmentService.getCurrentETFHoldings(this.user.getId())).thenReturn(eiDTO);
+        when(this.etfInvestmentService.getCurrentETFHoldings("email")).thenReturn(eiDTO);
 
         Assertions.assertIterableEquals(eiDTO, this.etfController.getETFHoldings(this.user).getBody());
     }
@@ -56,7 +56,7 @@ class ETFControllerTest {
     public void getPositions() {
         List<ETFInvestmentDTO> eiDTO = this.createETFList();
 
-        when(this.etfInvestmentService.getAllPositions(this.user.getId())).thenReturn(eiDTO);
+        when(this.etfInvestmentService.getAllPositions("email")).thenReturn(eiDTO);
 
         Assertions.assertIterableEquals(eiDTO, this.etfController.getPositions(this.user).getBody());
     }
@@ -66,7 +66,7 @@ class ETFControllerTest {
         ETFInvestmentDTO eiDTO = ETFInvestmentDTO.builder().valueDiff(0.1).transactionDate(new Date()).id(1L).fee(7.0).liveValue(55.6)
                 .shortName("s1").buySell("b").exchange("e1").currencyId("eur").quantity(645).build();
 
-        when(this.etfInvestmentService.createInvestment(eiDTO, user)).thenReturn(eiDTO);
+        when(this.etfInvestmentService.createInvestment(eiDTO, "email")).thenReturn(eiDTO);
 
         Assertions.assertEquals(eiDTO, this.etfController.createInvestment(user, eiDTO).getBody());
 
@@ -94,7 +94,7 @@ class ETFControllerTest {
         ETFInvestmentDTO eiDTO = ETFInvestmentDTO.builder().valueDiff(0.1).transactionDate(new Date()).id(1L).fee(7.0).liveValue(55.6)
                 .shortName("s1").buySell("b").exchange("e1").currencyId("eur").quantity(645).build();
 
-        when(this.etfInvestmentService.updateInvestment(eiDTO, user)).thenReturn(eiDTO);
+        when(this.etfInvestmentService.updateInvestment(eiDTO, "email")).thenReturn(eiDTO);
 
         Assertions.assertEquals(eiDTO, this.etfController.updateInvestment(user, eiDTO).getBody());
     }

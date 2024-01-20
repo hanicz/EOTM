@@ -4,6 +4,7 @@ import eye.on.the.money.dto.in.TransactionQuery;
 import eye.on.the.money.dto.out.TransactionDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.service.crypto.TransactionService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +18,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,7 +25,6 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
 
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
@@ -37,13 +36,13 @@ class TransactionControllerTest {
     @InjectMocks
     private TransactionController transactionController;
 
-    private final User user = User.builder().id(1L).build();
+    private final User user = User.builder().id(1L).email("email").build();
 
     @Test
     public void getCoinTransactionsByUserId() {
         List<TransactionDTO> tDTO = this.createTransactionList();
 
-        when(this.transactionService.getTransactionsByUserId(this.user.getId())).thenReturn(tDTO);
+        when(this.transactionService.getTransactionsByUserId("email")).thenReturn(tDTO);
 
         Assertions.assertIterableEquals(tDTO, this.transactionController.getCoinTransactionsByUserId(this.user).getBody());
     }
@@ -52,7 +51,7 @@ class TransactionControllerTest {
     public void getAllPositions() {
         List<TransactionDTO> tDTO = this.createTransactionList();
 
-        when(this.transactionService.getAllPositions(this.user.getId())).thenReturn(tDTO);
+        when(this.transactionService.getAllPositions("email")).thenReturn(tDTO);
 
         Assertions.assertIterableEquals(tDTO, this.transactionController.getAllPositions(this.user).getBody());
     }
@@ -62,7 +61,7 @@ class TransactionControllerTest {
         TransactionQuery query = TransactionQuery.builder().currency("eur").build();
         List<TransactionDTO> tDTO = this.createTransactionList();
 
-        when(this.transactionService.getCurrentHoldings(this.user.getId(), query)).thenReturn(tDTO);
+        when(this.transactionService.getCurrentHoldings("email", query)).thenReturn(tDTO);
 
         Assertions.assertIterableEquals(tDTO, this.transactionController.getAllHoldings(this.user, query).getBody());
     }
@@ -89,7 +88,7 @@ class TransactionControllerTest {
         TransactionDTO tDTO = TransactionDTO.builder().transactionString("s1").transactionDate(new Date()).amount(555.1).quantity(431.0)
                 .buySell("b").symbol("s1").url("u1").fee(7.0).currencyId("c1").coinId("co1").liveValue(33.1).valueDiff(1.0).build();
 
-        when(this.transactionService.createTransaction(tDTO, this.user)).thenReturn(tDTO);
+        when(this.transactionService.createTransaction(tDTO, "email")).thenReturn(tDTO);
 
         Assertions.assertEquals(tDTO, this.transactionController.createTransaction(this.user, tDTO).getBody());
     }
@@ -99,7 +98,7 @@ class TransactionControllerTest {
         TransactionDTO tDTO = TransactionDTO.builder().transactionId(1L).transactionString("s1").transactionDate(new Date()).amount(555.1).quantity(431.0)
                 .buySell("b").symbol("s1").url("u1").fee(7.0).currencyId("c1").coinId("co1").liveValue(33.1).valueDiff(1.0).build();
 
-        when(this.transactionService.updateTransaction(tDTO, this.user)).thenReturn(tDTO);
+        when(this.transactionService.updateTransaction(tDTO, "email")).thenReturn(tDTO);
 
         Assertions.assertEquals(tDTO, this.transactionController.updateTransaction(this.user, tDTO).getBody());
     }
@@ -108,7 +107,7 @@ class TransactionControllerTest {
     public void processCSV() throws IOException {
         MultipartFile mpf = new MockMultipartFile("mpf", "mpf.csv", MediaType.TEXT_PLAIN_VALUE, "content".getBytes());
 
-        doNothing().when(this.transactionService).processCSV(this.user, mpf);
+        doNothing().when(this.transactionService).processCSV("email", mpf);
 
         Assertions.assertEquals(HttpStatus.CREATED, this.transactionController.processCSV(this.user, mpf).getStatusCode());
     }

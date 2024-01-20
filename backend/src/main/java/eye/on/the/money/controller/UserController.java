@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,14 +27,14 @@ public class UserController {
     }
 
     @GetMapping()
-    public ResponseEntity<HttpStatus> validatingToken(@AuthenticationPrincipal User user) {
+    public ResponseEntity<HttpStatus> validatingToken(@AuthenticationPrincipal UserDetails user) {
         log.trace("Enter");
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping("/me")
-    public ResponseEntity<String> getUserEmail(@AuthenticationPrincipal User user) {
+    public ResponseEntity<String> getUserEmail(@AuthenticationPrincipal UserDetails user) {
         log.trace("Enter");
-        return new ResponseEntity<>("{ \"email\": \"" + user.getEmail() + "\" }", HttpStatus.OK);
+        return new ResponseEntity<>("{ \"email\": \"" + user.getUsername() + "\" }", HttpStatus.OK);
     }
 }

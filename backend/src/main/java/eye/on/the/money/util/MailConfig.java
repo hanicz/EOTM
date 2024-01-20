@@ -2,14 +2,11 @@ package eye.on.the.money.util;
 
 import eye.on.the.money.repository.CredentialRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.beans.factory.annotation.Value;
-
-import java.util.NoSuchElementException;
-import java.util.Properties;
 
 @Configuration
 public class MailConfig {
@@ -30,7 +27,7 @@ public class MailConfig {
     public JavaMailSender getJavaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 
-        mailSender.setHost(mailServerHost);
+       /* mailSender.setHost(mailServerHost);
         mailSender.setPort(mailServerPort);
 
         mailSender.setUsername(this.credentialRepository.findById("email_user").orElseThrow(NoSuchElementException::new).getSecret());
@@ -40,7 +37,7 @@ public class MailConfig {
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.auth", this.mailServerAuth);
         props.put("mail.smtp.starttls.enable", this.mailServerStartTls);
-        props.put("mail.debug", "true");
+        props.put("mail.debug", "true");*/
 
         return mailSender;
     }

@@ -9,6 +9,7 @@ import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.forex.ForexTransactionRepository;
 import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.forex.ForexTransactionService;
+import eye.on.the.money.service.impl.UserServiceImpl;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,14 +29,17 @@ public class ForexTransactionServiceImpl implements ForexTransactionService {
     private ForexTransactionRepository forexTransactionRepository;
 
     @Autowired
+    private UserServiceImpl userService;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     @Autowired
     private EODAPIService eodAPIService;
 
     @Override
-    public List<ForexTransactionDTO> getForexTransactionsByUserId(Long userId) {
-        return this.forexTransactionRepository.findByUser_IdOrderByTransactionDate(userId).stream().map(this::convertToForexTransactionDTO).collect(Collectors.toList());
+    public List<ForexTransactionDTO> getForexTransactionsByUserId(String userEmail) {
+        return this.forexTransactionRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToForexTransactionDTO).collect(Collectors.toList());
     }
 
     private ForexTransactionDTO convertToForexTransactionDTO(ForexTransaction forexTransaction) {
@@ -45,15 +49,16 @@ public class ForexTransactionServiceImpl implements ForexTransactionService {
 
     @Transactional
     @Override
-    public void deleteForexTransactionById(User user, List<Long> ids) {
-        this.forexTransactionRepository.deleteByUser_IdAndIdIn(user.getId(), ids);
+    public void deleteForexTransactionById(String userEmail, List<Long> ids) {
+        this.forexTransactionRepository.deleteByUserEmailAndIdIn(userEmail, ids);
     }
 
     @Transactional
     @Override
-    public ForexTransactionDTO createForexTransaction(ForexTransactionDTO forexTransactionDTO, User user) {
+    public ForexTransactionDTO createForexTransaction(ForexTransactionDTO forexTransactionDTO, String userEmail) {
         Currency toCurrency = this.currencyRepository.findById(forexTransactionDTO.getToCurrencyId()).orElseThrow(NoSuchElementException::new);
         Currency fromCurrency = this.currencyRepository.findById(forexTransactionDTO.getFromCurrencyId()).orElseThrow(NoSuchElementException::new);
+        User user = this.userService.loadUserByEmail(userEmail);
 
         ForexTransaction forexTransaction = ForexTransaction.builder()
                 .buySell(forexTransactionDTO.getBuySell())
@@ -72,10 +77,10 @@ public class ForexTransactionServiceImpl implements ForexTransactionService {
 
     @Transactional
     @Override
-    public ForexTransactionDTO updateForexTransaction(ForexTransactionDTO forexTransactionDTO, User user) {
+    public ForexTransactionDTO updateForexTransaction(ForexTransactionDTO forexTransactionDTO, String userEmail) {
         Currency toCurrency = this.currencyRepository.findById(forexTransactionDTO.getToCurrencyId()).orElseThrow(NoSuchElementException::new);
         Currency fromCurrency = this.currencyRepository.findById(forexTransactionDTO.getFromCurrencyId()).orElseThrow(NoSuchElementException::new);
-        ForexTransaction forexTransaction = this.forexTransactionRepository.findByIdAndUser_Id(forexTransactionDTO.getForexTransactionId(), user.getId()).orElseThrow(NoSuchElementException::new);
+        ForexTransaction forexTransaction = this.forexTransactionRepository.findByIdAndUserEmail(forexTransactionDTO.getForexTransactionId(), userEmail).orElseThrow(NoSuchElementException::new);
 
         forexTransaction.setBuySell(forexTransactionDTO.getBuySell());
         forexTransaction.setTransactionDate(forexTransactionDTO.getTransactionDate());
@@ -89,8 +94,8 @@ public class ForexTransactionServiceImpl implements ForexTransactionService {
     }
 
     @Override
-    public List<ForexTransactionDTO> getAllForexHoldings(Long userId) {
-        Map<String, ForexTransactionDTO> forexTransactionMap = this.getCalculated(userId);
+    public List<ForexTransactionDTO> getAllForexHoldings(String userEmail) {
+        Map<String, ForexTransactionDTO> forexTransactionMap = this.getCalculated(userEmail);
         List<ForexTransactionDTO> forexTransactions = new ArrayList<>(forexTransactionMap.values());
         String joinedList = forexTransactions.stream().map(f -> (f.getToCurrencyId() + f.getFromCurrencyId() + ".FOREX")).collect(Collectors.joining(","));
 
@@ -107,8 +112,8 @@ public class ForexTransactionServiceImpl implements ForexTransactionService {
         return forexTransactions;
     }
 
-    private Map<String, ForexTransactionDTO> getCalculated(Long userId) {
-        List<ForexTransactionDTO> forexTransactions = this.forexTransactionRepository.findByUser_IdOrderByTransactionDate(userId).stream().map(this::convertToForexTransactionDTO).collect(Collectors.toList());
+    private Map<String, ForexTransactionDTO> getCalculated(String userEmail) {
+        List<ForexTransactionDTO> forexTransactions = this.forexTransactionRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToForexTransactionDTO).collect(Collectors.toList());
         Map<String, ForexTransactionDTO> forexTransactionMap = new HashMap<>();
         for (ForexTransactionDTO ft : forexTransactions) {
             String symbol = ft.getFromCurrencyId() + ft.getToCurrencyId();

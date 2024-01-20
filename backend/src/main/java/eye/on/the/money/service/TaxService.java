@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface TaxService {
     void loadRatesFromXLS(MultipartFile file);
-    void doTaxByYear(Long userId, Integer year, List<TaxEntry> taxEntries);
+    void doTaxByYear(String userEmail, Integer year, List<TaxEntry> taxEntries);
 }

@@ -1,13 +1,13 @@
 package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.out.ForexTransactionDTO;
-import eye.on.the.money.model.User;
 import eye.on.the.money.service.forex.ForexTransactionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,34 +23,34 @@ public class ForexController {
     private ForexTransactionService forexTransactionService;
 
     @GetMapping()
-    public ResponseEntity<List<ForexTransactionDTO>> getForexTransactionsByUserId(@AuthenticationPrincipal User user) {
+    public ResponseEntity<List<ForexTransactionDTO>> getForexTransactionsByUserId(@AuthenticationPrincipal UserDetails user) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.forexTransactionService.getForexTransactionsByUserId(user.getId()), HttpStatus.OK);
+        return new ResponseEntity<>(this.forexTransactionService.getForexTransactionsByUserId(user.getUsername()), HttpStatus.OK);
     }
 
     @GetMapping("/holding")
-    public ResponseEntity<List<ForexTransactionDTO>> getForexHoldings(@AuthenticationPrincipal User user) {
+    public ResponseEntity<List<ForexTransactionDTO>> getForexHoldings(@AuthenticationPrincipal UserDetails user) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.forexTransactionService.getAllForexHoldings(user.getId()), HttpStatus.OK);
+        return new ResponseEntity<>(this.forexTransactionService.getAllForexHoldings(user.getUsername()), HttpStatus.OK);
     }
 
     @DeleteMapping()
-    public ResponseEntity<HttpStatus> deleteByIds(@AuthenticationPrincipal User user, @RequestParam String ids) {
+    public ResponseEntity<HttpStatus> deleteByIds(@AuthenticationPrincipal UserDetails user, @RequestParam String ids) {
         log.trace("Enter");
         List<Long> idList = Stream.of(ids.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
-        this.forexTransactionService.deleteForexTransactionById(user, idList);
+        this.forexTransactionService.deleteForexTransactionById(user.getUsername(), idList);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<ForexTransactionDTO> createTransaction(@AuthenticationPrincipal User user, @RequestBody ForexTransactionDTO forexTransactionDTO) {
+    public ResponseEntity<ForexTransactionDTO> createTransaction(@AuthenticationPrincipal UserDetails user, @RequestBody ForexTransactionDTO forexTransactionDTO) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.forexTransactionService.createForexTransaction(forexTransactionDTO, user), HttpStatus.CREATED);
+        return new ResponseEntity<>(this.forexTransactionService.createForexTransaction(forexTransactionDTO, user.getUsername()), HttpStatus.CREATED);
     }
 
     @PutMapping
-    public ResponseEntity<ForexTransactionDTO> updateTransaction(@AuthenticationPrincipal User user, @RequestBody ForexTransactionDTO forexTransactionDTO) {
+    public ResponseEntity<ForexTransactionDTO> updateTransaction(@AuthenticationPrincipal UserDetails user, @RequestBody ForexTransactionDTO forexTransactionDTO) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.forexTransactionService.updateForexTransaction(forexTransactionDTO, user), HttpStatus.OK);
+        return new ResponseEntity<>(this.forexTransactionService.updateForexTransaction(forexTransactionDTO, user.getUsername()), HttpStatus.OK);
     }
 }

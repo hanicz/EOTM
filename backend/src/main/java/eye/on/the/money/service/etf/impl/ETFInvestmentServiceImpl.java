@@ -2,17 +2,18 @@ package eye.on.the.money.service.etf.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.out.ETFInvestmentDTO;
+import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.etf.ETF;
 import eye.on.the.money.model.etf.ETFInvestment;
 import eye.on.the.money.model.etf.ETFPayment;
-import eye.on.the.money.model.Currency;
 import eye.on.the.money.repository.etf.ETFInvestmentRepository;
 import eye.on.the.money.repository.etf.ETFRepository;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.etf.ETFInvestmentService;
 import eye.on.the.money.service.etf.ETFPaymentService;
+import eye.on.the.money.service.impl.UserServiceImpl;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.modelmapper.ModelMapper;
@@ -42,14 +43,17 @@ public class ETFInvestmentServiceImpl implements ETFInvestmentService {
     private EODAPIService eodAPIService;
 
     @Autowired
+    private UserServiceImpl userService;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     @Autowired
     private ETFPaymentService etfPaymentService;
 
     @Override
-    public List<ETFInvestmentDTO> getETFInvestments(Long userId) {
-        return this.etfInvestmentRepository.findByUser_IdOrderByTransactionDate(userId).stream().map(this::convertToETFInvestmentDTO).collect(Collectors.toList());
+    public List<ETFInvestmentDTO> getETFInvestments(String userEmail) {
+        return this.etfInvestmentRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToETFInvestmentDTO).collect(Collectors.toList());
     }
 
     private ETFInvestmentDTO convertToETFInvestmentDTO(ETFInvestment etfInvestment) {
@@ -58,8 +62,8 @@ public class ETFInvestmentServiceImpl implements ETFInvestmentService {
     }
 
     @Override
-    public List<ETFInvestmentDTO> getCurrentETFHoldings(Long userId) {
-        Map<String, ETFInvestmentDTO> investmentMap = this.getCalculated(userId);
+    public List<ETFInvestmentDTO> getCurrentETFHoldings(String userEmail) {
+        Map<String, ETFInvestmentDTO> investmentMap = this.getCalculated(userEmail);
         List<ETFInvestmentDTO> etfInvestmentDTOList = (new ArrayList<>(investmentMap.values()))
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
         String joinedList = etfInvestmentDTOList.stream().map(i -> (i.getShortName() + "." + i.getExchange())).collect(Collectors.joining(","));
@@ -77,13 +81,13 @@ public class ETFInvestmentServiceImpl implements ETFInvestmentService {
     }
 
     @Override
-    public List<ETFInvestmentDTO> getAllPositions(Long userId) {
-        Map<String, ETFInvestmentDTO> investmentMap = this.getCalculated(userId);
+    public List<ETFInvestmentDTO> getAllPositions(String userEmail) {
+        Map<String, ETFInvestmentDTO> investmentMap = this.getCalculated(userEmail);
         return (new ArrayList<>(investmentMap.values()));
     }
 
-    private Map<String, ETFInvestmentDTO> getCalculated(Long userId) {
-        List<ETFInvestmentDTO> investments = this.etfInvestmentRepository.findByUser_IdOrderByTransactionDate(userId).stream().map(this::convertToETFInvestmentDTO).collect(Collectors.toList());
+    private Map<String, ETFInvestmentDTO> getCalculated(String userEmail) {
+        List<ETFInvestmentDTO> investments = this.etfInvestmentRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToETFInvestmentDTO).toList();
 
         Map<String, ETFInvestmentDTO> investmentMap = new HashMap<>();
         for (ETFInvestmentDTO i : investments) {
@@ -98,16 +102,17 @@ public class ETFInvestmentServiceImpl implements ETFInvestmentService {
 
     @Transactional
     @Override
-    public void deleteInvestmentById(User user, List<Long> ids) {
-        this.etfInvestmentRepository.deleteByUser_IdAndIdIn(user.getId(), ids);
+    public void deleteInvestmentById(String userEmail, List<Long> ids) {
+        this.etfInvestmentRepository.deleteByUserEmailAndIdIn(userEmail, ids);
     }
 
     @Transactional
     @Override
-    public ETFInvestmentDTO createInvestment(ETFInvestmentDTO investmentDTO, User user) {
+    public ETFInvestmentDTO createInvestment(ETFInvestmentDTO investmentDTO, String userEmail) {
         Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
         ETF etf = this.etfRepository.findByShortNameAndExchange(investmentDTO.getShortName(), investmentDTO.getExchange()).orElseThrow(NoSuchElementException::new);
         ETFPayment etfPayment = this.etfPaymentService.createPayment(currency, investmentDTO.getAmount());
+        User user = this.userService.loadUserByEmail(userEmail);
 
         ETFInvestment investment = ETFInvestment.builder()
                 .buySell(investmentDTO.getBuySell())
@@ -125,10 +130,10 @@ public class ETFInvestmentServiceImpl implements ETFInvestmentService {
 
     @Transactional
     @Override
-    public ETFInvestmentDTO updateInvestment(ETFInvestmentDTO investmentDTO, User user) {
+    public ETFInvestmentDTO updateInvestment(ETFInvestmentDTO investmentDTO, String userEmail) {
         Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
         ETF etf = this.etfRepository.findByShortNameAndExchange(investmentDTO.getShortName(), investmentDTO.getExchange()).orElseThrow(NoSuchElementException::new);
-        ETFInvestment investment = this.etfInvestmentRepository.findByIdAndUser_Id(investmentDTO.getId(), user.getId()).orElseThrow(NoSuchElementException::new);
+        ETFInvestment investment = this.etfInvestmentRepository.findByIdAndUserEmail(investmentDTO.getId(), userEmail).orElseThrow(NoSuchElementException::new);
         ETFPayment etfPayment = investment.getEtfPayment();
 
         investment.setBuySell(investmentDTO.getBuySell());
@@ -143,12 +148,12 @@ public class ETFInvestmentServiceImpl implements ETFInvestmentService {
     }
 
     @Override
-    public void getCSV(Long userId, Writer writer) {
+    public void getCSV(String userEmail, Writer writer) {
         List<ETFInvestmentDTO> investmentList =
-                this.etfInvestmentRepository.findByUser_IdOrderByTransactionDate(userId)
+                this.etfInvestmentRepository.findByUserEmailOrderByTransactionDate(userEmail)
                         .stream()
                         .map(this::convertToETFInvestmentDTO).
-                        collect(Collectors.toList());
+                        toList();
         try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
             if (!investmentList.isEmpty()) {
                 csvPrinter.printRecord("Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Exchange", "Amount", "Currency", "Fee");

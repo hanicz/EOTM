@@ -48,8 +48,8 @@ class TransactionServiceImplTest {
 
     @Test
     public void getTransactionsByUserId() {
-        List<TransactionDTO> result = this.transactionService.getTransactionsByUserId(this.user.getId());
-        List<Transaction> transactions = this.transactionRepository.findByUser_IdOrderByTransactionDate(this.user.getId());
+        List<TransactionDTO> result = this.transactionService.getTransactionsByUserId(this.user.getUsername());
+        List<Transaction> transactions = this.transactionRepository.findByUserEmailOrderByTransactionDate(this.user.getUsername());
 
         Assertions.assertIterableEquals(transactions.stream()
                 .map(this::convertToTransactionDTO).collect(Collectors.toList()), result);
@@ -57,7 +57,7 @@ class TransactionServiceImplTest {
 
     @Test
     public void getAllPositions() {
-        List<TransactionDTO> result = this.transactionService.getAllPositions(this.user.getId());
+        List<TransactionDTO> result = this.transactionService.getAllPositions(this.user.getUsername());
         TransactionDTO testObject = result.stream().filter(tDTO -> "DOT".equals(tDTO.getSymbol())).findAny().get();
 
         Assertions.assertAll("Assert all merged values",
@@ -68,7 +68,7 @@ class TransactionServiceImplTest {
 
     @Test
     public void getAllPositions2() {
-        List<TransactionDTO> result = this.transactionService.getAllPositions(this.user.getId());
+        List<TransactionDTO> result = this.transactionService.getAllPositions(this.user.getUsername());
         TransactionDTO testObject = result.stream().filter(tDTO -> "BTC".equals(tDTO.getSymbol())).findAny().get();
 
         Assertions.assertAll("Assert all merged values",
@@ -79,7 +79,7 @@ class TransactionServiceImplTest {
 
     @Test
     public void getAllPositions3() {
-        List<TransactionDTO> result = this.transactionService.getAllPositions(this.user.getId());
+        List<TransactionDTO> result = this.transactionService.getAllPositions(this.user.getUsername());
         TransactionDTO testObject = result.stream().filter(tDTO -> "ADA".equals(tDTO.getSymbol())).findAny().get();
 
         Assertions.assertAll("Assert all merged values",

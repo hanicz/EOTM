@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,26 +31,29 @@ public class AlertServiceImpl implements AlertService {
     private StockService stockService;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private UserServiceImpl userService;
 
     @Override
-    public List<StockAlertDTO> getAllStockAlerts(Long userId) {
+    public List<StockAlertDTO> getAllStockAlerts(String userEmail) {
         log.trace("Enter");
-        List<StockAlert> stockAlerts = this.stockAlertRepository.findByUser_IdOrderByStockShortName(userId);
+        List<StockAlert> stockAlerts = this.stockAlertRepository.findByUserEmailOrderByStockShortName(userEmail);
         return stockAlerts.stream().map(this::convertToStockAlertDTO).collect(Collectors.toList());
     }
 
     @Transactional
     @Override
-    public boolean deleteStockAlert(Long userid, Long id) {
+    public boolean deleteStockAlert(String userEmail, Long id) {
         log.trace("Enter");
-        return this.stockAlertRepository.deleteByIdAndUser_Id(id, userid) > 0;
+        return this.stockAlertRepository.deleteByIdAndUserEmail(id, userEmail) > 0;
     }
 
     @Transactional
     @Override
-    public StockAlertDTO createNewStockAlert(User user, StockAlertDTO stockAlertDTO) {
+    public StockAlertDTO createNewStockAlert(UserDetails userDetails, StockAlertDTO stockAlertDTO) {
         log.trace("Enter");
         Stock stock = this.stockService.getOrCreateStock(stockAlertDTO.getShortName(), stockAlertDTO.getExchange(), stockAlertDTO.getName());
+        User user = this.userService.loadUserByEmail(userDetails.getUsername());
 
         StockAlert stockAlert = StockAlert.builder().stock(stock).user(user).type(stockAlertDTO.getType()).valuePoint(stockAlertDTO.getValuePoint()).build();
         this.stockAlertRepository.save(stockAlert);

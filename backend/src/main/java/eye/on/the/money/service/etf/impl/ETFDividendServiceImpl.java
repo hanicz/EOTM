@@ -9,6 +9,7 @@ import eye.on.the.money.repository.etf.ETFDividendRepository;
 import eye.on.the.money.repository.etf.ETFRepository;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.service.etf.ETFDividendService;
+import eye.on.the.money.service.impl.UserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -47,12 +48,15 @@ public class ETFDividendServiceImpl implements ETFDividendService {
     private ETFRepository etfRepository;
 
     @Autowired
+    private UserServiceImpl userService;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     @Override
-    public List<ETFDividendDTO> getDividends(Long userId) {
+    public List<ETFDividendDTO> getDividends(String userEmail) {
         log.trace("Enter getDividends");
-        return this.etfDividendRepository.findByUser_IdOrderByDividendDate(userId).stream().map(this::convertToETFDividendDTO).collect(Collectors.toList());
+        return this.etfDividendRepository.findByUserEmailOrderByDividendDate(userEmail).stream().map(this::convertToETFDividendDTO).collect(Collectors.toList());
     }
 
     private ETFDividendDTO convertToETFDividendDTO(ETFDividend dividend) {
@@ -63,10 +67,11 @@ public class ETFDividendServiceImpl implements ETFDividendService {
 
     @Transactional
     @Override
-    public ETFDividendDTO createETFDividend(ETFDividendDTO dividendDTO, User user) {
+    public ETFDividendDTO createETFDividend(ETFDividendDTO dividendDTO, String userEmail) {
         log.trace("Enter createETFDividend");
         Currency currency = this.currencyRepository.findById(dividendDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
         ETF etf = this.etfRepository.findByShortName(dividendDTO.getShortName()).orElseThrow(NoSuchElementException::new);
+        User user = this.userService.loadUserByEmail(userEmail);
 
         ETFDividend dividend = ETFDividend.builder()
                 .amount(dividendDTO.getAmount())
@@ -82,11 +87,11 @@ public class ETFDividendServiceImpl implements ETFDividendService {
 
     @Transactional
     @Override
-    public ETFDividendDTO updateETFDividend(ETFDividendDTO dividendDTO, User user) {
+    public ETFDividendDTO updateETFDividend(ETFDividendDTO dividendDTO, String userEmail) {
         log.trace("Enter updateETFDividend");
         Currency currency = this.currencyRepository.findById(dividendDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
         ETF etf = this.etfRepository.findByShortName(dividendDTO.getShortName()).orElseThrow(NoSuchElementException::new);
-        ETFDividend dividend = this.etfDividendRepository.findByIdAndUser_Id(dividendDTO.getId(), user.getId()).orElseThrow(NoSuchElementException::new);
+        ETFDividend dividend = this.etfDividendRepository.findByIdAndUserEmail(dividendDTO.getId(), userEmail).orElseThrow(NoSuchElementException::new);
 
         dividend.setDividendDate(dividendDTO.getDividendDate());
         dividend.setCurrency(currency);
@@ -98,18 +103,18 @@ public class ETFDividendServiceImpl implements ETFDividendService {
 
     @Transactional
     @Override
-    public void deleteETFDividendById(List<Long> ids, User user) {
+    public void deleteETFDividendById(List<Long> ids, String userEmail) {
         log.trace("Enter deleteETFDividendById");
-        this.etfDividendRepository.deleteByUser_idAndIdIn(user.getId(), ids);
+        this.etfDividendRepository.deleteByUserEmailAndIdIn(userEmail, ids);
     }
 
     @Override
-    public void getCSV(Long userId, Writer writer) {
+    public void getCSV(String userEmail, Writer writer) {
         List<ETFDividendDTO> dividendListList =
-                this.etfDividendRepository.findByUser_IdOrderByDividendDate(userId)
+                this.etfDividendRepository.findByUserEmailOrderByDividendDate(userEmail)
                         .stream()
-                        .map(this::convertToETFDividendDTO).
-                        collect(Collectors.toList());
+                        .map(this::convertToETFDividendDTO)
+                        .toList();
         try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
             if (!dividendListList.isEmpty()) {
                 csvPrinter.printRecord("Dividend Id", "Amount", "Dividend Date", "Short Name", "Currency");
@@ -127,7 +132,7 @@ public class ETFDividendServiceImpl implements ETFDividendService {
 
     @Transactional
     @Override
-    public void processCSV(User user, MultipartFile file) {
+    public void processCSV(String userEmail, MultipartFile file) {
         try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
              CSVParser csvParser = new CSVParser(fileReader, CSVFormat.Builder.create()
                      .setHeader("Dividend Id", "Amount", "Dividend Date", "Short Name", "Currency")
@@ -149,11 +154,11 @@ public class ETFDividendServiceImpl implements ETFDividendService {
                         .build();
 
                 if (!dividendId.isEmpty() &&
-                        this.etfDividendRepository.findByIdAndUser_Id(Long.parseLong(dividendId), user.getId()).isPresent()) {
+                        this.etfDividendRepository.findByIdAndUserEmail(Long.parseLong(dividendId), userEmail).isPresent()) {
                     dividend.setId(Long.parseLong(dividendId));
-                    this.updateETFDividend(dividend, user);
+                    this.updateETFDividend(dividend, userEmail);
                 } else {
-                    this.createETFDividend(dividend, user);
+                    this.createETFDividend(dividend, userEmail);
                 }
             }
         } catch (IOException | ParseException e) {

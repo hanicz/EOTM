@@ -4,16 +4,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.in.TransactionQuery;
 import eye.on.the.money.dto.out.TransactionDTO;
 import eye.on.the.money.model.Currency;
-import eye.on.the.money.model.crypto.Payment;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.crypto.Coin;
+import eye.on.the.money.model.crypto.Payment;
 import eye.on.the.money.model.crypto.Transaction;
 import eye.on.the.money.repository.crypto.CoinRepository;
-import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.crypto.TransactionRepository;
+import eye.on.the.money.repository.forex.CurrencyRepository;
+import eye.on.the.money.service.api.CryptoAPIService;
 import eye.on.the.money.service.crypto.PaymentService;
 import eye.on.the.money.service.crypto.TransactionService;
-import eye.on.the.money.service.api.CryptoAPIService;
+import eye.on.the.money.service.impl.UserServiceImpl;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -43,6 +44,8 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     private PaymentService paymentService;
     @Autowired
+    private UserServiceImpl userService;
+    @Autowired
     private CurrencyRepository currencyRepository;
     @Autowired
     private CoinRepository coinRepository;
@@ -52,20 +55,20 @@ public class TransactionServiceImpl implements TransactionService {
     private CryptoAPIService cryptoAPIService;
 
     @Override
-    public List<TransactionDTO> getTransactionsByUserId(Long userId) {
-        return this.transactionRepository.findByUser_IdOrderByTransactionDate(userId).stream()
+    public List<TransactionDTO> getTransactionsByUserId(String userEmail) {
+        return this.transactionRepository.findByUserEmailOrderByTransactionDate(userEmail).stream()
                 .map(this::convertToTransactionDTO).collect(Collectors.toList());
     }
 
     @Override
-    public List<TransactionDTO> getAllPositions(Long userId) {
-        Map<String, TransactionDTO> transactionMap = this.getCalculated(userId);
+    public List<TransactionDTO> getAllPositions(String userEmail) {
+        Map<String, TransactionDTO> transactionMap = this.getCalculated(userEmail);
         return new ArrayList<>((new ArrayList<>(transactionMap.values())));
     }
 
     @Override
-    public List<TransactionDTO> getCurrentHoldings(Long userId, TransactionQuery query) {
-        Map<String, TransactionDTO> transactionMap = this.getCalculated(userId);
+    public List<TransactionDTO> getCurrentHoldings(String userEmail, TransactionQuery query) {
+        Map<String, TransactionDTO> transactionMap = this.getCalculated(userEmail);
         List<TransactionDTO> transactionDTOList = (new ArrayList<>(transactionMap.values()))
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
         String ids = transactionDTOList.stream().map(TransactionDTO::getCoinId).collect(Collectors.joining(","));
@@ -86,16 +89,17 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Transactional
     @Override
-    public void deleteTransactionById(User user, List<Long> ids) {
-        this.transactionRepository.deleteByUser_IdAndIdIn(user.getId(), ids);
+    public void deleteTransactionById(String userEmail, List<Long> ids) {
+        this.transactionRepository.deleteByUserEmailAndIdIn(userEmail, ids);
     }
 
     @Transactional
     @Override
-    public TransactionDTO createTransaction(TransactionDTO transactionDTO, User user) {
+    public TransactionDTO createTransaction(TransactionDTO transactionDTO, String userEmail) {
         Currency currency = this.currencyRepository.findById(transactionDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
         Coin coin = this.coinRepository.findBySymbol(transactionDTO.getSymbol()).orElseThrow(NoSuchElementException::new);
         Payment payment = this.paymentService.createPayment(currency, transactionDTO.getAmount());
+        User user = this.userService.loadUserByEmail(userEmail);
 
         Transaction transaction = Transaction.builder()
                 .buySell(transactionDTO.getBuySell())
@@ -115,10 +119,10 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Transactional
     @Override
-    public TransactionDTO updateTransaction(TransactionDTO transactionDTO, User user) {
+    public TransactionDTO updateTransaction(TransactionDTO transactionDTO, String userEmail) {
         Currency currency = this.currencyRepository.findById(transactionDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
         Coin coin = this.coinRepository.findBySymbol(transactionDTO.getSymbol()).orElseThrow(NoSuchElementException::new);
-        Transaction transaction = this.transactionRepository.findByIdAndUser_Id(transactionDTO.getTransactionId(), user.getId()).orElseThrow(NoSuchElementException::new);
+        Transaction transaction = this.transactionRepository.findByIdAndUserEmail(transactionDTO.getTransactionId(), userEmail).orElseThrow(NoSuchElementException::new);
         Payment payment = transaction.getPayment();
 
         transaction.setBuySell(transactionDTO.getBuySell());
@@ -133,9 +137,9 @@ public class TransactionServiceImpl implements TransactionService {
         return this.convertToTransactionDTO(transaction);
     }
 
-    private Map<String, TransactionDTO> getCalculated(Long userId) {
-        List<TransactionDTO> transactions = this.transactionRepository.findByUser_IdOrderByTransactionDate(userId).stream()
-                .map(this::convertToTransactionDTO).collect(Collectors.toList());
+    private Map<String, TransactionDTO> getCalculated(String userEmail) {
+        List<TransactionDTO> transactions = this.transactionRepository.findByUserEmailOrderByTransactionDate(userEmail).stream()
+                .map(this::convertToTransactionDTO).toList();
         Map<String, TransactionDTO> transactionMap = new HashMap<>();
         for (TransactionDTO t : transactions) {
             if (t.getBuySell().equals("S")) {
@@ -147,12 +151,12 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public void getCSV(Long userId, Writer writer) {
+    public void getCSV(String userEmail, Writer writer) {
         List<TransactionDTO> transactionList =
-                this.transactionRepository.findByUser_IdOrderByTransactionDate(userId)
+                this.transactionRepository.findByUserEmailOrderByTransactionDate(userEmail)
                         .stream()
-                        .map(this::convertToTransactionDTO).
-                        collect(Collectors.toList());
+                        .map(this::convertToTransactionDTO)
+                        .toList();
         try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
             if (!transactionList.isEmpty()) {
                 csvPrinter.printRecord("Transaction Id", "Quantity", "Type", "Transaction Date", "Symbol", "Amount", "Currency", "Fee");
@@ -169,7 +173,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Transactional
     @Override
-    public void processCSV(User user, MultipartFile file) {
+    public void processCSV(String userEmail, MultipartFile file) {
         try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
              CSVParser csvParser = new CSVParser(fileReader, CSVFormat.Builder.create()
                      .setHeader("Transaction Id", "Quantity", "Type", "Transaction Date", "Symbol", "Amount", "Currency", "Fee")
@@ -194,11 +198,11 @@ public class TransactionServiceImpl implements TransactionService {
                         .build();
 
                 if (!transactionId.isEmpty() &&
-                        this.transactionRepository.findByIdAndUser_Id(Long.parseLong(transactionId), user.getId()).isPresent()) {
+                        this.transactionRepository.findByIdAndUserEmail(Long.parseLong(transactionId), userEmail).isPresent()) {
                     transaction.setTransactionId(Long.parseLong(transactionId));
-                    this.updateTransaction(transaction, user);
+                    this.updateTransaction(transaction, userEmail);
                 } else {
-                    this.createTransaction(transaction, user);
+                    this.createTransaction(transaction, userEmail);
                 }
             }
         } catch (IOException | ParseException e) {

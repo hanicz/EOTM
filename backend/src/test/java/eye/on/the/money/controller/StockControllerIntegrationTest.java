@@ -172,7 +172,7 @@ class StockControllerIntegrationTest {
                 () -> assertArrayEquals(eodList.stream().map(ecq -> ecq.getDate().getTime()).toArray(Long[]::new), result.getT()));
     }
 
-    private List<EODCandleQuote> geteodList(){
+    private List<EODCandleQuote> geteodList() {
         List<EODCandleQuote> eodList = new ArrayList<>();
         eodList.add(EODCandleQuote.builder().close(1.0).date(new Date()).high(5.0).low(0.2).open(3.5).volume(5123123L).build());
         eodList.add(EODCandleQuote.builder().close(2.0).date(new Date()).high(532.0).low(0.9).open(323.5).volume(5123L).build());

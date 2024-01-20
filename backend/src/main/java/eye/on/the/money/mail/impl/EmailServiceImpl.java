@@ -5,6 +5,7 @@ import eye.on.the.money.mail.EmailService;
 import eye.on.the.money.repository.CredentialRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -17,6 +18,7 @@ import java.util.NoSuchElementException;
 public class EmailServiceImpl implements EmailService {
 
     @Autowired
+    @Lazy
     private JavaMailSender javaMailSender;
 
     @Autowired

@@ -6,6 +6,6 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface ForexWatchRepository extends CrudRepository<ForexWatch, Long> {
-    List<ForexWatch> findByUser_Id(Long userId);
-    void deleteByIdAndUser_Id(Long id, Long userId);
+    List<ForexWatch> findByUserEmail(String userEmail);
+    void deleteByIdAndUserEmail(Long id, String userEmail);
 }

@@ -31,7 +31,7 @@ class WatchlistControllerTest {
     @InjectMocks
     private WatchlistController watchlistController;
 
-    private final User user = User.builder().id(1L).build();
+    private final User user = User.builder().id(1L).email("email").build();
 
     @Test
     public void getCryptoWatchList() {
@@ -40,7 +40,7 @@ class WatchlistControllerTest {
         cDTO.add(CryptoWatchDTO.builder().cryptoWatchId(2L).liveValue(632.1).change(333.1).coinId("c2").name("n2").symbol("s2").build());
         cDTO.add(CryptoWatchDTO.builder().cryptoWatchId(3L).liveValue(32.3).change(11.1).coinId("c3").name("n3").symbol("s3").build());
 
-        when(this.watchlistService.getCryptoWatchlistByUserId(this.user.getId(), "eur")).thenReturn(cDTO);
+        when(this.watchlistService.getCryptoWatchlistByUserId(this.user.getEmail(), "eur")).thenReturn(cDTO);
 
         Assertions.assertIterableEquals(cDTO, this.watchlistController.getCryptoWatchList(this.user, "eur").getBody());
     }
@@ -52,7 +52,7 @@ class WatchlistControllerTest {
         fDTO.add(ForexWatchDTO.builder().forexWatchID(2L).liveValue(632.1).change(333.1).pChange(5.1).fromCurrencyId("fc2").toCurrencyId("tc2").build());
         fDTO.add(ForexWatchDTO.builder().forexWatchID(3L).liveValue(32.3).change(11.1).pChange(3.3).fromCurrencyId("fc3").toCurrencyId("tc3").build());
 
-        when(this.watchlistService.getForexWatchlistByUserId(this.user.getId())).thenReturn(fDTO);
+        when(this.watchlistService.getForexWatchlistByUserId(this.user.getUsername())).thenReturn(fDTO);
 
         Assertions.assertIterableEquals(fDTO, this.watchlistController.getForexWatchList(this.user).getBody());
     }
@@ -64,28 +64,28 @@ class WatchlistControllerTest {
         sDTO.add(StockWatchDTO.builder().tickerWatchId(2L).liveValue(632.1).change(333.1).stockExchange("e2").stockName("n2").stockShortName("s2").pChange(1.1).build());
         sDTO.add(StockWatchDTO.builder().tickerWatchId(3L).liveValue(32.3).change(11.1).stockExchange("e3").stockName("n3").stockShortName("s3").pChange(3.3).build());
 
-        when(this.watchlistService.getStockWatchlistByUserId(this.user.getId())).thenReturn(sDTO);
+        when(this.watchlistService.getStockWatchlistByUserId(this.user.getUsername())).thenReturn(sDTO);
 
         Assertions.assertIterableEquals(sDTO, this.watchlistController.getStockWatchList(this.user).getBody());
     }
 
     @Test
     public void deleteCryptoWatch() {
-        doNothing().when(this.watchlistService).deleteCryptoWatchById(this.user.getId(), 1L);
+        doNothing().when(this.watchlistService).deleteCryptoWatchById(this.user.getUsername(), 1L);
 
         Assertions.assertEquals(HttpStatus.OK, this.watchlistController.deleteCryptoWatch(user, 1L).getStatusCode());
     }
 
     @Test
     public void deleteStockWatch() {
-        doNothing().when(this.watchlistService).deleteStockWatchById(this.user.getId(), 1L);
+        doNothing().when(this.watchlistService).deleteStockWatchById(this.user.getUsername(), 1L);
 
         Assertions.assertEquals(HttpStatus.OK, this.watchlistController.deleteStockWatch(user, 1L).getStatusCode());
     }
 
     @Test
     public void deleteForexWatch() {
-        doNothing().when(this.watchlistService).deleteForexWatchById(this.user.getId(), 1L);
+        doNothing().when(this.watchlistService).deleteForexWatchById(this.user.getUsername(), 1L);
 
         Assertions.assertEquals(HttpStatus.OK, this.watchlistController.deleteForexWatch(user, 1L).getStatusCode());
     }
@@ -95,7 +95,7 @@ class WatchlistControllerTest {
         Stock stock = Stock.builder().shortName("s1").exchange("e1").id("i1").build();
         StockWatchDTO sDTO = StockWatchDTO.builder().tickerWatchId(1L).liveValue(32.1).change(33.1).stockExchange("e1").stockName("n1").stockShortName("s1").pChange(3.1).build();
 
-        when(this.watchlistService.createNewStockWatch(this.user, stock)).thenReturn(sDTO);
+        when(this.watchlistService.createNewStockWatch(this.user.getUsername(), stock)).thenReturn(sDTO);
 
         Assertions.assertEquals(sDTO, this.watchlistController.createStockWatch(this.user, stock).getBody());
     }
@@ -104,7 +104,7 @@ class WatchlistControllerTest {
     public void createCryptoWatch() {
         CryptoWatchDTO cDTO = CryptoWatchDTO.builder().cryptoWatchId(1L).liveValue(32.1).change(33.1).coinId("c1").name("n1").symbol("s1").build();
 
-        when(this.watchlistService.createNewCryptoWatch(this.user, "c1")).thenReturn(cDTO);
+        when(this.watchlistService.createNewCryptoWatch(this.user.getUsername(), "c1")).thenReturn(cDTO);
 
         Assertions.assertEquals(cDTO, this.watchlistController.createCryptoWatch(this.user, "c1").getBody());
     }

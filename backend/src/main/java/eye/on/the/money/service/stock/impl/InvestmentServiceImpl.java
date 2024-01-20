@@ -11,6 +11,7 @@ import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.stock.InvestmentRepository;
 import eye.on.the.money.repository.stock.StockRepository;
 import eye.on.the.money.service.api.EODAPIService;
+import eye.on.the.money.service.impl.UserServiceImpl;
 import eye.on.the.money.service.stock.InvestmentService;
 import eye.on.the.money.service.stock.StockPaymentService;
 import eye.on.the.money.service.stock.StockService;
@@ -49,6 +50,8 @@ public class InvestmentServiceImpl implements InvestmentService {
     @Autowired
     private StockPaymentService stockPaymentService;
     @Autowired
+    private UserServiceImpl userService;
+    @Autowired
     private ModelMapper modelMapper;
     @Autowired
     private EODAPIService eodAPIService;
@@ -56,19 +59,19 @@ public class InvestmentServiceImpl implements InvestmentService {
     private StockService stockService;
 
     @Override
-    public List<InvestmentDTO> getInvestments(Long userId) {
-        return this.investmentRepository.findByUser_IdOrderByTransactionDate(userId).stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
+    public List<InvestmentDTO> getInvestments(String userEmail) {
+        return this.investmentRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
     }
 
     @Override
-    public List<InvestmentDTO> getInvestmentsByTypeAndDate(Long userId, String buySell, Date from, Date to) {
-        return this.investmentRepository.findByUser_IdAndBuySellAndTransactionDateBetween(userId, buySell, from, to)
+    public List<InvestmentDTO> getInvestmentsByTypeAndDate(String userEmail, String buySell, Date from, Date to) {
+        return this.investmentRepository.findByUserEmailAndBuySellAndTransactionDateBetween(userEmail, buySell, from, to)
                 .stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
     }
 
     @Override
-    public List<InvestmentDTO> getCurrentHoldings(Long userId) {
-        Map<String, InvestmentDTO> investmentMap = this.getCalculated(userId);
+    public List<InvestmentDTO> getCurrentHoldings(String userEmail) {
+        Map<String, InvestmentDTO> investmentMap = this.getCalculated(userEmail);
         List<InvestmentDTO> investmentDTOList = (new ArrayList<>(investmentMap.values()))
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
         String joinedList = investmentDTOList.stream().map(i -> (i.getShortName() + "." + i.getExchange())).collect(Collectors.joining(","));
@@ -87,13 +90,13 @@ public class InvestmentServiceImpl implements InvestmentService {
     }
 
     @Override
-    public List<InvestmentDTO> getAllPositions(Long userId) {
-        Map<String, InvestmentDTO> investmentMap = this.getCalculated(userId);
+    public List<InvestmentDTO> getAllPositions(String userEmail) {
+        Map<String, InvestmentDTO> investmentMap = this.getCalculated(userEmail);
         return new ArrayList<>((new ArrayList<>(investmentMap.values())));
     }
 
-    private Map<String, InvestmentDTO> getCalculated(Long userId) {
-        List<InvestmentDTO> investments = this.investmentRepository.findByUser_IdOrderByTransactionDate(userId).stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
+    private Map<String, InvestmentDTO> getCalculated(String userEmail) {
+        List<InvestmentDTO> investments = this.investmentRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToInvestmentDTO).toList();
         Map<String, InvestmentDTO> investmentMap = new HashMap<>();
         for (InvestmentDTO i : investments) {
             if (i.getBuySell().equals("S")) {
@@ -111,10 +114,11 @@ public class InvestmentServiceImpl implements InvestmentService {
 
     @Transactional
     @Override
-    public InvestmentDTO createInvestment(InvestmentDTO investmentDTO, User user) {
+    public InvestmentDTO createInvestment(InvestmentDTO investmentDTO, String userEmail) {
         Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
         Stock stock = this.stockService.getOrCreateStock(investmentDTO.getShortName(), investmentDTO.getExchange(), investmentDTO.getName());
         StockPayment stockPayment = this.stockPaymentService.createNewPayment(currency, investmentDTO.getAmount());
+        User user = this.userService.loadUserByEmail(userEmail);
 
         Investment investment = Investment.builder()
                 .buySell(investmentDTO.getBuySell())
@@ -132,10 +136,10 @@ public class InvestmentServiceImpl implements InvestmentService {
 
     @Transactional
     @Override
-    public InvestmentDTO updateInvestment(InvestmentDTO investmentDTO, User user) {
+    public InvestmentDTO updateInvestment(InvestmentDTO investmentDTO, String userEmail) {
         Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
         Stock stock = this.stockService.getOrCreateStock(investmentDTO.getShortName(), investmentDTO.getExchange(), investmentDTO.getName());
-        Investment investment = this.investmentRepository.findByIdAndUser_Id(investmentDTO.getInvestmentId(), user.getId()).orElseThrow(NoSuchElementException::new);
+        Investment investment = this.investmentRepository.findByIdAndUserEmail(investmentDTO.getInvestmentId(), userEmail).orElseThrow(NoSuchElementException::new);
         StockPayment stockPayment = investment.getStockPayment();
 
         investment.setBuySell(investmentDTO.getBuySell());
@@ -151,17 +155,17 @@ public class InvestmentServiceImpl implements InvestmentService {
 
     @Transactional
     @Override
-    public void deleteInvestmentById(User user, List<Long> ids) {
-        this.investmentRepository.deleteByUser_IdAndIdIn(user.getId(), ids);
+    public void deleteInvestmentById(String userEmail, List<Long> ids) {
+        this.investmentRepository.deleteByUserEmailAndIdIn(userEmail, ids);
     }
 
     @Override
-    public void getCSV(Long userId, Writer writer) {
+    public void getCSV(String userEmail, Writer writer) {
         List<InvestmentDTO> investmentList =
-                this.investmentRepository.findByUser_IdOrderByTransactionDate(userId)
+                this.investmentRepository.findByUserEmailOrderByTransactionDate(userEmail)
                         .stream()
-                        .map(this::convertToInvestmentDTO).
-                        collect(Collectors.toList());
+                        .map(this::convertToInvestmentDTO)
+                        .toList();
         try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
             if (!investmentList.isEmpty()) {
                 csvPrinter.printRecord("Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Amount", "Currency", "Fee");
@@ -178,7 +182,7 @@ public class InvestmentServiceImpl implements InvestmentService {
 
     @Transactional
     @Override
-    public void processCSV(User user, MultipartFile file) {
+    public void processCSV(String userEmail, MultipartFile file) {
         try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
              CSVParser csvParser = new CSVParser(fileReader, CSVFormat.Builder.create()
                      .setHeader("Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Amount", "Currency", "Fee")
@@ -204,13 +208,13 @@ public class InvestmentServiceImpl implements InvestmentService {
                 log.trace(investment.toString());
 
                 if (!investmentId.isEmpty() &&
-                        this.investmentRepository.findByIdAndUser_Id(Long.parseLong(investmentId), user.getId()).isPresent()) {
+                        this.investmentRepository.findByIdAndUserEmail(Long.parseLong(investmentId), userEmail).isPresent()) {
                     investment.setInvestmentId(Long.parseLong(investmentId));
                     log.trace("Update investment " + investment.toString());
-                    this.updateInvestment(investment, user);
+                    this.updateInvestment(investment, userEmail);
                 } else {
                     log.trace("Create investment " + investment.toString());
-                    this.createInvestment(investment, user);
+                    this.createInvestment(investment, userEmail);
                 }
             }
         } catch (IOException | ParseException e) {

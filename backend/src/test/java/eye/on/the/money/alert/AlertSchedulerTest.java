@@ -193,6 +193,7 @@ class AlertSchedulerTest {
     private StockAlert createNewAlert(String type, Double vp) {
         User user = this.userRepository.findByEmail("test@test.test");
         Stock stock = this.stockRepository.findById("crsr").get();
+
         return StockAlert.builder().stock(stock).user(user).valuePoint(vp).type(type).build();
     }
 }

@@ -46,6 +46,9 @@ public class WatchListServiceImpl implements WatchlistService {
     private CryptoAPIService cryptoAPIService;
 
     @Autowired
+    private UserServiceImpl userService;
+
+    @Autowired
     private EODAPIService eodAPIService;
 
     @Autowired
@@ -61,8 +64,8 @@ public class WatchListServiceImpl implements WatchlistService {
     private StockService stockService;
 
     @Override
-    public List<CryptoWatchDTO> getCryptoWatchlistByUserId(Long userId, String currency) {
-        List<CryptoWatchDTO> cryptoList = this.cryptoWatchRepository.findByUser_IdOrderByCoin_Symbol(userId).stream()
+    public List<CryptoWatchDTO> getCryptoWatchlistByUserId(String userEmail, String currency) {
+        List<CryptoWatchDTO> cryptoList = this.cryptoWatchRepository.findByUserEmailOrderByCoin_Symbol(userEmail).stream()
                 .map(this::convertToCryptoWatchDTO).collect(Collectors.toList());
 
         String ids = cryptoList.stream().map(CryptoWatchDTO::getCoinId).collect(Collectors.joining(","));
@@ -77,8 +80,8 @@ public class WatchListServiceImpl implements WatchlistService {
     }
 
     @Override
-    public List<StockWatchDTO> getStockWatchlistByUserId(Long userId) {
-        List<StockWatchDTO> stockList = this.stockWatchRepository.findByUser_IdOrderByStockShortName(userId).stream()
+    public List<StockWatchDTO> getStockWatchlistByUserId(String userEmail) {
+        List<StockWatchDTO> stockList = this.stockWatchRepository.findByUserEmailOrderByStockShortName(userEmail).stream()
                 .map(this::convertToStockWatchDTO).collect(Collectors.toList());
         String joinedList = stockList.stream().map(s -> (s.getStockShortName() + "." + s.getStockExchange())).collect(Collectors.joining(","));
         JsonNode responseBody = this.eodAPIService.getLiveValue(joinedList, "/real-time/stock/?api_token={0}&fmt=json&s={1}");
@@ -98,8 +101,8 @@ public class WatchListServiceImpl implements WatchlistService {
     }
 
     @Override
-    public List<ForexWatchDTO> getForexWatchlistByUserId(Long userId) {
-        List<ForexWatchDTO> forexList = this.forexWatchRepository.findByUser_Id(userId).stream()
+    public List<ForexWatchDTO> getForexWatchlistByUserId(String userEmail) {
+        List<ForexWatchDTO> forexList = this.forexWatchRepository.findByUserEmail(userEmail).stream()
                 .map(this::convertToForexDTO).collect(Collectors.toList());
         String joinedList = forexList.stream().map(f -> (f.getFromCurrencyId() + f.getToCurrencyId() + ".FOREX")).collect(Collectors.joining(","));
         JsonNode responseBody = this.eodAPIService.getLiveValue(joinedList, "/real-time/forex/?api_token={0}&fmt=json&s={1}");
@@ -118,26 +121,27 @@ public class WatchListServiceImpl implements WatchlistService {
 
     @Transactional
     @Override
-    public void deleteStockWatchById(Long userid, Long id) {
-        this.stockWatchRepository.deleteByIdAndUser_Id(id, userid);
+    public void deleteStockWatchById(String userEmail, Long id) {
+        this.stockWatchRepository.deleteByIdAndUserEmail(id, userEmail);
     }
 
     @Transactional
     @Override
-    public void deleteCryptoWatchById(Long userid, Long id) {
-        this.cryptoWatchRepository.deleteByIdAndUser_Id(id, userid);
+    public void deleteCryptoWatchById(String userEmail, Long id) {
+        this.cryptoWatchRepository.deleteByIdAndUserEmail(id, userEmail);
     }
 
     @Transactional
     @Override
-    public void deleteForexWatchById(Long userid, Long id) {
-        this.forexWatchRepository.deleteByIdAndUser_Id(id, userid);
+    public void deleteForexWatchById(String userEmail, Long id) {
+        this.forexWatchRepository.deleteByIdAndUserEmail(id, userEmail);
     }
 
     @Transactional
     @Override
-    public StockWatchDTO createNewStockWatch(User user, Stock wStock) {
+    public StockWatchDTO createNewStockWatch(String userEmail, Stock wStock) {
         Stock stock = this.stockService.getOrCreateStock(wStock.getShortName(), wStock.getExchange(), wStock.getName());
+        User user = this.userService.loadUserByEmail(userEmail);
 
         TickerWatch tickerWatch = TickerWatch.builder().stock(stock).user(user).build();
         this.stockWatchRepository.save(tickerWatch);
@@ -146,8 +150,9 @@ public class WatchListServiceImpl implements WatchlistService {
 
     @Transactional
     @Override
-    public CryptoWatchDTO createNewCryptoWatch(User user, String coinId) {
+    public CryptoWatchDTO createNewCryptoWatch(String userEmail, String coinId) {
         Coin coin = this.coinRepository.findById(coinId).orElseThrow(NoSuchElementException::new);
+        User user = this.userService.loadUserByEmail(userEmail);
 
         CryptoWatch cryptoWatch = CryptoWatch.builder().coin(coin).user(user).build();
         this.cryptoWatchRepository.save(cryptoWatch);

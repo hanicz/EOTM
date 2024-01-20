@@ -5,11 +5,7 @@ import eye.on.the.money.util.Generated;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.FetchType;
+import jakarta.persistence.*;
 import java.util.Set;
 
 @Entity

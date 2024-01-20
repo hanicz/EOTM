@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ETFInvestmentRepository extends CrudRepository<ETFInvestment, Long> {
-    Optional<ETFInvestment> findByIdAndUser_Id(Long id, Long userId);
-    List<ETFInvestment> findByUser_IdOrderByTransactionDate(Long userId);
-    void deleteByUser_IdAndIdIn(Long userId, List<Long> ids);
+    Optional<ETFInvestment> findByIdAndUserEmail(Long id, String userEmail);
+    List<ETFInvestment> findByUserEmailOrderByTransactionDate(String userEmail);
+    void deleteByUserEmailAndIdIn(String userEmail, List<Long> ids);
 }

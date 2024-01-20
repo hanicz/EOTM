@@ -78,8 +78,8 @@ public class TaxServiceImpl implements TaxService {
 
 
     @Override
-    public void doTaxByYear(Long userId, Integer year, List<TaxEntry> taxEntries) {
-        List<InvestmentDTO> investments = this.investmentService.getInvestmentsByTypeAndDate(userId, "S", this.getDate(year, 0), this.getDate(year, 11));
+    public void doTaxByYear(String userEmail, Integer year, List<TaxEntry> taxEntries) {
+        List<InvestmentDTO> investments = this.investmentService.getInvestmentsByTypeAndDate(userEmail, "S", this.getDate(year, 0), this.getDate(year, 11));
         List<Long> investmentIds = taxEntries.stream().map(TaxEntry::getInvestmentId).collect(Collectors.toList());
 
 

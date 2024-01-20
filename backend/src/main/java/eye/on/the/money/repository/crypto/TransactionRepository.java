@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TransactionRepository extends CrudRepository<Transaction, Long> {
-    List<Transaction> findByUser_IdOrderByTransactionDate(Long userId);
-    void deleteByUser_IdAndIdIn(Long userId, List<Long> ids);
-    Optional<Transaction> findByIdAndUser_Id(Long id, Long userId);
+    List<Transaction> findByUserEmailOrderByTransactionDate(String userEmail);
+    void deleteByUserEmailAndIdIn(String userEmail, List<Long> ids);
+    Optional<Transaction> findByIdAndUserEmail(Long id, String userEmail);
 }

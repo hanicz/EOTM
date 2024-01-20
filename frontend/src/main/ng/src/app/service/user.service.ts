@@ -28,6 +28,7 @@ export class UserService {
       withCredentials: true,
       observe: 'response'
     }).pipe(tap(response => {
+      console.log(<string>response.headers.get('token'));
       localStorage.setItem('token', <string>response.headers.get('token'));
     }));
   }

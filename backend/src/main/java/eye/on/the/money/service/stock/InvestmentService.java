@@ -9,13 +9,13 @@ import java.util.Date;
 import java.util.List;
 
 public interface InvestmentService {
-    public List<InvestmentDTO> getInvestments(Long userId);
-    public void deleteInvestmentById(User user, List<Long> ids);
-    public List<InvestmentDTO> getCurrentHoldings(Long userId);
-    public List<InvestmentDTO> getAllPositions(Long userId);
-    public InvestmentDTO createInvestment(InvestmentDTO investmentDTO, User user);
-    public void getCSV(Long userId, Writer writer);
-    public InvestmentDTO updateInvestment(InvestmentDTO investmentDTO, User user);
-    public void processCSV(User user, MultipartFile file);
-    public List<InvestmentDTO> getInvestmentsByTypeAndDate(Long userId, String buySell, Date from, Date to);
+    public List<InvestmentDTO> getInvestments(String userEmail);
+    public void deleteInvestmentById(String userEmail, List<Long> ids);
+    public List<InvestmentDTO> getCurrentHoldings(String userEmail);
+    public List<InvestmentDTO> getAllPositions(String userEmail);
+    public InvestmentDTO createInvestment(InvestmentDTO investmentDTO, String userEmail);
+    public void getCSV(String userEmail, Writer writer);
+    public InvestmentDTO updateInvestment(InvestmentDTO investmentDTO, String userEmail);
+    public void processCSV(String userEmail, MultipartFile file);
+    public List<InvestmentDTO> getInvestmentsByTypeAndDate(String userEmail, String buySell, Date from, Date to);
 }

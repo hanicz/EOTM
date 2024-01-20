@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ETFDividendRepository extends CrudRepository<ETFDividend, Long> {
-    List<ETFDividend> findByUser_IdOrderByDividendDate(Long userId);
-    void deleteByUser_idAndIdIn(Long userId, List<Long> ids);
-    Optional<ETFDividend> findByIdAndUser_Id(Long id, Long userId);
+    List<ETFDividend> findByUserEmailOrderByDividendDate(String userEmail);
+    void deleteByUserEmailAndIdIn(String userEmail, List<Long> ids);
+    Optional<ETFDividend> findByIdAndUserEmail(Long id, String userEmail);
 }

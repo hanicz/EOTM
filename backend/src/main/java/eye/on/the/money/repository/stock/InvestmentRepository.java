@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface InvestmentRepository extends CrudRepository<Investment, Long> {
-    List<Investment> findByUser_IdOrderByTransactionDate(Long userId);
-    List<Investment> findByUser_IdAndBuySell(Long userId, String buySell);
-    List<Investment> findByUser_IdAndTransactionDateBetween(Long userId, Date transactionDateStart, Date transactionDateEnd);
-    List<Investment> findByUser_IdAndBuySellAndTransactionDateBetween(Long userId, String buySell, Date transactionDateStart, Date transactionDateEnd);
-    Optional<Investment> findByIdAndUser_Id(Long id, Long userId);
-    void deleteByUser_IdAndIdIn(Long userId, List<Long> ids);
-    List<Investment> findByUser_IdAndIdIn(Long userId, List<Long> idList);
+    List<Investment> findByUserEmailOrderByTransactionDate(String userEmail);
+    List<Investment> findByUserEmailAndBuySell(String userEmail, String buySell);
+    List<Investment> findByUserEmailAndTransactionDateBetween(String userEmail, Date transactionDateStart, Date transactionDateEnd);
+    List<Investment> findByUserEmailAndBuySellAndTransactionDateBetween(String userEmail, String buySell, Date transactionDateStart, Date transactionDateEnd);
+    Optional<Investment> findByIdAndUserEmail(Long id, String userEmail);
+    void deleteByUserEmailAndIdIn(String userEmail, List<Long> ids);
+    List<Investment> findByUserEmailAndIdIn(String userEmail, List<Long> idList);
 }

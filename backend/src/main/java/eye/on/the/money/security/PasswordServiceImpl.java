@@ -1,4 +1,4 @@
-package eye.on.the.money.service.impl;
+package eye.on.the.money.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

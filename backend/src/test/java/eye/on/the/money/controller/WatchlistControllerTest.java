@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -40,7 +41,7 @@ class WatchlistControllerTest {
         cDTO.add(CryptoWatchDTO.builder().cryptoWatchId(2L).liveValue(632.1).change(333.1).coinId("c2").name("n2").symbol("s2").build());
         cDTO.add(CryptoWatchDTO.builder().cryptoWatchId(3L).liveValue(32.3).change(11.1).coinId("c3").name("n3").symbol("s3").build());
 
-        when(this.watchlistService.getCryptoWatchlistByUserId(this.user.getId(), "eur")).thenReturn(cDTO);
+        when(this.watchlistService.getCryptoWatchlistByUserId(this.user.getEmail(), "eur")).thenReturn(cDTO);
 
         Assertions.assertIterableEquals(cDTO, this.watchlistController.getCryptoWatchList(this.user, "eur").getBody());
     }

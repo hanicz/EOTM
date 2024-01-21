@@ -12,11 +12,13 @@ import eye.on.the.money.service.api.CryptoAPIService;
 import eye.on.the.money.service.api.EODAPIService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -32,7 +34,6 @@ public class AlertScheduler {
     @Autowired
     private CryptoAPIService cryptoAPIService;
     @Autowired
-    @Lazy
     private EmailService emailServiceImpl;
 
 
@@ -59,10 +60,8 @@ public class AlertScheduler {
             coinMap.put(field.getKey(), field.getValue());
         }
 
-        List<CommonAlert> commonAlerts = Collections.synchronizedList(new ArrayList<>());
-
         cryptoAlerts.parallelStream().forEach(alert -> {
-            commonAlerts.add(CommonAlert.builder()
+            this.sendAlert(CommonAlert.builder()
                     .id(alert.getId())
                     .type(alert.getType())
                     .valuePoint(alert.getValuePoint())
@@ -73,8 +72,6 @@ public class AlertScheduler {
                     .actualChange(coinMap.get(alert.getCoin().getId()).findValue("eur_24h_change").asDouble())
                     .build());
         });
-
-        this.sendAlerts(commonAlerts);
         log.trace("Exit");
     }
 
@@ -91,11 +88,9 @@ public class AlertScheduler {
             stockMap.put(stock.findValue("code").textValue(), stock);
         }
 
-        List<CommonAlert> commonAlerts = Collections.synchronizedList(new ArrayList<>());
-
         stockAlertList.parallelStream().forEach(alert -> {
             String ticker = alert.getStock().getShortName() + "." + alert.getStock().getExchange();
-            commonAlerts.add(CommonAlert.builder()
+            this.sendAlert(CommonAlert.builder()
                     .id(alert.getId())
                     .type(alert.getType())
                     .valuePoint(alert.getValuePoint())
@@ -106,41 +101,38 @@ public class AlertScheduler {
                     .actualValue(stockMap.get(ticker).findValue("close").asDouble())
                     .build());
         });
-
-        this.sendAlerts(commonAlerts);
         log.trace("Exit");
     }
 
-    private void sendAlerts(List<CommonAlert> alertList) {
+    private void sendAlert(CommonAlert alert) {
         log.trace("Enter");
-        alertList.parallelStream().forEach(alert -> {
-            log.trace("Checking alert: {}", alert);
-            switch (alert.getType()) {
-                case "PERCENT_OVER":
-                    if (alert.getActualChange() >= alert.getValuePoint()) {
-                        this.sendAndDelete(alert, alert.getSymbolOrTicker() + " is over " + alert.getValuePoint() + "%");
-                    }
-                    break;
-                case "PERCENT_UNDER":
-                    if (alert.getActualChange() <= alert.getValuePoint()) {
-                        this.sendAndDelete(alert, alert.getSymbolOrTicker() + " is under " + alert.getValuePoint() + "%");
-                    }
-                    break;
-                case "PRICE_OVER":
-                    if (alert.getActualValue() >= alert.getValuePoint()) {
-                        this.sendAndDelete(alert, alert.getSymbolOrTicker() + " is over " + alert.getValuePoint() + " price point");
-                    }
-                    break;
-                case "PRICE_UNDER":
-                    if (alert.getActualValue() <= alert.getValuePoint()) {
-                        this.sendAndDelete(alert, alert.getSymbolOrTicker() + " is under " + alert.getValuePoint() + " price point");
-                    }
-                    break;
-                default:
-                    break;
-            }
-            log.trace("Alert checked with id: {}", alert.getId());
-        });
+
+        log.trace("Checking alert: {}", alert);
+        switch (alert.getType()) {
+            case "PERCENT_OVER":
+                if (alert.getActualChange() >= alert.getValuePoint()) {
+                    this.sendAndDelete(alert, alert.getSymbolOrTicker() + " is over " + alert.getValuePoint() + "%");
+                }
+                break;
+            case "PERCENT_UNDER":
+                if (alert.getActualChange() <= alert.getValuePoint()) {
+                    this.sendAndDelete(alert, alert.getSymbolOrTicker() + " is under " + alert.getValuePoint() + "%");
+                }
+                break;
+            case "PRICE_OVER":
+                if (alert.getActualValue() >= alert.getValuePoint()) {
+                    this.sendAndDelete(alert, alert.getSymbolOrTicker() + " is over " + alert.getValuePoint() + " price point");
+                }
+                break;
+            case "PRICE_UNDER":
+                if (alert.getActualValue() <= alert.getValuePoint()) {
+                    this.sendAndDelete(alert, alert.getSymbolOrTicker() + " is under " + alert.getValuePoint() + " price point");
+                }
+                break;
+            default:
+                break;
+        }
+        log.trace("Alert checked with id: {}", alert.getId());
         log.trace("Exit");
     }
 

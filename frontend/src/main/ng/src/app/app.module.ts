@@ -63,6 +63,7 @@ import { ForexholdingComponent } from './forex/forexholding/forexholding.compone
 import { AlertComponent } from './alert/alert.component';
 import { AlertTypePipe } from './util/pipe';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { DatePipe } from '@angular/common';
 
 
 @NgModule({
@@ -129,7 +130,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
     SkeletonModule,
     InputNumberModule
   ],
-  providers: [MessageService, Globals],
+  providers: [MessageService, Globals, DatePipe],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

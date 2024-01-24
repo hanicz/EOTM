@@ -10,7 +10,7 @@ import { Globals } from '../util/global';
 import { WatchlistService } from '../service/watchlist.service';
 import { Symbol } from '../model/symbol';
 import { Exchange } from '../model/exchange';
-import * as moment from 'moment';
+import { DatePipe } from '@angular/common';
 
 import {
   ChartComponent,
@@ -68,7 +68,8 @@ export class SearchComponent implements OnInit {
   public recChartOptions: Partial<ChartOptions> | any;
 
   constructor(private stockService: StockService, globals: Globals,
-    private metricService: MetricService, private watchlistService: WatchlistService) {
+    private metricService: MetricService, private watchlistService: WatchlistService,
+    private datepipe: DatePipe) {
 
     this.globals = globals;
     this.options = [
@@ -363,7 +364,7 @@ export class SearchComponent implements OnInit {
         type: 'category',
         categories: categories,
         labels: {
-          formatter: (value: number) => moment(value).format("MMM'YY"),
+          formatter: (value: number) => this.datepipe.transform(value, 'MMM YY'),
         }
       },
     });

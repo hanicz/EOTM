@@ -9,9 +9,9 @@ import eye.on.the.money.model.stock.Symbol;
 import java.util.List;
 
 public interface EODAPIService {
-    public JsonNode getLiveValue(String tickerList, String path);
-    public List<EODCandleQuote> getCandleQuoteByShortName(String shortname, int months);
-    public List<Symbol> getAllSymbols(String exchange);
-    public List<Exchange> getAllExchanges();
-    public JsonNode getLiveValueForSingle(String ticker, String path);
+    JsonNode getLiveValue(String tickerList, String path);
+    List<EODCandleQuote> getCandleQuoteByShortName(String shortname, int months);
+    List<Symbol> getAllSymbols(String exchange);
+    List<Exchange> getAllExchanges();
+    JsonNode getLiveValueForSingle(String ticker, String path);
 }

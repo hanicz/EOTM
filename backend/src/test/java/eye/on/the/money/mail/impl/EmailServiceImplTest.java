@@ -1,6 +1,7 @@
 package eye.on.the.money.mail.impl;
 
 import eye.on.the.money.EotmApplication;
+import eye.on.the.money.service.mail.impl.EmailServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

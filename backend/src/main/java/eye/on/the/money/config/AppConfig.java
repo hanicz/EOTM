@@ -1,4 +1,4 @@
-package eye.on.the.money.util;
+package eye.on.the.money.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;

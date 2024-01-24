@@ -1,4 +1,4 @@
-package eye.on.the.money.mail;
+package eye.on.the.money.service.mail;
 
 public interface EmailService {
 

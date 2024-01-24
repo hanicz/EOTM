@@ -1,20 +1,20 @@
 package eye.on.the.money.alert;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import eye.on.the.money.mail.EmailService;
-import eye.on.the.money.model.alert.CommonAlert;
+import eye.on.the.money.model.alert.Alert;
 import eye.on.the.money.model.alert.CryptoAlert;
 import eye.on.the.money.model.alert.StockAlert;
-import eye.on.the.money.model.crypto.Coin;
 import eye.on.the.money.repository.alert.CryptoAlertRepository;
 import eye.on.the.money.repository.alert.StockAlertRepository;
 import eye.on.the.money.service.api.CryptoAPIService;
 import eye.on.the.money.service.api.EODAPIService;
+import eye.on.the.money.service.mail.EmailService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -36,6 +36,15 @@ public class AlertScheduler {
     @Autowired
     private EmailService emailServiceImpl;
 
+    private final static Map<String, String> messageMap = new HashMap<>();
+
+    static {
+        AlertScheduler.messageMap.put("PERCENT_OVER", "{0} is over {1}%");
+        AlertScheduler.messageMap.put("PERCENT_UNDER", "{0} is under {1}%");
+        AlertScheduler.messageMap.put("PRICE_OVER", "{0} is over {1} price point");
+        AlertScheduler.messageMap.put("PRICE_UNDER", "{0} is under {1} price point");
+    }
+
 
     @Scheduled(fixedDelay = 300000)
     public void checkAlerts() {
@@ -49,8 +58,9 @@ public class AlertScheduler {
         log.trace("Enter");
         List<CryptoAlert> cryptoAlerts = this.cryptoAlertRepository.findAll();
         if (cryptoAlerts.isEmpty()) return;
-        String ids = cryptoAlerts.stream().map(CryptoAlert::getCoin).collect(Collectors.toSet())
-                .stream().map(Coin::getId).collect(Collectors.joining(","));
+        String ids = String.join(",", cryptoAlerts.stream()
+                .map(alert -> alert.getCoin().getId())
+                .collect(Collectors.toSet()));
 
         JsonNode responseBody = this.cryptoAPIService.getLiveValueForCoins("eur", ids);
         Iterator<Map.Entry<String, JsonNode>> fields = responseBody.fields();
@@ -61,16 +71,10 @@ public class AlertScheduler {
         }
 
         cryptoAlerts.parallelStream().forEach(alert -> {
-            this.sendAlert(CommonAlert.builder()
-                    .id(alert.getId())
-                    .type(alert.getType())
-                    .valuePoint(alert.getValuePoint())
-                    .user(alert.getUser())
-                    .alertType("crypto")
-                    .symbolOrTicker(alert.getCoin().getId())
-                    .actualValue(coinMap.get(alert.getCoin().getId()).findValue("eur").asDouble())
-                    .actualChange(coinMap.get(alert.getCoin().getId()).findValue("eur_24h_change").asDouble())
-                    .build());
+            alert.setActualChange(coinMap.get(alert.getCoin().getId()).findValue("eur_24h_change").asDouble());
+            alert.setActualValue(coinMap.get(alert.getCoin().getId()).findValue("eur").asDouble());
+            alert.setSymbolOrTicker(alert.getCoin().getId());
+            this.evaluateAlert(alert);
         });
         log.trace("Exit");
     }
@@ -79,8 +83,9 @@ public class AlertScheduler {
         log.trace("Enter");
         List<StockAlert> stockAlertList = this.stockAlertRepository.findAll();
         if (stockAlertList.isEmpty()) return;
-        String joinedList = stockAlertList.stream().map(StockAlert::getStock).collect(Collectors.toSet())
-                .stream().map(s -> (s.getShortName() + "." + s.getExchange())).collect(Collectors.joining(","));
+        String joinedList = String.join(",", stockAlertList.stream()
+                .map(alert -> alert.getStock().getShortName() + "." + alert.getStock().getExchange())
+                .collect(Collectors.toSet()));
 
         JsonNode responseBody = this.eodAPIService.getLiveValue(joinedList, "/real-time/stock/?api_token={0}&fmt=json&s={1}");
         Map<String, JsonNode> stockMap = new HashMap<>();
@@ -90,53 +95,27 @@ public class AlertScheduler {
 
         stockAlertList.parallelStream().forEach(alert -> {
             String ticker = alert.getStock().getShortName() + "." + alert.getStock().getExchange();
-            this.sendAlert(CommonAlert.builder()
-                    .id(alert.getId())
-                    .type(alert.getType())
-                    .valuePoint(alert.getValuePoint())
-                    .user(alert.getUser())
-                    .symbolOrTicker(ticker)
-                    .alertType("stock")
-                    .actualChange(stockMap.get(ticker).findValue("change_p").asDouble())
-                    .actualValue(stockMap.get(ticker).findValue("close").asDouble())
-                    .build());
+            alert.setSymbolOrTicker(ticker);
+            alert.setActualChange(stockMap.get(ticker).findValue("change_p").asDouble());
+            alert.setActualValue(stockMap.get(ticker).findValue("close").asDouble());
+            this.evaluateAlert(alert);
         });
         log.trace("Exit");
     }
 
-    private void sendAlert(CommonAlert alert) {
+    private void evaluateAlert(Alert alert) {
         log.trace("Enter");
 
         log.trace("Checking alert: {}", alert);
-        switch (alert.getType()) {
-            case "PERCENT_OVER":
-                if (alert.getActualChange() >= alert.getValuePoint()) {
-                    this.sendAndDelete(alert, alert.getSymbolOrTicker() + " is over " + alert.getValuePoint() + "%");
-                }
-                break;
-            case "PERCENT_UNDER":
-                if (alert.getActualChange() <= alert.getValuePoint()) {
-                    this.sendAndDelete(alert, alert.getSymbolOrTicker() + " is under " + alert.getValuePoint() + "%");
-                }
-                break;
-            case "PRICE_OVER":
-                if (alert.getActualValue() >= alert.getValuePoint()) {
-                    this.sendAndDelete(alert, alert.getSymbolOrTicker() + " is over " + alert.getValuePoint() + " price point");
-                }
-                break;
-            case "PRICE_UNDER":
-                if (alert.getActualValue() <= alert.getValuePoint()) {
-                    this.sendAndDelete(alert, alert.getSymbolOrTicker() + " is under " + alert.getValuePoint() + " price point");
-                }
-                break;
-            default:
-                break;
+        if (alert.isAlertActive()) {
+            String message = MessageFormat.format(AlertScheduler.messageMap.get(alert.getType()), alert.getSymbolOrTicker(), Double.toString(alert.getValuePoint()));
+            this.sendAndDelete(alert, message);
         }
         log.trace("Alert checked with id: {}", alert.getId());
         log.trace("Exit");
     }
 
-    private void sendAndDelete(CommonAlert alert, String message) {
+    private void sendAndDelete(Alert alert, String message) {
         this.emailServiceImpl.sendMail(alert.getUser().getEmail(), message);
         if ("stock".equals(alert.getAlertType()))
             this.stockAlertRepository.deleteById(alert.getId());

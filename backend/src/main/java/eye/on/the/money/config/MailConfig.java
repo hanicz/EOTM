@@ -1,4 +1,4 @@
-package eye.on.the.money.util;
+package eye.on.the.money.config;
 
 import eye.on.the.money.repository.CredentialRepository;
 import org.springframework.beans.factory.annotation.Autowired;

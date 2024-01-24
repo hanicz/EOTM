@@ -1,7 +1,7 @@
-package eye.on.the.money.mail.impl;
+package eye.on.the.money.service.mail.impl;
 
 
-import eye.on.the.money.mail.EmailService;
+import eye.on.the.money.service.mail.EmailService;
 import eye.on.the.money.repository.CredentialRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -10,6 +10,7 @@ import { Globals } from '../util/global';
 import { WatchlistService } from '../service/watchlist.service';
 import { Symbol } from '../model/symbol';
 import { Exchange } from '../model/exchange';
+import * as moment from 'moment';
 
 import {
   ChartComponent,
@@ -359,8 +360,11 @@ export class SearchComponent implements OnInit {
     this.recChart.updateOptions({
       colors: ["#c11f01", "#ff2700", "#f0ff00", "#36ff00", "#2ac600"],
       xaxis: {
-        type: 'datetime',
+        type: 'category',
         categories: categories,
+        labels: {
+          formatter: (value: number) => moment(value).format("MMM'YY"),
+        }
       },
     });
     this.recChart.updateSeries(chartData, false);

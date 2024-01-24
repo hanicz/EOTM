@@ -1,5 +1,6 @@
 package eye.on.the.money.model.stock;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import eye.on.the.money.util.Generated;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Profile {
     private String country;
     private String currency;

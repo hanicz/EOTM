@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eye.on.the.money.EotmApplication;
-import eye.on.the.money.mail.EmailService;
+import eye.on.the.money.service.mail.EmailService;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.alert.StockAlert;
 import eye.on.the.money.model.stock.Stock;

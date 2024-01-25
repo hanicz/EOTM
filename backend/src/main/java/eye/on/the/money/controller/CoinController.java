@@ -17,8 +17,12 @@ import java.util.List;
 @Slf4j
 public class CoinController {
 
+    private final CoinService coinService;
+
     @Autowired
-    private CoinService coinService;
+    public CoinController(CoinService coinService) {
+        this.coinService = coinService;
+    }
 
     @GetMapping()
     public ResponseEntity<List<Coin>> getAllCoins() {

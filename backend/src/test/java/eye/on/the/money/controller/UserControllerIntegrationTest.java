@@ -1,7 +1,7 @@
 package eye.on.the.money.controller;
 
 import eye.on.the.money.EotmApplication;
-import eye.on.the.money.service.impl.UserServiceImpl;
+import eye.on.the.money.service.UserServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;

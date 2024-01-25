@@ -21,8 +21,12 @@ import java.util.List;
 @Slf4j
 public class StockController {
 
+    private final StockService stockService;
+
     @Autowired
-    private StockService stockService;
+    public StockController(StockService stockService) {
+        this.stockService = stockService;
+    }
 
     @GetMapping()
     public ResponseEntity<List<Stock>> getAllStocks() {

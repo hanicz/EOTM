@@ -5,6 +5,7 @@ import eye.on.the.money.model.stock.Metric;
 import eye.on.the.money.model.stock.Profile;
 import eye.on.the.money.model.stock.Recommendation;
 import eye.on.the.money.service.api.StockMetricAPIService;
+import eye.on.the.money.service.stock.MetricService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -20,14 +21,14 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = EotmApplication.class)
 @ActiveProfiles("test")
-class MetricServiceImplTest {
+class MetricServiceTest {
 
 
     @Mock
     private StockMetricAPIService stockMetricAPIService;
 
     @InjectMocks
-    private MetricServiceImpl metricService;
+    private MetricService metricService;
 
     @Test
     public void getProfileBySymbol() {

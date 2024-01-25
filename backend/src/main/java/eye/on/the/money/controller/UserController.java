@@ -1,7 +1,7 @@
 package eye.on.the.money.controller;
 
 import eye.on.the.money.model.User;
-import eye.on.the.money.service.impl.UserServiceImpl;
+import eye.on.the.money.service.UserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,9 +15,12 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class UserController {
 
-    @Autowired
-    private UserServiceImpl userService;
+    private final UserServiceImpl userService;
 
+    @Autowired
+    public UserController(UserServiceImpl userService) {
+        this.userService = userService;
+    }
 
     @PostMapping("/signup")
     public ResponseEntity<HttpStatus> createNewUser(@RequestBody User user) {

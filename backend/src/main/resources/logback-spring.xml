@@ -39,7 +39,7 @@
     </root>
 
     <!-- LOG "eye.on.the.money.%" at TRACE level -->
-    <logger name="eye.on.the.money" level="trace" additivity="false">
+    <logger name="eye.on.the.money" level="debug" additivity="false">
         <appender-ref ref="RollingFile" />
         <appender-ref ref="Console" />
     </logger>

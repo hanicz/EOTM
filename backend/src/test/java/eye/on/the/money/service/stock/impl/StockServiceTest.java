@@ -6,6 +6,7 @@ import eye.on.the.money.EotmApplication;
 import eye.on.the.money.model.stock.*;
 import eye.on.the.money.repository.stock.StockRepository;
 import eye.on.the.money.service.api.EODAPIService;
+import eye.on.the.money.service.stock.StockService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +29,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = EotmApplication.class)
 @ActiveProfiles("test")
-class StockServiceImplTest {
+class StockServiceTest {
 
     @MockBean
     private EODAPIService eodAPIService;
@@ -37,7 +38,7 @@ class StockServiceImplTest {
     private StockRepository stockRepository;
 
     @Autowired
-    private StockServiceImpl stockService;
+    private StockService stockService;
 
     private final ObjectMapper mapper = new ObjectMapper();
 

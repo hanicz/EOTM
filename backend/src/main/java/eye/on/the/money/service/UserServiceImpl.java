@@ -1,10 +1,8 @@
-package eye.on.the.money.service.impl;
+package eye.on.the.money.service;
 
-import eye.on.the.money.EotmApplication;
 import eye.on.the.money.model.User;
 import eye.on.the.money.repository.UserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,15 +13,16 @@ import org.springframework.stereotype.Service;
 import static java.util.Collections.emptyList;
 
 @Service
+@Slf4j
 public class UserServiceImpl implements UserDetailsService {
-    private static final Logger log = LoggerFactory.getLogger(EotmApplication.class);
+    private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private UserRepository userRepository;
-
+    public UserServiceImpl(PasswordEncoder passwordEncoder, UserRepository userRepository) {
+        this.passwordEncoder = passwordEncoder;
+        this.userRepository = userRepository;
+    }
 
     public void signUp(User user) {
         user.setPassword(this.passwordEncoder.encode(user.getPassword()));

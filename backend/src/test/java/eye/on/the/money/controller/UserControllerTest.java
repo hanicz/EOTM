@@ -1,7 +1,7 @@
 package eye.on.the.money.controller;
 
 import eye.on.the.money.model.User;
-import eye.on.the.money.service.impl.UserServiceImpl;
+import eye.on.the.money.service.UserServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

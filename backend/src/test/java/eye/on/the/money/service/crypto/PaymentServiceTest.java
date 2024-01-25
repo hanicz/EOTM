@@ -1,4 +1,4 @@
-package eye.on.the.money.service.crypto.impl;
+package eye.on.the.money.service.crypto;
 
 import eye.on.the.money.EotmApplication;
 import eye.on.the.money.model.Currency;
@@ -15,13 +15,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = EotmApplication.class)
 @ActiveProfiles("test")
-class PaymentServiceImplTest {
+class PaymentServiceTest {
 
     @Autowired
     private PaymentRepository paymentRepository;
 
     @Autowired
-    private PaymentServiceImpl paymentService;
+    private PaymentService paymentService;
 
     @Autowired
     private CurrencyRepository currencyRepository;

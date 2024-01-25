@@ -20,8 +20,12 @@ import java.util.List;
 @Slf4j
 public class MetricController {
 
+    private final MetricService metricService;
+
     @Autowired
-    private MetricService metricService;
+    public MetricController(MetricService metricService) {
+        this.metricService = metricService;
+    }
 
     @GetMapping("/profile/{symbol}")
     public ResponseEntity<Profile> getProfileBySymbol(@PathVariable String symbol) {

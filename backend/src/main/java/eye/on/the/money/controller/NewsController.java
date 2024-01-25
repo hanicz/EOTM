@@ -18,8 +18,12 @@ import java.util.List;
 @Slf4j
 public class NewsController {
 
+    private final NewsAPIService newsAPIService;
+
     @Autowired
-    private NewsAPIService newsAPIService;
+    public NewsController(NewsAPIService newsAPIService) {
+        this.newsAPIService = newsAPIService;
+    }
 
     @GetMapping("category/{category}")
     public ResponseEntity<List<News>> getGeneralNews(@PathVariable String category) {

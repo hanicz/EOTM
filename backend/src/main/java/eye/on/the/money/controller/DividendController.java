@@ -22,9 +22,12 @@ import java.util.stream.Stream;
 @Slf4j
 public class DividendController {
 
+    private final DividendService dividendService;
 
     @Autowired
-    private DividendService dividendService;
+    public DividendController(DividendService dividendService) {
+        this.dividendService = dividendService;
+    }
 
     @GetMapping()
     public ResponseEntity<List<DividendDTO>> getAllDividends(@AuthenticationPrincipal UserDetails user) {

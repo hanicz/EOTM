@@ -1,4 +1,4 @@
-package eye.on.the.money.service.crypto.impl;
+package eye.on.the.money.service.crypto;
 
 import eye.on.the.money.EotmApplication;
 import eye.on.the.money.dto.out.TransactionDTO;
@@ -27,14 +27,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = EotmApplication.class)
 @ActiveProfiles("test")
-class TransactionServiceImplTest {
+class TransactionServiceTest {
 
     @MockBean
     private CryptoAPIService cryptoAPIService;
     @Autowired
     private TransactionRepository transactionRepository;
     @Autowired
-    private TransactionServiceImpl transactionService;
+    private TransactionService transactionService;
     @Autowired
     private UserRepository userRepository;
     private User user;

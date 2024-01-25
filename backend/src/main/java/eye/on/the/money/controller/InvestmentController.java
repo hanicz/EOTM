@@ -22,8 +22,12 @@ import java.util.stream.Stream;
 @Slf4j
 public class InvestmentController {
 
+    private final InvestmentService investmentService;
+
     @Autowired
-    private InvestmentService investmentService;
+    public InvestmentController(InvestmentService investmentService) {
+        this.investmentService = investmentService;
+    }
 
     @GetMapping()
     public ResponseEntity<List<InvestmentDTO>> getAllInvestments(@AuthenticationPrincipal UserDetails user) {

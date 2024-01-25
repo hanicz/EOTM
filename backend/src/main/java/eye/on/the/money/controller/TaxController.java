@@ -17,9 +17,12 @@ import java.io.IOException;
 @RequestMapping("tax")
 @Slf4j
 public class TaxController {
+    private TaxService taxService;
 
     @Autowired
-    private TaxService taxService;
+    public TaxController(TaxService taxService) {
+        this.taxService = taxService;
+    }
 
     @PostMapping("/process")
     public ResponseEntity<HttpStatus> processMNBExcel(@RequestParam("file") MultipartFile file) throws IOException {

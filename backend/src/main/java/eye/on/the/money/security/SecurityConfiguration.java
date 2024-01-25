@@ -1,6 +1,6 @@
 package eye.on.the.money.security;
 
-import eye.on.the.money.service.impl.UserServiceImpl;
+import eye.on.the.money.service.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;

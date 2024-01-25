@@ -19,8 +19,12 @@ import java.util.stream.Stream;
 @Slf4j
 public class ForexController {
 
+    private final ForexTransactionService forexTransactionService;
+
     @Autowired
-    private ForexTransactionService forexTransactionService;
+    public ForexController(ForexTransactionService forexTransactionService) {
+        this.forexTransactionService = forexTransactionService;
+    }
 
     @GetMapping()
     public ResponseEntity<List<ForexTransactionDTO>> getForexTransactionsByUserId(@AuthenticationPrincipal UserDetails user) {

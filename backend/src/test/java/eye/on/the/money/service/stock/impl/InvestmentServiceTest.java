@@ -9,6 +9,7 @@ import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.stock.InvestmentRepository;
 import eye.on.the.money.repository.stock.StockRepository;
 import eye.on.the.money.service.api.EODAPIService;
+import eye.on.the.money.service.stock.InvestmentService;
 import eye.on.the.money.service.stock.StockPaymentService;
 import eye.on.the.money.service.stock.StockService;
 import org.junit.jupiter.api.Assertions;
@@ -34,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest(classes = EotmApplication.class)
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
-class InvestmentServiceImplTest {
+class InvestmentServiceTest {
 
     @Autowired
     private InvestmentRepository investmentRepository;
@@ -49,7 +50,7 @@ class InvestmentServiceImplTest {
     @MockBean
     private StockService stockService;
     @Autowired
-    private InvestmentServiceImpl investmentService;
+    private InvestmentService investmentService;
     @Autowired
     private ModelMapper modelMapper;
     @Autowired

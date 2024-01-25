@@ -1,4 +1,4 @@
-package eye.on.the.money.service.impl;
+package eye.on.the.money.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.out.CryptoWatchDTO;
@@ -11,11 +11,9 @@ import eye.on.the.money.model.watchlist.CryptoWatch;
 import eye.on.the.money.model.watchlist.ForexWatch;
 import eye.on.the.money.model.watchlist.TickerWatch;
 import eye.on.the.money.repository.crypto.CoinRepository;
-import eye.on.the.money.repository.stock.StockRepository;
 import eye.on.the.money.repository.watchlist.CryptoWatchRepository;
 import eye.on.the.money.repository.watchlist.ForexWatchRepository;
 import eye.on.the.money.repository.watchlist.StockWatchRepository;
-import eye.on.the.money.service.WatchlistService;
 import eye.on.the.money.service.api.CryptoAPIService;
 import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.stock.StockService;
@@ -31,39 +29,33 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class WatchListServiceImpl implements WatchlistService {
+public class WatchListService {
+    private final CryptoWatchRepository cryptoWatchRepository;
+    private final StockWatchRepository stockWatchRepository;
+    private final ForexWatchRepository forexWatchRepository;
+    private final CryptoAPIService cryptoAPIService;
+    private final UserServiceImpl userService;
+    private final EODAPIService eodAPIService;
+    private final CoinRepository coinRepository;
+    private final ModelMapper modelMapper;
+    private final StockService stockService;
 
     @Autowired
-    private CryptoWatchRepository cryptoWatchRepository;
+    public WatchListService(CryptoWatchRepository cryptoWatchRepository, StockWatchRepository stockWatchRepository,
+                            ForexWatchRepository forexWatchRepository, CryptoAPIService cryptoAPIService,
+                            UserServiceImpl userService, EODAPIService eodAPIService, CoinRepository coinRepository,
+                            ModelMapper modelMapper, StockService stockService) {
+        this.cryptoWatchRepository = cryptoWatchRepository;
+        this.stockWatchRepository = stockWatchRepository;
+        this.forexWatchRepository = forexWatchRepository;
+        this.cryptoAPIService = cryptoAPIService;
+        this.userService = userService;
+        this.eodAPIService = eodAPIService;
+        this.coinRepository = coinRepository;
+        this.modelMapper = modelMapper;
+        this.stockService = stockService;
+    }
 
-    @Autowired
-    private StockWatchRepository stockWatchRepository;
-
-    @Autowired
-    private ForexWatchRepository forexWatchRepository;
-
-    @Autowired
-    private CryptoAPIService cryptoAPIService;
-
-    @Autowired
-    private UserServiceImpl userService;
-
-    @Autowired
-    private EODAPIService eodAPIService;
-
-    @Autowired
-    private StockRepository stockRepository;
-
-    @Autowired
-    private CoinRepository coinRepository;
-
-    @Autowired
-    private ModelMapper modelMapper;
-
-    @Autowired
-    private StockService stockService;
-
-    @Override
     public List<CryptoWatchDTO> getCryptoWatchlistByUserId(String userEmail, String currency) {
         List<CryptoWatchDTO> cryptoList = this.cryptoWatchRepository.findByUserEmailOrderByCoin_Symbol(userEmail).stream()
                 .map(this::convertToCryptoWatchDTO).collect(Collectors.toList());
@@ -79,7 +71,6 @@ public class WatchListServiceImpl implements WatchlistService {
         return cryptoList;
     }
 
-    @Override
     public List<StockWatchDTO> getStockWatchlistByUserId(String userEmail) {
         List<StockWatchDTO> stockList = this.stockWatchRepository.findByUserEmailOrderByStockShortName(userEmail).stream()
                 .map(this::convertToStockWatchDTO).collect(Collectors.toList());
@@ -100,7 +91,6 @@ public class WatchListServiceImpl implements WatchlistService {
         return stockList;
     }
 
-    @Override
     public List<ForexWatchDTO> getForexWatchlistByUserId(String userEmail) {
         List<ForexWatchDTO> forexList = this.forexWatchRepository.findByUserEmail(userEmail).stream()
                 .map(this::convertToForexDTO).collect(Collectors.toList());
@@ -120,25 +110,21 @@ public class WatchListServiceImpl implements WatchlistService {
     }
 
     @Transactional
-    @Override
     public void deleteStockWatchById(String userEmail, Long id) {
         this.stockWatchRepository.deleteByIdAndUserEmail(id, userEmail);
     }
 
     @Transactional
-    @Override
     public void deleteCryptoWatchById(String userEmail, Long id) {
         this.cryptoWatchRepository.deleteByIdAndUserEmail(id, userEmail);
     }
 
     @Transactional
-    @Override
     public void deleteForexWatchById(String userEmail, Long id) {
         this.forexWatchRepository.deleteByIdAndUserEmail(id, userEmail);
     }
 
     @Transactional
-    @Override
     public StockWatchDTO createNewStockWatch(String userEmail, Stock wStock) {
         Stock stock = this.stockService.getOrCreateStock(wStock.getShortName(), wStock.getExchange(), wStock.getName());
         User user = this.userService.loadUserByEmail(userEmail);
@@ -149,7 +135,6 @@ public class WatchListServiceImpl implements WatchlistService {
     }
 
     @Transactional
-    @Override
     public CryptoWatchDTO createNewCryptoWatch(String userEmail, String coinId) {
         Coin coin = this.coinRepository.findById(coinId).orElseThrow(NoSuchElementException::new);
         User user = this.userService.loadUserByEmail(userEmail);

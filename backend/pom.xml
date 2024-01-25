@@ -102,7 +102,7 @@
 			<scope>runtime</scope>
 		</dependency>
 
-
+		<!--DB-->
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
@@ -116,6 +116,8 @@
 			<artifactId>postgresql</artifactId>
 			<version>42.7.1</version>
 		</dependency>
+
+		<!--Other-->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>

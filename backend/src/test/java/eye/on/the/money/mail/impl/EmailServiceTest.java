@@ -1,7 +1,7 @@
 package eye.on.the.money.mail.impl;
 
 import eye.on.the.money.EotmApplication;
-import eye.on.the.money.service.mail.impl.EmailServiceImpl;
+import eye.on.the.money.service.mail.EmailService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,13 +25,13 @@ import static org.mockito.Mockito.verify;
 @SpringBootTest(classes = EotmApplication.class)
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
-class EmailServiceImplTest {
+class EmailServiceTest {
 
     @MockBean
     private JavaMailSender javaMailSender;
 
     @Autowired
-    private EmailServiceImpl emailService;
+    private EmailService emailService;
 
     @Test
     public void sendEmail() {

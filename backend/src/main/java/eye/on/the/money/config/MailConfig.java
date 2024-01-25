@@ -24,8 +24,12 @@ public class MailConfig {
     @Value("${spring.mail.properties.mail.smtp.starttls.enable}")
     private String mailServerStartTls;
 
+    private final CredentialRepository credentialRepository;
+
     @Autowired
-    private CredentialRepository credentialRepository;
+    public MailConfig(CredentialRepository credentialRepository) {
+        this.credentialRepository = credentialRepository;
+    }
 
     @Bean
     @DependsOnDatabaseInitialization

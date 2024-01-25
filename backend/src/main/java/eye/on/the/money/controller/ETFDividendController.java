@@ -22,8 +22,12 @@ import java.util.stream.Stream;
 @Slf4j
 public class ETFDividendController {
 
+    private final ETFDividendService etfDividendService;
+
     @Autowired
-    private ETFDividendService etfDividendService;
+    public ETFDividendController(ETFDividendService etfDividendService) {
+        this.etfDividendService = etfDividendService;
+    }
 
     @GetMapping()
     public ResponseEntity<List<ETFDividendDTO>> getAllETFDividends(@AuthenticationPrincipal UserDetails user) {

@@ -25,16 +25,21 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AlertScheduler {
 
+    private final StockAlertRepository stockAlertRepository;
+    private final CryptoAlertRepository cryptoAlertRepository;
+    private final EODAPIService eodAPIService;
+    private final CryptoAPIService cryptoAPIService;
+    private final EmailService emailServiceImpl;
+
     @Autowired
-    private StockAlertRepository stockAlertRepository;
-    @Autowired
-    private CryptoAlertRepository cryptoAlertRepository;
-    @Autowired
-    private EODAPIService eodAPIService;
-    @Autowired
-    private CryptoAPIService cryptoAPIService;
-    @Autowired
-    private EmailService emailServiceImpl;
+    public AlertScheduler(StockAlertRepository stockAlertRepository, CryptoAlertRepository cryptoAlertRepository,
+                          EODAPIService eodAPIService, CryptoAPIService cryptoAPIService, EmailService emailServiceImpl) {
+        this.stockAlertRepository = stockAlertRepository;
+        this.cryptoAlertRepository = cryptoAlertRepository;
+        this.eodAPIService = eodAPIService;
+        this.cryptoAPIService = cryptoAPIService;
+        this.emailServiceImpl = emailServiceImpl;
+    }
 
     private final static Map<String, String> messageMap = new HashMap<>();
 

@@ -1,4 +1,4 @@
-package eye.on.the.money.service.crypto.impl;
+package eye.on.the.money.service.crypto;
 
 import eye.on.the.money.EotmApplication;
 import eye.on.the.money.model.crypto.Coin;
@@ -14,13 +14,13 @@ import java.util.List;
 
 @SpringBootTest(classes = EotmApplication.class)
 @ActiveProfiles("test")
-class CoinServiceImplTest {
+class CoinServiceTest {
 
     @Autowired
     private CoinRepository coinRepository;
 
     @Autowired
-    private CoinServiceImpl coinService;
+    private CoinService coinService;
 
     @Test
     public void getAllCoins() {

@@ -5,6 +5,7 @@ import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.stock.StockPayment;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.stock.StockPaymentRepository;
+import eye.on.the.money.service.stock.StockPaymentService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +16,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = EotmApplication.class)
 @ActiveProfiles("test")
-class StockPaymentServiceImplTest {
+class StockPaymentServiceTest {
 
     @Autowired
     private StockPaymentRepository stockPaymentRepository;
 
     @Autowired
-    private StockPaymentServiceImpl stockPaymentService;
+    private StockPaymentService stockPaymentService;
 
     @Autowired
     private CurrencyRepository currencyRepository;

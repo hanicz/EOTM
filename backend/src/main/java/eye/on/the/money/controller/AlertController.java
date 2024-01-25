@@ -17,8 +17,12 @@ import java.util.List;
 @Slf4j
 public class AlertController {
 
+    private final AlertService alertService;
+
     @Autowired
-    private AlertService alertService;
+    public AlertController(AlertService alertService) {
+        this.alertService = alertService;
+    }
 
     @GetMapping()
     public ResponseEntity<List<StockAlertDTO>> getAlerts(@AuthenticationPrincipal UserDetails user) {

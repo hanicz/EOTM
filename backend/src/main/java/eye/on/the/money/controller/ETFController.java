@@ -22,8 +22,12 @@ import java.util.stream.Stream;
 @Slf4j
 public class ETFController {
 
+    private final ETFInvestmentService etfInvestmentService;
+
     @Autowired
-    private ETFInvestmentService etfInvestmentService;
+    public ETFController(ETFInvestmentService etfInvestmentService) {
+        this.etfInvestmentService = etfInvestmentService;
+    }
 
     @GetMapping()
     public ResponseEntity<List<ETFInvestmentDTO>> getAllETFInvestments(@AuthenticationPrincipal UserDetails user) {

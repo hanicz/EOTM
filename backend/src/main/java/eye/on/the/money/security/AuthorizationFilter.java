@@ -1,6 +1,6 @@
 package eye.on.the.money.security;
 
-import eye.on.the.money.service.impl.UserServiceImpl;
+import eye.on.the.money.service.UserServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

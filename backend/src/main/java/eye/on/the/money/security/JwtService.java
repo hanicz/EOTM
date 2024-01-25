@@ -37,7 +37,7 @@ public class JwtService {
     private Claims getTokenBody(String token) {
         try {
             var key = Keys.hmacShaKeyFor(KEY.getBytes());
-            System.out.println(token);
+
             return Jwts.parser()
                     .verifyWith(key)
                     .build()

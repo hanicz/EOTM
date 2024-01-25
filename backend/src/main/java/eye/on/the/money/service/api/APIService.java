@@ -7,7 +7,6 @@ import eye.on.the.money.exception.APIException;
 import eye.on.the.money.repository.ConfigRepository;
 import eye.on.the.money.repository.CredentialRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -21,14 +20,22 @@ import java.util.stream.Stream;
 @Slf4j
 public abstract class APIService {
 
-    @Autowired
-    private CredentialRepository credentialRepository;
-    @Autowired
-    private ConfigRepository configRepository;
-    @Autowired
-    protected WebClient webClient;
-    @Autowired
-    protected ObjectMapper mapper;
+
+    private final CredentialRepository credentialRepository;
+
+    private final ConfigRepository configRepository;
+
+    protected final WebClient webClient;
+
+    protected final ObjectMapper mapper;
+
+    public APIService(CredentialRepository credentialRepository, ConfigRepository configRepository,
+                      WebClient webClient, ObjectMapper mapper) {
+        this.credentialRepository = credentialRepository;
+        this.configRepository = configRepository;
+        this.webClient = webClient;
+        this.mapper = mapper;
+    }
 
     protected String createURL(String api, String path, String... params) {
         log.trace("Enter");
@@ -37,14 +44,14 @@ public abstract class APIService {
         Object[] array = Stream.concat(Stream.of(secret), Stream.of(params)).toArray();
 
         String URL = MessageFormat.format(stockAPI + path, array);
-        log.debug(URL);
+        log.trace(URL);
         return URL;
     }
 
     protected ResponseEntity<?> callGetAPI(String URL, Class<?> cls) {
         log.trace("Enter");
 
-        log.debug("Call to {}", URL);
+        log.trace("Call to {}", URL);
         ResponseEntity<?> responseEntity = this.webClient
                 .get()
                 .uri(URI.create(URL))
@@ -59,7 +66,7 @@ public abstract class APIService {
     }
 
     protected void checkForEmptyBody(ResponseEntity<?> response) {
-        if(response == null || !response.hasBody()) {
+        if (response == null || !response.hasBody()) {
             log.error("Empty response API");
             throw new APIException("Empty response from API");
         }

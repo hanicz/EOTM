@@ -2,8 +2,8 @@ package eye.on.the.money.controller;
 
 import eye.on.the.money.model.news.News;
 import eye.on.the.money.service.api.NewsAPIService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,16 +14,13 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("news")
+@RequestMapping("api/v1/news")
 @Slf4j
+@RequiredArgsConstructor
 public class NewsController {
 
     private final NewsAPIService newsAPIService;
 
-    @Autowired
-    public NewsController(NewsAPIService newsAPIService) {
-        this.newsAPIService = newsAPIService;
-    }
 
     @GetMapping("category/{category}")
     public ResponseEntity<List<News>> getGeneralNews(@PathVariable String category) {

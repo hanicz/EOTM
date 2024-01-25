@@ -3,8 +3,8 @@ package eye.on.the.money.controller;
 import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.service.stock.InvestmentService;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,16 +18,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RestController
-@RequestMapping("investment")
+@RequestMapping("api/v1/investment")
 @Slf4j
+@RequiredArgsConstructor
 public class InvestmentController {
 
     private final InvestmentService investmentService;
-
-    @Autowired
-    public InvestmentController(InvestmentService investmentService) {
-        this.investmentService = investmentService;
-    }
 
     @GetMapping()
     public ResponseEntity<List<InvestmentDTO>> getAllInvestments(@AuthenticationPrincipal UserDetails user) {

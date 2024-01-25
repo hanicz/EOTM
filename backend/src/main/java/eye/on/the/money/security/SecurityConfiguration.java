@@ -24,18 +24,20 @@ import static eye.on.the.money.security.SecurityConstants.SIGN_UP_URL;
 @EnableWebSecurity
 public class SecurityConfiguration {
 
-    @Autowired
-    private UserServiceImpl userService;
+    private final UserServiceImpl userService;
+    private final PasswordEncoder passwordEncoder;
+    private final CorsConfigurationSource corsConfigurationSource;
+    private final JwtService jwtService;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    @Qualifier("cors")
-    private CorsConfigurationSource corsConfigurationSource;
-
-    @Autowired
-    private JwtService jwtService;
+    public SecurityConfiguration(UserServiceImpl userService, PasswordEncoder passwordEncoder,
+                                 @Qualifier("cors") CorsConfigurationSource corsConfigurationSource,
+                                 JwtService jwtService) {
+        this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
+        this.corsConfigurationSource = corsConfigurationSource;
+        this.jwtService = jwtService;
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {

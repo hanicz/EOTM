@@ -27,8 +27,9 @@ public class CryptoAPIService extends APIService {
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public JsonNode getLiveValueForCoins(String currency, String ids) {
         log.trace("Enter");
-        ResponseEntity<?> response = this.callGetAPI(this.createURL(CryptoAPIService.API,
-                "/simple/price?ids={1}&vs_currencies={2}&include_24hr_change={3}&token={0}", ids, currency, Boolean.TRUE.toString()), String.class);
+        String url = this.createURL(CryptoAPIService.API,
+                "/simple/price?ids={1}&vs_currencies={2}&include_24hr_change={3}&token={0}", ids, currency, Boolean.TRUE.toString());
+        ResponseEntity<?> response = this.callGetAPI(url, String.class);
         return this.getJsonNodeFromBody((String) response.getBody());
     }
 }

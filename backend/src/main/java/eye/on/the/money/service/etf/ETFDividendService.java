@@ -9,6 +9,7 @@ import eye.on.the.money.repository.etf.ETFDividendRepository;
 import eye.on.the.money.repository.etf.ETFRepository;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.service.UserServiceImpl;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -16,7 +17,6 @@ import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ETFDividendService {
 
     private final ETFDividendRepository etfDividendRepository;
@@ -43,15 +44,7 @@ public class ETFDividendService {
     private final UserServiceImpl userService;
     private final ModelMapper modelMapper;
 
-    @Autowired
-    public ETFDividendService(ETFDividendRepository etfDividendRepository, CurrencyRepository currencyRepository,
-                              ETFRepository etfRepository, UserServiceImpl userService, ModelMapper modelMapper) {
-        this.etfDividendRepository = etfDividendRepository;
-        this.currencyRepository = currencyRepository;
-        this.etfRepository = etfRepository;
-        this.userService = userService;
-        this.modelMapper = modelMapper;
-    }
+    private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     public List<ETFDividendDTO> getDividends(String userEmail) {
         log.trace("Enter getDividends");
@@ -138,7 +131,7 @@ public class ETFDividendService {
 
             for (CSVRecord csvRecord : csvParser) {
                 String dividendId = csvRecord.get("Dividend Id");
-                Date dividendDate = new SimpleDateFormat("yyyy-MM-dd").parse(csvRecord.get("Dividend Date"));
+                Date dividendDate = DATE_FORMAT.parse(csvRecord.get("Dividend Date"));
 
                 ETFDividendDTO dividend = ETFDividendDTO.builder()
                         .dividendDate(dividendDate)

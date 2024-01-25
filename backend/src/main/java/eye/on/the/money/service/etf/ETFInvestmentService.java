@@ -12,11 +12,11 @@ import eye.on.the.money.repository.etf.ETFRepository;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.service.UserServiceImpl;
 import eye.on.the.money.service.api.EODAPIService;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +26,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ETFInvestmentService {
     private final ETFInvestmentRepository etfInvestmentRepository;
     private final ETFRepository etfRepository;
@@ -34,19 +35,6 @@ public class ETFInvestmentService {
     private final UserServiceImpl userService;
     private final ModelMapper modelMapper;
     private final ETFPaymentService etfPaymentService;
-
-    @Autowired
-    public ETFInvestmentService(ETFInvestmentRepository etfInvestmentRepository, ETFRepository etfRepository,
-                                CurrencyRepository currencyRepository, EODAPIService eodAPIService,
-                                UserServiceImpl userService, ModelMapper modelMapper, ETFPaymentService etfPaymentService) {
-        this.etfInvestmentRepository = etfInvestmentRepository;
-        this.etfRepository = etfRepository;
-        this.currencyRepository = currencyRepository;
-        this.eodAPIService = eodAPIService;
-        this.userService = userService;
-        this.modelMapper = modelMapper;
-        this.etfPaymentService = etfPaymentService;
-    }
 
     public List<ETFInvestmentDTO> getETFInvestments(String userEmail) {
         return this.etfInvestmentRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToETFInvestmentDTO).collect(Collectors.toList());

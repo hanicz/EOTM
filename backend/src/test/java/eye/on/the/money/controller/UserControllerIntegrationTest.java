@@ -29,6 +29,6 @@ public class UserControllerIntegrationTest {
 
     @Test
     public void validatingTokenOK() throws Exception {
-        this.mockMvc.perform(get("/user")).andExpect(status().isOk());
+        this.mockMvc.perform(get("/api/v1/user")).andExpect(status().isOk());
     }
 }

@@ -3,8 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { ResourceHelper } from '../util/servicehelper';
 import { environment } from '../../environments/environment';
 import { StockAlert } from '../model/stockalert';
-import { Symbol } from '../model/symbol';
-import { Exchange } from '../model/exchange';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +11,7 @@ export class AlertService {
 
   private helper = new ResourceHelper();
 
-  private watchListUrl = `${environment.API_URL}/alert`;
+  private watchListUrl = `${environment.API_URL}/api/v1/alert`;
 
   constructor(private http: HttpClient) { }
 

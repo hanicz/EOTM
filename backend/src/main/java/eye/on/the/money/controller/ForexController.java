@@ -2,8 +2,8 @@ package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.out.ForexTransactionDTO;
 import eye.on.the.money.service.forex.ForexTransactionService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,16 +15,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RestController
-@RequestMapping("forex")
+@RequestMapping("api/v1/forex")
 @Slf4j
+@RequiredArgsConstructor
 public class ForexController {
 
     private final ForexTransactionService forexTransactionService;
-
-    @Autowired
-    public ForexController(ForexTransactionService forexTransactionService) {
-        this.forexTransactionService = forexTransactionService;
-    }
 
     @GetMapping()
     public ResponseEntity<List<ForexTransactionDTO>> getForexTransactionsByUserId(@AuthenticationPrincipal UserDetails user) {

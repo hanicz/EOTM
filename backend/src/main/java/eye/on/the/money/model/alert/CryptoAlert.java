@@ -23,9 +23,4 @@ public class CryptoAlert extends Alert {
     @ManyToOne
     @JoinColumn(name = "coin_id", nullable = false)
     private Coin coin;
-
-    @Override
-    public String getAlertType() {
-        return "crypto";
-    }
 }

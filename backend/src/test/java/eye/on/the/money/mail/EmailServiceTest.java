@@ -1,4 +1,4 @@
-package eye.on.the.money.mail.impl;
+package eye.on.the.money.mail;
 
 import eye.on.the.money.EotmApplication;
 import eye.on.the.money.service.mail.EmailService;

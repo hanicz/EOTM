@@ -11,15 +11,15 @@ import eye.on.the.money.model.crypto.Transaction;
 import eye.on.the.money.repository.crypto.CoinRepository;
 import eye.on.the.money.repository.crypto.TransactionRepository;
 import eye.on.the.money.repository.forex.CurrencyRepository;
-import eye.on.the.money.service.api.CryptoAPIService;
 import eye.on.the.money.service.UserServiceImpl;
+import eye.on.the.money.service.api.CryptoAPIService;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,6 +35,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class TransactionService {
 
     private final TransactionRepository transactionRepository;
@@ -45,18 +46,7 @@ public class TransactionService {
     private final ModelMapper modelMapper;
     private final CryptoAPIService cryptoAPIService;
 
-    @Autowired
-    public TransactionService(TransactionRepository transactionRepository, PaymentService paymentService,
-                              UserServiceImpl userService, CurrencyRepository currencyRepository,
-                              CoinRepository coinRepository, ModelMapper modelMapper, CryptoAPIService cryptoAPIService) {
-        this.transactionRepository = transactionRepository;
-        this.paymentService = paymentService;
-        this.userService = userService;
-        this.currencyRepository = currencyRepository;
-        this.coinRepository = coinRepository;
-        this.modelMapper = modelMapper;
-        this.cryptoAPIService = cryptoAPIService;
-    }
+    private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     public List<TransactionDTO> getTransactionsByUserId(String userEmail) {
         return this.transactionRepository.findByUserEmailOrderByTransactionDate(userEmail).stream()
@@ -181,7 +171,7 @@ public class TransactionService {
 
             for (CSVRecord csvRecord : csvParser) {
                 String transactionId = csvRecord.get("Transaction Id");
-                Date transactionDate = new SimpleDateFormat("yyyy-MM-dd").parse(csvRecord.get("Transaction Date"));
+                Date transactionDate = DATE_FORMAT.parse(csvRecord.get("Transaction Date"));
 
                 TransactionDTO transaction = TransactionDTO.builder()
                         .buySell(csvRecord.get("Type"))

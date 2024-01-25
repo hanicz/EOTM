@@ -3,11 +3,11 @@ package eye.on.the.money.model.tax;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.util.Generated;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-import jakarta.persistence.*;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -24,7 +24,7 @@ public class MNBRate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Double rate;
-    private Date rateDate;
+    private LocalDate rateDate;
 
     @ManyToOne
     @JoinColumn(name = "currency_id", nullable = false)

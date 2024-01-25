@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RestController
-@RequestMapping("etf")
+@RequestMapping("api/v1/etf")
 @Slf4j
 public class ETFController {
 

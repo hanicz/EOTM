@@ -1,38 +1,31 @@
 package eye.on.the.money.service;
 
-import eye.on.the.money.dto.in.TaxEntry;
-import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.tax.MNBRate;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.tax.MNBRateRepository;
-import eye.on.the.money.service.stock.InvestmentService;
+import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 @Service
+@RequiredArgsConstructor
 public class TaxService {
+
     private final MNBRateRepository mnbRateRepository;
     private final CurrencyRepository currencyRepository;
-    private final InvestmentService investmentService;
-
-    @Autowired
-    public TaxService(MNBRateRepository mnbRateRepository, CurrencyRepository currencyRepository, InvestmentService investmentService) {
-        this.mnbRateRepository = mnbRateRepository;
-        this.currencyRepository = currencyRepository;
-        this.investmentService = investmentService;
-    }
 
     public void loadRatesFromXLS(MultipartFile file) {
         try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
@@ -42,7 +35,7 @@ public class TaxService {
                 if (row.getRowNum() < 2) continue;
 
                 for (Map.Entry<Currency, Integer> entry : rateMap.entrySet()) {
-                    Date rateDateInExcel = row.getCell(0).getDateCellValue();
+                    LocalDate rateDateInExcel = row.getCell(0).getLocalDateTimeCellValue().toLocalDate();
                     Double rateInExcel = row.getCell(entry.getValue()).getNumericCellValue();
                     Optional<MNBRate> rate = this.mnbRateRepository.findByCurrency_IdAndRateDate(entry.getKey().getId(), rateDateInExcel);
                     rate.ifPresentOrElse(r -> r.setRate(rateInExcel),
@@ -65,27 +58,12 @@ public class TaxService {
         return rateMap;
     }
 
-    private void createNewRateEntry(Currency currency, Date rateDate, Double rate) {
+    private void createNewRateEntry(Currency currency, LocalDate rateDate, Double rate) {
         MNBRate mnbRate = MNBRate.builder()
                 .rate(rate)
                 .rateDate(rateDate)
                 .currency(currency)
                 .build();
         this.mnbRateRepository.save(mnbRate);
-    }
-
-    public void doTaxByYear(String userEmail, Integer year, List<TaxEntry> taxEntries) {
-        List<InvestmentDTO> investments = this.investmentService.getInvestmentsByTypeAndDate(userEmail, "S", this.getDate(year, 0), this.getDate(year, 11));
-        List<Long> investmentIds = taxEntries.stream().map(TaxEntry::getInvestmentId).collect(Collectors.toList());
-
-
-    }
-
-    private Date getDate(Integer year, Integer month) {
-        Calendar calendarStart = Calendar.getInstance();
-        calendarStart.set(Calendar.YEAR, year);
-        calendarStart.set(Calendar.MONTH, month);
-        calendarStart.set(Calendar.DAY_OF_MONTH, 31);
-        return calendarStart.getTime();
     }
 }

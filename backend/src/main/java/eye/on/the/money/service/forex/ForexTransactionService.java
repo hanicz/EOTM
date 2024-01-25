@@ -7,11 +7,11 @@ import eye.on.the.money.model.User;
 import eye.on.the.money.model.forex.ForexTransaction;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.forex.ForexTransactionRepository;
-import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.UserServiceImpl;
+import eye.on.the.money.service.api.EODAPIService;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,23 +19,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ForexTransactionService {
     private final CurrencyRepository currencyRepository;
     private final ForexTransactionRepository forexTransactionRepository;
     private final UserServiceImpl userService;
     private final ModelMapper modelMapper;
     private final EODAPIService eodAPIService;
-
-    @Autowired
-    public ForexTransactionService(CurrencyRepository currencyRepository,
-                                   ForexTransactionRepository forexTransactionRepository, UserServiceImpl userService,
-                                   ModelMapper modelMapper, EODAPIService eodAPIService) {
-        this.currencyRepository = currencyRepository;
-        this.forexTransactionRepository = forexTransactionRepository;
-        this.userService = userService;
-        this.modelMapper = modelMapper;
-        this.eodAPIService = eodAPIService;
-    }
 
     public List<ForexTransactionDTO> getForexTransactionsByUserId(String userEmail) {
         return this.forexTransactionRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToForexTransactionDTO).collect(Collectors.toList());
@@ -64,7 +54,7 @@ public class ForexTransactionService {
                 .fromCurrency(fromCurrency)
                 .fromAmount(forexTransactionDTO.getFromAmount())
                 .toAmount(forexTransactionDTO.getToAmount())
-                .changeRate(forexTransactionDTO.getBuySell().equals("B") ? forexTransactionDTO.getFromAmount()/forexTransactionDTO.getToAmount() : forexTransactionDTO.getToAmount()/forexTransactionDTO.getFromAmount())
+                .changeRate(forexTransactionDTO.getBuySell().equals("B") ? forexTransactionDTO.getFromAmount() / forexTransactionDTO.getToAmount() : forexTransactionDTO.getToAmount() / forexTransactionDTO.getFromAmount())
                 .user(user)
                 .build();
 
@@ -84,7 +74,7 @@ public class ForexTransactionService {
         forexTransaction.setToAmount(forexTransactionDTO.getToAmount());
         forexTransaction.setToCurrency(toCurrency);
         forexTransaction.setFromCurrency(fromCurrency);
-        forexTransaction.setChangeRate(forexTransactionDTO.getBuySell().equals("B") ? forexTransactionDTO.getFromAmount()/forexTransactionDTO.getToAmount() : forexTransactionDTO.getToAmount()/forexTransactionDTO.getFromAmount());
+        forexTransaction.setChangeRate(forexTransactionDTO.getBuySell().equals("B") ? forexTransactionDTO.getFromAmount() / forexTransactionDTO.getToAmount() : forexTransactionDTO.getToAmount() / forexTransactionDTO.getFromAmount());
 
         return this.convertToForexTransactionDTO(forexTransaction);
     }

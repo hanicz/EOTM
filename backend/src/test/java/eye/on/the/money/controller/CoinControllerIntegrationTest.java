@@ -35,7 +35,7 @@ class CoinControllerIntegrationTest {
     @Test
     public void getAllCoins() throws Exception {
         List<Coin> coins = this.coinRepository.findAllByOrderByNameAsc();
-        MvcResult response = this.mockMvc.perform(get("/coin")).andExpect(status().isOk()).andReturn();
+        MvcResult response = this.mockMvc.perform(get("/api/v1/coin")).andExpect(status().isOk()).andReturn();
         List<Coin> result = om.readValue(response.getResponse().getContentAsString(), new TypeReference<>() {});
 
         Assertions.assertIterableEquals(coins,result);

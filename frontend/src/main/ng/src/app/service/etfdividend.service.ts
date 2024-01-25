@@ -12,7 +12,7 @@ export class EtfdividendService {
 
   private helper = new ResourceHelper();
 
-  private etfDividendUrl = `${environment.API_URL}/etfdividend`;
+  private etfDividendUrl = `${environment.API_URL}/api/v1/etfdividend`;
 
   constructor(private http: HttpClient) { }
 

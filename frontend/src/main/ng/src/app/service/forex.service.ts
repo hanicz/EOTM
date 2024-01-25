@@ -11,7 +11,7 @@ export class ForexService {
 
   private helper = new ResourceHelper();
 
-  private forexUrl = `${environment.API_URL}/forex`;
+  private forexUrl = `${environment.API_URL}/api/v1/forex`;
 
   constructor(private http: HttpClient) { }
 

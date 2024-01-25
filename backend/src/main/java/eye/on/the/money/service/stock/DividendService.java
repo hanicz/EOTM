@@ -9,13 +9,13 @@ import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.stock.DividendRepository;
 import eye.on.the.money.repository.stock.StockRepository;
 import eye.on.the.money.service.UserServiceImpl;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,6 +33,7 @@ import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class DividendService {
     private final DividendRepository dividendRepository;
     private final CurrencyRepository currencyRepository;
@@ -40,15 +41,7 @@ public class DividendService {
     private final UserServiceImpl userService;
     private final ModelMapper modelMapper;
 
-    @Autowired
-    public DividendService(DividendRepository dividendRepository, CurrencyRepository currencyRepository,
-                           StockRepository stockRepository, UserServiceImpl userService, ModelMapper modelMapper) {
-        this.dividendRepository = dividendRepository;
-        this.currencyRepository = currencyRepository;
-        this.stockRepository = stockRepository;
-        this.userService = userService;
-        this.modelMapper = modelMapper;
-    }
+    private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     public List<DividendDTO> getDividends(String userEmail) {
         return this.dividendRepository.findByUserEmailOrderByDividendDate(userEmail).stream().map(this::convertToDividendDTO).collect(Collectors.toList());
@@ -129,7 +122,7 @@ public class DividendService {
 
             for (CSVRecord csvRecord : csvParser) {
                 String dividendId = csvRecord.get("Dividend Id");
-                Date dividendDate = new SimpleDateFormat("yyyy-MM-dd").parse(csvRecord.get("Dividend Date"));
+                Date dividendDate = DATE_FORMAT.parse(csvRecord.get("Dividend Date"));
 
                 DividendDTO dividend = DividendDTO.builder()
                         .dividendDate(dividendDate)

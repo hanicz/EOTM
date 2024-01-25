@@ -9,9 +9,9 @@ import eye.on.the.money.model.stock.Stock;
 import eye.on.the.money.model.stock.StockPayment;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.stock.InvestmentRepository;
-import eye.on.the.money.repository.stock.StockRepository;
-import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.UserServiceImpl;
+import eye.on.the.money.service.api.EODAPIService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -19,7 +19,6 @@ import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,10 +35,10 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class InvestmentService {
 
     private final InvestmentRepository investmentRepository;
-    private final StockRepository stockRepository;
     private final CurrencyRepository currencyRepository;
     private final StockPaymentService stockPaymentService;
     private final UserServiceImpl userService;
@@ -47,20 +46,7 @@ public class InvestmentService {
     private final EODAPIService eodAPIService;
     private final StockService stockService;
 
-    @Autowired
-    public InvestmentService(InvestmentRepository investmentRepository, StockRepository stockRepository,
-                             CurrencyRepository currencyRepository, StockPaymentService stockPaymentService,
-                             UserServiceImpl userService, ModelMapper modelMapper, EODAPIService eodAPIService,
-                             StockService stockService) {
-        this.investmentRepository = investmentRepository;
-        this.stockRepository = stockRepository;
-        this.currencyRepository = currencyRepository;
-        this.stockPaymentService = stockPaymentService;
-        this.userService = userService;
-        this.modelMapper = modelMapper;
-        this.eodAPIService = eodAPIService;
-        this.stockService = stockService;
-    }
+    private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     public List<InvestmentDTO> getInvestments(String userEmail) {
         return this.investmentRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
@@ -189,7 +175,7 @@ public class InvestmentService {
 
             for (CSVRecord csvRecord : csvParser) {
                 String investmentId = csvRecord.get("Investment Id");
-                Date transactionDate = new SimpleDateFormat("yyyy-MM-dd").parse(csvRecord.get("Transaction Date"));
+                Date transactionDate = DATE_FORMAT.parse(csvRecord.get("Transaction Date"));
 
                 InvestmentDTO investment = InvestmentDTO.builder()
                         .buySell(csvRecord.get("Type"))
@@ -205,15 +191,15 @@ public class InvestmentService {
                 if (!investmentId.isEmpty() &&
                         this.investmentRepository.findByIdAndUserEmail(Long.parseLong(investmentId), userEmail).isPresent()) {
                     investment.setInvestmentId(Long.parseLong(investmentId));
-                    log.trace("Update investment " + investment.toString());
+                    log.trace("Update investment {}", investment);
                     this.updateInvestment(investment, userEmail);
                 } else {
-                    log.trace("Create investment " + investment.toString());
+                    log.trace("Create investment {}", investment);
                     this.createInvestment(investment, userEmail);
                 }
             }
         } catch (IOException | ParseException e) {
-            throw new RuntimeException("fail to parse CSV file: " + e.getMessage());
+            throw new RuntimeException("Failed to parse CSV file: " + e.getMessage());
         }
     }
 }

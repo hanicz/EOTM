@@ -1,4 +1,4 @@
-package eye.on.the.money.service.stock.impl;
+package eye.on.the.money.service.stock;
 
 import eye.on.the.money.EotmApplication;
 import eye.on.the.money.model.stock.Metric;

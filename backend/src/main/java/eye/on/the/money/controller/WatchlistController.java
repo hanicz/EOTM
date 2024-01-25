@@ -5,8 +5,8 @@ import eye.on.the.money.dto.out.ForexWatchDTO;
 import eye.on.the.money.dto.out.StockWatchDTO;
 import eye.on.the.money.model.stock.Stock;
 import eye.on.the.money.service.WatchListService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,16 +17,12 @@ import java.util.Collections;
 import java.util.List;
 
 @RestController
-@RequestMapping("watchlist")
+@RequestMapping("api/v1/watchlist")
 @Slf4j
+@RequiredArgsConstructor
 public class WatchlistController {
 
     private final WatchListService watchlistService;
-
-    @Autowired
-    public WatchlistController(WatchListService watchlistService) {
-        this.watchlistService = watchlistService;
-    }
 
     @GetMapping("/crypto/{currency}")
     public ResponseEntity<List<CryptoWatchDTO>> getCryptoWatchList(@AuthenticationPrincipal UserDetails user, @PathVariable String currency) {

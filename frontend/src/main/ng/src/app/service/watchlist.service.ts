@@ -15,7 +15,7 @@ export class WatchlistService {
 
   private helper = new ResourceHelper();
 
-  private watchListUrl = `${environment.API_URL}/watchlist`;
+  private watchListUrl = `${environment.API_URL}/api/v1/watchlist`;
 
   constructor(private http: HttpClient) { }
 

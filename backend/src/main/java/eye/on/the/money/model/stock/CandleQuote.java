@@ -41,7 +41,7 @@ public class CandleQuote {
             t[i] = eodList.get(i).getDate().getTime();
         }
 
-        if(sameDay != null) {
+        if (sameDay != null) {
             c[eodList.size()] = sameDay.findValue("close").doubleValue();
             o[eodList.size()] = sameDay.findValue("open").doubleValue();
             l[eodList.size()] = sameDay.findValue("low").doubleValue();

@@ -12,12 +12,12 @@ export class CryptoService {
 
   private helper = new ResourceHelper();
 
-  private transactionUrl = `${environment.API_URL}/transaction`;
+  private transactionUrl = `${environment.API_URL}/api/v1/transaction`;
 
   constructor(private http: HttpClient) { }
 
   getAllCrypto() {
-    const url = `${environment.API_URL}/coin`;
+    const url = `${environment.API_URL}/api/v1/coin`;
     return this.http.get<Crypto[]>(url, {
       headers: this.helper.getHeadersWithToken()
     });

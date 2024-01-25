@@ -1,4 +1,4 @@
-package eye.on.the.money.service.stock.impl;
+package eye.on.the.money.service.stock;
 
 import eye.on.the.money.EotmApplication;
 import eye.on.the.money.dto.out.DividendDTO;
@@ -138,7 +138,6 @@ class DividendServiceTest {
     public void getCSV() {
         Writer writer = new StringWriter();
         this.dividendService.getCSV(this.user.getUsername(), writer);
-        System.out.println(writer.toString());
         assertAll(
                 () -> assertTrue(writer.toString().contains("Dividend Id,Amount,Dividend Date,Short Name,Currency")),
                 () -> assertTrue(writer.toString().contains("2,225.0,2021-08-03 00:00:00.0,CRSR,HUF"))

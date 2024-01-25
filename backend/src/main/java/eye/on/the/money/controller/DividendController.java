@@ -3,8 +3,8 @@ package eye.on.the.money.controller;
 import eye.on.the.money.dto.out.DividendDTO;
 import eye.on.the.money.service.stock.DividendService;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,16 +18,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RestController
-@RequestMapping("dividend")
+@RequestMapping("api/v1/dividend")
 @Slf4j
+@RequiredArgsConstructor
 public class DividendController {
 
     private final DividendService dividendService;
-
-    @Autowired
-    public DividendController(DividendService dividendService) {
-        this.dividendService = dividendService;
-    }
 
     @GetMapping()
     public ResponseEntity<List<DividendDTO>> getAllDividends(@AuthenticationPrincipal UserDetails user) {

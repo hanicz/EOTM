@@ -24,9 +24,4 @@ public class StockAlert extends Alert {
     @ManyToOne
     @JoinColumn(name = "stock_id", nullable = false)
     private Stock stock;
-
-    @Override
-    public String getAlertType() {
-        return "stock";
-    }
 }

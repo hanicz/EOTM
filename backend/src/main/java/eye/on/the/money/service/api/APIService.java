@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eye.on.the.money.exception.APIException;
 import eye.on.the.money.repository.ConfigRepository;
 import eye.on.the.money.repository.CredentialRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
 @Slf4j
+@RequiredArgsConstructor
 public abstract class APIService {
 
 
@@ -28,14 +30,6 @@ public abstract class APIService {
     protected final WebClient webClient;
 
     protected final ObjectMapper mapper;
-
-    public APIService(CredentialRepository credentialRepository, ConfigRepository configRepository,
-                      WebClient webClient, ObjectMapper mapper) {
-        this.credentialRepository = credentialRepository;
-        this.configRepository = configRepository;
-        this.webClient = webClient;
-        this.mapper = mapper;
-    }
 
     protected String createURL(String api, String path, String... params) {
         log.trace("Enter");

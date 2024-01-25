@@ -11,7 +11,7 @@ export class DividendService {
 
   private helper = new ResourceHelper();
 
-  private dividendUrl = `${environment.API_URL}/dividend`;
+  private dividendUrl = `${environment.API_URL}/api/v1/dividend`;
 
   constructor(private http: HttpClient) { }
 

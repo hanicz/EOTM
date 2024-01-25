@@ -1,7 +1,7 @@
 package eye.on.the.money.config;
 
 import eye.on.the.money.repository.CredentialRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +13,7 @@ import java.util.NoSuchElementException;
 import java.util.Properties;
 
 @Configuration
+@RequiredArgsConstructor
 public class MailConfig {
 
     @Value("${spring.mail.host}")
@@ -26,10 +27,6 @@ public class MailConfig {
 
     private final CredentialRepository credentialRepository;
 
-    @Autowired
-    public MailConfig(CredentialRepository credentialRepository) {
-        this.credentialRepository = credentialRepository;
-    }
 
     @Bean
     @DependsOnDatabaseInitialization

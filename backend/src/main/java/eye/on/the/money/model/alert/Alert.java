@@ -61,7 +61,4 @@ public abstract class Alert {
         }
         return false;
     }
-
-    public abstract String getAlertType();
-
 }

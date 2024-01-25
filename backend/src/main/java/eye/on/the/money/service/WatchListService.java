@@ -17,9 +17,9 @@ import eye.on.the.money.repository.watchlist.StockWatchRepository;
 import eye.on.the.money.service.api.CryptoAPIService;
 import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.stock.StockService;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +29,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class WatchListService {
+
     private final CryptoWatchRepository cryptoWatchRepository;
     private final StockWatchRepository stockWatchRepository;
     private final ForexWatchRepository forexWatchRepository;
@@ -39,22 +41,6 @@ public class WatchListService {
     private final CoinRepository coinRepository;
     private final ModelMapper modelMapper;
     private final StockService stockService;
-
-    @Autowired
-    public WatchListService(CryptoWatchRepository cryptoWatchRepository, StockWatchRepository stockWatchRepository,
-                            ForexWatchRepository forexWatchRepository, CryptoAPIService cryptoAPIService,
-                            UserServiceImpl userService, EODAPIService eodAPIService, CoinRepository coinRepository,
-                            ModelMapper modelMapper, StockService stockService) {
-        this.cryptoWatchRepository = cryptoWatchRepository;
-        this.stockWatchRepository = stockWatchRepository;
-        this.forexWatchRepository = forexWatchRepository;
-        this.cryptoAPIService = cryptoAPIService;
-        this.userService = userService;
-        this.eodAPIService = eodAPIService;
-        this.coinRepository = coinRepository;
-        this.modelMapper = modelMapper;
-        this.stockService = stockService;
-    }
 
     public List<CryptoWatchDTO> getCryptoWatchlistByUserId(String userEmail, String currency) {
         List<CryptoWatchDTO> cryptoList = this.cryptoWatchRepository.findByUserEmailOrderByCoin_Symbol(userEmail).stream()

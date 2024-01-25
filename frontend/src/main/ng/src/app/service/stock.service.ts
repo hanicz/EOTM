@@ -15,33 +15,33 @@ export class StockService {
 
   private helper = new ResourceHelper();
 
-  private investmentUrl = `${environment.API_URL}/investment`;
+  private investmentUrl = `${environment.API_URL}/api/v1/investment`;
 
   constructor(private http: HttpClient) { }
 
   getAllStocks() {
-    const url = `${environment.API_URL}/stock`;
+    const url = `${environment.API_URL}/api/v1/stock`;
     return this.http.get<Stock[]>(url, {
       headers: this.helper.getHeadersWithToken()
     });
   };
 
   getAllSymbols(exchange: string) {
-    const url = `${environment.API_URL}/stock/symbols/${exchange}`;
+    const url = `${environment.API_URL}/api/v1/stock/symbols/${exchange}`;
     return this.http.get<Symbol[]>(url, {
       headers: this.helper.getHeadersWithToken()
     });
   };
 
   getAllExchanges() {
-    const url = `${environment.API_URL}/stock/exchanges`;
+    const url = `${environment.API_URL}/api/v1/stock/exchanges`;
     return this.http.get<Exchange[]>(url, {
       headers: this.helper.getHeadersWithToken()
     });
   };
 
   getCandleData(shortName: string, exchange: string, month: number) {
-    const url = `${environment.API_URL}/stock/candle/${shortName}.${exchange}/${month}`;
+    const url = `${environment.API_URL}/api/v1/stock/candle/${shortName}.${exchange}/${month}`;
     return this.http.get<Candle>(url, {
       headers: this.helper.getHeadersWithToken()
     });

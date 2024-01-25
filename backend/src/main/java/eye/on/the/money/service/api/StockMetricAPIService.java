@@ -34,24 +34,27 @@ public class StockMetricAPIService extends APIService {
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public Profile getProfile(String symbol) {
         log.trace("Enter");
-        ResponseEntity<?> response = this.callGetAPI(this.createURL(StockMetricAPIService.API,
-                "/stock/profile2?symbol={1}&token={0}", symbol), Profile.class);
+        String url = this.createURL(StockMetricAPIService.API,
+                "/stock/profile2?symbol={1}&token={0}", symbol);
+        ResponseEntity<?> response = this.callGetAPI(url, Profile.class);
         return (Profile) response.getBody();
     }
 
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public String[] getPeers(String symbol) {
         log.trace("Enter");
-        ResponseEntity<?> response = this.callGetAPI(this.createURL(StockMetricAPIService.API,
-                "/stock/peers?symbol={1}&token={0}", symbol), String[].class);
+        String url = this.createURL(StockMetricAPIService.API,
+                "/stock/peers?symbol={1}&token={0}", symbol);
+        ResponseEntity<?> response = this.callGetAPI(url, String[].class);
         return (String[]) response.getBody();
     }
 
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public Metric getMetric(String symbol) {
         log.trace("Enter");
-        ResponseEntity<?> response = this.callGetAPI(this.createURL(StockMetricAPIService.API,
-                "/stock/metric?metric=all&symbol={1}&token={0}", symbol), String.class);
+        String url = this.createURL(StockMetricAPIService.API,
+                "/stock/metric?metric=all&symbol={1}&token={0}", symbol);
+        ResponseEntity<?> response = this.callGetAPI(url, String.class);
         try {
             JsonNode metric = this.mapper.readTree((String) response.getBody()).path("metric");
             return this.mapper.treeToValue(metric, Metric.class);

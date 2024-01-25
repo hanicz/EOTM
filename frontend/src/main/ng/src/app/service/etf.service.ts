@@ -11,7 +11,7 @@ export class EtfService {
 
   private helper = new ResourceHelper();
 
-  private etfUrl = `${environment.API_URL}/etf`;
+  private etfUrl = `${environment.API_URL}/api/v1/etf`;
 
   constructor(private http: HttpClient) { }
 

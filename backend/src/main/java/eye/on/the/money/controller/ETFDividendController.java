@@ -3,8 +3,8 @@ package eye.on.the.money.controller;
 import eye.on.the.money.dto.out.ETFDividendDTO;
 import eye.on.the.money.service.etf.ETFDividendService;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,16 +18,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RestController
-@RequestMapping("etfdividend")
+@RequestMapping("api/v1/etfdividend")
 @Slf4j
+@RequiredArgsConstructor
 public class ETFDividendController {
 
     private final ETFDividendService etfDividendService;
-
-    @Autowired
-    public ETFDividendController(ETFDividendService etfDividendService) {
-        this.etfDividendService = etfDividendService;
-    }
 
     @GetMapping()
     public ResponseEntity<List<ETFDividendDTO>> getAllETFDividends(@AuthenticationPrincipal UserDetails user) {

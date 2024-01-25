@@ -13,7 +13,7 @@ export class MetricService {
 
   private helper = new ResourceHelper();
 
-  private newsUrl = `${environment.API_URL}/metric`;
+  private newsUrl = `${environment.API_URL}/api/v1/metric`;
 
   constructor(private http: HttpClient) { }
 

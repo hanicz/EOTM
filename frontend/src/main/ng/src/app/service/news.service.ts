@@ -11,7 +11,7 @@ export class NewsService {
 
   private helper = new ResourceHelper();
 
-  private newsUrl = `${environment.API_URL}/news`;
+  private newsUrl = `${environment.API_URL}/api/v1/news`;
 
   constructor(private http: HttpClient) { }
 

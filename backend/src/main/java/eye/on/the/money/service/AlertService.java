@@ -6,10 +6,10 @@ import eye.on.the.money.model.alert.StockAlert;
 import eye.on.the.money.model.stock.Stock;
 import eye.on.the.money.repository.alert.StockAlertRepository;
 import eye.on.the.money.service.stock.StockService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,20 +19,12 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class AlertService {
     private final StockAlertRepository stockAlertRepository;
     private final StockService stockService;
     private final ModelMapper modelMapper;
     private final UserServiceImpl userService;
-
-    @Autowired
-    public AlertService(StockAlertRepository stockAlertRepository, StockService stockService,
-                        ModelMapper modelMapper, UserServiceImpl userService) {
-        this.stockAlertRepository = stockAlertRepository;
-        this.stockService = stockService;
-        this.modelMapper = modelMapper;
-        this.userService = userService;
-    }
 
     public List<StockAlertDTO> getAllStockAlerts(String userEmail) {
         log.trace("Enter");

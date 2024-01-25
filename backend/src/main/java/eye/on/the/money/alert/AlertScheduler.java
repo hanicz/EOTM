@@ -9,8 +9,8 @@ import eye.on.the.money.repository.alert.StockAlertRepository;
 import eye.on.the.money.service.api.CryptoAPIService;
 import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.mail.EmailService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class AlertScheduler {
 
     private final StockAlertRepository stockAlertRepository;
@@ -30,16 +31,6 @@ public class AlertScheduler {
     private final EODAPIService eodAPIService;
     private final CryptoAPIService cryptoAPIService;
     private final EmailService emailServiceImpl;
-
-    @Autowired
-    public AlertScheduler(StockAlertRepository stockAlertRepository, CryptoAlertRepository cryptoAlertRepository,
-                          EODAPIService eodAPIService, CryptoAPIService cryptoAPIService, EmailService emailServiceImpl) {
-        this.stockAlertRepository = stockAlertRepository;
-        this.cryptoAlertRepository = cryptoAlertRepository;
-        this.eodAPIService = eodAPIService;
-        this.cryptoAPIService = cryptoAPIService;
-        this.emailServiceImpl = emailServiceImpl;
-    }
 
     private final static Map<String, String> messageMap = new HashMap<>();
 
@@ -122,9 +113,10 @@ public class AlertScheduler {
 
     private void sendAndDelete(Alert alert, String message) {
         this.emailServiceImpl.sendMail(alert.getUser().getEmail(), message);
-        if ("stock".equals(alert.getAlertType()))
-            this.stockAlertRepository.deleteById(alert.getId());
-        else
-            this.cryptoAlertRepository.deleteById(alert.getId());
+        switch (alert) {
+            case StockAlert sa -> this.stockAlertRepository.deleteById(sa.getId());
+            case CryptoAlert ca -> this.cryptoAlertRepository.deleteById(ca.getId());
+            default -> throw new IllegalStateException("Not able to defer type");
+        }
     }
 }

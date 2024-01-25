@@ -17,7 +17,7 @@ export class UserService {
     'Accept': 'application/json'
   });
 
-  private userUrl = `${environment.API_URL}/user`;
+  private userUrl = `${environment.API_URL}/api/v1/user`;
 
   constructor(private http: HttpClient) { }
 

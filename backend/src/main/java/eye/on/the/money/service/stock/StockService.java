@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.model.stock.*;
 import eye.on.the.money.repository.stock.StockRepository;
 import eye.on.the.money.service.api.EODAPIService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -18,16 +18,12 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class StockService {
     private final StockRepository stockRepository;
     private final EODAPIService eodAPIService;
     private final SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
 
-    @Autowired
-    public StockService(StockRepository stockRepository, EODAPIService eodAPIService) {
-        this.stockRepository = stockRepository;
-        this.eodAPIService = eodAPIService;
-    }
 
     public List<Stock> getAllStocks() {
         log.trace("Enter getAllStocks");
@@ -57,7 +53,7 @@ public class StockService {
         List<EODCandleQuote> eodList = this.eodAPIService.getCandleQuoteByShortName(shortName, months);
 
         JsonNode responseBody = this.eodAPIService.getLiveValueForSingle(shortName, "/real-time/{1}/?api_token={0}&fmt=json&");
-        boolean sameDay = this.fmt.format(eodList.get(eodList.size() -1 ).getDate())
+        boolean sameDay = this.fmt.format(eodList.get(eodList.size() - 1).getDate())
                 .equals(this.fmt.format(new Date(TimeUnit.SECONDS.toMillis(responseBody.findValue("timestamp").longValue()))));
         int arraySize = sameDay ? eodList.size() : eodList.size() + 1;
 

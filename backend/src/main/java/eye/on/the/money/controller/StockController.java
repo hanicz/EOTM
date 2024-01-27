@@ -1,6 +1,6 @@
 package eye.on.the.money.controller;
 
-import eye.on.the.money.model.stock.CandleQuote;
+import eye.on.the.money.dto.out.CandleQuoteDTO;
 import eye.on.the.money.model.stock.Exchange;
 import eye.on.the.money.model.stock.Stock;
 import eye.on.the.money.model.stock.Symbol;
@@ -44,7 +44,7 @@ public class StockController {
     }
 
     @GetMapping("candle/{shortName}/{months}")
-    public ResponseEntity<CandleQuote> getCandleQuoteByShortName(@PathVariable String shortName, @PathVariable int months) {
+    public ResponseEntity<CandleQuoteDTO> getCandleQuoteByShortName(@PathVariable String shortName, @PathVariable int months) {
         log.trace("Enter");
         return new ResponseEntity<>(this.stockService.getCandleQuoteByShortName(shortName, months), HttpStatus.OK);
     }

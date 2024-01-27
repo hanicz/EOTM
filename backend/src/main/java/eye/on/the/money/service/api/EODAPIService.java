@@ -3,7 +3,7 @@ package eye.on.the.money.service.api;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eye.on.the.money.exception.APIException;
-import eye.on.the.money.model.stock.EODCandleQuote;
+import eye.on.the.money.dto.in.EODCandleQuoteDTO;
 import eye.on.the.money.model.stock.Exchange;
 import eye.on.the.money.model.stock.Symbol;
 import eye.on.the.money.repository.ConfigRepository;
@@ -52,14 +52,14 @@ public class EODAPIService extends APIService {
     }
 
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
-    public List<EODCandleQuote> getCandleQuoteByShortName(String shortname, int months) {
+    public List<EODCandleQuoteDTO> getCandleQuoteByShortName(String shortname, int months) {
         log.trace("Enter");
         String from = (months <= 60) ? "&from=" + this.dateFormat.format(Date.from(ZonedDateTime.now().minusMonths(months).toInstant())) : "";
         String period = (months > 23) ? ((months > 60) ? "m" : "w") : "d";
         String url = this.createURL(EODAPIService.API, "/eod/{1}?api_token={0}&fmt=json&period={2}{3}", shortname, period, from);
         ResponseEntity<?> response = this.callGetAPI(url,
-                EODCandleQuote[].class);
-        return Arrays.asList((EODCandleQuote[]) response.getBody());
+                EODCandleQuoteDTO[].class);
+        return Arrays.asList((EODCandleQuoteDTO[]) response.getBody());
     }
 
     @Retryable(retryFor = APIException.class, maxAttempts = 3)

@@ -1,7 +1,8 @@
-package eye.on.the.money.model.stock;
+package eye.on.the.money.dto.out;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.JsonNode;
+import eye.on.the.money.dto.in.EODCandleQuoteDTO;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,7 +19,7 @@ import java.util.List;
 @EqualsAndHashCode
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CandleQuote {
+public class CandleQuoteDTO {
     private Double[] c;
     private Double[] h;
     private Double[] l;
@@ -26,7 +27,7 @@ public class CandleQuote {
     private Long[] t;
     private Long[] v;
 
-    public static CandleQuote createFromEODResponse(int size, List<EODCandleQuote> eodList, JsonNode sameDay) {
+    public static CandleQuoteDTO createFromEODResponse(int size, List<EODCandleQuoteDTO> eodList, JsonNode sameDay) {
         Double[] c = new Double[size];
         Double[] o = new Double[size];
         Double[] l = new Double[size];
@@ -53,6 +54,6 @@ public class CandleQuote {
             t[eodList.size()] = date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
         }
 
-        return new CandleQuote(c, h, l, o, t, v);
+        return new CandleQuoteDTO(c, h, l, o, t, v);
     }
 }

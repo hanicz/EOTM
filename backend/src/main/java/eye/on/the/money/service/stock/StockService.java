@@ -1,6 +1,8 @@
 package eye.on.the.money.service.stock;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import eye.on.the.money.dto.in.EODCandleQuoteDTO;
+import eye.on.the.money.dto.out.CandleQuoteDTO;
 import eye.on.the.money.model.stock.*;
 import eye.on.the.money.repository.stock.StockRepository;
 import eye.on.the.money.service.api.EODAPIService;
@@ -47,15 +49,15 @@ public class StockService {
         return this.eodAPIService.getAllExchanges();
     }
 
-    public CandleQuote getCandleQuoteByShortName(String shortName, int months) {
+    public CandleQuoteDTO getCandleQuoteByShortName(String shortName, int months) {
         log.trace("Enter getCandleQuoteByShortName");
-        List<EODCandleQuote> eodList = this.eodAPIService.getCandleQuoteByShortName(shortName, months);
+        List<EODCandleQuoteDTO> eodList = this.eodAPIService.getCandleQuoteByShortName(shortName, months);
 
         JsonNode responseBody = this.eodAPIService.getLiveValueForSingle(shortName, "/real-time/{1}/?api_token={0}&fmt=json&");
         boolean sameDay = this.sameDay(eodList.get(eodList.size() - 1).getDate(), responseBody.findValue("timestamp").longValue());
         int arraySize = sameDay ? eodList.size() : eodList.size() + 1;
 
-        return CandleQuote.createFromEODResponse(arraySize, eodList, sameDay ? null : responseBody);
+        return CandleQuoteDTO.createFromEODResponse(arraySize, eodList, sameDay ? null : responseBody);
     }
 
     private boolean sameDay(LocalDate lastInCandleList, Long timeStampOnLiveValue) {

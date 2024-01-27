@@ -1,4 +1,4 @@
-package eye.on.the.money.model.stock;
+package eye.on.the.money.dto.in;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import eye.on.the.money.util.Generated;
@@ -17,7 +17,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Generated
-public class EODCandleQuote {
+public class EODCandleQuoteDTO {
 
     private Double close;
     private Double high;

@@ -1,11 +1,8 @@
 package eye.on.the.money.security;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SignatureException;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
@@ -35,16 +32,11 @@ public class JwtService {
     }
 
     private Claims getTokenBody(String token) {
-        try {
-            var key = Keys.hmacShaKeyFor(KEY.getBytes());
-
-            return Jwts.parser()
-                    .verifyWith(key)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
-        } catch (SignatureException | ExpiredJwtException e) {
-            throw new AccessDeniedException("Access denied: " + e.getMessage());
-        }
+        var key = Keys.hmacShaKeyFor(KEY.getBytes());
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 }

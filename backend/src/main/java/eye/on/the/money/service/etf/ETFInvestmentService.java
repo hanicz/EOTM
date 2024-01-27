@@ -65,7 +65,7 @@ public class ETFInvestmentService {
 
     public List<ETFInvestmentDTO> getAllPositions(String userEmail) {
         Map<String, ETFInvestmentDTO> investmentMap = this.getCalculated(userEmail);
-        return (new ArrayList<>(investmentMap.values()));
+        return new ArrayList<>(investmentMap.values());
     }
 
     private Map<String, ETFInvestmentDTO> getCalculated(String userEmail) {

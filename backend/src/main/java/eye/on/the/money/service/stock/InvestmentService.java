@@ -78,7 +78,7 @@ public class InvestmentService {
 
     public List<InvestmentDTO> getAllPositions(String userEmail) {
         Map<String, InvestmentDTO> investmentMap = this.getCalculated(userEmail);
-        return new ArrayList<>((new ArrayList<>(investmentMap.values())));
+        return new ArrayList<>(investmentMap.values());
     }
 
     private Map<String, InvestmentDTO> getCalculated(String userEmail) {

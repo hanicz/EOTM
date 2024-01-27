@@ -55,7 +55,7 @@ public class TransactionService {
 
     public List<TransactionDTO> getAllPositions(String userEmail) {
         Map<String, TransactionDTO> transactionMap = this.getCalculated(userEmail);
-        return new ArrayList<>((new ArrayList<>(transactionMap.values())));
+        return new ArrayList<>(transactionMap.values());
     }
 
     public List<TransactionDTO> getCurrentHoldings(String userEmail, TransactionQuery query) {

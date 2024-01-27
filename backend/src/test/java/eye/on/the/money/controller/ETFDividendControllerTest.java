@@ -18,8 +18,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -40,9 +40,9 @@ class ETFDividendControllerTest {
     @Test
     public void getAllETFDividends() {
         List<ETFDividendDTO> edDTO = new ArrayList<>();
-        edDTO.add(ETFDividendDTO.builder().dividendDate(new Date()).id(1L).amount(5.6).currencyId("eur").shortName("s1").exchange("e1").build());
-        edDTO.add(ETFDividendDTO.builder().dividendDate(new Date()).id(2L).amount(5.36).currencyId("huf").shortName("s2").exchange("e2").build());
-        edDTO.add(ETFDividendDTO.builder().dividendDate(new Date()).id(3L).amount(51.6).currencyId("usd").shortName("s3").exchange("e3").build());
+        edDTO.add(ETFDividendDTO.builder().dividendDate(LocalDate.now()).id(1L).amount(5.6).currencyId("eur").shortName("s1").exchange("e1").build());
+        edDTO.add(ETFDividendDTO.builder().dividendDate(LocalDate.now()).id(2L).amount(5.36).currencyId("huf").shortName("s2").exchange("e2").build());
+        edDTO.add(ETFDividendDTO.builder().dividendDate(LocalDate.now()).id(3L).amount(51.6).currencyId("usd").shortName("s3").exchange("e3").build());
 
         when(this.etfDividendService.getDividends("email")).thenReturn(edDTO);
 
@@ -51,7 +51,7 @@ class ETFDividendControllerTest {
 
     @Test
     public void createDividend() {
-        ETFDividendDTO edDTO = ETFDividendDTO.builder().dividendDate(new Date()).id(1L).amount(5.6).currencyId("eur").shortName("s1").exchange("e1").build();
+        ETFDividendDTO edDTO = ETFDividendDTO.builder().dividendDate(LocalDate.now()).id(1L).amount(5.6).currencyId("eur").shortName("s1").exchange("e1").build();
 
         when(this.etfDividendService.createETFDividend(edDTO, "email")).thenReturn(edDTO);
 
@@ -77,7 +77,7 @@ class ETFDividendControllerTest {
 
     @Test
     public void updateETFDividend() {
-        ETFDividendDTO edDTO = ETFDividendDTO.builder().dividendDate(new Date()).id(1L).amount(5.6).currencyId("eur").shortName("s1").exchange("e1").build();
+        ETFDividendDTO edDTO = ETFDividendDTO.builder().dividendDate(LocalDate.now()).id(1L).amount(5.6).currencyId("eur").shortName("s1").exchange("e1").build();
 
         when(this.etfDividendService.updateETFDividend(edDTO, "email")).thenReturn(edDTO);
 

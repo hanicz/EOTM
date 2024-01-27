@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -26,8 +26,8 @@ public class ETFInvestment {
     private Long id;
     private Integer quantity;
     private String buySell;
-    private Date creationDate;
-    private Date transactionDate;
+    private LocalDate creationDate;
+    private LocalDate transactionDate;
     private Double fee;
 
     @ManyToOne

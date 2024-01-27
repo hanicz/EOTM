@@ -4,8 +4,6 @@ import eye.on.the.money.util.Generated;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Date;
-
 @Getter
 @Setter
 @Slf4j
@@ -17,6 +15,4 @@ import java.util.Date;
 public class TransactionQuery {
     private String currency;
     private String type;
-    private Date transactionDateStart;
-    private Date transactionDateEnd;
 }

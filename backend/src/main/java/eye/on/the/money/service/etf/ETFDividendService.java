@@ -1,6 +1,7 @@
 package eye.on.the.money.service.etf;
 
 import eye.on.the.money.dto.out.ETFDividendDTO;
+import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.etf.ETF;
@@ -26,9 +27,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -44,7 +45,7 @@ public class ETFDividendService {
     private final UserServiceImpl userService;
     private final ModelMapper modelMapper;
 
-    private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public List<ETFDividendDTO> getDividends(String userEmail) {
         log.trace("Enter getDividends");
@@ -131,7 +132,7 @@ public class ETFDividendService {
 
             for (CSVRecord csvRecord : csvParser) {
                 String dividendId = csvRecord.get("Dividend Id");
-                Date dividendDate = DATE_FORMAT.parse(csvRecord.get("Dividend Date"));
+                LocalDate dividendDate = LocalDate.parse(csvRecord.get("Dividend Date"), FORMATTER);
 
                 ETFDividendDTO dividend = ETFDividendDTO.builder()
                         .dividendDate(dividendDate)
@@ -148,9 +149,9 @@ public class ETFDividendService {
                     this.createETFDividend(dividend, userEmail);
                 }
             }
-        } catch (IOException | ParseException e) {
+        } catch (IOException | DateTimeParseException e) {
             log.error("Error while processing CSV", e);
-            throw new RuntimeException("fail to parse CSV file: " + e.getMessage());
+            throw new CSVException("Failed to parse CSV file: " + e.getMessage(), e);
         }
     }
 }

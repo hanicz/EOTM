@@ -9,9 +9,6 @@ import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.stock.InvestmentRepository;
 import eye.on.the.money.repository.stock.StockRepository;
 import eye.on.the.money.service.api.EODAPIService;
-import eye.on.the.money.service.stock.InvestmentService;
-import eye.on.the.money.service.stock.StockPaymentService;
-import eye.on.the.money.service.stock.StockService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,9 +21,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -67,16 +61,6 @@ class InvestmentServiceTest {
     public void getInvestments() {
         List<InvestmentDTO> result = this.investmentService.getInvestments(this.user.getUsername());
         List<Investment> investments = this.investmentRepository.findByUserEmailOrderByTransactionDate(this.user.getUsername());
-
-        Assertions.assertIterableEquals(investments.stream().map(this::convertToInvestmentDTO).collect(Collectors.toList()), result);
-    }
-
-    @Test
-    public void getInvestmentsByTypeAndDate() {
-        Date from = Date.from(LocalDate.parse("2020-01-01").atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-        Date to = new Date();
-        List<InvestmentDTO> result = this.investmentService.getInvestmentsByTypeAndDate(this.user.getUsername(), "B", from, to);
-        List<Investment> investments = this.investmentRepository.findByUserEmailAndBuySellAndTransactionDateBetween(this.user.getUsername(), "B", from, to);
 
         Assertions.assertIterableEquals(investments.stream().map(this::convertToInvestmentDTO).collect(Collectors.toList()), result);
     }

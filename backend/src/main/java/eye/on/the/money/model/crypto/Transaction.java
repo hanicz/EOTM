@@ -3,11 +3,11 @@ package eye.on.the.money.model.crypto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import eye.on.the.money.model.User;
 import eye.on.the.money.util.Generated;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-import jakarta.persistence.*;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -26,9 +26,9 @@ public class Transaction {
     private Long id;
     private Double quantity;
     private String buySell;
-    private Date creationDate;
+    private LocalDate creationDate;
     private String transactionString;
-    private Date transactionDate;
+    private LocalDate transactionDate;
     private Double fee;
 
     @ManyToOne

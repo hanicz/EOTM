@@ -2,6 +2,7 @@ package eye.on.the.money.service.stock;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.out.InvestmentDTO;
+import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Investment;
@@ -28,8 +29,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -46,15 +48,10 @@ public class InvestmentService {
     private final EODAPIService eodAPIService;
     private final StockService stockService;
 
-    private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public List<InvestmentDTO> getInvestments(String userEmail) {
         return this.investmentRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
-    }
-
-    public List<InvestmentDTO> getInvestmentsByTypeAndDate(String userEmail, String buySell, Date from, Date to) {
-        return this.investmentRepository.findByUserEmailAndBuySellAndTransactionDateBetween(userEmail, buySell, from, to)
-                .stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
     }
 
     public List<InvestmentDTO> getCurrentHoldings(String userEmail) {
@@ -107,7 +104,7 @@ public class InvestmentService {
 
         Investment investment = Investment.builder()
                 .buySell(investmentDTO.getBuySell())
-                .creationDate(new Date())
+                .creationDate(LocalDate.now())
                 .transactionDate(investmentDTO.getTransactionDate())
                 .user(user)
                 .quantity(investmentDTO.getQuantity())
@@ -158,7 +155,7 @@ public class InvestmentService {
                         i.getAmount(), i.getCurrencyId(), i.getFee());
             }
         } catch (IOException e) {
-            throw new RuntimeException("fail to create CSV file: " + e.getMessage());
+            throw new CSVException("Failed to create CSV file: " + e.getMessage(), e);
         }
     }
 
@@ -175,7 +172,7 @@ public class InvestmentService {
 
             for (CSVRecord csvRecord : csvParser) {
                 String investmentId = csvRecord.get("Investment Id");
-                Date transactionDate = DATE_FORMAT.parse(csvRecord.get("Transaction Date"));
+                LocalDate transactionDate = LocalDate.parse(csvRecord.get("Transaction Date"), FORMATTER);
 
                 InvestmentDTO investment = InvestmentDTO.builder()
                         .buySell(csvRecord.get("Type"))
@@ -198,8 +195,9 @@ public class InvestmentService {
                     this.createInvestment(investment, userEmail);
                 }
             }
-        } catch (IOException | ParseException e) {
-            throw new RuntimeException("Failed to parse CSV file: " + e.getMessage());
+        } catch (IOException | DateTimeParseException e) {
+            log.error("Error while processing CSV", e);
+            throw new CSVException("Failed to parse CSV file: " + e.getMessage(), e);
         }
     }
 }

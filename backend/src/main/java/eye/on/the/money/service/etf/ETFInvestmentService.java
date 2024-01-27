@@ -2,6 +2,7 @@ package eye.on.the.money.service.etf;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.out.ETFInvestmentDTO;
+import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.etf.ETF;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -96,7 +98,7 @@ public class ETFInvestmentService {
 
         ETFInvestment investment = ETFInvestment.builder()
                 .buySell(investmentDTO.getBuySell())
-                .creationDate(new Date())
+                .creationDate(LocalDate.now())
                 .transactionDate(investmentDTO.getTransactionDate())
                 .user(user)
                 .quantity(investmentDTO.getQuantity())
@@ -142,7 +144,7 @@ public class ETFInvestmentService {
                         i.getAmount(), i.getCurrencyId(), i.getFee());
             }
         } catch (IOException e) {
-            throw new RuntimeException("fail to create CSV file: " + e.getMessage());
+            throw new CSVException("Failed to create CSV file: " + e.getMessage(), e);
         }
     }
 }

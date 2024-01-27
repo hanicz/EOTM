@@ -7,8 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.NoSuchElementException;
 
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.*;
 
 @ControllerAdvice
 public class ExceptionAdvice {
@@ -19,6 +18,11 @@ public class ExceptionAdvice {
 
     @ExceptionHandler(APIException.class)
     public ResponseEntity<ErrorResponse> handleAPIException(APIException e) {
-        return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new ErrorResponse(INTERNAL_SERVER_ERROR.value(), e.getMessage()));
+        return ResponseEntity.status(BAD_REQUEST).body(new ErrorResponse(BAD_REQUEST.value(), e.getMessage()));
+    }
+
+    @ExceptionHandler(CSVException.class)
+    public ResponseEntity<ErrorResponse> handleCSVException(CSVException e) {
+        return ResponseEntity.status(BAD_REQUEST).body(new ErrorResponse(BAD_REQUEST.value(), e.getMessage()));
     }
 }

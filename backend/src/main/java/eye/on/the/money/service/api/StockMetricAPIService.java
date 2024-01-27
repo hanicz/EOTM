@@ -3,10 +3,10 @@ package eye.on.the.money.service.api;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eye.on.the.money.dto.out.MetricDTO;
 import eye.on.the.money.exception.APIException;
-import eye.on.the.money.model.stock.Metric;
-import eye.on.the.money.model.stock.Profile;
-import eye.on.the.money.model.stock.Recommendation;
+import eye.on.the.money.dto.out.ProfileDTO;
+import eye.on.the.money.dto.out.RecommendationDTO;
 import eye.on.the.money.repository.ConfigRepository;
 import eye.on.the.money.repository.CredentialRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -32,12 +32,12 @@ public class StockMetricAPIService extends APIService {
     }
 
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
-    public Profile getProfile(String symbol) {
+    public ProfileDTO getProfile(String symbol) {
         log.trace("Enter");
         String url = this.createURL(StockMetricAPIService.API,
                 "/stock/profile2?symbol={1}&token={0}", symbol);
-        ResponseEntity<?> response = this.callGetAPI(url, Profile.class);
-        return (Profile) response.getBody();
+        ResponseEntity<?> response = this.callGetAPI(url, ProfileDTO.class);
+        return (ProfileDTO) response.getBody();
     }
 
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
@@ -50,14 +50,14 @@ public class StockMetricAPIService extends APIService {
     }
 
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
-    public Metric getMetric(String symbol) {
+    public MetricDTO getMetric(String symbol) {
         log.trace("Enter");
         String url = this.createURL(StockMetricAPIService.API,
                 "/stock/metric?metric=all&symbol={1}&token={0}", symbol);
         ResponseEntity<?> response = this.callGetAPI(url, String.class);
         try {
             JsonNode metric = this.mapper.readTree((String) response.getBody()).path("metric");
-            return this.mapper.treeToValue(metric, Metric.class);
+            return this.mapper.treeToValue(metric, MetricDTO.class);
         } catch (JsonProcessingException | NullPointerException e) {
             log.error("JSON process failed. {}", e.getMessage());
             throw new APIException("JSON process failed");
@@ -65,10 +65,10 @@ public class StockMetricAPIService extends APIService {
     }
 
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
-    public List<Recommendation> getRecommendations(String symbol) {
+    public List<RecommendationDTO> getRecommendations(String symbol) {
         log.trace("Enter");
         ResponseEntity<?> response = this.callGetAPI(this.createURL(StockMetricAPIService.API,
-                "/stock/recommendation?symbol={1}&token={0}", symbol), Recommendation[].class);
-        return Arrays.asList((Recommendation[]) response.getBody());
+                "/stock/recommendation?symbol={1}&token={0}", symbol), RecommendationDTO[].class);
+        return Arrays.asList((RecommendationDTO[]) response.getBody());
     }
 }

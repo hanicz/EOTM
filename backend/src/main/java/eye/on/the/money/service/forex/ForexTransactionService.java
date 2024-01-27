@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ForexTransactionService {
+
     private final CurrencyRepository currencyRepository;
     private final ForexTransactionRepository forexTransactionRepository;
     private final UserServiceImpl userService;

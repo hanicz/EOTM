@@ -5,7 +5,7 @@ import eye.on.the.money.util.Generated;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Slf4j
 @Getter
@@ -23,6 +23,6 @@ public class EODCandleQuote {
     private Double high;
     private Double low;
     private Double open;
-    private Date date;
+    private LocalDate date;
     private Long volume;
 }

@@ -1,8 +1,8 @@
 package eye.on.the.money.service.stock;
 
-import eye.on.the.money.model.stock.Metric;
-import eye.on.the.money.model.stock.Profile;
-import eye.on.the.money.model.stock.Recommendation;
+import eye.on.the.money.dto.out.MetricDTO;
+import eye.on.the.money.dto.out.ProfileDTO;
+import eye.on.the.money.dto.out.RecommendationDTO;
 import eye.on.the.money.service.api.StockMetricAPIService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,22 +19,22 @@ public class MetricService {
 
     private final StockMetricAPIService stockMetricAPIService;
 
-    public Profile getProfileBySymbol(String symbol) {
+    public ProfileDTO getProfileBySymbol(String symbol) {
         log.trace("Enter");
-        Profile profile = this.stockMetricAPIService.getProfile(symbol);
-        profile.setPeers(Arrays.asList(this.stockMetricAPIService.getPeers(symbol)));
-        return profile;
+        ProfileDTO profileDTO = this.stockMetricAPIService.getProfile(symbol);
+        profileDTO.setPeers(Arrays.asList(this.stockMetricAPIService.getPeers(symbol)));
+        return profileDTO;
     }
 
-    public Metric getMetricBySymbol(String symbol) {
+    public MetricDTO getMetricBySymbol(String symbol) {
         log.trace("Enter");
         return this.stockMetricAPIService.getMetric(symbol);
     }
 
-    public List<Recommendation> getRecommendations(String symbol) {
+    public List<RecommendationDTO> getRecommendations(String symbol) {
         log.trace("Enter");
-        List<Recommendation> recommendations = this.stockMetricAPIService.getRecommendations(symbol);
-        recommendations.sort(Comparator.comparing(Recommendation::getPeriod));
-        return recommendations;
+        List<RecommendationDTO> recommendationDTOS = this.stockMetricAPIService.getRecommendations(symbol);
+        recommendationDTOS.sort(Comparator.comparing(RecommendationDTO::getPeriod));
+        return recommendationDTOS;
     }
 }

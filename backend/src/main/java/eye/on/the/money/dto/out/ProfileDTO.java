@@ -1,11 +1,15 @@
-package eye.on.the.money.model.stock;
+package eye.on.the.money.dto.out;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import eye.on.the.money.util.Generated;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -18,12 +22,14 @@ import java.util.List;
 @NoArgsConstructor
 @Generated
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Profile {
+public class ProfileDTO {
     private String country;
     private String currency;
     private String exchange;
     private String finnhubIndustry;
-    private Date ipo;
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    private LocalDate ipo;
     private String logo;
     private String name;
     private String ticker;

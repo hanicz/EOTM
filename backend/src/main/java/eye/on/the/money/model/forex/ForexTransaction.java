@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -27,7 +27,7 @@ public class ForexTransaction {
     private Long id;
     private Double fromAmount;
     private Double toAmount;
-    private Date transactionDate;
+    private LocalDate transactionDate;
     private String buySell;
     private Double changeRate;
 

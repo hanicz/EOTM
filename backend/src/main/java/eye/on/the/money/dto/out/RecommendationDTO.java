@@ -12,20 +12,21 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-@Builder
 @Slf4j
 @ToString
+@Builder
+@EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
 @Generated
-public class DividendDTO {
-    private Long dividendId;
-    private Double amount;
+public class RecommendationDTO {
+    private Integer buy;
+    private Integer hold;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
-    private LocalDate dividendDate;
-    private String shortName;
-    private String currencyId;
-    private String exchange;
+    private LocalDate period;
+    private Integer sell;
+    private Integer strongBuy;
+    private Integer strongSell;
+    private String symbol;
 }

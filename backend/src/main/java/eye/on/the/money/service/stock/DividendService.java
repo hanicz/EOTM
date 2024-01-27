@@ -1,6 +1,7 @@
 package eye.on.the.money.service.stock;
 
 import eye.on.the.money.dto.out.DividendDTO;
+import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Dividend;
@@ -10,6 +11,7 @@ import eye.on.the.money.repository.stock.DividendRepository;
 import eye.on.the.money.repository.stock.StockRepository;
 import eye.on.the.money.service.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -25,15 +27,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DividendService {
     private final DividendRepository dividendRepository;
     private final CurrencyRepository currencyRepository;
@@ -41,7 +44,7 @@ public class DividendService {
     private final UserServiceImpl userService;
     private final ModelMapper modelMapper;
 
-    private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public List<DividendDTO> getDividends(String userEmail) {
         return this.dividendRepository.findByUserEmailOrderByDividendDate(userEmail).stream().map(this::convertToDividendDTO).collect(Collectors.toList());
@@ -122,7 +125,7 @@ public class DividendService {
 
             for (CSVRecord csvRecord : csvParser) {
                 String dividendId = csvRecord.get("Dividend Id");
-                Date dividendDate = DATE_FORMAT.parse(csvRecord.get("Dividend Date"));
+                LocalDate dividendDate = LocalDate.parse(csvRecord.get("Dividend Date"), FORMATTER);
 
                 DividendDTO dividend = DividendDTO.builder()
                         .dividendDate(dividendDate)
@@ -139,8 +142,9 @@ public class DividendService {
                     this.createDividend(dividend, userEmail);
                 }
             }
-        } catch (IOException | ParseException e) {
-            throw new RuntimeException("Failed to parse CSV file: " + e.getMessage());
+        } catch (IOException | DateTimeParseException e) {
+            log.error("Error while processing CSV", e);
+            throw new CSVException("Failed to parse CSV file: " + e.getMessage(), e);
         }
     }
 }

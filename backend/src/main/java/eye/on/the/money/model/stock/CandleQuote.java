@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Getter
@@ -38,16 +40,17 @@ public class CandleQuote {
             l[i] = eodList.get(i).getLow();
             h[i] = eodList.get(i).getHigh();
             v[i] = eodList.get(i).getVolume();
-            t[i] = eodList.get(i).getDate().getTime();
+            t[i] = eodList.get(i).getDate().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
         }
 
         if (sameDay != null) {
+            LocalDate date = Instant.ofEpochSecond(sameDay.findValue("timestamp").longValue()).atZone(ZoneId.systemDefault()).toLocalDate();
             c[eodList.size()] = sameDay.findValue("close").doubleValue();
             o[eodList.size()] = sameDay.findValue("open").doubleValue();
             l[eodList.size()] = sameDay.findValue("low").doubleValue();
             h[eodList.size()] = sameDay.findValue("high").doubleValue();
             v[eodList.size()] = sameDay.findValue("volume").longValue();
-            t[eodList.size()] = TimeUnit.SECONDS.toMillis(sameDay.findValue("timestamp").longValue());
+            t[eodList.size()] = date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
         }
 
         return new CandleQuote(c, h, l, o, t, v);

@@ -1,8 +1,8 @@
 package eye.on.the.money.controller;
 
-import eye.on.the.money.model.stock.Metric;
-import eye.on.the.money.model.stock.Profile;
-import eye.on.the.money.model.stock.Recommendation;
+import eye.on.the.money.dto.out.MetricDTO;
+import eye.on.the.money.dto.out.ProfileDTO;
+import eye.on.the.money.dto.out.RecommendationDTO;
 import eye.on.the.money.service.stock.MetricService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,19 +25,19 @@ public class MetricController {
 
 
     @GetMapping("/profile/{symbol}")
-    public ResponseEntity<Profile> getProfileBySymbol(@PathVariable String symbol) {
+    public ResponseEntity<ProfileDTO> getProfileBySymbol(@PathVariable String symbol) {
         log.trace("Enter");
         return new ResponseEntity<>(this.metricService.getProfileBySymbol(symbol), HttpStatus.OK);
     }
 
     @GetMapping("/metric/{symbol}")
-    public ResponseEntity<Metric> getMetricBySymbol(@PathVariable String symbol) {
+    public ResponseEntity<MetricDTO> getMetricBySymbol(@PathVariable String symbol) {
         log.trace("Enter");
         return new ResponseEntity<>(this.metricService.getMetricBySymbol(symbol), HttpStatus.OK);
     }
 
     @GetMapping("/recommendation/{symbol}")
-    public ResponseEntity<List<Recommendation>> getRecommendations(@PathVariable String symbol) {
+    public ResponseEntity<List<RecommendationDTO>> getRecommendations(@PathVariable String symbol) {
         log.trace("Enter");
         return new ResponseEntity<>(this.metricService.getRecommendations(symbol), HttpStatus.OK);
     }

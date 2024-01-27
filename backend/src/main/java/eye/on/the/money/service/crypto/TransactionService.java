@@ -3,6 +3,7 @@ package eye.on.the.money.service.crypto;
 import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.in.TransactionQuery;
 import eye.on.the.money.dto.out.TransactionDTO;
+import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.crypto.Coin;
@@ -14,6 +15,7 @@ import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.service.UserServiceImpl;
 import eye.on.the.money.service.api.CryptoAPIService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -29,13 +31,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TransactionService {
 
     private final TransactionRepository transactionRepository;
@@ -46,7 +50,7 @@ public class TransactionService {
     private final ModelMapper modelMapper;
     private final CryptoAPIService cryptoAPIService;
 
-    private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public List<TransactionDTO> getTransactionsByUserId(String userEmail) {
         return this.transactionRepository.findByUserEmailOrderByTransactionDate(userEmail).stream()
@@ -95,7 +99,7 @@ public class TransactionService {
                 .transactionDate(transactionDTO.getTransactionDate())
                 .transactionString(transactionDTO.getTransactionString())
                 .quantity(transactionDTO.getQuantity())
-                .creationDate(new Date())
+                .creationDate(LocalDate.now())
                 .coin(coin)
                 .payment(payment)
                 .user(user)
@@ -154,7 +158,7 @@ public class TransactionService {
                         t.getAmount(), t.getCurrencyId(), t.getFee());
             }
         } catch (IOException e) {
-            throw new RuntimeException("fail to crate CSV file: " + e.getMessage());
+            throw new CSVException("Failed to create CSV file: " + e.getMessage(), e);
         }
     }
 
@@ -171,7 +175,7 @@ public class TransactionService {
 
             for (CSVRecord csvRecord : csvParser) {
                 String transactionId = csvRecord.get("Transaction Id");
-                Date transactionDate = DATE_FORMAT.parse(csvRecord.get("Transaction Date"));
+                LocalDate transactionDate = LocalDate.parse(csvRecord.get("Transaction Date"), FORMATTER);
 
                 TransactionDTO transaction = TransactionDTO.builder()
                         .buySell(csvRecord.get("Type"))
@@ -191,8 +195,9 @@ public class TransactionService {
                     this.createTransaction(transaction, userEmail);
                 }
             }
-        } catch (IOException | ParseException e) {
-            throw new RuntimeException("Failed to parse CSV file: " + e.getMessage());
+        } catch (IOException | DateTimeParseException e) {
+            log.error("Error while processing CSV", e);
+            throw new CSVException("Failed to parse CSV file: " + e.getMessage(), e);
         }
     }
 }

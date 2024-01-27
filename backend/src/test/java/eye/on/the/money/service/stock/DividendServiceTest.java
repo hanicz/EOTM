@@ -6,7 +6,6 @@ import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Dividend;
 import eye.on.the.money.repository.UserRepository;
 import eye.on.the.money.repository.stock.DividendRepository;
-import eye.on.the.money.service.stock.DividendService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,7 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -47,6 +47,7 @@ class DividendServiceTest {
     private User user;
 
     private final ModelMapper modelMapper = new ModelMapper();
+    private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @BeforeEach
     public void init() {
@@ -140,7 +141,7 @@ class DividendServiceTest {
         this.dividendService.getCSV(this.user.getUsername(), writer);
         assertAll(
                 () -> assertTrue(writer.toString().contains("Dividend Id,Amount,Dividend Date,Short Name,Currency")),
-                () -> assertTrue(writer.toString().contains("2,225.0,2021-08-03 00:00:00.0,CRSR,HUF"))
+                () -> assertTrue(writer.toString().contains("2,225.0,2021-08-03,CRSR,HUF"))
         );
     }
 
@@ -153,7 +154,7 @@ class DividendServiceTest {
 
     @Test
     public void processCSV_Update() {
-        String csvContent = "Dividend Id,Amount,Dividend Date,Short Name,Currency\n1,250.0,2021-06-03 00:00:00.0,CRSR,HUF";
+        String csvContent = "Dividend Id,Amount,Dividend Date,Short Name,Currency\n1,250.0,2021-06-03,CRSR,HUF";
         MultipartFile mpf = new MockMultipartFile("file", "file.csv", MediaType.TEXT_PLAIN_VALUE, csvContent.getBytes());
 
         this.dividendService.processCSV(this.user.getUsername(), mpf);
@@ -165,7 +166,7 @@ class DividendServiceTest {
 
     @Test
     public void processCSV_Create() {
-        String csvContent = "Dividend Id,Amount,Dividend Date,Short Name,Currency\n,299.0,2021-06-03 00:00:00.0,INTC,USD";
+        String csvContent = "Dividend Id,Amount,Dividend Date,Short Name,Currency\n,299.0,2021-06-03,INTC,USD";
         MultipartFile mpf = new MockMultipartFile("file", "file.csv", MediaType.TEXT_PLAIN_VALUE, csvContent.getBytes());
 
         this.dividendService.processCSV(this.user.getUsername(), mpf);
@@ -190,7 +191,7 @@ class DividendServiceTest {
         return DividendDTO.builder()
                 .dividendId(1L)
                 .amount(10000000.0)
-                .dividendDate(new SimpleDateFormat("yyyy-MM-dd").parse("2021-07-03"))
+                .dividendDate(LocalDate.parse("2021-07-03", FORMATTER))
                 .shortName("CRSR")
                 .currencyId("EUR")
                 .exchange("US")

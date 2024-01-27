@@ -16,6 +16,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -94,7 +97,7 @@ class StockServiceTest {
                 () -> assertArrayEquals(eodList.stream().map(EODCandleQuote::getClose).toArray(Double[]::new), cq.getC()),
                 () -> assertArrayEquals(eodList.stream().map(EODCandleQuote::getVolume).toArray(Long[]::new), cq.getV()),
                 () -> assertArrayEquals(eodList.stream().map(EODCandleQuote::getOpen).toArray(Double[]::new), cq.getO()),
-                () -> assertArrayEquals(eodList.stream().map(ecq -> ecq.getDate().getTime()).toArray(Long[]::new), cq.getT()));
+                () -> assertArrayEquals(eodList.stream().map(ecq -> ecq.getDate().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()).toArray(Long[]::new), cq.getT()));
     }
 
     @Test
@@ -107,7 +110,7 @@ class StockServiceTest {
 
         CandleQuote cq = this.stockService.getCandleQuoteByShortName("shortName", 1);
 
-        eodList.add(EODCandleQuote.builder().close(119.7044).date(new Date(TimeUnit.SECONDS.toMillis(1700255640))).high(119.97).low(118.82).open(119.64).volume(5094170L).build());
+        eodList.add(EODCandleQuote.builder().close(119.7044).date(Instant.ofEpochSecond(1700255640).atZone(ZoneId.systemDefault()).toLocalDate()).high(119.97).low(118.82).open(119.64).volume(5094170L).build());
 
         Assertions.assertAll("Assert all cq arrays",
                 () -> assertArrayEquals(eodList.stream().map(EODCandleQuote::getHigh).toArray(Double[]::new), cq.getH()),
@@ -115,7 +118,7 @@ class StockServiceTest {
                 () -> assertArrayEquals(eodList.stream().map(EODCandleQuote::getClose).toArray(Double[]::new), cq.getC()),
                 () -> assertArrayEquals(eodList.stream().map(EODCandleQuote::getVolume).toArray(Long[]::new), cq.getV()),
                 () -> assertArrayEquals(eodList.stream().map(EODCandleQuote::getOpen).toArray(Double[]::new), cq.getO()),
-                () -> assertArrayEquals(eodList.stream().map(ecq -> ecq.getDate().getTime()).toArray(Long[]::new), cq.getT()));
+                () -> assertArrayEquals(eodList.stream().map(ecq -> ecq.getDate().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()).toArray(Long[]::new), cq.getT()));
     }
 
     @Test
@@ -139,11 +142,11 @@ class StockServiceTest {
 
     private List<EODCandleQuote> geteodList(){
         List<EODCandleQuote> eodList = new ArrayList<>();
-        eodList.add(EODCandleQuote.builder().close(1.0).date(new Date()).high(5.0).low(0.2).open(3.5).volume(5123123L).build());
-        eodList.add(EODCandleQuote.builder().close(2.0).date(new Date()).high(532.0).low(0.9).open(323.5).volume(5123L).build());
-        eodList.add(EODCandleQuote.builder().close(3.0).date(new Date()).high(51.0).low(301.4).open(13.8).volume(7234L).build());
-        eodList.add(EODCandleQuote.builder().close(4.0).date(new Date()).high(55.0).low(200.0).open(553.5).volume(94123L).build());
-        eodList.add(EODCandleQuote.builder().close(5.0).date(new Date()).high(25.0).low(100.0).open(37.5).volume(7213L).build());
+        eodList.add(EODCandleQuote.builder().close(1.0).date(LocalDate.now()).high(5.0).low(0.2).open(3.5).volume(5123123L).build());
+        eodList.add(EODCandleQuote.builder().close(2.0).date(LocalDate.now()).high(532.0).low(0.9).open(323.5).volume(5123L).build());
+        eodList.add(EODCandleQuote.builder().close(3.0).date(LocalDate.now()).high(51.0).low(301.4).open(13.8).volume(7234L).build());
+        eodList.add(EODCandleQuote.builder().close(4.0).date(LocalDate.now()).high(55.0).low(200.0).open(553.5).volume(94123L).build());
+        eodList.add(EODCandleQuote.builder().close(5.0).date(LocalDate.now()).high(25.0).low(100.0).open(37.5).volume(7213L).build());
 
         return eodList;
     }

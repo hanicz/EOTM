@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -38,8 +39,9 @@ public class ForexTransactionService {
     }
 
     @Transactional
-    public void deleteForexTransactionById(String userEmail, List<Long> ids) {
-        this.forexTransactionRepository.deleteByUserEmailAndIdIn(userEmail, ids);
+    public void deleteForexTransactionById(String userEmail, String ids) {
+        List<Long> idList = Stream.of(ids.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
+        this.forexTransactionRepository.deleteByUserEmailAndIdIn(userEmail, idList);
     }
 
     @Transactional

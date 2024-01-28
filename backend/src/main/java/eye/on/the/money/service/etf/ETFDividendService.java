@@ -33,6 +33,7 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -93,9 +94,10 @@ public class ETFDividendService {
     }
 
     @Transactional
-    public void deleteETFDividendById(List<Long> ids, String userEmail) {
+    public void deleteETFDividendById(String ids, String userEmail) {
         log.trace("Enter deleteETFDividendById");
-        this.etfDividendRepository.deleteByUserEmailAndIdIn(userEmail, ids);
+        List<Long> idList = Stream.of(ids.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
+        this.etfDividendRepository.deleteByUserEmailAndIdIn(userEmail, idList);
     }
 
     public void getCSV(String userEmail, Writer writer) {

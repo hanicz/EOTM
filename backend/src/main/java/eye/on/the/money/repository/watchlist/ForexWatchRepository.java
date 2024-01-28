@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface ForexWatchRepository extends CrudRepository<ForexWatch, Long> {
     List<ForexWatch> findByUserEmail(String userEmail);
+
     void deleteByIdAndUserEmail(Long id, String userEmail);
 }

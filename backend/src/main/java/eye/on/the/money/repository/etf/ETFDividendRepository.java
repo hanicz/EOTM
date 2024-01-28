@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public interface ETFDividendRepository extends CrudRepository<ETFDividend, Long> {
     List<ETFDividend> findByUserEmailOrderByDividendDate(String userEmail);
+
     void deleteByUserEmailAndIdIn(String userEmail, List<Long> ids);
+
     Optional<ETFDividend> findByIdAndUserEmail(Long id, String userEmail);
 }

@@ -33,6 +33,7 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -88,8 +89,9 @@ public class DividendService {
     }
 
     @Transactional
-    public void deleteDividendById(List<Long> ids, String userEmail) {
-        this.dividendRepository.deleteByUserEmailAndIdIn(userEmail, ids);
+    public void deleteDividendById(String ids, String userEmail) {
+        List<Long> idList = Stream.of(ids.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
+        this.dividendRepository.deleteByUserEmailAndIdIn(userEmail, idList);
     }
 
     public void getCSV(String userEmail, Writer writer) {

@@ -2,8 +2,8 @@ package eye.on.the.money.service.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eye.on.the.money.exception.APIException;
 import eye.on.the.money.dto.in.EODCandleQuoteDTO;
+import eye.on.the.money.exception.APIException;
 import eye.on.the.money.model.stock.Exchange;
 import eye.on.the.money.model.stock.Symbol;
 import eye.on.the.money.repository.ConfigRepository;

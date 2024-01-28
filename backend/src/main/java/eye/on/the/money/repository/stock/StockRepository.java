@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public interface StockRepository extends CrudRepository<Stock, String> {
     Optional<Stock> findByName(String name);
+
     Optional<Stock> findByShortName(String shortName);
+
     List<Stock> findAllByOrderByShortNameAsc();
 }

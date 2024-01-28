@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public interface ForexTransactionRepository extends CrudRepository<ForexTransaction, Long> {
     List<ForexTransaction> findByUserEmailOrderByTransactionDate(String userEmail);
+
     void deleteByUserEmailAndIdIn(String userEmail, List<Long> ids);
+
     Optional<ForexTransaction> findByIdAndUserEmail(Long id, String userEmail);
 }

@@ -14,8 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("api/v1/dividend")
@@ -40,8 +38,7 @@ public class DividendController {
     @DeleteMapping()
     public ResponseEntity<HttpStatus> deleteByIds(@AuthenticationPrincipal UserDetails user, @RequestParam String ids) {
         log.trace("Enter");
-        List<Long> idList = Stream.of(ids.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
-        this.dividendService.deleteDividendById(idList, user.getUsername());
+        this.dividendService.deleteDividendById(ids, user.getUsername());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

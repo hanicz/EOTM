@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface CryptoWatchRepository extends CrudRepository<CryptoWatch, Long> {
     List<CryptoWatch> findByUserEmailOrderByCoin_Symbol(String userEMail);
+
     void deleteByIdAndUserEmail(Long id, String userEmail);
 }

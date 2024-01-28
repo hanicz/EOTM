@@ -28,6 +28,7 @@ public class CorsConfig {
         source.registerCorsConfiguration("/**", corsConfiguration);
         return source;
     }
+
     @Bean
     @Profile("!local")
     @Qualifier("cors")

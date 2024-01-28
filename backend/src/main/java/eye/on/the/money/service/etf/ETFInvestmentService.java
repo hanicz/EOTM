@@ -26,6 +26,7 @@ import java.io.Writer;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -85,8 +86,9 @@ public class ETFInvestmentService {
 
 
     @Transactional
-    public void deleteInvestmentById(String userEmail, List<Long> ids) {
-        this.etfInvestmentRepository.deleteByUserEmailAndIdIn(userEmail, ids);
+    public void deleteInvestmentById(String userEmail, String ids) {
+        List<Long> idList = Stream.of(ids.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
+        this.etfInvestmentRepository.deleteByUserEmailAndIdIn(userEmail, idList);
     }
 
     @Transactional

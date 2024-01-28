@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public interface ETFInvestmentRepository extends CrudRepository<ETFInvestment, Long> {
     Optional<ETFInvestment> findByIdAndUserEmail(Long id, String userEmail);
+
     List<ETFInvestment> findByUserEmailOrderByTransactionDate(String userEmail);
+
     void deleteByUserEmailAndIdIn(String userEmail, List<Long> ids);
 }

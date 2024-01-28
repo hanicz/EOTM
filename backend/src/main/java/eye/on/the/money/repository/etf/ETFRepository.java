@@ -8,7 +8,10 @@ import java.util.Optional;
 
 public interface ETFRepository extends CrudRepository<ETF, String> {
     Optional<ETF> findByName(String name);
+
     Optional<ETF> findByShortName(String shortName);
+
     Optional<ETF> findByShortNameAndExchange(String shortName, String exhange);
+
     List<ETF> findAllByOrderByShortNameAsc();
 }

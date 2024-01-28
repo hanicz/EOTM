@@ -2,10 +2,11 @@ package eye.on.the.money.model;
 
 
 import eye.on.the.money.util.Generated;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-
-import jakarta.persistence.*;
 
 @Entity
 @Getter

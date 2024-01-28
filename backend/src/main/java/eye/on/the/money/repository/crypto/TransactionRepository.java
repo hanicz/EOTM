@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public interface TransactionRepository extends CrudRepository<Transaction, Long> {
     List<Transaction> findByUserEmailOrderByTransactionDate(String userEmail);
+
     void deleteByUserEmailAndIdIn(String userEmail, List<Long> ids);
+
     Optional<Transaction> findByIdAndUserEmail(Long id, String userEmail);
 }

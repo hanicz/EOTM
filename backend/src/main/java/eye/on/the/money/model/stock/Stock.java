@@ -2,10 +2,10 @@ package eye.on.the.money.model.stock;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import eye.on.the.money.util.Generated;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-import jakarta.persistence.*;
 import java.util.Set;
 
 @Entity

@@ -36,6 +36,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -83,8 +84,9 @@ public class TransactionService {
     }
 
     @Transactional
-    public void deleteTransactionById(String userEmail, List<Long> ids) {
-        this.transactionRepository.deleteByUserEmailAndIdIn(userEmail, ids);
+    public void deleteTransactionById(String userEmail, String ids) {
+        List<Long> idList = Stream.of(ids.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
+        this.transactionRepository.deleteByUserEmailAndIdIn(userEmail, idList);
     }
 
     @Transactional

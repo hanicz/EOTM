@@ -3,10 +3,9 @@ package eye.on.the.money.model.crypto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.util.Generated;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-
-import jakarta.persistence.*;
 
 @Entity
 @Data

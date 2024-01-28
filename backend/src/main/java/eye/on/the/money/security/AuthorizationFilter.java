@@ -48,7 +48,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
             log.warn("Auth failed: {}", e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             PrintWriter pw = response.getWriter();
-            pw.write("HTTP Status 401 - Authorization failed" );
+            pw.write("HTTP Status 401 - Authorization failed");
         }
     }
 }

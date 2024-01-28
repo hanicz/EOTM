@@ -4,10 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.crypto.Coin;
 import eye.on.the.money.util.Generated;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-
-import jakarta.persistence.*;
 
 @Entity
 @Getter

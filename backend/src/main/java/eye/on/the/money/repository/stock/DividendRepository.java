@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public interface DividendRepository extends CrudRepository<Dividend, Long> {
     List<Dividend> findByUserEmailOrderByDividendDate(String userEmail);
+
     void deleteByUserEmailAndIdIn(String userEmail, List<Long> ids);
+
     Optional<Dividend> findByIdAndUserEmail(Long id, String userEmail);
 }

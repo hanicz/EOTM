@@ -23,7 +23,6 @@ import java.io.Writer;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -128,9 +127,7 @@ class DividendServiceTest {
 
     @Test
     public void deleteDividendById() {
-        List<Long> ids = new ArrayList<>();
-        ids.add(1L);
-        this.dividendService.deleteDividendById(ids, this.user.getUsername());
+        this.dividendService.deleteDividendById("1", this.user.getUsername());
         Optional<Dividend> dividend = this.dividendRepository.findById(1L);
         assertFalse(dividend.isPresent());
     }

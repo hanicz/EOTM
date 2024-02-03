@@ -14,6 +14,7 @@ export class HomeComponent implements OnInit {
 
   constructor(private newsService: NewsService) {
     this.options = [
+      { label: 'Reddit', value: 'category/reddit' },
       { label: 'General', value: 'category/general' },
       { label: 'Forex', value: 'category/forex' },
       { label: 'Crypto', value: 'category/crypto' }

@@ -2,7 +2,6 @@ package eye.on.the.money.service.etf;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.out.ETFInvestmentDTO;
-import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.etf.ETF;
@@ -11,17 +10,15 @@ import eye.on.the.money.model.etf.ETFPayment;
 import eye.on.the.money.repository.etf.ETFInvestmentRepository;
 import eye.on.the.money.repository.etf.ETFRepository;
 import eye.on.the.money.repository.forex.CurrencyRepository;
+import eye.on.the.money.service.CSVService;
 import eye.on.the.money.service.UserServiceImpl;
 import eye.on.the.money.service.api.EODAPIService;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.io.Writer;
 import java.time.LocalDate;
 import java.util.*;
@@ -38,6 +35,7 @@ public class ETFInvestmentService {
     private final UserServiceImpl userService;
     private final ModelMapper modelMapper;
     private final ETFPaymentService etfPaymentService;
+    private final CSVService csvService;
 
     public List<ETFInvestmentDTO> getETFInvestments(String userEmail) {
         return this.etfInvestmentRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToETFInvestmentDTO).collect(Collectors.toList());
@@ -136,17 +134,6 @@ public class ETFInvestmentService {
                         .stream()
                         .map(this::convertToETFInvestmentDTO).
                         toList();
-        try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
-            if (!investmentList.isEmpty()) {
-                csvPrinter.printRecord("Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Exchange", "Amount", "Currency", "Fee");
-            }
-            for (ETFInvestmentDTO i : investmentList) {
-                csvPrinter.printRecord(i.getId(), i.getQuantity(),
-                        i.getBuySell(), i.getTransactionDate(), i.getShortName(), i.getExchange(),
-                        i.getAmount(), i.getCurrencyId(), i.getFee());
-            }
-        } catch (IOException e) {
-            throw new CSVException("Failed to create CSV file: " + e.getMessage(), e);
-        }
+        this.csvService.getCSV(investmentList, writer);
     }
 }

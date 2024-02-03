@@ -12,13 +12,12 @@ import eye.on.the.money.model.crypto.Transaction;
 import eye.on.the.money.repository.crypto.CoinRepository;
 import eye.on.the.money.repository.crypto.TransactionRepository;
 import eye.on.the.money.repository.forex.CurrencyRepository;
+import eye.on.the.money.service.CSVService;
 import eye.on.the.money.service.UserServiceImpl;
 import eye.on.the.money.service.api.CryptoAPIService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -26,11 +25,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -50,6 +46,7 @@ public class TransactionService {
     private final CoinRepository coinRepository;
     private final ModelMapper modelMapper;
     private final CryptoAPIService cryptoAPIService;
+    private final CSVService csvService;
 
     private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -150,50 +147,21 @@ public class TransactionService {
                         .stream()
                         .map(this::convertToTransactionDTO)
                         .toList();
-        try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
-            if (!transactionList.isEmpty()) {
-                csvPrinter.printRecord("Transaction Id", "Quantity", "Type", "Transaction Date", "Symbol", "Amount", "Currency", "Fee");
-            }
-            for (TransactionDTO t : transactionList) {
-                csvPrinter.printRecord(t.getTransactionId(), t.getQuantity(),
-                        t.getBuySell(), t.getTransactionDate(), t.getSymbol(),
-                        t.getAmount(), t.getCurrencyId(), t.getFee());
-            }
-        } catch (IOException e) {
-            throw new CSVException("Failed to create CSV file: " + e.getMessage(), e);
-        }
+        this.csvService.getCSV(transactionList, writer);
     }
 
     @Transactional
     public void processCSV(String userEmail, MultipartFile file) {
-        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
-             CSVParser csvParser = new CSVParser(fileReader, CSVFormat.Builder.create()
-                     .setHeader("Transaction Id", "Quantity", "Type", "Transaction Date", "Symbol", "Amount", "Currency", "Fee")
-                     .setSkipHeaderRecord(true)
-                     .setDelimiter(",")
-                     .setTrim(true)
-                     .setIgnoreHeaderCase(true)
-                     .build())) {
-
+        try (CSVParser csvParser = this.csvService.getParser(file,
+                new String[]{"Transaction Id", "Quantity", "Type", "Transaction Date", "Symbol", "Amount", "Currency", "Fee"})) {
             for (CSVRecord csvRecord : csvParser) {
-                String transactionId = csvRecord.get("Transaction Id");
-                LocalDate transactionDate = LocalDate.parse(csvRecord.get("Transaction Date"), FORMATTER);
+                TransactionDTO transaction = TransactionDTO.createFromCSVRecord(csvRecord, FORMATTER);
 
-                TransactionDTO transaction = TransactionDTO.builder()
-                        .buySell(csvRecord.get("Type"))
-                        .transactionDate(transactionDate)
-                        .amount(Double.parseDouble(csvRecord.get("Amount")))
-                        .quantity(Double.parseDouble(csvRecord.get("Quantity")))
-                        .currencyId(csvRecord.get("Currency"))
-                        .symbol(csvRecord.get("Symbol"))
-                        .fee(Double.parseDouble(csvRecord.get("Fee")))
-                        .build();
-
-                if (!transactionId.isEmpty() &&
-                        this.transactionRepository.findByIdAndUserEmail(Long.parseLong(transactionId), userEmail).isPresent()) {
-                    transaction.setTransactionId(Long.parseLong(transactionId));
+                if (transaction.getTransactionId() != null &&
+                        this.transactionRepository.findByIdAndUserEmail(transaction.getTransactionId(), userEmail).isPresent()) {
                     this.updateTransaction(transaction, userEmail);
                 } else {
+                    transaction.setTransactionId(null);
                     this.createTransaction(transaction, userEmail);
                 }
             }

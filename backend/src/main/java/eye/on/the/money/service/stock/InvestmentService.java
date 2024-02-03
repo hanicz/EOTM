@@ -10,13 +10,12 @@ import eye.on.the.money.model.stock.Stock;
 import eye.on.the.money.model.stock.StockPayment;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.stock.InvestmentRepository;
+import eye.on.the.money.service.CSVService;
 import eye.on.the.money.service.UserServiceImpl;
 import eye.on.the.money.service.api.EODAPIService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -24,11 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -48,6 +44,7 @@ public class InvestmentService {
     private final ModelMapper modelMapper;
     private final EODAPIService eodAPIService;
     private final StockService stockService;
+    private final CSVService csvService;
 
     private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -82,12 +79,12 @@ public class InvestmentService {
     private Map<String, InvestmentDTO> getCalculated(String userEmail) {
         List<InvestmentDTO> investments = this.investmentRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToInvestmentDTO).toList();
         Map<String, InvestmentDTO> investmentMap = new HashMap<>();
-        for (InvestmentDTO i : investments) {
+        investments.forEach(i -> {
             if (i.getBuySell().equals("S")) {
                 i.negateAmountAndQuantity();
             }
             investmentMap.compute(i.getShortName(), (key, value) -> (value == null) ? i : value.mergeInvestments(i));
-        }
+        });
         return investmentMap;
     }
 
@@ -147,52 +144,22 @@ public class InvestmentService {
                         .stream()
                         .map(this::convertToInvestmentDTO)
                         .toList();
-        try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
-            if (!investmentList.isEmpty()) {
-                csvPrinter.printRecord("Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Amount", "Currency", "Fee");
-            }
-            for (InvestmentDTO i : investmentList) {
-                csvPrinter.printRecord(i.getInvestmentId(), i.getQuantity(),
-                        i.getBuySell(), i.getTransactionDate(), i.getShortName(),
-                        i.getAmount(), i.getCurrencyId(), i.getFee());
-            }
-        } catch (IOException e) {
-            throw new CSVException("Failed to create CSV file: " + e.getMessage(), e);
-        }
+        this.csvService.getCSV(investmentList, writer);
     }
 
     @Transactional
     public void processCSV(String userEmail, MultipartFile file) {
-        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
-             CSVParser csvParser = new CSVParser(fileReader, CSVFormat.Builder.create()
-                     .setHeader("Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Amount", "Currency", "Fee")
-                     .setSkipHeaderRecord(true)
-                     .setDelimiter(",")
-                     .setTrim(true)
-                     .setIgnoreHeaderCase(true)
-                     .build())) {
-
+        try (CSVParser csvParser = this.csvService.getParser(file,
+                new String[]{"Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Amount", "Currency", "Fee"})) {
             for (CSVRecord csvRecord : csvParser) {
-                String investmentId = csvRecord.get("Investment Id");
-                LocalDate transactionDate = LocalDate.parse(csvRecord.get("Transaction Date"), FORMATTER);
+                InvestmentDTO investment = InvestmentDTO.createFromCSVRecord(csvRecord, FORMATTER);
 
-                InvestmentDTO investment = InvestmentDTO.builder()
-                        .buySell(csvRecord.get("Type"))
-                        .transactionDate(transactionDate)
-                        .amount(Double.parseDouble(csvRecord.get("Amount")))
-                        .quantity(Integer.parseInt(csvRecord.get("Quantity")))
-                        .currencyId(csvRecord.get("Currency"))
-                        .shortName(csvRecord.get("Short Name"))
-                        .fee(Double.parseDouble(csvRecord.get("Fee")))
-                        .build();
-                log.trace(investment.toString());
-
-                if (!investmentId.isEmpty() &&
-                        this.investmentRepository.findByIdAndUserEmail(Long.parseLong(investmentId), userEmail).isPresent()) {
-                    investment.setInvestmentId(Long.parseLong(investmentId));
+                if (investment.getInvestmentId() != null &&
+                        this.investmentRepository.findByIdAndUserEmail(investment.getInvestmentId(), userEmail).isPresent()) {
                     log.trace("Update investment {}", investment);
                     this.updateInvestment(investment, userEmail);
                 } else {
+                    investment.setInvestmentId(null);
                     log.trace("Create investment {}", investment);
                     this.createInvestment(investment, userEmail);
                 }

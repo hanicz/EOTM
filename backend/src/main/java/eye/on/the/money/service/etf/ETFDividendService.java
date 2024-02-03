@@ -9,12 +9,11 @@ import eye.on.the.money.model.etf.ETFDividend;
 import eye.on.the.money.repository.etf.ETFDividendRepository;
 import eye.on.the.money.repository.etf.ETFRepository;
 import eye.on.the.money.repository.forex.CurrencyRepository;
+import eye.on.the.money.service.CSVService;
 import eye.on.the.money.service.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -22,12 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Writer;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -45,6 +40,7 @@ public class ETFDividendService {
     private final ETFRepository etfRepository;
     private final UserServiceImpl userService;
     private final ModelMapper modelMapper;
+    private final CSVService csvService;
 
     private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -106,48 +102,21 @@ public class ETFDividendService {
                         .stream()
                         .map(this::convertToETFDividendDTO)
                         .toList();
-        try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
-            if (!dividendListList.isEmpty()) {
-                csvPrinter.printRecord("Dividend Id", "Amount", "Dividend Date", "Short Name", "Currency");
-            }
-            for (ETFDividendDTO d : dividendListList) {
-                csvPrinter.printRecord(d.getId(), d.getAmount(),
-                        d.getDividendDate(), d.getShortName(),
-                        d.getCurrencyId());
-            }
-        } catch (IOException e) {
-            log.error("Error while writing to CSV", e);
-            throw new RuntimeException("fail to create CSV file: " + e.getMessage());
-        }
+        this.csvService.getCSV(dividendListList, writer);
     }
 
     @Transactional
     public void processCSV(String userEmail, MultipartFile file) {
-        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
-             CSVParser csvParser = new CSVParser(fileReader, CSVFormat.Builder.create()
-                     .setHeader("Dividend Id", "Amount", "Dividend Date", "Short Name", "Currency")
-                     .setSkipHeaderRecord(true)
-                     .setDelimiter(",")
-                     .setTrim(true)
-                     .setIgnoreHeaderCase(true)
-                     .build())) {
-
+        try (CSVParser csvParser = this.csvService.getParser(file,
+                new String[]{"Dividend Id", "Amount", "Dividend Date", "Short Name", "Currency"})) {
             for (CSVRecord csvRecord : csvParser) {
-                String dividendId = csvRecord.get("Dividend Id");
-                LocalDate dividendDate = LocalDate.parse(csvRecord.get("Dividend Date"), FORMATTER);
+                ETFDividendDTO dividend = ETFDividendDTO.createFromCSVRecord(csvRecord, FORMATTER);
 
-                ETFDividendDTO dividend = ETFDividendDTO.builder()
-                        .dividendDate(dividendDate)
-                        .amount(Double.parseDouble(csvRecord.get("Amount")))
-                        .currencyId(csvRecord.get("Currency"))
-                        .shortName(csvRecord.get("Short Name"))
-                        .build();
-
-                if (!dividendId.isEmpty() &&
-                        this.etfDividendRepository.findByIdAndUserEmail(Long.parseLong(dividendId), userEmail).isPresent()) {
-                    dividend.setId(Long.parseLong(dividendId));
+                if (dividend.getId() != null &&
+                        this.etfDividendRepository.findByIdAndUserEmail(dividend.getId(), userEmail).isPresent()) {
                     this.updateETFDividend(dividend, userEmail);
                 } else {
+                    dividend.setId(null);
                     this.createETFDividend(dividend, userEmail);
                 }
             }

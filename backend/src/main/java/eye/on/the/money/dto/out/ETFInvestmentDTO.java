@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import eye.on.the.money.dto.CSVHelper;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,7 +18,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
-public class ETFInvestmentDTO {
+public class ETFInvestmentDTO implements CSVHelper {
 
     private Long id;
     private Integer quantity;
@@ -49,5 +50,16 @@ public class ETFInvestmentDTO {
     public void negateAmountAndQuantity() {
         this.amount = -this.amount;
         this.quantity = -this.quantity;
+    }
+
+    @Override
+    public Object[] getHeaders() {
+        return new String[]{"Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Exchange", "Amount", "Currency", "Fee"};
+    }
+
+    @Override
+    public Object[] getCSVRecord() {
+        return new Object[]{this.getId(), this.getQuantity(), this.getBuySell(), this.getTransactionDate(),
+                this.getShortName(), this.getExchange(), this.getAmount(), this.getCurrencyId(), this.getFee()};
     }
 }

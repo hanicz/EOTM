@@ -1,6 +1,7 @@
 package eye.on.the.money.alert;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import eye.on.the.money.exception.AlertException;
 import eye.on.the.money.model.alert.Alert;
 import eye.on.the.money.model.alert.CryptoAlert;
 import eye.on.the.money.model.alert.StockAlert;
@@ -45,8 +46,14 @@ public class AlertScheduler {
     @Scheduled(fixedDelay = 300000)
     public void checkAlerts() {
         log.trace("Enter");
-        this.checkStockAlerts();
-        this.checkCryptoAlerts();
+        Thread stockThread = Thread.ofVirtual().start(this::checkStockAlerts);
+        Thread cryptoThread = Thread.ofVirtual().start(this::checkCryptoAlerts);
+        try {
+            stockThread.join();
+            cryptoThread.join();
+        } catch (InterruptedException e) {
+            throw new AlertException("Error during alerts.", e);
+        }
         log.trace("Exit");
     }
 

@@ -34,6 +34,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 @Slf4j
 public class DividendService {
+
     private final DividendRepository dividendRepository;
     private final CurrencyRepository currencyRepository;
     private final StockRepository stockRepository;

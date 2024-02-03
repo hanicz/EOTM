@@ -8,9 +8,9 @@ docker buildx build --load --platform linux/arm/v7 -t thanicz/rpi .
 
 #Digital ocean
 docker login
-docker buildx build --load --platform linux/amd64 -t thanicz/eotm:2.3 .
-docker push thanicz/eotm:2.3
-docker pull thanicz/eotm:2.3
+docker buildx build --load --platform linux/amd64 -t thanicz/eotm:2.5 .
+docker push thanicz/eotm:2.5
+docker pull thanicz/eotm:2.5
 docker images
 docker image rm {id}
 Modify docker-compose.yml with new tag

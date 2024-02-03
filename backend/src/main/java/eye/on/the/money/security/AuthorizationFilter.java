@@ -32,10 +32,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         String token = request.getHeader(HEADER_NAME);
 
         if (token == null) {
-            log.warn("Auth failed, missing token");
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            PrintWriter pw = response.getWriter();
-            pw.write("HTTP Status 401 - Authorization token must be included");
+            filterChain.doFilter(request, response);
             return;
         }
         try {

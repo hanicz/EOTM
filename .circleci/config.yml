@@ -31,6 +31,10 @@ jobs:
       - run:
           name: Deploy to DigitalOcean Droplet
           command: |
-            echo ${DO_IP_ADDRESS} 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINDJemRgVKD3HjDdNpxHJrxJykLdkEm6nwpp+x/lWlcn' >> ~/.ssh/known_hosts
-            ssh $DO_USER@$DO_IP_ADDRESS 'ls -la'
+            echo ${DO_KNOWN_HOST} >> ~/.ssh/known_hosts
+            ssh $DO_USER@$DO_IP_ADDRESS cd eotm
+            ssh $DO_USER@$DO_IP_ADDRESS docker-compose down
+            ssh $DO_USER@$DO_IP_ADDRESS docker pull $DOCKERHUB_USERNAME/eotm/latest
+            ssh $DO_USER@$DO_IP_ADDRESS docker-compose up -d
+
 

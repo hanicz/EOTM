@@ -18,5 +18,9 @@ jobs:
       - store_artifacts:
           path: backend/target/checkstyle-result.xml
           destination: checkstyle
+      - run:
+          name: Build Docker Image
+          command: |
+            docker build -t my_image .
       
 

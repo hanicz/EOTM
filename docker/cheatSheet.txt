@@ -43,3 +43,10 @@ add new cert files to nginx.conf
 docker build --build-arg JAR_FILE=*.jar -t thanicz/demo .
 docker build -t thanicz/demo .
 docker run -p 8080:8080 thanicz/demo
+
+#deploy.sh
+docker-compose down
+docker login
+docker pull thanicz/eotm:latest
+docker-compose up -d
+docker image prune -a -f

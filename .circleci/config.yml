@@ -1,6 +1,6 @@
 version: 2.1
 jobs:
-  build-and-deploy:
+  build:
     docker:
       - image: cimg/openjdk:21.0.0
     steps:

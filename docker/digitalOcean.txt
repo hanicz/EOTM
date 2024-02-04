@@ -1,6 +1,7 @@
 SSH:
 Generate new key with puttygen
 Add public key to sudo nano ~/.ssh/authorized_keys
+sudo systemctl restart ssh
 
 Logs:
 --Ufw

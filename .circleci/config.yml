@@ -25,5 +25,13 @@ jobs:
             docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
             docker buildx build --load --platform linux/amd64 -t $DOCKERHUB_USERNAME/eotm:latest .
             docker push $DOCKERHUB_USERNAME/eotm:latest
-      
+  deploy:
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "${DO_FINGERPRINT}"
+      - run:
+          name: Deploy to DigitalOcean Droplet
+          command: |
+            ssh $DO_USER@$DO_IP_ADDRESS 'docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD && docker pull $DOCKERHUB_USERNAME/eotm/latest'
 

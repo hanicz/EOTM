@@ -1,12 +1,12 @@
 package eye.on.the.money.repository.forex;
 
 import eye.on.the.money.model.forex.ForexTransaction;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface ForexTransactionRepository extends CrudRepository<ForexTransaction, Long> {
+public interface ForexTransactionRepository extends JpaRepository<ForexTransaction, Long> {
     List<ForexTransaction> findByUserEmailOrderByTransactionDate(String userEmail);
 
     void deleteByUserEmailAndIdIn(String userEmail, List<Long> ids);

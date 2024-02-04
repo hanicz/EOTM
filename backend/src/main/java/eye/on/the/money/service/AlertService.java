@@ -9,7 +9,6 @@ import eye.on.the.money.service.stock.StockService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,32 +26,32 @@ public class AlertService {
     private final UserServiceImpl userService;
 
     public List<StockAlertDTO> getAllStockAlerts(String userEmail) {
-        log.trace("Enter");
         List<StockAlert> stockAlerts = this.stockAlertRepository.findByUserEmailOrderByStockShortName(userEmail);
         return stockAlerts.stream().map(this::convertToStockAlertDTO).collect(Collectors.toList());
     }
 
     @Transactional
     public boolean deleteStockAlert(String userEmail, Long id) {
-        log.trace("Enter");
         return this.stockAlertRepository.deleteByIdAndUserEmail(id, userEmail) > 0;
     }
 
     @Transactional
     public StockAlertDTO createNewStockAlert(UserDetails userDetails, StockAlertDTO stockAlertDTO) {
-        log.trace("Enter");
         Stock stock = this.stockService.getOrCreateStock(stockAlertDTO.getShortName(), stockAlertDTO.getExchange(), stockAlertDTO.getName());
         User user = this.userService.loadUserByEmail(userDetails.getUsername());
 
-        StockAlert stockAlert = StockAlert.builder().stock(stock).user(user).type(stockAlertDTO.getType()).valuePoint(stockAlertDTO.getValuePoint()).build();
+        StockAlert stockAlert = StockAlert.builder()
+                .stock(stock)
+                .user(user)
+                .type(stockAlertDTO.getType())
+                .valuePoint(stockAlertDTO.getValuePoint())
+                .build();
         this.stockAlertRepository.save(stockAlert);
         log.debug("New alert created {}", stockAlert);
         return this.convertToStockAlertDTO(stockAlert);
     }
 
     private StockAlertDTO convertToStockAlertDTO(StockAlert stockAlert) {
-        log.trace("Enter");
-        this.modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
         return this.modelMapper.map(stockAlert, StockAlertDTO.class);
     }
 }

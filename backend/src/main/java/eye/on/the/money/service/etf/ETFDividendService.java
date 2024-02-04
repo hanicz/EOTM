@@ -16,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,19 +44,15 @@ public class ETFDividendService {
     private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public List<ETFDividendDTO> getDividends(String userEmail) {
-        log.trace("Enter getDividends");
         return this.etfDividendRepository.findByUserEmailOrderByDividendDate(userEmail).stream().map(this::convertToETFDividendDTO).collect(Collectors.toList());
     }
 
     private ETFDividendDTO convertToETFDividendDTO(ETFDividend dividend) {
-        log.trace("Enter convertToETFDividendDTO");
-        this.modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
         return this.modelMapper.map(dividend, ETFDividendDTO.class);
     }
 
     @Transactional
     public ETFDividendDTO createETFDividend(ETFDividendDTO dividendDTO, String userEmail) {
-        log.trace("Enter createETFDividend");
         Currency currency = this.currencyRepository.findById(dividendDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
         ETF etf = this.etfRepository.findByShortName(dividendDTO.getShortName()).orElseThrow(NoSuchElementException::new);
         User user = this.userService.loadUserByEmail(userEmail);
@@ -76,7 +71,6 @@ public class ETFDividendService {
 
     @Transactional
     public ETFDividendDTO updateETFDividend(ETFDividendDTO dividendDTO, String userEmail) {
-        log.trace("Enter updateETFDividend");
         Currency currency = this.currencyRepository.findById(dividendDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
         ETF etf = this.etfRepository.findByShortName(dividendDTO.getShortName()).orElseThrow(NoSuchElementException::new);
         ETFDividend dividend = this.etfDividendRepository.findByIdAndUserEmail(dividendDTO.getId(), userEmail).orElseThrow(NoSuchElementException::new);
@@ -91,7 +85,6 @@ public class ETFDividendService {
 
     @Transactional
     public void deleteETFDividendById(String ids, String userEmail) {
-        log.trace("Enter deleteETFDividendById");
         List<Long> idList = Stream.of(ids.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
         this.etfDividendRepository.deleteByUserEmailAndIdIn(userEmail, idList);
     }

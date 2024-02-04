@@ -20,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -76,7 +75,6 @@ public class TransactionService {
     }
 
     private TransactionDTO convertToTransactionDTO(Transaction transaction) {
-        this.modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
         return this.modelMapper.map(transaction, TransactionDTO.class);
     }
 

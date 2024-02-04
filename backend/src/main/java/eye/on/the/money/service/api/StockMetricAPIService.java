@@ -56,8 +56,8 @@ public class StockMetricAPIService extends APIService {
                 "/stock/metric?metric=all&symbol={1}&token={0}", symbol);
         ResponseEntity<?> response = this.callGetAPI(url, String.class);
         try {
-            JsonNode metric = this.mapper.readTree((String) response.getBody()).path("metric");
-            return this.mapper.treeToValue(metric, MetricDTO.class);
+            JsonNode metric = this.objectMapper.readTree((String) response.getBody()).path("metric");
+            return this.objectMapper.treeToValue(metric, MetricDTO.class);
         } catch (JsonProcessingException | NullPointerException e) {
             log.error("JSON process failed. {}", e.getMessage());
             throw new APIException("JSON process failed");

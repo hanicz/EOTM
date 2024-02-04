@@ -1,13 +1,13 @@
 package eye.on.the.money.repository.stock;
 
 import eye.on.the.money.model.stock.Investment;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public interface InvestmentRepository extends CrudRepository<Investment, Long> {
+public interface InvestmentRepository extends JpaRepository<Investment, Long> {
     List<Investment> findByUserEmailOrderByTransactionDate(String userEmail);
 
     List<Investment> findByUserEmailAndBuySellAndTransactionDateBetween(String userEmail, String buySell, Date transactionDateStart, Date transactionDateEnd);

@@ -19,7 +19,6 @@ import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.stock.StockService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -131,17 +130,14 @@ public class WatchListService {
     }
 
     private CryptoWatchDTO convertToCryptoWatchDTO(CryptoWatch cryptoWatch) {
-        this.modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
         return this.modelMapper.map(cryptoWatch, CryptoWatchDTO.class);
     }
 
     private StockWatchDTO convertToStockWatchDTO(TickerWatch tickerWatch) {
-        this.modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
         return this.modelMapper.map(tickerWatch, StockWatchDTO.class);
     }
 
     private ForexWatchDTO convertToForexDTO(ForexWatch forexWatch) {
-        this.modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
         return this.modelMapper.map(forexWatch, ForexWatchDTO.class);
     }
 }

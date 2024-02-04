@@ -21,14 +21,13 @@ public class EmailService {
     private final CredentialRepository credentialRepository;
 
     public void sendMail(String sendTo, String message) {
-        log.trace("Enter");
         SimpleMailMessage smp = new SimpleMailMessage();
         smp.setTo(sendTo);
         smp.setSubject("EOTM Alert");
         smp.setText(message);
         smp.setFrom(this.credentialRepository.findById("email_user").orElseThrow(NoSuchElementException::new).getSecret());
 
-        log.trace("Send alert to {} with message: {}", sendTo, message);
+        log.info("Send alert to {} with message: {}", sendTo, message);
         this.javaMailSender.send(smp);
     }
 }

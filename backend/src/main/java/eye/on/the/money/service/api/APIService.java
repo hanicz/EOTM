@@ -22,29 +22,20 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public abstract class APIService {
 
-
     private final CredentialRepository credentialRepository;
-
     private final ConfigRepository configRepository;
-
     protected final WebClient webClient;
-
-    protected final ObjectMapper mapper;
+    protected final ObjectMapper objectMapper;
 
     protected String createURL(String api, String path, String... params) {
-        log.trace("Enter");
         String stockAPI = this.configRepository.findById(api).orElseThrow(NoSuchElementException::new).getConfigValue();
         Object secret = this.credentialRepository.findById(api).orElseThrow(NoSuchElementException::new).getSecret();
         Object[] array = Stream.concat(Stream.of(secret), Stream.of(params)).toArray();
 
-        String URL = MessageFormat.format(stockAPI + path, array);
-        log.trace(URL);
-        return URL;
+        return MessageFormat.format(stockAPI + path, array);
     }
 
     protected ResponseEntity<?> callGetAPI(String URL, Class<?> cls) {
-        log.trace("Enter");
-
         log.trace("Call to {}", URL);
         ResponseEntity<?> responseEntity = this.webClient
                 .get()
@@ -68,7 +59,7 @@ public abstract class APIService {
 
     protected JsonNode getJsonNodeFromBody(String body) {
         try {
-            return this.mapper.readTree(body);
+            return this.objectMapper.readTree(body);
         } catch (JsonProcessingException e) {
             log.error("JSON process failed: {}", e.getMessage());
             throw new APIException("JSON process failed");

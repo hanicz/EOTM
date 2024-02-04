@@ -11,7 +11,6 @@ import eye.on.the.money.service.UserServiceImpl;
 import eye.on.the.money.service.api.EODAPIService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +33,6 @@ public class ForexTransactionService {
     }
 
     private ForexTransactionDTO convertToForexTransactionDTO(ForexTransaction forexTransaction) {
-        this.modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
         return this.modelMapper.map(forexTransaction, ForexTransactionDTO.class);
     }
 

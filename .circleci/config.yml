@@ -1,6 +1,6 @@
 version: 2.1
 jobs:
-  build:
+  build-and-deploy:
     docker:
       - image: cimg/openjdk:21.0.0
     steps:
@@ -25,10 +25,6 @@ jobs:
             docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
             docker buildx build --load --platform linux/amd64 -t $DOCKERHUB_USERNAME/eotm:latest .
             docker push $DOCKERHUB_USERNAME/eotm:latest
-  deploy:
-    docker:
-      - image: cimg/openjdk:21.0.0
-    steps:
       - add_ssh_keys:
           fingerprints:
             - "${DO_FINGERPRINT}"

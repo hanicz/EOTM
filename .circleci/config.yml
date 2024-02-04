@@ -22,6 +22,8 @@ jobs:
       - run:
           name: Build Docker Image
           command: |
-            docker build -t my_image .
+            docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
+            docker buildx build --load --platform linux/amd64 -t $DOCKERHUB_USERNAME/eotm:latest .
+            docker push $DOCKERHUB_USERNAME/eotm:latest
       
 

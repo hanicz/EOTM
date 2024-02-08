@@ -16,6 +16,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=eotmdb
       - SPRING_DATASOURCE_PASSWORD=.
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_DATA_REDIS_HOST=redis
       - EOTM_KEY=.
   finances:
     image: 'thanicz/finances:0.3'

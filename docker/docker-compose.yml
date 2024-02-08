@@ -48,13 +48,18 @@ services:
       - app
     links:
       - app
-  teamspeak:
-    image: teamspeak:latest
-    environment:
-      - TS3SERVER_LICENSE=accept
-    volumes:
-      - $PWD/data:/data:rw
+  redis:
+    image: redis:latest
     ports:
-      - '9987:9987/udp'
-      - '30033:30033'
-      - '10011:10011'
+      - "6379:6379"
+#  teamspeak:
+#    image: teamspeak:latest
+#    environment:
+#      - TS3SERVER_LICENSE=accept
+#    volumes:
+#      - $PWD/data:/data:rw
+#    ports:
+#      - '9987:9987/udp'
+#      - '30033:30033'
+#      - '10011:10011'
+

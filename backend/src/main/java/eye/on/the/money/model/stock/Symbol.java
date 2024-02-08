@@ -6,6 +6,8 @@ import eye.on.the.money.util.Generated;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
 @Slf4j
@@ -16,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Generated
-public class Symbol {
+public class Symbol implements Serializable {
     @JsonProperty("Name")
     private String name;
     @JsonProperty("Code")

@@ -1,4 +1,4 @@
-package eye.on.the.money.service;
+package eye.on.the.money.service.shared;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.out.CryptoWatchDTO;
@@ -14,6 +14,7 @@ import eye.on.the.money.repository.crypto.CoinRepository;
 import eye.on.the.money.repository.watchlist.CryptoWatchRepository;
 import eye.on.the.money.repository.watchlist.ForexWatchRepository;
 import eye.on.the.money.repository.watchlist.StockWatchRepository;
+import eye.on.the.money.service.user.UserServiceImpl;
 import eye.on.the.money.service.api.CryptoAPIService;
 import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.stock.StockService;

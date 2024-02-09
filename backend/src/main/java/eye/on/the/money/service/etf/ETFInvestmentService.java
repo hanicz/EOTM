@@ -10,8 +10,8 @@ import eye.on.the.money.model.etf.ETFPayment;
 import eye.on.the.money.repository.etf.ETFInvestmentRepository;
 import eye.on.the.money.repository.etf.ETFRepository;
 import eye.on.the.money.repository.forex.CurrencyRepository;
-import eye.on.the.money.service.CSVService;
-import eye.on.the.money.service.UserServiceImpl;
+import eye.on.the.money.service.shared.ICSVService;
+import eye.on.the.money.service.user.UserServiceImpl;
 import eye.on.the.money.service.api.EODAPIService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
-public class ETFInvestmentService {
+public class ETFInvestmentService implements ICSVService {
     private final ETFInvestmentRepository etfInvestmentRepository;
     private final ETFRepository etfRepository;
     private final CurrencyRepository currencyRepository;
@@ -34,7 +34,6 @@ public class ETFInvestmentService {
     private final UserServiceImpl userService;
     private final ModelMapper modelMapper;
     private final ETFPaymentService etfPaymentService;
-    private final CSVService csvService;
 
     public List<ETFInvestmentDTO> getETFInvestments(String userEmail) {
         return this.etfInvestmentRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToETFInvestmentDTO).collect(Collectors.toList());
@@ -132,6 +131,6 @@ public class ETFInvestmentService {
                         .stream()
                         .map(this::convertToETFInvestmentDTO).
                         toList();
-        this.csvService.getCSV(investmentList, writer);
+        this.printRecords(investmentList, writer);
     }
 }

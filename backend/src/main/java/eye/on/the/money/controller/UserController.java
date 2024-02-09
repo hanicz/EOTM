@@ -1,7 +1,7 @@
 package eye.on.the.money.controller;
 
 import eye.on.the.money.model.User;
-import eye.on.the.money.service.UserServiceImpl;
+import eye.on.the.money.service.user.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

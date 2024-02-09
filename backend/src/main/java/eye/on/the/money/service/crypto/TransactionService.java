@@ -12,8 +12,8 @@ import eye.on.the.money.model.crypto.Transaction;
 import eye.on.the.money.repository.crypto.CoinRepository;
 import eye.on.the.money.repository.crypto.TransactionRepository;
 import eye.on.the.money.repository.forex.CurrencyRepository;
-import eye.on.the.money.service.CSVService;
-import eye.on.the.money.service.UserServiceImpl;
+import eye.on.the.money.service.shared.ICSVService;
+import eye.on.the.money.service.user.UserServiceImpl;
 import eye.on.the.money.service.api.CryptoAPIService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class TransactionService {
+public class TransactionService implements ICSVService {
 
     private final TransactionRepository transactionRepository;
     private final PaymentService paymentService;
@@ -45,7 +45,6 @@ public class TransactionService {
     private final CoinRepository coinRepository;
     private final ModelMapper modelMapper;
     private final CryptoAPIService cryptoAPIService;
-    private final CSVService csvService;
 
     private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -145,12 +144,12 @@ public class TransactionService {
                         .stream()
                         .map(this::convertToTransactionDTO)
                         .toList();
-        this.csvService.getCSV(transactionList, writer);
+        this.printRecords(transactionList, writer);
     }
 
     @Transactional
     public void processCSV(String userEmail, MultipartFile file) {
-        try (CSVParser csvParser = this.csvService.getParser(file,
+        try (CSVParser csvParser = this.getParser(file,
                 new String[]{"Transaction Id", "Quantity", "Type", "Transaction Date", "Symbol", "Amount", "Currency", "Fee"})) {
             for (CSVRecord csvRecord : csvParser) {
                 TransactionDTO transaction = TransactionDTO.createFromCSVRecord(csvRecord, FORMATTER);

@@ -19,7 +19,7 @@ public class RedditController {
     private final RedditService redditService;
 
     @GetMapping
-    public ResponseEntity<List<RedditPostDTO>> getToken() {
+    public ResponseEntity<List<RedditPostDTO>> getHotPosts() {
         return new ResponseEntity<>(this.redditService.getHotNewsFromSubreddits(), HttpStatus.OK);
     }
 }

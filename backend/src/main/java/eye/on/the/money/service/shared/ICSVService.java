@@ -1,11 +1,10 @@
-package eye.on.the.money.service;
+package eye.on.the.money.service.shared;
 
 import eye.on.the.money.dto.CSVHelper;
 import eye.on.the.money.exception.CSVException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
-import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
@@ -15,13 +14,12 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-@Service
-public class CSVService {
+public interface ICSVService {
 
-    public void getCSV(List<? extends CSVHelper> dtoList, Writer writer) {
+    default <T extends CSVHelper> void printRecords(List<T> dtoList, Writer writer) {
         try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
             if (!dtoList.isEmpty()) {
-                csvPrinter.printRecord(dtoList.get(0).getHeaders());
+                csvPrinter.printRecord(dtoList.getFirst().getHeaders());
             }
             for (CSVHelper record : dtoList) {
                 csvPrinter.printRecord(record.getCSVRecord());
@@ -31,7 +29,7 @@ public class CSVService {
         }
     }
 
-    public CSVParser getParser(MultipartFile file, String[] headers) throws IOException {
+    default CSVParser getParser(MultipartFile file, String[] headers) throws IOException {
         BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
         return new CSVParser(fileReader, CSVFormat.Builder.create()
                 .setHeader(headers)

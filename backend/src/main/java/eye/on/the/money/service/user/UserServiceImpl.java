@@ -1,4 +1,4 @@
-package eye.on.the.money.service;
+package eye.on.the.money.service.user;
 
 import eye.on.the.money.model.User;
 import eye.on.the.money.repository.UserRepository;

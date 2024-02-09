@@ -6,7 +6,7 @@ import eye.on.the.money.model.User;
 import eye.on.the.money.model.alert.StockAlert;
 import eye.on.the.money.repository.UserRepository;
 import eye.on.the.money.repository.alert.StockAlertRepository;
-import eye.on.the.money.service.AlertService;
+import eye.on.the.money.service.shared.AlertService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,7 +1,7 @@
 package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.out.StockAlertDTO;
-import eye.on.the.money.service.AlertService;
+import eye.on.the.money.service.shared.AlertService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

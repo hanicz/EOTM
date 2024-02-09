@@ -5,7 +5,7 @@ import eye.on.the.money.dto.out.ForexWatchDTO;
 import eye.on.the.money.dto.out.StockWatchDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Stock;
-import eye.on.the.money.service.WatchListService;
+import eye.on.the.money.service.shared.WatchListService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,10 +1,11 @@
-package eye.on.the.money.service;
+package eye.on.the.money.service.shared;
 
 import eye.on.the.money.dto.out.StockAlertDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.alert.StockAlert;
 import eye.on.the.money.model.stock.Stock;
 import eye.on.the.money.repository.alert.StockAlertRepository;
+import eye.on.the.money.service.user.UserServiceImpl;
 import eye.on.the.money.service.stock.StockService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

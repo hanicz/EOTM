@@ -7,7 +7,7 @@ import eye.on.the.money.model.User;
 import eye.on.the.money.model.forex.ForexTransaction;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.forex.ForexTransactionRepository;
-import eye.on.the.money.service.UserServiceImpl;
+import eye.on.the.money.service.user.UserServiceImpl;
 import eye.on.the.money.service.api.EODAPIService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;

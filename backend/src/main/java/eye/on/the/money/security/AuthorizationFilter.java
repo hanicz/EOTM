@@ -1,6 +1,6 @@
 package eye.on.the.money.security;
 
-import eye.on.the.money.service.UserServiceImpl;
+import eye.on.the.money.service.user.UserServiceImpl;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;

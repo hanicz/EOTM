@@ -2,7 +2,7 @@ package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.out.StockAlertDTO;
 import eye.on.the.money.model.User;
-import eye.on.the.money.service.AlertService;
+import eye.on.the.money.service.shared.AlertService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

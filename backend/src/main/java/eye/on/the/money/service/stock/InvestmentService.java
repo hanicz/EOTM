@@ -10,8 +10,8 @@ import eye.on.the.money.model.stock.Stock;
 import eye.on.the.money.model.stock.StockPayment;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.stock.InvestmentRepository;
-import eye.on.the.money.service.CSVService;
-import eye.on.the.money.service.UserServiceImpl;
+import eye.on.the.money.service.shared.ICSVService;
+import eye.on.the.money.service.user.UserServiceImpl;
 import eye.on.the.money.service.api.EODAPIService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class InvestmentService {
+public class InvestmentService implements ICSVService {
 
     private final InvestmentRepository investmentRepository;
     private final CurrencyRepository currencyRepository;
@@ -43,7 +43,6 @@ public class InvestmentService {
     private final ModelMapper modelMapper;
     private final EODAPIService eodAPIService;
     private final StockService stockService;
-    private final CSVService csvService;
 
     private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -142,12 +141,12 @@ public class InvestmentService {
                         .stream()
                         .map(this::convertToInvestmentDTO)
                         .toList();
-        this.csvService.getCSV(investmentList, writer);
+        this.printRecords(investmentList, writer);
     }
 
     @Transactional
     public void processCSV(String userEmail, MultipartFile file) {
-        try (CSVParser csvParser = this.csvService.getParser(file,
+        try (CSVParser csvParser = this.getParser(file,
                 new String[]{"Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Amount", "Currency", "Fee"})) {
             for (CSVRecord csvRecord : csvParser) {
                 InvestmentDTO investment = InvestmentDTO.createFromCSVRecord(csvRecord, FORMATTER);

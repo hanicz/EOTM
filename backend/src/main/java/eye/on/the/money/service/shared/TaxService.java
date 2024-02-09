@@ -1,4 +1,4 @@
-package eye.on.the.money.service;
+package eye.on.the.money.service.shared;
 
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.tax.MNBRate;

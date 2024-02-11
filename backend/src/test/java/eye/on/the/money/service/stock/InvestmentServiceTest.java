@@ -113,4 +113,8 @@ class InvestmentServiceTest {
         this.modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
         return this.modelMapper.map(investment, InvestmentDTO.class);
     }
+
+    public void testGetCSVWithMocks() {
+
+    }
 }

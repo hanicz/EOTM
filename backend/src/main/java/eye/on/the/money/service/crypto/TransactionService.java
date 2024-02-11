@@ -125,6 +125,8 @@ public class TransactionService implements ICSVService {
         return this.convertToTransactionDTO(transaction);
     }
 
+
+
     private Map<String, TransactionDTO> getCalculated(String userEmail) {
         List<TransactionDTO> transactions = this.transactionRepository.findByUserEmailOrderByTransactionDate(userEmail).stream()
                 .map(this::convertToTransactionDTO).toList();

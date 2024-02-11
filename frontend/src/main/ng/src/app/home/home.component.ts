@@ -1,6 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { News } from '../model/news';
-import { NewsService } from '../service/news.service';
 
 @Component({
   selector: 'app-home',
@@ -12,7 +10,7 @@ export class HomeComponent implements OnInit {
   selectedType = 'category/general';
   options: any[];
 
-  constructor(private newsService: NewsService) {
+  constructor() {
     this.options = [
       { label: 'Reddit', value: 'category/reddit' },
       { label: 'General', value: 'category/general' },
@@ -22,9 +20,5 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit(): void {
-  }
-
-  typeChanged() {
-
   }
 }

@@ -21,4 +21,6 @@ public class RedditPostDTO {
     private String thumbnail;
     private boolean stickied;
     private String permalink;
+    private Long created;
+    private String subreddit;
 }

@@ -63,3 +63,8 @@ INSERT INTO EOTM_CREDENTIAL (NAME,SECRET) VALUES ('email_user', 'user'),
 ('email_password', 'password'),
 ('eod', 'token'),
 ('finnhub', 'token');
+
+--Test coin watch
+INSERT INTO EOTM_COIN_WATCH (USER_ID, COIN_ID) VALUES
+(1, 'cardano'),
+(1, 'bitcoin');

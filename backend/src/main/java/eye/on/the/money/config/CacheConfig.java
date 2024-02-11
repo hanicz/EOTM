@@ -22,6 +22,6 @@ public class CacheConfig {
                 .withCacheConfiguration("symbols",
                         RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofDays(3L)))
                 .withCacheConfiguration("token",
-                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(5L)));
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(23L)));
     }
 }

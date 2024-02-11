@@ -5,11 +5,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eye.on.the.money.dto.in.RedditPostDTO;
 import eye.on.the.money.exception.JsonException;
+import eye.on.the.money.model.news.News;
 import eye.on.the.money.model.reddit.SubReddit;
 import eye.on.the.money.repository.reddit.SubredditRepository;
 import eye.on.the.money.service.api.RedditAPIService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -25,8 +27,13 @@ public class RedditService {
     private final RedditAPIService redditAPIService;
     private final SubredditRepository subredditRepository;
     private final ObjectMapper objectMapper;
+    @Value("${reddit.url}")
+    private String redditUrl;
+    @Value("${reddit.logo}")
+    private String redditLogo;
 
-    public List<RedditPostDTO> getHotNewsFromSubreddits() {
+
+    public List<News> getHotNewsFromSubreddits() {
         List<SubReddit> subRedditList = this.subredditRepository.findAll();
         JsonNode token = this.redditAPIService.getToken();
         Flux<JsonNode> subRedditsFlux = this.redditAPIService.getHotRedditNews(
@@ -36,8 +43,12 @@ public class RedditService {
         return subRedditsFlux
                 .map(jsonNode -> jsonNode.findValue("children").findValues("data"))
                 .collectList().block()
-                .stream().flatMap(Collection::stream).map(data -> this.convert(data, RedditPostDTO.class))
-                .filter(post -> !post.isStickied()).toList();
+                .stream()
+                .flatMap(Collection::stream)
+                .map(data -> this.convert(data, RedditPostDTO.class))
+                .filter(post -> !post.isStickied())
+                .map(this::convertPostToNews)
+                .toList();
     }
 
     private <T> T convert(JsonNode json, Class<T> cls) {
@@ -47,5 +58,18 @@ public class RedditService {
             log.error("Unable to process reddit response. {}", e.getMessage(), e);
             throw new JsonException("Unable to process reddit response");
         }
+    }
+
+    private News convertPostToNews(RedditPostDTO post) {
+        return News.builder()
+                .id(post.getCreated())
+                .image("self".equals(post.getThumbnail()) || post.getThumbnail().isBlank() ? this.redditLogo : post.getThumbnail())
+                .url(this.redditUrl + post.getPermalink())
+                .category("Reddit")
+                .datetime(post.getCreated())
+                .headline(post.getTitle())
+                .source(post.getSubreddit())
+                .summary(post.getSelftext())
+                .build();
     }
 }

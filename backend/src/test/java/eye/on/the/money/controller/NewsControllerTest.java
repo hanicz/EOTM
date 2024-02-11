@@ -2,6 +2,7 @@ package eye.on.the.money.controller;
 
 import eye.on.the.money.model.news.News;
 import eye.on.the.money.service.api.NewsAPIService;
+import eye.on.the.money.service.reddit.RedditService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +24,8 @@ class NewsControllerTest {
 
     @Mock
     private NewsAPIService newsAPIService;
+    @Mock
+    private RedditService redditService;
 
     @InjectMocks
     private NewsController newsController;
@@ -45,6 +48,15 @@ class NewsControllerTest {
         ResponseEntity<List<News>> result = this.newsController.getCompanyNews("symbol");
 
         Assertions.assertEquals(news, result.getBody());
+    }
+
+    @Test
+    public void getRedditNews() {
+        List<News> newsList = this.createNewsList();
+        when(this.redditService.getHotNewsFromSubreddits()).thenReturn(newsList);
+
+        ResponseEntity<List<News>> result = this.newsController.getHotPosts();
+        Assertions.assertEquals(newsList, result.getBody());
     }
 
     private List<News> createNewsList() {

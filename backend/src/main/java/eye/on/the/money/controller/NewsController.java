@@ -2,6 +2,7 @@ package eye.on.the.money.controller;
 
 import eye.on.the.money.model.news.News;
 import eye.on.the.money.service.api.NewsAPIService;
+import eye.on.the.money.service.reddit.RedditService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,12 @@ import java.util.List;
 public class NewsController {
 
     private final NewsAPIService newsAPIService;
+    private final RedditService redditService;
 
+    @GetMapping("category/reddit")
+    public ResponseEntity<List<News>> getHotPosts() {
+        return new ResponseEntity<>(this.redditService.getHotNewsFromSubreddits(), HttpStatus.OK);
+    }
 
     @GetMapping("category/{category}")
     public ResponseEntity<List<News>> getGeneralNews(@PathVariable String category) {

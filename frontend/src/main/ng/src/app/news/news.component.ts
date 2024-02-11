@@ -24,7 +24,7 @@ export class NewsComponent implements OnInit {
     this.newsLoading = true;
     if (this.type != undefined && this.type != '') {
       this.newsService.getNews(this.type).subscribe({
-        next: (data) => {
+        next: (data) => { 
           this.newsLoading = false;
           this.news = data;
         }

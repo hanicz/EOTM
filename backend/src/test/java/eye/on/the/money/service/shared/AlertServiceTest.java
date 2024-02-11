@@ -1,4 +1,4 @@
-package eye.on.the.money.service;
+package eye.on.the.money.service.shared;
 
 import eye.on.the.money.EotmApplication;
 import eye.on.the.money.dto.out.StockAlertDTO;

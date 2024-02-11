@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -70,5 +71,11 @@ public class ETFController {
     public ResponseEntity<ETFInvestmentDTO> updateInvestment(@AuthenticationPrincipal UserDetails user, @RequestBody ETFInvestmentDTO investmentDTO) {
         log.trace("Enter");
         return new ResponseEntity<>(this.etfInvestmentService.updateInvestment(investmentDTO, user.getUsername()), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/process/csv")
+    public ResponseEntity<HttpStatus> processCSV(@AuthenticationPrincipal UserDetails user, @RequestParam("file") MultipartFile file) throws IOException {
+        this.etfInvestmentService.processCSV(user.getUsername(), file);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }

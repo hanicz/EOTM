@@ -57,4 +57,13 @@ export class ForexService {
       headers: this.helper.getHeadersWithToken(),
     });
   }
+
+  uploadCSV(file: File) {
+    const formData = new FormData();
+    formData.append('file', file, 'file.csv')
+    const url = `${this.forexUrl}/process/csv`;
+    return this.http.post<any>(url, formData, {
+      headers: this.helper.getAuthHeaders(),
+    });
+  }
 }

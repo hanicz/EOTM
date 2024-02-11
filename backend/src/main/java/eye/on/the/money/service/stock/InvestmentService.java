@@ -147,7 +147,7 @@ public class InvestmentService implements ICSVService {
     @Transactional
     public void processCSV(String userEmail, MultipartFile file) {
         try (CSVParser csvParser = this.getParser(file,
-                new String[]{"Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Amount", "Currency", "Fee"})) {
+                new String[]{"Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Exchange", "Amount", "Currency", "Fee"})) {
             for (CSVRecord csvRecord : csvParser) {
                 InvestmentDTO investment = InvestmentDTO.createFromCSVRecord(csvRecord, FORMATTER);
 

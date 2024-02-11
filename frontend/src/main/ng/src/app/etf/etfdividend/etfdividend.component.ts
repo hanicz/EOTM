@@ -71,7 +71,7 @@ export class EtfdividendComponent implements OnInit {
   download() {
     this.etfDividendService.download().subscribe({
       next: (data) => {
-        let fileName = 'dividends.csv';
+        let fileName = 'etfdividends.csv';
         let a = document.createElement('a');
         a.href = window.URL.createObjectURL(data as Blob);
         a.download = fileName;

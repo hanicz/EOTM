@@ -105,13 +105,13 @@ export class EtfinvestmentComponent implements OnInit {
   }
 
   onUpload(event: any) {
- /*   for (let file of event.files) {
-      this.stockService.uploadCSV(file).subscribe({
+    for (let file of event.files) {
+      this.etfService.uploadCSV(file).subscribe({
         next: () => {
           this.fetchData();
           this.fileUpload.clear();
         }
       });
-    }*/
+    }
   }
 }

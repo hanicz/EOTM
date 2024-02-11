@@ -2,6 +2,7 @@ package eye.on.the.money.service.etf;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.out.ETFInvestmentDTO;
+import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.etf.ETF;
@@ -10,22 +11,30 @@ import eye.on.the.money.model.etf.ETFPayment;
 import eye.on.the.money.repository.etf.ETFInvestmentRepository;
 import eye.on.the.money.repository.etf.ETFRepository;
 import eye.on.the.money.repository.forex.CurrencyRepository;
+import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.user.UserServiceImpl;
-import eye.on.the.money.service.api.EODAPIService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.Writer;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ETFInvestmentService implements ICSVService {
     private final ETFInvestmentRepository etfInvestmentRepository;
     private final ETFRepository etfRepository;
@@ -34,6 +43,8 @@ public class ETFInvestmentService implements ICSVService {
     private final UserServiceImpl userService;
     private final ModelMapper modelMapper;
     private final ETFPaymentService etfPaymentService;
+
+    private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public List<ETFInvestmentDTO> getETFInvestments(String userEmail) {
         return this.etfInvestmentRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToETFInvestmentDTO).collect(Collectors.toList());
@@ -132,5 +143,28 @@ public class ETFInvestmentService implements ICSVService {
                         .map(this::convertToETFInvestmentDTO).
                         toList();
         this.printRecords(investmentList, writer);
+    }
+
+    @Transactional
+    public void processCSV(String userEmail, MultipartFile file) {
+        try (CSVParser csvParser = this.getParser(file,
+                new String[]{"Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Exchange", "Amount", "Currency", "Fee"})) {
+            for (CSVRecord csvRecord : csvParser) {
+                ETFInvestmentDTO investment = ETFInvestmentDTO.createFromCSVRecord(csvRecord, FORMATTER);
+
+                if (investment.getId() != null &&
+                        this.etfInvestmentRepository.findByIdAndUserEmail(investment.getId(), userEmail).isPresent()) {
+                    log.trace("Update etf investment {}", investment);
+                    this.updateInvestment(investment, userEmail);
+                } else {
+                    investment.setId(null);
+                    log.trace("Create etf investment {}", investment);
+                    this.createInvestment(investment, userEmail);
+                }
+            }
+        } catch (IOException | DateTimeParseException e) {
+            log.error("Error while processing CSV", e);
+            throw new CSVException("Failed to parse CSV file: " + e.getMessage(), e);
+        }
     }
 }

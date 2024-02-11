@@ -104,6 +104,15 @@ export class ForextransactionComponent {
     }
   }
 
-  onUpload(event: any) {}
+  onUpload(event: any) {
+    for (let file of event.files) {
+      this.forexService.uploadCSV(file).subscribe({
+        next: () => {
+          this.fetchData();
+          this.fileUpload.clear();
+        }
+      });
+    }
+  }
 
 }

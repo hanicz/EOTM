@@ -58,13 +58,13 @@ public class InvestmentDTO implements CSVHelper {
 
     @Override
     public Object[] getHeaders() {
-        return new String[]{"Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Amount", "Currency", "Fee"};
+        return new String[]{"Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Exchange", "Amount", "Currency", "Fee"};
     }
 
     @Override
     public Object[] getCSVRecord() {
         return new Object[]{this.getInvestmentId(), this.getQuantity(),
-                this.getBuySell(), this.getTransactionDate(), this.getShortName(),
+                this.getBuySell(), this.getTransactionDate(), this.getShortName(), this.getExchange(),
                 this.getAmount(), this.getCurrencyId(), this.getFee()};
     }
 
@@ -77,6 +77,7 @@ public class InvestmentDTO implements CSVHelper {
                 .quantity(Integer.parseInt(csvRecord.get("Quantity")))
                 .currencyId(csvRecord.get("Currency"))
                 .shortName(csvRecord.get("Short Name"))
+                .exchange(csvRecord.get("Exchange"))
                 .fee(Double.parseDouble(csvRecord.get("Fee")))
                 .build();
     }

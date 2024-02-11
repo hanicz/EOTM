@@ -62,5 +62,4 @@ public class ETFDividendController {
         this.etfDividendService.processCSV(user.getUsername(), file);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
-
 }

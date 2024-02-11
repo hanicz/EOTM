@@ -100,7 +100,7 @@ public class ETFDividendService implements ICSVService {
     @Transactional
     public void processCSV(String userEmail, MultipartFile file) {
         try (CSVParser csvParser = this.getParser(file,
-                new String[]{"Dividend Id", "Amount", "Dividend Date", "Short Name", "Currency"})) {
+                new String[]{"Dividend Id", "Amount", "Dividend Date", "Short Name","Exchange", "Currency"})) {
             for (CSVRecord csvRecord : csvParser) {
                 ETFDividendDTO dividend = ETFDividendDTO.createFromCSVRecord(csvRecord, FORMATTER);
 

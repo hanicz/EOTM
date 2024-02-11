@@ -34,13 +34,13 @@ public class ETFDividendDTO implements CSVHelper {
 
     @Override
     public Object[] getHeaders() {
-        return new String[]{"Dividend Id", "Amount", "Dividend Date", "Short Name", "Currency"};
+        return new String[]{"Dividend Id", "Amount", "Dividend Date", "Short Name", "Exchange", "Currency"};
     }
 
     @Override
     public Object[] getCSVRecord() {
         return new Object[]{this.getId(), this.getAmount(),
-                this.getDividendDate(), this.getShortName(),
+                this.getDividendDate(), this.getShortName(), this.getExchange(),
                 this.getCurrencyId()};
     }
 
@@ -51,6 +51,7 @@ public class ETFDividendDTO implements CSVHelper {
                 .amount(Double.parseDouble(csvRecord.get("Amount")))
                 .currencyId(csvRecord.get("Currency"))
                 .shortName(csvRecord.get("Short Name"))
+                .exchange(csvRecord.get("Exchange"))
                 .build();
     }
 }

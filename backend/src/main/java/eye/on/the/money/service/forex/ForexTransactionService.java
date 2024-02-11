@@ -2,31 +2,44 @@ package eye.on.the.money.service.forex;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.out.ForexTransactionDTO;
+import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.forex.ForexTransaction;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.forex.ForexTransactionRepository;
-import eye.on.the.money.service.user.UserServiceImpl;
 import eye.on.the.money.service.api.EODAPIService;
+import eye.on.the.money.service.shared.ICSVService;
+import eye.on.the.money.service.user.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
-public class ForexTransactionService {
+@Slf4j
+public class ForexTransactionService implements ICSVService {
 
     private final CurrencyRepository currencyRepository;
     private final ForexTransactionRepository forexTransactionRepository;
     private final UserServiceImpl userService;
     private final ModelMapper modelMapper;
     private final EODAPIService eodAPIService;
+
+    private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public List<ForexTransactionDTO> getForexTransactionsByUserId(String userEmail) {
         return this.forexTransactionRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToForexTransactionDTO).collect(Collectors.toList());
@@ -106,5 +119,37 @@ public class ForexTransactionService {
             forexTransactionMap.compute(symbol, (key, value) -> (value == null) ? ft : value.mergeTransactions(ft));
         }
         return forexTransactionMap;
+    }
+
+    public void getCSV(String userEmail, Writer writer) {
+        List<ForexTransactionDTO> forexList =
+                this.forexTransactionRepository.findByUserEmailOrderByTransactionDate(userEmail)
+                        .stream()
+                        .map(this::convertToForexTransactionDTO)
+                        .toList();
+        this.printRecords(forexList, writer);
+    }
+
+    @Transactional
+    public void processCSV(String userEmail, MultipartFile file) {
+        try (CSVParser csvParser = this.getParser(file,
+                new String[]{"Transaction Id", "From Amount", "To Amount", "Type", "Transaction Date", "Change Rate", "From Currency", "To Currency"})) {
+            for (CSVRecord csvRecord : csvParser) {
+                ForexTransactionDTO transaction = ForexTransactionDTO.createFromCSVRecord(csvRecord, FORMATTER);
+
+                if (transaction.getForexTransactionId() != null &&
+                        this.forexTransactionRepository.findByIdAndUserEmail(transaction.getForexTransactionId(), userEmail).isPresent()) {
+                    log.trace("Update forex transaction {}", transaction);
+                    this.updateForexTransaction(transaction, userEmail);
+                } else {
+                    transaction.setForexTransactionId(null);
+                    log.trace("Create forex transaction {}", transaction);
+                    this.createForexTransaction(transaction, userEmail);
+                }
+            }
+        } catch (IOException | DateTimeParseException e) {
+            log.error("Error while processing CSV", e);
+            throw new CSVException("Failed to parse CSV file: " + e.getMessage(), e);
+        }
     }
 }

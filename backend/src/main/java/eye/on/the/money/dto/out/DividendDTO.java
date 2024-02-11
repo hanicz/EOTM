@@ -34,13 +34,13 @@ public class DividendDTO implements CSVHelper {
 
     @Override
     public Object[] getHeaders() {
-        return new String[]{"Dividend Id", "Amount", "Dividend Date", "Short Name", "Currency"};
+        return new String[]{"Dividend Id", "Amount", "Dividend Date", "Short Name", "Exchange", "Currency"};
     }
 
     @Override
     public Object[] getCSVRecord() {
         return new Object[]{this.getDividendId(), this.getAmount(),
-                this.getDividendDate(), this.getShortName(), this.getCurrencyId()};
+                this.getDividendDate(), this.getShortName(), this.getExchange(), this.getCurrencyId()};
     }
 
     public static DividendDTO createFromCSVRecord(CSVRecord csvRecord, DateTimeFormatter formatter) {
@@ -50,6 +50,7 @@ public class DividendDTO implements CSVHelper {
                 .amount(Double.parseDouble(csvRecord.get("Amount")))
                 .currencyId(csvRecord.get("Currency"))
                 .shortName(csvRecord.get("Short Name"))
+                .exchange(csvRecord.get("Exchange"))
                 .build();
     }
 }

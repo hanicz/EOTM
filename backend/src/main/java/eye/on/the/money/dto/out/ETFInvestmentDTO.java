@@ -7,8 +7,10 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import eye.on.the.money.dto.CSVHelper;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.csv.CSVRecord;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Getter
 @Setter
@@ -61,5 +63,19 @@ public class ETFInvestmentDTO implements CSVHelper {
     public Object[] getCSVRecord() {
         return new Object[]{this.getId(), this.getQuantity(), this.getBuySell(), this.getTransactionDate(),
                 this.getShortName(), this.getExchange(), this.getAmount(), this.getCurrencyId(), this.getFee()};
+    }
+
+    public static ETFInvestmentDTO createFromCSVRecord(CSVRecord csvRecord, DateTimeFormatter formatter) {
+        return ETFInvestmentDTO.builder()
+                .id(csvRecord.get("Investment Id").isBlank() ? null : Long.parseLong(csvRecord.get("Investment Id")))
+                .buySell(csvRecord.get("Type"))
+                .transactionDate(LocalDate.parse(csvRecord.get("Transaction Date"), formatter))
+                .amount(Double.parseDouble(csvRecord.get("Amount")))
+                .quantity(Integer.parseInt(csvRecord.get("Quantity")))
+                .currencyId(csvRecord.get("Currency"))
+                .shortName(csvRecord.get("Short Name"))
+                .exchange(csvRecord.get("Exchange"))
+                .fee(Double.parseDouble(csvRecord.get("Fee")))
+                .build();
     }
 }

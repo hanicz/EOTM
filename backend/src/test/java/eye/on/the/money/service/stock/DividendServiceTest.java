@@ -137,8 +137,8 @@ class DividendServiceTest {
         Writer writer = new StringWriter();
         this.dividendService.getCSV(this.user.getUsername(), writer);
         assertAll(
-                () -> assertTrue(writer.toString().contains("Dividend Id,Amount,Dividend Date,Short Name,Currency")),
-                () -> assertTrue(writer.toString().contains("2,225.0,2021-08-03,CRSR,HUF"))
+                () -> assertTrue(writer.toString().contains("Dividend Id,Amount,Dividend Date,Short Name,Exchange,Currency")),
+                () -> assertTrue(writer.toString().contains("2,225.0,2021-08-03,CRSR,US,HUF"))
         );
     }
 
@@ -151,7 +151,7 @@ class DividendServiceTest {
 
     @Test
     public void processCSV_Update() {
-        String csvContent = "Dividend Id,Amount,Dividend Date,Short Name,Currency\n1,250.0,2021-06-03,CRSR,HUF";
+        String csvContent = "Dividend Id,Amount,Dividend Date,Short Name,Exchange,Currency\n1,250.0,2021-06-03,CRSR,US,HUF";
         MultipartFile mpf = new MockMultipartFile("file", "file.csv", MediaType.TEXT_PLAIN_VALUE, csvContent.getBytes());
 
         this.dividendService.processCSV(this.user.getUsername(), mpf);
@@ -163,7 +163,7 @@ class DividendServiceTest {
 
     @Test
     public void processCSV_Create() {
-        String csvContent = "Dividend Id,Amount,Dividend Date,Short Name,Currency\n,299.0,2021-06-03,INTC,USD";
+        String csvContent = "Dividend Id,Amount,Dividend Date,Short Name,Exchange,Currency\n,299.0,2021-06-03,INTC,US,USD";
         MultipartFile mpf = new MockMultipartFile("file", "file.csv", MediaType.TEXT_PLAIN_VALUE, csvContent.getBytes());
 
         this.dividendService.processCSV(this.user.getUsername(), mpf);

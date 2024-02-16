@@ -42,8 +42,6 @@ public class AlertScheduler {
         AlertScheduler.messageMap.put("PRICE_UNDER", "{0} is under {1} price point");
     }
 
-
-    //@Scheduled(fixedDelay = 300000)
     public void checkAlerts() {
         log.trace("Enter");
         Thread stockThread = Thread.ofVirtual().start(this::checkStockAlerts);

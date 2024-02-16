@@ -43,7 +43,7 @@ public class AlertScheduler {
     }
 
 
-    @Scheduled(fixedDelay = 300000)
+    //@Scheduled(fixedDelay = 300000)
     public void checkAlerts() {
         log.trace("Enter");
         Thread stockThread = Thread.ofVirtual().start(this::checkStockAlerts);

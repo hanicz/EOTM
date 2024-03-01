@@ -12,6 +12,7 @@ import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.mail.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.text.MessageFormat;
@@ -41,6 +42,7 @@ public class AlertScheduler {
         AlertScheduler.messageMap.put("PRICE_UNDER", "{0} is under {1} price point");
     }
 
+    @Scheduled(fixedDelay = 300000)
     public void checkAlerts() {
         log.trace("Enter");
         Thread stockThread = Thread.ofVirtual().start(this::checkStockAlerts);

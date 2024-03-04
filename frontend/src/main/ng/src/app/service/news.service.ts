@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { News } from '../model/news';
 import { ResourceHelper } from '../util/servicehelper';
 import { environment } from '../../environments/environment';
+import { Subreddit } from '../model/subreddit';
 
 @Injectable({
   providedIn: 'root'
@@ -28,4 +29,11 @@ export class NewsService {
       headers: this.helper.getHeadersWithToken()
     });
   };
+
+  getSubreddits() {
+    const url = `${this.newsUrl}/reddit`;
+    return this.http.get<Subreddit[]>(url, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  }
 }

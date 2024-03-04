@@ -172,5 +172,31 @@
                 </ng-template>
             </p-table>
         </p-tabPanel>
+        <p-tabPanel header="Forex">
+            <div class="grid">
+                <div class="col-12 pt-3">
+                    <span class="p-float-label">
+                        <input type="text" pInputText [(ngModel)]="toForex" id="toForex"/>
+                        <label htmlFor="toForex">To</label>
+                    </span>
+                </div>
+                <div class="col-12 pt-3">
+                    <span class="p-float-label">
+                        <input type="text" pInputText [(ngModel)]="fromForex" id="fromForex"/>
+                        <label htmlFor="fromForex">From</label>
+                    </span>
+                </div>
+                <div class="col-2 col-offset-5">
+                    <button pButton pRipple type="button" icon="fas fa-plus" (click)="createForexWatch()"
+                        class="p-button-rounded p-button-text ml-2 p-button-success"
+                        *ngIf="!checkForexContain()">Add</button>
+                </div>
+                <div class="col-2 col-offset-5">
+                    <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteForexWatch()"
+                        class="p-button-rounded p-button-text ml-2 p-button-danger"
+                        *ngIf="checkForexContain()">Delete</button>
+                </div>
+            </div>
+        </p-tabPanel>
     </p-tabView>
 </p-dialog>

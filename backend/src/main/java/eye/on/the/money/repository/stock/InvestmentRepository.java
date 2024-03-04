@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface InvestmentRepository extends JpaRepository<Investment, Long> {
+    List<Investment> findByUserEmailOrderByTransactionDateDesc(String userEmail);
     List<Investment> findByUserEmailOrderByTransactionDate(String userEmail);
+    List<Investment> findByUserEmailAndAccountIdOrderByTransactionDate(String userEmail, Long accountId);
 
     List<Investment> findByUserEmailAndBuySellAndTransactionDateBetween(String userEmail, String buySell, Date transactionDateStart, Date transactionDateEnd);
 

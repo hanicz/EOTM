@@ -30,6 +30,8 @@ export class WatchlistComponent implements OnInit {
   globals: Globals;
   display: boolean = false;
   assetUrl: string;
+  fromForex: string = '';
+  toForex: string = '';
   selectedStock: Symbol = {} as Symbol;
   selectedExchange: Exchange = {} as Exchange;
 
@@ -129,10 +131,10 @@ export class WatchlistComponent implements OnInit {
     return this.cryptoWatchList.some(c => c.name === name)
   }
 
-  deleteStockWatch() {
-    let id = this.globals.stockWatchList.find(s => s.stockShortName === this.selectedStock.Code);
-    this.deleteWatch(`/stock/${id?.tickerWatchId}`);
+  checkForexContain() {
+    return this.forexWatchList.some(f => f.fromCurrencyId === this.fromForex && f.toCurrencyId === this.toForex)
   }
+
 
   createStockWatch() {
     this.watchlistService.createNewStockWatch(this.selectedStock, this.selectedExchange).subscribe({
@@ -143,17 +145,12 @@ export class WatchlistComponent implements OnInit {
     });
   }
 
-  deleteCryptoWatch(name: string) {
-    let id = this.cryptoWatchList.find(c => c.name === name);
-    this.deleteWatch(`/crypto/${id?.cryptoWatchId}`);
-  }
-
   createCryptoWatch(id: string) {
     this.createWatch(`/crypto/${id}`);
   }
 
-  deleteWatch(path: string) {
-    this.watchlistService.deleteWatch(path).subscribe({
+  createForexWatch() {
+    this.watchlistService.createNewForexWatch(this.fromForex, this.toForex).subscribe({
       next: () => {
         this.display = false;
         this.fetchData();
@@ -163,6 +160,30 @@ export class WatchlistComponent implements OnInit {
 
   createWatch(path: string) {
     this.watchlistService.createWatch(path).subscribe({
+      next: () => {
+        this.display = false;
+        this.fetchData();
+      }
+    });
+  }
+
+  deleteForexWatch() {
+    let id = this.forexWatchList.find(f => f.fromCurrencyId === this.fromForex && f.toCurrencyId === this.toForex)
+    this.deleteWatch(`/forex/${id?.forexWatchID}`);
+  }
+
+  deleteStockWatch() {
+    let id = this.globals.stockWatchList.find(s => s.stockShortName === this.selectedStock.Code);
+    this.deleteWatch(`/stock/${id?.tickerWatchId}`);
+  }
+  
+  deleteCryptoWatch(name: string) {
+    let id = this.cryptoWatchList.find(c => c.name === name);
+    this.deleteWatch(`/crypto/${id?.cryptoWatchId}`);
+  }
+
+  deleteWatch(path: string) {
+    this.watchlistService.deleteWatch(path).subscribe({
       next: () => {
         this.display = false;
         this.fetchData();

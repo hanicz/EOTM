@@ -1,6 +1,7 @@
 package eye.on.the.money.dto.out;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
@@ -36,6 +37,8 @@ public class InvestmentDTO implements CSVHelper {
     private Double valueDiff;
     private Double fee;
     private String name;
+    private String accountName;
+    private Long accountId;
 
     public InvestmentDTO mergeInvestments(InvestmentDTO other) {
         if (!this.getShortName().equals(other.getShortName()))
@@ -57,15 +60,18 @@ public class InvestmentDTO implements CSVHelper {
 
 
     @Override
+    @JsonIgnore
     public Object[] getHeaders() {
-        return new String[]{"Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Exchange", "Amount", "Currency", "Fee"};
+        return new String[]{"Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Exchange",
+                "Amount", "Currency", "Fee", "Account"};
     }
 
     @Override
+    @JsonIgnore
     public Object[] getCSVRecord() {
         return new Object[]{this.getInvestmentId(), this.getQuantity(),
                 this.getBuySell(), this.getTransactionDate(), this.getShortName(), this.getExchange(),
-                this.getAmount(), this.getCurrencyId(), this.getFee()};
+                this.getAmount(), this.getCurrencyId(), this.getFee(), this.getAccountName()};
     }
 
     public static InvestmentDTO createFromCSVRecord(CSVRecord csvRecord, DateTimeFormatter formatter) {
@@ -79,6 +85,7 @@ public class InvestmentDTO implements CSVHelper {
                 .shortName(csvRecord.get("Short Name"))
                 .exchange(csvRecord.get("Exchange"))
                 .fee(Double.parseDouble(csvRecord.get("Fee")))
+                .accountName(csvRecord.get("Account"))
                 .build();
     }
 }

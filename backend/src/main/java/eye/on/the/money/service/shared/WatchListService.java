@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.out.CryptoWatchDTO;
 import eye.on.the.money.dto.out.ForexWatchDTO;
 import eye.on.the.money.dto.out.StockWatchDTO;
+import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.crypto.Coin;
 import eye.on.the.money.model.stock.Stock;
@@ -11,6 +12,7 @@ import eye.on.the.money.model.watchlist.CryptoWatch;
 import eye.on.the.money.model.watchlist.ForexWatch;
 import eye.on.the.money.model.watchlist.TickerWatch;
 import eye.on.the.money.repository.crypto.CoinRepository;
+import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.watchlist.CryptoWatchRepository;
 import eye.on.the.money.repository.watchlist.ForexWatchRepository;
 import eye.on.the.money.repository.watchlist.StockWatchRepository;
@@ -35,6 +37,7 @@ public class WatchListService {
     private final CryptoWatchRepository cryptoWatchRepository;
     private final StockWatchRepository stockWatchRepository;
     private final ForexWatchRepository forexWatchRepository;
+    private final CurrencyRepository currencyRepository;
     private final CryptoAPIService cryptoAPIService;
     private final UserServiceImpl userService;
     private final EODAPIService eodAPIService;
@@ -78,7 +81,7 @@ public class WatchListService {
     }
 
     public List<ForexWatchDTO> getForexWatchlistByUserId(String userEmail) {
-        List<ForexWatchDTO> forexList = this.forexWatchRepository.findByUserEmail(userEmail).stream()
+        List<ForexWatchDTO> forexList = this.forexWatchRepository.findByUserEmailOrderByFromCurrencyAscToCurrencyAsc(userEmail).stream()
                 .map(this::convertToForexDTO).collect(Collectors.toList());
         String joinedList = forexList.stream().map(f -> (f.getFromCurrencyId() + f.getToCurrencyId() + ".FOREX")).collect(Collectors.joining(","));
         JsonNode responseBody = this.eodAPIService.getLiveValue(joinedList, "/real-time/forex/?api_token={0}&fmt=json&s={1}");
@@ -128,6 +131,17 @@ public class WatchListService {
         CryptoWatch cryptoWatch = CryptoWatch.builder().coin(coin).user(user).build();
         this.cryptoWatchRepository.save(cryptoWatch);
         return this.convertToCryptoWatchDTO(cryptoWatch);
+    }
+
+    @Transactional
+    public ForexWatchDTO createNewForexWatch(String userEmail, String fromCurrencyId, String toCurrencyId) {
+        User user = this.userService.loadUserByEmail(userEmail);
+        Currency fromCurrency = this.currencyRepository.findById(fromCurrencyId).orElseThrow(NoSuchElementException::new);
+        Currency toCurrency = this.currencyRepository.findById(toCurrencyId).orElseThrow(NoSuchElementException::new);
+
+        ForexWatch forexWatch = ForexWatch.builder().fromCurrency(fromCurrency).toCurrency(toCurrency).user(user).build();
+        this.forexWatchRepository.save(forexWatch);
+        return this.convertToForexDTO(forexWatch);
     }
 
     private CryptoWatchDTO convertToCryptoWatchDTO(CryptoWatch cryptoWatch) {

@@ -1,5 +1,6 @@
 package eye.on.the.money.dto.out;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
@@ -45,11 +46,13 @@ public class ForexTransactionDTO implements CSVHelper{
     }
 
     @Override
+    @JsonIgnore
     public Object[] getHeaders() {
         return new String[]{"Transaction Id", "From Amount", "To Amount", "Type", "Transaction Date", "Change Rate", "From Currency", "To Currency"};
     }
 
     @Override
+    @JsonIgnore
     public Object[] getCSVRecord() {
         return new Object[]{this.getForexTransactionId(), this.getFromAmount(), this.getToAmount(),
                 this.getBuySell(), this.getTransactionDate(), this.getChangeRate(), this.getFromCurrencyId(), this.getToCurrencyId()};

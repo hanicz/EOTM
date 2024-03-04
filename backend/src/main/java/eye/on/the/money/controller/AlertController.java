@@ -20,20 +20,20 @@ public class AlertController {
 
     private final AlertService alertService;
 
-    @GetMapping()
+    @GetMapping("stock")
     public ResponseEntity<List<StockAlertDTO>> getAlerts(@AuthenticationPrincipal UserDetails user) {
         log.trace("Enter");
         return new ResponseEntity<>(this.alertService.getAllStockAlerts(user.getUsername()), HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("stock/{id}")
     public ResponseEntity<HttpStatus> deleteStockAlert(@AuthenticationPrincipal UserDetails user, @PathVariable Long id) {
         log.trace("Enter");
         var isDeleted = this.alertService.deleteStockAlert(user.getUsername(), id);
         return new ResponseEntity<>(isDeleted ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping()
+    @PostMapping("stock")
     public ResponseEntity<StockAlertDTO> createStockAlert(@AuthenticationPrincipal UserDetails user, @RequestBody StockAlertDTO stockAlertDTO) {
         log.trace("Enter");
         return new ResponseEntity<>(this.alertService.createNewStockAlert(user, stockAlertDTO), HttpStatus.OK);

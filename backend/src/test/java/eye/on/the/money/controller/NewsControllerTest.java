@@ -1,5 +1,6 @@
 package eye.on.the.money.controller;
 
+import eye.on.the.money.model.User;
 import eye.on.the.money.model.news.News;
 import eye.on.the.money.service.api.NewsAPIService;
 import eye.on.the.money.service.reddit.RedditService;
@@ -30,6 +31,8 @@ class NewsControllerTest {
     @InjectMocks
     private NewsController newsController;
 
+    private final User user = User.builder().id(1L).email("email").build();
+
     @Test
     public void getGeneralNews() {
         List<News> news = this.createNewsList();
@@ -53,9 +56,9 @@ class NewsControllerTest {
     @Test
     public void getRedditNews() {
         List<News> newsList = this.createNewsList();
-        when(this.redditService.getHotNewsFromSubreddits()).thenReturn(newsList);
+        when(this.redditService.getHotNewsFromSubreddits(this.user.getEmail())).thenReturn(newsList);
 
-        ResponseEntity<List<News>> result = this.newsController.getHotPosts();
+        ResponseEntity<List<News>> result = this.newsController.getHotPosts(this.user);
         Assertions.assertEquals(newsList, result.getBody());
     }
 

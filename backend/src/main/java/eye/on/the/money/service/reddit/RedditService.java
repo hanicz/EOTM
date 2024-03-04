@@ -4,15 +4,19 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eye.on.the.money.dto.in.RedditPostDTO;
+import eye.on.the.money.dto.in.SubredditDTO;
 import eye.on.the.money.exception.JsonException;
+import eye.on.the.money.model.User;
 import eye.on.the.money.model.news.News;
-import eye.on.the.money.model.reddit.SubReddit;
+import eye.on.the.money.model.reddit.Subreddit;
 import eye.on.the.money.repository.reddit.SubredditRepository;
 import eye.on.the.money.service.api.RedditAPIService;
+import eye.on.the.money.service.user.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 
 import java.util.Collection;
@@ -26,6 +30,7 @@ public class RedditService {
 
     private final RedditAPIService redditAPIService;
     private final SubredditRepository subredditRepository;
+    private final UserServiceImpl userService;
     private final ObjectMapper objectMapper;
     @Value("${reddit.url}")
     private String redditUrl;
@@ -33,11 +38,11 @@ public class RedditService {
     private String redditLogo;
 
 
-    public List<News> getHotNewsFromSubreddits() {
-        List<SubReddit> subRedditList = this.subredditRepository.findAll();
+    public List<News> getHotNewsFromSubreddits(String userEmail) {
+        List<Subreddit> subredditList = this.subredditRepository.findByUserEmailOrderByIdAsc(userEmail);
         JsonNode token = this.redditAPIService.getToken();
         Flux<JsonNode> subRedditsFlux = this.redditAPIService.getHotRedditNews(
-                subRedditList.stream().map(SubReddit::getId).collect(Collectors.toList()),
+                subredditList.stream().map(Subreddit::getSubreddit).collect(Collectors.toList()),
                 token.findValue("access_token").textValue());
 
         return subRedditsFlux
@@ -49,6 +54,25 @@ public class RedditService {
                 .filter(post -> !post.isStickied())
                 .map(this::convertPostToNews)
                 .toList();
+    }
+
+    @Transactional
+    public void deleteSubreddit(Long id, String userEmail) {
+        this.subredditRepository.deleteByIdAndUserEmail(id, userEmail);
+    }
+
+    @Transactional
+    public Subreddit addSubreddit(SubredditDTO subreddit, String userEmail) {
+        User user = this.userService.loadUserByEmail(userEmail);
+        return this.subredditRepository.save(Subreddit.builder()
+                .subreddit(subreddit.subreddit())
+                .description(subreddit.description())
+                .user(user)
+                .build());
+    }
+
+    public List<Subreddit> getSubredditsByUser(String userEmail) {
+        return this.subredditRepository.findByUserEmailOrderByIdAsc(userEmail);
     }
 
     private <T> T convert(JsonNode json, Class<T> cls) {
@@ -63,7 +87,7 @@ public class RedditService {
     private News convertPostToNews(RedditPostDTO post) {
         return News.builder()
                 .id(post.getCreated())
-                .image("self".equals(post.getThumbnail()) || post.getThumbnail().isBlank() ? this.redditLogo : post.getThumbnail())
+                .image(post.getThumbnail().isBlank() || "self".equals(post.getThumbnail()) ? this.redditLogo : post.getThumbnail())
                 .url(this.redditUrl + post.getPermalink())
                 .category("Reddit")
                 .datetime(post.getCreated())

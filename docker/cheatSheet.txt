@@ -23,7 +23,7 @@ docker-compose up
 docker-compose up -d //run in background
 
 #Existing containers
-docker ps
+docker ps -a
 
 #Bash into container
 docker exec -it <container_id> bash

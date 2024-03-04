@@ -1,5 +1,6 @@
 package eye.on.the.money.dto.out;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
@@ -33,11 +34,13 @@ public class ETFDividendDTO implements CSVHelper {
     private String exchange;
 
     @Override
+    @JsonIgnore
     public Object[] getHeaders() {
         return new String[]{"Dividend Id", "Amount", "Dividend Date", "Short Name", "Exchange", "Currency"};
     }
 
     @Override
+    @JsonIgnore
     public Object[] getCSVRecord() {
         return new Object[]{this.getId(), this.getAmount(),
                 this.getDividendDate(), this.getShortName(), this.getExchange(),

@@ -1,6 +1,7 @@
 package eye.on.the.money.model.stock;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eye.on.the.money.model.Account;
 import eye.on.the.money.model.User;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
@@ -42,4 +43,8 @@ public class Investment {
     @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true)
     @JoinColumn(name = "stockPayment_id", nullable = false)
     private StockPayment stockPayment;
+
+    @ManyToOne
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
 }

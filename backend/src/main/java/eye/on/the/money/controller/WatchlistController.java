@@ -26,7 +26,6 @@ public class WatchlistController {
 
     @GetMapping("/crypto/{currency}")
     public ResponseEntity<List<CryptoWatchDTO>> getCryptoWatchList(@AuthenticationPrincipal UserDetails user, @PathVariable String currency) {
-        log.trace("Enter");
         List<CryptoWatchDTO> cryptoWatchList = this.watchlistService.getCryptoWatchlistByUserId(user.getUsername(), currency);
         cryptoWatchList.sort(Collections.reverseOrder());
         return new ResponseEntity<>(cryptoWatchList, HttpStatus.OK);
@@ -34,46 +33,45 @@ public class WatchlistController {
 
     @GetMapping("/forex")
     public ResponseEntity<List<ForexWatchDTO>> getForexWatchList(@AuthenticationPrincipal UserDetails user) {
-        log.trace("Enter");
         return new ResponseEntity<>(this.watchlistService.getForexWatchlistByUserId(user.getUsername()), HttpStatus.OK);
     }
 
     @GetMapping("/stock")
     public ResponseEntity<List<StockWatchDTO>> getStockWatchList(@AuthenticationPrincipal UserDetails user) {
-        log.trace("Enter");
         return new ResponseEntity<>(this.watchlistService.getStockWatchlistByUserId(user.getUsername()), HttpStatus.OK);
     }
 
     @DeleteMapping("/crypto/{id}")
     public ResponseEntity<HttpStatus> deleteCryptoWatch(@AuthenticationPrincipal UserDetails user, @PathVariable Long id) {
-        log.trace("Enter");
         this.watchlistService.deleteCryptoWatchById(user.getUsername(), id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping("/stock/{id}")
     public ResponseEntity<HttpStatus> deleteStockWatch(@AuthenticationPrincipal UserDetails user, @PathVariable Long id) {
-        log.trace("Enter");
         this.watchlistService.deleteStockWatchById(user.getUsername(), id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping("/forex/{id}")
     public ResponseEntity<HttpStatus> deleteForexWatch(@AuthenticationPrincipal UserDetails user, @PathVariable Long id) {
-        log.trace("Enter");
         this.watchlistService.deleteForexWatchById(user.getUsername(), id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/stock")
     public ResponseEntity<StockWatchDTO> createStockWatch(@AuthenticationPrincipal UserDetails user, @RequestBody Stock wStock) {
-        log.trace("Enter");
         return new ResponseEntity<>(this.watchlistService.createNewStockWatch(user.getUsername(), wStock), HttpStatus.OK);
     }
 
     @PostMapping("/crypto/{coinId}")
     public ResponseEntity<CryptoWatchDTO> createCryptoWatch(@AuthenticationPrincipal UserDetails user, @PathVariable String coinId) {
-        log.trace("Enter");
         return new ResponseEntity<>(this.watchlistService.createNewCryptoWatch(user.getUsername(), coinId), HttpStatus.OK);
+    }
+
+    @PostMapping("/forex/{from}/{to}")
+    public ResponseEntity<ForexWatchDTO> createForexWatch(@AuthenticationPrincipal UserDetails user,
+                                                          @PathVariable String from, @PathVariable String to) {
+        return new ResponseEntity<>(this.watchlistService.createNewForexWatch(user.getUsername(), from, to), HttpStatus.OK);
     }
 }

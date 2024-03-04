@@ -16,21 +16,21 @@ export class AlertService {
   constructor(private http: HttpClient) { }
 
   getAlerts() {
-    const url = `${this.watchListUrl}`;
+    const url = `${this.watchListUrl}/stock`;
     return this.http.get<StockAlert[]>(url, {
       headers: this.helper.getHeadersWithToken()
     });
   };
 
   deleteStockAlert(id: number) {
-    const url = `${this.watchListUrl}/${id}`;
+    const url = `${this.watchListUrl}/stock/${id}`;
     return this.http.delete(url, {
       headers: this.helper.getHeadersWithToken()
     });
   };
 
   createNewStockAlert(data: any) {
-    const url = `${this.watchListUrl}`;
+    const url = `${this.watchListUrl}/stock`;
     return this.http.post(url, data,{
       headers: this.helper.getHeadersWithToken()
     });

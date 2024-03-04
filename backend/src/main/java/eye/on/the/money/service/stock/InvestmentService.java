@@ -3,12 +3,14 @@ package eye.on.the.money.service.stock;
 import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.exception.CSVException;
+import eye.on.the.money.model.Account;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Investment;
 import eye.on.the.money.model.stock.Stock;
 import eye.on.the.money.model.stock.StockPayment;
 import eye.on.the.money.repository.forex.CurrencyRepository;
+import eye.on.the.money.repository.stock.AccountRepository;
 import eye.on.the.money.repository.stock.InvestmentRepository;
 import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.shared.ICSVService;
@@ -39,6 +41,7 @@ public class InvestmentService implements ICSVService {
     private final InvestmentRepository investmentRepository;
     private final CurrencyRepository currencyRepository;
     private final StockPaymentService stockPaymentService;
+    private final AccountRepository accountRepository;
     private final UserServiceImpl userService;
     private final ModelMapper modelMapper;
     private final EODAPIService eodAPIService;
@@ -47,11 +50,27 @@ public class InvestmentService implements ICSVService {
     private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public List<InvestmentDTO> getInvestments(String userEmail) {
-        return this.investmentRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
+        return this.investmentRepository.findByUserEmailOrderByTransactionDateDesc(userEmail).stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
+    }
+
+    public List<InvestmentDTO> getInvestmentsByAccountId(String userEmail, Long accountId) {
+        return this.investmentRepository.findByUserEmailAndAccountIdOrderByTransactionDate(userEmail, accountId)
+                .stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
     }
 
     public List<InvestmentDTO> getCurrentHoldings(String userEmail) {
-        Map<String, InvestmentDTO> investmentMap = this.getCalculated(userEmail);
+        List<InvestmentDTO> investments = this.investmentRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToInvestmentDTO).toList();
+        return this.getLiveDataForInvestments(investments);
+    }
+
+    public List<InvestmentDTO> getHoldingsByAccountId(String userEmail, Long accountId) {
+        List<InvestmentDTO> investments = this.investmentRepository.findByUserEmailAndAccountIdOrderByTransactionDate(userEmail, accountId)
+                .stream().map(this::convertToInvestmentDTO).toList();
+        return this.getLiveDataForInvestments(investments);
+    }
+
+    private List<InvestmentDTO> getLiveDataForInvestments(List<InvestmentDTO> investments) {
+        Map<String, InvestmentDTO> investmentMap = this.getCalculated(investments);
         List<InvestmentDTO> investmentDTOList = (new ArrayList<>(investmentMap.values()))
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
         String joinedList = investmentDTOList.stream().map(i -> (i.getShortName() + "." + i.getExchange())).collect(Collectors.joining(","));
@@ -70,12 +89,20 @@ public class InvestmentService implements ICSVService {
     }
 
     public List<InvestmentDTO> getAllPositions(String userEmail) {
-        Map<String, InvestmentDTO> investmentMap = this.getCalculated(userEmail);
+        List<InvestmentDTO> investments = this.investmentRepository.findByUserEmailOrderByTransactionDate(userEmail)
+                .stream().map(this::convertToInvestmentDTO).toList();
+        Map<String, InvestmentDTO> investmentMap = this.getCalculated(investments);
         return new ArrayList<>(investmentMap.values());
     }
 
-    private Map<String, InvestmentDTO> getCalculated(String userEmail) {
-        List<InvestmentDTO> investments = this.investmentRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToInvestmentDTO).toList();
+    public List<InvestmentDTO> getPositionsByAccountId(String userEmail, Long accountId) {
+        List<InvestmentDTO> investments = this.investmentRepository.findByUserEmailAndAccountIdOrderByTransactionDate(userEmail, accountId)
+                .stream().map(this::convertToInvestmentDTO).toList();
+        Map<String, InvestmentDTO> investmentMap = this.getCalculated(investments);
+        return new ArrayList<>(investmentMap.values());
+    }
+
+    private Map<String, InvestmentDTO> getCalculated(List<InvestmentDTO> investments) {
         Map<String, InvestmentDTO> investmentMap = new HashMap<>();
         investments.forEach(i -> {
             if (i.getBuySell().equals("S")) {
@@ -96,6 +123,7 @@ public class InvestmentService implements ICSVService {
         Stock stock = this.stockService.getOrCreateStock(investmentDTO.getShortName(), investmentDTO.getExchange(), investmentDTO.getName());
         StockPayment stockPayment = this.stockPaymentService.createNewPayment(currency, investmentDTO.getAmount());
         User user = this.userService.loadUserByEmail(userEmail);
+        Account account = this.accountRepository.findByUserEmailAndId(userEmail, investmentDTO.getAccountId()).orElseThrow(NoSuchElementException::new);
 
         Investment investment = Investment.builder()
                 .buySell(investmentDTO.getBuySell())
@@ -106,6 +134,7 @@ public class InvestmentService implements ICSVService {
                 .stock(stock)
                 .stockPayment(stockPayment)
                 .fee(investmentDTO.getFee())
+                .account(account)
                 .build();
         investment = this.investmentRepository.save(investment);
         return this.convertToInvestmentDTO(investment);
@@ -117,11 +146,13 @@ public class InvestmentService implements ICSVService {
         Stock stock = this.stockService.getOrCreateStock(investmentDTO.getShortName(), investmentDTO.getExchange(), investmentDTO.getName());
         Investment investment = this.investmentRepository.findByIdAndUserEmail(investmentDTO.getInvestmentId(), userEmail).orElseThrow(NoSuchElementException::new);
         StockPayment stockPayment = investment.getStockPayment();
+        Account account = this.accountRepository.findByUserEmailAndId(userEmail, investmentDTO.getAccountId()).orElseThrow(NoSuchElementException::new);
 
         investment.setBuySell(investmentDTO.getBuySell());
         investment.setTransactionDate(investmentDTO.getTransactionDate());
         investment.setQuantity(investmentDTO.getQuantity());
         investment.setStock(stock);
+        investment.setAccount(account);
         investment.setFee(investmentDTO.getFee());
         stockPayment.setAmount(investmentDTO.getAmount());
         stockPayment.setCurrency(currency);
@@ -147,7 +178,7 @@ public class InvestmentService implements ICSVService {
     @Transactional
     public void processCSV(String userEmail, MultipartFile file) {
         try (CSVParser csvParser = this.getParser(file,
-                new String[]{"Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Exchange", "Amount", "Currency", "Fee"})) {
+                new String[]{"Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Exchange", "Amount", "Currency", "Fee", "Account"})) {
             for (CSVRecord csvRecord : csvParser) {
                 InvestmentDTO investment = InvestmentDTO.createFromCSVRecord(csvRecord, FORMATTER);
 

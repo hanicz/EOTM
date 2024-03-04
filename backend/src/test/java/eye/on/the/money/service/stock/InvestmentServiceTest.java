@@ -60,7 +60,7 @@ class InvestmentServiceTest {
     @Test
     public void getInvestments() {
         List<InvestmentDTO> result = this.investmentService.getInvestments(this.user.getUsername());
-        List<Investment> investments = this.investmentRepository.findByUserEmailOrderByTransactionDate(this.user.getUsername());
+        List<Investment> investments = this.investmentRepository.findByUserEmailOrderByTransactionDateDesc(this.user.getUsername());
 
         Assertions.assertIterableEquals(investments.stream().map(this::convertToInvestmentDTO).collect(Collectors.toList()), result);
     }
@@ -112,9 +112,5 @@ class InvestmentServiceTest {
     private InvestmentDTO convertToInvestmentDTO(Investment investment) {
         this.modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
         return this.modelMapper.map(investment, InvestmentDTO.class);
-    }
-
-    public void testGetCSVWithMocks() {
-
     }
 }

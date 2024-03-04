@@ -61,4 +61,11 @@ export class WatchlistService {
       headers: this.helper.getHeadersWithToken()
     });
   };
+
+  createNewForexWatch(from: string, to: string) {
+    const url = `${this.watchListUrl}/forex/${from}/${to}`;
+    return this.http.post(url, {},{
+      headers: this.helper.getHeadersWithToken()
+    });
+  };
 }

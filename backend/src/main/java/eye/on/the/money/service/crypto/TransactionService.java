@@ -49,7 +49,7 @@ public class TransactionService implements ICSVService {
     private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public List<TransactionDTO> getTransactionsByUserId(String userEmail) {
-        return this.transactionRepository.findByUserEmailOrderByTransactionDate(userEmail).stream()
+        return this.transactionRepository.findByUserEmailOrderByTransactionDateDesc(userEmail).stream()
                 .map(this::convertToTransactionDTO).collect(Collectors.toList());
     }
 

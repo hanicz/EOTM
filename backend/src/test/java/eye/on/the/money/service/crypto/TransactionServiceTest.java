@@ -49,7 +49,7 @@ class TransactionServiceTest {
     @Test
     public void getTransactionsByUserId() {
         List<TransactionDTO> result = this.transactionService.getTransactionsByUserId(this.user.getUsername());
-        List<Transaction> transactions = this.transactionRepository.findByUserEmailOrderByTransactionDate(this.user.getUsername());
+        List<Transaction> transactions = this.transactionRepository.findByUserEmailOrderByTransactionDateDesc(this.user.getUsername());
 
         Assertions.assertIterableEquals(transactions.stream()
                 .map(this::convertToTransactionDTO).collect(Collectors.toList()), result);

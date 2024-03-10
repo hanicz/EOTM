@@ -8,6 +8,7 @@ import java.util.Optional;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
     List<Transaction> findByUserEmailOrderByTransactionDate(String userEmail);
+    List<Transaction> findByUserEmailOrderByTransactionDateDesc(String userEmail);
 
     void deleteByUserEmailAndIdIn(String userEmail, List<Long> ids);
 

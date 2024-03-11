@@ -40,7 +40,7 @@ class AlertControllerTest {
 
         when(this.alertService.getAllStockAlerts(anyString())).thenReturn(alerts);
 
-        ResponseEntity<List<StockAlertDTO>> result = this.alertController.getAlerts(User.builder().id(1L).email("email").build());
+        ResponseEntity<List<StockAlertDTO>> result = this.alertController.getStockAlerts(User.builder().id(1L).email("email").build());
 
         Assertions.assertIterableEquals(result.getBody(), alerts);
     }

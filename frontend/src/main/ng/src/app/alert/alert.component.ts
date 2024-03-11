@@ -3,6 +3,7 @@ import { StockAlert } from '../model/stockalert';
 import { AlertService } from '../service/alert.service';
 import { Exchange } from '../model/exchange';
 import { Symbol } from '../model/symbol';
+import { Globals } from '../util/global';
 import { StockService } from '../service/stock.service';
 
 @Component({
@@ -21,12 +22,15 @@ export class AlertComponent implements OnInit {
   selectedExchange: Exchange = {} as Exchange;
   exchangesLoading: boolean = true;
   stocksLoading: boolean = false;
+  globals: Globals;
   valuePoint: number = 0.0;
   types;
   selectedType: string = '';
 
-  constructor(private alertService: AlertService, private stockService: StockService) {
+  constructor(private alertService: AlertService, private stockService: StockService,
+    globals: Globals) {
     this.fetchData();
+    this.globals = globals;
 
     this.stockService.getAllExchanges().subscribe({
       next: (data) => {

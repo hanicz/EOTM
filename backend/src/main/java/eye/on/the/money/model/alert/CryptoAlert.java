@@ -7,13 +7,14 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 
 @Entity
 @Getter
 @Setter
 @Slf4j
-@Builder
+@SuperBuilder
 @ToString
 @Table(name = "EOTM_COIN_ALERT")
 @AllArgsConstructor

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -15,5 +16,9 @@ public class CoinService {
 
     public List<Coin> getAllCoins() {
         return this.coinRepository.findAllByOrderByNameAsc();
+    }
+
+    public Coin getCoinBySymbol(String symbol) {
+        return this.coinRepository.findBySymbol(symbol).orElseThrow(NoSuchElementException::new);
     }
 }

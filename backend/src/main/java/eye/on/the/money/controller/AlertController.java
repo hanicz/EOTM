@@ -21,14 +21,23 @@ public class AlertController {
     private final AlertService alertService;
 
     @GetMapping("stock")
-    public ResponseEntity<List<StockAlertDTO>> getAlerts(@AuthenticationPrincipal UserDetails user) {
-        log.trace("Enter");
+    public ResponseEntity<List<StockAlertDTO>> getStockAlerts(@AuthenticationPrincipal UserDetails user) {
         return new ResponseEntity<>(this.alertService.getAllStockAlerts(user.getUsername()), HttpStatus.OK);
+    }
+
+    @GetMapping("crypto")
+    public ResponseEntity<List<CryptoAlertDTO>> getCryptoAlerts(@AuthenticationPrincipal UserDetails user) {
+        return new ResponseEntity<>(this.alertService.getAllCryptoAlerts(user.getUsername()), HttpStatus.OK);
+    }
+
+    @DeleteMapping("crypto/{id}")
+    public ResponseEntity<HttpStatus> deleteCryptoAlert(@AuthenticationPrincipal UserDetails user, @PathVariable Long id) {
+        var isDeleted = this.alertService.deleteCryptoAlert(user.getUsername(), id);
+        return new ResponseEntity<>(isDeleted ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping("stock/{id}")
     public ResponseEntity<HttpStatus> deleteStockAlert(@AuthenticationPrincipal UserDetails user, @PathVariable Long id) {
-        log.trace("Enter");
         var isDeleted = this.alertService.deleteStockAlert(user.getUsername(), id);
         return new ResponseEntity<>(isDeleted ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     }
@@ -37,5 +46,11 @@ public class AlertController {
     public ResponseEntity<StockAlertDTO> createStockAlert(@AuthenticationPrincipal UserDetails user, @RequestBody StockAlertDTO stockAlertDTO) {
         log.trace("Enter");
         return new ResponseEntity<>(this.alertService.createNewStockAlert(user, stockAlertDTO), HttpStatus.OK);
+    }
+
+    @PostMapping("crypto")
+    public ResponseEntity<CryptoAlertDTO> createCryptoAlert(@AuthenticationPrincipal UserDetails user, @RequestBody CryptoAlertDTO cryptoAlertDTO) {
+        log.trace("Enter");
+        return new ResponseEntity<>(this.alertService.createNewCryptoAlert(user, cryptoAlertDTO), HttpStatus.OK);
     }
 }

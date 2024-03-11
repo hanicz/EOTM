@@ -43,7 +43,9 @@
                         <p-tag severity="info" value="{{alert.shortName}}.{{alert.exchange}}">
                         </p-tag>
                     </td>
-                    <td>{{alert.name}}</td>
+                    <td><p-image src="https://eodhd.com/img/logos/{{alert.exchange}}/{{alert.shortName}}.png" width="15"
+                            class="mr-1" (onImageError)="globals.errorHandler($event)"></p-image>
+                        {{alert.name}}</td>
                     <td>{{alert.type | alertTypePipe}}</td>
                     <td [ngStyle]="{'color': (alert.type.indexOf('OVER') > 0) ? '#008002' : '#910101'}">
                         {{alert.valuePoint}}</td>
@@ -73,8 +75,8 @@
             </p-dropdown>
         </div>
         <div class="col-12">
-            <p-dropdown class="searchDropdown" [options]="types" [(ngModel)]="selectedType" optionLabel="name" optionValue="code" [style]="{'width':'100%'}"
-                placeholder="Select a Type"></p-dropdown>
+            <p-dropdown class="searchDropdown" [options]="types" [(ngModel)]="selectedType" optionLabel="name"
+                optionValue="code" [style]="{'width':'100%'}" placeholder="Select a Type"></p-dropdown>
         </div>
         <div class="col-6 mt-2">
             <span class="p-float-label">

@@ -37,12 +37,6 @@ public class StockService {
         return this.eodAPIService.getAllSymbols(exchange);
     }
 
-  /*  @CacheEvict(value = {"symbols", "exchanges"}, allEntries = true)
-    @Scheduled(fixedRateString = "${cache.stockTTL}")
-    public void evictStockRelatedCache() {
-        log.trace("Evict stock related cache");
-    }*/
-
     @Cacheable("exchanges")
     public List<Exchange> getAllExchanges() {
         log.trace("Enter getAllExchanges");

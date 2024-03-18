@@ -1,5 +1,6 @@
 package eye.on.the.money.service.user;
 
+import eye.on.the.money.dto.in.ChangePasswordDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class UserServiceImpl implements UserDetailsService {
     public void signUp(User user) {
         user.setPassword(this.passwordEncoder.encode(user.getPassword()));
         this.userRepository.save(user);
+        log.debug("User created: {}", user.getEmail());
     }
 
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -39,5 +41,11 @@ public class UserServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException(email);
         }
         return user;
+    }
+
+    public void changePassword(String userEmail, ChangePasswordDTO passwordDTO) {
+        User user = this.loadUserByEmail(userEmail);
+        user.setPassword(this.passwordEncoder.encode(passwordDTO.password()));
+        log.debug("Password changed for user: {}", user.getEmail());
     }
 }

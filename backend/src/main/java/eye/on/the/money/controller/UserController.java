@@ -1,5 +1,6 @@
 package eye.on.the.money.controller;
 
+import eye.on.the.money.dto.in.ChangePasswordDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.service.user.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -27,13 +28,17 @@ public class UserController {
 
     @GetMapping()
     public ResponseEntity<HttpStatus> validatingToken(@AuthenticationPrincipal UserDetails user) {
-        log.trace("Enter");
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping("/me")
     public ResponseEntity<String> getUserEmail(@AuthenticationPrincipal UserDetails user) {
-        log.trace("Enter");
         return new ResponseEntity<>("{ \"email\": \"" + user.getUsername() + "\" }", HttpStatus.OK);
+    }
+
+    @PutMapping("/password")
+    public ResponseEntity<HttpStatus> changePassword(@RequestBody ChangePasswordDTO passwordDTO, @AuthenticationPrincipal UserDetails user) {
+        this.userService.changePassword(user.getUsername(), passwordDTO);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

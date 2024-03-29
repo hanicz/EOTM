@@ -3,6 +3,7 @@ package eye.on.the.money.controller;
 import eye.on.the.money.dto.in.ChangePasswordDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.service.user.UserServiceImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -21,7 +22,6 @@ public class UserController {
 
     @PostMapping("/signup")
     public ResponseEntity<HttpStatus> createNewUser(@RequestBody User user) {
-        log.trace("Enter");
         this.userService.signUp(user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -37,7 +37,7 @@ public class UserController {
     }
 
     @PutMapping("/password")
-    public ResponseEntity<HttpStatus> changePassword(@RequestBody ChangePasswordDTO passwordDTO, @AuthenticationPrincipal UserDetails user) {
+    public ResponseEntity<HttpStatus> changePassword(@RequestBody @Valid ChangePasswordDTO passwordDTO, @AuthenticationPrincipal UserDetails user) {
         this.userService.changePassword(user.getUsername(), passwordDTO);
         return new ResponseEntity<>(HttpStatus.OK);
     }

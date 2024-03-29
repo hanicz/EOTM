@@ -1,4 +1,6 @@
 package eye.on.the.money.dto.in;
 
-public record ChangePasswordDTO(String password) {
+import jakarta.validation.constraints.NotNull;
+
+public record ChangePasswordDTO(@NotNull String password) {
 }

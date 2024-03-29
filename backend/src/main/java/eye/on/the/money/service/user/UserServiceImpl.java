@@ -23,7 +23,7 @@ public class UserServiceImpl implements UserDetailsService {
     public void signUp(User user) {
         user.setPassword(this.passwordEncoder.encode(user.getPassword()));
         this.userRepository.save(user);
-        log.debug("User created: {}", user.getEmail());
+        log.info("User created: {}", user.getEmail());
     }
 
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -35,7 +35,6 @@ public class UserServiceImpl implements UserDetailsService {
     }
 
     public User loadUserByEmail(String email) throws UsernameNotFoundException {
-
         User user = this.userRepository.findByEmail(email);
         if (user == null) {
             throw new UsernameNotFoundException(email);
@@ -46,6 +45,6 @@ public class UserServiceImpl implements UserDetailsService {
     public void changePassword(String userEmail, ChangePasswordDTO passwordDTO) {
         User user = this.loadUserByEmail(userEmail);
         user.setPassword(this.passwordEncoder.encode(passwordDTO.password()));
-        log.debug("Password changed for user: {}", user.getEmail());
+        log.info("Password changed for user: {}", user.getEmail());
     }
 }

@@ -10,6 +10,7 @@ import { ForexComponent } from './forex/forex.component';
 import { LandingComponent } from './landing/landing.component';
 import { EtfComponent } from './etf/etf.component';
 import { AlertComponent } from './alert/alert.component';
+import { SettingsComponent } from './settings/settings.component';
 
 const routes: Routes = [
   { path: '', component: LandingComponent },
@@ -22,6 +23,7 @@ const routes: Routes = [
   { path: 'forex', component: ForexComponent },
   { path: 'etf', component: EtfComponent },
   { path: 'alert', component: AlertComponent },
+  { path: 'settings', component: SettingsComponent }
 ];
 
 @NgModule({

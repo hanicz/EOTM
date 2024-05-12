@@ -1,0 +1,14 @@
+<div class="shadow-5">
+    <menu class="pl-0 mb-0"></menu>
+    <p-panel header="Settings">
+        <p-dataView #dv [value]="subReddits">
+            <ng-template let-subReddit pTemplate="listItem">
+                <div class="col-12">
+                    <div class="flex flex-column xl:flex-row xl:align-items-start p-4 gap-4">
+                        {{subReddit.description}}
+                    </div>
+                </div>
+            </ng-template>
+        </p-dataView>
+    </p-panel>
+</div>

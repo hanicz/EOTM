@@ -76,6 +76,11 @@ export class MenuComponent implements OnInit {
         label: 'Lookup',
         icon: 'fas fa-search',
         routerLink: ['/search']
+      },
+      {
+        label: 'Settings',
+        icon: 'fa-solid fa-gear',
+        routerLink: ['/settings']
       }
     ];
   }

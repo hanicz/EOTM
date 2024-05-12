@@ -51,7 +51,7 @@ import { ImageModule } from 'primeng/image';
 import { ChipModule } from 'primeng/chip';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { SkeletonModule } from 'primeng/skeleton';
-
+import { DataViewModule } from 'primeng/dataview';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { EtfComponent } from './etf/etf.component';
 import { EtfinvestmentComponent } from './etf/etfinvestment/etfinvestment.component';
@@ -64,6 +64,7 @@ import { AlertComponent } from './alert/alert.component';
 import { AlertTypePipe } from './util/pipe';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DatePipe } from '@angular/common';
+import { SettingsComponent } from './settings/settings.component';
 
 
 @NgModule({
@@ -94,7 +95,8 @@ import { DatePipe } from '@angular/common';
     ForextransactionComponent,
     ForexholdingComponent,
     AlertComponent,
-    AlertTypePipe
+    AlertTypePipe,
+    SettingsComponent
   ],
   imports: [
     BrowserModule,
@@ -128,7 +130,8 @@ import { DatePipe } from '@angular/common';
     ChipModule,
     ProgressSpinnerModule,
     SkeletonModule,
-    InputNumberModule
+    InputNumberModule,
+    DataViewModule
   ],
   providers: [MessageService, Globals, DatePipe],
   bootstrap: [AppComponent]

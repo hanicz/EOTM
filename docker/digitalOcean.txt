@@ -11,3 +11,5 @@ sudo tail /var/log/ufw.log
 sudo grep "Invalid user" /var/log/auth.log
 
 sudo iptables -S | grep f2b
+
+sudo grep "Invalid user" /var/log/auth.log | awk '{print $6}' | sort | uniq -c | sort -rn

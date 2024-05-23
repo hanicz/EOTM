@@ -36,4 +36,11 @@ export class NewsService {
       headers: this.helper.getHeadersWithToken()
     });
   }
+
+  deleteSubReddit(id: number) {
+    const url = `${this.newsUrl}/reddit/${id}`;
+    return this.http.delete(url, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  }
 }

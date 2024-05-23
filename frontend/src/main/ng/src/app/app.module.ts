@@ -65,7 +65,7 @@ import { AlertTypePipe } from './util/pipe';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DatePipe } from '@angular/common';
 import { SettingsComponent } from './settings/settings.component';
-
+import { PasswordModule } from 'primeng/password';
 
 @NgModule({
   declarations: [
@@ -131,7 +131,8 @@ import { SettingsComponent } from './settings/settings.component';
     ProgressSpinnerModule,
     SkeletonModule,
     InputNumberModule,
-    DataViewModule
+    DataViewModule,
+    PasswordModule
   ],
   providers: [MessageService, Globals, DatePipe],
   bootstrap: [AppComponent]

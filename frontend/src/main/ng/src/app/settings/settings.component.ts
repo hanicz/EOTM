@@ -13,13 +13,21 @@ export class SettingsComponent implements OnInit {
 
   constructor(private newsService: NewsService) {
 
-   }
-  
+  }
+
   ngOnInit(): void {
+    this.loadSubReddits();
+  }
+
+  loadSubReddits() {
     this.newsService.getSubreddits().subscribe(data => {
-      this.subReddits = data
-      console.log(this.subReddits);
+      this.subReddits = data;
     });
   }
 
+  delete(subReddit: Subreddit) {
+    this.newsService.deleteSubReddit(subReddit.id).subscribe(() => {
+      this.loadSubReddits();
+    });
+  }
 }

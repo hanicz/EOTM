@@ -7,8 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.NoSuchElementException;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.*;
 
 @ControllerAdvice
 public class ExceptionAdvice {
@@ -25,5 +24,10 @@ public class ExceptionAdvice {
     @ExceptionHandler(CSVException.class)
     public ResponseEntity<ErrorResponse> handleCSVException(CSVException e) {
         return ResponseEntity.status(BAD_REQUEST).body(new ErrorResponse(BAD_REQUEST.value(), e.getMessage()));
+    }
+
+    @ExceptionHandler(PasswordException.class)
+    public ResponseEntity<ErrorResponse> handlePasswordException(PasswordException e) {
+        return ResponseEntity.status(FORBIDDEN).body(new ErrorResponse(FORBIDDEN.value(), e.getMessage()));
     }
 }

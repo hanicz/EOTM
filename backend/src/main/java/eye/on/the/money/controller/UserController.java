@@ -1,5 +1,7 @@
 package eye.on.the.money.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eye.on.the.money.dto.in.ChangePasswordDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.service.user.UserServiceImpl;
@@ -12,6 +14,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("api/v1/user")
 @Slf4j
@@ -19,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserServiceImpl userService;
+    private final ObjectMapper objectMapper;
 
     @PostMapping("/signup")
     public ResponseEntity<HttpStatus> createNewUser(@RequestBody User user) {
@@ -32,8 +38,10 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<String> getUserEmail(@AuthenticationPrincipal UserDetails user) {
-        return new ResponseEntity<>("{ \"email\": \"" + user.getUsername() + "\" }", HttpStatus.OK);
+    public ResponseEntity<String> getUserEmail(@AuthenticationPrincipal UserDetails user) throws JsonProcessingException {
+        Map<String, String> map = new HashMap<>();
+        map.put("email", user.getUsername());
+        return new ResponseEntity<>(this.objectMapper.writeValueAsString(map), HttpStatus.OK);
     }
 
     @PutMapping("/password")

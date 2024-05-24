@@ -45,4 +45,12 @@ export class UserService {
       headers: this.helper.getHeadersWithToken(),
     });
   }
+
+  changePassword(oldPassword: string, newPassword: string) {
+    const url = `${this.userUrl}/password`;
+    console.log(JSON.stringify({ oldPassword, newPassword }));
+    return this.http.put(url, JSON.stringify({ oldPassword, newPassword }), {
+      headers: this.helper.getHeadersWithToken()
+    });
+  }
 }

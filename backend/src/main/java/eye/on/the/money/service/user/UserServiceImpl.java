@@ -1,6 +1,7 @@
 package eye.on.the.money.service.user;
 
 import eye.on.the.money.dto.in.ChangePasswordDTO;
+import eye.on.the.money.exception.PasswordException;
 import eye.on.the.money.model.User;
 import eye.on.the.money.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.Collections.emptyList;
 
@@ -42,9 +44,16 @@ public class UserServiceImpl implements UserDetailsService {
         return user;
     }
 
+    @Transactional
     public void changePassword(String userEmail, ChangePasswordDTO passwordDTO) {
         User user = this.loadUserByEmail(userEmail);
-        user.setPassword(this.passwordEncoder.encode(passwordDTO.password()));
-        log.info("Password changed for user: {}", user.getEmail());
+
+        if(this.passwordEncoder.matches(passwordDTO.oldPassword(), user.getPassword())) {
+            user.setPassword(this.passwordEncoder.encode(passwordDTO.newPassword()));
+            log.info("Password changed for user: {}", user.getEmail());
+        } else {
+            log.info("Incorrect old password provided while changing password for user: {}", user.getEmail());
+            throw new PasswordException("Invalid old password provided");
+        }
     }
 }

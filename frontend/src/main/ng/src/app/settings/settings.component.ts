@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { NewsService } from '../service/news.service';
 import { Subreddit } from '../model/subreddit';
+import { UserService } from '../service/user.service';
 
 @Component({
   selector: 'app-settings',
@@ -10,8 +11,10 @@ import { Subreddit } from '../model/subreddit';
 export class SettingsComponent implements OnInit {
 
   subReddits: Subreddit[] = [];
+  oldPassword: string = '';
+  newPassword: string = '';
 
-  constructor(private newsService: NewsService) {
+  constructor(private newsService: NewsService, private userService: UserService) {
 
   }
 
@@ -28,6 +31,13 @@ export class SettingsComponent implements OnInit {
   delete(subReddit: Subreddit) {
     this.newsService.deleteSubReddit(subReddit.id).subscribe(() => {
       this.loadSubReddits();
+    });
+  }
+
+  changePassword() {
+    this.userService.changePassword(this.oldPassword, this.newPassword).subscribe(() => {
+      this.oldPassword = '';
+      this.newPassword = '';
     });
   }
 }

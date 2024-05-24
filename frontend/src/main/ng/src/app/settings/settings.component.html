@@ -2,9 +2,15 @@
     <menu class="pl-0 mb-0"></menu>
     <p-panel header="Settings">
         <div class="grid">
+            <div class="col">
+
+            </div>
             <div class="col-4">
                 <div>
-                    <button pButton pRipple label="Add" icon="pi pi-plus" class="p-button-success mr-2"></button>
+                    <h2>Followed subreddits</h2>
+                </div>
+                <div>
+                    <button pButton pRipple label="Add" class="p-button-success mr-2"></button>
                 </div>
                 <p-dataView #dv [value]="subReddits">
                     <ng-template let-subReddit pTemplate="listItem">
@@ -31,8 +37,20 @@
                     </ng-template>
                 </p-dataView>
             </div>
-            <div class="col">
-                <p-password [toggleMask]="true"></p-password>
+            <div class="col-2">
+
+            </div>
+            <div class="col-5">
+                <h2>User settings</h2>
+                <span class="p-float-label">
+                    <p-password [toggleMask]="true" [feedback]="false" [(ngModel)]="oldPassword"></p-password>
+                    <label for="password">Old Password</label>
+                </span>
+                <span class="p-float-label mt-4">
+                    <p-password [toggleMask]="true" [(ngModel)]="newPassword"></p-password>
+                    <label for="password">New Password</label>
+                </span>
+                <button pButton pRipple label="Save" class="p-button-info mt-2" (click)="changePassword()"></button>
             </div>
         </div>
     </p-panel>

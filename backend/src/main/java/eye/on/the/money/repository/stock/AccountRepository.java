@@ -10,4 +10,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     Optional<Account> findByUserEmailAndId(String email, Long id);
 
     List<Account> findByUserEmailOrderByAccountName(String email);
+
+    void deleteByUserEmailAndId(String email, Long id);
 }

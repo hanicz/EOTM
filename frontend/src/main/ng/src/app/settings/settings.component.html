@@ -2,15 +2,12 @@
     <menu class="pl-0 mb-0"></menu>
     <p-panel header="Settings">
         <div class="grid">
-            <div class="col">
-
-            </div>
             <div class="col-4">
                 <div>
                     <h2>Followed subreddits</h2>
                 </div>
-                <div>
-                    <button pButton pRipple label="Add" class="p-button-success mr-2"></button>
+                <div class="flex flex-row-reverse flex-wrap">
+                    <button pButton pRipple label="Add" class="p-button-success mb-1" (click)="openDialog()"></button>
                 </div>
                 <p-dataView #dv [value]="subReddits">
                     <ng-template let-subReddit pTemplate="listItem">
@@ -37,10 +34,39 @@
                     </ng-template>
                 </p-dataView>
             </div>
-            <div class="col-2">
-
+            <div class="col">
             </div>
-            <div class="col-5">
+            <div class="col-4">
+                <div>
+                    <h2>Stock accounts</h2>
+                </div>
+                <div class="flex flex-row-reverse flex-wrap">
+                    <button pButton pRipple label="Add" class="p-button-success mb-1"></button>
+                </div>
+                <p-dataView #dv [value]="accounts">
+                    <ng-template let-account pTemplate="listItem">
+                        <div class="col-12">
+                            <div class="flex flex-column xl:flex-row xl:align-items-start p-4 gap-4">
+                                <div
+                                    class="flex flex-column sm:flex-row justify-content-between align-items-center xl:align-items-start flex-1 gap-4">
+                                    <div class="flex flex-column align-items-center sm:align-items-start gap-3 font-bold">
+                                        {{account.accountName}}
+                                        <div class="flex align-items-center gap-3 text-sm font-italic">
+                                            Created: {{account.creationDate | date:'mediumDate'}}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-column align-items-center sm:align-items-end gap-3">
+                                    <button pButton pRipple type="button" icon="pi pi-times"
+                                        class="p-button-rounded p-button-text ml-2 p-button-danger"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </ng-template>
+                </p-dataView>
+            </div>
+            <div class="col"></div>
+            <div class="col-2">
                 <h2>User settings</h2>
                 <span class="p-float-label">
                     <p-password [toggleMask]="true" [feedback]="false" [(ngModel)]="oldPassword"></p-password>
@@ -55,3 +81,23 @@
         </div>
     </p-panel>
 </div>
+
+<p-dialog [(visible)]="addSubRedditDialog" [style]="{width: '35vw'}" header="Add Subreddit" [modal]="true"
+    styleClass="p-fluid">
+    <ng-template pTemplate="content">
+        <div class="p-field">
+            <label for="symbol">Subreddit</label>
+            <input type="text" pInputText id="subreddit" [(ngModel)]="subReddit" autofocus />
+        </div>
+        <div class="p-field">
+            <label for="symbol">Description</label>
+            <input type="text" pInputText id="description" [(ngModel)]="description" autofocus />
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+        <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text"
+            (click)="saveSubReddit()"></button>
+    </ng-template>
+</p-dialog>

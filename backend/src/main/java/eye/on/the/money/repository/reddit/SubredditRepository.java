@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface SubredditRepository extends JpaRepository<Subreddit, Long> {
-    List<Subreddit> findByUserEmailOrderByIdAsc(String userEmail);
+    List<Subreddit> findByUserEmailOrderBySubredditAsc(String userEmail);
 
     void deleteByIdAndUserEmail(Long id, String userEmail);
 }

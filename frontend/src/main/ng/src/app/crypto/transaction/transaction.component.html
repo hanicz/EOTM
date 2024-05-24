@@ -114,7 +114,6 @@
             <label for="currency">Type</label>
             <p-dropdown [options]="statuses" [(ngModel)]="transaction.buySell" placeholder="Any">
                 <ng-template let-option pTemplate="item">
-
                     <p-tag styleClass="p-mr-2" severity="info" *ngIf="option.label === 'BUY'" value="BUY">
                     </p-tag>
                     <p-tag styleClass="p-mr-2" severity="warning" *ngIf="option.label === 'SELL'" value="SELL"></p-tag>

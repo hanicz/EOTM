@@ -43,4 +43,11 @@ export class NewsService {
       headers: this.helper.getHeadersWithToken()
     });
   }
+
+  addSubreddit(subReddit: string, description: string) {
+    const url = `${this.newsUrl}/reddit`;
+    return this.http.post(url, JSON.stringify({ subReddit, description }), {
+      headers: this.helper.getHeadersWithToken()
+    });
+  }
 }

@@ -39,7 +39,7 @@ public class RedditService {
 
 
     public List<News> getHotNewsFromSubreddits(String userEmail) {
-        List<Subreddit> subredditList = this.subredditRepository.findByUserEmailOrderByIdAsc(userEmail);
+        List<Subreddit> subredditList = this.subredditRepository.findByUserEmailOrderBySubredditAsc(userEmail);
         JsonNode token = this.redditAPIService.getToken();
         Flux<JsonNode> subRedditsFlux = this.redditAPIService.getHotRedditNews(
                 subredditList.stream().map(Subreddit::getSubreddit).collect(Collectors.toList()),
@@ -65,14 +65,14 @@ public class RedditService {
     public Subreddit addSubreddit(SubredditDTO subreddit, String userEmail) {
         User user = this.userService.loadUserByEmail(userEmail);
         return this.subredditRepository.save(Subreddit.builder()
-                .subreddit(subreddit.subreddit())
+                .subreddit(subreddit.subReddit())
                 .description(subreddit.description())
                 .user(user)
                 .build());
     }
 
     public List<Subreddit> getSubredditsByUser(String userEmail) {
-        return this.subredditRepository.findByUserEmailOrderByIdAsc(userEmail);
+        return this.subredditRepository.findByUserEmailOrderBySubredditAsc(userEmail);
     }
 
     private <T> T convert(JsonNode json, Class<T> cls) {

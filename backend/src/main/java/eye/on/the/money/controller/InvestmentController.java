@@ -29,8 +29,8 @@ public class InvestmentController {
     }
 
     @GetMapping("/account/{accountId}")
-    public ResponseEntity<List<InvestmentDTO>> getInvestmentsByAccountId(@AuthenticationPrincipal UserDetails user, @PathVariable Long accountId) {
-        return new ResponseEntity<>(this.investmentService.getInvestments(user.getUsername()), HttpStatus.OK);
+    public ResponseEntity<List<InvestmentDTO>> getInvestmentsByAccount(@AuthenticationPrincipal UserDetails user, @PathVariable Long accountId) {
+        return new ResponseEntity<>(this.investmentService.getInvestmentsByAccountId(user.getUsername(), accountId), HttpStatus.OK);
     }
 
     @GetMapping("/holding")
@@ -38,9 +38,19 @@ public class InvestmentController {
         return new ResponseEntity<>(this.investmentService.getCurrentHoldings(user.getUsername()), HttpStatus.OK);
     }
 
+    @GetMapping("/holding/account/{accountId}")
+    public ResponseEntity<List<InvestmentDTO>> getHoldingsByAccount(@AuthenticationPrincipal UserDetails user, @PathVariable Long accountId) {
+        return new ResponseEntity<>(this.investmentService.getHoldingsByAccountId(user.getUsername(), accountId), HttpStatus.OK);
+    }
+
     @GetMapping("/position")
     public ResponseEntity<List<InvestmentDTO>> getPositions(@AuthenticationPrincipal UserDetails user) {
         return new ResponseEntity<>(this.investmentService.getAllPositions(user.getUsername()), HttpStatus.OK);
+    }
+
+    @GetMapping("/position/account/{accountId}")
+    public ResponseEntity<List<InvestmentDTO>> getPositionsByAccount(@AuthenticationPrincipal UserDetails user, @PathVariable Long accountId) {
+        return new ResponseEntity<>(this.investmentService.getPositionsByAccountId(user.getUsername(), accountId), HttpStatus.OK);
     }
 
     @PostMapping

@@ -54,7 +54,7 @@ public class InvestmentService implements ICSVService {
     }
 
     public List<InvestmentDTO> getInvestmentsByAccountId(String userEmail, Long accountId) {
-        return this.investmentRepository.findByUserEmailAndAccountIdOrderByTransactionDate(userEmail, accountId)
+        return this.investmentRepository.findByUserEmailAndAccountIdOrderByTransactionDateDesc(userEmail, accountId)
                 .stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
     }
 
@@ -64,7 +64,7 @@ public class InvestmentService implements ICSVService {
     }
 
     public List<InvestmentDTO> getHoldingsByAccountId(String userEmail, Long accountId) {
-        List<InvestmentDTO> investments = this.investmentRepository.findByUserEmailAndAccountIdOrderByTransactionDate(userEmail, accountId)
+        List<InvestmentDTO> investments = this.investmentRepository.findByUserEmailAndAccountIdOrderByTransactionDateDesc(userEmail, accountId)
                 .stream().map(this::convertToInvestmentDTO).toList();
         return this.getLiveDataForInvestments(investments);
     }
@@ -96,7 +96,7 @@ public class InvestmentService implements ICSVService {
     }
 
     public List<InvestmentDTO> getPositionsByAccountId(String userEmail, Long accountId) {
-        List<InvestmentDTO> investments = this.investmentRepository.findByUserEmailAndAccountIdOrderByTransactionDate(userEmail, accountId)
+        List<InvestmentDTO> investments = this.investmentRepository.findByUserEmailAndAccountIdOrderByTransactionDateDesc(userEmail, accountId)
                 .stream().map(this::convertToInvestmentDTO).toList();
         Map<String, InvestmentDTO> investmentMap = this.getCalculated(investments);
         return new ArrayList<>(investmentMap.values());

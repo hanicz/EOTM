@@ -11,4 +11,6 @@ export interface Investment {
     fee: number;
     exchange: string;
     name: string;
+    accountId: number;
+    accoutName: string;
 }

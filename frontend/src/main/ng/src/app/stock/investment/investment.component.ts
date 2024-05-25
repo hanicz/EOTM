@@ -4,6 +4,8 @@ import { StockService } from '../../service/stock.service';
 import { Globals } from '../../util/global';
 import { Exchange } from 'src/app/model/exchange';
 import { Symbol } from 'src/app/model/symbol';
+import { AccountService } from 'src/app/service/account.service';
+import { Account } from 'src/app/model/account';
 
 @Component({
   selector: 'app-investment',
@@ -13,6 +15,7 @@ import { Symbol } from 'src/app/model/symbol';
 export class InvestmentComponent implements OnInit {
 
   investments: Investment[] = [];
+  accounts: Account[] = [];
   currencies: any[];
   statuses: any[];
   selectedInvestments: Investment[] = [];
@@ -27,7 +30,7 @@ export class InvestmentComponent implements OnInit {
   selectedStock: Symbol = {} as Symbol;
   selectedExchange: Exchange = {} as Exchange;
 
-  constructor(private stockService: StockService, globals: Globals) {
+  constructor(private stockService: StockService, globals: Globals, private accountService: AccountService) {
     this.globals = globals;
     this.currencies = globals.currencies;
 
@@ -40,6 +43,12 @@ export class InvestmentComponent implements OnInit {
       next: (data) => {
         this.exchangesLoading = false;
         this.exchanges = data;
+      }
+    });
+
+    this.accountService.getAccounts().subscribe({
+      next: (data) => {
+        this.accounts = data;
       }
     });
 

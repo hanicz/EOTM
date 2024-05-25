@@ -53,6 +53,7 @@
             <th>Spent</th>
             <th>Average</th>
             <th>Date</th>
+            <th>Account</th>
             <th>Currency</th>
             <th>Fee</th>
             <th></th>
@@ -79,6 +80,7 @@
             <td>{{(investment.amount / investment.quantity) | currency : investment.currencyId : 'symbol' : '0.0-3'}}
             </td>
             <td>{{investment.transactionDate | date:'mediumDate'}}</td>
+            <td>{{investment.accountName}}</td>
             <td>{{investment.currencyId}}</td>
             <td>{{investment.fee}}</td>
             <td>
@@ -107,6 +109,11 @@
                 [style]="{'width':'100%'}"
                 [dropdownIcon]="stocksLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
             </p-dropdown>
+        </div>
+        <div class="p-field">
+            <label for="currency">Account</label>
+            <p-dropdown [options]="accounts" [(ngModel)]="investment.accountId" id="account" optionLabel="accountName"
+                optionValue="id"></p-dropdown>
         </div>
         <div class="p-field">
             <label for="currency">Currency</label>

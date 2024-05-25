@@ -21,4 +21,18 @@ export class AccountService {
       headers: this.helper.getHeadersWithToken()
     });
   };
+
+  deleteAccount(id: number) {
+    const url = `${this.accountUrl}/${id}`;
+    return this.http.delete(url, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  }
+
+  createAccount(account: Account) {
+    const url = `${this.accountUrl}`;
+    return this.http.post(url, account, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  }
 }

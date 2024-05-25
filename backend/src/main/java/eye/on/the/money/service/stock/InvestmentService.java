@@ -3,7 +3,7 @@ package eye.on.the.money.service.stock;
 import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.exception.CSVException;
-import eye.on.the.money.model.Account;
+import eye.on.the.money.model.stock.Account;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Investment;

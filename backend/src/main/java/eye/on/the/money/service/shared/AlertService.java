@@ -1,6 +1,6 @@
 package eye.on.the.money.service.shared;
 
-import eye.on.the.money.controller.CryptoAlertDTO;
+import eye.on.the.money.dto.out.CryptoAlertDTO;
 import eye.on.the.money.dto.out.StockAlertDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.alert.CryptoAlert;

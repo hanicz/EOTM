@@ -1,7 +1,9 @@
 package eye.on.the.money.service.stock;
 
-import eye.on.the.money.model.Account;
+import eye.on.the.money.model.User;
+import eye.on.the.money.model.stock.Account;
 import eye.on.the.money.repository.stock.AccountRepository;
+import eye.on.the.money.service.user.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import java.util.List;
 public class AccountService {
 
     private final AccountRepository accountRepository;
+    private final UserServiceImpl userService;
 
     public Account save(Account account) {
         return this.accountRepository.save(account);
@@ -25,18 +28,15 @@ public class AccountService {
     }
 
     @Transactional
-    public void deleteById(String userEmail, Long id) {
-        this.accountRepository.deleteByUserEmailAndId(userEmail, id);
+    public boolean deleteById(String userEmail, Long id) {
+        return this.accountRepository.deleteByUserEmailAndId(userEmail, id) > 0;
     }
 
     @Transactional
-    public Account createAccount(Account account) {
+    public Account createAccount(Account account, String userEmail) {
+        User user = this.userService.loadUserByEmail(userEmail);
         account.setId(null);
-        return this.accountRepository.save(account);
-    }
-
-    @Transactional
-    private Account updateAccount(Account account) {
+        account.setUser(user);
         return this.accountRepository.save(account);
     }
 }

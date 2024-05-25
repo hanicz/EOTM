@@ -1,6 +1,11 @@
-package eye.on.the.money.model;
+package eye.on.the.money.model.stock;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Investment;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
@@ -16,6 +21,7 @@ import java.util.Set;
 @Slf4j
 @Builder
 @ToString
+@EqualsAndHashCode
 @Table(name = "EOTM_USER_ACCOUNT")
 @AllArgsConstructor
 @NoArgsConstructor
@@ -27,6 +33,8 @@ public class Account {
     private Long id;
 
     private String accountName;
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate creationDate;
 
     @ManyToOne
@@ -34,7 +42,7 @@ public class Account {
     @JsonIgnore
     private User user;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "account")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "account", cascade = CascadeType.REMOVE)
     @JsonIgnore
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

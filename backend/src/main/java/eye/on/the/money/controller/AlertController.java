@@ -1,5 +1,6 @@
 package eye.on.the.money.controller;
 
+import eye.on.the.money.dto.out.CryptoAlertDTO;
 import eye.on.the.money.dto.out.StockAlertDTO;
 import eye.on.the.money.service.shared.AlertService;
 import lombok.RequiredArgsConstructor;

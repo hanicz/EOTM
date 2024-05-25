@@ -1,6 +1,6 @@
 package eye.on.the.money.repository.stock;
 
-import eye.on.the.money.model.Account;
+import eye.on.the.money.model.stock.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -11,5 +11,5 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     List<Account> findByUserEmailOrderByAccountName(String email);
 
-    void deleteByUserEmailAndId(String email, Long id);
+    int deleteByUserEmailAndId(String email, Long id);
 }

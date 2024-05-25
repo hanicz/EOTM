@@ -17,8 +17,10 @@ export class SettingsComponent implements OnInit {
   oldPassword: string = '';
   newPassword: string = '';
   addSubRedditDialog: boolean = false;
+  createAccountDialog: boolean = false;
   subReddit: string = '';
   description: string = '';
+  newAccount: Account = {} as Account;
 
   constructor(private newsService: NewsService, private userService: UserService,
     private accountService: AccountService) { }
@@ -53,14 +55,23 @@ export class SettingsComponent implements OnInit {
     });
   }
 
-  openDialog() {
+  openSubredditDialog() {
     this.subReddit = '';
     this.description = '';
     this.addSubRedditDialog = true;
   }
 
-  hideDialog() {
+  hideSubredditDialog() {
     this.addSubRedditDialog = false;
+  }
+
+  openAccountDialog() {
+    this.newAccount = {} as Account;
+    this.createAccountDialog = true;
+  }
+
+  hideAccountDialog() {
+    this.createAccountDialog = false;
   }
 
   saveSubReddit() {
@@ -69,6 +80,19 @@ export class SettingsComponent implements OnInit {
       this.addSubRedditDialog = false;
       this.subReddit = '';
       this.description = '';
+    });
+  }
+
+  deleteAccount(account: Account) {
+    this.accountService.deleteAccount(account.id).subscribe(() => {
+      this.loadAccounts();
+    });
+  }
+
+  createAccount() {
+    this.accountService.createAccount(this.newAccount).subscribe(() => {
+      this.loadAccounts();
+      this.createAccountDialog = false;
     });
   }
 }

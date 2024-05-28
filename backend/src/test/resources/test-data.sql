@@ -19,7 +19,8 @@ INSERT INTO EOTM_STOCK (ID,NAME,SHORT_NAME,EXCHANGE) VALUES ('crsr', 'Corsair Ga
 --Test coins
 INSERT INTO EOTM_COIN (ID,NAME,SYMBOL) VALUES ('polkadot', 'Polkadot', 'DOT')
 ,('bitcoin', 'Bitcoin', 'BTC')
-,('cardano', 'Cardano', 'ADA');
+,('cardano', 'Cardano', 'ADA')
+,('terra-luna', 'Terra', 'LUNA');
 
 --Test coin payments
 INSERT INTO EOTM_COIN_PAYMENT (AMOUNT,CURRENCY_ID) VALUES (156.80, 'EUR'),

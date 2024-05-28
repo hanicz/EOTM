@@ -43,10 +43,9 @@ public class TransactionController {
     }
 
     @DeleteMapping()
-    public ResponseEntity<HttpStatus> deleteByIds(@AuthenticationPrincipal UserDetails user, @RequestParam String ids) {
-        log.trace("Enter");
-        this.transactionService.deleteTransactionById(user.getUsername(), ids);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<Void> deleteByIds(@AuthenticationPrincipal UserDetails user, @RequestParam String ids) {
+        var isDeleted = this.transactionService.deleteTransactionById(user.getUsername(), ids);
+        return new ResponseEntity<>(isDeleted ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     }
 
     @GetMapping("/csv")

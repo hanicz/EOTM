@@ -29,4 +29,12 @@ class CoinServiceTest {
 
         Assertions.assertEquals(expected, result);
     }
+
+    @Test
+    public void getCoinBySymbol() {
+        Coin expected = this.coinRepository.findBySymbol("BTC").get();
+        Coin result = this.coinService.getCoinBySymbol("BTC");
+
+        Assertions.assertEquals(expected, result);
+    }
 }

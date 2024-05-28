@@ -22,7 +22,7 @@ import java.time.format.DateTimeFormatter;
 @EqualsAndHashCode
 @NoArgsConstructor
 public class TransactionDTO implements CSVHelper {
-    private Long transactionId;
+    private Long id;
     private Double quantity;
     private String buySell;
     private String transactionString;
@@ -65,14 +65,14 @@ public class TransactionDTO implements CSVHelper {
     @Override
     @JsonIgnore
     public Object[] getCSVRecord() {
-        return new Object[]{this.getTransactionId(), this.getQuantity(),
+        return new Object[]{this.getId(), this.getQuantity(),
                 this.getBuySell(), this.getTransactionDate(), this.getSymbol(),
                 this.getAmount(), this.getCurrencyId(), this.getFee()};
     }
 
     public static TransactionDTO createFromCSVRecord(CSVRecord csvRecord, DateTimeFormatter formatter) {
         return TransactionDTO.builder()
-                .transactionId(csvRecord.get("Transaction Id").isBlank() ? null : Long.parseLong(csvRecord.get("Transaction Id")))
+                .id(csvRecord.get("Transaction Id").isBlank() ? null : Long.parseLong(csvRecord.get("Transaction Id")))
                 .buySell(csvRecord.get("Type"))
                 .transactionDate(LocalDate.parse(csvRecord.get("Transaction Date"), formatter))
                 .amount(Double.parseDouble(csvRecord.get("Amount")))

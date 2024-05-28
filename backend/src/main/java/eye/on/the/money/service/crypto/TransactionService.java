@@ -78,9 +78,9 @@ public class TransactionService implements ICSVService {
     }
 
     @Transactional
-    public void deleteTransactionById(String userEmail, String ids) {
+    public boolean deleteTransactionById(String userEmail, String ids) {
         List<Long> idList = Stream.of(ids.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
-        this.transactionRepository.deleteByUserEmailAndIdIn(userEmail, idList);
+        return this.transactionRepository.deleteByUserEmailAndIdIn(userEmail, idList) == idList.size();
     }
 
     @Transactional
@@ -110,7 +110,7 @@ public class TransactionService implements ICSVService {
     public TransactionDTO updateTransaction(TransactionDTO transactionDTO, String userEmail) {
         Currency currency = this.currencyRepository.findById(transactionDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
         Coin coin = this.coinRepository.findBySymbol(transactionDTO.getSymbol()).orElseThrow(NoSuchElementException::new);
-        Transaction transaction = this.transactionRepository.findByIdAndUserEmail(transactionDTO.getTransactionId(), userEmail).orElseThrow(NoSuchElementException::new);
+        Transaction transaction = this.transactionRepository.findByIdAndUserEmail(transactionDTO.getId(), userEmail).orElseThrow(NoSuchElementException::new);
         Payment payment = transaction.getPayment();
 
         transaction.setBuySell(transactionDTO.getBuySell());
@@ -156,11 +156,11 @@ public class TransactionService implements ICSVService {
             for (CSVRecord csvRecord : csvParser) {
                 TransactionDTO transaction = TransactionDTO.createFromCSVRecord(csvRecord, FORMATTER);
 
-                if (transaction.getTransactionId() != null &&
-                        this.transactionRepository.findByIdAndUserEmail(transaction.getTransactionId(), userEmail).isPresent()) {
+                if (transaction.getId() != null &&
+                        this.transactionRepository.findByIdAndUserEmail(transaction.getId(), userEmail).isPresent()) {
                     this.updateTransaction(transaction, userEmail);
                 } else {
-                    transaction.setTransactionId(null);
+                    transaction.setId(null);
                     this.createTransaction(transaction, userEmail);
                 }
             }

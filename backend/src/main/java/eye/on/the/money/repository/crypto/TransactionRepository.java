@@ -10,7 +10,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Transaction> findByUserEmailOrderByTransactionDate(String userEmail);
     List<Transaction> findByUserEmailOrderByTransactionDateDesc(String userEmail);
 
-    void deleteByUserEmailAndIdIn(String userEmail, List<Long> ids);
+    int deleteByUserEmailAndIdIn(String userEmail, List<Long> ids);
 
     Optional<Transaction> findByIdAndUserEmail(Long id, String userEmail);
 }

@@ -62,7 +62,7 @@ export class TransactionComponent implements OnInit {
   deleteClicked() {
     let ids = '';
     this.selectedTransactions.forEach(t => {
-      ids += t.transactionId + ',';
+      ids += t.id + ',';
     });
     this.deleteByIds(ids);
   }
@@ -89,7 +89,7 @@ export class TransactionComponent implements OnInit {
   }
 
   saveTransaction() {
-    if (this.transaction.transactionId === undefined) {
+    if (this.transaction.id === undefined) {
       this.cryptoService.create(this.transaction).subscribe({
         next: () => {
           this.fetchData();

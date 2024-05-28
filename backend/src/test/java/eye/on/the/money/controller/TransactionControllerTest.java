@@ -68,9 +68,16 @@ class TransactionControllerTest {
 
     @Test
     public void deleteByIds() {
-        doNothing().when(this.transactionService).deleteTransactionById(any(), any());
+        when(this.transactionService.deleteTransactionById(any(), any())).thenReturn(true);
 
         Assertions.assertEquals(HttpStatus.OK, this.transactionController.deleteByIds(this.user, "1,2,3").getStatusCode());
+    }
+
+    @Test
+    public void deleteByIds404() {
+        when(this.transactionService.deleteTransactionById(any(), any())).thenReturn(false);
+
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, this.transactionController.deleteByIds(this.user, "1,2,3").getStatusCode());
     }
 
     @Test
@@ -95,7 +102,7 @@ class TransactionControllerTest {
 
     @Test
     public void updateTransaction() {
-        TransactionDTO tDTO = TransactionDTO.builder().transactionId(1L).transactionString("s1").transactionDate(LocalDate.now()).amount(555.1).quantity(431.0)
+        TransactionDTO tDTO = TransactionDTO.builder().id(1L).transactionString("s1").transactionDate(LocalDate.now()).amount(555.1).quantity(431.0)
                 .buySell("b").symbol("s1").url("u1").fee(7.0).currencyId("c1").coinId("co1").liveValue(33.1).valueDiff(1.0).build();
 
         when(this.transactionService.updateTransaction(tDTO, "email")).thenReturn(tDTO);
@@ -114,11 +121,11 @@ class TransactionControllerTest {
 
     private List<TransactionDTO> createTransactionList() {
         List<TransactionDTO> tDTO = new ArrayList<>();
-        tDTO.add(TransactionDTO.builder().transactionId(1L).transactionString("s1").transactionDate(LocalDate.now()).amount(555.1).quantity(431.0)
+        tDTO.add(TransactionDTO.builder().id(1L).transactionString("s1").transactionDate(LocalDate.now()).amount(555.1).quantity(431.0)
                 .buySell("b").symbol("s1").url("u1").fee(7.0).currencyId("c1").coinId("co1").liveValue(33.1).valueDiff(1.0).build());
-        tDTO.add(TransactionDTO.builder().transactionId(2L).transactionString("s2").transactionDate(LocalDate.now()).amount(1555.1).quantity(3431.0)
+        tDTO.add(TransactionDTO.builder().id(2L).transactionString("s2").transactionDate(LocalDate.now()).amount(1555.1).quantity(3431.0)
                 .buySell("s").symbol("s2").url("u2").fee(7.2).currencyId("c2").coinId("co2").liveValue(233.1).valueDiff(1.1).build());
-        tDTO.add(TransactionDTO.builder().transactionId(3L).transactionString("s3").transactionDate(LocalDate.now()).amount(5553.1).quantity(4321.0)
+        tDTO.add(TransactionDTO.builder().id(3L).transactionString("s3").transactionDate(LocalDate.now()).amount(5553.1).quantity(4321.0)
                 .buySell("b").symbol("s3").url("u3").fee(7.3).currencyId("c3").coinId("co3").liveValue(313.1).valueDiff(22.0).build());
 
         return tDTO;

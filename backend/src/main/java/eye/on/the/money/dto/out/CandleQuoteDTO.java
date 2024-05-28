@@ -19,6 +19,7 @@ import java.util.List;
 @EqualsAndHashCode
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Builder
 public class CandleQuoteDTO {
     private Double[] c;
     private Double[] h;

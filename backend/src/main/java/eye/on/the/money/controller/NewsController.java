@@ -48,8 +48,8 @@ public class NewsController {
 
     @DeleteMapping("reddit/{id}")
     public ResponseEntity<Void> deleteSubreddit(@PathVariable Long id, @AuthenticationPrincipal UserDetails user) {
-        this.redditService.deleteSubreddit(id, user.getUsername());
-        return new ResponseEntity<>(HttpStatus.OK);
+        var isDeleted = this.redditService.deleteSubreddit(id, user.getUsername());
+        return new ResponseEntity<>(isDeleted ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     }
 
     @PostMapping("reddit")

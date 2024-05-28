@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
+@EqualsAndHashCode
 public class Subreddit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

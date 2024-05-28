@@ -57,8 +57,8 @@ public class RedditService {
     }
 
     @Transactional
-    public void deleteSubreddit(Long id, String userEmail) {
-        this.subredditRepository.deleteByIdAndUserEmail(id, userEmail);
+    public boolean deleteSubreddit(Long id, String userEmail) {
+        return this.subredditRepository.deleteByIdAndUserEmail(id, userEmail) > 0;
     }
 
     @Transactional

@@ -73,3 +73,12 @@ INSERT INTO EOTM_CREDENTIAL (NAME,SECRET) VALUES ('email_user', 'user'),
 INSERT INTO EOTM_COIN_WATCH (USER_ID, COIN_ID) VALUES
 (1, 'cardano'),
 (1, 'bitcoin');
+
+
+--Test Subreddits
+INSERT INTO EOTM_SUBREDDIT (SUBREDDIT, DESCRIPTION, USER_ID) VALUES
+('stocks', 'Stocks', 1),
+('wallstreetbets', 'Wall Street Bets', 1),
+('trading', 'Trading', 1),
+('investing', 'Investing', 1),
+('stockmarket', 'Stock Market', 1);

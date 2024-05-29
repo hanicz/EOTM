@@ -1,0 +1,20 @@
+Create new key pair: 
+ssh-keygen -t ed25519
+
+Login:
+ssh -i <priv_key_location> root@<ip_address>
+
+Docker:
+snap install docker
+Docker compose:
+https://docs.docker.com/compose/install/linux/
+
+SSH:
+sudo nano /etc/ssh/sshd_config
+PasswordAuthentication no
+PermitRootLogin prohibit-password
+sudo systemctl restart ssh
+
+Certbot:
+sudo apt install certbot
+sudo certbot --apache

@@ -29,9 +29,9 @@ jobs:
           fingerprints:
             - "SHA256:YBcL3BJjz6DrQH3dgjJBdiy1NMeEd/AA0uDCtp/Xo3M"
       - run:
-          name: Deploy to DigitalOcean Droplet
+          name: Deploy to Hetzner VPS
           command: |
-            echo ${DO_KNOWN_HOST} >> ~/.ssh/known_hosts
-            ssh $DO_USER@$DO_IP_ADDRESS 'cd eotm && bash deploy.sh'
+            echo ${HETZNER_KNOWN_HOST} >> ~/.ssh/known_hosts
+            ssh $HETZNER_USER@$HETZNER_IP 'cd eotm && bash deploy.sh'
 
 

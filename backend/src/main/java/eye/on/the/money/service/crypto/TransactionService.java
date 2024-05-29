@@ -164,7 +164,7 @@ public class TransactionService implements ICSVService {
                     this.createTransaction(transaction, userEmail);
                 }
             }
-        } catch (IOException | DateTimeParseException e) {
+        } catch (IOException | DateTimeParseException | IllegalArgumentException e) {
             log.error("Error while processing CSV", e);
             throw new CSVException("Failed to parse CSV file: " + e.getMessage(), e);
         }

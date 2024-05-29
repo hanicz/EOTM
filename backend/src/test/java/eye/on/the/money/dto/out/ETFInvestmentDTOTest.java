@@ -1,13 +1,25 @@
 package eye.on.the.money.dto.out;
 
+import org.apache.commons.csv.CSVRecord;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
+@ExtendWith(SpringExtension.class)
 class ETFInvestmentDTOTest {
+
+    @Mock
+    private CSVRecord record;
 
     @Test
     public void mergeInvestments() {
@@ -107,6 +119,70 @@ class ETFInvestmentDTOTest {
                 () -> assertEquals(6123, eiDTO.getQuantity()));
     }
 
+    @Test
+    public void getHeaders() {
+        ETFInvestmentDTO eiDTO = ETFInvestmentDTO.builder().build();
+
+        Assertions.assertAll("Assert all headers",
+                () -> assertEquals("Investment Id", eiDTO.getHeaders()[0]),
+                () -> assertEquals("Quantity", eiDTO.getHeaders()[1]),
+                () -> assertEquals("Type", eiDTO.getHeaders()[2]),
+                () -> assertEquals("Transaction Date", eiDTO.getHeaders()[3]),
+                () -> assertEquals("Short Name", eiDTO.getHeaders()[4]),
+                () -> assertEquals("Exchange", eiDTO.getHeaders()[5]),
+                () -> assertEquals("Amount", eiDTO.getHeaders()[6]),
+                () -> assertEquals("Currency", eiDTO.getHeaders()[7]),
+                () -> assertEquals("Fee", eiDTO.getHeaders()[8])
+        );
+    }
+
+    @Test
+    public void getCSVRecord() {
+        LocalDate ld = LocalDate.now();
+        ETFInvestmentDTO eiDTO = this.getBaseDTO();
+        eiDTO.setTransactionDate(ld);
+
+        Assertions.assertAll("Assert all headers",
+                () -> assertEquals(1L, eiDTO.getCSVRecord()[0]),
+                () -> assertEquals(667, eiDTO.getCSVRecord()[1]),
+                () -> assertEquals("B", eiDTO.getCSVRecord()[2]),
+                () -> assertEquals(ld, eiDTO.getCSVRecord()[3]),
+                () -> assertEquals("AMD", eiDTO.getCSVRecord()[4]),
+                () -> assertEquals("NASDAQ", eiDTO.getCSVRecord()[5]),
+                () -> assertEquals(15.0, eiDTO.getCSVRecord()[6]),
+                () -> assertEquals("USD", eiDTO.getCSVRecord()[7]),
+                () -> assertEquals(1.2, eiDTO.getCSVRecord()[8])
+
+        );
+    }
+
+    @Test
+    public void createFromCSVRecord() {
+        when(this.record.get("Investment Id")).thenReturn("1");
+        when(this.record.get("Quantity")).thenReturn("667");
+        when(this.record.get("Type")).thenReturn("B");
+        when(this.record.get("Transaction Date")).thenReturn("2020-01-01");
+        when(this.record.get("Short Name")).thenReturn("AMD");
+        when(this.record.get("Exchange")).thenReturn("NASDAQ");
+        when(this.record.get("Amount")).thenReturn("15.0");
+        when(this.record.get("Currency")).thenReturn("USD");
+        when(this.record.get("Fee")).thenReturn("1.2");
+
+        ETFInvestmentDTO eiDTO = ETFInvestmentDTO.createFromCSVRecord(this.record, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+        Assertions.assertAll("Assert all values",
+                () -> assertEquals(1L, eiDTO.getId()),
+                () -> assertEquals(667, eiDTO.getQuantity()),
+                () -> assertEquals("B", eiDTO.getBuySell()),
+                () -> assertEquals(LocalDate.parse("2020-01-01"), eiDTO.getTransactionDate()),
+                () -> assertEquals("AMD", eiDTO.getShortName()),
+                () -> assertEquals("NASDAQ", eiDTO.getExchange()),
+                () -> assertEquals(15.0, eiDTO.getAmount()),
+                () -> assertEquals("USD", eiDTO.getCurrencyId()),
+                () -> assertEquals(1.2, eiDTO.getFee())
+        );
+    }
+
     private ETFInvestmentDTO getBaseDTO() {
         return ETFInvestmentDTO.builder()
                 .amount(15.0)
@@ -115,7 +191,10 @@ class ETFInvestmentDTOTest {
                 .buySell("B")
                 .liveValue(55.4)
                 .shortName("AMD")
+                .currencyId("USD")
                 .valueDiff(77.8)
+                .exchange("NASDAQ")
+                .fee(1.2)
                 .build();
     }
 }

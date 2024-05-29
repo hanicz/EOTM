@@ -112,7 +112,7 @@ public class DividendService implements ICSVService {
                     this.createDividend(dividend, userEmail);
                 }
             }
-        } catch (IOException | DateTimeParseException e) {
+        } catch (IOException | DateTimeParseException | IllegalArgumentException e) {
             log.error("Error while processing CSV", e);
             throw new CSVException("Failed to parse CSV file: " + e.getMessage(), e);
         }

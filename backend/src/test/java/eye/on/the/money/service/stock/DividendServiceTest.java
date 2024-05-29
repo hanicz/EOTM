@@ -2,6 +2,7 @@ package eye.on.the.money.service.stock;
 
 import eye.on.the.money.EotmApplication;
 import eye.on.the.money.dto.out.DividendDTO;
+import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Dividend;
 import eye.on.the.money.repository.UserRepository;
@@ -180,7 +181,16 @@ class DividendServiceTest {
         String csvContent = "EXCEPTION,1\n3,EXC,333\n64";
         MultipartFile mpf = new MockMultipartFile("file", "file.csv", MediaType.TEXT_PLAIN_VALUE, csvContent.getBytes());
 
-        assertThrows(RuntimeException.class,
+        assertThrows(CSVException.class,
+                () -> this.dividendService.processCSV(this.user.getUsername(), mpf));
+    }
+
+    @Test
+    public void processCSV_DateExc() {
+        String csvContent = "Dividend Id,Amount,Dividend Date,Short Name,Exchange,Currency\n,299.0,NOT_DATE,INTC,US,USD";
+        MultipartFile mpf = new MockMultipartFile("file", "file.csv", MediaType.TEXT_PLAIN_VALUE, csvContent.getBytes());
+
+        assertThrows(CSVException.class,
                 () -> this.dividendService.processCSV(this.user.getUsername(), mpf));
     }
 

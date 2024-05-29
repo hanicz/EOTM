@@ -12,6 +12,7 @@ import eye.on.the.money.model.crypto.Transaction;
 import eye.on.the.money.repository.UserRepository;
 import eye.on.the.money.repository.crypto.TransactionRepository;
 import eye.on.the.money.service.api.CryptoAPIService;
+import eye.on.the.money.service.user.UserServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,6 +54,8 @@ class TransactionServiceTest {
     private TransactionService transactionService;
     @Autowired
     private UserRepository userRepository;
+    @MockBean
+    private UserServiceImpl userService;
     @Autowired
     private ObjectMapper objectMapper;
     private User user;
@@ -62,6 +65,7 @@ class TransactionServiceTest {
     @BeforeEach
     public void init() {
         this.user = this.userRepository.findByEmail("test@test.test");
+        when(this.userService.loadUserByEmail(this.user.getUsername())).thenReturn(this.user);
     }
 
     @Test

@@ -18,3 +18,7 @@ sudo systemctl restart ssh
 Certbot:
 sudo apt install certbot
 sudo certbot --apache
+
+Memory dump:
+jps
+jmap -dump:format=b,file=heapdump.hprof <pid>

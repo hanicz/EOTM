@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { ResourceHelper } from '../util/servicehelper';
 import { environment } from '../../environments/environment';
 import { StockAlert } from '../model/stockalert';
+import { CryptoAlert } from '../model/cryptoalert';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,7 @@ export class AlertService {
 
   constructor(private http: HttpClient) { }
 
-  getAlerts() {
+  getStockAlerts() {
     const url = `${this.watchListUrl}/stock`;
     return this.http.get<StockAlert[]>(url, {
       headers: this.helper.getHeadersWithToken()
@@ -31,6 +32,27 @@ export class AlertService {
 
   createNewStockAlert(data: any) {
     const url = `${this.watchListUrl}/stock`;
+    return this.http.post(url, data,{
+      headers: this.helper.getHeadersWithToken()
+    });
+  };
+
+  getCryptoAlerts() {
+    const url = `${this.watchListUrl}/crypto`;
+    return this.http.get<CryptoAlert[]>(url, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  };
+
+  deleteCryptoAlert(id: number) {
+    const url = `${this.watchListUrl}/crypto/${id}`;
+    return this.http.delete(url, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  };
+
+  createNewCryptoAlert(data: any) {
+    const url = `${this.watchListUrl}/crypto`;
     return this.http.post(url, data,{
       headers: this.helper.getHeadersWithToken()
     });

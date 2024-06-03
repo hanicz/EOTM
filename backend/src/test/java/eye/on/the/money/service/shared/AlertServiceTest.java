@@ -1,12 +1,14 @@
 package eye.on.the.money.service.shared;
 
 import eye.on.the.money.EotmApplication;
+import eye.on.the.money.dto.out.CryptoAlertDTO;
 import eye.on.the.money.dto.out.StockAlertDTO;
 import eye.on.the.money.model.User;
+import eye.on.the.money.model.alert.CryptoAlert;
 import eye.on.the.money.model.alert.StockAlert;
 import eye.on.the.money.repository.UserRepository;
+import eye.on.the.money.repository.alert.CryptoAlertRepository;
 import eye.on.the.money.repository.alert.StockAlertRepository;
-import eye.on.the.money.service.shared.AlertService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +28,9 @@ public class AlertServiceTest {
 
     @Autowired
     private StockAlertRepository stockAlertRepository;
+
+    @Autowired
+    private CryptoAlertRepository cryptoAlertRepository;
 
     @Autowired
     private AlertService alertService;
@@ -52,6 +57,14 @@ public class AlertServiceTest {
     }
 
     @Test
+    public void getAllCryptoAlerts() {
+        List<CryptoAlert> alertsInDB = this.cryptoAlertRepository.findByUserEmailOrderByCoinSymbol(this.user.getUsername());
+        List<CryptoAlertDTO> alertsResponse = this.alertService.getAllCryptoAlerts(this.user.getUsername());
+
+        Assertions.assertEquals(alertsInDB.stream().map(this::convertToCryptoAlertDTO).collect(Collectors.toList()), alertsResponse);
+    }
+
+    @Test
     public void createNewStockAlert() {
         StockAlertDTO sDTO = this.getStockAlertDTO();
         StockAlertDTO createdDTO = this.alertService.createNewStockAlert(this.user, sDTO);
@@ -59,6 +72,16 @@ public class AlertServiceTest {
         StockAlert expected = this.stockAlertRepository.findById(createdDTO.getId()).get();
 
         Assertions.assertEquals(this.convertToStockAlertDTO(expected), sDTO);
+    }
+
+    @Test
+    public void createNewCryptoAlert() {
+        CryptoAlertDTO cDTO = this.getCryptoAlertDTO();
+        CryptoAlertDTO createdDTO = this.alertService.createNewCryptoAlert(this.user, cDTO);
+        cDTO.setId(createdDTO.getId());
+        CryptoAlert expected = this.cryptoAlertRepository.findById(createdDTO.getId()).get();
+
+        Assertions.assertEquals(this.convertToCryptoAlertDTO(expected), cDTO);
     }
 
     @Test
@@ -73,8 +96,24 @@ public class AlertServiceTest {
     }
 
     @Test
+    public void deleteCryptoAlert() {
+        Optional<CryptoAlert> beforeDelete = this.cryptoAlertRepository.findById(1L);
+        var deleted = this.alertService.deleteCryptoAlert("test@test.test", this.user.getId());
+        Optional<CryptoAlert> afterDelete = this.cryptoAlertRepository.findById(1L);
+
+        Assertions.assertTrue(deleted);
+        Assertions.assertTrue(beforeDelete.isPresent());
+        Assertions.assertTrue(afterDelete.isEmpty());
+    }
+
+    @Test
     public void deleteStockAlertNotFound() {
         Assertions.assertFalse(this.alertService.deleteStockAlert("test@test.test", 200L));
+    }
+
+    @Test
+    public void deleteCryptoAlertNotFound() {
+        Assertions.assertFalse(this.alertService.deleteCryptoAlert("test@test.test", 200L));
     }
 
     private StockAlertDTO getStockAlertDTO() {
@@ -87,8 +126,22 @@ public class AlertServiceTest {
                 .build();
     }
 
+    private CryptoAlertDTO getCryptoAlertDTO() {
+        return CryptoAlertDTO.builder()
+                .symbol("BTC")
+                .type("PERCENT_OVER")
+                .valuePoint(5.0)
+                .name("Bitcoin")
+                .build();
+    }
+
     private StockAlertDTO convertToStockAlertDTO(StockAlert stockAlert) {
         this.modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
         return this.modelMapper.map(stockAlert, StockAlertDTO.class);
+    }
+
+    private CryptoAlertDTO convertToCryptoAlertDTO(CryptoAlert cryptoAlert) {
+        this.modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
+        return this.modelMapper.map(cryptoAlert, CryptoAlertDTO.class);
     }
 }

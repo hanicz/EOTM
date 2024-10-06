@@ -22,3 +22,11 @@ sudo certbot --apache
 Memory dump:
 jps
 jmap -dump:format=b,file=heapdump.hprof <pid>
+
+Renew:
+If its missing apache sudo apt install -y certbot python3-certbot-apache
+certbot plugins
+certbot renew
+
+netstat -ntlp
+/etc/init.d/apache2 stop

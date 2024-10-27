@@ -22,6 +22,11 @@ INSERT INTO EOTM_COIN (ID,NAME,SYMBOL) VALUES ('polkadot', 'Polkadot', 'DOT')
 ,('cardano', 'Cardano', 'ADA')
 ,('terra-luna', 'Terra', 'LUNA');
 
+--Test ETFs
+INSERT INTO EOTM_ETF (ID,NAME,SHORT_NAME,EXCHANGE) VALUES
+('vwrl', 'Vang FTSE AllW-D', 'VWRL', 'AS'),
+('vwce', 'Vang FTSE AllW-A', 'VWCE', 'MI');
+
 --Test coin payments
 INSERT INTO EOTM_COIN_PAYMENT (AMOUNT,CURRENCY_ID) VALUES (156.80, 'EUR'),
 (100, 'EUR'),

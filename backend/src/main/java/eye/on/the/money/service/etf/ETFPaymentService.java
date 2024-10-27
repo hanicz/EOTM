@@ -17,9 +17,4 @@ public class ETFPaymentService {
     public ETFPayment createPayment(Currency currency, Double amount) {
         return this.etfPaymentRepository.save(ETFPayment.builder().amount(amount).currency(currency).build());
     }
-
-    @Transactional
-    public ETFPayment updatePayment(ETFPayment payment) {
-        return this.etfPaymentRepository.save(payment);
-    }
 }

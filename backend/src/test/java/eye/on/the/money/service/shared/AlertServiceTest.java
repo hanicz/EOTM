@@ -86,9 +86,11 @@ public class AlertServiceTest {
 
     @Test
     public void deleteStockAlert() {
-        Optional<StockAlert> beforeDelete = this.stockAlertRepository.findById(1L);
-        var deleted = this.alertService.deleteStockAlert("test@test.test", this.user.getId());
-        Optional<StockAlert> afterDelete = this.stockAlertRepository.findById(1L);
+        StockAlertDTO sDTO = this.getStockAlertDTO();
+        StockAlertDTO createdDTO = this.alertService.createNewStockAlert(this.user, sDTO);
+        Optional<StockAlert> beforeDelete = this.stockAlertRepository.findById(createdDTO.getId());
+        var deleted = this.alertService.deleteStockAlert("test@test.test", createdDTO.getId());
+        Optional<StockAlert> afterDelete = this.stockAlertRepository.findById(createdDTO.getId());
 
         Assertions.assertTrue(deleted);
         Assertions.assertTrue(beforeDelete.isPresent());
@@ -97,9 +99,11 @@ public class AlertServiceTest {
 
     @Test
     public void deleteCryptoAlert() {
-        Optional<CryptoAlert> beforeDelete = this.cryptoAlertRepository.findById(1L);
-        var deleted = this.alertService.deleteCryptoAlert("test@test.test", this.user.getId());
-        Optional<CryptoAlert> afterDelete = this.cryptoAlertRepository.findById(1L);
+        CryptoAlertDTO cDTO = this.getCryptoAlertDTO();
+        CryptoAlertDTO createdDTO = this.alertService.createNewCryptoAlert(this.user, cDTO);
+        Optional<CryptoAlert> beforeDelete = this.cryptoAlertRepository.findById(createdDTO.getId());
+        var deleted = this.alertService.deleteCryptoAlert("test@test.test", createdDTO.getId());
+        Optional<CryptoAlert> afterDelete = this.cryptoAlertRepository.findById(createdDTO.getId());
 
         Assertions.assertTrue(deleted);
         Assertions.assertTrue(beforeDelete.isPresent());

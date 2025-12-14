@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class AlertControllerTest {
 
     @Mock
@@ -59,7 +59,7 @@ class AlertControllerTest {
     public void deleteAlert404() {
         when(this.alertService.deleteStockAlert(anyString(), anyLong())).thenReturn(false);
 
-        ResponseEntity<HttpStatus> result = this.alertController.deleteStockAlert(User.builder().id(1L).build(), 1L);
+        ResponseEntity<HttpStatus> result = this.alertController.deleteStockAlert(User.builder().id(1L).email("user@email.com").build(), 1L);
 
         assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
     }
@@ -104,7 +104,7 @@ class AlertControllerTest {
     public void deleteCryptoAlert404() {
         when(this.alertService.deleteCryptoAlert(anyString(), anyLong())).thenReturn(false);
 
-        ResponseEntity<HttpStatus> result = this.alertController.deleteCryptoAlert(User.builder().id(1L).build(), 1L);
+        ResponseEntity<HttpStatus> result = this.alertController.deleteCryptoAlert(User.builder().id(1L).email("user@email.com").build(), 1L);
 
         assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
     }

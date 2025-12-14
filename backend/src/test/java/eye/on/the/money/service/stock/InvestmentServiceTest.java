@@ -5,9 +5,7 @@ import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Investment;
 import eye.on.the.money.repository.UserRepository;
-import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.stock.InvestmentRepository;
-import eye.on.the.money.repository.stock.StockRepository;
 import eye.on.the.money.service.api.EODAPIService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,8 +15,8 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
@@ -33,15 +31,11 @@ class InvestmentServiceTest {
 
     @Autowired
     private InvestmentRepository investmentRepository;
-    @Autowired
-    private StockRepository stockRepository;
-    @Autowired
-    private CurrencyRepository currencyRepository;
-    @MockBean
+    @MockitoBean
     private StockPaymentService stockPaymentService;
-    @MockBean
+    @MockitoBean
     private EODAPIService eodAPIService;
-    @MockBean
+    @MockitoBean
     private StockService stockService;
     @Autowired
     private InvestmentService investmentService;

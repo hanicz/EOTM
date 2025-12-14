@@ -21,10 +21,10 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -46,7 +46,7 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles("test")
 class TransactionServiceTest {
 
-    @MockBean
+    @MockitoBean
     private CryptoAPIService cryptoAPIService;
     @Autowired
     private TransactionRepository transactionRepository;
@@ -54,7 +54,7 @@ class TransactionServiceTest {
     private TransactionService transactionService;
     @Autowired
     private UserRepository userRepository;
-    @MockBean
+    @MockitoBean
     private UserServiceImpl userService;
     @Autowired
     private ObjectMapper objectMapper;

@@ -9,10 +9,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Arrays;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(SpringExtension.class)
 class EmailServiceTest {
 
-    @MockBean
+    @MockitoBean
     private JavaMailSender javaMailSender;
 
     @Autowired

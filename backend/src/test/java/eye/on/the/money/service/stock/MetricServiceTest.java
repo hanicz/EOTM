@@ -7,8 +7,10 @@ import eye.on.the.money.dto.out.RecommendationDTO;
 import eye.on.the.money.service.api.StockMetricAPIService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -20,8 +22,8 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = EotmApplication.class)
 @ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class)
 class MetricServiceTest {
-
 
     @Mock
     private StockMetricAPIService stockMetricAPIService;

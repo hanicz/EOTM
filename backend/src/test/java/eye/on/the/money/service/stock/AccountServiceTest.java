@@ -5,7 +5,6 @@ import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Account;
 import eye.on.the.money.repository.UserRepository;
 import eye.on.the.money.repository.stock.AccountRepository;
-import eye.on.the.money.service.user.UserServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,8 +23,6 @@ import java.util.List;
 class AccountServiceTest {
     @Autowired
     private AccountRepository accountRepository;
-    @Autowired
-    private UserServiceImpl userService;
     @Autowired
     private AccountService accountService;
     @Autowired

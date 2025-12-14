@@ -5,12 +5,12 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.4</version>
+        <version>4.0.0</version>
         <relativePath/>
     </parent>
     <groupId>eye.on.the.money</groupId>
     <artifactId>EOTM</artifactId>
-    <version>1.6</version>
+    <version>1.7</version>
     <packaging>pom</packaging>
     <name>EOTM</name>
     <description>Project for crypto and stock tracking</description>
@@ -21,19 +21,19 @@
     </modules>
 
     <properties>
-        <spring.retry.version>2.0.9</spring.retry.version>
-        <io.jsonwebtoken.version>0.12.6</io.jsonwebtoken.version>
-        <tomcat.jdbc.version>10.1.30</tomcat.jdbc.version>
-        <postgresql.version>42.7.3</postgresql.version>
-        <lombok.version>1.18.34</lombok.version>
-        <modelmapper.version>3.2.1</modelmapper.version>
-        <commons-csv.version>1.12.0</commons-csv.version>
-        <poi.version>5.3.0</poi.version>
-        <jackson-datatype-jsr310.version>2.18.0</jackson-datatype-jsr310.version>
-        <h2.version>2.3.232</h2.version>
-        <maven-clean-plugin.version>3.4.0</maven-clean-plugin.version>
-        <maven-checkstyle-plugin.version>3.5.0</maven-checkstyle-plugin.version>
-        <maven-jacoco-plugin.verson>0.8.12</maven-jacoco-plugin.verson>
+        <spring.retry.version>2.0.12</spring.retry.version>
+        <io.jsonwebtoken.version>0.13.0</io.jsonwebtoken.version>
+        <tomcat.jdbc.version>11.0.15</tomcat.jdbc.version>
+        <postgresql.version>42.7.8</postgresql.version>
+        <lombok.version>1.18.42</lombok.version>
+        <modelmapper.version>3.2.6</modelmapper.version>
+        <commons-csv.version>1.14.1</commons-csv.version>
+        <poi.version>5.5.1</poi.version>
+        <jackson-datatype-jsr310.version>2.20.1</jackson-datatype-jsr310.version>
+        <h2.version>2.4.240</h2.version>
+        <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
+        <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
+        <maven-jacoco-plugin.verson>0.8.14</maven-jacoco-plugin.verson>
     </properties>
 
     <dependencyManagement>

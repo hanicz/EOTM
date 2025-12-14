@@ -5,7 +5,7 @@
     <parent>
         <artifactId>EOTM</artifactId>
         <groupId>eye.on.the.money</groupId>
-        <version>1.6</version>
+        <version>1.7</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -21,6 +21,7 @@
 	<repositories>
 		<repository>
 			<id>central</id>
+
 			<url>https://repo1.maven.org/maven2</url>
 			<snapshots>
 				<enabled>false</enabled>
@@ -149,7 +150,17 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<plugins>

@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0</version>
         <relativePath/>
     </parent>
     <groupId>eye.on.the.money</groupId>
@@ -21,19 +21,19 @@
     </modules>
 
     <properties>
-        <spring.retry.version>2.0.12</spring.retry.version>
+        <spring.retry.version>2.0.13</spring.retry.version>
         <io.jsonwebtoken.version>0.13.0</io.jsonwebtoken.version>
-        <tomcat.jdbc.version>11.0.15</tomcat.jdbc.version>
-        <postgresql.version>42.7.8</postgresql.version>
-        <lombok.version>1.18.42</lombok.version>
+        <tomcat.jdbc.version>11.0.22</tomcat.jdbc.version>
+        <postgresql.version>42.7.11</postgresql.version>
+        <lombok.version>1.18.46</lombok.version>
         <modelmapper.version>3.2.6</modelmapper.version>
         <commons-csv.version>1.14.1</commons-csv.version>
         <poi.version>5.5.1</poi.version>
-        <jackson-datatype-jsr310.version>2.20.1</jackson-datatype-jsr310.version>
+        <jackson-datatype-jsr310.version>2.22.0</jackson-datatype-jsr310.version>
         <h2.version>2.4.240</h2.version>
         <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
         <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
-        <maven-jacoco-plugin.verson>0.8.14</maven-jacoco-plugin.verson>
+        <maven-jacoco-plugin.verson>0.8.15</maven-jacoco-plugin.verson>
     </properties>
 
     <dependencyManagement>

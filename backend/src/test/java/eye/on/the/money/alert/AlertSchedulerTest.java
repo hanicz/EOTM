@@ -63,7 +63,7 @@ class AlertSchedulerTest {
         JsonNode json = om.readTree("[{\"code\":\"CRSR.US\",\"timestamp\":1700859720,\"gmtoffset\":0,\"open\":116.49,\"high\":116.59,\"low\":115.34,\"close\":116.25,\"volume\":2149550,\"previousClose\":116.24,\"change\":0.01,\"change_p\":0.0086}]");
 
         doNothing().when(this.emailService).sendMail(anyString(), anyString());
-        when(this.eodapiService.getLiveValue("CRSR.US", "/real-time/stock/?api_token={0}&fmt=json&s={1}")).thenReturn(json);
+        when(this.eodapiService.getLiveStockValue("CRSR.US")).thenReturn(json);
 
         this.alertScheduler.checkAlerts();
 
@@ -79,7 +79,7 @@ class AlertSchedulerTest {
         JsonNode json = om.readTree("[{\"code\":\"CRSR.US\",\"timestamp\":1700859720,\"gmtoffset\":0,\"open\":116.49,\"high\":116.59,\"low\":115.34,\"close\":49.99,\"volume\":2149550,\"previousClose\":116.24,\"change\":0.01,\"change_p\":0.0086}]");
 
         doNothing().when(this.emailService).sendMail(anyString(), anyString());
-        when(this.eodapiService.getLiveValue("CRSR.US", "/real-time/stock/?api_token={0}&fmt=json&s={1}")).thenReturn(json);
+        when(this.eodapiService.getLiveStockValue("CRSR.US")).thenReturn(json);
 
         this.alertScheduler.checkAlerts();
 
@@ -95,7 +95,7 @@ class AlertSchedulerTest {
         JsonNode json = om.readTree("[{\"code\":\"CRSR.US\",\"timestamp\":1700859720,\"gmtoffset\":0,\"open\":116.49,\"high\":116.59,\"low\":115.34,\"close\":116.25,\"volume\":2149550,\"previousClose\":116.24,\"change\":0.01,\"change_p\":0.0086}]");
 
         doNothing().when(this.emailService).sendMail(anyString(), anyString());
-        when(this.eodapiService.getLiveValue("CRSR.US", "/real-time/stock/?api_token={0}&fmt=json&s={1}")).thenReturn(json);
+        when(this.eodapiService.getLiveStockValue("CRSR.US")).thenReturn(json);
 
         this.alertScheduler.checkAlerts();
 
@@ -111,7 +111,7 @@ class AlertSchedulerTest {
         JsonNode json = om.readTree("[{\"code\":\"CRSR.US\",\"timestamp\":1700859720,\"gmtoffset\":0,\"open\":116.49,\"high\":116.59,\"low\":115.34,\"close\":200.01,\"volume\":2149550,\"previousClose\":116.24,\"change\":0.01,\"change_p\":0.0086}]");
 
         doNothing().when(this.emailService).sendMail(anyString(), anyString());
-        when(this.eodapiService.getLiveValue("CRSR.US", "/real-time/stock/?api_token={0}&fmt=json&s={1}")).thenReturn(json);
+        when(this.eodapiService.getLiveStockValue("CRSR.US")).thenReturn(json);
 
         this.alertScheduler.checkAlerts();
 
@@ -127,7 +127,7 @@ class AlertSchedulerTest {
         JsonNode json = om.readTree("[{\"code\":\"CRSR.US\",\"timestamp\":1700859720,\"gmtoffset\":0,\"open\":116.49,\"high\":116.59,\"low\":115.34,\"close\":116.25,\"volume\":2149550,\"previousClose\":116.24,\"change\":0.1,\"change_p\":6.78}]");
 
         doNothing().when(this.emailService).sendMail(anyString(), anyString());
-        when(this.eodapiService.getLiveValue("CRSR.US", "/real-time/stock/?api_token={0}&fmt=json&s={1}")).thenReturn(json);
+        when(this.eodapiService.getLiveStockValue("CRSR.US")).thenReturn(json);
 
         this.alertScheduler.checkAlerts();
 
@@ -143,7 +143,7 @@ class AlertSchedulerTest {
         JsonNode json = om.readTree("[{\"code\":\"CRSR.US\",\"timestamp\":1700859720,\"gmtoffset\":0,\"open\":116.49,\"high\":116.59,\"low\":115.34,\"close\":116.25,\"volume\":2149550,\"previousClose\":116.24,\"change\":0.1,\"change_p\":4.99}]");
 
         doNothing().when(this.emailService).sendMail(anyString(), anyString());
-        when(this.eodapiService.getLiveValue("CRSR.US", "/real-time/stock/?api_token={0}&fmt=json&s={1}")).thenReturn(json);
+        when(this.eodapiService.getLiveStockValue("CRSR.US")).thenReturn(json);
 
         this.alertScheduler.checkAlerts();
 
@@ -159,7 +159,7 @@ class AlertSchedulerTest {
         JsonNode json = om.readTree("[{\"code\":\"CRSR.US\",\"timestamp\":1700859720,\"gmtoffset\":0,\"open\":116.49,\"high\":116.59,\"low\":115.34,\"close\":116.25,\"volume\":2149550,\"previousClose\":116.24,\"change\":-0.06,\"change_p\":-6.89}]");
 
         doNothing().when(this.emailService).sendMail(anyString(), anyString());
-        when(this.eodapiService.getLiveValue("CRSR.US", "/real-time/stock/?api_token={0}&fmt=json&s={1}")).thenReturn(json);
+        when(this.eodapiService.getLiveStockValue("CRSR.US")).thenReturn(json);
 
         this.alertScheduler.checkAlerts();
 
@@ -175,7 +175,7 @@ class AlertSchedulerTest {
         JsonNode json = om.readTree("[{\"code\":\"CRSR.US\",\"timestamp\":1700859720,\"gmtoffset\":0,\"open\":116.49,\"high\":116.59,\"low\":115.34,\"close\":116.25,\"volume\":2149550,\"previousClose\":116.24,\"change\":-0.06,\"change_p\":-4.99}]");
 
         doNothing().when(this.emailService).sendMail(anyString(), anyString());
-        when(this.eodapiService.getLiveValue("CRSR.US", "/real-time/stock/?api_token={0}&fmt=json&s={1}")).thenReturn(json);
+        when(this.eodapiService.getLiveStockValue("CRSR.US")).thenReturn(json);
 
         this.alertScheduler.checkAlerts();
 
@@ -187,7 +187,7 @@ class AlertSchedulerTest {
     public void checkAlertsNoAlert() throws JsonProcessingException {
         this.alertScheduler.checkAlerts();
 
-        verify(this.eodapiService, times(0)).getLiveValue(anyString(), anyString());
+        verify(this.eodapiService, times(0)).getLiveStockValue(anyString());
     }
 
     private StockAlert createNewAlert(String type, Double vp) {

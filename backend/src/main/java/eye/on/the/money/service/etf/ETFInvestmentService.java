@@ -60,7 +60,7 @@ public class ETFInvestmentService implements ICSVService {
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
         String joinedList = etfInvestmentDTOList.stream().map(i -> (i.getShortName() + "." + i.getExchange())).collect(Collectors.joining(","));
 
-        JsonNode responseBody = this.eodAPIService.getLiveValue(joinedList, "/real-time/etf/?api_token={0}&fmt=json&s={1}");
+        JsonNode responseBody = this.eodAPIService.getLiveEtfValue(joinedList);
 
         for (JsonNode etf : responseBody) {
             Optional<ETFInvestmentDTO> etfInvestmentDTO = etfInvestmentDTOList.stream().filter

@@ -87,7 +87,7 @@ class StockServiceTest {
         List<EODCandleQuoteDTO> eodList = this.geteodList();
 
         when(this.eodAPIService.getCandleQuoteByShortName("shortName", 1)).thenReturn(eodList);
-        when(this.eodAPIService.getLiveValueForSingle("shortName", "/real-time/{1}/?api_token={0}&fmt=json&"))
+        when(this.eodAPIService.getLiveValueForSingle("shortName"))
                 .thenReturn(mapper.readTree("{\"code\":\"AMD.US\",\"timestamp\":" + TimeUnit.MILLISECONDS.toSeconds(new Date().getTime()) + ",\"gmtoffset\":0,\"open\":119.64,\"high\":119.97,\"low\":118.82,\"close\":119.7044,\"volume\":5094170,\"previousClose\":119.83,\"change\":-0.1256,\"change_p\":-0.1048}"));
 
         CandleQuoteDTO cq = this.stockService.getCandleQuoteByShortName("shortName", 1);
@@ -106,7 +106,7 @@ class StockServiceTest {
         List<EODCandleQuoteDTO> eodList = this.geteodList();
 
         when(this.eodAPIService.getCandleQuoteByShortName("shortName", 1)).thenReturn(eodList);
-        when(this.eodAPIService.getLiveValueForSingle("shortName", "/real-time/{1}/?api_token={0}&fmt=json&"))
+        when(this.eodAPIService.getLiveValueForSingle("shortName"))
                 .thenReturn(mapper.readTree("{\"code\":\"AMD.US\",\"timestamp\": 1700255640,\"gmtoffset\":0,\"open\":119.64,\"high\":119.97,\"low\":118.82,\"close\":119.7044,\"volume\":5094170,\"previousClose\":119.83,\"change\":-0.1256,\"change_p\":-0.1048}"));
 
         CandleQuoteDTO cq = this.stockService.getCandleQuoteByShortName("shortName", 1);

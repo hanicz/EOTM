@@ -120,17 +120,6 @@ export class AlertComponent implements OnInit {
     });
   }
 
-  createCryptoAlert() {
-    let data = {shortName: this.selectedStock.Code, exchange: this.selectedExchange.Code, type: this.selectedType, valuePoint: this.valuePoint, name: this.selectedStock.Name}
-
-    this.alertService.createNewStockAlert(data).subscribe({
-      next: (data) => {
-        this.fetchData();
-        this.displayDialog = false;
-      }
-    });
-  }
-
   showDialog() {
     this.displayDialog = true;
   }

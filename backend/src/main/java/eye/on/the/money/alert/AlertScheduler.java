@@ -89,7 +89,7 @@ public class AlertScheduler {
                 .map(alert -> alert.getStock().getShortName() + "." + alert.getStock().getExchange())
                 .collect(Collectors.toSet()));
 
-        JsonNode responseBody = this.eodAPIService.getLiveValue(joinedList, "/real-time/stock/?api_token={0}&fmt=json&s={1}");
+        JsonNode responseBody = this.eodAPIService.getLiveStockValue(joinedList);
         Map<String, JsonNode> stockMap = new HashMap<>();
         for (JsonNode stock : responseBody) {
             stockMap.put(stock.findValue("code").textValue(), stock);

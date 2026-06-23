@@ -1,21 +1,32 @@
 <p-menubar [model]="items">
     <ng-template pTemplate="start">
-        <h2 class="mt-0 mb-0">Eye OTM <i class="fas fa-search-dollar"></i></h2>
+        <h2 class="logo">
+            Eye OTM <i class="fas fa-search-dollar"></i>
+        </h2>
     </ng-template>
     <ng-template pTemplate="end">
-        <div class="flex flex-row flex-wrap">
-            <label class="pt-2 mr-1" for="cryptoDropdown">Crypto</label>
-            <p-dropdown inputId="cryptoDropdown" [options]="globals.currencies" [(ngModel)]="selectedCrypto"
-                optionLabel="label" optionValue="value" (onChange)="changedCrypto()"></p-dropdown>
-            <label class="pt-2 mr-1 ml-1" for="stockDropdown">Stock</label>
-            <p-dropdown inputId="stockDropdown" [options]="globals.currencies" [(ngModel)]="selectedStock"
-                optionLabel="label" optionValue="value" (onChange)="changedStock()"></p-dropdown>
-            <label class="pt-2 mr-1 ml-1" for="etfDropdown">ETF</label>
-            <p-dropdown inputId="etfDropdown" [options]="globals.currencies" [(ngModel)]="selectedETF"
-                optionLabel="label" optionValue="value" (onChange)="changedETF()"></p-dropdown>
-            <div class="flex text-sm ml-2 align-items-center">{{user.email}}
-                <button pButton pRipple type="button" icon="pi pi-sign-out" (click)="logOut()"
-                    class="p-button-rounded p-button-text"></button>
+        <div class="toolbar">
+            <ng-container *ngFor="let type of currencyTypes">
+                <label [for]="type.id">{{ type.label }}</label>
+                <p-dropdown 
+                    [inputId]="type.id"
+                    [options]="globals.currencies"
+                    [(ngModel)]="selectedCurrencies[type.key]"
+                    optionLabel="label" 
+                    optionValue="value"
+                    (onChange)="onCurrencyChange(type.key)">
+                </p-dropdown>
+            </ng-container>
+            <div class="user-section">
+                <span>{{ user.email }}</span>
+                <button 
+                    pButton 
+                    pRipple 
+                    type="button" 
+                    icon="pi pi-sign-out" 
+                    (click)="logOut()"
+                    class="p-button-rounded p-button-text">
+                </button>
             </div>
         </div>
     </ng-template>

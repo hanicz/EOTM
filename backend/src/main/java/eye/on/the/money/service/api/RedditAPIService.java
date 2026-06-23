@@ -28,6 +28,8 @@ public class RedditAPIService extends APIService {
     private final static String API = "reddit";
     private final static String TOKEN_API = "redditToken";
 
+    private final static String SUBREDDIT_PATH = "{0}/hot.json?limit=10";
+
     @Autowired
     public RedditAPIService(CredentialRepository credentialRepository, ConfigRepository configRepository,
                             WebClient webClient, ObjectMapper mapper) {
@@ -45,7 +47,7 @@ public class RedditAPIService extends APIService {
 
     public Flux<JsonNode> getHotRedditNews(List<String> subreddits, String bearerToken) {
         return Flux.fromIterable(subreddits).flatMap(s ->
-                this.callNonBlockingGetAPI(this.createURL(RedditAPIService.API, "{0}/hot.json?limit=10", s),
+                this.callNonBlockingGetAPI(this.createURL(RedditAPIService.API, SUBREDDIT_PATH, s),
                         JsonNode.class, this.getBearerHttpHeader(bearerToken)));
     }
 

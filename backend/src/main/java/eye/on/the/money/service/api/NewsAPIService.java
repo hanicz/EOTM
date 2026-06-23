@@ -25,6 +25,9 @@ public class NewsAPIService extends APIService {
     private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private final static String API = "finnhub";
 
+    private final static String NEWS_PATH = "/news?category={1}&token={0}";
+    private final static String COMPANY_NEWS_PATH = "/company-news?symbol={1}&from={2}&to={3}&token={0}";
+
     @Autowired
     public NewsAPIService(CredentialRepository credentialRepository, ConfigRepository configRepository,
                           WebClient webClient, ObjectMapper mapper) {
@@ -34,7 +37,7 @@ public class NewsAPIService extends APIService {
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public List<News> getNews(String category) {
         log.trace("Enter");
-        String url = this.createURL(NewsAPIService.API, "/news?category={1}&token={0}", category);
+        String url = this.createURL(NewsAPIService.API, NEWS_PATH, category);
         ResponseEntity<?> response = this.callGetAPI(url, News[].class);
         return Arrays.asList((News[]) response.getBody());
     }
@@ -45,7 +48,7 @@ public class NewsAPIService extends APIService {
         Date threeMonths = new Date(System.currentTimeMillis() - 30L * 24 * 60 * 60 * 1000);
         String fromDate = this.dateFormat.format(threeMonths);
         String toDate = this.dateFormat.format(new Date());
-        String url = this.createURL(NewsAPIService.API, "/company-news?symbol={1}&from={2}&to={3}&token={0}", symbol, fromDate, toDate);
+        String url = this.createURL(NewsAPIService.API, COMPANY_NEWS_PATH, symbol, fromDate, toDate);
         ResponseEntity<?> response = this.callGetAPI(url, News[].class);
         return Arrays.asList((News[]) response.getBody());
     }

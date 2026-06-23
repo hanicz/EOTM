@@ -20,10 +20,10 @@
                 </div>
             </td>
             <td>
-                <span *ngIf="transaction.quantity > 0">{{transaction.amount | currency : globals.cryptoCurrency : 'symbol' : '0.0-2'}}</span>
+                <span *ngIf="transaction.quantity > 0">{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</span>
             </td>
             <td>
-                <span *ngIf="transaction.quantity > 0">{{(transaction.amount / transaction.quantity) | currency : globals.cryptoCurrency : 'symbol' : '0.0-3'}}</span>
+                <span *ngIf="transaction.quantity > 0">{{(transaction.amount / transaction.quantity) | currency : transaction.currencyId : 'symbol' : '0.0-3'}}</span>
             </td>
             <td>
                 <p-tag styleClass="p-mr-2" [severity]="(transaction.quantity > 0) ? 'info':'warning'"
@@ -31,9 +31,9 @@
             </td>
             <td>
                 <p-tag styleClass="p-mr-2" severity="success" *ngIf="transaction.quantity == 0 && transaction.amount < 0"
-                    value="{{myMath.abs(transaction.amount) | currency : globals.cryptoCurrency : 'symbol' : '0.0-2'}}"></p-tag>
+                    value="{{myMath.abs(transaction.amount) | currency : transaction.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
                 <p-tag styleClass="p-mr-2" severity="danger" *ngIf="transaction.quantity == 0 && transaction.amount > 0"
-                    value="{{transaction.amount | currency : globals.cryptoCurrency : 'symbol' : '0.0-2'}}"></p-tag>
+                    value="{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
             </td>
         </tr>
     </ng-template>

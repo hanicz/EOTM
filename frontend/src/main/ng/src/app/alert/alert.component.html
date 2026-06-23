@@ -4,9 +4,9 @@
         <p-tabView>
             <p-tabPanel header="Stock">
 
-                <button pButton pRipple type="button"
-                    class="p-button-rounded p-button-raised p-button-text ml-2 mb-2 p-button-success"
-                    (click)="showDialog()">Create</button>
+                <button pButton pRipple label="Create" icon="pi pi-plus"
+                    class="p-button-rounded p-button-success ml-2 mb-2" (click)="showDialog()">
+                </button>
                 <p-table [value]="[{}]" styleClass="p-datatable-striped p-datatable-sm" responsiveLayout="scroll"
                     *ngIf="alertsLoading">
                     <ng-template pTemplate="header">
@@ -60,8 +60,9 @@
                 </p-table>
             </p-tabPanel>
             <p-tabPanel header="Crypto">
-                <button pButton pRipple type="button"
-                    class="p-button-rounded p-button-raised p-button-text ml-2 mb-2 p-button-success">Create</button>
+                <button pButton pRipple label="Create" icon="pi pi-plus"
+                    class="p-button-rounded p-button-success ml-2 mb-2">
+                </button>
                 <p-table [value]="[{}]" styleClass="p-datatable-striped p-datatable-sm" responsiveLayout="scroll"
                     *ngIf="cryptoAlertsLoading">
                     <ng-template pTemplate="header">
@@ -140,16 +141,17 @@
             <p-dropdown class="searchDropdown" [options]="types" [(ngModel)]="selectedType" optionLabel="name"
                 optionValue="code" [style]="{'width':'100%'}" placeholder="Select a Type"></p-dropdown>
         </div>
-        <div class="col-6 mt-2">
+        <div class="col-12 mt-2">
             <span class="p-float-label">
                 <p-inputNumber [(ngModel)]="valuePoint" inputId="valuePoint" mode="decimal" [minFractionDigits]="0"
                     [maxFractionDigits]="2"> </p-inputNumber>
                 <label htmlFor="valuePoint">Number</label>
             </span>
         </div>
-        <div class="col-1 col-offset-3 mt-2">
-            <button pButton pRipple type="button" icon="fas fa-plus" (click)="createStockAlert()"
-                class="p-button-rounded p-button-text ml-2 p-button-success">Create</button>
-        </div>
     </div>
+    <ng-template pTemplate="footer">
+        <button pButton pRipple label="Create" icon="pi pi-plus" class="p-button-rounded p-button-success"
+            (click)="createStockAlert()">
+        </button>
+    </ng-template>
 </p-dialog>

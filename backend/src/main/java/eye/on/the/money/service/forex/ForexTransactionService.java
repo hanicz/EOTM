@@ -98,7 +98,7 @@ public class ForexTransactionService implements ICSVService {
         List<ForexTransactionDTO> forexTransactions = new ArrayList<>(forexTransactionMap.values());
         String joinedList = forexTransactions.stream().map(f -> (f.getToCurrencyId() + f.getFromCurrencyId() + ".FOREX")).collect(Collectors.joining(","));
 
-        JsonNode responseBody = this.eodAPIService.getLiveValue(joinedList, "/real-time/forex/?api_token={0}&fmt=json&s={1}");
+        JsonNode responseBody = this.eodAPIService.getLiveForexValue(joinedList);
         for (JsonNode forex : responseBody) {
             Optional<ForexTransactionDTO> forexTransactionDTO = forexTransactions.stream().filter
                     (f -> (f.getToCurrencyId() + f.getFromCurrencyId() + ".FOREX").equals(forex.findValue("code").textValue())).findFirst();

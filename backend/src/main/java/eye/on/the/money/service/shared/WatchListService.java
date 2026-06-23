@@ -64,7 +64,7 @@ public class WatchListService {
         List<StockWatchDTO> stockList = this.stockWatchRepository.findByUserEmailOrderByStockShortName(userEmail).stream()
                 .map(this::convertToStockWatchDTO).collect(Collectors.toList());
         String joinedList = stockList.stream().map(s -> (s.getStockShortName() + "." + s.getStockExchange())).collect(Collectors.joining(","));
-        JsonNode responseBody = this.eodAPIService.getLiveValue(joinedList, "/real-time/stock/?api_token={0}&fmt=json&s={1}");
+        JsonNode responseBody = this.eodAPIService.getLiveStockValue(joinedList);
 
         for (JsonNode stock : responseBody) {
             Optional<StockWatchDTO> stockWatchDTO = stockList.stream().filter
@@ -84,7 +84,7 @@ public class WatchListService {
         List<ForexWatchDTO> forexList = this.forexWatchRepository.findByUserEmailOrderByFromCurrencyAscToCurrencyAsc(userEmail).stream()
                 .map(this::convertToForexDTO).collect(Collectors.toList());
         String joinedList = forexList.stream().map(f -> (f.getFromCurrencyId() + f.getToCurrencyId() + ".FOREX")).collect(Collectors.joining(","));
-        JsonNode responseBody = this.eodAPIService.getLiveValue(joinedList, "/real-time/forex/?api_token={0}&fmt=json&s={1}");
+        JsonNode responseBody = this.eodAPIService.getLiveForexValue(joinedList);
 
         for (JsonNode forex : responseBody) {
             Optional<ForexWatchDTO> forexWatchDTO = forexList.stream().filter

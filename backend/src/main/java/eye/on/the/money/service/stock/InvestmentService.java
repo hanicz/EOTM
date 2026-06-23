@@ -75,7 +75,7 @@ public class InvestmentService implements ICSVService {
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
         String joinedList = investmentDTOList.stream().map(i -> (i.getShortName() + "." + i.getExchange())).collect(Collectors.joining(","));
 
-        JsonNode responseBody = this.eodAPIService.getLiveValue(joinedList, "/real-time/stock/?api_token={0}&fmt=json&s={1}");
+        JsonNode responseBody = this.eodAPIService.getLiveStockValue(joinedList);
 
         for (JsonNode stock : responseBody) {
             Optional<InvestmentDTO> investmentDTO = investmentDTOList.stream().filter

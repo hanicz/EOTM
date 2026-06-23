@@ -18,6 +18,8 @@ public class CryptoAPIService extends APIService {
 
     private final static String API = "coingecko";
 
+    private final static String CRYPTO_PATH = "/simple/price?ids={1}&vs_currencies={2}&include_24hr_change={3}&token={0}";
+
     @Autowired
     public CryptoAPIService(CredentialRepository credentialRepository, ConfigRepository configRepository,
                             WebClient webClient, ObjectMapper mapper) {
@@ -28,7 +30,7 @@ public class CryptoAPIService extends APIService {
     public JsonNode getLiveValueForCoins(String currency, String ids) {
         log.trace("Enter");
         String url = this.createURL(CryptoAPIService.API,
-                "/simple/price?ids={1}&vs_currencies={2}&include_24hr_change={3}&token={0}", ids, currency, Boolean.TRUE.toString());
+                CRYPTO_PATH, ids, currency, Boolean.TRUE.toString());
         ResponseEntity<?> response = this.callGetAPI(url, String.class);
         return this.getJsonNodeFromBody((String) response.getBody());
     }

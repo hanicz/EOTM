@@ -1,3 +1,30 @@
-:host ::ng-deep .p-menubar {
-    margin-top: 0px;
+:host {
+    display: block;
+}
+
+::ng-deep .p-menubar {
+    margin-top: 0;
+}
+
+.logo {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+}
+
+.toolbar label {
+    padding-top: 0.5rem;
+}
+
+.user-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
 }

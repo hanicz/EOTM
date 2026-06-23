@@ -34,6 +34,7 @@
         <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
         <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
         <maven-jacoco-plugin.verson>0.8.15</maven-jacoco-plugin.verson>
+        <maven-surefire-plugin.version>3.5.6</maven-surefire-plugin.version>
     </properties>
 
     <dependencyManagement>

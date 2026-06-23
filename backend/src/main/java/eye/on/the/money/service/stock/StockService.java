@@ -47,7 +47,7 @@ public class StockService {
         log.trace("Enter getCandleQuoteByShortName");
         List<EODCandleQuoteDTO> eodList = this.eodAPIService.getCandleQuoteByShortName(shortName, months);
 
-        JsonNode responseBody = this.eodAPIService.getLiveValueForSingle(shortName, "/real-time/{1}/?api_token={0}&fmt=json&");
+        JsonNode responseBody = this.eodAPIService.getLiveValueForSingle(shortName);
         boolean sameDay = this.sameDay(eodList.get(eodList.size() - 1).getDate(), responseBody.findValue("timestamp").longValue());
         int arraySize = sameDay ? eodList.size() : eodList.size() + 1;
 

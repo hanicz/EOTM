@@ -13,16 +13,11 @@ export class CryptopositionComponent implements OnInit {
 
   transactions: Transaction[] = [];
   myMath = Math;
-  globals: Globals;
   assetUrl: string;
 
-  constructor(private cryptoService: CryptoService, globals: Globals) {
-    this.globals = globals;
+  constructor(private cryptoService: CryptoService) {
     this.assetUrl = environment.assets_url;
     this.fetchData();
-    globals.cryptoCurrencyChange.subscribe(value => {
-      this.fetchData();
-    });
   }
 
   ngOnInit(): void {

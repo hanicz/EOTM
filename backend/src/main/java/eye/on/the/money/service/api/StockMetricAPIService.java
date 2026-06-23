@@ -25,6 +25,11 @@ public class StockMetricAPIService extends APIService {
 
     private final static String API = "finnhub";
 
+    private final static String PEERS_PATH = "/stock/peers?symbol={1}&token={0}";
+    private final static String METRIC_PATH = "/stock/metric?metric=all&symbol={1}&token={0}";
+    private final static String RECOMMENDATION_PATH = "/stock/recommendation?symbol={1}&token={0}";
+    private final static String PROFILE_PATH = "/stock/profile2?symbol={1}&token={0}";
+
     @Autowired
     public StockMetricAPIService(CredentialRepository credentialRepository, ConfigRepository configRepository,
                                  WebClient webClient, ObjectMapper mapper) {
@@ -34,8 +39,7 @@ public class StockMetricAPIService extends APIService {
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public ProfileDTO getProfile(String symbol) {
         log.trace("Enter");
-        String url = this.createURL(StockMetricAPIService.API,
-                "/stock/profile2?symbol={1}&token={0}", symbol);
+        String url = this.createURL(StockMetricAPIService.API, PROFILE_PATH, symbol);
         ResponseEntity<?> response = this.callGetAPI(url, ProfileDTO.class);
         return (ProfileDTO) response.getBody();
     }
@@ -43,8 +47,7 @@ public class StockMetricAPIService extends APIService {
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public String[] getPeers(String symbol) {
         log.trace("Enter");
-        String url = this.createURL(StockMetricAPIService.API,
-                "/stock/peers?symbol={1}&token={0}", symbol);
+        String url = this.createURL(StockMetricAPIService.API, PEERS_PATH, symbol);
         ResponseEntity<?> response = this.callGetAPI(url, String[].class);
         return (String[]) response.getBody();
     }
@@ -52,8 +55,7 @@ public class StockMetricAPIService extends APIService {
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public MetricDTO getMetric(String symbol) {
         log.trace("Enter");
-        String url = this.createURL(StockMetricAPIService.API,
-                "/stock/metric?metric=all&symbol={1}&token={0}", symbol);
+        String url = this.createURL(StockMetricAPIService.API, METRIC_PATH, symbol);
         ResponseEntity<?> response = this.callGetAPI(url, String.class);
         try {
             JsonNode metric = this.objectMapper.readTree((String) response.getBody()).path("metric");
@@ -68,7 +70,7 @@ public class StockMetricAPIService extends APIService {
     public List<RecommendationDTO> getRecommendations(String symbol) {
         log.trace("Enter");
         ResponseEntity<?> response = this.callGetAPI(this.createURL(StockMetricAPIService.API,
-                "/stock/recommendation?symbol={1}&token={0}", symbol), RecommendationDTO[].class);
+                RECOMMENDATION_PATH, symbol), RecommendationDTO[].class);
         return Arrays.asList((RecommendationDTO[]) response.getBody());
     }
 }

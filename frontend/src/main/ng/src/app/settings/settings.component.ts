@@ -1,14 +1,28 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { NewsService } from '../service/news.service';
 import { Subreddit } from '../model/subreddit';
 import { UserService } from '../service/user.service';
 import { AccountService } from '../service/account.service';
 import { Account } from '../model/account';
+import { MenuComponent } from '../menu/menu.component';
+import { Bind } from 'primeng/bind';
+import { Panel } from 'primeng/panel';
+import { ButtonDirective } from 'primeng/button';
+import { Ripple } from 'primeng/ripple';
+import { DataView } from 'primeng/dataview';
+import { PrimeTemplate } from 'primeng/api';
+import { Password } from 'primeng/password';
+import { FormsModule } from '@angular/forms';
+import { Dialog } from 'primeng/dialog';
+import { InputText } from 'primeng/inputtext';
+import { DatePicker } from 'primeng/datepicker';
+import { DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-settings',
-  templateUrl: './settings.component.html',
-  styleUrls: ['./settings.component.css']
+    selector: 'app-settings',
+    templateUrl: './settings.component.html',
+    styleUrls: ['./settings.component.css'],
+    imports: [MenuComponent, Bind, Panel, ButtonDirective, Ripple, DataView, PrimeTemplate, Password, FormsModule, Dialog, InputText, DatePicker, DatePipe]
 })
 export class SettingsComponent implements OnInit {
 
@@ -34,6 +48,7 @@ export class SettingsComponent implements OnInit {
     private newsService: NewsService,
     private userService: UserService,
     private accountService: AccountService,
+    private cdr: ChangeDetectorRef,
   ) { }
 
   ngOnInit(): void {
@@ -48,10 +63,12 @@ export class SettingsComponent implements OnInit {
       next: (data) => {
         this.subReddits = data;
         this.isLoading = false;
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error loading subreddits:', error);
         this.isLoading = false;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -112,10 +129,12 @@ export class SettingsComponent implements OnInit {
       next: (data) => {
         this.accounts = data;
         this.isLoading = false;
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error loading accounts:', error);
         this.isLoading = false;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -187,10 +206,12 @@ export class SettingsComponent implements OnInit {
         this.oldPassword = '';
         this.newPassword = '';
         this.isLoading = false;
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error changing password:', error);
         this.isLoading = false;
+        this.cdr.markForCheck();
       }
     });
   }

@@ -1,5 +1,4 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import { LoginComponent } from './login/login.component';
 import { HomeComponent } from './home/home.component';
 import { StockComponent } from './stock/stock.component';
@@ -12,7 +11,7 @@ import { EtfComponent } from './etf/etf.component';
 import { AlertComponent } from './alert/alert.component';
 import { SettingsComponent } from './settings/settings.component';
 
-const routes: Routes = [
+export const routes: Routes = [
   { path: '', component: LandingComponent },
   { path: 'login', component: LoginComponent },
   { path: 'home', component: HomeComponent },
@@ -25,9 +24,3 @@ const routes: Routes = [
   { path: 'alert', component: AlertComponent },
   { path: 'settings', component: SettingsComponent }
 ];
-
-@NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
-})
-export class AppRoutingModule { }

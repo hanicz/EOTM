@@ -1,12 +1,25 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { ETFDividend } from 'src/app/model/etfdividend';
 import { EtfdividendService } from 'src/app/service/etfdividend.service';
 import { Globals } from '../../util/global';
+import { Bind } from 'primeng/bind';
+import { Toolbar } from 'primeng/toolbar';
+import { PrimeTemplate } from 'primeng/api';
+import { ButtonDirective } from 'primeng/button';
+import { Ripple } from 'primeng/ripple';
+import { FileUpload } from 'primeng/fileupload';
+import { TableModule } from 'primeng/table';
+import { InputText } from 'primeng/inputtext';
+import { Dialog } from 'primeng/dialog';
+import { FormsModule } from '@angular/forms';
+import { Select } from 'primeng/select';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-etfdividend',
-  templateUrl: './etfdividend.component.html',
-  styleUrls: ['./etfdividend.component.css']
+    selector: 'app-etfdividend',
+    templateUrl: './etfdividend.component.html',
+    styleUrls: ['./etfdividend.component.css'],
+    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Dialog, FormsModule, Select, CurrencyPipe, DatePipe]
 })
 export class EtfdividendComponent implements OnInit {
 
@@ -17,7 +30,7 @@ export class EtfdividendComponent implements OnInit {
   dividend: ETFDividend = {} as ETFDividend;
   @ViewChild('fileUpload') fileUpload: any;
 
-  constructor(private etfDividendService: EtfdividendService, globals: Globals) {
+  constructor(private etfDividendService: EtfdividendService, globals: Globals, private cdr: ChangeDetectorRef) {
     this.currencies = globals.currencies;
 
     this.fetchData();
@@ -30,6 +43,7 @@ export class EtfdividendComponent implements OnInit {
     this.etfDividendService.getAllDividends().subscribe({
       next: (data) => {
         this.dividends = data;
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.log(error);

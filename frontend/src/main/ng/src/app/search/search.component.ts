@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { Candle } from '../model/candle';
 import { Metric } from '../model/metric';
 import { News } from '../model/news';
@@ -10,7 +10,7 @@ import { Globals } from '../util/global';
 import { WatchlistService } from '../service/watchlist.service';
 import { Symbol } from '../model/symbol';
 import { Exchange } from '../model/exchange';
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe, CurrencyPipe } from '@angular/common';
 
 import {
   ChartComponent,
@@ -21,6 +21,18 @@ import {
   ApexTooltip
 } from "ng-apexcharts";
 import { Recommendation } from '../model/recommendation';
+import { MenuComponent } from '../menu/menu.component';
+import { Bind } from 'primeng/bind';
+import { Panel } from 'primeng/panel';
+import { Select } from 'primeng/select';
+import { FormsModule } from '@angular/forms';
+import { Tag } from 'primeng/tag';
+import { Image } from 'primeng/image';
+import { ButtonDirective } from 'primeng/button';
+import { Ripple } from 'primeng/ripple';
+import { Divider } from 'primeng/divider';
+import { SelectButton } from 'primeng/selectbutton';
+import { NewsComponent } from '../news/news.component';
 
 export type ChartOptions = {
   series: ApexAxisChartSeries;
@@ -31,9 +43,10 @@ export type ChartOptions = {
 };
 
 @Component({
-  selector: 'app-search',
-  templateUrl: './search.component.html',
-  styleUrls: ['./search.component.css']
+    selector: 'app-search',
+    templateUrl: './search.component.html',
+    styleUrls: ['./search.component.css'],
+    imports: [MenuComponent, Bind, Panel, Select, FormsModule, Tag, Image, ButtonDirective, Ripple, Divider, SelectButton, ChartComponent, NewsComponent, DecimalPipe, CurrencyPipe, DatePipe]
 })
 export class SearchComponent implements OnInit {
 
@@ -69,7 +82,7 @@ export class SearchComponent implements OnInit {
 
   constructor(private stockService: StockService, globals: Globals,
     private metricService: MetricService, private watchlistService: WatchlistService,
-    private datepipe: DatePipe) {
+    private datepipe: DatePipe, private cdr: ChangeDetectorRef) {
 
     this.globals = globals;
     this.options = [
@@ -84,6 +97,7 @@ export class SearchComponent implements OnInit {
     this.stockService.getAllStocks().subscribe({
       next: (data) => {
         this.stocks = data;
+        this.cdr.markForCheck();
       }
     });
 
@@ -91,6 +105,7 @@ export class SearchComponent implements OnInit {
       next: (data) => {
         this.exchangesLoading = false;
         this.exchanges = data;
+        this.cdr.markForCheck();
       }
     });
 
@@ -213,12 +228,14 @@ export class SearchComponent implements OnInit {
     this.metricService.getMetrics(this.globals.selectedStock).subscribe({
       next: (data) => {
         this.metric = data;
+        this.cdr.markForCheck();
       }
     });
 
     this.metricService.getProfile(this.globals.selectedStock).subscribe({
       next: (data) => {
         this.profile = data;
+        this.cdr.markForCheck();
       }
     });
 
@@ -226,6 +243,7 @@ export class SearchComponent implements OnInit {
       next: (data) => {
         this.recommendations = data;
         this.createRecChart();
+        this.cdr.markForCheck();
       }
     });
 
@@ -240,6 +258,7 @@ export class SearchComponent implements OnInit {
       next: (data) => {
         this.stocksLoading = false;
         this.symbols = data;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -249,6 +268,7 @@ export class SearchComponent implements OnInit {
       next: (data) => {
         this.candle = data;
         this.createChart();
+        this.cdr.markForCheck();
       }
     });
   }

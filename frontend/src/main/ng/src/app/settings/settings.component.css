@@ -7,7 +7,7 @@
 
 .settings-header {
   margin-bottom: 3rem;
-  border-bottom: 2px solid var(--surface-border);
+  border-bottom: 2px solid var(--p-surface-200);
   padding-bottom: 2rem;
 }
 
@@ -15,12 +15,12 @@
   font-size: 2.5rem;
   font-weight: 600;
   margin: 0 0 0.5rem 0;
-  color: var(--text-color);
+  color: var(--p-text-color);
 }
 
 .settings-subtitle {
   font-size: 1rem;
-  color: var(--text-color-secondary);
+  color: var(--p-text-muted-color);
   margin: 0;
 }
 
@@ -40,8 +40,8 @@
 
 /* Settings Card */
 .settings-card {
-  background: var(--surface-card);
-  border: 1px solid var(--surface-border);
+  background: var(--p-surface-0);
+  border: 1px solid var(--p-surface-200);
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   overflow: hidden;
@@ -50,7 +50,7 @@
 
 .settings-card:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  border-color: var(--primary-color);
+  border-color: var(--p-primary-color);
 }
 
 .settings-card.full-width {
@@ -63,8 +63,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem;
-  border-bottom: 1px solid var(--surface-border);
-  background: var(--surface-ground);
+  border-bottom: 1px solid var(--p-surface-200);
+  background: var(--p-surface-50);
 }
 
 .card-header > div {
@@ -78,17 +78,17 @@
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0 0 0.5rem 0;
-  color: var(--text-color);
+  color: var(--p-text-color);
 }
 
 .card-header h2 i {
-  color: var(--primary-color);
+  color: var(--p-primary-color);
   font-size: 1.5rem;
 }
 
 .card-description {
   font-size: 0.875rem;
-  color: var(--text-color-secondary);
+  color: var(--p-text-muted-color);
   margin: 0;
 }
 
@@ -111,9 +111,9 @@
   gap: 1rem;
   padding: 1rem;
   margin-bottom: 1rem;
-  background: var(--surface-ground);
+  background: var(--p-surface-50);
   border-radius: 8px;
-  border: 1px solid var(--surface-border);
+  border: 1px solid var(--p-surface-200);
   transition: all 0.2s ease;
 }
 
@@ -124,8 +124,8 @@
 
 .subreddit-item:hover,
 .account-item:hover {
-  background: var(--surface-section);
-  border-color: var(--primary-color);
+  background: var(--p-surface-100);
+  border-color: var(--p-primary-color);
 }
 
 .item-icon {
@@ -134,7 +134,7 @@
   justify-content: center;
   width: 44px;
   height: 44px;
-  background: var(--primary-color);
+  background: var(--p-primary-color);
   border-radius: 8px;
   color: white;
   font-size: 1.5rem;
@@ -142,7 +142,7 @@
 }
 
 .item-icon.account-icon {
-  background: var(--info-color);
+  background: var(--p-blue-500);
 }
 
 .item-info {
@@ -154,19 +154,19 @@
   font-size: 1rem;
   font-weight: 600;
   margin: 0 0 0.25rem 0;
-  color: var(--text-color);
+  color: var(--p-text-color);
   word-break: break-word;
 }
 
 .item-info p {
   font-size: 0.875rem;
-  color: var(--text-color-secondary);
+  color: var(--p-text-muted-color);
   margin: 0;
   word-break: break-word;
 }
 
 .account-date {
-  color: var(--text-color-secondary);
+  color: var(--p-text-muted-color);
 }
 
 .item-action {
@@ -191,10 +191,10 @@
 }
 
 /* Empty Message */
-:deep(.p-dataview-emptymessage) {
+::ng-deep .p-dataview-emptymessage {
   padding: 2rem 1rem;
   text-align: center;
-  color: var(--text-color-secondary);
+  color: var(--p-text-muted-color);
 }
 
 /* Password Section */
@@ -220,7 +220,7 @@
 
 .p-float-label > label {
   font-weight: 500;
-  color: var(--text-color);
+  color: var(--p-text-color);
 }
 
 .save-button {
@@ -242,49 +242,49 @@
 
 .dialog-field label {
   font-weight: 500;
-  color: var(--text-color);
+  color: var(--p-text-color);
   font-size: 0.95rem;
 }
 
 .dialog-field input,
-.dialog-field :deep(.p-calendar) {
+.dialog-field ::ng-deep .p-datepicker {
   width: 100%;
 }
 
 /* PrimeNG Component Overrides */
-:deep(.p-button.p-button-success) {
-  background: var(--green-500);
-  border-color: var(--green-500);
+::ng-deep .p-button.p-button-success {
+  background: var(--p-green-500);
+  border-color: var(--p-green-500);
 }
 
-:deep(.p-button.p-button-success:hover) {
-  background: var(--green-600);
-  border-color: var(--green-600);
+::ng-deep .p-button.p-button-success:hover {
+  background: var(--p-green-600);
+  border-color: var(--p-green-600);
 }
 
-:deep(.p-button.p-button-info) {
-  background: var(--blue-500);
-  border-color: var(--blue-500);
+::ng-deep .p-button.p-button-info {
+  background: var(--p-blue-500);
+  border-color: var(--p-blue-500);
 }
 
-:deep(.p-button.p-button-info:hover) {
-  background: var(--blue-600);
-  border-color: var(--blue-600);
+::ng-deep .p-button.p-button-info:hover {
+  background: var(--p-blue-600);
+  border-color: var(--p-blue-600);
 }
 
-:deep(.p-button.p-button-danger) {
-  color: var(--red-500);
+::ng-deep .p-button.p-button-danger {
+  color: var(--p-red-500);
 }
 
-:deep(.p-button.p-button-danger:hover) {
+::ng-deep .p-button.p-button-danger:hover {
   background: rgba(239, 68, 68, 0.1);
 }
 
-:deep(.p-password) {
+::ng-deep .p-password {
   width: 100%;
 }
 
-:deep(.p-password input) {
+::ng-deep .p-password input {
   width: 100%;
 }
 
@@ -334,7 +334,7 @@
 
 /* Accessibility */
 .settings-card:focus-within {
-  outline: 2px solid var(--primary-color);
+  outline: 2px solid var(--p-primary-color);
   outline-offset: 2px;
 }
 

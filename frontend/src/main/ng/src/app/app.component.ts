@@ -1,19 +1,20 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { PrimeNGConfig } from 'primeng/api';
+import { Router, RouterOutlet } from '@angular/router';
 import { NavigationStart } from '@angular/router';
+import { WatchlistComponent } from './watchlist/watchlist.component';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.css'],
+    imports: [RouterOutlet, WatchlistComponent]
 })
 export class AppComponent {
   router: Router;
   title = 'Eye OTM';
   routeUrl = "";
 
-  constructor(private primengConfig: PrimeNGConfig, router: Router) {
+  constructor(router: Router) {
     this.router = router;
     this.router.events.subscribe(routerEvent => {
       if (routerEvent instanceof NavigationStart) {
@@ -23,9 +24,5 @@ export class AppComponent {
         }
       }
     });
-  }
-
-  ngOnInit() {
-    this.primengConfig.ripple = true;
   }
 }

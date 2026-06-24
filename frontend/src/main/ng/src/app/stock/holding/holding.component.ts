@@ -1,13 +1,21 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { Globals } from '../../util/global';
 import { Investment } from '../../model/investment';
 import { StockService } from '../../service/stock.service';
 import { AlertService } from 'src/app/service/alert.service';
+import { Bind } from 'primeng/bind';
+import { TableModule } from 'primeng/table';
+import { PrimeTemplate } from 'primeng/api';
+import { Skeleton } from 'primeng/skeleton';
+import { Image } from 'primeng/image';
+import { Tag } from 'primeng/tag';
+import { DecimalPipe, CurrencyPipe } from '@angular/common';
 
 @Component({
-  selector: 'app-holding',
-  templateUrl: './holding.component.html',
-  styleUrls: ['./holding.component.css']
+    selector: 'app-holding',
+    templateUrl: './holding.component.html',
+    styleUrls: ['./holding.component.css'],
+    imports: [Bind, TableModule, PrimeTemplate, Skeleton, Image, Tag, DecimalPipe, CurrencyPipe]
 })
 export class HoldingComponent implements OnInit {
 
@@ -17,7 +25,7 @@ export class HoldingComponent implements OnInit {
 
   investmentsLoading: boolean = true;
 
-  constructor(private stockService: StockService, globals: Globals, private alertService: AlertService) {
+  constructor(private stockService: StockService, globals: Globals, private alertService: AlertService, private cdr: ChangeDetectorRef) {
     this.globals = globals;
 
     this.fetchData();
@@ -35,6 +43,7 @@ export class HoldingComponent implements OnInit {
         this.investmentsLoading = false;
         this.investments = data;
         this.dataLoaded.emit(this.investments);
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.log(error);

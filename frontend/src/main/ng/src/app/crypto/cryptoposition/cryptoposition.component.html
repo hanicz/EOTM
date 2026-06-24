@@ -1,40 +1,48 @@
-<p-table #dt1 [value]="transactions" responsiveLayout="scroll" styleClass="p-datatable-striped" [autoLayout]="true"
-    sortField="amount" [sortOrder]=-1>
-    <ng-template pTemplate="header">
-        <tr>
-            <th>Symbol</th>
-            <th pSortableColumn="amount">Total Spent <p-sortIcon field="amount"></p-sortIcon>
-            </th>
-            <th>Average</th>
-            <th>Position</th>
-            <th>Profit</th>
-        </tr>
-    </ng-template>
-    <ng-template pTemplate="body" let-transaction>
-        <tr>
-            <td>
-                <div class="flex align-items-center">
-                    <p-image src="{{assetUrl + transaction.symbol + '.svg'}}" width="15"
-                        class="mr-1"></p-image>
-                    {{transaction.symbol}}
-                </div>
-            </td>
-            <td>
-                <span *ngIf="transaction.quantity > 0">{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</span>
-            </td>
-            <td>
-                <span *ngIf="transaction.quantity > 0">{{(transaction.amount / transaction.quantity) | currency : transaction.currencyId : 'symbol' : '0.0-3'}}</span>
-            </td>
-            <td>
-                <p-tag styleClass="p-mr-2" [severity]="(transaction.quantity > 0) ? 'info':'warning'"
-                    value="{{(transaction.quantity > 0) ? (transaction.quantity | number: '0.0-4') : 'Closed'}}"></p-tag>
-            </td>
-            <td>
-                <p-tag styleClass="p-mr-2" severity="success" *ngIf="transaction.quantity == 0 && transaction.amount < 0"
-                    value="{{myMath.abs(transaction.amount) | currency : transaction.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
-                <p-tag styleClass="p-mr-2" severity="danger" *ngIf="transaction.quantity == 0 && transaction.amount > 0"
-                    value="{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
-            </td>
-        </tr>
-    </ng-template>
+<p-table #dt1 [value]="transactions" responsiveLayout="scroll" styleClass="p-datatable-striped"
+  sortField="amount" [sortOrder]=-1>
+  <ng-template pTemplate="header">
+    <tr>
+      <th>Symbol</th>
+      <th pSortableColumn="amount">Total Spent <p-sortIcon field="amount"></p-sortIcon>
+    </th>
+    <th>Average</th>
+    <th>Position</th>
+    <th>Profit</th>
+  </tr>
+</ng-template>
+<ng-template pTemplate="body" let-transaction>
+  <tr>
+    <td>
+      <div class="flex align-items-center">
+        <p-image src="{{assetUrl + transaction.symbol + '.svg'}}" width="15"
+        class="mr-1"></p-image>
+        {{transaction.symbol}}
+      </div>
+    </td>
+    <td>
+      @if (transaction.quantity > 0) {
+        <span>{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</span>
+      }
+    </td>
+    <td>
+      @if (transaction.quantity > 0) {
+        <span>{{(transaction.amount / transaction.quantity) | currency : transaction.currencyId : 'symbol' : '0.0-3'}}</span>
+      }
+    </td>
+    <td>
+      <p-tag styleClass="p-mr-2" [severity]="(transaction.quantity > 0) ? 'info':'warn'"
+      value="{{(transaction.quantity > 0) ? (transaction.quantity | number: '0.0-4') : 'Closed'}}"></p-tag>
+    </td>
+    <td>
+      @if (transaction.quantity == 0 && transaction.amount < 0) {
+        <p-tag styleClass="p-mr-2" severity="success"
+        value="{{myMath.abs(transaction.amount) | currency : transaction.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
+      }
+      @if (transaction.quantity == 0 && transaction.amount > 0) {
+        <p-tag styleClass="p-mr-2" severity="danger"
+        value="{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
+      }
+    </td>
+  </tr>
+</ng-template>
 </p-table>

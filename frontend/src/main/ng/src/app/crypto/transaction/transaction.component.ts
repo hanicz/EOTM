@@ -1,13 +1,28 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { Transaction } from '../../model/transaction';
 import { CryptoService } from '../../service/crypto.service';
 import { Globals } from '../../util/global';
 import { environment } from '../../../environments/environment';
+import { Bind } from 'primeng/bind';
+import { Toolbar } from 'primeng/toolbar';
+import { PrimeTemplate } from 'primeng/api';
+import { ButtonDirective } from 'primeng/button';
+import { Ripple } from 'primeng/ripple';
+import { FileUpload } from 'primeng/fileupload';
+import { TableModule } from 'primeng/table';
+import { InputText } from 'primeng/inputtext';
+import { Select } from 'primeng/select';
+import { FormsModule } from '@angular/forms';
+import { Tag } from 'primeng/tag';
+import { Image } from 'primeng/image';
+import { Dialog } from 'primeng/dialog';
+import { DecimalPipe, CurrencyPipe, DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-transaction',
-  templateUrl: './transaction.component.html',
-  styleUrls: ['./transaction.component.css']
+    selector: 'app-transaction',
+    templateUrl: './transaction.component.html',
+    styleUrls: ['./transaction.component.css'],
+    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Tag, Image, Dialog, DecimalPipe, CurrencyPipe, DatePipe]
 })
 export class TransactionComponent implements OnInit {
 
@@ -20,7 +35,7 @@ export class TransactionComponent implements OnInit {
   @ViewChild('fileUpload') fileUpload: any;
   assetUrl: string;
 
-  constructor(private cryptoService: CryptoService, globals: Globals) {
+  constructor(private cryptoService: CryptoService, globals: Globals, private cdr: ChangeDetectorRef) {
     this.currencies = globals.currencies;
     this.statuses = globals.statuses;
     this.assetUrl = environment.assets_url;
@@ -38,6 +53,7 @@ export class TransactionComponent implements OnInit {
     this.cryptoService.getTransactions().subscribe({
       next: (data) => {
         this.transactions = data;
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.log(error);

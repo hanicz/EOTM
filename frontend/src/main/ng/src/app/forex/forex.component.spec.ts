@@ -8,8 +8,8 @@ describe('ForexComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ForexComponent ]
-    })
+    imports: [ForexComponent]
+})
     .compileComponents();
   });
 

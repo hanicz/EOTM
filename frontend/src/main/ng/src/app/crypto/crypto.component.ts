@@ -1,11 +1,23 @@
 import { Component, OnInit } from '@angular/core';
 import { Transaction } from '../model/transaction';
 import { Globals } from '../util/global';
+import { MenuComponent } from '../menu/menu.component';
+import { Bind } from 'primeng/bind';
+import { Panel } from 'primeng/panel';
+import { Tag } from 'primeng/tag';
+import { Divider } from 'primeng/divider';
+import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primeng/tabs';
+import { Ripple } from 'primeng/ripple';
+import { CryptoholdingComponent } from './cryptoholding/cryptoholding.component';
+import { CryptopositionComponent } from './cryptoposition/cryptoposition.component';
+import { TransactionComponent } from './transaction/transaction.component';
+import { DecimalPipe, CurrencyPipe } from '@angular/common';
 
 @Component({
-  selector: 'app-crypto',
-  templateUrl: './crypto.component.html',
-  styleUrls: ['./crypto.component.css']
+    selector: 'app-crypto',
+    templateUrl: './crypto.component.html',
+    styleUrls: ['./crypto.component.css'],
+    imports: [MenuComponent, Bind, Panel, Tag, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, CryptoholdingComponent, CryptopositionComponent, TransactionComponent, DecimalPipe, CurrencyPipe]
 })
 export class CryptoComponent implements OnInit {
 

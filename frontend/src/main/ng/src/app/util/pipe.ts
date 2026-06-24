@@ -1,8 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-@Pipe({
-    name: 'alertTypePipe'
-  })
+@Pipe({ name: 'alertTypePipe' })
   export class AlertTypePipe implements PipeTransform {
 
     transform(value: string): string {

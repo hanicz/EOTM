@@ -14,26 +14,28 @@
                             <p class="card-description">Curate your news feeds</p>
                         </div>
                         <button pButton pRipple label="Add Subreddit" icon="pi pi-plus"
-                            class="p-button-rounded p-button-success" (click)="openSubredditDialog()">
+                            class="p-button-rounded" severity="success" (click)="openSubredditDialog()">
                         </button>
                     </div>
 
                     <div class="card-content">
                         <p-dataView [value]="subReddits" [emptyMessage]="'No subreddits followed yet'"
                             styleClass="data-view-minimal">
-                            <ng-template let-subReddit pTemplate="listItem">
-                                <div class="subreddit-item">
-                                    <div class="item-icon">
-                                        <i class="pi pi-reddit"></i>
+                            <ng-template #list let-subReddits>
+                                @for (subReddit of subReddits; track subReddit.id) {
+                                    <div class="subreddit-item">
+                                        <div class="item-icon">
+                                            <i class="pi pi-reddit"></i>
+                                        </div>
+                                        <div class="item-info">
+                                            <h3>/r/{{subReddit.subreddit}}</h3>
+                                            <p>{{subReddit.description}}</p>
+                                        </div>
+                                        <button pButton pRipple type="button" icon="pi pi-trash" (click)="delete(subReddit)"
+                                            class="p-button-rounded p-button-text item-action" severity="danger">
+                                        </button>
                                     </div>
-                                    <div class="item-info">
-                                        <h3>/r/{{subReddit.subreddit}}</h3>
-                                        <p>{{subReddit.description}}</p>
-                                    </div>
-                                    <button pButton pRipple type="button" icon="pi pi-trash" (click)="delete(subReddit)"
-                                        class="p-button-rounded p-button-text p-button-danger item-action">
-                                    </button>
-                                </div>
+                                }
                             </ng-template>
                         </p-dataView>
                     </div>
@@ -50,28 +52,30 @@
                             <p class="card-description">Track your investment accounts</p>
                         </div>
                         <button pButton pRipple label="Add Account" icon="pi pi-plus"
-                            class="p-button-rounded p-button-success" (click)="openAccountDialog()">
+                            class="p-button-rounded" severity="success" (click)="openAccountDialog()">
                         </button>
                     </div>
 
                     <div class="card-content">
                         <p-dataView [value]="accounts" [emptyMessage]="'No accounts created yet'"
                             styleClass="data-view-minimal">
-                            <ng-template let-account pTemplate="listItem">
-                                <div class="account-item">
-                                    <div class="item-icon account-icon">
-                                        <i class="pi pi-dollar"></i>
+                            <ng-template #list let-accounts>
+                                @for (account of accounts; track account.id) {
+                                    <div class="account-item">
+                                        <div class="item-icon account-icon">
+                                            <i class="pi pi-dollar"></i>
+                                        </div>
+                                        <div class="item-info">
+                                            <h3>{{account.accountName}}</h3>
+                                            <p class="account-date">Created: {{account.creationDate | date:'mediumDate'}}
+                                            </p>
+                                        </div>
+                                        <button pButton pRipple type="button" icon="pi pi-trash"
+                                            (click)="deleteAccount(account)"
+                                            class="p-button-rounded p-button-text item-action" severity="danger">
+                                        </button>
                                     </div>
-                                    <div class="item-info">
-                                        <h3>{{account.accountName}}</h3>
-                                        <p class="account-date">Created: {{account.creationDate | date:'mediumDate'}}
-                                        </p>
-                                    </div>
-                                    <button pButton pRipple type="button" icon="pi pi-trash"
-                                        (click)="deleteAccount(account)"
-                                        class="p-button-rounded p-button-text p-button-danger item-action">
-                                    </button>
-                                </div>
+                                }
                             </ng-template>
                         </p-dataView>
                     </div>
@@ -109,7 +113,7 @@
                         </span>
                     </div>
 
-                    <button pButton pRipple label="Update Password" icon="pi pi-check" class="p-button-info save-button"
+                    <button pButton pRipple label="Update Password" icon="pi pi-check" class="save-button" severity="info"
                         (click)="changePassword()">
                     </button>
                 </div>
@@ -137,7 +141,7 @@
     <ng-template pTemplate="footer">
         <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideSubredditDialog()">
         </button>
-        <button pButton pRipple label="Add" icon="pi pi-check" class="p-button-success" (click)="saveSubReddit()">
+        <button pButton pRipple label="Add" icon="pi pi-check" severity="success" (click)="saveSubReddit()">
         </button>
     </ng-template>
 </p-dialog>
@@ -153,16 +157,16 @@
         </div>
         <div class="dialog-field">
             <label for="creationDate">Creation Date</label>
-            <p-calendar [(ngModel)]="newAccount.creationDate" dateFormat="yy-mm-dd" [showIcon]="true"
+            <p-datepicker [(ngModel)]="newAccount.creationDate" dateFormat="yy-mm-dd" [showIcon]="true"
                 placeholder="Select a date">
-            </p-calendar>
+            </p-datepicker>
         </div>
     </ng-template>
 
     <ng-template pTemplate="footer">
         <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideAccountDialog()">
         </button>
-        <button pButton pRipple label="Create" icon="pi pi-check" class="p-button-success" (click)="createAccount()">
+        <button pButton pRipple label="Create" icon="pi pi-check" severity="success" (click)="createAccount()">
         </button>
     </ng-template>
 </p-dialog>

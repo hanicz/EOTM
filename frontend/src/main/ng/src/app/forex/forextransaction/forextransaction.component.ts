@@ -1,12 +1,26 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { ForexTransaction } from 'src/app/model/forextransaction';
 import { ForexService } from 'src/app/service/forex.service';
 import { Globals } from '../../util/global';
+import { Bind } from 'primeng/bind';
+import { Toolbar } from 'primeng/toolbar';
+import { PrimeTemplate } from 'primeng/api';
+import { ButtonDirective } from 'primeng/button';
+import { Ripple } from 'primeng/ripple';
+import { FileUpload } from 'primeng/fileupload';
+import { TableModule } from 'primeng/table';
+import { InputText } from 'primeng/inputtext';
+import { Select } from 'primeng/select';
+import { FormsModule } from '@angular/forms';
+import { Tag } from 'primeng/tag';
+import { Dialog } from 'primeng/dialog';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-forextransaction',
-  templateUrl: './forextransaction.component.html',
-  styleUrls: ['./forextransaction.component.css']
+    selector: 'app-forextransaction',
+    templateUrl: './forextransaction.component.html',
+    styleUrls: ['./forextransaction.component.css'],
+    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Tag, Dialog, CurrencyPipe, DatePipe]
 })
 export class ForextransactionComponent {
 
@@ -18,7 +32,7 @@ export class ForextransactionComponent {
   forexTransaction: ForexTransaction = {} as ForexTransaction;
   @ViewChild('fileUpload') fileUpload: any;
 
-  constructor(private forexService: ForexService, globals: Globals) {
+  constructor(private forexService: ForexService, globals: Globals, private cdr: ChangeDetectorRef) {
     this.currencies = globals.currencies;
 
     this.statuses = [
@@ -36,6 +50,7 @@ export class ForextransactionComponent {
     this.forexService.getTransactions().subscribe({
       next: (data) => {
         this.forexTransactions = data;
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.log(error);

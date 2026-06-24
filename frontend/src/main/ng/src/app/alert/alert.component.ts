@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { StockAlert } from '../model/stockalert';
 import { AlertService } from '../service/alert.service';
 import { Exchange } from '../model/exchange';
@@ -7,11 +7,29 @@ import { Globals } from '../util/global';
 import { StockService } from '../service/stock.service';
 import { CryptoAlert } from '../model/cryptoalert';
 import { environment } from 'src/environments/environment';
+import { MenuComponent } from '../menu/menu.component';
+import { Bind } from 'primeng/bind';
+import { Panel } from 'primeng/panel';
+import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primeng/tabs';
+import { Ripple } from 'primeng/ripple';
+import { ButtonDirective } from 'primeng/button';
+import { TableModule } from 'primeng/table';
+import { PrimeTemplate } from 'primeng/api';
+import { Skeleton } from 'primeng/skeleton';
+import { NgClass, NgStyle } from '@angular/common';
+import { Tag } from 'primeng/tag';
+import { Image } from 'primeng/image';
+import { Dialog } from 'primeng/dialog';
+import { Select } from 'primeng/select';
+import { FormsModule } from '@angular/forms';
+import { InputNumber } from 'primeng/inputnumber';
+import { AlertTypePipe } from '../util/pipe';
 
 @Component({
-  selector: 'app-alert',
-  templateUrl: './alert.component.html',
-  styleUrls: ['./alert.component.css']
+    selector: 'app-alert',
+    templateUrl: './alert.component.html',
+    styleUrls: ['./alert.component.css'],
+    imports: [MenuComponent, Bind, Panel, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, TableModule, PrimeTemplate, Skeleton, NgClass, Tag, Image, NgStyle, Dialog, Select, FormsModule, InputNumber, AlertTypePipe]
 })
 export class AlertComponent implements OnInit {
 
@@ -33,7 +51,7 @@ export class AlertComponent implements OnInit {
   assetUrl: string;
 
   constructor(private alertService: AlertService, private stockService: StockService,
-    globals: Globals) {
+    globals: Globals, private cdr: ChangeDetectorRef) {
     this.fetchData();
     this.globals = globals;
     this.assetUrl = environment.assets_url;
@@ -41,6 +59,7 @@ export class AlertComponent implements OnInit {
       next: (data) => {
         this.exchangesLoading = false;
         this.exchanges = data;
+        this.cdr.markForCheck();
       }
     });
 
@@ -60,6 +79,7 @@ export class AlertComponent implements OnInit {
       next: (data) => {
         this.alertsLoading = false;
         this.stockAlerts = data;
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.log(error);
@@ -70,6 +90,7 @@ export class AlertComponent implements OnInit {
       next: (data) => {
         this.cryptoAlertsLoading = false;
         this.cryptoAlerts = data;
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.log(error);
@@ -105,6 +126,7 @@ export class AlertComponent implements OnInit {
       next: (data) => {
         this.stocksLoading = false;
         this.symbols = data;
+        this.cdr.markForCheck();
       }
     });
   }

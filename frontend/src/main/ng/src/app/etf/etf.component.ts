@@ -1,11 +1,24 @@
 import { Component, OnInit } from '@angular/core';
 import { Globals } from '../util/global';
 import { ETFInvestment } from '../model/etfinvestment';
+import { MenuComponent } from '../menu/menu.component';
+import { Bind } from 'primeng/bind';
+import { Panel } from 'primeng/panel';
+import { Tag } from 'primeng/tag';
+import { Divider } from 'primeng/divider';
+import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primeng/tabs';
+import { Ripple } from 'primeng/ripple';
+import { EtfholdingComponent } from './etfholding/etfholding.component';
+import { EtfpositionComponent } from './etfposition/etfposition.component';
+import { EtfinvestmentComponent } from './etfinvestment/etfinvestment.component';
+import { EtfdividendComponent } from './etfdividend/etfdividend.component';
+import { DecimalPipe, CurrencyPipe } from '@angular/common';
 
 @Component({
-  selector: 'app-etf',
-  templateUrl: './etf.component.html',
-  styleUrls: ['./etf.component.css']
+    selector: 'app-etf',
+    templateUrl: './etf.component.html',
+    styleUrls: ['./etf.component.css'],
+    imports: [MenuComponent, Bind, Panel, Tag, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, EtfholdingComponent, EtfpositionComponent, EtfinvestmentComponent, EtfdividendComponent, DecimalPipe, CurrencyPipe]
 })
 export class EtfComponent implements OnInit {
 

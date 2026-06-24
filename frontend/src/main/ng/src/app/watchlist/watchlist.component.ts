@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CryptoWatch } from '../model/cryptowatch';
 import { ForexWatch } from '../model/forexwatch';
 import { StockWatch } from '../model/stockwatch';
@@ -12,11 +12,28 @@ import { CryptoService } from '../service/crypto.service';
 import { environment } from '../../environments/environment';
 import { Symbol } from '../model/symbol';
 import { Exchange } from '../model/exchange';
+import { Bind } from 'primeng/bind';
+import { Toolbar } from 'primeng/toolbar';
+import { PrimeTemplate } from 'primeng/api';
+import { ButtonDirective } from 'primeng/button';
+import { Ripple } from 'primeng/ripple';
+import { Accordion, AccordionPanel, AccordionHeader, AccordionContent } from 'primeng/accordion';
+import { TableModule } from 'primeng/table';
+import { Skeleton } from 'primeng/skeleton';
+import { NgClass, NgStyle, DecimalPipe, CurrencyPipe } from '@angular/common';
+import { Image } from 'primeng/image';
+import { Tag } from 'primeng/tag';
+import { Dialog } from 'primeng/dialog';
+import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primeng/tabs';
+import { Select } from 'primeng/select';
+import { FormsModule } from '@angular/forms';
+import { InputText } from 'primeng/inputtext';
 
 @Component({
-  selector: 'app-watchlist',
-  templateUrl: './watchlist.component.html',
-  styleUrls: ['./watchlist.component.css']
+    selector: 'app-watchlist',
+    templateUrl: './watchlist.component.html',
+    styleUrls: ['./watchlist.component.css'],
+    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, Accordion, AccordionPanel, AccordionHeader, AccordionContent, TableModule, Skeleton, NgClass, Image, NgStyle, Tag, Dialog, Tabs, TabList, Tab, TabPanels, TabPanel, Select, FormsModule, InputText, DecimalPipe, CurrencyPipe]
 })
 export class WatchlistComponent implements OnInit {
 
@@ -46,7 +63,8 @@ export class WatchlistComponent implements OnInit {
     globals: Globals,
     private router: Router,
     private stockService: StockService,
-    private cryptoService: CryptoService) {
+    private cryptoService: CryptoService,
+    private cdr: ChangeDetectorRef) {
 
     this.assetUrl = environment.assets_url;
     this.globals = globals;
@@ -56,6 +74,7 @@ export class WatchlistComponent implements OnInit {
       next: (data) => {
         this.exchangesLoading = false;
         this.exchanges = data;
+        this.cdr.markForCheck();
       }
     });
     
@@ -78,6 +97,7 @@ export class WatchlistComponent implements OnInit {
       next: (data) => {
         this.forexLoading = false;
         this.forexWatchList = data;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -87,6 +107,7 @@ export class WatchlistComponent implements OnInit {
       next: (data) => {
         this.stockLoading = false;
         this.globals.stockWatchList = data;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -96,6 +117,7 @@ export class WatchlistComponent implements OnInit {
       next: (data) => {
         this.cryptoLoading = false;
         this.cryptoWatchList = data;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -113,12 +135,14 @@ export class WatchlistComponent implements OnInit {
     this.stockService.getAllStocks().subscribe({
       next: (data) => {
         this.stocks = data;
+        this.cdr.markForCheck();
       }
     });
 
     this.cryptoService.getAllCrypto().subscribe({
       next: (data) => {
         this.cryptos = data;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -197,6 +221,7 @@ export class WatchlistComponent implements OnInit {
       next: (data) => {
         this.stocksLoading = false;
         this.symbols = data;
+        this.cdr.markForCheck();
       }
     });
   }

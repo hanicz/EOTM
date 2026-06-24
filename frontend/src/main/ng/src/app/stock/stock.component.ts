@@ -1,11 +1,24 @@
 import { Component, OnInit } from '@angular/core';
 import { Globals } from '../util/global';
 import { Investment } from '../model/investment';
+import { MenuComponent } from '../menu/menu.component';
+import { Bind } from 'primeng/bind';
+import { Panel } from 'primeng/panel';
+import { Tag } from 'primeng/tag';
+import { Divider } from 'primeng/divider';
+import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primeng/tabs';
+import { Ripple } from 'primeng/ripple';
+import { HoldingComponent } from './holding/holding.component';
+import { PositionComponent } from './position/position.component';
+import { InvestmentComponent } from './investment/investment.component';
+import { DividendComponent } from './dividend/dividend.component';
+import { DecimalPipe, CurrencyPipe } from '@angular/common';
 
 @Component({
-  selector: 'app-stock',
-  templateUrl: './stock.component.html',
-  styleUrls: ['./stock.component.css']
+    selector: 'app-stock',
+    templateUrl: './stock.component.html',
+    styleUrls: ['./stock.component.css'],
+    imports: [MenuComponent, Bind, Panel, Tag, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, HoldingComponent, PositionComponent, InvestmentComponent, DividendComponent, DecimalPipe, CurrencyPipe]
 })
 export class StockComponent implements OnInit {
 

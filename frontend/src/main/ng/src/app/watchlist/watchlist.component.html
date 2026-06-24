@@ -1,202 +1,248 @@
 <div class="shadow-5">
-    <p-toolbar styleClass="p-1">
-        <ng-template pTemplate="left">
-            <h4 class="p-0 m-0 pl-1">Watchlist</h4>
-        </ng-template>
-        <ng-template pTemplate="right">
-            <button pButton pRipple type="button" icon="pi pi-pencil" (click)="showDialog()"
-                class="p-button-rounded p-button-text ml-2 p-button-info"></button>
-        </ng-template>
-    </p-toolbar>
-    <p-accordion [multiple]="true">
-        <p-accordionTab header="Stock" [selected]="true" styleClass="p-0 m-0" class="p-0 m-0">
-            <p-table [value]="[{}]" #dt44 styleClass="p-datatable-sm" *ngIf="stockLoading">
-                <ng-template pTemplate="body">
-                    <tr *ngFor="let item of [].constructor(3);">
-                        <td><p-skeleton></p-skeleton></td>
-                        <td><p-skeleton></p-skeleton></td>
-                        <td><p-skeleton></p-skeleton></td>
-                        <td><p-skeleton></p-skeleton></td>
-                    </tr>
-                </ng-template>
-            </p-table>
-            <p-table #dt1 [value]="globals.stockWatchList" responsiveLayout="scroll" styleClass="p-datatable-sm"
-                [autoLayout]="true" *ngIf="!stockLoading">
-                <ng-template pTemplate="body" let-stockWatch>
-                    <tr (click)="stockSelected(stockWatch)" style="cursor: pointer;"
-                        [ngClass]="{'row-over': (stockWatch.change > 0), 'row-under': (stockWatch.change < 0) }">
-                        <td class="text-sm">
-                            <div class="flex align-items-center">
-                                <p-image
-                                    src="https://eodhd.com/img/logos/{{stockWatch.stockExchange}}/{{stockWatch.stockShortName}}.png"
-                                    width="15" class="mr-1" (onImageError)="globals.errorHandler($event)"></p-image>
-                                {{stockWatch.stockShortName}}
-                            </div>
-                        </td>
-                        <td class="text-sm font-bold"
-                            [ngStyle]="{'color': (stockWatch.change > 0) ? '#008002' : (stockWatch.change === 0) ? '#999999' : '#910101'}">
-                            {{stockWatch.liveValue | currency : stockWatch.currencyId : 'symbol' : '0.0-2'}}</td>
-                        <td class="text-sm font-bold"
-                            [ngStyle]="{'color': (stockWatch.change > 0) ? '#008002' : (stockWatch.change === 0) ? '#999999' : '#910101'}">
-                            {{stockWatch.change | number : '0.0-2'}}</td>
-                        <td class="text-sm font-bold"
-                            [ngStyle]="{'color': (stockWatch.change > 0) ? '#008002' : (stockWatch.change === 0) ? '#999999' : '#910101'}">
-                            {{stockWatch.pchange | number : '0.0-2'}}%</td>
-                    </tr>
-                </ng-template>
-            </p-table>
-        </p-accordionTab>
-        <p-accordionTab header="Crypto" [selected]="true">
-            <p-table [value]="[{}]" #dt44 styleClass="p-datatable-sm" *ngIf="cryptoLoading">
-                <ng-template pTemplate="body">
-                    <tr *ngFor="let item of [].constructor(3);">
-                        <td><p-skeleton></p-skeleton></td>
-                        <td><p-skeleton></p-skeleton></td>
-                        <td><p-skeleton></p-skeleton></td>
-                        <td><p-skeleton></p-skeleton></td>
-                    </tr>
-                </ng-template>
-            </p-table>
-            <p-table #dt2 [value]="cryptoWatchList" responsiveLayout="scroll" styleClass="p-datatable-sm"
-                [autoLayout]="true" *ngIf="!cryptoLoading">
-                <ng-template pTemplate="body" let-cryptoWatch>
-                    <tr [ngClass]="{'row-over': (cryptoWatch.change > 0), 'row-under': (cryptoWatch.change < 0) }">
-                        <td class="text-xs">
-                            <div class="flex align-items-center">
-                                <p-image src="{{assetUrl + cryptoWatch.symbol + '.svg'}}" width="15"
-                                    class="mr-1"></p-image>
-                                {{cryptoWatch.name}}
-                            </div>
-                        </td>
-                        <td class="text-sm font-bold"
-                            [ngStyle]="{'color': (cryptoWatch.change > 0) ? '#008002' : (cryptoWatch.change === 0) ? '#999999' : '#910101'}">
-                            {{cryptoWatch.liveValue | currency : 'EUR' : 'symbol' : '0.0-2'}}</td>
-                        <td class="text-sm font-bold"
-                            [ngStyle]="{'color': (cryptoWatch.change > 0) ? '#008002' : (cryptoWatch.change === 0) ? '#999999' : '#910101'}">
-                            {{cryptoWatch.change | number : '0.0-2'}}%</td>
-                    </tr>
-                </ng-template>
-            </p-table>
-        </p-accordionTab>
-        <p-accordionTab header="Forex" [selected]="true">
-            <p-table [value]="[{}]" #dt44 styleClass="p-datatable-sm" *ngIf="forexLoading">
-                <ng-template pTemplate="body">
-                    <tr *ngFor="let item of [].constructor(3);">
-                        <td><p-skeleton></p-skeleton></td>
-                        <td><p-skeleton></p-skeleton></td>
-                        <td><p-skeleton></p-skeleton></td>
-                        <td><p-skeleton></p-skeleton></td>
-                    </tr>
-                </ng-template>
-            </p-table>
-            <p-table #dt3 [value]="forexWatchList" responsiveLayout="scroll" styleClass="p-datatable-sm"
-                [autoLayout]="true" *ngIf="!forexLoading">
-                <ng-template pTemplate="body" let-forexWatch>
-                    <tr [ngClass]="{'row-over': (forexWatch.change > 0), 'row-under': (forexWatch.change < 0) }">
-                        <td>
-                            <p-tag severity="info" value="{{forexWatch.fromCurrencyId + forexWatch.toCurrencyId}}">
-                            </p-tag>
-                        </td>
-                        <td></td>
-                        <td class="text-sm font-bold"
-                            [ngStyle]="{'color': (forexWatch.change > 0) ? '#008002' : (forexWatch.change === 0) ? '#999999' : '#910101'}">
-                            {{forexWatch.liveValue | currency : forexWatch.toCurrencyId : 'symbol' : '0.0-2'}}</td>
-                        <td class="text-sm font-bold"
-                            [ngStyle]="{'color': (forexWatch.change > 0) ? '#008002' : (forexWatch.change === 0) ? '#999999' : '#910101'}">
-                            {{forexWatch.change | number : '0.0-2'}}</td>
-                        <td class="text-sm font-bold"
-                            [ngStyle]="{'color': (forexWatch.change > 0) ? '#008002' : (forexWatch.change === 0) ? '#999999' : '#910101'}">
-                            {{forexWatch.pchange | number : '0.0-2'}}%</td>
-                    </tr>
-                </ng-template>
-            </p-table>
-        </p-accordionTab>
-    </p-accordion>
+  <p-toolbar styleClass="p-1">
+    <ng-template pTemplate="left">
+      <h4 class="p-0 m-0 pl-1">Watchlist</h4>
+    </ng-template>
+    <ng-template pTemplate="right">
+      <button pButton pRipple type="button" icon="pi pi-pencil" (click)="showDialog()"
+      class="p-button-rounded p-button-text ml-2" severity="info"></button>
+    </ng-template>
+  </p-toolbar>
+  <p-accordion [value]="['0', '1', '2']" [multiple]="true">
+    <p-accordion-panel value="0" styleClass="p-0 m-0" class="p-0 m-0">
+    <p-accordion-header>Stock</p-accordion-header>
+    <p-accordion-content>
+      @if (stockLoading) {
+        <p-table [value]="[{}]" #dt44 styleClass="p-datatable-sm">
+          <ng-template pTemplate="body">
+            @for (item of [].constructor(3); track $index) {
+              <tr>
+                <td><p-skeleton></p-skeleton></td>
+                <td><p-skeleton></p-skeleton></td>
+                <td><p-skeleton></p-skeleton></td>
+                <td><p-skeleton></p-skeleton></td>
+              </tr>
+            }
+          </ng-template>
+        </p-table>
+      }
+      @if (!stockLoading) {
+        <p-table #dt1 [value]="globals.stockWatchList" responsiveLayout="scroll" styleClass="p-datatable-sm"
+>
+          <ng-template pTemplate="body" let-stockWatch>
+            <tr (click)="stockSelected(stockWatch)" style="cursor: pointer;"
+              [ngClass]="{'row-over': (stockWatch.change > 0), 'row-under': (stockWatch.change < 0) }">
+              <td class="text-sm">
+                <div class="flex align-items-center">
+                  <p-image
+                    src="https://eodhd.com/img/logos/{{stockWatch.stockExchange}}/{{stockWatch.stockShortName}}.png"
+                  width="15" class="mr-1" (onImageError)="globals.errorHandler($event)"></p-image>
+                  {{stockWatch.stockShortName}}
+                </div>
+              </td>
+              <td class="text-sm font-bold"
+                [ngStyle]="{'color': (stockWatch.change > 0) ? '#008002' : (stockWatch.change === 0) ? '#999999' : '#910101'}">
+              {{stockWatch.liveValue | currency : stockWatch.currencyId : 'symbol' : '0.0-2'}}</td>
+              <td class="text-sm font-bold"
+                [ngStyle]="{'color': (stockWatch.change > 0) ? '#008002' : (stockWatch.change === 0) ? '#999999' : '#910101'}">
+              {{stockWatch.change | number : '0.0-2'}}</td>
+              <td class="text-sm font-bold"
+                [ngStyle]="{'color': (stockWatch.change > 0) ? '#008002' : (stockWatch.change === 0) ? '#999999' : '#910101'}">
+              {{stockWatch.pchange | number : '0.0-2'}}%</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      }
+    </p-accordion-content>
+    </p-accordion-panel>
+    <p-accordion-panel value="1">
+    <p-accordion-header>Crypto</p-accordion-header>
+    <p-accordion-content>
+      @if (cryptoLoading) {
+        <p-table [value]="[{}]" #dt44 styleClass="p-datatable-sm">
+          <ng-template pTemplate="body">
+            @for (item of [].constructor(3); track $index) {
+              <tr>
+                <td><p-skeleton></p-skeleton></td>
+                <td><p-skeleton></p-skeleton></td>
+                <td><p-skeleton></p-skeleton></td>
+                <td><p-skeleton></p-skeleton></td>
+              </tr>
+            }
+          </ng-template>
+        </p-table>
+      }
+      @if (!cryptoLoading) {
+        <p-table #dt2 [value]="cryptoWatchList" responsiveLayout="scroll" styleClass="p-datatable-sm"
+>
+          <ng-template pTemplate="body" let-cryptoWatch>
+            <tr [ngClass]="{'row-over': (cryptoWatch.change > 0), 'row-under': (cryptoWatch.change < 0) }">
+              <td class="text-xs">
+                <div class="flex align-items-center">
+                  <p-image src="{{assetUrl + cryptoWatch.symbol + '.svg'}}" width="15"
+                  class="mr-1"></p-image>
+                  {{cryptoWatch.name}}
+                </div>
+              </td>
+              <td class="text-sm font-bold"
+                [ngStyle]="{'color': (cryptoWatch.change > 0) ? '#008002' : (cryptoWatch.change === 0) ? '#999999' : '#910101'}">
+              {{cryptoWatch.liveValue | currency : 'EUR' : 'symbol' : '0.0-2'}}</td>
+              <td class="text-sm font-bold"
+                [ngStyle]="{'color': (cryptoWatch.change > 0) ? '#008002' : (cryptoWatch.change === 0) ? '#999999' : '#910101'}">
+              {{cryptoWatch.change | number : '0.0-2'}}%</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      }
+    </p-accordion-content>
+    </p-accordion-panel>
+    <p-accordion-panel value="2">
+    <p-accordion-header>Forex</p-accordion-header>
+    <p-accordion-content>
+      @if (forexLoading) {
+        <p-table [value]="[{}]" #dt44 styleClass="p-datatable-sm">
+          <ng-template pTemplate="body">
+            @for (item of [].constructor(3); track $index) {
+              <tr>
+                <td><p-skeleton></p-skeleton></td>
+                <td><p-skeleton></p-skeleton></td>
+                <td><p-skeleton></p-skeleton></td>
+                <td><p-skeleton></p-skeleton></td>
+              </tr>
+            }
+          </ng-template>
+        </p-table>
+      }
+      @if (!forexLoading) {
+        <p-table #dt3 [value]="forexWatchList" responsiveLayout="scroll" styleClass="p-datatable-sm"
+>
+          <ng-template pTemplate="body" let-forexWatch>
+            <tr [ngClass]="{'row-over': (forexWatch.change > 0), 'row-under': (forexWatch.change < 0) }">
+              <td>
+                <p-tag severity="info" value="{{forexWatch.fromCurrencyId + forexWatch.toCurrencyId}}">
+                </p-tag>
+              </td>
+              <td></td>
+              <td class="text-sm font-bold"
+                [ngStyle]="{'color': (forexWatch.change > 0) ? '#008002' : (forexWatch.change === 0) ? '#999999' : '#910101'}">
+              {{forexWatch.liveValue | currency : forexWatch.toCurrencyId : 'symbol' : '0.0-2'}}</td>
+              <td class="text-sm font-bold"
+                [ngStyle]="{'color': (forexWatch.change > 0) ? '#008002' : (forexWatch.change === 0) ? '#999999' : '#910101'}">
+              {{forexWatch.change | number : '0.0-2'}}</td>
+              <td class="text-sm font-bold"
+                [ngStyle]="{'color': (forexWatch.change > 0) ? '#008002' : (forexWatch.change === 0) ? '#999999' : '#910101'}">
+              {{forexWatch.pchange | number : '0.0-2'}}%</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      }
+    </p-accordion-content>
+    </p-accordion-panel>
+  </p-accordion>
 </div>
 
 <p-dialog [(visible)]="display" [breakpoints]="{'960px': '75vw', '640px': '100vw'}"
-    [style]="{width: '25vw', height: '30vw'}" [draggable]="false" [resizable]="false">
-    <p-tabView>
-        <p-tabPanel header="Stock" [selected]="true">
+  [style]="{width: '25vw', height: '30vw'}" [draggable]="false" [resizable]="false">
+  <p-tabs value="0">
+  <p-tablist>
+    <p-tab value="0">Stock</p-tab>
+    <p-tab value="1">Crypto</p-tab>
+    <p-tab value="2">Forex</p-tab>
+  </p-tablist>
+  <p-tabpanels>
+    <p-tabpanel value="0">
 
-            <div class="grid">
-                <div class="col-12">
-                    <p-dropdown class="searchDropdown" [options]="exchanges" optionLabel="Name" [virtualScroll]="true"
-                        [itemSize]="31" [filter]="true" (onChange)="exchangeChanged($event)"
-                        [(ngModel)]="selectedExchange" placeholder="Select an Exchange" [style]="{'width':'100%'}"
-                        [dropdownIcon]="exchangesLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
-                    </p-dropdown>
-                </div>
-                <div class="col-12">
-                    <p-dropdown class="searchDropdown" [options]="symbols" optionLabel="Name" [virtualScroll]="true"
-                        [itemSize]="31" [filter]="true" [(ngModel)]="selectedStock" placeholder="Select a Ticker"
-                        [style]="{'width':'100%'}"
-                        [dropdownIcon]="stocksLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
-                    </p-dropdown>
-                </div>
-                <div class="col-2 col-offset-5">
-                    <button pButton pRipple type="button" icon="fas fa-plus" (click)="createStockWatch()"
-                        class="p-button-rounded p-button-text ml-2 p-button-success"
-                        *ngIf="!checkStockContain() && selectedStock.Code != undefined">Add</button>
-                </div>
-                <div class="col-2 col-offset-5">
-                    <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteStockWatch()"
-                        class="p-button-rounded p-button-text ml-2 p-button-danger"
-                        *ngIf="checkStockContain()">Delete</button>
-                </div>
-            </div>
-        </p-tabPanel>
-        <p-tabPanel header="Crypto">
-            <p-table #dt5 [value]="cryptos" responsiveLayout="scroll" [autoLayout]="true" styleClass="p-datatable-sm">
-                <ng-template pTemplate="body" let-crypto>
-                    <tr>
-                        <td>
-                            <button pButton pRipple *ngIf="!(checkCryptoContain(crypto.name))" type="button"
-                                icon="fas fa-plus" (click)="createCryptoWatch(crypto.id)"
-                                class="p-button-rounded p-button-text ml-2 p-button-success"></button>
-                            <button pButton pRipple *ngIf="checkCryptoContain(crypto.name)" type="button"
-                                icon="pi pi-times" (click)="deleteCryptoWatch(crypto.name)"
-                                class="p-button-rounded p-button-text ml-2 p-button-danger"></button>
-                        </td>
-                        <td>
-                            <p-tag severity="info" value="{{crypto.symbol}}">
-                            </p-tag>
-                        </td>
-                        <td>
-                            <div class="flex align-items-center">
-                                <p-image src="{{assetUrl + crypto.symbol + '.svg'}}" width="15" class="mr-1"></p-image>
-                                {{crypto.name}}
-                            </div>
-                        </td>
-                    </tr>
-                </ng-template>
-            </p-table>
-        </p-tabPanel>
-        <p-tabPanel header="Forex">
-            <div class="grid">
-                <div class="col-12 pt-3">
-                    <span class="p-float-label">
-                        <input type="text" pInputText [(ngModel)]="toForex" id="toForex"/>
-                        <label htmlFor="toForex">To</label>
-                    </span>
-                </div>
-                <div class="col-12 pt-3">
-                    <span class="p-float-label">
-                        <input type="text" pInputText [(ngModel)]="fromForex" id="fromForex"/>
-                        <label htmlFor="fromForex">From</label>
-                    </span>
-                </div>
-                <div class="col-2 col-offset-5">
-                    <button pButton pRipple type="button" icon="fas fa-plus" (click)="createForexWatch()"
-                        class="p-button-rounded p-button-text ml-2 p-button-success"
-                        *ngIf="!checkForexContain()">Add</button>
-                </div>
-                <div class="col-2 col-offset-5">
-                    <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteForexWatch()"
-                        class="p-button-rounded p-button-text ml-2 p-button-danger"
-                        *ngIf="checkForexContain()">Delete</button>
-                </div>
-            </div>
-        </p-tabPanel>
-    </p-tabView>
+      <div class="grid">
+        <div class="col-12">
+          <p-select class="searchDropdown" [options]="exchanges" optionLabel="Name" [virtualScroll]="true"
+            [virtualScrollItemSize]="31" [filter]="true" (onChange)="exchangeChanged($event)"
+            [(ngModel)]="selectedExchange" placeholder="Select an Exchange" [style]="{'width':'100%'}"
+            [dropdownIcon]="exchangesLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+          </p-select>
+        </div>
+        <div class="col-12">
+          <p-select class="searchDropdown" [options]="symbols" optionLabel="Name" [virtualScroll]="true"
+            [virtualScrollItemSize]="31" [filter]="true" [(ngModel)]="selectedStock" placeholder="Select a Ticker"
+            [style]="{'width':'100%'}"
+            [dropdownIcon]="stocksLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+          </p-select>
+        </div>
+        <div class="col-2 col-offset-5">
+          @if (!checkStockContain() && selectedStock.Code != undefined) {
+            <button pButton pRipple type="button" icon="fas fa-plus" (click)="createStockWatch()"
+              class="p-button-rounded p-button-text ml-2" severity="success"
+            >Add</button>
+          }
+        </div>
+        <div class="col-2 col-offset-5">
+          @if (checkStockContain()) {
+            <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteStockWatch()"
+              class="p-button-rounded p-button-text ml-2" severity="danger"
+            >Delete</button>
+          }
+        </div>
+      </div>
+    </p-tabpanel>
+    <p-tabpanel value="1">
+      <p-table #dt5 [value]="cryptos" responsiveLayout="scroll" styleClass="p-datatable-sm">
+        <ng-template pTemplate="body" let-crypto>
+          <tr>
+            <td>
+              @if (!(checkCryptoContain(crypto.name))) {
+                <button pButton pRipple type="button"
+                  icon="fas fa-plus" (click)="createCryptoWatch(crypto.id)"
+                class="p-button-rounded p-button-text ml-2" severity="success"></button>
+              }
+              @if (checkCryptoContain(crypto.name)) {
+                <button pButton pRipple type="button"
+                  icon="pi pi-times" (click)="deleteCryptoWatch(crypto.name)"
+                class="p-button-rounded p-button-text ml-2" severity="danger"></button>
+              }
+            </td>
+            <td>
+              <p-tag severity="info" value="{{crypto.symbol}}">
+              </p-tag>
+            </td>
+            <td>
+              <div class="flex align-items-center">
+                <p-image src="{{assetUrl + crypto.symbol + '.svg'}}" width="15" class="mr-1"></p-image>
+                {{crypto.name}}
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-tabpanel>
+    <p-tabpanel value="2">
+      <div class="grid">
+        <div class="col-12 pt-3">
+          <span class="p-float-label">
+            <input type="text" pInputText [(ngModel)]="toForex" id="toForex"/>
+            <label htmlFor="toForex">To</label>
+          </span>
+        </div>
+        <div class="col-12 pt-3">
+          <span class="p-float-label">
+            <input type="text" pInputText [(ngModel)]="fromForex" id="fromForex"/>
+            <label htmlFor="fromForex">From</label>
+          </span>
+        </div>
+        <div class="col-2 col-offset-5">
+          @if (!checkForexContain()) {
+            <button pButton pRipple type="button" icon="fas fa-plus" (click)="createForexWatch()"
+              class="p-button-rounded p-button-text ml-2" severity="success"
+            >Add</button>
+          }
+        </div>
+        <div class="col-2 col-offset-5">
+          @if (checkForexContain()) {
+            <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteForexWatch()"
+              class="p-button-rounded p-button-text ml-2" severity="danger"
+            >Delete</button>
+          }
+        </div>
+      </div>
+    </p-tabpanel>
+  </p-tabpanels>
+  </p-tabs>
 </p-dialog>

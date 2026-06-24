@@ -1,12 +1,26 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { Dividend } from 'src/app/model/dividend';
 import { DividendService } from 'src/app/service/dividend.service';
 import { Globals } from '../../util/global';
+import { Bind } from 'primeng/bind';
+import { Toolbar } from 'primeng/toolbar';
+import { PrimeTemplate } from 'primeng/api';
+import { ButtonDirective } from 'primeng/button';
+import { Ripple } from 'primeng/ripple';
+import { FileUpload } from 'primeng/fileupload';
+import { TableModule } from 'primeng/table';
+import { InputText } from 'primeng/inputtext';
+import { Dialog } from 'primeng/dialog';
+import { FormsModule } from '@angular/forms';
+import { Select } from 'primeng/select';
+import { Image } from 'primeng/image';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-dividend',
-  templateUrl: './dividend.component.html',
-  styleUrls: ['./dividend.component.css']
+    selector: 'app-dividend',
+    templateUrl: './dividend.component.html',
+    styleUrls: ['./dividend.component.css'],
+    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Dialog, FormsModule, Select, Image, CurrencyPipe, DatePipe]
 })
 export class DividendComponent implements OnInit {
 
@@ -16,8 +30,10 @@ export class DividendComponent implements OnInit {
   dividendDialog: boolean = false;
   dividend: Dividend = {} as Dividend;
   @ViewChild('fileUpload') fileUpload: any;
+  globals: Globals;
 
-  constructor(private dividendService: DividendService, globals: Globals) {
+  constructor(private dividendService: DividendService, globals: Globals, private cdr: ChangeDetectorRef) {
+    this.globals = globals;
     this.currencies = globals.currencies;
 
     this.fetchData();
@@ -30,6 +46,7 @@ export class DividendComponent implements OnInit {
     this.dividendService.getAllDividends().subscribe({
       next: (data) => {
         this.dividends = data;
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.log(error);

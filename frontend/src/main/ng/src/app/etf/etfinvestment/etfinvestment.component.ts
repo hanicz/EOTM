@@ -1,12 +1,26 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { ETFInvestment } from 'src/app/model/etfinvestment';
 import { EtfService } from 'src/app/service/etf.service';
 import { Globals } from '../../util/global';
+import { Bind } from 'primeng/bind';
+import { Toolbar } from 'primeng/toolbar';
+import { PrimeTemplate } from 'primeng/api';
+import { ButtonDirective } from 'primeng/button';
+import { Ripple } from 'primeng/ripple';
+import { FileUpload } from 'primeng/fileupload';
+import { TableModule } from 'primeng/table';
+import { InputText } from 'primeng/inputtext';
+import { Select } from 'primeng/select';
+import { FormsModule } from '@angular/forms';
+import { Tag } from 'primeng/tag';
+import { Dialog } from 'primeng/dialog';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-etfinvestment',
-  templateUrl: './etfinvestment.component.html',
-  styleUrls: ['./etfinvestment.component.css']
+    selector: 'app-etfinvestment',
+    templateUrl: './etfinvestment.component.html',
+    styleUrls: ['./etfinvestment.component.css'],
+    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Tag, Dialog, CurrencyPipe, DatePipe]
 })
 export class EtfinvestmentComponent implements OnInit {
 
@@ -18,7 +32,7 @@ export class EtfinvestmentComponent implements OnInit {
   investment: ETFInvestment = {} as ETFInvestment;
   @ViewChild('fileUpload') fileUpload: any;
 
-  constructor(private etfService: EtfService, globals: Globals) {
+  constructor(private etfService: EtfService, globals: Globals, private cdr: ChangeDetectorRef) {
     this.currencies = globals.currencies;
 
     this.statuses = [
@@ -36,6 +50,7 @@ export class EtfinvestmentComponent implements OnInit {
     this.etfService.getInvestments().subscribe({
       next: (data) => {
         this.investments = data;
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.log(error);

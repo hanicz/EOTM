@@ -2,13 +2,19 @@ import { Component, OnInit, HostListener } from '@angular/core';
 import { User } from '../model/user';
 import { UserService } from '../service/user.service';
 import { Router } from '@angular/router';
-import { UntypedFormControl, Validators } from '@angular/forms';
+import { UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
+import { Bind } from 'primeng/bind';
+import { Toast } from 'primeng/toast';
+import { InputText } from 'primeng/inputtext';
+import { ButtonDirective } from 'primeng/button';
+import { Ripple } from 'primeng/ripple';
 
 @Component({
-  selector: 'login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+    selector: 'login',
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.css'],
+    imports: [Bind, Toast, FormsModule, InputText, ReactiveFormsModule, ButtonDirective, Ripple]
 })
 export class LoginComponent {
 

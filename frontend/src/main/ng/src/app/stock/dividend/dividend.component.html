@@ -1,8 +1,8 @@
 <p-toolbar styleClass="p-mb-4">
     <ng-template pTemplate="left">
-        <button pButton pRipple label="New" icon="pi pi-plus" class="p-button-success mr-2"
+        <button pButton pRipple label="New" icon="pi pi-plus" class="mr-2" severity="success"
             (click)="openNew()"></button>
-        <button pButton pRipple icon="pi pi-trash" class="p-button-danger"
+        <button pButton pRipple icon="pi pi-trash" severity="danger"
             [disabled]="!selectedDividends || !selectedDividends.length" (click)="deleteClicked()"></button>
     </ng-template>
 
@@ -10,10 +10,10 @@
         <p-fileUpload mode="basic" #fileUpload accept=".csv" [customUpload]="true" label="Import" chooseLabel="Import"
             class="mr-2 p-d-inline-block" (uploadHandler)="onUpload($event)">
         </p-fileUpload>
-        <button pButton pRipple label="Export" icon="pi pi-upload" class="p-button-info" (click)="download()"></button>
+        <button pButton pRipple label="Export" icon="pi pi-upload" severity="info" (click)="download()"></button>
     </ng-template>
 </p-toolbar>
-<p-table #dt1 [value]="dividends" responsiveLayout="scroll" styleClass="p-datatable-striped" [autoLayout]="true"
+<p-table #dt1 [value]="dividends" responsiveLayout="scroll" styleClass="p-datatable-striped"
     [(selection)]="selectedDividends">
 
     <ng-template pTemplate="caption">
@@ -22,7 +22,7 @@
                 <span class="mr-2">
                     <input pInputText type="text"
                         (input)="dt1.filter($any($event.target)?.value, 'shortName', 'contains')"
-                        [value]="$any(dt1.filters['shortName'])?.value" placeholder="Search by Name"
+                        [value]="$any(dt1.filters['shortName'])?.value ?? ''" placeholder="Search by Name"
                         class="p-column-filter">
                 </span>
             </div>
@@ -44,14 +44,20 @@
             <td>
                 <p-tableCheckbox [value]="dividend"></p-tableCheckbox>
             </td>
-            <td>{{dividend.shortName}}.{{dividend.exchange}}</td>
+            <td>
+                <div class="flex align-items-center">
+                    <p-image src="https://eodhd.com/img/logos/{{dividend.exchange}}/{{dividend.shortName}}.png"
+                        width="15" class="mr-1" (onImageError)="globals.errorHandler($event)"></p-image>
+                    {{dividend.shortName}}.{{dividend.exchange}}
+                </div>
+            </td>
             <td>{{dividend.amount | currency : dividend.currencyId : 'symbol' : '0.0-2'}}</td>
             <td>{{dividend.dividendDate | date:'mediumDate'}}</td>
             <td>
                 <button pButton pRipple type="button" icon="pi pi-pencil" (click)="editDividend(dividend)"
-                    class="p-button-rounded p-button-text mr-1 p-button-info"></button>
+                    class="p-button-rounded p-button-text mr-1" severity="info"></button>
                 <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(dividend.dividendId)"
-                    class="p-button-rounded p-button-text ml-2 p-button-danger"></button>
+                    class="p-button-rounded p-button-text ml-2" severity="danger"></button>
             </td>
         </tr>
     </ng-template>
@@ -66,8 +72,8 @@
         </div>
         <div class="p-field">
             <label for="currency">Currency</label>
-            <p-dropdown [options]="currencies" [(ngModel)]="dividend.currencyId" id="currency" optionLabel="label"
-                optionValue="value"></p-dropdown>
+            <p-select [options]="currencies" [(ngModel)]="dividend.currencyId" id="currency" optionLabel="label"
+                optionValue="value"></p-select>
         </div>
         <div class="p-field">
             <label for="amount">Amount</label>

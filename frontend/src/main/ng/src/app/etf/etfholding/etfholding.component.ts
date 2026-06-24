@@ -1,12 +1,19 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { Globals } from '../../util/global';
 import { ETFInvestment } from 'src/app/model/etfinvestment';
 import { EtfService } from 'src/app/service/etf.service';
+import { Bind } from 'primeng/bind';
+import { TableModule } from 'primeng/table';
+import { PrimeTemplate } from 'primeng/api';
+import { Skeleton } from 'primeng/skeleton';
+import { Tag } from 'primeng/tag';
+import { DecimalPipe, CurrencyPipe } from '@angular/common';
 
 @Component({
-  selector: 'app-etfholding',
-  templateUrl: './etfholding.component.html',
-  styleUrls: ['./etfholding.component.css']
+    selector: 'app-etfholding',
+    templateUrl: './etfholding.component.html',
+    styleUrls: ['./etfholding.component.css'],
+    imports: [Bind, TableModule, PrimeTemplate, Skeleton, Tag, DecimalPipe, CurrencyPipe]
 })
 export class EtfholdingComponent implements OnInit {
 
@@ -16,7 +23,7 @@ export class EtfholdingComponent implements OnInit {
 
   investmentsLoading: boolean = true;
 
-  constructor(private etfService: EtfService, globals: Globals) {
+  constructor(private etfService: EtfService, globals: Globals, private cdr: ChangeDetectorRef) {
     this.globals = globals;
 
     this.fetchData();
@@ -34,6 +41,7 @@ export class EtfholdingComponent implements OnInit {
         this.investmentsLoading = false;
         this.investments = data;
         this.dataLoaded.emit(this.investments);
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.log(error);

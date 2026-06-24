@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { Investment } from '../../model/investment';
 import { StockService } from '../../service/stock.service';
 import { Globals } from '../../util/global';
@@ -6,11 +6,26 @@ import { Exchange } from 'src/app/model/exchange';
 import { Symbol } from 'src/app/model/symbol';
 import { AccountService } from 'src/app/service/account.service';
 import { Account } from 'src/app/model/account';
+import { Bind } from 'primeng/bind';
+import { Toolbar } from 'primeng/toolbar';
+import { PrimeTemplate } from 'primeng/api';
+import { ButtonDirective } from 'primeng/button';
+import { Ripple } from 'primeng/ripple';
+import { FileUpload } from 'primeng/fileupload';
+import { TableModule } from 'primeng/table';
+import { InputText } from 'primeng/inputtext';
+import { Select } from 'primeng/select';
+import { FormsModule } from '@angular/forms';
+import { Tag } from 'primeng/tag';
+import { Image } from 'primeng/image';
+import { Dialog } from 'primeng/dialog';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-investment',
-  templateUrl: './investment.component.html',
-  styleUrls: ['./investment.component.css']
+    selector: 'app-investment',
+    templateUrl: './investment.component.html',
+    styleUrls: ['./investment.component.css'],
+    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Tag, Image, Dialog, CurrencyPipe, DatePipe]
 })
 export class InvestmentComponent implements OnInit {
 
@@ -30,7 +45,7 @@ export class InvestmentComponent implements OnInit {
   selectedStock: Symbol = {} as Symbol;
   selectedExchange: Exchange = {} as Exchange;
 
-  constructor(private stockService: StockService, globals: Globals, private accountService: AccountService) {
+  constructor(private stockService: StockService, globals: Globals, private accountService: AccountService, private cdr: ChangeDetectorRef) {
     this.globals = globals;
     this.currencies = globals.currencies;
 
@@ -43,12 +58,14 @@ export class InvestmentComponent implements OnInit {
       next: (data) => {
         this.exchangesLoading = false;
         this.exchanges = data;
+        this.cdr.markForCheck();
       }
     });
 
     this.accountService.getAccounts().subscribe({
       next: (data) => {
         this.accounts = data;
+        this.cdr.markForCheck();
       }
     });
 
@@ -62,6 +79,7 @@ export class InvestmentComponent implements OnInit {
     this.stockService.getInvestments().subscribe({
       next: (data) => {
         this.investments = data;
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.log(error);
@@ -150,6 +168,7 @@ export class InvestmentComponent implements OnInit {
       next: (data) => {
         this.stocksLoading = false;
         this.symbols = data;
+        this.cdr.markForCheck();
       }
     });
   }

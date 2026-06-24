@@ -1,9 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { MenuItem } from 'primeng/api';
+import { MenuItem, PrimeTemplate } from 'primeng/api';
 import { Router } from '@angular/router';
 import { Globals } from '../util/global';
 import { User } from '../model/user';
 import { UserService } from '../service/user.service';
+import { Bind } from 'primeng/bind';
+import { Menubar } from 'primeng/menubar';
+import { Select } from 'primeng/select';
+import { FormsModule } from '@angular/forms';
+import { ButtonDirective } from 'primeng/button';
+import { Ripple } from 'primeng/ripple';
 
 interface CurrencyType {
   id: string;
@@ -12,9 +18,10 @@ interface CurrencyType {
 }
 
 @Component({
-  selector: 'menu',
-  templateUrl: './menu.component.html',
-  styleUrls: ['./menu.component.css']
+    selector: 'menu',
+    templateUrl: './menu.component.html',
+    styleUrls: ['./menu.component.css'],
+    imports: [Bind, Menubar, PrimeTemplate, Select, FormsModule, ButtonDirective, Ripple]
 })
 export class MenuComponent implements OnInit {
   items: MenuItem[] = [];

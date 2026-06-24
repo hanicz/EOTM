@@ -1,150 +1,174 @@
 <p-toolbar styleClass="p-mb-4">
-    <ng-template pTemplate="left">
-        <button pButton pRipple label="New" icon="pi pi-plus" class="p-button-success mr-2"
-            (click)="openNew()"></button>
-        <button pButton pRipple icon="pi pi-trash" class="p-button-danger"
-            [disabled]="!selectedTransactions || !selectedTransactions.length" (click)="deleteClicked()"></button>
-    </ng-template>
+  <ng-template pTemplate="left">
+    <button pButton pRipple label="New" icon="pi pi-plus" class="mr-2" severity="success"
+    (click)="openNew()"></button>
+    <button pButton pRipple icon="pi pi-trash" severity="danger"
+    [disabled]="!selectedTransactions || !selectedTransactions.length" (click)="deleteClicked()"></button>
+  </ng-template>
 
-    <ng-template pTemplate="right">
-        <p-fileUpload mode="basic" #fileUpload accept=".csv" [customUpload]="true" label="Import" chooseLabel="Import"
-            class="mr-2 p-d-inline-block" (uploadHandler)="onUpload($event)">
-        </p-fileUpload>
-        <button pButton pRipple label="Export" icon="pi pi-upload" class="p-button-info" (click)="download()"></button>
-    </ng-template>
+  <ng-template pTemplate="right">
+    <p-fileUpload mode="basic" #fileUpload accept=".csv" [customUpload]="true" label="Import" chooseLabel="Import"
+      class="mr-2 p-d-inline-block" (uploadHandler)="onUpload($event)">
+    </p-fileUpload>
+    <button pButton pRipple label="Export" icon="pi pi-upload" severity="info" (click)="download()"></button>
+  </ng-template>
 </p-toolbar>
-<p-table #dt1 [value]="transactions" responsiveLayout="scroll" styleClass="p-datatable-striped" [autoLayout]="true"
-    [(selection)]="selectedTransactions">
-    <ng-template pTemplate="caption">
-        <div class="flex justify-content-between flex-wrap">
-            <div class="flex flex-row flex-wrap">
-                <span>
-                    <input pInputText type="text" (input)="dt1.filter($any($event.target)?.value, 'symbol', 'contains')"
-                        [value]="$any(dt1.filters['symbol'])?.value" placeholder="Search by Symbol"
-                        class="p-column-filter">
-                </span>
-                <p-columnFilter field="buySell" matchMode="equals" [showMenu]="false">
-                    <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-                        <p-dropdown [ngModel]="value" [options]="statuses" (onChange)="filter($any($event)?.value)"
-                            placeholder="Any">
-                            <ng-template let-option pTemplate="item">
+<p-table #dt1 [value]="transactions" responsiveLayout="scroll" styleClass="p-datatable-striped"
+  [(selection)]="selectedTransactions">
+  <ng-template pTemplate="caption">
+    <div class="flex justify-content-between flex-wrap">
+      <div class="flex flex-row flex-wrap">
+        <span>
+          <input pInputText type="text" (input)="dt1.filter($any($event.target)?.value, 'symbol', 'contains')"
+            [value]="$any(dt1.filters['symbol'])?.value ?? ''" placeholder="Search by Symbol"
+            class="p-column-filter">
+          </span>
+          <p-columnFilter field="buySell" matchMode="equals" [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-select [ngModel]="value" [options]="statuses" (onChange)="filter($any($event)?.value)"
+                [showClear]="true" placeholder="Any">
+                <ng-template let-option pTemplate="item">
 
-                                <p-tag styleClass="p-mr-2" severity="info" *ngIf="option.label === 'BUY'" value="BUY">
-                                </p-tag>
-                                <p-tag styleClass="p-mr-2" severity="warning" *ngIf="option.label === 'SELL'"
-                                    value="SELL"></p-tag>
-                                <p-tag styleClass="p-mr-2" severity="success" *ngIf="option.label === 'REDEMPTION'"
-                                    value="REDEMPTION"></p-tag>
-                                <p-tag styleClass="p-mr-2" severity="success" *ngIf="option.label === 'EARN'"
-                                    value="EARN"></p-tag>
-                            </ng-template>
-                        </p-dropdown>
-                    </ng-template>
-                </p-columnFilter>
-            </div>
+                  @if (option.label === 'BUY') {
+                    <p-tag styleClass="p-mr-2" severity="info" value="BUY">
+                    </p-tag>
+                  }
+                  @if (option.label === 'SELL') {
+                    <p-tag styleClass="p-mr-2" severity="warn"
+                    value="SELL"></p-tag>
+                  }
+                  @if (option.label === 'REDEMPTION') {
+                    <p-tag styleClass="p-mr-2" severity="success"
+                    value="REDEMPTION"></p-tag>
+                  }
+                  @if (option.label === 'EARN') {
+                    <p-tag styleClass="p-mr-2" severity="success"
+                    value="EARN"></p-tag>
+                  }
+                </ng-template>
+              </p-select>
+            </ng-template>
+          </p-columnFilter>
         </div>
+      </div>
     </ng-template>
     <ng-template pTemplate="header">
-        <tr>
-            <th style="width: 3rem">
-                <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
-            </th>
-            <th>Symbol</th>
-            <th>Type</th>
-            <th>Quantity</th>
-            <th>Spent</th>
-            <th>Average</th>
-            <th>Date</th>
-            <th>Currency</th>
-            <th>Fee</th>
-            <th></th>
-        </tr>
+      <tr>
+        <th style="width: 3rem">
+          <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+        </th>
+        <th>Symbol</th>
+        <th>Type</th>
+        <th>Quantity</th>
+        <th>Spent</th>
+        <th>Average</th>
+        <th>Date</th>
+        <th>Currency</th>
+        <th>Fee</th>
+        <th></th>
+      </tr>
     </ng-template>
     <ng-template pTemplate="body" let-transaction>
-        <tr>
-            <td>
-                <p-tableCheckbox [value]="transaction"></p-tableCheckbox>
-            </td>
-            <td>
-                <div class="flex align-items-center">
-                    <p-image src="{{assetUrl + transaction.symbol + '.svg'}}" width="15"
-                        class="mr-1"></p-image>
-                    {{transaction.symbol}}
-                </div>
-            </td>
-            <td>
-                <p-tag styleClass="p-mr-2" severity="info" *ngIf="transaction.buySell === 'B'" value="BUY"></p-tag>
-                <p-tag styleClass="p-mr-2" severity="warning" *ngIf="transaction.buySell === 'S'" value="SELL">
-                </p-tag>
-                <p-tag styleClass="p-mr-2" severity="success" *ngIf="transaction.buySell === 'R'" value="REDEMPTION">
-                </p-tag>
-                <p-tag styleClass="p-mr-2" severity="success" *ngIf="transaction.buySell === 'E'" value="EARN">
-                </p-tag>
-            </td>
-            <td>{{transaction.quantity | number : '0.0-4'}}</td>
-            <td>{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</td>
-            <td>{{(transaction.amount / transaction.quantity) | currency : transaction.currencyId : 'symbol' : '0.0-3'}}
-            </td>
-            <td>{{transaction.transactionDate | date:'mediumDate'}}</td>
-            <td>{{transaction.currencyId}}</td>
-            <td>{{transaction.fee}}</td>
-            <td>
-                <button pButton pRipple type="button" icon="pi pi-pencil" (click)="editTransaction(transaction)"
-                    class="p-button-rounded p-button-text mr-1 p-button-info"></button>
-                <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(transaction.id)"
-                    class="p-button-rounded p-button-text ml-2 p-button-danger"></button>
-            </td>
-        </tr>
+      <tr>
+        <td>
+          <p-tableCheckbox [value]="transaction"></p-tableCheckbox>
+        </td>
+        <td>
+          <div class="flex align-items-center">
+            <p-image src="{{assetUrl + transaction.symbol + '.svg'}}" width="15"
+            class="mr-1"></p-image>
+            {{transaction.symbol}}
+          </div>
+        </td>
+        <td>
+          @if (transaction.buySell === 'B') {
+            <p-tag styleClass="p-mr-2" severity="info" value="BUY"></p-tag>
+          }
+          @if (transaction.buySell === 'S') {
+            <p-tag styleClass="p-mr-2" severity="warn" value="SELL">
+            </p-tag>
+          }
+          @if (transaction.buySell === 'R') {
+            <p-tag styleClass="p-mr-2" severity="success" value="REDEMPTION">
+            </p-tag>
+          }
+          @if (transaction.buySell === 'E') {
+            <p-tag styleClass="p-mr-2" severity="success" value="EARN">
+            </p-tag>
+          }
+        </td>
+        <td>{{transaction.quantity | number : '0.0-4'}}</td>
+        <td>{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</td>
+        <td>{{(transaction.amount / transaction.quantity) | currency : transaction.currencyId : 'symbol' : '0.0-3'}}
+        </td>
+        <td>{{transaction.transactionDate | date:'mediumDate'}}</td>
+        <td>{{transaction.currencyId}}</td>
+        <td>{{transaction.fee}}</td>
+        <td>
+          <button pButton pRipple type="button" icon="pi pi-pencil" (click)="editTransaction(transaction)"
+          class="p-button-rounded p-button-text mr-1" severity="info"></button>
+          <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(transaction.id)"
+          class="p-button-rounded p-button-text ml-2" severity="danger"></button>
+        </td>
+      </tr>
     </ng-template>
-</p-table>
+  </p-table>
 
-<p-dialog [(visible)]="transactionDialog" [style]="{width: '50vw'}" header="Transaction Details" [modal]="true"
+  <p-dialog [(visible)]="transactionDialog" [style]="{width: '50vw'}" header="Transaction Details" [modal]="true"
     styleClass="p-fluid">
     <ng-template pTemplate="content">
-        <div class="p-field">
-            <label for="symbol">Symbol</label>
-            <input type="text" pInputText id="symbol" [(ngModel)]="transaction.symbol" autofocus />
+      <div class="p-field">
+        <label for="symbol">Symbol</label>
+        <input type="text" pInputText id="symbol" [(ngModel)]="transaction.symbol" autofocus />
+      </div>
+      <div class="p-field">
+        <label for="currency">Currency</label>
+        <p-select [options]="currencies" [(ngModel)]="transaction.currencyId" id="currency" optionLabel="label"
+        optionValue="value"></p-select>
+      </div>
+      <div class="p-field">
+        <label for="currency">Type</label>
+        <p-select [options]="statuses" [(ngModel)]="transaction.buySell" placeholder="Any">
+          <ng-template let-option pTemplate="item">
+            @if (option.label === 'BUY') {
+              <p-tag styleClass="p-mr-2" severity="info" value="BUY">
+              </p-tag>
+            }
+            @if (option.label === 'SELL') {
+              <p-tag styleClass="p-mr-2" severity="warn" value="SELL"></p-tag>
+            }
+            @if (option.label === 'REDEMPTION') {
+              <p-tag styleClass="p-mr-2" severity="success"
+              value="REDEMPTION"></p-tag>
+            }
+            @if (option.label === 'EARN') {
+              <p-tag styleClass="p-mr-2" severity="success" value="EARN"></p-tag>
+            }
+          </ng-template>
+        </p-select>
+      </div>
+      <div class="p-field">
+        <label for="amount">Amount</label>
+        <input type="number" pInputText id="amount" [(ngModel)]="transaction.amount" />
+      </div>
+      <div class="p-field">
+        <label for="quantity">Quantity</label>
+        <input type="number" pInputText id="quantity" [(ngModel)]="transaction.quantity" />
+      </div>
+      <div class="p-field p-col-4 p-md-4">
+        <label for="date">Date</label>
+        <input type="text" pInputText id="date" placeholder="YYYY-MM-DD"
+          [(ngModel)]="transaction.transactionDate" />
         </div>
         <div class="p-field">
-            <label for="currency">Currency</label>
-            <p-dropdown [options]="currencies" [(ngModel)]="transaction.currencyId" id="currency" optionLabel="label"
-                optionValue="value"></p-dropdown>
+          <label for="fee">Fee</label>
+          <input type="number" pInputText id="fee" [(ngModel)]="transaction.fee" />
         </div>
-        <div class="p-field">
-            <label for="currency">Type</label>
-            <p-dropdown [options]="statuses" [(ngModel)]="transaction.buySell" placeholder="Any">
-                <ng-template let-option pTemplate="item">
-                    <p-tag styleClass="p-mr-2" severity="info" *ngIf="option.label === 'BUY'" value="BUY">
-                    </p-tag>
-                    <p-tag styleClass="p-mr-2" severity="warning" *ngIf="option.label === 'SELL'" value="SELL"></p-tag>
-                    <p-tag styleClass="p-mr-2" severity="success" *ngIf="option.label === 'REDEMPTION'"
-                        value="REDEMPTION"></p-tag>
-                    <p-tag styleClass="p-mr-2" severity="success" *ngIf="option.label === 'EARN'" value="EARN"></p-tag>
-                </ng-template>
-            </p-dropdown>
-        </div>
-        <div class="p-field">
-            <label for="amount">Amount</label>
-            <input type="number" pInputText id="amount" [(ngModel)]="transaction.amount" />
-        </div>
-        <div class="p-field">
-            <label for="quantity">Quantity</label>
-            <input type="number" pInputText id="quantity" [(ngModel)]="transaction.quantity" />
-        </div>
-        <div class="p-field p-col-4 p-md-4">
-            <label for="date">Date</label>
-            <input type="text" pInputText id="date" placeholder="YYYY-MM-DD"
-                [(ngModel)]="transaction.transactionDate" />
-        </div>
-        <div class="p-field">
-            <label for="fee">Fee</label>
-            <input type="number" pInputText id="fee" [(ngModel)]="transaction.fee" />
-        </div>
-    </ng-template>
+      </ng-template>
 
-    <ng-template pTemplate="footer">
+      <ng-template pTemplate="footer">
         <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
         <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text"
-            (click)="saveTransaction()"></button>
-    </ng-template>
-</p-dialog>
+        (click)="saveTransaction()"></button>
+      </ng-template>
+    </p-dialog>

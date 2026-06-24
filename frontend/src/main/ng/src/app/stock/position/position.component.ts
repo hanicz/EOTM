@@ -1,12 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Investment } from '../../model/investment';
 import { StockService } from '../../service/stock.service';
 import { Globals } from '../../util/global';
+import { Bind } from 'primeng/bind';
+import { TableModule } from 'primeng/table';
+import { PrimeTemplate } from 'primeng/api';
+import { Image } from 'primeng/image';
+import { Tag } from 'primeng/tag';
+import { DecimalPipe, CurrencyPipe } from '@angular/common';
 
 @Component({
-  selector: 'app-position',
-  templateUrl: './position.component.html',
-  styleUrls: ['./position.component.css']
+    selector: 'app-position',
+    templateUrl: './position.component.html',
+    styleUrls: ['./position.component.css'],
+    imports: [Bind, TableModule, PrimeTemplate, Image, Tag, DecimalPipe, CurrencyPipe]
 })
 export class PositionComponent implements OnInit {
 
@@ -14,7 +21,7 @@ export class PositionComponent implements OnInit {
   myMath = Math;
   globals: Globals;
 
-  constructor(private stockService: StockService, globals: Globals) {
+  constructor(private stockService: StockService, globals: Globals, private cdr: ChangeDetectorRef) {
     this.globals = globals;
 
     this.fetchData();
@@ -30,6 +37,7 @@ export class PositionComponent implements OnInit {
     this.stockService.getPositions().subscribe({
       next: (data) => {
         this.investments = data;
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.log(error);

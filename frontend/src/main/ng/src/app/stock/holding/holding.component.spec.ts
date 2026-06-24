@@ -8,8 +8,8 @@ describe('HoldingComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ HoldingComponent ]
-    })
+    imports: [HoldingComponent]
+})
     .compileComponents();
   });
 

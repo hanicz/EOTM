@@ -8,8 +8,8 @@ describe('EtfinvestmentComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ EtfinvestmentComponent ]
-    })
+    imports: [EtfinvestmentComponent]
+})
     .compileComponents();
   });
 

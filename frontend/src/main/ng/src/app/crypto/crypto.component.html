@@ -56,5 +56,13 @@
         </p-tabpanel>
       </p-tabpanels>
     </p-tabs>
+    @if (allocationChartOptions.series && allocationChartOptions.series.length > 0) {
+      <p-divider></p-divider>
+      <div class="flex justify-content-center">
+        <apx-chart [series]="allocationChartOptions.series" [chart]="allocationChartOptions.chart!"
+          [labels]="allocationChartOptions.labels!" [legend]="allocationChartOptions.legend!">
+        </apx-chart>
+      </div>
+    }
   </p-panel>
 </div>

@@ -29,9 +29,6 @@ export class HoldingComponent implements OnInit {
     this.globals = globals;
 
     this.fetchData();
-    globals.stockCurrencyChange.subscribe(value => {
-      this.fetchData();
-    });
   }
 
   ngOnInit(): void {

@@ -49,8 +49,20 @@
         <td>{{investment.quantity}}</td>
         <td>{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}</td>
         <td>{{investment.amount / investment.quantity | currency : investment.currencyId : 'symbol' : '0.0-3'}}</td>
-        <td>{{investment.liveValue | currency : investment.currencyId : 'symbol' : '0.0-2'}}</td>
-        <td>{{investment.liveValue / investment.quantity | currency : investment.currencyId : 'symbol' : '0.0-3'}}</td>
+        <td>
+          @if (investment.liveValue != null) {
+            {{investment.liveValue | currency : investment.currencyId : 'symbol' : '0.0-2'}}
+          } @else {
+            <span>N/A</span>
+          }
+        </td>
+        <td>
+          @if (investment.liveValue != null) {
+            {{investment.liveValue / investment.quantity | currency : investment.currencyId : 'symbol' : '0.0-3'}}
+          } @else {
+            <span>N/A</span>
+          }
+        </td>
         <td>
           @if (investment.valueDiff > 0) {
             <p-tag styleClass="p-mr-2" severity="success" value="{{investment.valueDiff | currency : investment.currencyId : 'symbol' : '0.0-2'}}"></p-tag>

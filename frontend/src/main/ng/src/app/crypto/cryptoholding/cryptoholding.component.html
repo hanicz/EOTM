@@ -56,16 +56,31 @@
         <td>{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</td>
         <td>{{transaction.amount / transaction.quantity | currency : transaction.currencyId : 'symbol' : '0.0-3'}}
         </td>
-        <td>{{transaction.liveValue | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</td>
-        <td>{{transaction.liveValue / transaction.quantity | currency : transaction.currencyId : 'symbol' :
-        '0.0-3'}}</td>
         <td>
-          <p-tag styleClass="p-mr-2" [severity]="(transaction.valueDiff > 0) ? 'success':'danger'"
-          value="{{transaction.valueDiff | currency : transaction.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
+          @if (transaction.liveValue != null) {
+            {{transaction.liveValue | currency : transaction.currencyId : 'symbol' : '0.0-2'}}
+          } @else {
+            <span>N/A</span>
+          }
         </td>
         <td>
-          <p-tag styleClass="p-mr-2" [severity]="(transaction.valueDiff > 0) ? 'success':'danger'"
-          value="{{(transaction.valueDiff / transaction.amount * 100 | number : '0.0-1') + '%'}}"></p-tag>
+          @if (transaction.liveValue != null) {
+            {{transaction.liveValue / transaction.quantity | currency : transaction.currencyId : 'symbol' : '0.0-3'}}
+          } @else {
+            <span>N/A</span>
+          }
+        </td>
+        <td>
+          @if (transaction.liveValue != null) {
+            <p-tag styleClass="p-mr-2" [severity]="(transaction.valueDiff > 0) ? 'success':'danger'"
+            value="{{transaction.valueDiff | currency : transaction.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
+          }
+        </td>
+        <td>
+          @if (transaction.liveValue != null) {
+            <p-tag styleClass="p-mr-2" [severity]="(transaction.valueDiff > 0) ? 'success':'danger'"
+            value="{{(transaction.valueDiff / transaction.amount * 100 | number : '0.0-1') + '%'}}"></p-tag>
+          }
         </td>
       </tr>
     </ng-template>

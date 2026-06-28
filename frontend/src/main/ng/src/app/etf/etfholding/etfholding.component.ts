@@ -1,5 +1,4 @@
 import { Component, OnInit, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
-import { Globals } from '../../util/global';
 import { ETFInvestment } from 'src/app/model/etfinvestment';
 import { EtfService } from 'src/app/service/etf.service';
 import { Bind } from 'primeng/bind';
@@ -19,17 +18,11 @@ export class EtfholdingComponent implements OnInit {
 
   investments: ETFInvestment[] = [];
   @Output() dataLoaded = new EventEmitter<ETFInvestment[]>();
-  globals: Globals;
 
   investmentsLoading: boolean = true;
 
-  constructor(private etfService: EtfService, globals: Globals, private cdr: ChangeDetectorRef) {
-    this.globals = globals;
-
+  constructor(private etfService: EtfService, private cdr: ChangeDetectorRef) {
     this.fetchData();
-    globals.stockCurrencyChange.subscribe(value => {
-      this.fetchData();
-    });
   }
 
   ngOnInit(): void {

@@ -1,5 +1,4 @@
 import { Injectable, EventEmitter, Output } from '@angular/core';
-import { Subject } from 'rxjs';
 import { StockWatch } from '../model/stockwatch';
 import { environment } from '../../environments/environment';
 
@@ -11,12 +10,6 @@ export class Globals {
 
     selectedExchange = '';
     @Output() exchangeSelectedEvent = new EventEmitter<any>();
-
-    stockCurrency: string = 'USD';
-    stockCurrencyChange: Subject<string> = new Subject<string>();
-
-    etfCurrency: string = 'EUR';
-    etfCurrencyChange: Subject<string> = new Subject<string>();
 
     stockWatchList: StockWatch[] = [];
     @Output() stockWatchEvent = new EventEmitter<any>();
@@ -38,22 +31,7 @@ export class Globals {
       ];
 
     constructor() {
-        this.stockCurrencyChange.subscribe((value) => {
-            this.stockCurrency = value;
-        });
-
-        this.etfCurrencyChange.subscribe((value) => {
-            this.etfCurrency = value;
-        });
         this.assetUrl = environment.assets_url;
-    }
-
-    changeStockCurrency(value: string) {
-        this.stockCurrencyChange.next(value);
-    }
-
-    changeETFCurrency(value: string) {
-        this.etfCurrencyChange.next(value);
     }
 
     errorHandler(event: any) {

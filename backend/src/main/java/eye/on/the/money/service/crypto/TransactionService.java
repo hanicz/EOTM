@@ -3,6 +3,7 @@ package eye.on.the.money.service.crypto;
 import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.in.TransactionQuery;
 import eye.on.the.money.dto.out.TransactionDTO;
+import eye.on.the.money.exception.APIException;
 import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
@@ -63,12 +64,16 @@ public class TransactionService implements ICSVService {
         List<TransactionDTO> transactionDTOList = (new ArrayList<>(transactionMap.values()))
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
         String ids = transactionDTOList.stream().map(TransactionDTO::getCoinId).collect(Collectors.joining(","));
-        JsonNode root = this.cryptoAPIService.getLiveValueForCoins(query.getCurrency(), ids);
 
-        transactionDTOList.forEach(transactionDTO -> {
-            transactionDTO.setLiveValue(root.path(transactionDTO.getCoinId()).get(query.getCurrency().toLowerCase()).doubleValue() * transactionDTO.getQuantity());
-            transactionDTO.setValueDiff(transactionDTO.getLiveValue() - transactionDTO.getAmount());
-        });
+        try {
+            JsonNode root = this.cryptoAPIService.getLiveValueForCoins(query.getCurrency(), ids);
+            transactionDTOList.forEach(transactionDTO -> {
+                transactionDTO.setLiveValue(root.path(transactionDTO.getCoinId()).get(query.getCurrency().toLowerCase()).doubleValue() * transactionDTO.getQuantity());
+                transactionDTO.setValueDiff(transactionDTO.getLiveValue() - transactionDTO.getAmount());
+            });
+        } catch (APIException e) {
+            log.error("Unable to fetch live coin values, returning holdings without live data", e);
+        }
 
         return transactionDTOList;
     }

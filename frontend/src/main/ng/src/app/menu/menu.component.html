@@ -6,17 +6,6 @@
   </ng-template>
   <ng-template pTemplate="end">
     <div class="toolbar">
-      @for (type of currencyTypes; track type) {
-        <label [for]="type.id">{{ type.label }}</label>
-        <p-select
-          [inputId]="type.id"
-          [options]="globals.currencies"
-          [(ngModel)]="selectedCurrencies[type.key]"
-          optionLabel="label"
-          optionValue="value"
-          (onChange)="onCurrencyChange(type.key)">
-        </p-select>
-      }
       <div class="user-section">
         <span>{{ user.email }}</span>
         <button

@@ -4,22 +4,22 @@
     <div class="card">
       <div class="flex flex-row flex-wrap card-container">
         <div class="flex mr-5">
-          <div>Total Spent: <b>{{totalSpent | currency : globals.etfCurrency : 'symbol' : '0.0-2'}}</b>
+          <div>Total Spent: <b>{{totalSpent | currency : 'EUR' : 'symbol' : '0.0-2'}}</b>
         </div>
       </div>
       <div class="flex mr-5">
-        <div>Total Worth: <b>{{totalWorth | currency : globals.etfCurrency : 'symbol' : '0.0-2'}}</b>
+        <div>Total Worth: <b>{{totalWorth | currency : 'EUR' : 'symbol' : '0.0-2'}}</b>
       </div>
     </div>
     <div class="flex mr-5">
       <div>Profit:
         @if (diffy > 0) {
           <p-tag styleClass="p-mr-2" severity="success"
-          value="{{diffy | currency : globals.etfCurrency : 'symbol' : '0.0-2'}}"></p-tag>
+          value="{{diffy | currency : 'EUR' : 'symbol' : '0.0-2'}}"></p-tag>
         }
         @if (diffy < 0) {
           <p-tag styleClass="p-mr-2" severity="danger"
-          value="{{diffy | currency : globals.etfCurrency : 'symbol' : '0.0-2'}}"></p-tag>
+          value="{{diffy | currency : 'EUR' : 'symbol' : '0.0-2'}}"></p-tag>
         }
       </div>
     </div>
@@ -62,5 +62,13 @@
     </p-tabpanel>
   </p-tabpanels>
 </p-tabs>
+@if (allocationChartOptions.series && allocationChartOptions.series.length > 0) {
+  <p-divider></p-divider>
+  <div class="flex justify-content-center">
+    <apx-chart [series]="allocationChartOptions.series" [chart]="allocationChartOptions.chart!"
+      [labels]="allocationChartOptions.labels!" [legend]="allocationChartOptions.legend!">
+    </apx-chart>
+  </div>
+}
 </p-panel>
 </div>

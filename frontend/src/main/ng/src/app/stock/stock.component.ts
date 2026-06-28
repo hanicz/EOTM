@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { Globals } from '../util/global';
 import { Investment } from '../model/investment';
 import { MenuComponent } from '../menu/menu.component';
 import { Bind } from 'primeng/bind';
@@ -13,12 +12,20 @@ import { PositionComponent } from './position/position.component';
 import { InvestmentComponent } from './investment/investment.component';
 import { DividendComponent } from './dividend/dividend.component';
 import { DecimalPipe, CurrencyPipe } from '@angular/common';
+import { ChartComponent, ApexChart, ApexNonAxisChartSeries, ApexLegend } from 'ng-apexcharts';
+
+export type AllocationChartOptions = {
+  series: ApexNonAxisChartSeries;
+  chart: ApexChart;
+  labels: string[];
+  legend: ApexLegend;
+};
 
 @Component({
     selector: 'app-stock',
     templateUrl: './stock.component.html',
     styleUrls: ['./stock.component.css'],
-    imports: [MenuComponent, Bind, Panel, Tag, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, HoldingComponent, PositionComponent, InvestmentComponent, DividendComponent, DecimalPipe, CurrencyPipe]
+    imports: [MenuComponent, Bind, Panel, Tag, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, HoldingComponent, PositionComponent, InvestmentComponent, DividendComponent, DecimalPipe, CurrencyPipe, ChartComponent]
 })
 export class StockComponent implements OnInit {
 
@@ -27,11 +34,18 @@ export class StockComponent implements OnInit {
   totalWorth: number = 0;
   diffy: number = 0;
   percentage: number = 0;
-  globals: Globals;
 
-  constructor(globals: Globals) {
-    this.globals = globals;
-  }
+  allocationChartOptions: Partial<AllocationChartOptions> = {
+    series: [],
+    chart: {
+      type: 'pie',
+      width: 380
+    },
+    labels: [],
+    legend: {
+      position: 'bottom'
+    }
+  };
 
   ngOnInit(): void {
   }
@@ -53,5 +67,8 @@ export class StockComponent implements OnInit {
     });
     this.diffy = this.totalWorth - this.totalSpent;
     this.percentage = this.diffy / this.totalSpent * 100;
+
+    this.allocationChartOptions.series = this.investments.map(i => i.liveValue ?? i.amount);
+    this.allocationChartOptions.labels = this.investments.map(i => `${i.shortName}.${i.exchange}`);
   }
 }

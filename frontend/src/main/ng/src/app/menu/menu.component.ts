@@ -1,41 +1,22 @@
 import { Component, OnInit } from '@angular/core';
 import { MenuItem, PrimeTemplate } from 'primeng/api';
 import { Router } from '@angular/router';
-import { Globals } from '../util/global';
 import { User } from '../model/user';
 import { UserService } from '../service/user.service';
 import { Bind } from 'primeng/bind';
 import { Menubar } from 'primeng/menubar';
-import { Select } from 'primeng/select';
-import { FormsModule } from '@angular/forms';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
-
-interface CurrencyType {
-  id: string;
-  label: string;
-  key: keyof typeof MenuComponent.prototype.selectedCurrencies;
-}
 
 @Component({
     selector: 'menu',
     templateUrl: './menu.component.html',
     styleUrls: ['./menu.component.css'],
-    imports: [Bind, Menubar, PrimeTemplate, Select, FormsModule, ButtonDirective, Ripple]
+    imports: [Bind, Menubar, PrimeTemplate, ButtonDirective, Ripple]
 })
 export class MenuComponent implements OnInit {
   items: MenuItem[] = [];
   user: User = {} as User;
-  
-  selectedCurrencies = {
-    stock: 'USD',
-    etf: 'EUR'
-  };
-
-  currencyTypes: CurrencyType[] = [
-    { id: 'stockDropdown', label: 'Stock', key: 'stock' },
-    { id: 'etfDropdown', label: 'ETF', key: 'etf' }
-  ];
 
   readonly menuItems: MenuItem[] = [
     { label: 'News', icon: 'far fa-newspaper', routerLink: ['/home'] },
@@ -50,7 +31,6 @@ export class MenuComponent implements OnInit {
 
   constructor(
     private router: Router,
-    public globals: Globals,
     private userService: UserService
   ) {
     this.userService.getUserEmail().subscribe(data => this.user = data);
@@ -58,14 +38,6 @@ export class MenuComponent implements OnInit {
 
   ngOnInit(): void {
     this.items = this.menuItems;
-  }
-
-  onCurrencyChange(type: string): void {
-    const methodMap = {
-      stock: () => this.globals.changeStockCurrency(this.selectedCurrencies.stock),
-      etf: () => this.globals.changeETFCurrency(this.selectedCurrencies.etf)
-    };
-    methodMap[type as keyof typeof methodMap]?.();
   }
 
   logOut(): void {

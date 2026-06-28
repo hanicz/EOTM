@@ -2,6 +2,7 @@ package eye.on.the.money.service.etf;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.out.ETFInvestmentDTO;
+import eye.on.the.money.exception.APIException;
 import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
@@ -60,14 +61,17 @@ public class ETFInvestmentService implements ICSVService {
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
         String joinedList = etfInvestmentDTOList.stream().map(i -> (i.getShortName() + "." + i.getExchange())).collect(Collectors.joining(","));
 
-        JsonNode responseBody = this.eodAPIService.getLiveEtfValue(joinedList);
-
-        for (JsonNode etf : responseBody) {
-            Optional<ETFInvestmentDTO> etfInvestmentDTO = etfInvestmentDTOList.stream().filter
-                    (i -> (i.getShortName() + "." + i.getExchange()).equals(etf.findValue("code").textValue())).findFirst();
-            if (etfInvestmentDTO.isEmpty()) continue;
-            etfInvestmentDTO.get().setLiveValue(etf.findValue("close").doubleValue() * etfInvestmentDTO.get().getQuantity());
-            etfInvestmentDTO.get().setValueDiff(etfInvestmentDTO.get().getLiveValue() - etfInvestmentDTO.get().getAmount());
+        try {
+            JsonNode responseBody = this.eodAPIService.getLiveEtfValue(joinedList);
+            for (JsonNode etf : responseBody) {
+                Optional<ETFInvestmentDTO> etfInvestmentDTO = etfInvestmentDTOList.stream().filter
+                        (i -> (i.getShortName() + "." + i.getExchange()).equals(etf.findValue("code").textValue())).findFirst();
+                if (etfInvestmentDTO.isEmpty()) continue;
+                etfInvestmentDTO.get().setLiveValue(etf.findValue("close").doubleValue() * etfInvestmentDTO.get().getQuantity());
+                etfInvestmentDTO.get().setValueDiff(etfInvestmentDTO.get().getLiveValue() - etfInvestmentDTO.get().getAmount());
+            }
+        } catch (APIException e) {
+            log.error("Unable to fetch live ETF values, returning holdings without live data", e);
         }
         return etfInvestmentDTOList;
     }

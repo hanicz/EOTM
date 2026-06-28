@@ -1,5 +1,4 @@
 import { Component, OnInit, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
-import { Globals } from '../../util/global';
 import { ForexTransaction } from 'src/app/model/forextransaction';
 import { ForexService } from 'src/app/service/forex.service';
 import { Bind } from 'primeng/bind';
@@ -19,17 +18,11 @@ export class ForexholdingComponent {
 
   forexTransactions: ForexTransaction[] = [];
   @Output() dataLoaded = new EventEmitter<ForexTransaction[]>();
-  globals: Globals;
 
   transactionsLoading: boolean = true;
 
-  constructor(private forexService: ForexService, globals: Globals, private cdr: ChangeDetectorRef) {
-    this.globals = globals;
-
+  constructor(private forexService: ForexService, private cdr: ChangeDetectorRef) {
     this.fetchData();
-    globals.stockCurrencyChange.subscribe(value => {
-      this.fetchData();
-    });
   }
 
   ngOnInit(): void {

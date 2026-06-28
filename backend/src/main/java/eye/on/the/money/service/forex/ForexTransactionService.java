@@ -2,6 +2,7 @@ package eye.on.the.money.service.forex;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.out.ForexTransactionDTO;
+import eye.on.the.money.exception.APIException;
 import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
@@ -98,14 +99,18 @@ public class ForexTransactionService implements ICSVService {
         List<ForexTransactionDTO> forexTransactions = new ArrayList<>(forexTransactionMap.values());
         String joinedList = forexTransactions.stream().map(f -> (f.getToCurrencyId() + f.getFromCurrencyId() + ".FOREX")).collect(Collectors.joining(","));
 
-        JsonNode responseBody = this.eodAPIService.getLiveForexValue(joinedList);
-        for (JsonNode forex : responseBody) {
-            Optional<ForexTransactionDTO> forexTransactionDTO = forexTransactions.stream().filter
-                    (f -> (f.getToCurrencyId() + f.getFromCurrencyId() + ".FOREX").equals(forex.findValue("code").textValue())).findFirst();
-            if (forexTransactionDTO.isEmpty()) continue;
-            forexTransactionDTO.get().setLiveValue(forex.findValue("close").doubleValue() * forexTransactionDTO.get().getToAmount());
-            forexTransactionDTO.get().setLiveChangeRate(forex.findValue("close").doubleValue());
-            forexTransactionDTO.get().setValueDiff(forexTransactionDTO.get().getLiveValue() - forexTransactionDTO.get().getFromAmount());
+        try {
+            JsonNode responseBody = this.eodAPIService.getLiveForexValue(joinedList);
+            for (JsonNode forex : responseBody) {
+                Optional<ForexTransactionDTO> forexTransactionDTO = forexTransactions.stream().filter
+                        (f -> (f.getToCurrencyId() + f.getFromCurrencyId() + ".FOREX").equals(forex.findValue("code").textValue())).findFirst();
+                if (forexTransactionDTO.isEmpty()) continue;
+                forexTransactionDTO.get().setLiveValue(forex.findValue("close").doubleValue() * forexTransactionDTO.get().getToAmount());
+                forexTransactionDTO.get().setLiveChangeRate(forex.findValue("close").doubleValue());
+                forexTransactionDTO.get().setValueDiff(forexTransactionDTO.get().getLiveValue() - forexTransactionDTO.get().getFromAmount());
+            }
+        } catch (APIException e) {
+            log.error("Unable to fetch live forex values, returning holdings without live data", e);
         }
 
         return forexTransactions;

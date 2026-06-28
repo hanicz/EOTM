@@ -26,6 +26,12 @@ node
 ### SQL ###
 backend/src/main/resources/data.sql
 
+# Generated Angular build output (built by Maven via ng build)
+backend/src/main/resources/public/resources/
+
+# npm lock files
+package-lock.json
+
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # compiled output

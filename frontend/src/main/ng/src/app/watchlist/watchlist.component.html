@@ -214,31 +214,30 @@
       </p-table>
     </p-tabpanel>
     <p-tabpanel value="2">
-      <div class="grid">
-        <div class="col-12 pt-3">
-          <span class="p-float-label">
-            <input type="text" pInputText [(ngModel)]="toForex" id="toForex"/>
-            <label htmlFor="toForex">To</label>
-          </span>
+      <div class="grid mt-2">
+        <div class="col-5">
+          <label htmlFor="fromForex" class="block text-sm text-color-secondary mb-1 font-medium">From</label>
+          <input type="text" pInputText [(ngModel)]="fromForex" id="fromForex" placeholder="USD"
+            maxlength="3" class="w-full text-uppercase text-center"/>
         </div>
-        <div class="col-12 pt-3">
-          <span class="p-float-label">
-            <input type="text" pInputText [(ngModel)]="fromForex" id="fromForex"/>
-            <label htmlFor="fromForex">From</label>
-          </span>
+        <div class="col-2 flex align-items-center justify-content-center" style="margin-top: 1.75rem;">
+          <i class="pi pi-arrow-right text-color-secondary"></i>
         </div>
-        <div class="col-2 col-offset-5">
+        <div class="col-5">
+          <label htmlFor="toForex" class="block text-sm text-color-secondary mb-1 font-medium">To</label>
+          <input type="text" pInputText [(ngModel)]="toForex" id="toForex" placeholder="EUR"
+            maxlength="3" class="w-full text-uppercase text-center"/>
+        </div>
+        <div class="col-12 mt-3">
           @if (!checkForexContain()) {
             <button pButton pRipple type="button" icon="fas fa-plus" (click)="createForexWatch()"
-              class="p-button-rounded p-button-text ml-2" severity="success"
-            >Add</button>
+              class="w-full" severity="success" label="Add to Watchlist">
+            </button>
           }
-        </div>
-        <div class="col-2 col-offset-5">
           @if (checkForexContain()) {
             <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteForexWatch()"
-              class="p-button-rounded p-button-text ml-2" severity="danger"
-            >Delete</button>
+              class="w-full" severity="danger" label="Remove from Watchlist">
+            </button>
           }
         </div>
       </div>

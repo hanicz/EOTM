@@ -12,27 +12,24 @@
         <div class="flex mr-5">
           <div>Profit:
             @if (diffy > 0) {
-              <p-tag styleClass="p-mr-2" severity="success"
+            <p-tag styleClass="p-mr-2" severity="success"
               value="{{diffy | currency : 'EUR' : 'symbol' : '0.0-2'}}"></p-tag>
             }
-            @if (diffy < 0) {
-              <p-tag styleClass="p-mr-2" severity="danger"
+            @if (diffy < 0) { <p-tag styleClass="p-mr-2" severity="danger"
               value="{{diffy | currency : 'EUR' : 'symbol' : '0.0-2'}}"></p-tag>
-            }
+              }
           </div>
         </div>
         <div class="flex">
           <div>Percentage:
             @if (diffy > 0) {
-              <p-tag styleClass="p-mr-2" severity="success"
-                value="{{(percentage | number : '0.0-1') + '%'}}">
-              </p-tag>
+            <p-tag styleClass="p-mr-2" severity="success" value="{{(percentage | number : '0.0-1') + '%'}}">
+            </p-tag>
             }
-            @if (diffy < 0) {
-              <p-tag styleClass="p-mr-2" severity="danger"
-                value="{{(percentage | number : '0.0-1') + '%'}}">
+            @if (diffy < 0) { <p-tag styleClass="p-mr-2" severity="danger"
+              value="{{(percentage | number : '0.0-1') + '%'}}">
               </p-tag>
-            }
+              }
           </div>
         </div>
       </div>
@@ -47,6 +44,14 @@
       <p-tabpanels>
         <p-tabpanel value="0">
           <app-cryptoholding (dataLoaded)="loadData($event)"></app-cryptoholding>
+          @if (allocationChartOptions.series && allocationChartOptions.series.length > 0) {
+          <p-divider></p-divider>
+          <div class="flex justify-content-center">
+            <apx-chart [series]="allocationChartOptions.series" [chart]="allocationChartOptions.chart!"
+              [labels]="allocationChartOptions.labels!" [legend]="allocationChartOptions.legend!">
+            </apx-chart>
+          </div>
+          }
         </p-tabpanel>
         <p-tabpanel value="1">
           <app-cryptoposition></app-cryptoposition>
@@ -56,13 +61,5 @@
         </p-tabpanel>
       </p-tabpanels>
     </p-tabs>
-    @if (allocationChartOptions.series && allocationChartOptions.series.length > 0) {
-      <p-divider></p-divider>
-      <div class="flex justify-content-center">
-        <apx-chart [series]="allocationChartOptions.series" [chart]="allocationChartOptions.chart!"
-          [labels]="allocationChartOptions.labels!" [legend]="allocationChartOptions.legend!">
-        </apx-chart>
-      </div>
-    }
   </p-panel>
 </div>

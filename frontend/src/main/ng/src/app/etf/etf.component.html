@@ -50,6 +50,14 @@
   <p-tabpanels>
     <p-tabpanel value="0">
       <app-etfholding (dataLoaded)="loadData($event)"></app-etfholding>
+      @if (allocationChartOptions.series && allocationChartOptions.series.length > 0) {
+        <p-divider></p-divider>
+        <div class="flex justify-content-center">
+          <apx-chart [series]="allocationChartOptions.series" [chart]="allocationChartOptions.chart!"
+            [labels]="allocationChartOptions.labels!" [legend]="allocationChartOptions.legend!">
+          </apx-chart>
+        </div>
+      }
     </p-tabpanel>
     <p-tabpanel value="1">
       <app-etfposition></app-etfposition>
@@ -62,13 +70,5 @@
     </p-tabpanel>
   </p-tabpanels>
 </p-tabs>
-@if (allocationChartOptions.series && allocationChartOptions.series.length > 0) {
-  <p-divider></p-divider>
-  <div class="flex justify-content-center">
-    <apx-chart [series]="allocationChartOptions.series" [chart]="allocationChartOptions.chart!"
-      [labels]="allocationChartOptions.labels!" [legend]="allocationChartOptions.legend!">
-    </apx-chart>
-  </div>
-}
 </p-panel>
 </div>

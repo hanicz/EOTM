@@ -9,31 +9,28 @@
         <div class="flex mr-5">
           <div>Total Worth: <b>{{totalWorth | currency : 'USD' : 'symbol' : '0.0-2'}}</b></div>
         </div>
-      </div>
-      <div class="flex mr-5">
-        <div>Profit:
-          @if (diffy > 0) {
+        <div class="flex mr-5">
+          <div>Profit:
+            @if (diffy > 0) {
             <p-tag styleClass="p-mr-2" severity="success"
-            value="{{diffy | currency : 'USD' : 'symbol' : '0.0-2'}}"></p-tag>
-          }
-          @if (diffy < 0) {
-            <p-tag styleClass="p-mr-2" severity="danger"
-            value="{{diffy | currency : 'USD' : 'symbol' : '0.0-2'}}"></p-tag>
-          }
+              value="{{diffy | currency : 'USD' : 'symbol' : '0.0-2'}}"></p-tag>
+            }
+            @if (diffy < 0) { <p-tag styleClass="p-mr-2" severity="danger"
+              value="{{diffy | currency : 'USD' : 'symbol' : '0.0-2'}}"></p-tag>
+              }
+          </div>
         </div>
-      </div>
-      <div class="flex">
-        <div>Percentage:
-          @if (diffy > 0) {
-            <p-tag styleClass="p-mr-2" severity="success"
-              value="{{(percentage | number : '0.0-1') + '%'}}">
+        <div class="flex">
+          <div>Percentage:
+            @if (diffy > 0) {
+            <p-tag styleClass="p-mr-2" severity="success" value="{{(percentage | number : '0.0-1') + '%'}}">
             </p-tag>
-          }
-          @if (diffy < 0) {
-            <p-tag styleClass="p-mr-2" severity="danger"
+            }
+            @if (diffy < 0) { <p-tag styleClass="p-mr-2" severity="danger"
               value="{{(percentage | number : '0.0-1') + '%'}}">
-            </p-tag>
-          }
+              </p-tag>
+              }
+          </div>
         </div>
       </div>
     </div>
@@ -48,6 +45,14 @@
       <p-tabpanels>
         <p-tabpanel value="0">
           <app-holding (dataLoaded)="loadData($event)"></app-holding>
+          @if (allocationChartOptions.series && allocationChartOptions.series.length > 0) {
+          <p-divider></p-divider>
+          <div class="flex justify-content-center">
+            <apx-chart [series]="allocationChartOptions.series" [chart]="allocationChartOptions.chart!"
+              [labels]="allocationChartOptions.labels!" [legend]="allocationChartOptions.legend!">
+            </apx-chart>
+          </div>
+          }
         </p-tabpanel>
         <p-tabpanel value="1">
           <app-position></app-position>
@@ -60,13 +65,5 @@
         </p-tabpanel>
       </p-tabpanels>
     </p-tabs>
-    @if (allocationChartOptions.series && allocationChartOptions.series.length > 0) {
-      <p-divider></p-divider>
-      <div class="flex justify-content-center">
-        <apx-chart [series]="allocationChartOptions.series" [chart]="allocationChartOptions.chart!"
-          [labels]="allocationChartOptions.labels!" [legend]="allocationChartOptions.legend!">
-        </apx-chart>
-      </div>
-    }
   </p-panel>
 </div>

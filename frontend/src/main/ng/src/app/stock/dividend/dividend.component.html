@@ -66,22 +66,25 @@
 <p-dialog [(visible)]="dividendDialog" [style]="{width: '50vw'}" header="Dividend Details" [modal]="true"
     styleClass="p-fluid">
     <ng-template pTemplate="content">
-        <div class="p-field">
-            <label for="name">Name</label>
-            <input type="text" pInputText id="name" [(ngModel)]="dividend.shortName" />
-        </div>
-        <div class="p-field">
-            <label for="currency">Currency</label>
-            <p-select [options]="currencies" [(ngModel)]="dividend.currencyId" id="currency" optionLabel="label"
-                optionValue="value"></p-select>
-        </div>
-        <div class="p-field">
-            <label for="amount">Amount</label>
-            <input type="number" pInputText id="amount" [(ngModel)]="dividend.amount" />
-        </div>
-        <div class="p-field p-col-4 p-md-4">
-            <label for="date">Date</label>
-            <input type="text" pInputText id="date" placeholder="YYYY-MM-DD" [(ngModel)]="dividend.dividendDate" />
+        <div class="grid">
+            <div class="col-12 mb-2">
+                <label for="name" class="block mb-2 font-medium text-color-secondary">Name</label>
+                <input type="text" pInputText id="name" [(ngModel)]="dividend.shortName" class="w-full" />
+            </div>
+            <div class="col-6 mb-2">
+                <label for="currency" class="block mb-2 font-medium text-color-secondary">Currency</label>
+                <p-select [options]="currencies" [(ngModel)]="dividend.currencyId" id="currency" optionLabel="label"
+                    optionValue="value" [style]="{'width':'100%'}"></p-select>
+            </div>
+            <div class="col-6 mb-2">
+                <label for="amount" class="block mb-2 font-medium text-color-secondary">Amount</label>
+                <input type="number" pInputText id="amount" [(ngModel)]="dividend.amount" class="w-full" />
+            </div>
+            <div class="col-12 mb-2">
+                <label for="date" class="block mb-2 font-medium text-color-secondary">Date</label>
+                <input type="text" pInputText id="date" placeholder="YYYY-MM-DD" [(ngModel)]="dividend.dividendDate"
+                    class="w-full" />
+            </div>
         </div>
     </ng-template>
 

@@ -94,40 +94,43 @@
 <p-dialog [(visible)]="forexDialog" [style]="{width: '50vw'}" header="Forex Transaction Details" [modal]="true"
   styleClass="p-fluid">
   <ng-template pTemplate="content">
-    <div class="p-field">
-      <label for="name">From</label>
-      <input type="text" pInputText id="from" [(ngModel)]="forexTransaction.fromCurrencyId" />
-    </div>
-    <div class="p-field">
-      <label for="exchange">To</label>
-      <input type="text" pInputText id="to" [(ngModel)]="forexTransaction.toCurrencyId" />
-    </div>
-    <div class="p-field">
-      <label for="currency">Type</label>
-      <p-select [options]="statuses" [(ngModel)]="forexTransaction.buySell" placeholder="Any">
-        <ng-template let-option pTemplate="item">
-
-          @if (option.label === 'BUY') {
-            <p-tag styleClass="p-mr-2" severity="info" value="BUY">
-            </p-tag>
-          }
-          @if (option.label === 'SELL') {
-            <p-tag styleClass="p-mr-2" severity="warn" value="SELL"></p-tag>
-          }
-        </ng-template>
-      </p-select>
-    </div>
-    <div class="p-field">
-      <label for="amount">Spent</label>
-      <input type="number" pInputText id="fromAmount" [(ngModel)]="forexTransaction.fromAmount" />
-    </div>
-    <div class="p-field">
-      <label for="amount">Got</label>
-      <input type="number" pInputText id="toAmount" [(ngModel)]="forexTransaction.toAmount" />
-    </div>
-    <div class="p-field p-col-4 p-md-4">
-      <label for="date">Date</label>
-      <input type="text" pInputText id="date" placeholder="YYYY-MM-DD" [(ngModel)]="forexTransaction.transactionDate" />
+    <div class="grid">
+      <div class="col-6 mb-2">
+        <label for="from" class="block mb-2 font-medium text-color-secondary">From</label>
+        <input type="text" pInputText id="from" [(ngModel)]="forexTransaction.fromCurrencyId" class="w-full" />
+      </div>
+      <div class="col-6 mb-2">
+        <label for="to" class="block mb-2 font-medium text-color-secondary">To</label>
+        <input type="text" pInputText id="to" [(ngModel)]="forexTransaction.toCurrencyId" class="w-full" />
+      </div>
+      <div class="col-6 mb-2">
+        <label for="type" class="block mb-2 font-medium text-color-secondary">Type</label>
+        <p-select [options]="statuses" [(ngModel)]="forexTransaction.buySell" placeholder="Any" id="type"
+          [style]="{'width':'100%'}">
+          <ng-template let-option pTemplate="item">
+            @if (option.label === 'BUY') {
+              <p-tag styleClass="p-mr-2" severity="info" value="BUY">
+              </p-tag>
+            }
+            @if (option.label === 'SELL') {
+              <p-tag styleClass="p-mr-2" severity="warn" value="SELL"></p-tag>
+            }
+          </ng-template>
+        </p-select>
+      </div>
+      <div class="col-6 mb-2">
+        <label for="date" class="block mb-2 font-medium text-color-secondary">Date</label>
+        <input type="text" pInputText id="date" placeholder="YYYY-MM-DD"
+          [(ngModel)]="forexTransaction.transactionDate" class="w-full" />
+      </div>
+      <div class="col-6 mb-2">
+        <label for="fromAmount" class="block mb-2 font-medium text-color-secondary">Spent</label>
+        <input type="number" pInputText id="fromAmount" [(ngModel)]="forexTransaction.fromAmount" class="w-full" />
+      </div>
+      <div class="col-6 mb-2">
+        <label for="toAmount" class="block mb-2 font-medium text-color-secondary">Got</label>
+        <input type="number" pInputText id="toAmount" [(ngModel)]="forexTransaction.toAmount" class="w-full" />
+      </div>
     </div>
   </ng-template>
 

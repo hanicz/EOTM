@@ -104,60 +104,65 @@
 <p-dialog [(visible)]="investmentDialog" [style]="{width: '50vw'}" header="Investment Details" [modal]="true"
   styleClass="p-fluid">
   <ng-template pTemplate="content">
-    <div class="p-field">
-      <p-select class="searchDropdown" [options]="exchanges" optionLabel="Name" [virtualScroll]="true"
-        [virtualScrollItemSize]="31" [filter]="true" (onChange)="exchangeChanged($event)" [(ngModel)]="selectedExchange"
-        placeholder="Select an Exchange" [style]="{'width':'100%'}"
-        [dropdownIcon]="exchangesLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
-      </p-select>
-    </div>
-    <div class="p-field">
-      <p-select class="searchDropdown" [options]="symbols" optionLabel="Name" [virtualScroll]="true"
-        [virtualScrollItemSize]="31" [filter]="true" [(ngModel)]="selectedStock" placeholder="Select a Ticker"
-        [style]="{'width':'100%'}"
-        [dropdownIcon]="stocksLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
-      </p-select>
-    </div>
-    <div class="p-field">
-      <label for="currency">Account</label>
-      <p-select [options]="accounts" [(ngModel)]="investment.accountId" id="account" optionLabel="accountName"
-      optionValue="id"></p-select>
-    </div>
-    <div class="p-field">
-      <label for="currency">Currency</label>
-      <p-select [options]="currencies" [(ngModel)]="investment.currencyId" id="currency" optionLabel="label"
-      optionValue="value"></p-select>
-    </div>
-    <div class="p-field">
-      <label for="currency">Type</label>
-      <p-select [options]="statuses" [(ngModel)]="investment.buySell" placeholder="Any">
-        <ng-template let-option pTemplate="item">
-
-          @if (option.label === 'BUY') {
-            <p-tag styleClass="p-mr-2" severity="info" value="BUY">
-            </p-tag>
-          }
-          @if (option.label === 'SELL') {
-            <p-tag styleClass="p-mr-2" severity="warn" value="SELL"></p-tag>
-          }
-        </ng-template>
-      </p-select>
-    </div>
-    <div class="p-field">
-      <label for="quantity">Quantity</label>
-      <input type="number" pInputText id="quantity" [(ngModel)]="investment.quantity" />
-    </div>
-    <div class="p-field">
-      <label for="amount">Amount</label>
-      <input type="number" pInputText id="amount" [(ngModel)]="investment.amount" />
-    </div>
-    <div class="p-field p-col-4 p-md-4">
-      <label for="date">Date</label>
-      <input type="text" pInputText id="date" placeholder="YYYY-MM-DD" [(ngModel)]="investment.transactionDate" />
-    </div>
-    <div class="p-field">
-      <label for="fee">Fee</label>
-      <input type="number" pInputText id="fee" [(ngModel)]="investment.fee" />
+    <div class="grid">
+      <div class="col-12 mb-2">
+        <label for="exchange" class="block mb-2 font-medium text-color-secondary">Exchange</label>
+        <p-select class="searchDropdown" [options]="exchanges" optionLabel="Name" [virtualScroll]="true"
+          [virtualScrollItemSize]="31" [filter]="true" (onChange)="exchangeChanged($event)" [(ngModel)]="selectedExchange"
+          placeholder="Select an Exchange" [style]="{'width':'100%'}"
+          [dropdownIcon]="exchangesLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+        </p-select>
+      </div>
+      <div class="col-12 mb-2">
+        <label for="ticker" class="block mb-2 font-medium text-color-secondary">Ticker</label>
+        <p-select class="searchDropdown" [options]="symbols" optionLabel="Name" [virtualScroll]="true"
+          [virtualScrollItemSize]="31" [filter]="true" [(ngModel)]="selectedStock" placeholder="Select a Ticker"
+          [style]="{'width':'100%'}"
+          [dropdownIcon]="stocksLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+        </p-select>
+      </div>
+      <div class="col-6 mb-2">
+        <label for="account" class="block mb-2 font-medium text-color-secondary">Account</label>
+        <p-select [options]="accounts" [(ngModel)]="investment.accountId" id="account" optionLabel="accountName"
+          optionValue="id" [style]="{'width':'100%'}"></p-select>
+      </div>
+      <div class="col-6 mb-2">
+        <label for="currency" class="block mb-2 font-medium text-color-secondary">Currency</label>
+        <p-select [options]="currencies" [(ngModel)]="investment.currencyId" id="currency" optionLabel="label"
+          optionValue="value" [style]="{'width':'100%'}"></p-select>
+      </div>
+      <div class="col-6 mb-2">
+        <label for="type" class="block mb-2 font-medium text-color-secondary">Type</label>
+        <p-select [options]="statuses" [(ngModel)]="investment.buySell" placeholder="Any" id="type"
+          [style]="{'width':'100%'}">
+          <ng-template let-option pTemplate="item">
+            @if (option.label === 'BUY') {
+              <p-tag styleClass="p-mr-2" severity="info" value="BUY">
+              </p-tag>
+            }
+            @if (option.label === 'SELL') {
+              <p-tag styleClass="p-mr-2" severity="warn" value="SELL"></p-tag>
+            }
+          </ng-template>
+        </p-select>
+      </div>
+      <div class="col-6 mb-2">
+        <label for="date" class="block mb-2 font-medium text-color-secondary">Date</label>
+        <input type="text" pInputText id="date" placeholder="YYYY-MM-DD" [(ngModel)]="investment.transactionDate"
+          class="w-full" />
+      </div>
+      <div class="col-4 mb-2">
+        <label for="quantity" class="block mb-2 font-medium text-color-secondary">Quantity</label>
+        <input type="number" pInputText id="quantity" [(ngModel)]="investment.quantity" class="w-full" />
+      </div>
+      <div class="col-4 mb-2">
+        <label for="amount" class="block mb-2 font-medium text-color-secondary">Amount</label>
+        <input type="number" pInputText id="amount" [(ngModel)]="investment.amount" class="w-full" />
+      </div>
+      <div class="col-4 mb-2">
+        <label for="fee" class="block mb-2 font-medium text-color-secondary">Fee</label>
+        <input type="number" pInputText id="fee" [(ngModel)]="investment.fee" class="w-full" />
+      </div>
     </div>
   </ng-template>
 

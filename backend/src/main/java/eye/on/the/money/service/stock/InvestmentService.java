@@ -2,6 +2,7 @@ package eye.on.the.money.service.stock;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.out.InvestmentDTO;
+import eye.on.the.money.exception.APIException;
 import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.stock.Account;
 import eye.on.the.money.model.Currency;
@@ -73,16 +74,25 @@ public class InvestmentService implements ICSVService {
         Map<String, InvestmentDTO> investmentMap = this.getCalculated(investments);
         List<InvestmentDTO> investmentDTOList = (new ArrayList<>(investmentMap.values()))
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
-        String joinedList = investmentDTOList.stream().map(i -> (i.getShortName() + "." + i.getExchange())).collect(Collectors.joining(","));
+        String joinedList = investmentDTOList.stream().map(i -> (i.getShortName() + "." + i.getExchange())).distinct().collect(Collectors.joining(","));
 
-        JsonNode responseBody = this.eodAPIService.getLiveStockValue(joinedList);
+        JsonNode responseBody;
+        try {
+            responseBody = this.eodAPIService.getLiveStockValue(joinedList);
+        } catch (APIException e) {
+            log.error("Unable to fetch live stock values, returning holdings without live data", e);
+            return investmentDTOList;
+        }
 
         for (JsonNode stock : responseBody) {
-            Optional<InvestmentDTO> investmentDTO = investmentDTOList.stream().filter
-                    (i -> (i.getShortName() + "." + i.getExchange()).equals(stock.findValue("code").textValue())).findFirst();
-            if (investmentDTO.isEmpty()) continue;
-            investmentDTO.get().setLiveValue(stock.findValue("close").doubleValue() * investmentDTO.get().getQuantity());
-            investmentDTO.get().setValueDiff(investmentDTO.get().getLiveValue() - investmentDTO.get().getAmount());
+            String code = stock.findValue("code").textValue();
+            double close = stock.findValue("close").doubleValue();
+            investmentDTOList.stream()
+                    .filter(i -> (i.getShortName() + "." + i.getExchange()).equals(code))
+                    .forEach(i -> {
+                        i.setLiveValue(close * i.getQuantity());
+                        i.setValueDiff(i.getLiveValue() - i.getAmount());
+                    });
         }
 
         return investmentDTOList;
@@ -108,7 +118,8 @@ public class InvestmentService implements ICSVService {
             if (i.getBuySell().equals("S")) {
                 i.negateAmountAndQuantity();
             }
-            investmentMap.compute(i.getShortName(), (key, value) -> (value == null) ? i : value.mergeInvestments(i));
+            String key = i.getShortName() + "_" + i.getAccountId();
+            investmentMap.compute(key, (k, value) -> (value == null) ? i : value.mergeInvestments(i));
         });
         return investmentMap;
     }

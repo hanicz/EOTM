@@ -44,6 +44,7 @@ public abstract class APIService {
                 .uri(URI.create(URL))
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response -> {
+                    log.error("GET call to {} failed with status {}", URL, response.statusCode());
                     throw new APIException("Unable to make GET call" + response.statusCode());
                 })
                 .toEntity(cls)
@@ -60,6 +61,7 @@ public abstract class APIService {
                 .headers(headersConsumer)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response -> {
+                    log.error("GET call to {} failed with status {}", URL, response.statusCode());
                     throw new APIException("Unable to make GET call" + response.statusCode());
                 })
                 .bodyToMono(cls);
@@ -74,6 +76,7 @@ public abstract class APIService {
                 .bodyValue(body)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response -> {
+                    log.error("POST call to {} failed with status {}", URL, response.statusCode());
                     throw new APIException("Unable to make POST call" + response.statusCode());
                 })
                 .toEntity(cls)

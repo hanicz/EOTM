@@ -1,7 +1,21 @@
-<p-table [value]="investments" responsiveLayout="scroll" styleClass="p-datatable-striped" sortField="quantity" [sortOrder]=-1>
+<p-table #dt1 [value]="investments" responsiveLayout="scroll" styleClass="p-datatable-striped" sortField="quantity" [sortOrder]=-1
+  [globalFilterFields]="['shortName', 'accountName']">
+  <ng-template pTemplate="caption">
+    <div class="flex justify-content-between flex-wrap">
+      <div class="flex flex-row flex-wrap">
+        <span class="mr-2">
+          <input pInputText type="text"
+            (input)="dt1.filterGlobal($any($event.target)?.value, 'contains')"
+            [value]="$any(dt1.filters['global'])?.value ?? ''" placeholder="Search by Name or Account"
+            class="p-column-filter" style="width: 16rem">
+        </span>
+      </div>
+    </div>
+  </ng-template>
   <ng-template pTemplate="header">
     <tr>
       <th>Stock Name</th>
+      <th>Account</th>
       <th>Total Spent</th>
       <th>Average</th>
       <th pSortableColumn="quantity">Position <p-sortIcon field="quantity"></p-sortIcon></th>
@@ -18,6 +32,7 @@
           {{investment.shortName}}.{{investment.exchange}}
         </div>
       </td>
+      <td>{{investment.accountName}}</td>
       <td>
         @if (investment.quantity > 0) {
           <span>{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}</span>

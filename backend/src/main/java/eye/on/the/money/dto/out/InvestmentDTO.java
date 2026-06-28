@@ -41,7 +41,7 @@ public class InvestmentDTO implements CSVHelper {
     private Long accountId;
 
     public InvestmentDTO mergeInvestments(InvestmentDTO other) {
-        if (!this.getShortName().equals(other.getShortName()))
+        if (!this.getShortName().equals(other.getShortName()) || !this.getAccountId().equals(other.getAccountId()))
             return this;
 
         this.setAmount(this.getAmount() + other.getAmount());

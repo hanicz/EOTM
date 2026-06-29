@@ -46,6 +46,10 @@ export class EtfinvestmentComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  refresh(): void {
+    this.fetchData();
+  }
+
   private fetchData(): void {
     this.etfService.getInvestments().subscribe({
       next: (data) => {

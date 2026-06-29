@@ -6,6 +6,8 @@ import { Symbol } from '../model/symbol';
 import { Globals } from '../util/global';
 import { StockService } from '../service/stock.service';
 import { CryptoAlert } from '../model/cryptoalert';
+import { Crypto } from '../model/crypto';
+import { CryptoService } from '../service/crypto.service';
 import { environment } from 'src/environments/environment';
 import { MenuComponent } from '../menu/menu.component';
 import { Bind } from 'primeng/bind';
@@ -13,6 +15,7 @@ import { Panel } from 'primeng/panel';
 import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primeng/tabs';
 import { Ripple } from 'primeng/ripple';
 import { ButtonDirective } from 'primeng/button';
+import { Tooltip } from 'primeng/tooltip';
 import { TableModule } from 'primeng/table';
 import { PrimeTemplate } from 'primeng/api';
 import { Skeleton } from 'primeng/skeleton';
@@ -29,7 +32,7 @@ import { AlertTypePipe } from '../util/pipe';
     selector: 'app-alert',
     templateUrl: './alert.component.html',
     styleUrls: ['./alert.component.css'],
-    imports: [MenuComponent, Bind, Panel, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, TableModule, PrimeTemplate, Skeleton, NgClass, Tag, Image, NgStyle, Dialog, Select, FormsModule, InputNumber, AlertTypePipe]
+    imports: [MenuComponent, Bind, Panel, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, TableModule, PrimeTemplate, Skeleton, NgClass, Tag, Image, NgStyle, Dialog, Select, FormsModule, InputNumber, AlertTypePipe]
 })
 export class AlertComponent implements OnInit {
 
@@ -38,20 +41,26 @@ export class AlertComponent implements OnInit {
   alertsLoading: boolean = true;
   cryptoAlertsLoading: boolean = true;
   displayDialog: boolean = false;
+  displayCryptoDialog: boolean = false;
   symbols: Symbol[] = [];
   exchanges: Exchange[] = [];
   selectedStock: Symbol = {} as Symbol;
   selectedExchange: Exchange = {} as Exchange;
   exchangesLoading: boolean = true;
   stocksLoading: boolean = false;
+  cryptos: Crypto[] = [];
+  cryptosLoading: boolean = true;
+  selectedCrypto: Crypto = {} as Crypto;
   globals: Globals;
   valuePoint: number = 0.0;
+  cryptoValuePoint: number = 0.0;
   types;
   selectedType: string = '';
+  selectedCryptoType: string = '';
   assetUrl: string;
 
   constructor(private alertService: AlertService, private stockService: StockService,
-    globals: Globals, private cdr: ChangeDetectorRef) {
+    private cryptoService: CryptoService, globals: Globals, private cdr: ChangeDetectorRef) {
     this.fetchData();
     this.globals = globals;
     this.assetUrl = environment.assets_url;
@@ -69,6 +78,14 @@ export class AlertComponent implements OnInit {
       { name: 'Price over', code: 'PRICE_OVER' },
       { name: 'Price under', code: 'PRICE_UNDER' }
   ];
+
+    this.cryptoService.getAllCrypto().subscribe({
+      next: (data) => {
+        this.cryptosLoading = false;
+        this.cryptos = data;
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -144,5 +161,20 @@ export class AlertComponent implements OnInit {
 
   showDialog() {
     this.displayDialog = true;
+  }
+
+  createCryptoAlert() {
+    let data = {symbol: this.selectedCrypto.symbol, type: this.selectedCryptoType, valuePoint: this.cryptoValuePoint, name: this.selectedCrypto.name}
+
+    this.alertService.createNewCryptoAlert(data).subscribe({
+      next: (data) => {
+        this.fetchData();
+        this.displayCryptoDialog = false;
+      }
+    });
+  }
+
+  showCryptoDialog() {
+    this.displayCryptoDialog = true;
   }
 }

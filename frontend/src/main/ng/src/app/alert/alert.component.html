@@ -1,6 +1,10 @@
 <div class="shadow-5">
   <menu class="pl-0 mb-0"></menu>
-  <p-panel header="Alerts">
+  <p-panel>
+    <ng-template pTemplate="icons">
+      <button pButton pRipple icon="pi pi-refresh" class="p-button-rounded p-button-text"
+        pTooltip="Refresh" (click)="fetchData()"></button>
+    </ng-template>
     <p-tabs value="0">
     <p-tablist>
       <p-tab value="0">Stock</p-tab>
@@ -72,7 +76,7 @@
   </p-tabpanel>
   <p-tabpanel value="1">
     <button pButton pRipple label="Create" icon="pi pi-plus"
-      class="p-button-rounded ml-2 mb-2" severity="success">
+      class="p-button-rounded ml-2 mb-2" severity="success" (click)="showCryptoDialog()">
     </button>
     @if (cryptoAlertsLoading) {
       <p-table [value]="[{}]" styleClass="p-datatable-striped p-datatable-sm" responsiveLayout="scroll"
@@ -99,7 +103,7 @@
       </p-table>
     }
 
-    @if (!alertsLoading) {
+    @if (!cryptoAlertsLoading) {
       <p-table [value]="cryptoAlerts" styleClass="p-datatable-striped" responsiveLayout="scroll"
         >
         <ng-template pTemplate="header">
@@ -138,38 +142,70 @@
 </p-panel>
 </div>
 
-<p-dialog [(visible)]="displayDialog" [breakpoints]="{'960px': '75vw', '640px': '100vw'}"
-  [style]="{width: '25vw', height: '30vw'}" [draggable]="false" [resizable]="false">
-  <div class="grid">
-    <div class="col-12">
-      <p-select class="searchDropdown" [options]="exchanges" optionLabel="Name" [virtualScroll]="true"
+<p-dialog header="Create Stock Alert" [(visible)]="displayDialog" [breakpoints]="{'960px': '75vw', '640px': '100vw'}"
+  [style]="{width: '28vw'}" [modal]="true" [draggable]="false" [resizable]="false">
+  <div class="alert-form">
+    <div class="alert-field">
+      <label class="alert-label" htmlFor="exchange">Exchange</label>
+      <p-select inputId="exchange" class="searchDropdown" [options]="exchanges" optionLabel="Name" [virtualScroll]="true"
         [virtualScrollItemSize]="31" [filter]="true" (onChange)="exchangeChanged($event)" [(ngModel)]="selectedExchange"
-        placeholder="Select an Exchange" [style]="{'width':'100%'}"
+        placeholder="Select an Exchange" [style]="{'width':'100%'}" [appendTo]="'body'"
         [dropdownIcon]="exchangesLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
       </p-select>
     </div>
-    <div class="col-12">
-      <p-select class="searchDropdown" [options]="symbols" optionLabel="Name" [virtualScroll]="true"
+    <div class="alert-field">
+      <label class="alert-label" htmlFor="ticker">Ticker</label>
+      <p-select inputId="ticker" class="searchDropdown" [options]="symbols" optionLabel="Name" [virtualScroll]="true"
         [virtualScrollItemSize]="31" [filter]="true" [(ngModel)]="selectedStock" placeholder="Select a Ticker"
-        [style]="{'width':'100%'}"
+        [style]="{'width':'100%'}" [appendTo]="'body'"
         [dropdownIcon]="stocksLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
       </p-select>
     </div>
-    <div class="col-12">
-      <p-select class="searchDropdown" [options]="types" [(ngModel)]="selectedType" optionLabel="name"
-      optionValue="code" [style]="{'width':'100%'}" placeholder="Select a Type"></p-select>
+    <div class="alert-field">
+      <label class="alert-label" htmlFor="type">Type</label>
+      <p-select inputId="type" class="searchDropdown" [options]="types" [(ngModel)]="selectedType" optionLabel="name"
+      optionValue="code" [style]="{'width':'100%'}" [appendTo]="'body'" placeholder="Select a Type"></p-select>
     </div>
-    <div class="col-12 mt-2">
-      <span class="p-float-label">
-        <p-inputNumber [(ngModel)]="valuePoint" inputId="valuePoint" mode="decimal" [minFractionDigits]="0"
-        [maxFractionDigits]="2"> </p-inputNumber>
-        <label htmlFor="valuePoint">Number</label>
-      </span>
+    <div class="alert-field">
+      <label class="alert-label" htmlFor="valuePoint">Value</label>
+      <p-inputNumber inputId="valuePoint" [(ngModel)]="valuePoint" mode="decimal" [minFractionDigits]="0"
+        [maxFractionDigits]="2" [style]="{'width':'100%'}" inputStyleClass="w-full">
+      </p-inputNumber>
     </div>
   </div>
   <ng-template pTemplate="footer">
     <button pButton pRipple label="Create" icon="pi pi-plus" class="p-button-rounded" severity="success"
       (click)="createStockAlert()">
+    </button>
+  </ng-template>
+</p-dialog>
+
+<p-dialog header="Create Crypto Alert" [(visible)]="displayCryptoDialog" [breakpoints]="{'960px': '75vw', '640px': '100vw'}"
+  [style]="{width: '28vw'}" [modal]="true" [draggable]="false" [resizable]="false">
+  <div class="alert-form">
+    <div class="alert-field">
+      <label class="alert-label" htmlFor="crypto">Coin</label>
+      <p-select inputId="crypto" class="searchDropdown" [options]="cryptos" optionLabel="name" [virtualScroll]="true"
+        [virtualScrollItemSize]="31" [filter]="true" [(ngModel)]="selectedCrypto" placeholder="Select a Coin"
+        [style]="{'width':'100%'}" [appendTo]="'body'"
+        [dropdownIcon]="cryptosLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+      </p-select>
+    </div>
+    <div class="alert-field">
+      <label class="alert-label" htmlFor="cryptoType">Type</label>
+      <p-select inputId="cryptoType" class="searchDropdown" [options]="types" [(ngModel)]="selectedCryptoType" optionLabel="name"
+      optionValue="code" [style]="{'width':'100%'}" [appendTo]="'body'" placeholder="Select a Type"></p-select>
+    </div>
+    <div class="alert-field">
+      <label class="alert-label" htmlFor="cryptoValuePoint">Value</label>
+      <p-inputNumber inputId="cryptoValuePoint" [(ngModel)]="cryptoValuePoint" mode="decimal" [minFractionDigits]="0"
+        [maxFractionDigits]="2" [style]="{'width':'100%'}" inputStyleClass="w-full">
+      </p-inputNumber>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Create" icon="pi pi-plus" class="p-button-rounded" severity="success"
+      (click)="createCryptoAlert()">
     </button>
   </ng-template>
 </p-dialog>

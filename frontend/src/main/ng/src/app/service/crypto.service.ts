@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Transaction } from '../model/transaction';
+import { Crypto } from '../model/crypto';
 import { ResourceHelper } from '../util/servicehelper';
 import { environment } from '../../environments/environment';
 

@@ -134,7 +134,7 @@
   justify-content: center;
   width: 44px;
   height: 44px;
-  background: var(--p-primary-color);
+  background: var(--p-red-500);
   border-radius: 8px;
   color: white;
   font-size: 1.5rem;

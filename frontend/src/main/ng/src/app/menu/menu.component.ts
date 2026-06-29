@@ -19,6 +19,7 @@ export class MenuComponent implements OnInit {
   user: User = {} as User;
 
   readonly menuItems: MenuItem[] = [
+    { label: 'Dashboard', icon: 'fa-solid fa-gauge', routerLink: ['/dashboard'] },
     { label: 'News', icon: 'far fa-newspaper', routerLink: ['/home'] },
     { label: 'Stock', icon: 'fa-solid fa-arrow-trend-up', routerLink: ['/stock'] },
     { label: 'Crypto', icon: 'fab fa-bitcoin', routerLink: ['/crypto'] },

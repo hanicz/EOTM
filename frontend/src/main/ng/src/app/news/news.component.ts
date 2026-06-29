@@ -38,7 +38,15 @@ export class NewsComponent implements OnInit {
     }
   }
 
+  isRedditSource(item: News): boolean {
+    return this.type.includes('reddit') || this.isRedditImage(item.image);
+  }
+
   isRedditImage(image: string): boolean {
     return image.includes('redd.it') || image.includes('reddit.com') || image.includes('redditmedia.com') || image.includes('redditstatic.com');
+  }
+
+  hasValidImage(item: News): boolean {
+    return !!item.image && /^https?:\/\//.test(item.image) && !this.isRedditSource(item);
   }
 }

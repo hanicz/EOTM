@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CryptoWatch } from '../model/cryptowatch';
+import { Crypto } from '../model/crypto';
 import { ForexWatch } from '../model/forexwatch';
 import { StockWatch } from '../model/stockwatch';
 import { WatchlistService } from '../service/watchlist.service';

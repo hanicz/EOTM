@@ -1,3 +1,22 @@
+.alert-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    padding-top: 0.25rem;
+}
+
+.alert-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.alert-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #5f5e5a;
+}
+
 :host ::ng-deep .row-over {
     background-color: rgba(188, 248, 206, 0.15) !important;
 }

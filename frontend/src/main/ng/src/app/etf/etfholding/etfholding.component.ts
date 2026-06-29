@@ -28,6 +28,11 @@ export class EtfholdingComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  refresh(): void {
+    this.investmentsLoading = true;
+    this.fetchData();
+  }
+
   private fetchData(): void {
     this.etfService.getHolding().subscribe({
       next: (data) => {

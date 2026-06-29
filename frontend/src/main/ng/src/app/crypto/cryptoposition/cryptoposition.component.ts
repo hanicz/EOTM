@@ -30,6 +30,10 @@ export class CryptopositionComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  refresh(): void {
+    this.fetchData();
+  }
+
   private fetchData(): void {
     this.cryptoService.getPositions().subscribe({
       next: (data) => {

@@ -49,6 +49,10 @@ export class TransactionComponent implements OnInit {
     this.fetchData();
   }
 
+  refresh(): void {
+    this.fetchData();
+  }
+
   private fetchData(): void {
     this.cryptoService.getTransactions().subscribe({
       next: (data) => {

@@ -42,6 +42,10 @@ export class DividendComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  refresh(): void {
+    this.fetchData();
+  }
+
   private fetchData(): void {
     this.dividendService.getAllDividends().subscribe({
       next: (data) => {

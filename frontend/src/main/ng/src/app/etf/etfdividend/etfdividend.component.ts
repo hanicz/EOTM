@@ -39,6 +39,10 @@ export class EtfdividendComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  refresh(): void {
+    this.fetchData();
+  }
+
   private fetchData(): void {
     this.etfDividendService.getAllDividends().subscribe({
       next: (data) => {

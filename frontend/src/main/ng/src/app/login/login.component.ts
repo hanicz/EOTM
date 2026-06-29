@@ -39,7 +39,7 @@ export class LoginComponent {
     if (this.emailControl.valid && this.passwordControl.valid) {
       this.userService.loginUser(this.user).subscribe({
         next: (data) => {
-          this.router.navigate(['./home'])
+          this.router.navigate(['./dashboard'])
         },
         error: () => {
           this.showError();

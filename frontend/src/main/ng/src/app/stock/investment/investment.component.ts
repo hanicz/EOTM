@@ -75,6 +75,10 @@ export class InvestmentComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  refresh(): void {
+    this.fetchData();
+  }
+
   private fetchData(): void {
     this.stockService.getInvestments().subscribe({
       next: (data) => {

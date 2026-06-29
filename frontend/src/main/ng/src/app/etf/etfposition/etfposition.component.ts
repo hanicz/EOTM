@@ -25,6 +25,10 @@ export class EtfpositionComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  refresh(): void {
+    this.fetchData();
+  }
+
   private fetchData(): void {
     this.etfService.getPositions().subscribe({
       next: (data) => {

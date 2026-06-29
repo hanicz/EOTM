@@ -12,7 +12,7 @@ export class LandingComponent implements OnInit {
   constructor(private router: Router, private userService: UserService) {
     if (localStorage.getItem('token') != null) {
       this.userService.validateToken().subscribe({
-        next: () => this.navigateOn('./home'),
+        next: () => this.navigateOn('./dashboard'),
         error: () => { 
           localStorage.removeItem('token');
           this.navigateOn('./login') 

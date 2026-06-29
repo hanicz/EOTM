@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { Candle } from '../model/candle';
 import { Metric } from '../model/metric';
 import { News } from '../model/news';
@@ -48,7 +48,7 @@ export type ChartOptions = {
     styleUrls: ['./search.component.css'],
     imports: [MenuComponent, Bind, Panel, Select, FormsModule, Tag, Image, ButtonDirective, Ripple, Divider, SelectButton, ChartComponent, NewsComponent, DecimalPipe, CurrencyPipe, DatePipe]
 })
-export class SearchComponent implements OnInit {
+export class SearchComponent implements OnInit, AfterViewInit {
 
   globals: Globals;
 
@@ -188,8 +188,10 @@ export class SearchComponent implements OnInit {
         },
       }
     };
+  }
 
-    if (globals.selectedStock != '') {
+  ngAfterViewInit(): void {
+    if (this.globals.selectedStock != '') {
       this.stockChanged(undefined);
     }
   }
@@ -301,7 +303,10 @@ export class SearchComponent implements OnInit {
         }
       },
       {
-        max: this.candle.v[this.candle.c.length - 2] / 100000,
+        seriesName: 'Volume',
+        opposite: true,
+        min: 0,
+        max: Math.max(...volumeChartData.map(v => v.y)) * 4,
         labels: {
           show: false,
         }
@@ -384,7 +389,7 @@ export class SearchComponent implements OnInit {
         type: 'category',
         categories: categories,
         labels: {
-          formatter: (value: number) => this.datepipe.transform(value, 'MMM YY'),
+          formatter: (value: number) => this.datepipe.transform(value, 'MMM y'),
         }
       },
     });

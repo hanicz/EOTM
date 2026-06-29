@@ -1,0 +1,172 @@
+.dashboard-card {
+    padding: 0.5rem 0;
+}
+
+::ng-deep .currency-select .p-select-label {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    font-size: 13px;
+}
+
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 1.5rem;
+}
+
+.metric-tile {
+    background-color: #f6f4ee;
+    border-radius: 8px;
+    padding: 14px;
+}
+
+.metric-tile-clickable {
+    cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.metric-tile-clickable:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+}
+
+.metric-tile-primary {
+    background-color: #1b1b1b;
+}
+
+.metric-tile-primary .metric-label {
+    color: #ef9f27;
+}
+
+.metric-tile-primary .metric-value {
+    color: #f1efe8;
+}
+
+.metric-label {
+    font-size: 12px;
+    color: #888780;
+    margin-bottom: 6px;
+}
+
+.metric-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1b1b1b;
+}
+
+.metric-change {
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.metric-change.positive {
+    color: #3b6d11;
+}
+
+.metric-change.negative {
+    color: #a32d2d;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 16px;
+}
+
+.detail-panel {
+    border: 1px solid #e3e0d5;
+    border-radius: 8px;
+    padding: 14px;
+}
+
+.detail-panel-clickable {
+    cursor: pointer;
+    transition: box-shadow 0.1s ease;
+}
+
+.detail-panel-clickable:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.detail-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1b1b1b;
+    margin-bottom: 10px;
+}
+
+.donut-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.donut {
+    width: 110px;
+    height: 110px;
+    flex: 0 0 110px;
+    transform: rotate(-90deg);
+}
+
+.legend {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.legend-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #5f5e5a;
+}
+
+.legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.legend-label {
+    flex: 1;
+}
+
+.legend-pct {
+    font-weight: 500;
+    color: #1b1b1b;
+}
+
+.alert-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    padding: 6px 0;
+    border-bottom: 1px solid #f1efe8;
+    color: #1b1b1b;
+}
+
+.alert-row:last-child {
+    border-bottom: none;
+}
+
+.alert-value {
+    color: #888780;
+}
+
+.empty-state {
+    font-size: 13px;
+    color: #888780;
+}
+
+@media (max-width: 900px) {
+    .metric-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+}

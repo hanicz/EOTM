@@ -10,10 +10,12 @@ import { LandingComponent } from './landing/landing.component';
 import { EtfComponent } from './etf/etf.component';
 import { AlertComponent } from './alert/alert.component';
 import { SettingsComponent } from './settings/settings.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent },
   { path: 'login', component: LoginComponent },
+  { path: 'dashboard', component: DashboardComponent },
   { path: 'home', component: HomeComponent },
   { path: 'stock', component: StockComponent },
   { path: 'crypto', component: CryptoComponent },

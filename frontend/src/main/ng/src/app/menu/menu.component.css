@@ -6,9 +6,32 @@
     margin-top: 0;
 }
 
+::ng-deep .p-menubar-item-link-active {
+    background: rgba(239, 159, 39, 0.12) !important;
+    color: #ef9f27 !important;
+}
+
+::ng-deep .p-menubar-item-link-active .p-menubar-item-icon {
+    color: #ef9f27 !important;
+}
+
+::ng-deep .user-section .p-button-text {
+    background: transparent !important;
+}
+
+::ng-deep .user-section .p-button-text:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #f1efe8 !important;
+}
+
 .logo {
     margin: 0;
     font-size: 1.25rem;
+    color: #f1efe8;
+}
+
+.logo i {
+    color: #ef9f27;
 }
 
 .toolbar {
@@ -27,4 +50,9 @@
     align-items: center;
     gap: 0.5rem;
     font-size: 0.875rem;
+    color: #f1efe8;
+}
+
+.user-section button {
+    color: #f1efe8;
 }

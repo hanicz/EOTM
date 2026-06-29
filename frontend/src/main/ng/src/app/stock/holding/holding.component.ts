@@ -34,6 +34,11 @@ export class HoldingComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  refresh(): void {
+    this.investmentsLoading = true;
+    this.fetchData();
+  }
+
   private fetchData(): void {
     this.stockService.getHolding().subscribe({
       next: (data) => {

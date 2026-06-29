@@ -31,6 +31,11 @@ export class CryptoholdingComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  refresh(): void {
+    this.transactionsLoading = true;
+    this.fetchData();
+  }
+
   private fetchData(): void {
     this.cryptoService.getHoldings().subscribe({
       next: (data) => {

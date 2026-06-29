@@ -28,6 +28,11 @@ export class ForexholdingComponent {
   ngOnInit(): void {
   }
 
+  refresh(): void {
+    this.transactionsLoading = true;
+    this.fetchData();
+  }
+
   private fetchData(): void {
     this.forexService.getHolding().subscribe({
       next: (data) => {

@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -32,15 +31,6 @@ public class AlertScheduler {
     private final EODAPIService eodAPIService;
     private final CryptoAPIService cryptoAPIService;
     private final EmailService emailServiceImpl;
-
-    private final static Map<String, String> messageMap = new HashMap<>();
-
-    static {
-        AlertScheduler.messageMap.put("PERCENT_OVER", "{0} is over {1}%");
-        AlertScheduler.messageMap.put("PERCENT_UNDER", "{0} is under {1}%");
-        AlertScheduler.messageMap.put("PRICE_OVER", "{0} is over {1} price point");
-        AlertScheduler.messageMap.put("PRICE_UNDER", "{0} is under {1} price point");
-    }
 
     @Scheduled(fixedDelay = 300000)
     public void checkAlerts() {
@@ -110,15 +100,15 @@ public class AlertScheduler {
 
         log.trace("Checking alert: {}", alert);
         if (alert.isAlertActive()) {
-            String message = MessageFormat.format(AlertScheduler.messageMap.get(alert.getType()), alert.getSymbolOrTicker(), Double.toString(alert.getValuePoint()));
-            this.sendAndDelete(alert, message);
+            this.sendAndDelete(alert);
         }
         log.trace("Alert checked with id: {}", alert.getId());
         log.trace("Exit");
     }
 
-    private void sendAndDelete(Alert alert, String message) {
-        this.emailServiceImpl.sendMail(alert.getUser().getEmail(), message);
+    private void sendAndDelete(Alert alert) {
+        this.emailServiceImpl.sendAlertMail(alert.getUser().getEmail(), alert.getSymbolOrTicker(), alert.getType(),
+            alert.getValuePoint(), alert.getActualValue(), alert.getActualChange());
         switch (alert) {
             case StockAlert sa -> this.stockAlertRepository.deleteById(sa.getId());
             case CryptoAlert ca -> this.cryptoAlertRepository.deleteById(ca.getId());

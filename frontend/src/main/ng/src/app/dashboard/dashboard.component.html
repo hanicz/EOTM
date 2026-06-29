@@ -1,0 +1,114 @@
+<div class="shadow-5">
+  <menu class="pl-0 mb-0"></menu>
+  <p-panel>
+    <ng-template pTemplate="icons">
+      <p-select [options]="currencyOptions" [(ngModel)]="selectedCurrency" (onChange)="onCurrencyChange()"
+        styleClass="currency-select" [style]="{'width':'90px'}"></p-select>
+      <button pButton pRipple icon="pi pi-refresh" class="p-button-rounded p-button-text"
+        pTooltip="Refresh" (click)="refresh()"></button>
+    </ng-template>
+    <div class="dashboard-card">
+
+      @if (loading) {
+        <div class="metric-grid">
+          @for (item of [].constructor(5); track $index) {
+            <div class="metric-tile">
+              <p-skeleton width="60%" styleClass="mb-2"></p-skeleton>
+              <p-skeleton width="80%" height="24px"></p-skeleton>
+            </div>
+          }
+        </div>
+      }
+
+      @if (!loading) {
+        <div class="metric-grid">
+          <div class="metric-tile metric-tile-primary">
+            <div class="metric-label">Net worth</div>
+            <div class="metric-value">{{netWorth | currency : selectedCurrency : 'symbol' : '0.0-2'}}</div>
+            <div class="metric-change" [class.positive]="netWorthChangePct >= 0" [class.negative]="netWorthChangePct < 0">
+              {{netWorthChangePct >= 0 ? '+' : ''}}{{netWorthChangePct | number : '0.0-1'}}%
+            </div>
+          </div>
+          <div class="metric-tile metric-tile-clickable" (click)="navigateTo('/stock')">
+            <div class="metric-label">Stock</div>
+            <div class="metric-value">{{stockTotal | currency : selectedCurrency : 'symbol' : '0.0-2'}}</div>
+            <div class="metric-change" [class.positive]="stockChangePct >= 0" [class.negative]="stockChangePct < 0">
+              {{stockChangePct >= 0 ? '+' : ''}}{{stockChangePct | number : '0.0-1'}}%
+            </div>
+          </div>
+          <div class="metric-tile metric-tile-clickable" (click)="navigateTo('/crypto')">
+            <div class="metric-label">Crypto</div>
+            <div class="metric-value">{{cryptoTotal | currency : selectedCurrency : 'symbol' : '0.0-2'}}</div>
+            <div class="metric-change" [class.positive]="cryptoChangePct >= 0" [class.negative]="cryptoChangePct < 0">
+              {{cryptoChangePct >= 0 ? '+' : ''}}{{cryptoChangePct | number : '0.0-1'}}%
+            </div>
+          </div>
+          <div class="metric-tile metric-tile-clickable" (click)="navigateTo('/etf')">
+            <div class="metric-label">ETF</div>
+            <div class="metric-value">{{etfTotal | currency : selectedCurrency : 'symbol' : '0.0-2'}}</div>
+            <div class="metric-change" [class.positive]="etfChangePct >= 0" [class.negative]="etfChangePct < 0">
+              {{etfChangePct >= 0 ? '+' : ''}}{{etfChangePct | number : '0.0-1'}}%
+            </div>
+          </div>
+          <div class="metric-tile metric-tile-clickable" (click)="navigateTo('/forex')">
+            <div class="metric-label">Forex</div>
+            <div class="metric-value">{{forexTotal | currency : selectedCurrency : 'symbol' : '0.0-2'}}</div>
+            <div class="metric-change" [class.positive]="forexChangePct >= 0" [class.negative]="forexChangePct < 0">
+              {{forexChangePct >= 0 ? '+' : ''}}{{forexChangePct | number : '0.0-1'}}%
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-grid">
+          <div class="detail-panel">
+            <div class="detail-title">Allocation by asset class</div>
+            @if (donutSegments.length > 0) {
+              <div class="donut-row">
+                <svg viewBox="0 0 100 100" class="donut">
+                  <circle cx="50" cy="50" r="42" fill="none" stroke="#f1efe8" stroke-width="16"></circle>
+                  @for (segment of donutSegments; track segment.color) {
+                    <circle cx="50" cy="50" r="42" fill="none" [attr.stroke]="segment.color" stroke-width="16"
+                      [attr.stroke-dasharray]="segment.dashArray" [attr.stroke-dashoffset]="segment.dashOffset"></circle>
+                  }
+                </svg>
+                <div class="legend">
+                  @for (slice of slices; track slice.label) {
+                    @if (slice.value > 0) {
+                      <div class="legend-row">
+                        <span class="legend-dot" [style.background]="slice.color"></span>
+                        <span class="legend-label">{{slice.label}}</span>
+                        <span class="legend-pct">{{slice.percentage | number : '0.0-0'}}%</span>
+                      </div>
+                    }
+                  }
+                </div>
+              </div>
+            } @else {
+              <div class="empty-state">No holdings yet</div>
+            }
+          </div>
+
+          <div class="detail-panel detail-panel-clickable" (click)="navigateTo('/alert')">
+            <div class="detail-title">Active alerts</div>
+            @if (stockAlerts.length === 0 && cryptoAlerts.length === 0) {
+              <div class="empty-state">No active alerts</div>
+            }
+            @for (alert of stockAlerts; track alert.id) {
+              <div class="alert-row">
+                <span>{{alert.shortName}}.{{alert.exchange}} {{alert.type | alertTypePipe}}</span>
+                <span class="alert-value">{{alert.valuePoint}}</span>
+              </div>
+            }
+            @for (alert of cryptoAlerts; track alert.id) {
+              <div class="alert-row">
+                <span>{{alert.symbol}} {{alert.type | alertTypePipe}}</span>
+                <span class="alert-value">{{alert.valuePoint}}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+    </div>
+  </p-panel>
+</div>

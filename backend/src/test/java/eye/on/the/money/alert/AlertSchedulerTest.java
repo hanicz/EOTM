@@ -22,6 +22,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -62,12 +63,12 @@ class AlertSchedulerTest {
 
         JsonNode json = om.readTree("[{\"code\":\"CRSR.US\",\"timestamp\":1700859720,\"gmtoffset\":0,\"open\":116.49,\"high\":116.59,\"low\":115.34,\"close\":116.25,\"volume\":2149550,\"previousClose\":116.24,\"change\":0.01,\"change_p\":0.0086}]");
 
-        doNothing().when(this.emailService).sendMail(anyString(), anyString());
+        doNothing().when(this.emailService).sendAlertMail(anyString(), anyString(), anyString(), anyDouble(), anyDouble(), anyDouble());
         when(this.eodapiService.getLiveStockValue("CRSR.US")).thenReturn(json);
 
         this.alertScheduler.checkAlerts();
 
-        verify(this.emailService, times(1)).sendMail("test@test.test", "CRSR.US is over 50.0 price point");
+        verify(this.emailService, times(1)).sendAlertMail("test@test.test", "CRSR.US", "PRICE_OVER", 50.0, 116.25, 0.0086);
         Assertions.assertFalse(this.stockAlertRepository.existsById(sa.getId()));
     }
 
@@ -78,12 +79,12 @@ class AlertSchedulerTest {
 
         JsonNode json = om.readTree("[{\"code\":\"CRSR.US\",\"timestamp\":1700859720,\"gmtoffset\":0,\"open\":116.49,\"high\":116.59,\"low\":115.34,\"close\":49.99,\"volume\":2149550,\"previousClose\":116.24,\"change\":0.01,\"change_p\":0.0086}]");
 
-        doNothing().when(this.emailService).sendMail(anyString(), anyString());
+        doNothing().when(this.emailService).sendAlertMail(anyString(), anyString(), anyString(), anyDouble(), anyDouble(), anyDouble());
         when(this.eodapiService.getLiveStockValue("CRSR.US")).thenReturn(json);
 
         this.alertScheduler.checkAlerts();
 
-        verify(this.emailService, times(0)).sendMail(anyString(), anyString());
+        verify(this.emailService, times(0)).sendAlertMail(anyString(), anyString(), anyString(), anyDouble(), anyDouble(), anyDouble());
         Assertions.assertTrue(this.stockAlertRepository.existsById(sa.getId()));
     }
 
@@ -94,12 +95,12 @@ class AlertSchedulerTest {
 
         JsonNode json = om.readTree("[{\"code\":\"CRSR.US\",\"timestamp\":1700859720,\"gmtoffset\":0,\"open\":116.49,\"high\":116.59,\"low\":115.34,\"close\":116.25,\"volume\":2149550,\"previousClose\":116.24,\"change\":0.01,\"change_p\":0.0086}]");
 
-        doNothing().when(this.emailService).sendMail(anyString(), anyString());
+        doNothing().when(this.emailService).sendAlertMail(anyString(), anyString(), anyString(), anyDouble(), anyDouble(), anyDouble());
         when(this.eodapiService.getLiveStockValue("CRSR.US")).thenReturn(json);
 
         this.alertScheduler.checkAlerts();
 
-        verify(this.emailService, times(1)).sendMail("test@test.test", "CRSR.US is under 200.0 price point");
+        verify(this.emailService, times(1)).sendAlertMail("test@test.test", "CRSR.US", "PRICE_UNDER", 200.0, 116.25, 0.0086);
         Assertions.assertFalse(this.stockAlertRepository.existsById(sa.getId()));
     }
 
@@ -110,12 +111,12 @@ class AlertSchedulerTest {
 
         JsonNode json = om.readTree("[{\"code\":\"CRSR.US\",\"timestamp\":1700859720,\"gmtoffset\":0,\"open\":116.49,\"high\":116.59,\"low\":115.34,\"close\":200.01,\"volume\":2149550,\"previousClose\":116.24,\"change\":0.01,\"change_p\":0.0086}]");
 
-        doNothing().when(this.emailService).sendMail(anyString(), anyString());
+        doNothing().when(this.emailService).sendAlertMail(anyString(), anyString(), anyString(), anyDouble(), anyDouble(), anyDouble());
         when(this.eodapiService.getLiveStockValue("CRSR.US")).thenReturn(json);
 
         this.alertScheduler.checkAlerts();
 
-        verify(this.emailService, times(0)).sendMail(anyString(), anyString());
+        verify(this.emailService, times(0)).sendAlertMail(anyString(), anyString(), anyString(), anyDouble(), anyDouble(), anyDouble());
         Assertions.assertTrue(this.stockAlertRepository.existsById(sa.getId()));
     }
 
@@ -126,12 +127,12 @@ class AlertSchedulerTest {
 
         JsonNode json = om.readTree("[{\"code\":\"CRSR.US\",\"timestamp\":1700859720,\"gmtoffset\":0,\"open\":116.49,\"high\":116.59,\"low\":115.34,\"close\":116.25,\"volume\":2149550,\"previousClose\":116.24,\"change\":0.1,\"change_p\":6.78}]");
 
-        doNothing().when(this.emailService).sendMail(anyString(), anyString());
+        doNothing().when(this.emailService).sendAlertMail(anyString(), anyString(), anyString(), anyDouble(), anyDouble(), anyDouble());
         when(this.eodapiService.getLiveStockValue("CRSR.US")).thenReturn(json);
 
         this.alertScheduler.checkAlerts();
 
-        verify(this.emailService, times(1)).sendMail("test@test.test", "CRSR.US is over 5.0%");
+        verify(this.emailService, times(1)).sendAlertMail("test@test.test", "CRSR.US", "PERCENT_OVER", 5.0, 116.25, 6.78);
         Assertions.assertFalse(this.stockAlertRepository.existsById(sa.getId()));
     }
 
@@ -142,12 +143,12 @@ class AlertSchedulerTest {
 
         JsonNode json = om.readTree("[{\"code\":\"CRSR.US\",\"timestamp\":1700859720,\"gmtoffset\":0,\"open\":116.49,\"high\":116.59,\"low\":115.34,\"close\":116.25,\"volume\":2149550,\"previousClose\":116.24,\"change\":0.1,\"change_p\":4.99}]");
 
-        doNothing().when(this.emailService).sendMail(anyString(), anyString());
+        doNothing().when(this.emailService).sendAlertMail(anyString(), anyString(), anyString(), anyDouble(), anyDouble(), anyDouble());
         when(this.eodapiService.getLiveStockValue("CRSR.US")).thenReturn(json);
 
         this.alertScheduler.checkAlerts();
 
-        verify(this.emailService, times(0)).sendMail(anyString(), anyString());
+        verify(this.emailService, times(0)).sendAlertMail(anyString(), anyString(), anyString(), anyDouble(), anyDouble(), anyDouble());
         Assertions.assertTrue(this.stockAlertRepository.existsById(sa.getId()));
     }
 
@@ -158,12 +159,12 @@ class AlertSchedulerTest {
 
         JsonNode json = om.readTree("[{\"code\":\"CRSR.US\",\"timestamp\":1700859720,\"gmtoffset\":0,\"open\":116.49,\"high\":116.59,\"low\":115.34,\"close\":116.25,\"volume\":2149550,\"previousClose\":116.24,\"change\":-0.06,\"change_p\":-6.89}]");
 
-        doNothing().when(this.emailService).sendMail(anyString(), anyString());
+        doNothing().when(this.emailService).sendAlertMail(anyString(), anyString(), anyString(), anyDouble(), anyDouble(), anyDouble());
         when(this.eodapiService.getLiveStockValue("CRSR.US")).thenReturn(json);
 
         this.alertScheduler.checkAlerts();
 
-        verify(this.emailService, times(1)).sendMail("test@test.test", "CRSR.US is under -5.0%");
+        verify(this.emailService, times(1)).sendAlertMail("test@test.test", "CRSR.US", "PERCENT_UNDER", -5.0, 116.25, -6.89);
         Assertions.assertFalse(this.stockAlertRepository.existsById(sa.getId()));
     }
 
@@ -174,12 +175,12 @@ class AlertSchedulerTest {
 
         JsonNode json = om.readTree("[{\"code\":\"CRSR.US\",\"timestamp\":1700859720,\"gmtoffset\":0,\"open\":116.49,\"high\":116.59,\"low\":115.34,\"close\":116.25,\"volume\":2149550,\"previousClose\":116.24,\"change\":-0.06,\"change_p\":-4.99}]");
 
-        doNothing().when(this.emailService).sendMail(anyString(), anyString());
+        doNothing().when(this.emailService).sendAlertMail(anyString(), anyString(), anyString(), anyDouble(), anyDouble(), anyDouble());
         when(this.eodapiService.getLiveStockValue("CRSR.US")).thenReturn(json);
 
         this.alertScheduler.checkAlerts();
 
-        verify(this.emailService, times(0)).sendMail(anyString(), anyString());
+        verify(this.emailService, times(0)).sendAlertMail(anyString(), anyString(), anyString(), anyDouble(), anyDouble(), anyDouble());
         Assertions.assertTrue(this.stockAlertRepository.existsById(sa.getId()));
     }
 

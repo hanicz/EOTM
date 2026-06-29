@@ -1,58 +1,40 @@
-<div>
-  <div class="grid justify-content-center pt-3">
-    @if (newsLoading) {
-      @for (item of [].constructor(4); track $index) {
-        <div
-          class="col-5 shadow-5 mr-3 mb-3 border-orange-100 surface-overlay border-1 border-round"
-          style="background-color: #fffaf5;">
-          <div class="grid">
-            <div class="col-2 col-offset-1"><p-skeleton></p-skeleton></div>
-            <div class="col-2 col-offset-6"><p-skeleton></p-skeleton></div>
-            <div class="col-10 col-offset-1"><p-skeleton
-              styleClass="mb-2"></p-skeleton><p-skeleton></p-skeleton>
-            </div>
-            <div class="col-3 col-offset-1"><p-skeleton height="80px"></p-skeleton></div>
-            <div class="col-6 col-offset-1">
-              <p-skeleton styleClass="mb-2"></p-skeleton>
-              <p-skeleton styleClass="mb-2"></p-skeleton>
-              <p-skeleton styleClass="mb-2"></p-skeleton>
-            </div>
-          </div>
+<div class="news-grid">
+  @if (newsLoading) {
+    @for (item of [].constructor(4); track $index) {
+      <div class="news-card">
+        <div class="news-card-media"><p-skeleton height="100%"></p-skeleton></div>
+        <div class="news-card-body">
+          <p-skeleton width="40%" styleClass="mb-2"></p-skeleton>
+          <p-skeleton width="90%" styleClass="mb-2"></p-skeleton>
+          <p-skeleton styleClass="mb-2"></p-skeleton>
+          <p-skeleton width="70%"></p-skeleton>
         </div>
-      }
+      </div>
     }
+  }
 
-    @if (!newsLoading) {
-      @for (new of news; track new) {
-        <div
-          class="col-5 shadow-5 mr-3 mb-3 border-orange-100 surface-overlay border-1 border-round"
-          style="background-color: #fffaf5;">
-          <a href="{{new.url}}" target="_blank" style="color: inherit; text-decoration: inherit;">
-            <div class="grid">
-              <div class="col-2 col-offset-1 font-italic">{{new.datetime * 1000 | date: 'yyyy-MM-dd'}}
-              </div>
-              <div class="col-1 col-offset-7 text-sm">{{new.source}}</div>
-            </div>
-            <div class="grid">
-              <div class="col-11 col-offset-1 font-bold">{{new.headline}}</div>
-            </div>
-            <div class="grid">
-              <div class="col-2 col-offset-1">
-                @if (new.image != undefined && new.image != '') {
-                  @if (isRedditImage(new.image)) {
-                    <i class="pi pi-reddit" style="font-size: 3rem; color: #FF4500;"></i>
-                  } @else {
-                    <p-image src="{{new.image}}" height="80"
-                    width="150"></p-image>
-                  }
-                }
-              </div>
-              <div class="col-6 col-offset-2 text-sm">{{(new.summary.length > 250) ? (new.summary | slice:
-              0:250) + '...' : new.summary }}</div>
-            </div>
-          </a>
+  @if (!newsLoading) {
+    @for (new of news; track new) {
+      <a class="news-card" href="{{new.url}}" target="_blank">
+        <div class="news-card-media">
+          @if (isRedditSource(new)) {
+            <i class="pi pi-reddit news-reddit-icon"></i>
+          } @else if (hasValidImage(new)) {
+            <p-image src="{{new.image}}" height="100%" width="100%"></p-image>
+          } @else {
+            <i class="pi pi-megaphone news-fallback-icon"></i>
+          }
         </div>
-      }
+        <div class="news-card-body">
+          <div class="news-card-meta">
+            <span>{{new.datetime * 1000 | date: 'yyyy-MM-dd'}}</span>
+            <span class="news-card-source">{{new.source}}</span>
+          </div>
+          <div class="news-card-headline">{{new.headline}}</div>
+          <div class="news-card-summary">{{(new.summary.length > 220) ? (new.summary | slice:
+          0:220) + '...' : new.summary }}</div>
+        </div>
+      </a>
     }
-  </div>
+  }
 </div>

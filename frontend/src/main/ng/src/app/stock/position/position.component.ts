@@ -31,6 +31,10 @@ export class PositionComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  refresh(): void {
+    this.fetchData();
+  }
+
   private fetchData(): void {
     this.stockService.getPositions().subscribe({
       next: (data) => {

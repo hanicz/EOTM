@@ -46,6 +46,10 @@ export class ForextransactionComponent {
   ngOnInit(): void {
   }
 
+  refresh(): void {
+    this.fetchData();
+  }
+
   private fetchData(): void {
     this.forexService.getTransactions().subscribe({
       next: (data) => {

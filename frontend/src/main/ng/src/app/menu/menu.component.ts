@@ -25,6 +25,7 @@ export class MenuComponent implements OnInit {
     { label: 'Crypto', icon: 'fab fa-bitcoin', routerLink: ['/crypto'] },
     { label: 'ETF', icon: 'fas fa-chart-line', routerLink: ['/etf'] },
     { label: 'Forex', icon: 'fa-solid fa-coins', routerLink: ['/forex'] },
+    { label: 'Securities', icon: 'fa-solid fa-building-columns', routerLink: ['/security'] },
     { label: 'Alerts', icon: 'fa-solid fa-bell', routerLink: ['/alert'] },
     { label: 'Lookup', icon: 'fas fa-search', routerLink: ['/search'] },
     { label: 'Settings', icon: 'fa-solid fa-gear', routerLink: ['/settings'] }
@@ -43,6 +44,7 @@ export class MenuComponent implements OnInit {
 
   logOut(): void {
     localStorage.removeItem('token');
+    this.userService.clearUserCache();
     this.router.navigate(['./']);
   }
 }

@@ -11,7 +11,7 @@
 
       @if (loading) {
         <div class="metric-grid">
-          @for (item of [].constructor(5); track $index) {
+          @for (item of [].constructor(6); track $index) {
             <div class="metric-tile">
               <p-skeleton width="60%" styleClass="mb-2"></p-skeleton>
               <p-skeleton width="80%" height="24px"></p-skeleton>
@@ -57,6 +57,13 @@
               {{forexChangePct >= 0 ? '+' : ''}}{{forexChangePct | number : '0.0-1'}}%
             </div>
           </div>
+          <div class="metric-tile metric-tile-clickable" (click)="navigateTo('/security')">
+            <div class="metric-label">Securities</div>
+            <div class="metric-value">{{securityTotal | currency : selectedCurrency : 'symbol' : '0.0-2'}}</div>
+            <div class="metric-change" [class.positive]="securityChangePct >= 0" [class.negative]="securityChangePct < 0">
+              {{securityChangePct >= 0 ? '+' : ''}}{{securityChangePct | number : '0.0-1'}}%
+            </div>
+          </div>
         </div>
 
         <div class="detail-grid">
@@ -64,17 +71,34 @@
             <div class="detail-title">Allocation by asset class</div>
             @if (donutSegments.length > 0) {
               <div class="donut-row">
-                <svg viewBox="0 0 100 100" class="donut">
-                  <circle cx="50" cy="50" r="42" fill="none" stroke="#f1efe8" stroke-width="16"></circle>
-                  @for (segment of donutSegments; track segment.color) {
-                    <circle cx="50" cy="50" r="42" fill="none" [attr.stroke]="segment.color" stroke-width="16"
-                      [attr.stroke-dasharray]="segment.dashArray" [attr.stroke-dashoffset]="segment.dashOffset"></circle>
-                  }
-                </svg>
+                <div class="donut-wrap" (mouseleave)="setHoveredSlice(null)">
+                  <svg viewBox="0 0 100 100" class="donut">
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="#f1efe8" stroke-width="13"></circle>
+                    @for (segment of donutSegments; track segment.label) {
+                      <circle cx="50" cy="50" r="40" fill="none" [attr.stroke]="segment.color"
+                        [attr.stroke-width]="hoveredLabel === segment.label ? 16 : 13"
+                        [class.donut-segment-dim]="hoveredLabel && hoveredLabel !== segment.label"
+                        class="donut-segment"
+                        [attr.stroke-dasharray]="segment.dashArray" [attr.stroke-dashoffset]="segment.dashOffset"
+                        (mouseenter)="setHoveredSlice(segment.label)"></circle>
+                    }
+                  </svg>
+                  <div class="donut-center">
+                    @if (hoveredSegment) {
+                      <div class="donut-center-label">{{hoveredSegment.label}}</div>
+                      <div class="donut-center-value">{{formatCompact(hoveredSegment.value)}}</div>
+                      <div class="donut-center-pct">{{hoveredSegment.percentage | number : '0.0-1'}}%</div>
+                    } @else {
+                      <div class="donut-center-label">Net worth</div>
+                      <div class="donut-center-value">{{formatCompact(netWorth)}}</div>
+                    }
+                  </div>
+                </div>
                 <div class="legend">
                   @for (slice of slices; track slice.label) {
                     @if (slice.value > 0) {
-                      <div class="legend-row">
+                      <div class="legend-row" [class.legend-row-active]="hoveredLabel === slice.label"
+                        (mouseenter)="setHoveredSlice(slice.label)" (mouseleave)="setHoveredSlice(null)">
                         <span class="legend-dot" [style.background]="slice.color"></span>
                         <span class="legend-label">{{slice.label}}</span>
                         <span class="legend-pct">{{slice.percentage | number : '0.0-0'}}%</span>

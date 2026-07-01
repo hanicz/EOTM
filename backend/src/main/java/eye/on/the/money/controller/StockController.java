@@ -1,9 +1,11 @@
 package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.out.CandleQuoteDTO;
+import eye.on.the.money.dto.out.SignalDTO;
 import eye.on.the.money.model.stock.Exchange;
 import eye.on.the.money.model.stock.Stock;
 import eye.on.the.money.model.stock.Symbol;
+import eye.on.the.money.service.signal.SignalService;
 import eye.on.the.money.service.stock.StockService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +25,7 @@ import java.util.List;
 public class StockController {
 
     private final StockService stockService;
+    private final SignalService signalService;
 
 
     @GetMapping()
@@ -47,5 +50,11 @@ public class StockController {
     public ResponseEntity<CandleQuoteDTO> getCandleQuoteByShortName(@PathVariable String shortName, @PathVariable int months) {
         log.trace("Enter");
         return new ResponseEntity<>(this.stockService.getCandleQuoteByShortName(shortName, months), HttpStatus.OK);
+    }
+
+    @GetMapping("{shortName}/signal")
+    public ResponseEntity<SignalDTO> getSignal(@PathVariable String shortName) {
+        log.trace("Enter");
+        return new ResponseEntity<>(this.signalService.evaluate(shortName), HttpStatus.OK);
     }
 }

@@ -1,0 +1,155 @@
+<p-toolbar styleClass="p-mb-4">
+  <ng-template pTemplate="left">
+    <button pButton pRipple label="New" icon="pi pi-plus" class="mr-2" severity="success"
+    (click)="openNew()"></button>
+    <button pButton pRipple icon="pi pi-trash" severity="danger"
+    [disabled]="!selectedTransactions || !selectedTransactions.length" (click)="deleteClicked()"></button>
+  </ng-template>
+
+  <ng-template pTemplate="right">
+    <p-fileUpload mode="basic" #fileUpload accept=".csv" [customUpload]="true" label="Import" chooseLabel="Import"
+      class="mr-2 p-d-inline-block" (uploadHandler)="onUpload($event)">
+    </p-fileUpload>
+    <button pButton pRipple label="Export" icon="pi pi-upload" severity="info" (click)="download()"></button>
+  </ng-template>
+</p-toolbar>
+<p-table #dt1 [value]="transactions" responsiveLayout="scroll" styleClass="p-datatable-striped"
+  [(selection)]="selectedTransactions">
+
+  <ng-template pTemplate="caption">
+    <div class="flex justify-content-between flex-wrap">
+      <div class="flex flex-row flex-wrap">
+        <span class="mr-2">
+          <input pInputText type="text"
+            (input)="dt1.filter($any($event.target)?.value, 'securityName', 'contains')"
+            [value]="$any(dt1.filters['securityName'])?.value ?? ''" placeholder="Search by Name"
+            class="p-column-filter">
+        </span>
+        <p-columnFilter field="buySell" matchMode="equals" [showMenu]="false">
+          <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+            <p-select [ngModel]="value" [options]="statuses" (onChange)="filter($any($event)?.value)"
+              [showClear]="true" placeholder="Any">
+              <ng-template let-option pTemplate="item">
+
+                @if (option.label === 'BUY') {
+                  <p-tag styleClass="p-mr-2" severity="info" value="BUY">
+                  </p-tag>
+                }
+                @if (option.label === 'SELL') {
+                  <p-tag styleClass="p-mr-2" severity="warn"
+                  value="SELL"></p-tag>
+                }
+              </ng-template>
+            </p-select>
+          </ng-template>
+        </p-columnFilter>
+      </div>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="header">
+    <tr>
+      <th style="width: 3rem">
+        <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+      </th>
+      <th>Security Id</th>
+      <th>Security Name</th>
+      <th>Type</th>
+      <th>Quantity</th>
+      <th>Spent</th>
+      <th>Average</th>
+      <th>Date</th>
+      <th>Currency</th>
+      <th></th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-transaction>
+    <tr>
+      <td>
+        <p-tableCheckbox [value]="transaction"></p-tableCheckbox>
+      </td>
+      <td>{{transaction.securityId}}</td>
+      <td>{{transaction.securityName}}</td>
+      <td>
+        @if (transaction.buySell === 'B') {
+          <p-tag styleClass="p-mr-2" severity="info" value="BUY"></p-tag>
+        }
+        @if (transaction.buySell === 'S') {
+          <p-tag styleClass="p-mr-2" severity="warn" value="SELL"></p-tag>
+        }
+      </td>
+      <td>{{transaction.quantity}}</td>
+      <td>{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</td>
+      <td>{{(transaction.amount / transaction.quantity) | currency : transaction.currencyId : 'symbol' : '0.0-3'}}
+      </td>
+      <td>{{transaction.transactionDate | date:'mediumDate'}}</td>
+      <td>{{transaction.currencyId}}</td>
+      <td>
+        <button pButton pRipple type="button" icon="pi pi-pencil" (click)="editTransaction(transaction)"
+        class="p-button-rounded p-button-text mr-1" severity="info"></button>
+        <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(transaction.transactionId)"
+        class="p-button-rounded p-button-text ml-2" severity="danger"></button>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog [(visible)]="transactionDialog" [style]="{width: '50vw'}" header="Transaction Details" [modal]="true"
+  styleClass="p-fluid">
+  <ng-template pTemplate="content">
+    <div class="grid">
+      <div class="col-12 mb-2">
+        <label for="existingSecurity" class="block mb-2 font-medium text-color-secondary">Existing Security</label>
+        <p-select id="existingSecurity" [options]="securities" [(ngModel)]="selectedExistingSecurity"
+          (onChange)="existingSecurityChanged()" optionLabel="name" [filter]="true" [showClear]="true"
+          placeholder="Select an existing security" [style]="{'width':'100%'}"></p-select>
+      </div>
+      <div class="col-6 mb-2">
+        <label for="securityId" class="block mb-2 font-medium text-color-secondary">Security Id</label>
+        <input type="text" pInputText id="securityId" [(ngModel)]="transaction.securityId" class="w-full" />
+      </div>
+      <div class="col-6 mb-2">
+        <label for="securityName" class="block mb-2 font-medium text-color-secondary">Security Name</label>
+        <input type="text" pInputText id="securityName" [(ngModel)]="transaction.securityName" class="w-full" />
+      </div>
+      <div class="col-6 mb-2">
+        <label for="currency" class="block mb-2 font-medium text-color-secondary">Currency</label>
+        <p-select [options]="currencies" [(ngModel)]="transaction.currencyId" id="currency" optionLabel="label"
+          optionValue="value" [style]="{'width':'100%'}"></p-select>
+      </div>
+      <div class="col-6 mb-2">
+        <label for="type" class="block mb-2 font-medium text-color-secondary">Type</label>
+        <p-select [options]="statuses" [(ngModel)]="transaction.buySell" placeholder="Any" id="type"
+          [style]="{'width':'100%'}">
+          <ng-template let-option pTemplate="item">
+            @if (option.label === 'BUY') {
+              <p-tag styleClass="p-mr-2" severity="info" value="BUY">
+              </p-tag>
+            }
+            @if (option.label === 'SELL') {
+              <p-tag styleClass="p-mr-2" severity="warn" value="SELL"></p-tag>
+            }
+          </ng-template>
+        </p-select>
+      </div>
+      <div class="col-6 mb-2">
+        <label for="date" class="block mb-2 font-medium text-color-secondary">Date</label>
+        <input type="text" pInputText id="date" placeholder="YYYY-MM-DD" [(ngModel)]="transaction.transactionDate"
+          class="w-full" />
+      </div>
+      <div class="col-6 mb-2">
+        <label for="quantity" class="block mb-2 font-medium text-color-secondary">Quantity</label>
+        <input type="number" pInputText id="quantity" [(ngModel)]="transaction.quantity" class="w-full" />
+      </div>
+      <div class="col-12 mb-2">
+        <label for="amount" class="block mb-2 font-medium text-color-secondary">Amount</label>
+        <input type="number" pInputText id="amount" [(ngModel)]="transaction.amount" class="w-full" />
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+    <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text"
+    (click)="saveTransaction()"></button>
+  </ng-template>
+</p-dialog>

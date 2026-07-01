@@ -7,6 +7,7 @@ import { Stock } from '../model/stock';
 import { Candle } from '../model/candle';
 import { Symbol } from '../model/symbol';
 import { Exchange } from '../model/exchange';
+import { SignalResult } from '../model/signal';
 
 @Injectable({
   providedIn: 'root'
@@ -43,6 +44,13 @@ export class StockService {
   getCandleData(shortName: string, exchange: string, month: number) {
     const url = `${environment.API_URL}/api/v1/stock/candle/${shortName}.${exchange}/${month}`;
     return this.http.get<Candle>(url, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  };
+
+  getSignal(shortName: string, exchange: string) {
+    const url = `${environment.API_URL}/api/v1/stock/${shortName}.${exchange}/signal`;
+    return this.http.get<SignalResult>(url, {
       headers: this.helper.getHeadersWithToken()
     });
   };

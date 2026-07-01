@@ -11,6 +11,7 @@ import { EtfComponent } from './etf/etf.component';
 import { AlertComponent } from './alert/alert.component';
 import { SettingsComponent } from './settings/settings.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { SecurityComponent } from './security/security.component';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent },
@@ -22,6 +23,7 @@ export const routes: Routes = [
   { path: 'watchlist', component: WatchlistComponent },
   { path: 'search', component: SearchComponent },
   { path: 'forex', component: ForexComponent },
+  { path: 'security', component: SecurityComponent },
   { path: 'etf', component: EtfComponent },
   { path: 'alert', component: AlertComponent },
   { path: 'settings', component: SettingsComponent }

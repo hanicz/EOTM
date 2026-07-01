@@ -113,14 +113,26 @@ public class InvestmentService implements ICSVService {
     }
 
     private Map<String, InvestmentDTO> getCalculated(List<InvestmentDTO> investments) {
-        Map<String, InvestmentDTO> investmentMap = new HashMap<>();
-        investments.forEach(i -> {
-            if (i.getBuySell().equals("S")) {
-                i.negateAmountAndQuantity();
-            }
-            String key = i.getShortName() + "_" + i.getAccountId();
-            investmentMap.compute(key, (k, value) -> (value == null) ? i : value.mergeInvestments(i));
-        });
+        Map<String, InvestmentDTO> investmentMap = new LinkedHashMap<>();
+        Map<String, Integer> lotIndexByKey = new HashMap<>();
+
+        investments.stream()
+                .sorted(Comparator.comparing(InvestmentDTO::getTransactionDate))
+                .forEach(i -> {
+                    if (i.getBuySell().equals("S")) {
+                        i.negateAmountAndQuantity();
+                    }
+                    String baseKey = i.getShortName() + "_" + i.getAccountId();
+                    int lotIndex = lotIndexByKey.getOrDefault(baseKey, 0);
+                    String key = baseKey + "_" + lotIndex;
+
+                    InvestmentDTO merged = investmentMap.compute(key, (k, value) -> (value == null) ? i : value.mergeInvestments(i));
+
+                    // Position fully closed: seal this lot and start a fresh cost basis for any later re-buy.
+                    if (merged.getQuantity() == 0) {
+                        lotIndexByKey.put(baseKey, lotIndex + 1);
+                    }
+                });
         return investmentMap;
     }
 

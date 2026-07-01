@@ -1,0 +1,43 @@
+@if (transactionsLoading) {
+  <p-table [value]="[{}]" styleClass="p-datatable-striped" responsiveLayout="scroll">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Security Name</th>
+        <th>Quantity</th>
+        <th>Spent</th>
+        <th>Average</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body">
+      @for (item of [].constructor(4); track $index) {
+        <tr>
+          <td><p-skeleton></p-skeleton></td>
+          <td><p-skeleton></p-skeleton></td>
+          <td><p-skeleton></p-skeleton></td>
+          <td><p-skeleton></p-skeleton></td>
+        </tr>
+      }
+    </ng-template>
+  </p-table>
+}
+
+@if (!transactionsLoading) {
+  <p-table [value]="transactions" styleClass="p-datatable-striped" responsiveLayout="scroll">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Security Name</th>
+        <th>Quantity</th>
+        <th>Spent</th>
+        <th>Average</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-transaction>
+      <tr>
+        <td>{{transaction.securityName}}</td>
+        <td>{{transaction.quantity | number : '0.0-2'}} {{transaction.currencyId}}</td>
+        <td>{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</td>
+        <td>{{(transaction.amount / transaction.quantity | number : '0.0-4') + '%'}}</td>
+      </tr>
+    </ng-template>
+  </p-table>
+}

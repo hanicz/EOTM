@@ -29,6 +29,7 @@ class InvestmentDTOTest {
                 .quantity(667)
                 .buySell("B")
                 .shortName("AMD")
+                .accountId(1L)
                 .build();
         InvestmentDTO baseDTO = this.getBaseDTO();
 
@@ -49,6 +50,7 @@ class InvestmentDTOTest {
                 .quantity(6)
                 .buySell("B")
                 .shortName("AMD")
+                .accountId(1L)
                 .build();
         InvestmentDTO baseDTO = this.getBaseDTO();
 
@@ -185,6 +187,7 @@ class InvestmentDTOTest {
                 .shortName("AMD")
                 .currencyId("USD")
                 .fee(0.0)
+                .accountId(1L)
                 .accountName("Account")
                 .build();
     }

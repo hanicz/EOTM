@@ -36,7 +36,6 @@ public interface ICSVService {
                 .setSkipHeaderRecord(true)
                 .setDelimiter(",")
                 .setTrim(true)
-                .setIgnoreHeaderCase(true)
-                .build());
+                .setIgnoreHeaderCase(true).get());
     }
 }

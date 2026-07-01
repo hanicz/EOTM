@@ -7,6 +7,7 @@ import eye.on.the.money.dto.out.StockWatchDTO;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.crypto.Coin;
+import eye.on.the.money.model.stock.Exchange;
 import eye.on.the.money.model.stock.Stock;
 import eye.on.the.money.model.watchlist.CryptoWatch;
 import eye.on.the.money.model.watchlist.ForexWatch;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -66,6 +68,11 @@ public class WatchListService {
         String joinedList = stockList.stream().map(s -> (s.getStockShortName() + "." + s.getStockExchange())).collect(Collectors.joining(","));
         JsonNode responseBody = this.eodAPIService.getLiveStockValue(joinedList);
 
+        Map<String, String> exchangeCurrencies = this.stockService.getAllExchanges().stream()
+                .collect(Collectors.toMap(Exchange::getCode, Exchange::getCurrency, (first, _) -> first));
+
+        stockList.forEach(s -> s.setCurrencyId(exchangeCurrencies.getOrDefault(s.getStockExchange(), "USD")));
+
         for (JsonNode stock : responseBody) {
             Optional<StockWatchDTO> stockWatchDTO = stockList.stream().filter
                     (s -> (s.getStockShortName() + "." + s.getStockExchange()).equals(stock.findValue("code").textValue())).findFirst();
@@ -74,7 +81,6 @@ public class WatchListService {
             stockWatchDTO.get().setLiveValue(stock.findValue("close").doubleValue());
             stockWatchDTO.get().setChange(stock.findValue("change").doubleValue());
             stockWatchDTO.get().setPChange(stock.findValue("change_p").doubleValue());
-            stockWatchDTO.get().setCurrencyId("USD");
         }
 
         return stockList;

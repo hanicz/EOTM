@@ -1,0 +1,71 @@
+<div class="shadow-5">
+  <menu class="pl-0 mb-0"></menu>
+  <p-panel>
+    <div class="card">
+      <div class="flex flex-row flex-wrap align-items-center card-container">
+        <div class="flex mr-5">
+          <div>Total Spent: <b>{{totalSpent | currency : selectedCurrency : 'symbol' : '0.0-2'}}</b></div>
+        </div>
+        <div class="flex mr-5">
+          <div>Total Worth: <b>{{totalWorth | currency : selectedCurrency : 'symbol' : '0.0-2'}}</b></div>
+        </div>
+        <div class="flex mr-5">
+          <div>Profit:
+            @if (diffy > 0) {
+            <p-tag styleClass="p-mr-2" severity="success"
+              value="{{diffy | currency : selectedCurrency : 'symbol' : '0.0-2'}}"></p-tag>
+            }
+            @if (diffy < 0) { <p-tag styleClass="p-mr-2" severity="danger"
+              value="{{diffy | currency : selectedCurrency : 'symbol' : '0.0-2'}}"></p-tag>
+              }
+          </div>
+        </div>
+        <div class="flex mr-5">
+          <div>Percentage:
+            @if (diffy > 0) {
+            <p-tag styleClass="p-mr-2" severity="success" value="{{(percentage | number : '0.0-1') + '%'}}">
+            </p-tag>
+            }
+            @if (diffy < 0) { <p-tag styleClass="p-mr-2" severity="danger"
+              value="{{(percentage | number : '0.0-1') + '%'}}">
+              </p-tag>
+              }
+          </div>
+        </div>
+        <div class="flex ml-auto align-items-center">
+          <p-select [options]="currencyOptions" [(ngModel)]="selectedCurrency" optionLabel="label" optionValue="value"
+            (onChange)="onCurrencyChange()" class="mr-2"></p-select>
+          <button pButton pRipple icon="pi pi-refresh" class="p-button-rounded p-button-text"
+            pTooltip="Refresh" (click)="refreshAll()"></button>
+        </div>
+      </div>
+    </div>
+    <p-divider></p-divider>
+    <p-tabs value="0">
+      <p-tablist>
+        <p-tab value="0">Holdings</p-tab>
+        <p-tab value="1">Transactions</p-tab>
+        <p-tab value="2">Interest</p-tab>
+      </p-tablist>
+      <p-tabpanels>
+        <p-tabpanel value="0">
+          <app-security-holding (dataLoaded)="loadData($event)"></app-security-holding>
+          @if (allocationChartOptions.series && allocationChartOptions.series.length > 0) {
+          <p-divider></p-divider>
+          <div class="flex justify-content-center">
+            <apx-chart [series]="allocationChartOptions.series" [chart]="allocationChartOptions.chart!"
+              [labels]="allocationChartOptions.labels!" [legend]="allocationChartOptions.legend!">
+            </apx-chart>
+          </div>
+          }
+        </p-tabpanel>
+        <p-tabpanel value="1">
+          <app-security-transaction></app-security-transaction>
+        </p-tabpanel>
+        <p-tabpanel value="2">
+          <app-interest (dataLoaded)="loadInterestData($event)"></app-interest>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </p-panel>
+</div>

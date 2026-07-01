@@ -21,30 +21,21 @@
       <div>
         <div class="grid ml-5 mr-5 mt-3">
           <div class="col-12 pb-0">
-            <div class="flex flex-wrap justify-content-between">
-              <div>
-                <div class="flex flex-wrap text-sm align-items-center">
-                  <div class="flex align-items-start mr-2">
-                    <p-tag value="{{profile.ticker}}" [rounded]="true">
-                      <p-image
-                        src="https://eodhd.com/img/logos/{{globals.selectedExchange}}/{{globals.selectedStock}}.png"
-                        width="20" class="mr-1 mt-1 ml-1"
-                      (onImageError)="globals.errorHandler($event)"></p-image>
-                    </p-tag>
+            <div class="ticker-header">
+              <div class="flex flex-wrap align-items-center">
+                <p-image
+                  src="https://eodhd.com/img/logos/{{globals.selectedExchange}}/{{globals.selectedStock}}.png"
+                  width="42" class="ticker-logo mr-3"
+                (onImageError)="globals.errorHandler($event)"></p-image>
+                <div>
+                  <div class="flex flex-wrap align-items-center">
+                    <div class="ticker-name">{{profile.name}}</div>
+                    <p-tag styleClass="ml-2" [rounded]="true" severity="contrast" value="{{profile.ticker}}"></p-tag>
                   </div>
-                  |
-                  <div class="flex align-items-start ml-2">{{profile.exchange}}</div>
+                  <div class="ticker-subline mt-1">{{profile.exchange}}</div>
                 </div>
-                <div class="flex flex-wrap text-sm align-items-center mt-1">
-                  <div class="flex align-items-start mr-2">
-                    <div class="flex align-items-start font-bold">{{profile.name}}</div>
-                  </div>
-                  -
-                  <div class="flex align-items-start ml-2">
-                    <p-tag styleClass="mr-2" severity="info"
-                      value="{{(endPrice | currency : profile.currency : 'symbol' : '0.0-1')}}">
-                    </p-tag>
-                  </div>
+                <div class="ticker-price ml-4">
+                  {{endPrice | currency : profile.currency : 'symbol' : '0.0-2'}}
                 </div>
               </div>
               <div class="flex flex-wrap mt-1">
@@ -69,7 +60,7 @@
         </div>
         <div class="grid ml-5 mr-5">
           <div class="col-8">
-            <div class="flex flex-wrap justify-content-between pb-2">
+            <div class="chart-toolbar">
               <p-selectButton [options]="options" [(ngModel)]="selectedOption" optionLabel="label"
                 optionValue="value" (onChange)="getCandleData()">
               </p-selectButton>
@@ -83,7 +74,7 @@
                 value="{{(percentage | number : '0.0-1') + '%'}}"></p-tag>
               </div>
             </div>
-            <div class="border-orange-100 border-1 border-round">
+            <div class="info-card chart-card">
               <apx-chart #chart [series]=" chartOptions.series" [chart]="chartOptions.chart"
                 [xaxis]="chartOptions.xaxis" [yaxis]="chartOptions.yaxis" [title]="chartOptions.title"
                 [noData]="chartOptions.noData" [tooltip]="chartOptions.tooltip">
@@ -94,78 +85,123 @@
             <p-divider layout="vertical"></p-divider>
           </div>
           <div class="col-3">
-            <div class="flex flex-wrap justify-content-between border-bottom-1">
-              <div class="flex align-items-start">Industry</div>
-              <div class="flex align-items-end">{{profile.finnhubIndustry}}</div>
+            <div class="info-card">
+              <div class="info-card-title">Company Info</div>
+              <div class="info-row">
+                <div class="info-label"><i class="pi pi-building"></i>Industry<i class="pi pi-question-circle info-tooltip-icon" pTooltip="The sector the company primarily operates in." tooltipPosition="top"></i></div>
+                <div class="info-value">{{profile.finnhubIndustry}}</div>
+              </div>
+              <div class="info-row">
+                <div class="info-label"><i class="pi pi-calendar"></i>IPO<i class="pi pi-question-circle info-tooltip-icon" pTooltip="Date the company went public via its Initial Public Offering." tooltipPosition="top"></i></div>
+                <div class="info-value">{{profile.ipo | date:'mediumDate' }}</div>
+              </div>
+              <div class="info-row">
+                <div class="info-label"><i class="pi pi-wallet"></i>Market Cap.<i class="pi pi-question-circle info-tooltip-icon" pTooltip="Total market value of the company's outstanding shares (share price x shares outstanding)." tooltipPosition="top"></i></div>
+                <div class="info-value">{{profile.marketCapitalization / 1000 | currency :
+                profile.currency : 'symbol' : '0.0-2'}}B</div>
+              </div>
+              <div class="info-row">
+                <div class="info-label"><i class="pi pi-th-large"></i>Outstanding Shares<i class="pi pi-question-circle info-tooltip-icon" pTooltip="Total number of shares currently held by all shareholders." tooltipPosition="top"></i></div>
+                <div class="info-value">{{profile.shareOutstanding / 1000 | number : '0.0-1'}}B</div>
+              </div>
+              <div class="info-row">
+                <div class="info-label"><i class="pi pi-link"></i>WebUrl<i class="pi pi-question-circle info-tooltip-icon" pTooltip="The company's official website." tooltipPosition="top"></i></div>
+                <div class="info-value"><a href="{{profile.weburl}}" target="_blank" class="info-link">{{profile.weburl}}</a></div>
+              </div>
+              <div class="info-row">
+                <div class="info-label"><i class="pi pi-users"></i>Peers<i class="pi pi-question-circle info-tooltip-icon" pTooltip="Other companies commonly compared to this one, e.g. competitors in the same industry." tooltipPosition="top"></i></div>
+                <div class="info-value info-value-wrap">
+                  @for (peer of profile.peers; track peer) {
+                    <div class="text-xs">
+                      {{peer}},
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <div class="info-card-title info-card-title-spaced">Trading Stats</div>
+              <div class="info-row">
+                <div class="info-label"><i class="pi pi-percentage"></i>P/E (TTM)<i class="pi pi-question-circle info-tooltip-icon" pTooltip="Price-to-Earnings ratio over the trailing twelve months, a measure of valuation relative to earnings." tooltipPosition="top"></i></div>
+                <div class="info-value">{{metric.peInclExtraTTM | number : '0.0-2'}}</div>
+              </div>
+              <div class="info-row">
+                <div class="info-label"><i class="pi pi-chart-bar"></i>Volume<i class="pi pi-question-circle info-tooltip-icon" pTooltip="Number of shares traded in the most recent trading session, in millions." tooltipPosition="top"></i></div>
+                <div class="info-value">{{volume | number : '0.0-1'}}M</div>
+              </div>
+              <div class="info-row">
+                <div class="info-label"><i class="pi pi-chart-bar"></i>Avg Vol (10D)<i class="pi pi-question-circle info-tooltip-icon" pTooltip="Average daily trading volume over the past 10 days, in millions." tooltipPosition="top"></i></div>
+                <div class="info-value">{{metric.tenDayAverageTradingVolume | number : '0.0-1'}}M
+                </div>
+              </div>
+              <div class="info-row">
+                <div class="info-label"><i class="pi pi-chart-bar"></i>Avg Vol (3M)<i class="pi pi-question-circle info-tooltip-icon" pTooltip="Average daily trading volume over the past 3 months, in millions." tooltipPosition="top"></i></div>
+                <div class="info-value">{{metric.threeMonthAverageTradingVolume | number :
+                  '0.0-1'}}M
+                </div>
+              </div>
+              <div class="info-row">
+                <div class="info-label"><i class="pi pi-arrows-v"></i>52 Week H/L<i class="pi pi-question-circle info-tooltip-icon" pTooltip="The highest and lowest price the stock has traded at over the past 52 weeks." tooltipPosition="top"></i></div>
+                <div class="info-value">
+                  <p-tag styleClass="mr-1 mt-1 mb-1" severity="success"
+                    value="{{metric.yearHigh | number : '0.0-1'}}">
+                  </p-tag>
+                  <p-tag styleClass="ml-2 mt-1 mb-1" severity="danger"
+                    value="{{metric.yearLow | number : '0.0-1'}}">
+                  </p-tag>
+                </div>
+              </div>
+              <div class="info-row info-row-last">
+                <div class="info-label"><i class="pi pi-calendar-times"></i>H/L Date<i class="pi pi-question-circle info-tooltip-icon" pTooltip="The dates on which the 52-week high and low prices occurred." tooltipPosition="top"></i></div>
+                <div class="info-value">{{(metric.yearHighDate | date:'mediumDate') + ' - ' +
+                (metric.yearLowDate | date:'mediumDate')}}</div>
+              </div>
             </div>
-            <div class="flex flex-wrap justify-content-between border-bottom-1">
-              <div class="flex align-items-start">IPO</div>
-              <div class="flex align-items-end">{{profile.ipo | date:'mediumDate' }}</div>
-            </div>
-            <div class="flex flex-wrap justify-content-between border-bottom-1">
-              <div class="flex align-items-start">Market Cap.</div>
-              <div class="flex align-items-end">{{profile.marketCapitalization / 1000 | currency :
-              profile.currency : 'symbol' : '0.0-2'}}B</div>
-            </div>
-            <div class="flex flex-wrap justify-content-between border-bottom-1">
-              <div class="flex align-items-start">Outstanding Shares</div>
-              <div class="flex align-items-end">{{profile.shareOutstanding / 1000 | number : '0.0-1'}}B</div>
-            </div>
-            <div class="flex flex-wrap justify-content-between border-bottom-1">
-              <div class="flex align-items-start">WebUrl</div>
-              <div class="flex align-items-end"><a href="{{profile.weburl}}" target="_blank"
-              style="color: inherit; text-decoration: inherit;">{{profile.weburl}}</a></div>
-            </div>
-            <div class="flex flex-wrap justify-content-between border-bottom-1">
-              <div class="flex align-items-start">Peers</div>
-              <div class="flex align-items-end">
-                @for (peer of profile.peers; track peer) {
-                  <div class="text-xs">
-                    {{peer}},
+          </div>
+        </div>
+        <div class="grid ml-5 mr-5">
+          <div class="col-12 pb-0">
+            <p-divider></p-divider>
+          </div>
+          <div class="col-8">
+            @if (signalResult) {
+              <div class="signal-card"
+                [ngClass]="{'signal-card-buy': signalResult.signal === 'BUY', 'signal-card-sell': signalResult.signal === 'SELL', 'signal-card-hold': signalResult.signal === 'HOLD'}">
+                <div class="flex flex-wrap align-items-center justify-content-between signal-card-header">
+                  <div class="flex align-items-center">
+                    <i class="pi pi-sparkles mr-2"></i>
+                    <div class="font-bold">Algorithmic Recommendation</div>
                   </div>
-                }
+                  <p-tag styleClass="signal-tag"
+                    [severity]="signalResult.signal === 'BUY' ? 'success' : (signalResult.signal === 'SELL' ? 'danger' : 'info')"
+                    [value]="signalResult.signal"></p-tag>
+                </div>
+                <div class="signal-card-subtitle">Based on 3 technical indicators over the selected price history.</div>
+                <p-divider styleClass="signal-divider"></p-divider>
+                <div class="indicator-list">
+                  @for (indicator of signalResult.indicators; track indicator.name) {
+                    <div class="indicator-row">
+                      <div class="indicator-icon"
+                        [ngClass]="{'indicator-icon-buy': indicator.vote === 'BUY', 'indicator-icon-sell': indicator.vote === 'SELL', 'indicator-icon-neutral': indicator.vote === 'NEUTRAL'}">
+                        <i class="pi" [ngClass]="{'pi-arrow-up': indicator.vote === 'BUY', 'pi-arrow-down': indicator.vote === 'SELL', 'pi-minus': indicator.vote === 'NEUTRAL'}"></i>
+                      </div>
+                      <div class="indicator-body">
+                        <div class="indicator-name">{{indicator.name}}</div>
+                        <div class="indicator-description">{{indicator.description}}</div>
+                        <div class="indicator-detail">{{indicator.detail}}</div>
+                      </div>
+                    </div>
+                  }
+                </div>
               </div>
-            </div>
-            <div class="flex flex-wrap justify-content-between border-bottom-1">
-              <div class="flex align-items-start">P/E (TTM)</div>
-              <div class="flex align-items-end">{{metric.peInclExtraTTM | number : '0.0-2'}}</div>
-            </div>
-            <div class="flex flex-wrap justify-content-between border-bottom-1">
-              <div class="flex align-items-start">Volume</div>
-              <div class="flex align-items-end">{{volume | number : '0.0-1'}}M</div>
-            </div>
-            <div class="flex flex-wrap justify-content-between border-bottom-1">
-              <div class="flex align-items-start">Avg Vol (10D)</div>
-              <div class="flex align-items-end">{{metric.tenDayAverageTradingVolume | number : '0.0-1'}}M
-              </div>
-            </div>
-            <div class="flex flex-wrap justify-content-between border-bottom-1">
-              <div class="flex align-items-start">Avg Vol (3M)</div>
-              <div class="flex align-items-end">{{metric.threeMonthAverageTradingVolume | number :
-                '0.0-1'}}M
-              </div>
-            </div>
-            <div class="flex flex-wrap justify-content-between border-bottom-1">
-              <div class="flex align-items-center">52 Week H/L</div>
-              <div class="flex align-items-end">
-                <p-tag styleClass="mr-1 mt-1 mb-1" severity="success"
-                  value="{{metric.yearHigh | number : '0.0-1'}}">
-                </p-tag>
-                <p-tag styleClass="ml-2 mt-1 mb-1" severity="danger"
-                  value="{{metric.yearLow | number : '0.0-1'}}">
-                </p-tag>
-              </div>
-            </div>
-            <div class="flex flex-wrap justify-content-between border-bottom-1">
-              <div class="flex align-items-start">H/L Date</div>
-              <div class="flex align-items-end">{{(metric.yearHighDate | date:'mediumDate') + ' - ' +
-              (metric.yearLowDate | date:'mediumDate')}}</div>
-            </div>
-            <div class="border-orange-100 border-1 border-round mt-1">
+            }
+          </div>
+          <div class="col-4">
+            <div class="info-card p-2">
               <apx-chart #recChart [series]=" recChartOptions.series" [chart]="recChartOptions.chart"
                 [xaxis]="recChartOptions.xaxis" [yaxis]="recChartOptions.yaxis"
                 [title]="recChartOptions.title" [noData]="recChartOptions.noData"
-                [tooltip]="recChartOptions.tooltip">
+                [tooltip]="recChartOptions.tooltip" [plotOptions]="recChartOptions.plotOptions"
+                [dataLabels]="recChartOptions.dataLabels">
               </apx-chart>
             </div>
           </div>

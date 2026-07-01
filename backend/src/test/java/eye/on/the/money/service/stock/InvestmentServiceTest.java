@@ -103,6 +103,33 @@ class InvestmentServiceTest {
                 () -> assertEquals(-100.0, testObject.getAmount(), this.epsilon));
     }
 
+    @Test
+    public void getAllPositionsReopenedLotIsNotMergedWithClosedLot() {
+        List<InvestmentDTO> result = this.investmentService.getAllPositions(this.user.getUsername());
+        List<InvestmentDTO> googPositions = result.stream().filter(iDTO -> "GOOG".equals(iDTO.getShortName())).toList();
+
+        InvestmentDTO closedLot = googPositions.stream().filter(iDTO -> iDTO.getQuantity() == 0).findAny().get();
+        InvestmentDTO openLot = googPositions.stream().filter(iDTO -> iDTO.getQuantity() > 0).findAny().get();
+
+        Assertions.assertAll("Closed and reopened lots must be tracked separately",
+                () -> assertEquals(2, googPositions.size()),
+                () -> assertEquals(-50.0, closedLot.getAmount(), this.epsilon),
+                () -> assertEquals(5, openLot.getQuantity()),
+                () -> assertEquals(50.0, openLot.getAmount(), this.epsilon));
+    }
+
+    @Test
+    public void getPositionsByAccountIdOnlyOpenLotHasPositiveQuantity() {
+        List<InvestmentDTO> result = this.investmentService.getPositionsByAccountId(this.user.getUsername(), 1L);
+        List<InvestmentDTO> googHoldings = result.stream()
+                .filter(iDTO -> "GOOG".equals(iDTO.getShortName()) && iDTO.getQuantity() > 0).toList();
+
+        Assertions.assertAll("Only the reopened lot should count towards current holdings",
+                () -> assertEquals(1, googHoldings.size()),
+                () -> assertEquals(5, googHoldings.get(0).getQuantity()),
+                () -> assertEquals(50.0, googHoldings.get(0).getAmount(), this.epsilon));
+    }
+
     private InvestmentDTO convertToInvestmentDTO(Investment investment) {
         this.modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
         return this.modelMapper.map(investment, InvestmentDTO.class);

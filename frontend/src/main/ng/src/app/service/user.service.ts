@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { User } from '../model/user';
 import { ResourceHelper } from '../util/servicehelper';
-import { tap } from 'rxjs/operators';
+import { tap, shareReplay } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -19,6 +20,8 @@ export class UserService {
 
   private userUrl = `${environment.API_URL}/api/v1/user`;
 
+  private cachedUser$?: Observable<User>;
+
   constructor(private http: HttpClient) { }
 
   loginUser(user: User) {
@@ -30,15 +33,26 @@ export class UserService {
     }).pipe(tap(response => {
       console.log(<string>response.headers.get('token'));
       localStorage.setItem('token', <string>response.headers.get('token'));
+      this.cachedUser$ = undefined;
     }));
   }
 
   getUserEmail() {
-    const url = `${this.userUrl}/me`;
-    return this.http.get<User>(url, {
-      headers: this.helper.getHeadersWithToken()
-    });
+    if (!this.cachedUser$) {
+      const url = `${this.userUrl}/me`;
+      this.cachedUser$ = this.http.get<User>(url, {
+        headers: this.helper.getHeadersWithToken()
+      }).pipe(
+        tap({ error: () => this.cachedUser$ = undefined }),
+        shareReplay(1)
+      );
+    }
+    return this.cachedUser$;
   };
+
+  clearUserCache(): void {
+    this.cachedUser$ = undefined;
+  }
 
   validateToken() {
     return this.http.get(this.userUrl, {

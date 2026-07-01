@@ -10,15 +10,15 @@
 
 .metric-grid {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 8px;
     margin-bottom: 1.5rem;
 }
 
 .metric-tile {
     background-color: #f6f4ee;
     border-radius: 8px;
-    padding: 14px;
+    padding: 10px;
 }
 
 .metric-tile-clickable {
@@ -44,19 +44,25 @@
 }
 
 .metric-label {
-    font-size: 12px;
+    font-size: 11px;
     color: #888780;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .metric-value {
-    font-size: 18px;
+    font-size: 15px;
     font-weight: 600;
     color: #1b1b1b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .metric-change {
-    font-size: 12px;
+    font-size: 11px;
     margin-top: 2px;
 }
 
@@ -102,11 +108,63 @@
     gap: 16px;
 }
 
+.donut-wrap {
+    position: relative;
+    width: 132px;
+    height: 132px;
+    flex: 0 0 132px;
+}
+
 .donut {
-    width: 110px;
-    height: 110px;
-    flex: 0 0 110px;
+    width: 132px;
+    height: 132px;
     transform: rotate(-90deg);
+}
+
+.donut-segment {
+    cursor: pointer;
+    transition: stroke-width 0.15s ease, opacity 0.15s ease;
+}
+
+.donut-segment-dim {
+    opacity: 0.35;
+}
+
+.donut-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 76px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    pointer-events: none;
+}
+
+.donut-center-label {
+    font-size: 9px;
+    line-height: 1.2;
+    color: #888780;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.donut-center-value {
+    font-size: 13px;
+    line-height: 1.2;
+    font-weight: 600;
+    color: #1b1b1b;
+}
+
+.donut-center-pct {
+    font-size: 10px;
+    line-height: 1.2;
+    color: #5f5e5a;
 }
 
 .legend {
@@ -121,6 +179,15 @@
     gap: 6px;
     font-size: 12px;
     color: #5f5e5a;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin: -2px -4px;
+    transition: background-color 0.15s ease;
+}
+
+.legend-row-active {
+    background-color: #f1efe8;
 }
 
 .legend-dot {
@@ -159,6 +226,12 @@
 .empty-state {
     font-size: 13px;
     color: #888780;
+}
+
+@media (max-width: 1100px) {
+    .metric-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
 }
 
 @media (max-width: 900px) {

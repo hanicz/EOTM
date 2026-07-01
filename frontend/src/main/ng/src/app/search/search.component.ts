@@ -10,7 +10,7 @@ import { Globals } from '../util/global';
 import { WatchlistService } from '../service/watchlist.service';
 import { Symbol } from '../model/symbol';
 import { Exchange } from '../model/exchange';
-import { DatePipe, DecimalPipe, CurrencyPipe } from '@angular/common';
+import { DatePipe, DecimalPipe, CurrencyPipe, NgClass } from '@angular/common';
 
 import {
   ChartComponent,
@@ -32,7 +32,9 @@ import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { Divider } from 'primeng/divider';
 import { SelectButton } from 'primeng/selectbutton';
+import { Tooltip } from 'primeng/tooltip';
 import { NewsComponent } from '../news/news.component';
+import { SignalResult } from '../model/signal';
 
 export type ChartOptions = {
   series: ApexAxisChartSeries;
@@ -46,7 +48,7 @@ export type ChartOptions = {
     selector: 'app-search',
     templateUrl: './search.component.html',
     styleUrls: ['./search.component.css'],
-    imports: [MenuComponent, Bind, Panel, Select, FormsModule, Tag, Image, ButtonDirective, Ripple, Divider, SelectButton, ChartComponent, NewsComponent, DecimalPipe, CurrencyPipe, DatePipe]
+    imports: [MenuComponent, Bind, Panel, Select, FormsModule, Tag, Image, ButtonDirective, Ripple, Divider, SelectButton, ChartComponent, NewsComponent, DecimalPipe, CurrencyPipe, DatePipe, NgClass, Tooltip]
 })
 export class SearchComponent implements OnInit, AfterViewInit {
 
@@ -62,8 +64,9 @@ export class SearchComponent implements OnInit, AfterViewInit {
   profile: Profile = {} as Profile;
   metric: Metric = {} as Metric;
   candle: Candle = {} as Candle;
+  signalResult: SignalResult | undefined;
 
-  selectedOption = 6;
+  selectedOption = 12;
   startPrice = 0;
   endPrice = 0;
   percentage = 0;
@@ -130,20 +133,36 @@ export class SearchComponent implements OnInit, AfterViewInit {
         animations: {
           enabled: false
         },
-        height: 350,
-        background: 'white',
+        height: 360,
+        background: 'transparent',
+        fontFamily: 'inherit',
         id: 'candles'
       },
       series: [],
       title: {
         text: 'Candlestick chart',
-        align: 'left'
+        align: 'left',
+        style: {
+          fontSize: '13px',
+          fontWeight: 700,
+          color: '#888780',
+        }
+      },
+      grid: {
+        borderColor: '#ece9df',
+        strokeDashArray: 3,
       },
       xaxis: {
         type: "category",
         labels: {
           show: false
         },
+        axisBorder: {
+          show: false
+        },
+        axisTicks: {
+          show: false
+        }
       },
       noData: {
         text: 'Waiting...'
@@ -161,7 +180,7 @@ export class SearchComponent implements OnInit, AfterViewInit {
       series: [],
       chart: {
         type: 'bar',
-        height: 135,
+        height: 220,
         stacked: true,
         toolbar: {
           show: true,
@@ -186,6 +205,13 @@ export class SearchComponent implements OnInit, AfterViewInit {
           horizontal: false,
           borderRadius: 10
         },
+      },
+      dataLabels: {
+        style: {
+          // Text color per series (Strong Sell, Sell, Hold, Buy, Strong Buy) chosen for
+          // contrast against each bar color - the bright Hold/Buy colors are unreadable with white text.
+          colors: ['#ffffff', '#ffffff', '#000000', '#000000', '#ffffff']
+        }
       }
     };
   }
@@ -252,6 +278,20 @@ export class SearchComponent implements OnInit, AfterViewInit {
     this.newsType = `company/${this.globals.selectedStock}`;
 
     this.getCandleData();
+    this.getSignal();
+  }
+
+  getSignal() {
+    this.stockService.getSignal(this.globals.selectedStock, this.globals.selectedExchange).subscribe({
+      next: (data) => {
+        this.signalResult = data;
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.log(error);
+        this.signalResult = undefined;
+      }
+    });
   }
 
   exchangeChanged(event: any) {

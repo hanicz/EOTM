@@ -1,18 +1,22 @@
 <p-toast position="bottom-center"></p-toast>
-<div class="loginContainer shadow-3 text-center text-black">
-    <div class="fluid">
-        <h1 class="mt-0">EyeOTM <i class="pi pi-chart-line" style="font-size: 1.5rem"></i></h1>
-        <div class="field pb-2">
-            <input id="username" type="text" pInputText [(ngModel)]="user.email" placeholder="Email"
-                [formControl]="emailControl">
-        </div>
-        <div class="field">
-            <input id="password" type="password" placeholder="Password" pInputText [(ngModel)]="user.password"
-                [formControl]="passwordControl">
-        </div>
-        <div class="field">
-            <button pButton pRipple type="button" class="p-button-primary mr-2" (click)="login()">Login<i
-                    class="pi pi-lock-open ml-1"></i></button>
+<div class="loginPage">
+    <div class="loginContainer shadow-3 text-center">
+        <img class="logo" [src]="assetUrl + 'logo-horizontal.png'" alt="Eye OTM">
+        <div class="fluid">
+            <div class="field">
+                <label for="username">Email</label>
+                <input id="username" class="w-full" type="text" pInputText [(ngModel)]="user.email"
+                    placeholder="Email" [formControl]="emailControl">
+            </div>
+            <div class="field">
+                <label for="password">Password</label>
+                <input id="password" class="w-full" type="password" placeholder="Password" pInputText
+                    [(ngModel)]="user.password" [formControl]="passwordControl">
+            </div>
+            <div class="field mt-4">
+                <button pButton pRipple type="button" class="p-button-primary w-full" (click)="login()">Login<i
+                        class="pi pi-lock-open ml-2"></i></button>
+            </div>
         </div>
     </div>
 </div>

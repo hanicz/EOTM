@@ -1,8 +1,6 @@
 <p-menubar [model]="items">
   <ng-template pTemplate="start">
-    <h2 class="logo">
-      Eye OTM <i class="fas fa-search-dollar"></i>
-    </h2>
+    <img class="logo" [src]="assetUrl + 'logo-horizontal.png'" alt="Eye OTM">
   </ng-template>
   <ng-template pTemplate="end">
     <div class="toolbar">
@@ -14,7 +12,7 @@
           type="button"
           icon="pi pi-sign-out"
           (click)="logOut()"
-          class="p-button-rounded p-button-text">
+          class="p-button-rounded p-button-primary">
         </button>
       </div>
     </div>

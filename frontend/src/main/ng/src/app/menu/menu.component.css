@@ -15,23 +15,11 @@
     color: #ef9f27 !important;
 }
 
-::ng-deep .user-section .p-button-text {
-    background: transparent !important;
-}
-
-::ng-deep .user-section .p-button-text:hover {
-    background: rgba(255, 255, 255, 0.08) !important;
-    color: #f1efe8 !important;
-}
-
 .logo {
-    margin: 0;
-    font-size: 1.25rem;
-    color: #f1efe8;
-}
-
-.logo i {
-    color: #ef9f27;
+    height: 3.5rem;
+    display: block;
+    /* cancel the menubar's 0.5rem 0.75rem padding so the logo bleeds to the edges */
+    margin: -0.5rem 0.5rem -0.5rem -0.75rem;
 }
 
 .toolbar {
@@ -53,6 +41,3 @@
     color: #f1efe8;
 }
 
-.user-section button {
-    color: #f1efe8;
-}

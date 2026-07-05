@@ -9,6 +9,7 @@ import { Toast } from 'primeng/toast';
 import { InputText } from 'primeng/inputtext';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
+import { environment } from '../../environments/environment';
 
 @Component({
     selector: 'login',
@@ -19,6 +20,7 @@ import { Ripple } from 'primeng/ripple';
 export class LoginComponent {
 
   user = new User();
+  assetUrl: string = environment.assets_url;
 
   emailControl = new UntypedFormControl('', [Validators.required, Validators.email]);
   passwordControl = new UntypedFormControl('', [Validators.required]);

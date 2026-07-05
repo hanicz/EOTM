@@ -1,26 +1,43 @@
-.loginContainer{
-    position: relative;
-    background-color: white;
-    padding: 2%;
-    max-width: 50%;
-    margin-top: 10%;
-    margin-left: 30%;
-  }
+:host {
+    display: block;
+}
 
-  loginContainer > * {
+.loginPage {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #2e2e2e;
+}
+
+.loginContainer {
+    background-color: #1b1b1b;
+    border-radius: 12px;
+    padding: 2.5rem 3rem;
     width: 100%;
-  }
+    max-width: 380px;
+}
 
-  .loginContainer h1 {
-    color: black;
-    font-weight: lighter;
-  }
+.loginContainer .logo {
+    /* bleed into the container's 3rem side padding to render larger than the form */
+    width: calc(100% + 3rem);
+    max-width: none;
+    margin: 0 -1.5rem 2rem;
+}
 
-  .loginContainer button {
-    font-weight: lighter;
-    max-width: 100%;
-  }
+.loginContainer .field {
+    text-align: left;
+    margin-bottom: 1.25rem;
+}
 
-  .loginContainer input {
-    max-width: 100%;
-  }
+.loginContainer label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #f1efe8;
+    font-size: 0.875rem;
+}
+
+.loginContainer button {
+    font-weight: 500;
+}

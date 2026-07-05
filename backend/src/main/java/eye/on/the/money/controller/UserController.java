@@ -1,7 +1,5 @@
 package eye.on.the.money.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eye.on.the.money.dto.in.ChangePasswordDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.service.user.UserServiceImpl;
@@ -24,7 +22,6 @@ import java.util.Map;
 public class UserController {
 
     private final UserServiceImpl userService;
-    private final ObjectMapper objectMapper;
 
     @PostMapping("/signup")
     public ResponseEntity<HttpStatus> createNewUser(@RequestBody User user) {
@@ -38,10 +35,10 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<String> getUserEmail(@AuthenticationPrincipal UserDetails user) throws JsonProcessingException {
+    public ResponseEntity<Map<String, String>> getUserEmail(@AuthenticationPrincipal UserDetails user) {
         Map<String, String> map = new HashMap<>();
         map.put("email", user.getUsername());
-        return new ResponseEntity<>(this.objectMapper.writeValueAsString(map), HttpStatus.OK);
+        return new ResponseEntity<>(map, HttpStatus.OK);
     }
 
     @PutMapping("/password")

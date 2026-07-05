@@ -1,7 +1,5 @@
 package eye.on.the.money.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eye.on.the.money.dto.in.ChangePasswordDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.service.user.UserServiceImpl;
@@ -14,6 +12,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.Map;
+
 import static org.mockito.Mockito.*;
 
 @ActiveProfiles("test")
@@ -23,13 +23,11 @@ class UserControllerTest {
     @Mock
     private UserServiceImpl userService;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
     private UserController userController;
 
     @BeforeEach
     public void setUp() {
-        this.userController = new UserController(this.userService, this.objectMapper);
+        this.userController = new UserController(this.userService);
     }
 
     private final User user = User.builder().id(1L).email("email").build();
@@ -56,7 +54,7 @@ class UserControllerTest {
     }
 
     @Test
-    void getUserEmail() throws JsonProcessingException {
-        Assertions.assertEquals("{\"email\":\"" + this.user.getUsername() + "\"}", this.userController.getUserEmail(this.user).getBody());
+    void getUserEmail() {
+        Assertions.assertEquals(Map.of("email", this.user.getUsername()), this.userController.getUserEmail(this.user).getBody());
     }
 }

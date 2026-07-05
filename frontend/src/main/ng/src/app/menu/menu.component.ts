@@ -7,6 +7,7 @@ import { Bind } from 'primeng/bind';
 import { Menubar } from 'primeng/menubar';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
+import { environment } from '../../environments/environment';
 
 @Component({
     selector: 'menu',
@@ -17,6 +18,7 @@ import { Ripple } from 'primeng/ripple';
 export class MenuComponent implements OnInit {
   items: MenuItem[] = [];
   user: User = {} as User;
+  assetUrl: string = environment.assets_url;
 
   readonly menuItems: MenuItem[] = [
     { label: 'Dashboard', icon: 'fa-solid fa-gauge', routerLink: ['/dashboard'] },

@@ -53,7 +53,7 @@ public class ETFController {
     }
 
     @DeleteMapping()
-    public ResponseEntity<HttpStatus> deleteByIds(@AuthenticationPrincipal UserDetails user, @RequestParam String ids) {
+    public ResponseEntity<HttpStatus> deleteByIds(@AuthenticationPrincipal UserDetails user, @RequestParam List<Long> ids) {
         log.trace("Enter");
         this.etfInvestmentService.deleteInvestmentById(user.getUsername(), ids);
         return new ResponseEntity<>(HttpStatus.OK);

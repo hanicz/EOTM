@@ -32,7 +32,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -181,9 +180,8 @@ public class InvestmentService implements ICSVService {
     }
 
     @Transactional
-    public void deleteInvestmentById(String userEmail, String ids) {
-        List<Long> idList = Stream.of(ids.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
-        this.investmentRepository.deleteByUserEmailAndIdIn(userEmail, idList);
+    public void deleteInvestmentById(String userEmail, List<Long> ids) {
+        this.investmentRepository.deleteByUserEmailAndIdIn(userEmail, ids);
     }
 
     public void getCSV(String userEmail, Writer writer) {

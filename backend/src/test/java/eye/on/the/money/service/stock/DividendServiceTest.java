@@ -128,7 +128,7 @@ class DividendServiceTest {
 
     @Test
     public void deleteDividendById() {
-        this.dividendService.deleteDividendById("1", this.user.getUsername());
+        this.dividendService.deleteDividendById(List.of(1L), this.user.getUsername());
         Optional<Dividend> dividend = this.dividendRepository.findById(1L);
         assertFalse(dividend.isPresent());
     }

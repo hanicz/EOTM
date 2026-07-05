@@ -26,7 +26,6 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -79,9 +78,8 @@ public class InterestService implements ICSVService {
     }
 
     @Transactional
-    public void deleteInterestById(String ids, String userEmail) {
-        List<Long> idList = Stream.of(ids.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
-        this.interestRepository.deleteByUserEmailAndIdIn(userEmail, idList);
+    public void deleteInterestById(List<Long> ids, String userEmail) {
+        this.interestRepository.deleteByUserEmailAndIdIn(userEmail, ids);
     }
 
     public void getCSV(String userEmail, Writer writer) {

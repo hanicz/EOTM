@@ -27,7 +27,6 @@ import java.io.Writer;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -48,9 +47,8 @@ public class ForexTransactionService implements ICSVService {
     }
 
     @Transactional
-    public void deleteForexTransactionById(String userEmail, String ids) {
-        List<Long> idList = Stream.of(ids.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
-        this.forexTransactionRepository.deleteByUserEmailAndIdIn(userEmail, idList);
+    public void deleteForexTransactionById(String userEmail, List<Long> ids) {
+        this.forexTransactionRepository.deleteByUserEmailAndIdIn(userEmail, ids);
     }
 
     @Transactional

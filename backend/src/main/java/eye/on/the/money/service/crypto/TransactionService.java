@@ -32,7 +32,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -80,9 +79,8 @@ public class TransactionService implements ICSVService {
     }
 
     @Transactional
-    public boolean deleteTransactionById(String userEmail, String ids) {
-        List<Long> idList = Stream.of(ids.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
-        return this.transactionRepository.deleteByUserEmailAndIdIn(userEmail, idList) == idList.size();
+    public boolean deleteTransactionById(String userEmail, List<Long> ids) {
+        return this.transactionRepository.deleteByUserEmailAndIdIn(userEmail, ids) == ids.size();
     }
 
     @Transactional

@@ -36,7 +36,7 @@ public class InterestController {
     }
 
     @DeleteMapping()
-    public ResponseEntity<HttpStatus> deleteByIds(@AuthenticationPrincipal UserDetails user, @RequestParam String ids) {
+    public ResponseEntity<HttpStatus> deleteByIds(@AuthenticationPrincipal UserDetails user, @RequestParam List<Long> ids) {
         log.trace("Enter");
         this.interestService.deleteInterestById(ids, user.getUsername());
         return new ResponseEntity<>(HttpStatus.OK);

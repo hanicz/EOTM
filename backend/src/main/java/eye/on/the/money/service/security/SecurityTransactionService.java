@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -110,9 +109,8 @@ public class SecurityTransactionService implements ICSVService {
     }
 
     @Transactional
-    public void deleteTransactionById(String userEmail, String ids) {
-        List<Long> idList = Stream.of(ids.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
-        this.securityTransactionRepository.deleteByUserEmailAndIdIn(userEmail, idList);
+    public void deleteTransactionById(String userEmail, List<Long> ids) {
+        this.securityTransactionRepository.deleteByUserEmailAndIdIn(userEmail, ids);
     }
 
     public void getCSV(String userEmail, Writer writer) {

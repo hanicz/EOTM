@@ -78,7 +78,7 @@ class InvestmentControllerTest {
     public void deleteByIds() {
         doNothing().when(this.investmentService).deleteInvestmentById(any(), any());
 
-        Assertions.assertEquals(HttpStatus.OK, this.investmentController.deleteByIds(user, "1,2,3").getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, this.investmentController.deleteByIds(user, List.of(1L, 2L, 3L)).getStatusCode());
     }
 
     @Test

@@ -31,7 +31,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -93,9 +92,8 @@ public class ETFInvestmentService implements ICSVService {
 
 
     @Transactional
-    public void deleteInvestmentById(String userEmail, String ids) {
-        List<Long> idList = Stream.of(ids.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
-        this.etfInvestmentRepository.deleteByUserEmailAndIdIn(userEmail, idList);
+    public void deleteInvestmentById(String userEmail, List<Long> ids) {
+        this.etfInvestmentRepository.deleteByUserEmailAndIdIn(userEmail, ids);
     }
 
     @Transactional

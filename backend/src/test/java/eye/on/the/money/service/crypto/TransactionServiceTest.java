@@ -190,12 +190,12 @@ class TransactionServiceTest {
         TransactionDTO transactionDTO = this.createNewTransaction();
         TransactionDTO inserted = this.transactionService.createTransaction(transactionDTO, this.user.getUsername());
 
-        Assertions.assertTrue(this.transactionService.deleteTransactionById(this.user.getUsername(), String.valueOf(inserted.getId())));
+        Assertions.assertTrue(this.transactionService.deleteTransactionById(this.user.getUsername(), List.of(inserted.getId())));
     }
 
     @Test
     public void deleteTransactionByIdNotExists() {
-        Assertions.assertFalse(this.transactionService.deleteTransactionById(this.user.getUsername(), "123456789"));
+        Assertions.assertFalse(this.transactionService.deleteTransactionById(this.user.getUsername(), List.of(123456789L)));
     }
 
     @Test

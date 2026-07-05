@@ -34,7 +34,7 @@ public class ForexController {
     }
 
     @DeleteMapping()
-    public ResponseEntity<HttpStatus> deleteByIds(@AuthenticationPrincipal UserDetails user, @RequestParam String ids) {
+    public ResponseEntity<HttpStatus> deleteByIds(@AuthenticationPrincipal UserDetails user, @RequestParam List<Long> ids) {
         this.forexTransactionService.deleteForexTransactionById(user.getUsername(), ids);
         return new ResponseEntity<>(HttpStatus.OK);
     }

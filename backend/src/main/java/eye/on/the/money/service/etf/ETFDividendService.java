@@ -27,7 +27,6 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -80,9 +79,8 @@ public class ETFDividendService implements ICSVService {
     }
 
     @Transactional
-    public void deleteETFDividendById(String ids, String userEmail) {
-        List<Long> idList = Stream.of(ids.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
-        this.etfDividendRepository.deleteByUserEmailAndIdIn(userEmail, idList);
+    public void deleteETFDividendById(List<Long> ids, String userEmail) {
+        this.etfDividendRepository.deleteByUserEmailAndIdIn(userEmail, ids);
     }
 
     public void getCSV(String userEmail, Writer writer) {

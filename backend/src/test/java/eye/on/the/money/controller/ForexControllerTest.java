@@ -54,7 +54,7 @@ class ForexControllerTest {
     public void deleteByIds() {
         doNothing().when(this.forexTransactionService).deleteForexTransactionById(any(), any());
 
-        Assertions.assertEquals(HttpStatus.OK, this.forexController.deleteByIds(user, "1,2,3").getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, this.forexController.deleteByIds(user, List.of(1L, 2L, 3L)).getStatusCode());
     }
 
     @Test

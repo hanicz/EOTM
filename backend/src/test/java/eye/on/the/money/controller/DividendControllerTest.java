@@ -61,7 +61,7 @@ class DividendControllerTest {
     public void deleteByIds() {
         doNothing().when(this.dividendService).deleteDividendById(any(), any());
 
-        Assertions.assertEquals(HttpStatus.OK, this.dividendController.deleteByIds(this.user, "1,2,3").getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, this.dividendController.deleteByIds(this.user, List.of(1L, 2L, 3L)).getStatusCode());
     }
 
     @Test

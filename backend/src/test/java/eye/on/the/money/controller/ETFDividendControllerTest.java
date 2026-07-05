@@ -62,7 +62,7 @@ class ETFDividendControllerTest {
     public void deleteByIds() {
         doNothing().when(this.etfDividendService).deleteETFDividendById(any(), any());
 
-        Assertions.assertEquals(HttpStatus.OK, this.etfDividendController.deleteByIds(user, "1,2,3").getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, this.etfDividendController.deleteByIds(user, List.of(1L, 2L, 3L)).getStatusCode());
     }
 
     @Test

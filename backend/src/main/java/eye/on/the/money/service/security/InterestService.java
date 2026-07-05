@@ -10,6 +10,7 @@ import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.security.InterestRepository;
 import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.util.DateFormats;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVParser;
@@ -21,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -38,9 +38,6 @@ public class InterestService implements ICSVService {
     private final SecurityService securityService;
     private final UserServiceImpl userService;
     private final ModelMapper modelMapper;
-
-    private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
     public List<InterestDTO> getInterest(String userEmail) {
         return this.interestRepository.findByUserEmailOrderByInterestDateDesc(userEmail).stream().map(this::convertToDTO).collect(Collectors.toList());
     }
@@ -101,7 +98,7 @@ public class InterestService implements ICSVService {
         try (CSVParser csvParser = this.getParser(file,
                 new String[]{"Interest Id", "Amount", "Interest Date", "Security Id", "Security Name", "Currency"})) {
             for (CSVRecord csvRecord : csvParser) {
-                InterestDTO interest = InterestDTO.createFromCSVRecord(csvRecord, FORMATTER);
+                InterestDTO interest = InterestDTO.createFromCSVRecord(csvRecord, DateFormats.YYYY_MM_DD);
 
                 if (interest.getInterestId() != null &&
                         this.interestRepository.findByIdAndUserEmail(interest.getInterestId(), userEmail).isPresent()) {

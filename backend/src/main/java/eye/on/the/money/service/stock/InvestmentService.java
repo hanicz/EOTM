@@ -16,6 +16,7 @@ import eye.on.the.money.repository.stock.InvestmentRepository;
 import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.util.DateFormats;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVParser;
@@ -28,7 +29,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.Writer;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -47,9 +47,6 @@ public class InvestmentService implements ICSVService {
     private final ModelMapper modelMapper;
     private final EODAPIService eodAPIService;
     private final StockService stockService;
-
-    private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
     public List<InvestmentDTO> getInvestments(String userEmail) {
         return this.investmentRepository.findByUserEmailOrderByTransactionDateDesc(userEmail).stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
     }
@@ -203,7 +200,7 @@ public class InvestmentService implements ICSVService {
         try (CSVParser csvParser = this.getParser(file,
                 new String[]{"Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Exchange", "Amount", "Currency", "Fee", "Account"})) {
             for (CSVRecord csvRecord : csvParser) {
-                InvestmentDTO investment = InvestmentDTO.createFromCSVRecord(csvRecord, FORMATTER);
+                InvestmentDTO investment = InvestmentDTO.createFromCSVRecord(csvRecord, DateFormats.YYYY_MM_DD);
 
                 if (investment.getInvestmentId() != null &&
                         this.investmentRepository.findByIdAndUserEmail(investment.getInvestmentId(), userEmail).isPresent()) {

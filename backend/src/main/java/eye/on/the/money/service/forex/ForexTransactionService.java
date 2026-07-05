@@ -12,6 +12,7 @@ import eye.on.the.money.repository.forex.ForexTransactionRepository;
 import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.util.DateFormats;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVParser;
@@ -23,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -39,9 +39,6 @@ public class ForexTransactionService implements ICSVService {
     private final UserServiceImpl userService;
     private final ModelMapper modelMapper;
     private final EODAPIService eodAPIService;
-
-    private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
     public List<ForexTransactionDTO> getForexTransactionsByUserId(String userEmail) {
         return this.forexTransactionRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToForexTransactionDTO).collect(Collectors.toList());
     }
@@ -140,7 +137,7 @@ public class ForexTransactionService implements ICSVService {
         try (CSVParser csvParser = this.getParser(file,
                 new String[]{"Transaction Id", "From Amount", "To Amount", "Type", "Transaction Date", "Change Rate", "From Currency", "To Currency"})) {
             for (CSVRecord csvRecord : csvParser) {
-                ForexTransactionDTO transaction = ForexTransactionDTO.createFromCSVRecord(csvRecord, FORMATTER);
+                ForexTransactionDTO transaction = ForexTransactionDTO.createFromCSVRecord(csvRecord, DateFormats.YYYY_MM_DD);
 
                 if (transaction.getForexTransactionId() != null &&
                         this.forexTransactionRepository.findByIdAndUserEmail(transaction.getForexTransactionId(), userEmail).isPresent()) {

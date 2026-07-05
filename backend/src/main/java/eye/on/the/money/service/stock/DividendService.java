@@ -11,6 +11,7 @@ import eye.on.the.money.repository.stock.DividendRepository;
 import eye.on.the.money.repository.stock.StockRepository;
 import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.util.DateFormats;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVParser;
@@ -22,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -39,9 +39,6 @@ public class DividendService implements ICSVService {
     private final StockRepository stockRepository;
     private final UserServiceImpl userService;
     private final ModelMapper modelMapper;
-
-    private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
     public List<DividendDTO> getDividends(String userEmail) {
         return this.dividendRepository.findByUserEmailOrderByDividendDate(userEmail).stream().map(this::convertToDividendDTO).collect(Collectors.toList());
     }
@@ -102,7 +99,7 @@ public class DividendService implements ICSVService {
         try (CSVParser csvParser = this.getParser(file,
                 new String[]{"Dividend Id", "Amount", "Dividend Date", "Short Name", "Exchange", "Currency"})) {
             for (CSVRecord csvRecord : csvParser) {
-                DividendDTO dividend = DividendDTO.createFromCSVRecord(csvRecord, FORMATTER);
+                DividendDTO dividend = DividendDTO.createFromCSVRecord(csvRecord, DateFormats.YYYY_MM_DD);
 
                 if (dividend.getDividendId() != null &&
                         this.dividendRepository.findByIdAndUserEmail(dividend.getDividendId(), userEmail).isPresent()) {

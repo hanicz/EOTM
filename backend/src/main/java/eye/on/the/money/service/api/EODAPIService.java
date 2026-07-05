@@ -8,6 +8,7 @@ import eye.on.the.money.model.stock.Exchange;
 import eye.on.the.money.model.stock.Symbol;
 import eye.on.the.money.repository.ConfigRepository;
 import eye.on.the.money.repository.CredentialRepository;
+import eye.on.the.money.util.DateFormats;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,18 +16,14 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 @Service
 @Slf4j
 public class EODAPIService extends APIService {
 
-    private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private final static String API = "eod";
 
     private final static String EXCHANGE_SYMBOL_LIST_PATH = "/exchange-symbol-list/{1}?api_token={0}&fmt=json";
@@ -76,7 +73,7 @@ public class EODAPIService extends APIService {
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public List<EODCandleQuoteDTO> getCandleQuoteByShortName(String shortname, int months) {
         log.trace("Enter");
-        String from = (months <= 60) ? "&from=" + this.dateFormat.format(Date.from(ZonedDateTime.now().minusMonths(months).toInstant())) : "";
+        String from = (months <= 60) ? "&from=" + LocalDate.now().minusMonths(months).format(DateFormats.YYYY_MM_DD) : "";
         String period = (months > 23) ? ((months > 60) ? "m" : "w") : "d";
         String url = this.createURL(EODAPIService.API, CANDLE_PATH, shortname, period, from);
         ResponseEntity<?> response = this.callGetAPI(url,

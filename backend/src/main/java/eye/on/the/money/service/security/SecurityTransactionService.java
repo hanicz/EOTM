@@ -10,6 +10,7 @@ import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.security.SecurityTransactionRepository;
 import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.util.DateFormats;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVParser;
@@ -22,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.Writer;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -43,9 +43,6 @@ public class SecurityTransactionService implements ICSVService {
     private final UserServiceImpl userService;
     private final ModelMapper modelMapper;
     private final SecurityService securityService;
-
-    private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
     public List<SecurityTransactionDTO> getTransactions(String userEmail) {
         return this.securityTransactionRepository.findByUserEmailOrderByTransactionDateDesc(userEmail)
                 .stream().map(this::convertToDTO).collect(Collectors.toList());
@@ -132,7 +129,7 @@ public class SecurityTransactionService implements ICSVService {
         try (CSVParser csvParser = this.getParser(file,
                 new String[]{"Transaction Id", "Quantity", "Type", "Transaction Date", "Security Id", "Security Name", "Amount", "Currency"})) {
             for (CSVRecord csvRecord : csvParser) {
-                SecurityTransactionDTO transaction = SecurityTransactionDTO.createFromCSVRecord(csvRecord, FORMATTER);
+                SecurityTransactionDTO transaction = SecurityTransactionDTO.createFromCSVRecord(csvRecord, DateFormats.YYYY_MM_DD);
 
                 if (transaction.getTransactionId() != null &&
                         this.securityTransactionRepository.findByIdAndUserEmail(transaction.getTransactionId(), userEmail).isPresent()) {

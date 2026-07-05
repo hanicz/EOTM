@@ -15,6 +15,7 @@ import eye.on.the.money.repository.crypto.TransactionRepository;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.util.DateFormats;
 import eye.on.the.money.service.api.CryptoAPIService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.Writer;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -46,9 +46,6 @@ public class TransactionService implements ICSVService {
     private final CoinRepository coinRepository;
     private final ModelMapper modelMapper;
     private final CryptoAPIService cryptoAPIService;
-
-    private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
     public List<TransactionDTO> getTransactionsByUserId(String userEmail) {
         return this.transactionRepository.findByUserEmailOrderByTransactionDateDesc(userEmail).stream()
                 .map(this::convertToTransactionDTO).collect(Collectors.toList());
@@ -159,7 +156,7 @@ public class TransactionService implements ICSVService {
         try (CSVParser csvParser = this.getParser(file,
                 new String[]{"Transaction Id", "Quantity", "Type", "Transaction Date", "Symbol", "Amount", "Currency", "Fee"})) {
             for (CSVRecord csvRecord : csvParser) {
-                TransactionDTO transaction = TransactionDTO.createFromCSVRecord(csvRecord, FORMATTER);
+                TransactionDTO transaction = TransactionDTO.createFromCSVRecord(csvRecord, DateFormats.YYYY_MM_DD);
 
                 if (transaction.getId() != null &&
                         this.transactionRepository.findByIdAndUserEmail(transaction.getId(), userEmail).isPresent()) {

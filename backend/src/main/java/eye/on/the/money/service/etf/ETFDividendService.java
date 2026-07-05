@@ -11,6 +11,7 @@ import eye.on.the.money.repository.etf.ETFRepository;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.util.DateFormats;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVParser;
@@ -22,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -39,9 +39,6 @@ public class ETFDividendService implements ICSVService {
     private final ETFRepository etfRepository;
     private final UserServiceImpl userService;
     private final ModelMapper modelMapper;
-
-    private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
     public List<ETFDividendDTO> getDividends(String userEmail) {
         return this.etfDividendRepository.findByUserEmailOrderByDividendDate(userEmail).stream().map(this::convertToETFDividendDTO).collect(Collectors.toList());
     }
@@ -102,7 +99,7 @@ public class ETFDividendService implements ICSVService {
         try (CSVParser csvParser = this.getParser(file,
                 new String[]{"Dividend Id", "Amount", "Dividend Date", "Short Name","Exchange", "Currency"})) {
             for (CSVRecord csvRecord : csvParser) {
-                ETFDividendDTO dividend = ETFDividendDTO.createFromCSVRecord(csvRecord, FORMATTER);
+                ETFDividendDTO dividend = ETFDividendDTO.createFromCSVRecord(csvRecord, DateFormats.YYYY_MM_DD);
 
                 if (dividend.getId() != null &&
                         this.etfDividendRepository.findByIdAndUserEmail(dividend.getId(), userEmail).isPresent()) {

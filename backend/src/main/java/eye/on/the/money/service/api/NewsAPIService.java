@@ -5,6 +5,7 @@ import eye.on.the.money.exception.APIException;
 import eye.on.the.money.model.news.News;
 import eye.on.the.money.repository.ConfigRepository;
 import eye.on.the.money.repository.CredentialRepository;
+import eye.on.the.money.util.DateFormats;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,17 +13,14 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 @Service
 @Slf4j
 public class NewsAPIService extends APIService {
 
-    private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private final static String API = "finnhub";
 
     private final static String NEWS_PATH = "/news?category={1}&token={0}";
@@ -45,9 +43,8 @@ public class NewsAPIService extends APIService {
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public List<News> getCompanyNews(String symbol) {
         log.trace("Enter getCompanyNews");
-        Date threeMonths = new Date(System.currentTimeMillis() - 30L * 24 * 60 * 60 * 1000);
-        String fromDate = this.dateFormat.format(threeMonths);
-        String toDate = this.dateFormat.format(new Date());
+        String fromDate = LocalDate.now().minusDays(30).format(DateFormats.YYYY_MM_DD);
+        String toDate = LocalDate.now().format(DateFormats.YYYY_MM_DD);
         String url = this.createURL(NewsAPIService.API, COMPANY_NEWS_PATH, symbol, fromDate, toDate);
         ResponseEntity<?> response = this.callGetAPI(url, News[].class);
         return Arrays.asList((News[]) response.getBody());

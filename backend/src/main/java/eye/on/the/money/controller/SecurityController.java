@@ -4,7 +4,6 @@ import eye.on.the.money.model.security.Security;
 import eye.on.the.money.service.security.SecurityService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +22,6 @@ public class SecurityController {
     @GetMapping()
     public ResponseEntity<List<Security>> getAllSecurities() {
         log.trace("Enter");
-        return new ResponseEntity<>(this.securityService.getAllSecurities(), HttpStatus.OK);
+        return ResponseEntity.ok(this.securityService.getAllSecurities());
     }
 }

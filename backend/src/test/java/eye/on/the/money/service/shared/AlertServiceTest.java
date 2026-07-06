@@ -67,7 +67,7 @@ public class AlertServiceTest {
     @Test
     public void createNewStockAlert() {
         StockAlertDTO sDTO = this.getStockAlertDTO();
-        StockAlertDTO createdDTO = this.alertService.createNewStockAlert(this.user, sDTO);
+        StockAlertDTO createdDTO = this.alertService.createNewStockAlert(this.user.getUsername(), sDTO);
         sDTO.setId(createdDTO.getId());
         StockAlert expected = this.stockAlertRepository.findById(createdDTO.getId()).get();
 
@@ -77,7 +77,7 @@ public class AlertServiceTest {
     @Test
     public void createNewCryptoAlert() {
         CryptoAlertDTO cDTO = this.getCryptoAlertDTO();
-        CryptoAlertDTO createdDTO = this.alertService.createNewCryptoAlert(this.user, cDTO);
+        CryptoAlertDTO createdDTO = this.alertService.createNewCryptoAlert(this.user.getUsername(), cDTO);
         cDTO.setId(createdDTO.getId());
         CryptoAlert expected = this.cryptoAlertRepository.findById(createdDTO.getId()).get();
 
@@ -87,7 +87,7 @@ public class AlertServiceTest {
     @Test
     public void deleteStockAlert() {
         StockAlertDTO sDTO = this.getStockAlertDTO();
-        StockAlertDTO createdDTO = this.alertService.createNewStockAlert(this.user, sDTO);
+        StockAlertDTO createdDTO = this.alertService.createNewStockAlert(this.user.getUsername(), sDTO);
         Optional<StockAlert> beforeDelete = this.stockAlertRepository.findById(createdDTO.getId());
         var deleted = this.alertService.deleteStockAlert("test@test.test", createdDTO.getId());
         Optional<StockAlert> afterDelete = this.stockAlertRepository.findById(createdDTO.getId());
@@ -100,7 +100,7 @@ public class AlertServiceTest {
     @Test
     public void deleteCryptoAlert() {
         CryptoAlertDTO cDTO = this.getCryptoAlertDTO();
-        CryptoAlertDTO createdDTO = this.alertService.createNewCryptoAlert(this.user, cDTO);
+        CryptoAlertDTO createdDTO = this.alertService.createNewCryptoAlert(this.user.getUsername(), cDTO);
         Optional<CryptoAlert> beforeDelete = this.cryptoAlertRepository.findById(createdDTO.getId());
         var deleted = this.alertService.deleteCryptoAlert("test@test.test", createdDTO.getId());
         Optional<CryptoAlert> afterDelete = this.cryptoAlertRepository.findById(createdDTO.getId());

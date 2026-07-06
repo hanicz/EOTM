@@ -9,7 +9,6 @@ import eye.on.the.money.service.signal.SignalService;
 import eye.on.the.money.service.stock.StockService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,30 +30,30 @@ public class StockController {
     @GetMapping()
     public ResponseEntity<List<Stock>> getAllStocks() {
         log.trace("Enter");
-        return new ResponseEntity<>(this.stockService.getAllStocks(), HttpStatus.OK);
+        return ResponseEntity.ok(this.stockService.getAllStocks());
     }
 
     @GetMapping("symbols/{exchange}")
     public ResponseEntity<List<Symbol>> getAllSymbols(@PathVariable String exchange) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.stockService.getAllSymbols(exchange), HttpStatus.OK);
+        return ResponseEntity.ok(this.stockService.getAllSymbols(exchange));
     }
 
     @GetMapping("exchanges")
     public ResponseEntity<List<Exchange>> getAllExchanges() {
         log.trace("Enter");
-        return new ResponseEntity<>(this.stockService.getAllExchanges(), HttpStatus.OK);
+        return ResponseEntity.ok(this.stockService.getAllExchanges());
     }
 
     @GetMapping("candle/{shortName}/{months}")
     public ResponseEntity<CandleQuoteDTO> getCandleQuoteByShortName(@PathVariable String shortName, @PathVariable int months) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.stockService.getCandleQuoteByShortName(shortName, months), HttpStatus.OK);
+        return ResponseEntity.ok(this.stockService.getCandleQuoteByShortName(shortName, months));
     }
 
     @GetMapping("{shortName}/signal")
     public ResponseEntity<SignalDTO> getSignal(@PathVariable String shortName) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.signalService.evaluate(shortName), HttpStatus.OK);
+        return ResponseEntity.ok(this.signalService.evaluate(shortName));
     }
 }

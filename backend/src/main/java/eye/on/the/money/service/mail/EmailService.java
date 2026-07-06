@@ -59,7 +59,7 @@ public class EmailService {
     }
 
     private void send(String sendTo, String subject, String plainText, String html) {
-        String from = this.credentialRepository.findById("email_user").orElseThrow(NoSuchElementException::new).getSecret();
+        String from = this.credentialRepository.findById("email_user").orElseThrow(() -> new NoSuchElementException("Credential not found: email_user")).getSecret();
         try {
             MimeMessage mimeMessage = this.javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");

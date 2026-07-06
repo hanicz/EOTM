@@ -21,10 +21,10 @@ public class TaxController {
     private final TaxService taxService;
 
     @PostMapping("/process")
-    public ResponseEntity<HttpStatus> processMNBExcel(@RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<Void> processMNBExcel(@RequestParam("file") MultipartFile file) throws IOException {
         log.trace("Enter");
         this.taxService.loadRatesFromXLS(file);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
 }

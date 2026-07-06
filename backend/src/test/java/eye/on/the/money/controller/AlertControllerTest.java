@@ -2,7 +2,6 @@ package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.out.CryptoAlertDTO;
 import eye.on.the.money.dto.out.StockAlertDTO;
-import eye.on.the.money.model.User;
 import eye.on.the.money.service.shared.AlertService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -41,7 +40,7 @@ class AlertControllerTest {
 
         when(this.alertService.getAllStockAlerts(anyString())).thenReturn(alerts);
 
-        ResponseEntity<List<StockAlertDTO>> result = this.alertController.getStockAlerts(User.builder().id(1L).email("email").build());
+        ResponseEntity<List<StockAlertDTO>> result = this.alertController.getStockAlerts("email");
 
         Assertions.assertIterableEquals(result.getBody(), alerts);
     }
@@ -50,7 +49,7 @@ class AlertControllerTest {
     public void deleteAlert() {
         when(this.alertService.deleteStockAlert(anyString(), anyLong())).thenReturn(true);
 
-        ResponseEntity<HttpStatus> result = this.alertController.deleteStockAlert(User.builder().id(1L).email("email").build(), 1L);
+        ResponseEntity<Void> result = this.alertController.deleteStockAlert("email", 1L);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
     }
@@ -59,7 +58,7 @@ class AlertControllerTest {
     public void deleteAlert404() {
         when(this.alertService.deleteStockAlert(anyString(), anyLong())).thenReturn(false);
 
-        ResponseEntity<HttpStatus> result = this.alertController.deleteStockAlert(User.builder().id(1L).email("user@email.com").build(), 1L);
+        ResponseEntity<Void> result = this.alertController.deleteStockAlert("user@email.com", 1L);
 
         assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
     }
@@ -67,10 +66,9 @@ class AlertControllerTest {
     @Test
     public void createStockAlert() {
         StockAlertDTO saDTO = StockAlertDTO.builder().name("n1").shortName("sn1").valuePoint(0.1).type("t1").exchange("e1").build();
-        User user = User.builder().id(1L).build();
-        when(this.alertService.createNewStockAlert(user, saDTO)).thenReturn(saDTO);
+        when(this.alertService.createNewStockAlert("email", saDTO)).thenReturn(saDTO);
 
-        ResponseEntity<StockAlertDTO> result = this.alertController.createStockAlert(user, saDTO);
+        ResponseEntity<StockAlertDTO> result = this.alertController.createStockAlert("email", saDTO);
 
         Assertions.assertAll("Assert response",
                 () -> assertEquals(saDTO, result.getBody()),
@@ -86,7 +84,7 @@ class AlertControllerTest {
 
         when(this.alertService.getAllCryptoAlerts(anyString())).thenReturn(alerts);
 
-        ResponseEntity<List<CryptoAlertDTO>> result = this.alertController.getCryptoAlerts(User.builder().id(1L).email("email").build());
+        ResponseEntity<List<CryptoAlertDTO>> result = this.alertController.getCryptoAlerts("email");
 
         Assertions.assertIterableEquals(result.getBody(), alerts);
     }
@@ -95,7 +93,7 @@ class AlertControllerTest {
     public void deleteCryptoAlert() {
         when(this.alertService.deleteCryptoAlert(anyString(), anyLong())).thenReturn(true);
 
-        ResponseEntity<HttpStatus> result = this.alertController.deleteCryptoAlert(User.builder().id(1L).email("email").build(), 1L);
+        ResponseEntity<Void> result = this.alertController.deleteCryptoAlert("email", 1L);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
     }
@@ -104,7 +102,7 @@ class AlertControllerTest {
     public void deleteCryptoAlert404() {
         when(this.alertService.deleteCryptoAlert(anyString(), anyLong())).thenReturn(false);
 
-        ResponseEntity<HttpStatus> result = this.alertController.deleteCryptoAlert(User.builder().id(1L).email("user@email.com").build(), 1L);
+        ResponseEntity<Void> result = this.alertController.deleteCryptoAlert("user@email.com", 1L);
 
         assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
     }
@@ -112,10 +110,9 @@ class AlertControllerTest {
     @Test
     public void createCryptoAlert() {
         CryptoAlertDTO caDTO = CryptoAlertDTO.builder().name("n1").symbol("sn1").valuePoint(0.1).type("t1").build();
-        User user = User.builder().id(1L).build();
-        when(this.alertService.createNewCryptoAlert(user, caDTO)).thenReturn(caDTO);
+        when(this.alertService.createNewCryptoAlert("email", caDTO)).thenReturn(caDTO);
 
-        ResponseEntity<CryptoAlertDTO> result = this.alertController.createCryptoAlert(user, caDTO);
+        ResponseEntity<CryptoAlertDTO> result = this.alertController.createCryptoAlert("email", caDTO);
 
         Assertions.assertAll("Assert response",
                 () -> assertEquals(caDTO, result.getBody()),

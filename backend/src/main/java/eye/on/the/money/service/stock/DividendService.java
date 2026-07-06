@@ -48,8 +48,8 @@ public class DividendService implements ICSVService {
 
     @Transactional
     public DividendDTO createDividend(DividendDTO dividendDTO, String userEmail) {
-        Currency currency = this.currencyRepository.findById(dividendDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
-        Stock stock = this.stockRepository.findByShortName(dividendDTO.getShortName()).orElseThrow(NoSuchElementException::new);
+        Currency currency = this.currencyRepository.findById(dividendDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + dividendDTO.getCurrencyId()));
+        Stock stock = this.stockRepository.findByShortName(dividendDTO.getShortName()).orElseThrow(() -> new NoSuchElementException("Stock not found: " + dividendDTO.getShortName()));
         User user = this.userService.loadUserByEmail(userEmail);
 
         Dividend dividend = Dividend.builder()
@@ -66,9 +66,9 @@ public class DividendService implements ICSVService {
 
     @Transactional
     public DividendDTO updateDividend(DividendDTO dividendDTO, String userEmail) {
-        Currency currency = this.currencyRepository.findById(dividendDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
-        Stock stock = this.stockRepository.findByShortName(dividendDTO.getShortName()).orElseThrow(NoSuchElementException::new);
-        Dividend dividend = this.dividendRepository.findByIdAndUserEmail(dividendDTO.getDividendId(), userEmail).orElseThrow(NoSuchElementException::new);
+        Currency currency = this.currencyRepository.findById(dividendDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + dividendDTO.getCurrencyId()));
+        Stock stock = this.stockRepository.findByShortName(dividendDTO.getShortName()).orElseThrow(() -> new NoSuchElementException("Stock not found: " + dividendDTO.getShortName()));
+        Dividend dividend = this.dividendRepository.findByIdAndUserEmail(dividendDTO.getDividendId(), userEmail).orElseThrow(() -> new NoSuchElementException("Dividend not found: " + dividendDTO.getDividendId()));
 
         dividend.setDividendDate(dividendDTO.getDividendDate());
         dividend.setCurrency(currency);

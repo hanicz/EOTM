@@ -131,7 +131,7 @@ public class WatchListService {
 
     @Transactional
     public CryptoWatchDTO createNewCryptoWatch(String userEmail, String coinId) {
-        Coin coin = this.coinRepository.findById(coinId).orElseThrow(NoSuchElementException::new);
+        Coin coin = this.coinRepository.findById(coinId).orElseThrow(() -> new NoSuchElementException("Coin not found: " + coinId));
         User user = this.userService.loadUserByEmail(userEmail);
 
         CryptoWatch cryptoWatch = CryptoWatch.builder().coin(coin).user(user).build();
@@ -142,8 +142,8 @@ public class WatchListService {
     @Transactional
     public ForexWatchDTO createNewForexWatch(String userEmail, String fromCurrencyId, String toCurrencyId) {
         User user = this.userService.loadUserByEmail(userEmail);
-        Currency fromCurrency = this.currencyRepository.findById(fromCurrencyId).orElseThrow(NoSuchElementException::new);
-        Currency toCurrency = this.currencyRepository.findById(toCurrencyId).orElseThrow(NoSuchElementException::new);
+        Currency fromCurrency = this.currencyRepository.findById(fromCurrencyId).orElseThrow(() -> new NoSuchElementException("Currency not found: " + fromCurrencyId));
+        Currency toCurrency = this.currencyRepository.findById(toCurrencyId).orElseThrow(() -> new NoSuchElementException("Currency not found: " + toCurrencyId));
 
         ForexWatch forexWatch = ForexWatch.builder().fromCurrency(fromCurrency).toCurrency(toCurrency).user(user).build();
         this.forexWatchRepository.save(forexWatch);

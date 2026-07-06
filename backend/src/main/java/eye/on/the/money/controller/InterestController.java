@@ -2,13 +2,13 @@ package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.out.InterestDTO;
 import eye.on.the.money.service.security.InterestService;
+import eye.on.the.money.util.CsvResponseUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import eye.on.the.money.security.CurrentUserEmail;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,42 +24,40 @@ public class InterestController {
     private final InterestService interestService;
 
     @GetMapping()
-    public ResponseEntity<List<InterestDTO>> getAllInterest(@AuthenticationPrincipal UserDetails user) {
+    public ResponseEntity<List<InterestDTO>> getAllInterest(@CurrentUserEmail String userEmail) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.interestService.getInterest(user.getUsername()), HttpStatus.OK);
+        return ResponseEntity.ok(this.interestService.getInterest(userEmail));
     }
 
     @PostMapping
-    public ResponseEntity<InterestDTO> createInterest(@AuthenticationPrincipal UserDetails user, @RequestBody InterestDTO interestDTO) {
+    public ResponseEntity<InterestDTO> createInterest(@CurrentUserEmail String userEmail, @RequestBody InterestDTO interestDTO) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.interestService.createInterest(interestDTO, user.getUsername()), HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.interestService.createInterest(interestDTO, userEmail));
     }
 
     @DeleteMapping()
-    public ResponseEntity<HttpStatus> deleteByIds(@AuthenticationPrincipal UserDetails user, @RequestParam List<Long> ids) {
+    public ResponseEntity<Void> deleteByIds(@CurrentUserEmail String userEmail, @RequestParam List<Long> ids) {
         log.trace("Enter");
-        this.interestService.deleteInterestById(ids, user.getUsername());
-        return new ResponseEntity<>(HttpStatus.OK);
+        this.interestService.deleteInterestById(ids, userEmail);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/csv")
-    public void getCSV(@AuthenticationPrincipal UserDetails user, HttpServletResponse servletResponse) throws IOException {
+    public void getCSV(@CurrentUserEmail String userEmail, HttpServletResponse servletResponse) throws IOException {
         log.trace("Enter");
-        servletResponse.setContentType("text/csv");
-        servletResponse.addHeader("Content-Disposition", "attachment; filename=\"interest.csv\"");
-        this.interestService.getCSV(user.getUsername(), servletResponse.getWriter());
+        this.interestService.getCSV(userEmail, CsvResponseUtil.prepare(servletResponse, "interest.csv"));
     }
 
     @PutMapping
-    public ResponseEntity<InterestDTO> updateInterest(@AuthenticationPrincipal UserDetails user, @RequestBody InterestDTO interestDTO) {
+    public ResponseEntity<InterestDTO> updateInterest(@CurrentUserEmail String userEmail, @RequestBody InterestDTO interestDTO) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.interestService.updateInterest(interestDTO, user.getUsername()), HttpStatus.CREATED);
+        return ResponseEntity.ok(this.interestService.updateInterest(interestDTO, userEmail));
     }
 
     @PostMapping("/process/csv")
-    public ResponseEntity<HttpStatus> processCSV(@AuthenticationPrincipal UserDetails user, @RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<Void> processCSV(@CurrentUserEmail String userEmail, @RequestParam("file") MultipartFile file) throws IOException {
         log.trace("Enter");
-        this.interestService.processCSV(user.getUsername(), file);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        this.interestService.processCSV(userEmail, file);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

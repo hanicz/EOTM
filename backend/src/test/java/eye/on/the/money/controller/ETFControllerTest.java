@@ -40,7 +40,7 @@ class ETFControllerTest {
 
         when(this.etfInvestmentService.getETFInvestments("email")).thenReturn(eiDTO);
 
-        Assertions.assertIterableEquals(eiDTO, this.etfController.getAllETFInvestments(this.user).getBody());
+        Assertions.assertIterableEquals(eiDTO, this.etfController.getAllETFInvestments("email").getBody());
     }
 
     @Test
@@ -49,7 +49,7 @@ class ETFControllerTest {
 
         when(this.etfInvestmentService.getCurrentETFHoldings("email")).thenReturn(eiDTO);
 
-        Assertions.assertIterableEquals(eiDTO, this.etfController.getETFHoldings(this.user).getBody());
+        Assertions.assertIterableEquals(eiDTO, this.etfController.getETFHoldings("email").getBody());
     }
 
     @Test
@@ -58,7 +58,7 @@ class ETFControllerTest {
 
         when(this.etfInvestmentService.getAllPositions("email")).thenReturn(eiDTO);
 
-        Assertions.assertIterableEquals(eiDTO, this.etfController.getPositions(this.user).getBody());
+        Assertions.assertIterableEquals(eiDTO, this.etfController.getPositions("email").getBody());
     }
 
     @Test
@@ -68,7 +68,7 @@ class ETFControllerTest {
 
         when(this.etfInvestmentService.createInvestment(eiDTO, "email")).thenReturn(eiDTO);
 
-        Assertions.assertEquals(eiDTO, this.etfController.createInvestment(user, eiDTO).getBody());
+        Assertions.assertEquals(eiDTO, this.etfController.createInvestment("email", eiDTO).getBody());
 
     }
 
@@ -76,7 +76,7 @@ class ETFControllerTest {
     public void deleteByIds() {
         doNothing().when(this.etfInvestmentService).deleteInvestmentById(any(), any());
 
-        Assertions.assertEquals(HttpStatus.OK, this.etfController.deleteByIds(user, List.of(1L, 2L, 3L)).getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, this.etfController.deleteByIds("email", List.of(1L, 2L, 3L)).getStatusCode());
     }
 
     @Test
@@ -84,7 +84,7 @@ class ETFControllerTest {
         HttpServletResponse httpSR = new MockHttpServletResponse();
 
         doNothing().when(this.etfInvestmentService).getCSV(any(), any());
-        this.etfController.getCSV(user, httpSR);
+        this.etfController.getCSV("email", httpSR);
 
         verify(this.etfInvestmentService, times(1)).getCSV(any(), any());
     }
@@ -96,7 +96,7 @@ class ETFControllerTest {
 
         when(this.etfInvestmentService.updateInvestment(eiDTO, "email")).thenReturn(eiDTO);
 
-        Assertions.assertEquals(eiDTO, this.etfController.updateInvestment(user, eiDTO).getBody());
+        Assertions.assertEquals(eiDTO, this.etfController.updateInvestment("email", eiDTO).getBody());
     }
 
     private List<ETFInvestmentDTO> createETFList() {

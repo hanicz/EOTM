@@ -19,6 +19,6 @@ public class CoinService {
     }
 
     public Coin getCoinBySymbol(String symbol) {
-        return this.coinRepository.findBySymbol(symbol).orElseThrow(NoSuchElementException::new);
+        return this.coinRepository.findBySymbol(symbol).orElseThrow(() -> new NoSuchElementException("Coin not found: " + symbol));
     }
 }

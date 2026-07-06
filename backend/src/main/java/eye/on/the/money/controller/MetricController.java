@@ -6,7 +6,6 @@ import eye.on.the.money.dto.out.RecommendationDTO;
 import eye.on.the.money.service.stock.MetricService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,18 +26,18 @@ public class MetricController {
     @GetMapping("/profile/{symbol}")
     public ResponseEntity<ProfileDTO> getProfileBySymbol(@PathVariable String symbol) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.metricService.getProfileBySymbol(symbol), HttpStatus.OK);
+        return ResponseEntity.ok(this.metricService.getProfileBySymbol(symbol));
     }
 
     @GetMapping("/metric/{symbol}")
     public ResponseEntity<MetricDTO> getMetricBySymbol(@PathVariable String symbol) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.metricService.getMetricBySymbol(symbol), HttpStatus.OK);
+        return ResponseEntity.ok(this.metricService.getMetricBySymbol(symbol));
     }
 
     @GetMapping("/recommendation/{symbol}")
     public ResponseEntity<List<RecommendationDTO>> getRecommendations(@PathVariable String symbol) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.metricService.getRecommendations(symbol), HttpStatus.OK);
+        return ResponseEntity.ok(this.metricService.getRecommendations(symbol));
     }
 }

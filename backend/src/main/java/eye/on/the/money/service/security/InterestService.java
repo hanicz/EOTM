@@ -47,7 +47,7 @@ public class InterestService implements ICSVService {
 
     @Transactional
     public InterestDTO createInterest(InterestDTO interestDTO, String userEmail) {
-        Currency currency = this.currencyRepository.findById(interestDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
+        Currency currency = this.currencyRepository.findById(interestDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + interestDTO.getCurrencyId()));
         Security security = this.securityService.getOrCreateSecurity(interestDTO.getSecurityId(), interestDTO.getSecurityName());
         User user = this.userService.loadUserByEmail(userEmail);
 
@@ -65,9 +65,9 @@ public class InterestService implements ICSVService {
 
     @Transactional
     public InterestDTO updateInterest(InterestDTO interestDTO, String userEmail) {
-        Currency currency = this.currencyRepository.findById(interestDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
+        Currency currency = this.currencyRepository.findById(interestDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + interestDTO.getCurrencyId()));
         Security security = this.securityService.getOrCreateSecurity(interestDTO.getSecurityId(), interestDTO.getSecurityName());
-        Interest interest = this.interestRepository.findByIdAndUserEmail(interestDTO.getInterestId(), userEmail).orElseThrow(NoSuchElementException::new);
+        Interest interest = this.interestRepository.findByIdAndUserEmail(interestDTO.getInterestId(), userEmail).orElseThrow(() -> new NoSuchElementException("Interest not found: " + interestDTO.getInterestId()));
 
         interest.setInterestDate(interestDTO.getInterestDate());
         interest.setCurrency(currency);

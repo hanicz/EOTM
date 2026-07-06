@@ -36,8 +36,8 @@ public class MailConfig {
         mailSender.setHost(this.mailServerHost);
         mailSender.setPort(this.mailServerPort);
 
-        mailSender.setUsername(this.credentialRepository.findById("email_user").orElseThrow(NoSuchElementException::new).getSecret());
-        mailSender.setPassword(this.credentialRepository.findById("email_password").orElseThrow(NoSuchElementException::new).getSecret());
+        mailSender.setUsername(this.credentialRepository.findById("email_user").orElseThrow(() -> new NoSuchElementException("Credential not found: email_user")).getSecret());
+        mailSender.setPassword(this.credentialRepository.findById("email_password").orElseThrow(() -> new NoSuchElementException("Credential not found: email_password")).getSecret());
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");

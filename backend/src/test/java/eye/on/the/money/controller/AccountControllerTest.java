@@ -1,6 +1,5 @@
 package eye.on.the.money.controller;
 
-import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Account;
 import eye.on.the.money.service.stock.AccountService;
 import org.junit.jupiter.api.Assertions;
@@ -39,7 +38,7 @@ class AccountControllerTest {
 
         when(this.accountService.getAccountsByUserEmail(anyString())).thenReturn(accountList);
 
-        ResponseEntity<List<Account>> result = this.accountController.getAccounts(User.builder().id(1L).email("email").build());
+        ResponseEntity<List<Account>> result = this.accountController.getAccounts("email");
 
         Assertions.assertIterableEquals(result.getBody(), accountList);
     }
@@ -48,7 +47,7 @@ class AccountControllerTest {
     public void deleteAccount() {
         when(this.accountService.deleteById(anyString(), anyLong())).thenReturn(true);
 
-        ResponseEntity<Void> result = this.accountController.deleteAccount(User.builder().id(1L).email("email").build(), 1L);
+        ResponseEntity<Void> result = this.accountController.deleteAccount("email", 1L);
 
         Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
     }
@@ -57,7 +56,7 @@ class AccountControllerTest {
     public void deleteAccount404() {
         when(this.accountService.deleteById(anyString(), anyLong())).thenReturn(false);
 
-        ResponseEntity<Void> result = this.accountController.deleteAccount(User.builder().id(1L).email("email").build(), 1L);
+        ResponseEntity<Void> result = this.accountController.deleteAccount("email", 1L);
 
         Assertions.assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
     }
@@ -65,10 +64,9 @@ class AccountControllerTest {
     @Test
     public void createAccount() {
         Account account = Account.builder().id(1L).build();
-        User user = User.builder().id(1L).build();
-        when(this.accountService.createAccount(account, user.getEmail())).thenReturn(account);
+        when(this.accountService.createAccount(account, "email")).thenReturn(account);
 
-        ResponseEntity<Account> result = this.accountController.createAccount(account, user);
+        ResponseEntity<Account> result = this.accountController.createAccount(account, "email");
 
         Assertions.assertEquals(account, result.getBody());
     }

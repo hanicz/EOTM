@@ -138,11 +138,11 @@ public class InvestmentService implements ICSVService {
 
     @Transactional
     public InvestmentDTO createInvestment(InvestmentDTO investmentDTO, String userEmail) {
-        Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
+        Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + investmentDTO.getCurrencyId()));
         Stock stock = this.stockService.getOrCreateStock(investmentDTO.getShortName(), investmentDTO.getExchange(), investmentDTO.getName());
         StockPayment stockPayment = this.stockPaymentService.createNewPayment(currency, investmentDTO.getAmount());
         User user = this.userService.loadUserByEmail(userEmail);
-        Account account = this.accountRepository.findByUserEmailAndId(userEmail, investmentDTO.getAccountId()).orElseThrow(NoSuchElementException::new);
+        Account account = this.accountRepository.findByUserEmailAndId(userEmail, investmentDTO.getAccountId()).orElseThrow(() -> new NoSuchElementException("Account not found: " + investmentDTO.getAccountId()));
 
         Investment investment = Investment.builder()
                 .buySell(investmentDTO.getBuySell())
@@ -161,11 +161,11 @@ public class InvestmentService implements ICSVService {
 
     @Transactional
     public InvestmentDTO updateInvestment(InvestmentDTO investmentDTO, String userEmail) {
-        Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
+        Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + investmentDTO.getCurrencyId()));
         Stock stock = this.stockService.getOrCreateStock(investmentDTO.getShortName(), investmentDTO.getExchange(), investmentDTO.getName());
-        Investment investment = this.investmentRepository.findByIdAndUserEmail(investmentDTO.getInvestmentId(), userEmail).orElseThrow(NoSuchElementException::new);
+        Investment investment = this.investmentRepository.findByIdAndUserEmail(investmentDTO.getInvestmentId(), userEmail).orElseThrow(() -> new NoSuchElementException("Investment not found: " + investmentDTO.getInvestmentId()));
         StockPayment stockPayment = investment.getStockPayment();
-        Account account = this.accountRepository.findByUserEmailAndId(userEmail, investmentDTO.getAccountId()).orElseThrow(NoSuchElementException::new);
+        Account account = this.accountRepository.findByUserEmailAndId(userEmail, investmentDTO.getAccountId()).orElseThrow(() -> new NoSuchElementException("Account not found: " + investmentDTO.getAccountId()));
 
         investment.setBuySell(investmentDTO.getBuySell());
         investment.setTransactionDate(investmentDTO.getTransactionDate());

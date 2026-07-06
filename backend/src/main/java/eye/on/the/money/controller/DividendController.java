@@ -2,13 +2,13 @@ package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.out.DividendDTO;
 import eye.on.the.money.service.stock.DividendService;
+import eye.on.the.money.util.CsvResponseUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import eye.on.the.money.security.CurrentUserEmail;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,42 +24,40 @@ public class DividendController {
     private final DividendService dividendService;
 
     @GetMapping()
-    public ResponseEntity<List<DividendDTO>> getAllDividends(@AuthenticationPrincipal UserDetails user) {
+    public ResponseEntity<List<DividendDTO>> getAllDividends(@CurrentUserEmail String userEmail) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.dividendService.getDividends(user.getUsername()), HttpStatus.OK);
+        return ResponseEntity.ok(this.dividendService.getDividends(userEmail));
     }
 
     @PostMapping
-    public ResponseEntity<DividendDTO> createDividend(@AuthenticationPrincipal UserDetails user, @RequestBody DividendDTO dividendDTO) {
+    public ResponseEntity<DividendDTO> createDividend(@CurrentUserEmail String userEmail, @RequestBody DividendDTO dividendDTO) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.dividendService.createDividend(dividendDTO, user.getUsername()), HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.dividendService.createDividend(dividendDTO, userEmail));
     }
 
     @DeleteMapping()
-    public ResponseEntity<HttpStatus> deleteByIds(@AuthenticationPrincipal UserDetails user, @RequestParam List<Long> ids) {
+    public ResponseEntity<Void> deleteByIds(@CurrentUserEmail String userEmail, @RequestParam List<Long> ids) {
         log.trace("Enter");
-        this.dividendService.deleteDividendById(ids, user.getUsername());
-        return new ResponseEntity<>(HttpStatus.OK);
+        this.dividendService.deleteDividendById(ids, userEmail);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/csv")
-    public void getCSV(@AuthenticationPrincipal UserDetails user, HttpServletResponse servletResponse) throws IOException {
+    public void getCSV(@CurrentUserEmail String userEmail, HttpServletResponse servletResponse) throws IOException {
         log.trace("Enter");
-        servletResponse.setContentType("text/csv");
-        servletResponse.addHeader("Content-Disposition", "attachment; filename=\"dividends.csv\"");
-        this.dividendService.getCSV(user.getUsername(), servletResponse.getWriter());
+        this.dividendService.getCSV(userEmail, CsvResponseUtil.prepare(servletResponse, "dividends.csv"));
     }
 
     @PutMapping
-    public ResponseEntity<DividendDTO> updateDividend(@AuthenticationPrincipal UserDetails user, @RequestBody DividendDTO dividendDTO) {
+    public ResponseEntity<DividendDTO> updateDividend(@CurrentUserEmail String userEmail, @RequestBody DividendDTO dividendDTO) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.dividendService.updateDividend(dividendDTO, user.getUsername()), HttpStatus.CREATED);
+        return ResponseEntity.ok(this.dividendService.updateDividend(dividendDTO, userEmail));
     }
 
     @PostMapping("/process/csv")
-    public ResponseEntity<HttpStatus> processCSV(@AuthenticationPrincipal UserDetails user, @RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<Void> processCSV(@CurrentUserEmail String userEmail, @RequestParam("file") MultipartFile file) throws IOException {
         log.trace("Enter");
-        this.dividendService.processCSV(user.getUsername(), file);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        this.dividendService.processCSV(userEmail, file);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

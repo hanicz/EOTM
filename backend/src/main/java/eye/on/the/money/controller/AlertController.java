@@ -7,8 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import eye.on.the.money.security.CurrentUserEmail;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,36 +21,36 @@ public class AlertController {
     private final AlertService alertService;
 
     @GetMapping("stock")
-    public ResponseEntity<List<StockAlertDTO>> getStockAlerts(@AuthenticationPrincipal UserDetails user) {
-        return new ResponseEntity<>(this.alertService.getAllStockAlerts(user.getUsername()), HttpStatus.OK);
+    public ResponseEntity<List<StockAlertDTO>> getStockAlerts(@CurrentUserEmail String userEmail) {
+        return ResponseEntity.ok(this.alertService.getAllStockAlerts(userEmail));
     }
 
     @GetMapping("crypto")
-    public ResponseEntity<List<CryptoAlertDTO>> getCryptoAlerts(@AuthenticationPrincipal UserDetails user) {
-        return new ResponseEntity<>(this.alertService.getAllCryptoAlerts(user.getUsername()), HttpStatus.OK);
+    public ResponseEntity<List<CryptoAlertDTO>> getCryptoAlerts(@CurrentUserEmail String userEmail) {
+        return ResponseEntity.ok(this.alertService.getAllCryptoAlerts(userEmail));
     }
 
     @DeleteMapping("crypto/{id}")
-    public ResponseEntity<HttpStatus> deleteCryptoAlert(@AuthenticationPrincipal UserDetails user, @PathVariable Long id) {
-        var isDeleted = this.alertService.deleteCryptoAlert(user.getUsername(), id);
-        return new ResponseEntity<>(isDeleted ? HttpStatus.OK : HttpStatus.NOT_FOUND);
+    public ResponseEntity<Void> deleteCryptoAlert(@CurrentUserEmail String userEmail, @PathVariable Long id) {
+        var isDeleted = this.alertService.deleteCryptoAlert(userEmail, id);
+        return ResponseEntity.status(isDeleted ? HttpStatus.OK : HttpStatus.NOT_FOUND).build();
     }
 
     @DeleteMapping("stock/{id}")
-    public ResponseEntity<HttpStatus> deleteStockAlert(@AuthenticationPrincipal UserDetails user, @PathVariable Long id) {
-        var isDeleted = this.alertService.deleteStockAlert(user.getUsername(), id);
-        return new ResponseEntity<>(isDeleted ? HttpStatus.OK : HttpStatus.NOT_FOUND);
+    public ResponseEntity<Void> deleteStockAlert(@CurrentUserEmail String userEmail, @PathVariable Long id) {
+        var isDeleted = this.alertService.deleteStockAlert(userEmail, id);
+        return ResponseEntity.status(isDeleted ? HttpStatus.OK : HttpStatus.NOT_FOUND).build();
     }
 
     @PostMapping("stock")
-    public ResponseEntity<StockAlertDTO> createStockAlert(@AuthenticationPrincipal UserDetails user, @RequestBody StockAlertDTO stockAlertDTO) {
+    public ResponseEntity<StockAlertDTO> createStockAlert(@CurrentUserEmail String userEmail, @RequestBody StockAlertDTO stockAlertDTO) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.alertService.createNewStockAlert(user, stockAlertDTO), HttpStatus.OK);
+        return ResponseEntity.ok(this.alertService.createNewStockAlert(userEmail, stockAlertDTO));
     }
 
     @PostMapping("crypto")
-    public ResponseEntity<CryptoAlertDTO> createCryptoAlert(@AuthenticationPrincipal UserDetails user, @RequestBody CryptoAlertDTO cryptoAlertDTO) {
+    public ResponseEntity<CryptoAlertDTO> createCryptoAlert(@CurrentUserEmail String userEmail, @RequestBody CryptoAlertDTO cryptoAlertDTO) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.alertService.createNewCryptoAlert(user, cryptoAlertDTO), HttpStatus.OK);
+        return ResponseEntity.ok(this.alertService.createNewCryptoAlert(userEmail, cryptoAlertDTO));
     }
 }

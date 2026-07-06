@@ -20,7 +20,7 @@
     "@angular/platform-browser-dynamic": "^22.0.2",
     "@angular/router": "^22.0.2",
     "@primeng/themes": "^21.0.4",
-    "apexcharts": "^5.15.2",
+    "apexcharts": "5.15.1",
     "ng-apexcharts": "^2.4.0",
     "primeflex": "^4.0.0",
     "primeicons": "^7.0.0",

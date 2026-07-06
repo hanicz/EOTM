@@ -15,7 +15,6 @@ import eye.on.the.money.service.user.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,9 +53,9 @@ public class AlertService {
     }
 
     @Transactional
-    public StockAlertDTO createNewStockAlert(UserDetails userDetails, StockAlertDTO stockAlertDTO) {
+    public StockAlertDTO createNewStockAlert(String userEmail, StockAlertDTO stockAlertDTO) {
         Stock stock = this.stockService.getOrCreateStock(stockAlertDTO.getShortName(), stockAlertDTO.getExchange(), stockAlertDTO.getName());
-        User user = this.userService.loadUserByEmail(userDetails.getUsername());
+        User user = this.userService.loadUserByEmail(userEmail);
 
         StockAlert stockAlert = StockAlert.builder()
                 .stock(stock)
@@ -70,9 +69,9 @@ public class AlertService {
     }
 
     @Transactional
-    public CryptoAlertDTO createNewCryptoAlert(UserDetails userDetails, CryptoAlertDTO cryptoAlertDTO) {
+    public CryptoAlertDTO createNewCryptoAlert(String userEmail, CryptoAlertDTO cryptoAlertDTO) {
         Coin coin = this.coinService.getCoinBySymbol(cryptoAlertDTO.getSymbol());
-        User user = this.userService.loadUserByEmail(userDetails.getUsername());
+        User user = this.userService.loadUserByEmail(userEmail);
 
         CryptoAlert cryptoAlert = CryptoAlert.builder()
                 .coin(coin)

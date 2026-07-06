@@ -12,7 +12,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
+import org.springframework.security.test.context.support.WithMockUser;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
@@ -30,5 +33,13 @@ public class UserControllerIntegrationTest {
     @Test
     public void validatingTokenOK() throws Exception {
         this.mockMvc.perform(get("/api/v1/user")).andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser("test@test.test")
+    public void getUserEmailResolvesCurrentUserEmail() throws Exception {
+        this.mockMvc.perform(get("/api/v1/user/me"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("test@test.test"));
     }
 }

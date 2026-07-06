@@ -3,13 +3,13 @@ package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.out.ETFInvestmentDTO;
 import eye.on.the.money.service.etf.ETFInvestmentService;
+import eye.on.the.money.util.CsvResponseUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import eye.on.the.money.security.CurrentUserEmail;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,53 +29,51 @@ public class ETFController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<ETFInvestmentDTO>> getAllETFInvestments(@AuthenticationPrincipal UserDetails user) {
+    public ResponseEntity<List<ETFInvestmentDTO>> getAllETFInvestments(@CurrentUserEmail String userEmail) {
         log.trace("Enter getAllETFInvestments");
-        return new ResponseEntity<>(this.etfInvestmentService.getETFInvestments(user.getUsername()), HttpStatus.OK);
+        return ResponseEntity.ok(this.etfInvestmentService.getETFInvestments(userEmail));
     }
 
     @GetMapping("/holding")
-    public ResponseEntity<List<ETFInvestmentDTO>> getETFHoldings(@AuthenticationPrincipal UserDetails user) {
+    public ResponseEntity<List<ETFInvestmentDTO>> getETFHoldings(@CurrentUserEmail String userEmail) {
         log.trace("Enter getETFHoldings");
-        return new ResponseEntity<>(this.etfInvestmentService.getCurrentETFHoldings(user.getUsername()), HttpStatus.OK);
+        return ResponseEntity.ok(this.etfInvestmentService.getCurrentETFHoldings(userEmail));
     }
 
     @GetMapping("/position")
-    public ResponseEntity<List<ETFInvestmentDTO>> getPositions(@AuthenticationPrincipal UserDetails user) {
+    public ResponseEntity<List<ETFInvestmentDTO>> getPositions(@CurrentUserEmail String userEmail) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.etfInvestmentService.getAllPositions(user.getUsername()), HttpStatus.OK);
+        return ResponseEntity.ok(this.etfInvestmentService.getAllPositions(userEmail));
     }
 
     @PostMapping
-    public ResponseEntity<ETFInvestmentDTO> createInvestment(@AuthenticationPrincipal UserDetails user, @RequestBody ETFInvestmentDTO investmentDTO) {
+    public ResponseEntity<ETFInvestmentDTO> createInvestment(@CurrentUserEmail String userEmail, @RequestBody ETFInvestmentDTO investmentDTO) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.etfInvestmentService.createInvestment(investmentDTO, user.getUsername()), HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.etfInvestmentService.createInvestment(investmentDTO, userEmail));
     }
 
     @DeleteMapping()
-    public ResponseEntity<HttpStatus> deleteByIds(@AuthenticationPrincipal UserDetails user, @RequestParam List<Long> ids) {
+    public ResponseEntity<Void> deleteByIds(@CurrentUserEmail String userEmail, @RequestParam List<Long> ids) {
         log.trace("Enter");
-        this.etfInvestmentService.deleteInvestmentById(user.getUsername(), ids);
-        return new ResponseEntity<>(HttpStatus.OK);
+        this.etfInvestmentService.deleteInvestmentById(userEmail, ids);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/csv")
-    public void getCSV(@AuthenticationPrincipal UserDetails user, HttpServletResponse servletResponse) throws IOException {
+    public void getCSV(@CurrentUserEmail String userEmail, HttpServletResponse servletResponse) throws IOException {
         log.trace("Enter");
-        servletResponse.setContentType("text/csv");
-        servletResponse.addHeader("Content-Disposition", "attachment; filename=\"investments.csv\"");
-        this.etfInvestmentService.getCSV(user.getUsername(), servletResponse.getWriter());
+        this.etfInvestmentService.getCSV(userEmail, CsvResponseUtil.prepare(servletResponse, "etf_investments.csv"));
     }
 
     @PutMapping
-    public ResponseEntity<ETFInvestmentDTO> updateInvestment(@AuthenticationPrincipal UserDetails user, @RequestBody ETFInvestmentDTO investmentDTO) {
+    public ResponseEntity<ETFInvestmentDTO> updateInvestment(@CurrentUserEmail String userEmail, @RequestBody ETFInvestmentDTO investmentDTO) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.etfInvestmentService.updateInvestment(investmentDTO, user.getUsername()), HttpStatus.CREATED);
+        return ResponseEntity.ok(this.etfInvestmentService.updateInvestment(investmentDTO, userEmail));
     }
 
     @PostMapping("/process/csv")
-    public ResponseEntity<HttpStatus> processCSV(@AuthenticationPrincipal UserDetails user, @RequestParam("file") MultipartFile file) throws IOException {
-        this.etfInvestmentService.processCSV(user.getUsername(), file);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<Void> processCSV(@CurrentUserEmail String userEmail, @RequestParam("file") MultipartFile file) throws IOException {
+        this.etfInvestmentService.processCSV(userEmail, file);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

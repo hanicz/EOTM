@@ -54,7 +54,7 @@ public class RedditAPIService extends APIService {
     private Consumer<HttpHeaders> getBasicHttpHeader() {
         return headers -> {
             headers.add("Authorization", "Basic " +
-                    this.credentialRepository.findById(RedditAPIService.API).orElseThrow(NoSuchElementException::new).getSecret());
+                    this.credentialRepository.findById(RedditAPIService.API).orElseThrow(() -> new NoSuchElementException("API credential not found: " + RedditAPIService.API)).getSecret());
         };
     }
 
@@ -72,7 +72,7 @@ public class RedditAPIService extends APIService {
 
     @Override
     protected String createURL(String api, String path, String... params) {
-        String apiURL = this.configRepository.findById(api).orElseThrow(NoSuchElementException::new).getConfigValue();
+        String apiURL = this.configRepository.findById(api).orElseThrow(() -> new NoSuchElementException("API config not found: " + api)).getConfigValue();
         Object[] array = Stream.of(params).toArray();
 
         return MessageFormat.format(apiURL + path, array);

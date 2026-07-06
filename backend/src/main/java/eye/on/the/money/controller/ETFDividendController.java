@@ -2,13 +2,13 @@ package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.out.ETFDividendDTO;
 import eye.on.the.money.service.etf.ETFDividendService;
+import eye.on.the.money.util.CsvResponseUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import eye.on.the.money.security.CurrentUserEmail;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,42 +24,40 @@ public class ETFDividendController {
     private final ETFDividendService etfDividendService;
 
     @GetMapping()
-    public ResponseEntity<List<ETFDividendDTO>> getAllETFDividends(@AuthenticationPrincipal UserDetails user) {
+    public ResponseEntity<List<ETFDividendDTO>> getAllETFDividends(@CurrentUserEmail String userEmail) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.etfDividendService.getDividends(user.getUsername()), HttpStatus.OK);
+        return ResponseEntity.ok(this.etfDividendService.getDividends(userEmail));
     }
 
     @PostMapping
-    public ResponseEntity<ETFDividendDTO> createDividend(@AuthenticationPrincipal UserDetails user, @RequestBody ETFDividendDTO dividendDTO) {
+    public ResponseEntity<ETFDividendDTO> createDividend(@CurrentUserEmail String userEmail, @RequestBody ETFDividendDTO dividendDTO) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.etfDividendService.createETFDividend(dividendDTO, user.getUsername()), HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.etfDividendService.createETFDividend(dividendDTO, userEmail));
     }
 
     @DeleteMapping()
-    public ResponseEntity<HttpStatus> deleteByIds(@AuthenticationPrincipal UserDetails user, @RequestParam List<Long> ids) {
+    public ResponseEntity<Void> deleteByIds(@CurrentUserEmail String userEmail, @RequestParam List<Long> ids) {
         log.trace("Enter");
-        this.etfDividendService.deleteETFDividendById(ids, user.getUsername());
-        return new ResponseEntity<>(HttpStatus.OK);
+        this.etfDividendService.deleteETFDividendById(ids, userEmail);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/csv")
-    public void getCSV(@AuthenticationPrincipal UserDetails user, HttpServletResponse servletResponse) throws IOException {
+    public void getCSV(@CurrentUserEmail String userEmail, HttpServletResponse servletResponse) throws IOException {
         log.trace("Enter");
-        servletResponse.setContentType("text/csv");
-        servletResponse.addHeader("Content-Disposition", "attachment; filename=\"dividends.csv\"");
-        this.etfDividendService.getCSV(user.getUsername(), servletResponse.getWriter());
+        this.etfDividendService.getCSV(userEmail, CsvResponseUtil.prepare(servletResponse, "etf_dividends.csv"));
     }
 
     @PutMapping
-    public ResponseEntity<ETFDividendDTO> updateETFDividend(@AuthenticationPrincipal UserDetails user, @RequestBody ETFDividendDTO dividendDTO) {
+    public ResponseEntity<ETFDividendDTO> updateETFDividend(@CurrentUserEmail String userEmail, @RequestBody ETFDividendDTO dividendDTO) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.etfDividendService.updateETFDividend(dividendDTO, user.getUsername()), HttpStatus.CREATED);
+        return ResponseEntity.ok(this.etfDividendService.updateETFDividend(dividendDTO, userEmail));
     }
 
     @PostMapping("/process/csv")
-    public ResponseEntity<HttpStatus> processCSV(@AuthenticationPrincipal UserDetails user, @RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<Void> processCSV(@CurrentUserEmail String userEmail, @RequestParam("file") MultipartFile file) throws IOException {
         log.trace("Enter");
-        this.etfDividendService.processCSV(user.getUsername(), file);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        this.etfDividendService.processCSV(userEmail, file);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

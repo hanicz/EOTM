@@ -46,7 +46,7 @@ class DividendControllerTest {
 
         when(this.dividendService.getDividends("email")).thenReturn(dividends);
 
-        Assertions.assertIterableEquals(dividends, this.dividendController.getAllDividends(this.user).getBody());
+        Assertions.assertIterableEquals(dividends, this.dividendController.getAllDividends("email").getBody());
     }
 
     @Test
@@ -54,14 +54,14 @@ class DividendControllerTest {
         DividendDTO dividendDTO = DividendDTO.builder().dividendId(1L).exchange("e1").dividendDate(LocalDate.now()).amount(55.1).currencyId("c1").shortName("s1").build();
         when(this.dividendService.createDividend(dividendDTO, "email")).thenReturn(dividendDTO);
 
-        Assertions.assertEquals(dividendDTO, this.dividendController.createDividend(this.user, dividendDTO).getBody());
+        Assertions.assertEquals(dividendDTO, this.dividendController.createDividend("email", dividendDTO).getBody());
     }
 
     @Test
     public void deleteByIds() {
         doNothing().when(this.dividendService).deleteDividendById(any(), any());
 
-        Assertions.assertEquals(HttpStatus.OK, this.dividendController.deleteByIds(this.user, List.of(1L, 2L, 3L)).getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, this.dividendController.deleteByIds("email", List.of(1L, 2L, 3L)).getStatusCode());
     }
 
     @Test
@@ -69,7 +69,7 @@ class DividendControllerTest {
         HttpServletResponse httpSR = new MockHttpServletResponse();
 
         doNothing().when(this.dividendService).getCSV(any(), any());
-        this.dividendController.getCSV(this.user, httpSR);
+        this.dividendController.getCSV("email", httpSR);
 
         verify(this.dividendService, times(1)).getCSV(any(), any());
     }
@@ -79,7 +79,7 @@ class DividendControllerTest {
         DividendDTO dividendDTO = DividendDTO.builder().dividendId(1L).exchange("e1").dividendDate(LocalDate.now()).amount(55.1).currencyId("c1").shortName("s1").build();
         when(this.dividendService.updateDividend(dividendDTO, "email")).thenReturn(dividendDTO);
 
-        Assertions.assertEquals(dividendDTO, this.dividendController.updateDividend(this.user, dividendDTO).getBody());
+        Assertions.assertEquals(dividendDTO, this.dividendController.updateDividend("email", dividendDTO).getBody());
     }
 
     @Test
@@ -88,6 +88,6 @@ class DividendControllerTest {
 
         doNothing().when(this.dividendService).processCSV("email", mpf);
 
-        Assertions.assertEquals(HttpStatus.CREATED, this.dividendController.processCSV(this.user, mpf).getStatusCode());
+        Assertions.assertEquals(HttpStatus.CREATED, this.dividendController.processCSV("email", mpf).getStatusCode());
     }
 }

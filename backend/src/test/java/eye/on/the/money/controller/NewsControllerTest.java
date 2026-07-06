@@ -61,7 +61,7 @@ class NewsControllerTest {
         List<News> newsList = this.createNewsList();
         when(this.redditService.getHotNewsFromSubreddits(this.user.getEmail())).thenReturn(newsList);
 
-        ResponseEntity<List<News>> result = this.newsController.getHotPosts(this.user);
+        ResponseEntity<List<News>> result = this.newsController.getHotPosts("email");
         Assertions.assertEquals(newsList, result.getBody());
     }
 
@@ -75,21 +75,21 @@ class NewsControllerTest {
 
         when(this.redditService.getSubredditsByUser(this.user.getEmail())).thenReturn(subReddits);
 
-        ResponseEntity<List<Subreddit>> result = this.newsController.getSubreddits(this.user);
+        ResponseEntity<List<Subreddit>> result = this.newsController.getSubreddits("email");
         Assertions.assertIterableEquals(subReddits, result.getBody());
     }
 
     @Test
     public void deleteSubreddit() {
         when(this.redditService.deleteSubreddit(1L, this.user.getEmail())).thenReturn(true);
-        ResponseEntity<Void> result = this.newsController.deleteSubreddit(1L, this.user);
+        ResponseEntity<Void> result = this.newsController.deleteSubreddit(1L, "email");
         Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
     }
 
     @Test
     public void deleteSubreddit404() {
         when(this.redditService.deleteSubreddit(1L, this.user.getEmail())).thenReturn(false);
-        ResponseEntity<Void> result = this.newsController.deleteSubreddit(1L, this.user);
+        ResponseEntity<Void> result = this.newsController.deleteSubreddit(1L, "email");
         Assertions.assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
     }
 
@@ -98,7 +98,7 @@ class NewsControllerTest {
         SubredditDTO sDTO = new SubredditDTO("subreddit", "description");
         Subreddit subreddit = new Subreddit(1L, "description", "subreddit", null);
         when(this.redditService.addSubreddit(sDTO, this.user.getEmail())).thenReturn(subreddit);
-        ResponseEntity<Subreddit> result = this.newsController.addSubreddit(sDTO, this.user);
+        ResponseEntity<Subreddit> result = this.newsController.addSubreddit(sDTO, "email");
         Assertions.assertEquals(subreddit, result.getBody());
     }
 

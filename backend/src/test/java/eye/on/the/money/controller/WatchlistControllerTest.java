@@ -42,7 +42,7 @@ class WatchlistControllerTest {
 
         when(this.watchlistService.getCryptoWatchlistByUserId(this.user.getEmail(), "eur")).thenReturn(cDTO);
 
-        Assertions.assertIterableEquals(cDTO, this.watchlistController.getCryptoWatchList(this.user, "eur").getBody());
+        Assertions.assertIterableEquals(cDTO, this.watchlistController.getCryptoWatchList("email", "eur").getBody());
     }
 
     @Test
@@ -54,7 +54,7 @@ class WatchlistControllerTest {
 
         when(this.watchlistService.getForexWatchlistByUserId(this.user.getUsername())).thenReturn(fDTO);
 
-        Assertions.assertIterableEquals(fDTO, this.watchlistController.getForexWatchList(this.user).getBody());
+        Assertions.assertIterableEquals(fDTO, this.watchlistController.getForexWatchList("email").getBody());
     }
 
     @Test
@@ -66,28 +66,28 @@ class WatchlistControllerTest {
 
         when(this.watchlistService.getStockWatchlistByUserId(this.user.getUsername())).thenReturn(sDTO);
 
-        Assertions.assertIterableEquals(sDTO, this.watchlistController.getStockWatchList(this.user).getBody());
+        Assertions.assertIterableEquals(sDTO, this.watchlistController.getStockWatchList("email").getBody());
     }
 
     @Test
     public void deleteCryptoWatch() {
         doNothing().when(this.watchlistService).deleteCryptoWatchById(this.user.getUsername(), 1L);
 
-        Assertions.assertEquals(HttpStatus.OK, this.watchlistController.deleteCryptoWatch(user, 1L).getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, this.watchlistController.deleteCryptoWatch("email", 1L).getStatusCode());
     }
 
     @Test
     public void deleteStockWatch() {
         doNothing().when(this.watchlistService).deleteStockWatchById(this.user.getUsername(), 1L);
 
-        Assertions.assertEquals(HttpStatus.OK, this.watchlistController.deleteStockWatch(user, 1L).getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, this.watchlistController.deleteStockWatch("email", 1L).getStatusCode());
     }
 
     @Test
     public void deleteForexWatch() {
         doNothing().when(this.watchlistService).deleteForexWatchById(this.user.getUsername(), 1L);
 
-        Assertions.assertEquals(HttpStatus.OK, this.watchlistController.deleteForexWatch(user, 1L).getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, this.watchlistController.deleteForexWatch("email", 1L).getStatusCode());
     }
 
     @Test
@@ -97,7 +97,7 @@ class WatchlistControllerTest {
 
         when(this.watchlistService.createNewStockWatch(this.user.getUsername(), stock)).thenReturn(sDTO);
 
-        Assertions.assertEquals(sDTO, this.watchlistController.createStockWatch(this.user, stock).getBody());
+        Assertions.assertEquals(sDTO, this.watchlistController.createStockWatch("email", stock).getBody());
     }
 
     @Test
@@ -106,6 +106,6 @@ class WatchlistControllerTest {
 
         when(this.watchlistService.createNewCryptoWatch(this.user.getUsername(), "c1")).thenReturn(cDTO);
 
-        Assertions.assertEquals(cDTO, this.watchlistController.createCryptoWatch(this.user, "c1").getBody());
+        Assertions.assertEquals(cDTO, this.watchlistController.createCryptoWatch("email", "c1").getBody());
     }
 }

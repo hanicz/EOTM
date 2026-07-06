@@ -85,8 +85,8 @@ public class TransactionService implements ICSVService {
 
     @Transactional
     public TransactionDTO createTransaction(TransactionDTO transactionDTO, String userEmail) {
-        Currency currency = this.currencyRepository.findById(transactionDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
-        Coin coin = this.coinRepository.findBySymbol(transactionDTO.getSymbol()).orElseThrow(NoSuchElementException::new);
+        Currency currency = this.currencyRepository.findById(transactionDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + transactionDTO.getCurrencyId()));
+        Coin coin = this.coinRepository.findBySymbol(transactionDTO.getSymbol()).orElseThrow(() -> new NoSuchElementException("Coin not found: " + transactionDTO.getSymbol()));
         Payment payment = this.paymentService.createPayment(currency, transactionDTO.getAmount());
         User user = this.userService.loadUserByEmail(userEmail);
 
@@ -108,9 +108,9 @@ public class TransactionService implements ICSVService {
 
     @Transactional
     public TransactionDTO updateTransaction(TransactionDTO transactionDTO, String userEmail) {
-        Currency currency = this.currencyRepository.findById(transactionDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
-        Coin coin = this.coinRepository.findBySymbol(transactionDTO.getSymbol()).orElseThrow(NoSuchElementException::new);
-        Transaction transaction = this.transactionRepository.findByIdAndUserEmail(transactionDTO.getId(), userEmail).orElseThrow(NoSuchElementException::new);
+        Currency currency = this.currencyRepository.findById(transactionDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + transactionDTO.getCurrencyId()));
+        Coin coin = this.coinRepository.findBySymbol(transactionDTO.getSymbol()).orElseThrow(() -> new NoSuchElementException("Coin not found: " + transactionDTO.getSymbol()));
+        Transaction transaction = this.transactionRepository.findByIdAndUserEmail(transactionDTO.getId(), userEmail).orElseThrow(() -> new NoSuchElementException("Transaction not found: " + transactionDTO.getId()));
         Payment payment = transaction.getPayment();
 
         transaction.setBuySell(transactionDTO.getBuySell());

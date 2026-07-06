@@ -48,8 +48,8 @@ public class ETFDividendService implements ICSVService {
 
     @Transactional
     public ETFDividendDTO createETFDividend(ETFDividendDTO dividendDTO, String userEmail) {
-        Currency currency = this.currencyRepository.findById(dividendDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
-        ETF etf = this.etfRepository.findByShortName(dividendDTO.getShortName()).orElseThrow(NoSuchElementException::new);
+        Currency currency = this.currencyRepository.findById(dividendDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + dividendDTO.getCurrencyId()));
+        ETF etf = this.etfRepository.findByShortName(dividendDTO.getShortName()).orElseThrow(() -> new NoSuchElementException("ETF not found: " + dividendDTO.getShortName()));
         User user = this.userService.loadUserByEmail(userEmail);
 
         ETFDividend dividend = ETFDividend.builder()
@@ -66,9 +66,9 @@ public class ETFDividendService implements ICSVService {
 
     @Transactional
     public ETFDividendDTO updateETFDividend(ETFDividendDTO dividendDTO, String userEmail) {
-        Currency currency = this.currencyRepository.findById(dividendDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
-        ETF etf = this.etfRepository.findByShortName(dividendDTO.getShortName()).orElseThrow(NoSuchElementException::new);
-        ETFDividend dividend = this.etfDividendRepository.findByIdAndUserEmail(dividendDTO.getId(), userEmail).orElseThrow(NoSuchElementException::new);
+        Currency currency = this.currencyRepository.findById(dividendDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + dividendDTO.getCurrencyId()));
+        ETF etf = this.etfRepository.findByShortName(dividendDTO.getShortName()).orElseThrow(() -> new NoSuchElementException("ETF not found: " + dividendDTO.getShortName()));
+        ETFDividend dividend = this.etfDividendRepository.findByIdAndUserEmail(dividendDTO.getId(), userEmail).orElseThrow(() -> new NoSuchElementException("ETF dividend not found: " + dividendDTO.getId()));
 
         dividend.setDividendDate(dividendDTO.getDividendDate());
         dividend.setCurrency(currency);

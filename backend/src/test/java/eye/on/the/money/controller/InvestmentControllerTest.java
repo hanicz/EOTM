@@ -43,7 +43,7 @@ class InvestmentControllerTest {
 
         when(this.investmentService.getInvestments("email")).thenReturn(iDTO);
 
-        Assertions.assertIterableEquals(iDTO, this.investmentController.getAllInvestments(this.user).getBody());
+        Assertions.assertIterableEquals(iDTO, this.investmentController.getAllInvestments("email").getBody());
     }
 
     @Test
@@ -52,7 +52,7 @@ class InvestmentControllerTest {
 
         when(this.investmentService.getCurrentHoldings("email")).thenReturn(iDTO);
 
-        Assertions.assertIterableEquals(iDTO, this.investmentController.getHoldings(this.user).getBody());
+        Assertions.assertIterableEquals(iDTO, this.investmentController.getHoldings("email").getBody());
     }
 
     @Test
@@ -61,7 +61,7 @@ class InvestmentControllerTest {
 
         when(this.investmentService.getAllPositions("email")).thenReturn(iDTO);
 
-        Assertions.assertIterableEquals(iDTO, this.investmentController.getPositions(this.user).getBody());
+        Assertions.assertIterableEquals(iDTO, this.investmentController.getPositions("email").getBody());
     }
 
     @Test
@@ -71,14 +71,14 @@ class InvestmentControllerTest {
 
         when(this.investmentService.createInvestment(iDTO, "email")).thenReturn(iDTO);
 
-        Assertions.assertEquals(iDTO, this.investmentController.createInvestment(this.user, iDTO).getBody());
+        Assertions.assertEquals(iDTO, this.investmentController.createInvestment("email", iDTO).getBody());
     }
 
     @Test
     public void deleteByIds() {
         doNothing().when(this.investmentService).deleteInvestmentById(any(), any());
 
-        Assertions.assertEquals(HttpStatus.OK, this.investmentController.deleteByIds(user, List.of(1L, 2L, 3L)).getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, this.investmentController.deleteByIds("email", List.of(1L, 2L, 3L)).getStatusCode());
     }
 
     @Test
@@ -86,7 +86,7 @@ class InvestmentControllerTest {
         HttpServletResponse httpSR = new MockHttpServletResponse();
 
         doNothing().when(this.investmentService).getCSV(any(), any());
-        this.investmentController.getCSV(user, httpSR);
+        this.investmentController.getCSV("email", httpSR);
 
         verify(this.investmentService, times(1)).getCSV(any(), any());
     }
@@ -98,7 +98,7 @@ class InvestmentControllerTest {
 
         when(this.investmentService.updateInvestment(iDTO, "email")).thenReturn(iDTO);
 
-        Assertions.assertEquals(iDTO, this.investmentController.updateInvestment(this.user, iDTO).getBody());
+        Assertions.assertEquals(iDTO, this.investmentController.updateInvestment("email", iDTO).getBody());
     }
 
     @Test
@@ -107,7 +107,7 @@ class InvestmentControllerTest {
 
         doNothing().when(this.investmentService).processCSV("email", mpf);
 
-        Assertions.assertEquals(HttpStatus.CREATED, this.investmentController.processCSV(user, mpf).getStatusCode());
+        Assertions.assertEquals(HttpStatus.CREATED, this.investmentController.processCSV("email", mpf).getStatusCode());
     }
 
     private List<InvestmentDTO> createInvestmentList() {

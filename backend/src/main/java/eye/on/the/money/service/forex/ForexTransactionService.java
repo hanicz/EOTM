@@ -53,8 +53,8 @@ public class ForexTransactionService implements ICSVService {
 
     @Transactional
     public ForexTransactionDTO createForexTransaction(ForexTransactionDTO forexTransactionDTO, String userEmail) {
-        Currency toCurrency = this.currencyRepository.findById(forexTransactionDTO.getToCurrencyId()).orElseThrow(NoSuchElementException::new);
-        Currency fromCurrency = this.currencyRepository.findById(forexTransactionDTO.getFromCurrencyId()).orElseThrow(NoSuchElementException::new);
+        Currency toCurrency = this.currencyRepository.findById(forexTransactionDTO.getToCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + forexTransactionDTO.getToCurrencyId()));
+        Currency fromCurrency = this.currencyRepository.findById(forexTransactionDTO.getFromCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + forexTransactionDTO.getFromCurrencyId()));
         User user = this.userService.loadUserByEmail(userEmail);
 
         ForexTransaction forexTransaction = ForexTransaction.builder()
@@ -74,9 +74,9 @@ public class ForexTransactionService implements ICSVService {
 
     @Transactional
     public ForexTransactionDTO updateForexTransaction(ForexTransactionDTO forexTransactionDTO, String userEmail) {
-        Currency toCurrency = this.currencyRepository.findById(forexTransactionDTO.getToCurrencyId()).orElseThrow(NoSuchElementException::new);
-        Currency fromCurrency = this.currencyRepository.findById(forexTransactionDTO.getFromCurrencyId()).orElseThrow(NoSuchElementException::new);
-        ForexTransaction forexTransaction = this.forexTransactionRepository.findByIdAndUserEmail(forexTransactionDTO.getForexTransactionId(), userEmail).orElseThrow(NoSuchElementException::new);
+        Currency toCurrency = this.currencyRepository.findById(forexTransactionDTO.getToCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + forexTransactionDTO.getToCurrencyId()));
+        Currency fromCurrency = this.currencyRepository.findById(forexTransactionDTO.getFromCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + forexTransactionDTO.getFromCurrencyId()));
+        ForexTransaction forexTransaction = this.forexTransactionRepository.findByIdAndUserEmail(forexTransactionDTO.getForexTransactionId(), userEmail).orElseThrow(() -> new NoSuchElementException("Forex transaction not found: " + forexTransactionDTO.getForexTransactionId()));
 
         forexTransaction.setBuySell(forexTransactionDTO.getBuySell());
         forexTransaction.setTransactionDate(forexTransactionDTO.getTransactionDate());

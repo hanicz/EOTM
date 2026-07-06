@@ -4,7 +4,6 @@ import eye.on.the.money.dto.out.DashboardRatesDTO;
 import eye.on.the.money.service.shared.DashboardService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +23,6 @@ public class DashboardController {
     @GetMapping("rates")
     public ResponseEntity<DashboardRatesDTO> getConversionRates(@RequestParam(required = false) List<String> currencies) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.dashboardService.getConversionRates(currencies == null ? List.of() : currencies), HttpStatus.OK);
+        return ResponseEntity.ok(this.dashboardService.getConversionRates(currencies == null ? List.of() : currencies));
     }
 }

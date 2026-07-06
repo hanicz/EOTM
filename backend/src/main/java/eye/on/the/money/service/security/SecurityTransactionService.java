@@ -74,7 +74,7 @@ public class SecurityTransactionService implements ICSVService {
 
     @Transactional
     public SecurityTransactionDTO createTransaction(SecurityTransactionDTO transactionDTO, String userEmail) {
-        Currency currency = this.currencyRepository.findById(transactionDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
+        Currency currency = this.currencyRepository.findById(transactionDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + transactionDTO.getCurrencyId()));
         Security security = this.securityService.getOrCreateSecurity(transactionDTO.getSecurityId(), transactionDTO.getSecurityName());
         User user = this.userService.loadUserByEmail(userEmail);
 
@@ -94,9 +94,9 @@ public class SecurityTransactionService implements ICSVService {
 
     @Transactional
     public SecurityTransactionDTO updateTransaction(SecurityTransactionDTO transactionDTO, String userEmail) {
-        Currency currency = this.currencyRepository.findById(transactionDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
+        Currency currency = this.currencyRepository.findById(transactionDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + transactionDTO.getCurrencyId()));
         Security security = this.securityService.getOrCreateSecurity(transactionDTO.getSecurityId(), transactionDTO.getSecurityName());
-        SecurityTransaction transaction = this.securityTransactionRepository.findByIdAndUserEmail(transactionDTO.getTransactionId(), userEmail).orElseThrow(NoSuchElementException::new);
+        SecurityTransaction transaction = this.securityTransactionRepository.findByIdAndUserEmail(transactionDTO.getTransactionId(), userEmail).orElseThrow(() -> new NoSuchElementException("Security transaction not found: " + transactionDTO.getTransactionId()));
 
         transaction.setBuySell(transactionDTO.getBuySell());
         transaction.setTransactionDate(transactionDTO.getTransactionDate());

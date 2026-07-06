@@ -3,13 +3,13 @@ package eye.on.the.money.controller;
 import eye.on.the.money.dto.in.TransactionQuery;
 import eye.on.the.money.dto.out.TransactionDTO;
 import eye.on.the.money.service.crypto.TransactionService;
+import eye.on.the.money.util.CsvResponseUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import eye.on.the.money.security.CurrentUserEmail;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,53 +25,51 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @GetMapping()
-    public ResponseEntity<List<TransactionDTO>> getCoinTransactionsByUserId(@AuthenticationPrincipal UserDetails user) {
+    public ResponseEntity<List<TransactionDTO>> getCoinTransactionsByUserId(@CurrentUserEmail String userEmail) {
         log.trace("Enter getCoinTransactionsByUserId");
-        return new ResponseEntity<>(this.transactionService.getTransactionsByUserId(user.getUsername()), HttpStatus.OK);
+        return ResponseEntity.ok(this.transactionService.getTransactionsByUserId(userEmail));
     }
 
     @GetMapping("/position")
-    public ResponseEntity<List<TransactionDTO>> getAllPositions(@AuthenticationPrincipal UserDetails user) {
+    public ResponseEntity<List<TransactionDTO>> getAllPositions(@CurrentUserEmail String userEmail) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.transactionService.getAllPositions(user.getUsername()), HttpStatus.OK);
+        return ResponseEntity.ok(this.transactionService.getAllPositions(userEmail));
     }
 
     @PostMapping("/holding")
-    public ResponseEntity<List<TransactionDTO>> getAllHoldings(@AuthenticationPrincipal UserDetails user, @RequestBody TransactionQuery query) {
+    public ResponseEntity<List<TransactionDTO>> getAllHoldings(@CurrentUserEmail String userEmail, @RequestBody TransactionQuery query) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.transactionService.getCurrentHoldings(user.getUsername(), query), HttpStatus.OK);
+        return ResponseEntity.ok(this.transactionService.getCurrentHoldings(userEmail, query));
     }
 
     @DeleteMapping()
-    public ResponseEntity<Void> deleteByIds(@AuthenticationPrincipal UserDetails user, @RequestParam List<Long> ids) {
-        var isDeleted = this.transactionService.deleteTransactionById(user.getUsername(), ids);
-        return new ResponseEntity<>(isDeleted ? HttpStatus.OK : HttpStatus.NOT_FOUND);
+    public ResponseEntity<Void> deleteByIds(@CurrentUserEmail String userEmail, @RequestParam List<Long> ids) {
+        var isDeleted = this.transactionService.deleteTransactionById(userEmail, ids);
+        return ResponseEntity.status(isDeleted ? HttpStatus.OK : HttpStatus.NOT_FOUND).build();
     }
 
     @GetMapping("/csv")
-    public void getCSV(@AuthenticationPrincipal UserDetails user, HttpServletResponse servletResponse) throws IOException {
+    public void getCSV(@CurrentUserEmail String userEmail, HttpServletResponse servletResponse) throws IOException {
         log.trace("Enter");
-        servletResponse.setContentType("text/csv");
-        servletResponse.addHeader("Content-Disposition", "attachment; filename=\"transactions.csv\"");
-        this.transactionService.getCSV(user.getUsername(), servletResponse.getWriter());
+        this.transactionService.getCSV(userEmail, CsvResponseUtil.prepare(servletResponse, "transactions.csv"));
     }
 
     @PostMapping
-    public ResponseEntity<TransactionDTO> createTransaction(@AuthenticationPrincipal UserDetails user, @RequestBody TransactionDTO transactionDTO) {
+    public ResponseEntity<TransactionDTO> createTransaction(@CurrentUserEmail String userEmail, @RequestBody TransactionDTO transactionDTO) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.transactionService.createTransaction(transactionDTO, user.getUsername()), HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.transactionService.createTransaction(transactionDTO, userEmail));
     }
 
     @PutMapping
-    public ResponseEntity<TransactionDTO> updateTransaction(@AuthenticationPrincipal UserDetails user, @RequestBody TransactionDTO transactionDTO) {
+    public ResponseEntity<TransactionDTO> updateTransaction(@CurrentUserEmail String userEmail, @RequestBody TransactionDTO transactionDTO) {
         log.trace("Enter");
-        return new ResponseEntity<>(this.transactionService.updateTransaction(transactionDTO, user.getUsername()), HttpStatus.OK);
+        return ResponseEntity.ok(this.transactionService.updateTransaction(transactionDTO, userEmail));
     }
 
     @PostMapping("/process/csv")
-    public ResponseEntity<HttpStatus> processCSV(@AuthenticationPrincipal UserDetails user, @RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<Void> processCSV(@CurrentUserEmail String userEmail, @RequestParam("file") MultipartFile file) throws IOException {
         log.trace("Enter");
-        this.transactionService.processCSV(user.getUsername(), file);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        this.transactionService.processCSV(userEmail, file);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

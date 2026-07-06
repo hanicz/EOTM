@@ -46,7 +46,7 @@ class ETFDividendControllerTest {
 
         when(this.etfDividendService.getDividends("email")).thenReturn(edDTO);
 
-        Assertions.assertIterableEquals(edDTO, this.etfDividendController.getAllETFDividends(this.user).getBody());
+        Assertions.assertIterableEquals(edDTO, this.etfDividendController.getAllETFDividends("email").getBody());
     }
 
     @Test
@@ -55,14 +55,14 @@ class ETFDividendControllerTest {
 
         when(this.etfDividendService.createETFDividend(edDTO, "email")).thenReturn(edDTO);
 
-        Assertions.assertEquals(edDTO, this.etfDividendController.createDividend(this.user, edDTO).getBody());
+        Assertions.assertEquals(edDTO, this.etfDividendController.createDividend("email", edDTO).getBody());
     }
 
     @Test
     public void deleteByIds() {
         doNothing().when(this.etfDividendService).deleteETFDividendById(any(), any());
 
-        Assertions.assertEquals(HttpStatus.OK, this.etfDividendController.deleteByIds(user, List.of(1L, 2L, 3L)).getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, this.etfDividendController.deleteByIds("email", List.of(1L, 2L, 3L)).getStatusCode());
     }
 
     @Test
@@ -70,7 +70,7 @@ class ETFDividendControllerTest {
         HttpServletResponse httpSR = new MockHttpServletResponse();
 
         doNothing().when(this.etfDividendService).getCSV(any(), any());
-        this.etfDividendController.getCSV(user, httpSR);
+        this.etfDividendController.getCSV("email", httpSR);
 
         verify(this.etfDividendService, times(1)).getCSV(any(), any());
     }
@@ -81,7 +81,7 @@ class ETFDividendControllerTest {
 
         when(this.etfDividendService.updateETFDividend(edDTO, "email")).thenReturn(edDTO);
 
-        Assertions.assertEquals(edDTO, this.etfDividendController.updateETFDividend(this.user, edDTO).getBody());
+        Assertions.assertEquals(edDTO, this.etfDividendController.updateETFDividend("email", edDTO).getBody());
     }
 
     @Test
@@ -90,6 +90,6 @@ class ETFDividendControllerTest {
 
         doNothing().when(this.etfDividendService).processCSV("email", mpf);
 
-        Assertions.assertEquals(HttpStatus.CREATED, this.etfDividendController.processCSV(user, mpf).getStatusCode());
+        Assertions.assertEquals(HttpStatus.CREATED, this.etfDividendController.processCSV("email", mpf).getStatusCode());
     }
 }

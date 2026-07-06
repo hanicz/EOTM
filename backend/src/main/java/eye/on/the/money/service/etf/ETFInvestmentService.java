@@ -98,8 +98,8 @@ public class ETFInvestmentService implements ICSVService {
 
     @Transactional
     public ETFInvestmentDTO createInvestment(ETFInvestmentDTO investmentDTO, String userEmail) {
-        Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
-        ETF etf = this.etfRepository.findByShortNameAndExchange(investmentDTO.getShortName(), investmentDTO.getExchange()).orElseThrow(NoSuchElementException::new);
+        Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + investmentDTO.getCurrencyId()));
+        ETF etf = this.etfRepository.findByShortNameAndExchange(investmentDTO.getShortName(), investmentDTO.getExchange()).orElseThrow(() -> new NoSuchElementException("ETF not found: " + investmentDTO.getShortName() + "." + investmentDTO.getExchange()));
         ETFPayment etfPayment = this.etfPaymentService.createPayment(currency, investmentDTO.getAmount());
         User user = this.userService.loadUserByEmail(userEmail);
 
@@ -119,9 +119,9 @@ public class ETFInvestmentService implements ICSVService {
 
     @Transactional
     public ETFInvestmentDTO updateInvestment(ETFInvestmentDTO investmentDTO, String userEmail) {
-        Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(NoSuchElementException::new);
-        ETF etf = this.etfRepository.findByShortNameAndExchange(investmentDTO.getShortName(), investmentDTO.getExchange()).orElseThrow(NoSuchElementException::new);
-        ETFInvestment investment = this.etfInvestmentRepository.findByIdAndUserEmail(investmentDTO.getId(), userEmail).orElseThrow(NoSuchElementException::new);
+        Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + investmentDTO.getCurrencyId()));
+        ETF etf = this.etfRepository.findByShortNameAndExchange(investmentDTO.getShortName(), investmentDTO.getExchange()).orElseThrow(() -> new NoSuchElementException("ETF not found: " + investmentDTO.getShortName() + "." + investmentDTO.getExchange()));
+        ETFInvestment investment = this.etfInvestmentRepository.findByIdAndUserEmail(investmentDTO.getId(), userEmail).orElseThrow(() -> new NoSuchElementException("ETF investment not found: " + investmentDTO.getId()));
         ETFPayment etfPayment = investment.getEtfPayment();
 
         investment.setBuySell(investmentDTO.getBuySell());

@@ -2,13 +2,13 @@ package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.out.SecurityTransactionDTO;
 import eye.on.the.money.service.security.SecurityTransactionService;
+import eye.on.the.money.util.CsvResponseUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import eye.on.the.money.security.CurrentUserEmail;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,41 +24,39 @@ public class SecurityTransactionController {
     private final SecurityTransactionService securityTransactionService;
 
     @GetMapping()
-    public ResponseEntity<List<SecurityTransactionDTO>> getAllTransactions(@AuthenticationPrincipal UserDetails user) {
-        return new ResponseEntity<>(this.securityTransactionService.getTransactions(user.getUsername()), HttpStatus.OK);
+    public ResponseEntity<List<SecurityTransactionDTO>> getAllTransactions(@CurrentUserEmail String userEmail) {
+        return ResponseEntity.ok(this.securityTransactionService.getTransactions(userEmail));
     }
 
     @GetMapping("/holding")
-    public ResponseEntity<List<SecurityTransactionDTO>> getHoldings(@AuthenticationPrincipal UserDetails user) {
-        return new ResponseEntity<>(this.securityTransactionService.getCurrentHoldings(user.getUsername()), HttpStatus.OK);
+    public ResponseEntity<List<SecurityTransactionDTO>> getHoldings(@CurrentUserEmail String userEmail) {
+        return ResponseEntity.ok(this.securityTransactionService.getCurrentHoldings(userEmail));
     }
 
     @PostMapping
-    public ResponseEntity<SecurityTransactionDTO> createTransaction(@AuthenticationPrincipal UserDetails user, @RequestBody SecurityTransactionDTO transactionDTO) {
-        return new ResponseEntity<>(this.securityTransactionService.createTransaction(transactionDTO, user.getUsername()), HttpStatus.CREATED);
+    public ResponseEntity<SecurityTransactionDTO> createTransaction(@CurrentUserEmail String userEmail, @RequestBody SecurityTransactionDTO transactionDTO) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.securityTransactionService.createTransaction(transactionDTO, userEmail));
     }
 
     @PutMapping
-    public ResponseEntity<SecurityTransactionDTO> updateTransaction(@AuthenticationPrincipal UserDetails user, @RequestBody SecurityTransactionDTO transactionDTO) {
-        return new ResponseEntity<>(this.securityTransactionService.updateTransaction(transactionDTO, user.getUsername()), HttpStatus.OK);
+    public ResponseEntity<SecurityTransactionDTO> updateTransaction(@CurrentUserEmail String userEmail, @RequestBody SecurityTransactionDTO transactionDTO) {
+        return ResponseEntity.ok(this.securityTransactionService.updateTransaction(transactionDTO, userEmail));
     }
 
     @DeleteMapping()
-    public ResponseEntity<HttpStatus> deleteByIds(@AuthenticationPrincipal UserDetails user, @RequestParam List<Long> ids) {
-        this.securityTransactionService.deleteTransactionById(user.getUsername(), ids);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<Void> deleteByIds(@CurrentUserEmail String userEmail, @RequestParam List<Long> ids) {
+        this.securityTransactionService.deleteTransactionById(userEmail, ids);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/csv")
-    public void getCSV(@AuthenticationPrincipal UserDetails user, HttpServletResponse servletResponse) throws IOException {
-        servletResponse.setContentType("text/csv");
-        servletResponse.addHeader("Content-Disposition", "attachment; filename=\"security_transactions.csv\"");
-        this.securityTransactionService.getCSV(user.getUsername(), servletResponse.getWriter());
+    public void getCSV(@CurrentUserEmail String userEmail, HttpServletResponse servletResponse) throws IOException {
+        this.securityTransactionService.getCSV(userEmail, CsvResponseUtil.prepare(servletResponse, "security_transactions.csv"));
     }
 
     @PostMapping("/process/csv")
-    public ResponseEntity<HttpStatus> processCSV(@AuthenticationPrincipal UserDetails user, @RequestParam("file") MultipartFile file) throws IOException {
-        this.securityTransactionService.processCSV(user.getUsername(), file);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<Void> processCSV(@CurrentUserEmail String userEmail, @RequestParam("file") MultipartFile file) throws IOException {
+        this.securityTransactionService.processCSV(userEmail, file);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

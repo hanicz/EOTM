@@ -30,8 +30,8 @@ public abstract class APIService {
     protected final ObjectMapper objectMapper;
 
     protected String createURL(String api, String path, String... params) {
-        String stockAPI = this.configRepository.findById(api).orElseThrow(NoSuchElementException::new).getConfigValue();
-        Object secret = this.credentialRepository.findById(api).orElseThrow(NoSuchElementException::new).getSecret();
+        String stockAPI = this.configRepository.findById(api).orElseThrow(() -> new NoSuchElementException("API config not found: " + api)).getConfigValue();
+        Object secret = this.credentialRepository.findById(api).orElseThrow(() -> new NoSuchElementException("API credential not found: " + api)).getSecret();
         Object[] array = Stream.concat(Stream.of(secret), Stream.of(params)).toArray();
 
         return MessageFormat.format(stockAPI + path, array);

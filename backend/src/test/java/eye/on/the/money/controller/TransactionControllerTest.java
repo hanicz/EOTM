@@ -44,7 +44,7 @@ class TransactionControllerTest {
 
         when(this.transactionService.getTransactionsByUserId("email")).thenReturn(tDTO);
 
-        Assertions.assertIterableEquals(tDTO, this.transactionController.getCoinTransactionsByUserId(this.user).getBody());
+        Assertions.assertIterableEquals(tDTO, this.transactionController.getCoinTransactionsByUserId("email").getBody());
     }
 
     @Test
@@ -53,7 +53,7 @@ class TransactionControllerTest {
 
         when(this.transactionService.getAllPositions("email")).thenReturn(tDTO);
 
-        Assertions.assertIterableEquals(tDTO, this.transactionController.getAllPositions(this.user).getBody());
+        Assertions.assertIterableEquals(tDTO, this.transactionController.getAllPositions("email").getBody());
     }
 
     @Test
@@ -63,21 +63,21 @@ class TransactionControllerTest {
 
         when(this.transactionService.getCurrentHoldings("email", query)).thenReturn(tDTO);
 
-        Assertions.assertIterableEquals(tDTO, this.transactionController.getAllHoldings(this.user, query).getBody());
+        Assertions.assertIterableEquals(tDTO, this.transactionController.getAllHoldings("email", query).getBody());
     }
 
     @Test
     public void deleteByIds() {
         when(this.transactionService.deleteTransactionById(any(), any())).thenReturn(true);
 
-        Assertions.assertEquals(HttpStatus.OK, this.transactionController.deleteByIds(this.user, List.of(1L, 2L, 3L)).getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, this.transactionController.deleteByIds("email", List.of(1L, 2L, 3L)).getStatusCode());
     }
 
     @Test
     public void deleteByIds404() {
         when(this.transactionService.deleteTransactionById(any(), any())).thenReturn(false);
 
-        Assertions.assertEquals(HttpStatus.NOT_FOUND, this.transactionController.deleteByIds(this.user, List.of(1L, 2L, 3L)).getStatusCode());
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, this.transactionController.deleteByIds("email", List.of(1L, 2L, 3L)).getStatusCode());
     }
 
     @Test
@@ -85,7 +85,7 @@ class TransactionControllerTest {
         HttpServletResponse httpSR = new MockHttpServletResponse();
 
         doNothing().when(this.transactionService).getCSV(any(), any());
-        this.transactionController.getCSV(this.user, httpSR);
+        this.transactionController.getCSV("email", httpSR);
 
         verify(this.transactionService, times(1)).getCSV(any(), any());
     }
@@ -97,7 +97,7 @@ class TransactionControllerTest {
 
         when(this.transactionService.createTransaction(tDTO, "email")).thenReturn(tDTO);
 
-        Assertions.assertEquals(tDTO, this.transactionController.createTransaction(this.user, tDTO).getBody());
+        Assertions.assertEquals(tDTO, this.transactionController.createTransaction("email", tDTO).getBody());
     }
 
     @Test
@@ -107,7 +107,7 @@ class TransactionControllerTest {
 
         when(this.transactionService.updateTransaction(tDTO, "email")).thenReturn(tDTO);
 
-        Assertions.assertEquals(tDTO, this.transactionController.updateTransaction(this.user, tDTO).getBody());
+        Assertions.assertEquals(tDTO, this.transactionController.updateTransaction("email", tDTO).getBody());
     }
 
     @Test
@@ -116,7 +116,7 @@ class TransactionControllerTest {
 
         doNothing().when(this.transactionService).processCSV("email", mpf);
 
-        Assertions.assertEquals(HttpStatus.CREATED, this.transactionController.processCSV(this.user, mpf).getStatusCode());
+        Assertions.assertEquals(HttpStatus.CREATED, this.transactionController.processCSV("email", mpf).getStatusCode());
     }
 
     private List<TransactionDTO> createTransactionList() {

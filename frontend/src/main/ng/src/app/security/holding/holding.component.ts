@@ -36,6 +36,10 @@ export class HoldingComponent implements OnInit {
     this.fetchData();
   }
 
+  markForCheck(): void {
+    this.cdr.markForCheck();
+  }
+
   private fetchData(): void {
     this.securityService.getHolding().subscribe({
       next: (data) => {

@@ -33,6 +33,10 @@ export class EtfholdingComponent implements OnInit {
     this.fetchData();
   }
 
+  markForCheck(): void {
+    this.cdr.markForCheck();
+  }
+
   private fetchData(): void {
     this.etfService.getHolding().subscribe({
       next: (data) => {

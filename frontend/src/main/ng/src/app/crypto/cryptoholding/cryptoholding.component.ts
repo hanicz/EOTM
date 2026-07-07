@@ -36,6 +36,10 @@ export class CryptoholdingComponent implements OnInit {
     this.fetchData();
   }
 
+  markForCheck(): void {
+    this.cdr.markForCheck();
+  }
+
   private fetchData(): void {
     this.cryptoService.getHoldings().subscribe({
       next: (data) => {

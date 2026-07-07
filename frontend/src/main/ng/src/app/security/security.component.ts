@@ -167,5 +167,7 @@ export class SecurityComponent implements OnInit {
 
     this.allocationChartOptions.series = this.transactions.map(t => this.convert(t.amount, t.currencyId));
     this.allocationChartOptions.labels = this.transactions.map(t => t.securityName);
+
+    this.holding?.markForCheck();
   }
 }

@@ -138,5 +138,7 @@ export class EtfComponent implements OnInit {
 
     this.allocationChartOptions.series = this.investments.map(i => this.convert(i.liveValue ?? i.amount, i.currencyId));
     this.allocationChartOptions.labels = this.investments.map(i => `${i.shortName}.${i.exchange}`);
+
+    this.etfholding?.markForCheck();
   }
 }

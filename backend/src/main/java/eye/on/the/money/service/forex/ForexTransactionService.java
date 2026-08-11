@@ -11,7 +11,7 @@ import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.forex.ForexTransactionRepository;
 import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.shared.ICSVService;
-import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +35,7 @@ public class ForexTransactionService implements ICSVService {
 
     private final CurrencyRepository currencyRepository;
     private final ForexTransactionRepository forexTransactionRepository;
-    private final UserServiceImpl userService;
+    private final UserService userService;
     private final ModelMapper modelMapper;
     private final EODAPIService eodAPIService;
     public List<ForexTransactionDTO> getForexTransactionsByUserId(String userEmail) {
@@ -147,7 +147,7 @@ public class ForexTransactionService implements ICSVService {
                     this.createForexTransaction(transaction, userEmail);
                 }
             }
-        } catch (IOException | DateTimeParseException e) {
+        } catch (IOException | DateTimeParseException | IllegalArgumentException e) {
             log.error("Error while processing CSV", e);
             throw new CSVException("Failed to parse CSV file: " + e.getMessage(), e);
         }

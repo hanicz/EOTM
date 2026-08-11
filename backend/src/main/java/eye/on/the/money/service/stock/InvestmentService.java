@@ -15,7 +15,7 @@ import eye.on.the.money.repository.stock.AccountRepository;
 import eye.on.the.money.repository.stock.InvestmentRepository;
 import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.shared.ICSVService;
-import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +42,7 @@ public class InvestmentService implements ICSVService {
     private final CurrencyRepository currencyRepository;
     private final StockPaymentService stockPaymentService;
     private final AccountRepository accountRepository;
-    private final UserServiceImpl userService;
+    private final UserService userService;
     private final ModelMapper modelMapper;
     private final EODAPIService eodAPIService;
     private final StockService stockService;
@@ -210,7 +210,7 @@ public class InvestmentService implements ICSVService {
                     this.createInvestment(investment, userEmail);
                 }
             }
-        } catch (IOException | DateTimeParseException e) {
+        } catch (IOException | DateTimeParseException | IllegalArgumentException e) {
             log.error("Error while processing CSV", e);
             throw new CSVException("Failed to parse CSV file: " + e.getMessage(), e);
         }

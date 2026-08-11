@@ -8,7 +8,7 @@ import eye.on.the.money.repository.UserRepository;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.forex.ForexTransactionRepository;
 import eye.on.the.money.service.api.EODAPIService;
-import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.service.user.UserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,7 +42,7 @@ class ForexTransactionServiceTest {
     @MockitoBean
     private EODAPIService eodapiService;
     @MockitoBean
-    private UserServiceImpl userService;
+    private UserService userService;
     @Autowired
     private ModelMapper modelMapper;
     @Autowired

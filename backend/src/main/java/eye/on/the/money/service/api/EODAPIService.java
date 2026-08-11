@@ -29,6 +29,7 @@ public class EODAPIService extends APIService {
     private final static String EXCHANGE_SYMBOL_LIST_PATH = "/exchange-symbol-list/{1}?api_token={0}&fmt=json";
     private final static String EXCHANGE_LIST_PATH = "/exchanges-list?api_token={0}&fmt=json";
     private final static String CANDLE_PATH = "/eod/{1}?api_token={0}&fmt=json&period={2}{3}";
+    private final static String HISTORICAL_PATH = "/eod/{1}?api_token={0}&fmt=json&period=d&from={2}&to={3}";
     private final static String SINGLE_TICKER_PATH = "/real-time/{1}/?api_token={0}&fmt=json";
     private final static String MULTIPLE_TICKER_PATH = SINGLE_TICKER_PATH + "&s={2}";
 
@@ -78,6 +79,15 @@ public class EODAPIService extends APIService {
         String url = this.createURL(EODAPIService.API, CANDLE_PATH, shortname, period, from);
         ResponseEntity<?> response = this.callGetAPI(url,
                 EODCandleQuoteDTO[].class);
+        return Arrays.asList((EODCandleQuoteDTO[]) response.getBody());
+    }
+
+    @Retryable(retryFor = APIException.class, maxAttempts = 3)
+    public List<EODCandleQuoteDTO> getHistoricalQuotes(String ticker, LocalDate from, LocalDate to) {
+        log.trace("Enter");
+        String url = this.createURL(EODAPIService.API, HISTORICAL_PATH, ticker,
+                from.format(DateFormats.YYYY_MM_DD), to.format(DateFormats.YYYY_MM_DD));
+        ResponseEntity<?> response = this.callGetAPI(url, EODCandleQuoteDTO[].class);
         return Arrays.asList((EODCandleQuoteDTO[]) response.getBody());
     }
 

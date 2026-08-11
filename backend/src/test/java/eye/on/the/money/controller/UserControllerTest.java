@@ -2,7 +2,7 @@ package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.in.ChangePasswordDTO;
 import eye.on.the.money.model.User;
-import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.service.user.UserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
 class UserControllerTest {
 
     @Mock
-    private UserServiceImpl userService;
+    private UserService userService;
 
     private UserController userController;
 

@@ -10,7 +10,7 @@ import eye.on.the.money.repository.etf.ETFDividendRepository;
 import eye.on.the.money.repository.etf.ETFRepository;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.service.shared.ICSVService;
-import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +36,7 @@ public class ETFDividendService implements ICSVService {
     private final ETFDividendRepository etfDividendRepository;
     private final CurrencyRepository currencyRepository;
     private final ETFRepository etfRepository;
-    private final UserServiceImpl userService;
+    private final UserService userService;
     private final ModelMapper modelMapper;
     public List<ETFDividendDTO> getDividends(String userEmail) {
         return this.etfDividendRepository.findByUserEmailOrderByDividendDate(userEmail).stream().map(this::convertToETFDividendDTO).collect(Collectors.toList());
@@ -107,7 +107,7 @@ public class ETFDividendService implements ICSVService {
                     this.createETFDividend(dividend, userEmail);
                 }
             }
-        } catch (IOException | DateTimeParseException e) {
+        } catch (IOException | DateTimeParseException | IllegalArgumentException e) {
             log.error("Error while processing CSV", e);
             throw new CSVException("Failed to parse CSV file: " + e.getMessage(), e);
         }

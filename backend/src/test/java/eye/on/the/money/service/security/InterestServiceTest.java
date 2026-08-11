@@ -7,7 +7,7 @@ import eye.on.the.money.model.security.Interest;
 import eye.on.the.money.model.security.Security;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.security.InterestRepository;
-import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.service.user.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,7 +36,7 @@ class InterestServiceTest {
     @Mock
     private SecurityService securityService;
     @Mock
-    private UserServiceImpl userService;
+    private UserService userService;
     @Mock
     private ModelMapper modelMapper;
 

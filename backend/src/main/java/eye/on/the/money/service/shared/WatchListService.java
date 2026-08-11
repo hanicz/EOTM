@@ -17,7 +17,7 @@ import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.watchlist.CryptoWatchRepository;
 import eye.on.the.money.repository.watchlist.ForexWatchRepository;
 import eye.on.the.money.repository.watchlist.StockWatchRepository;
-import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.service.api.CryptoAPIService;
 import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.stock.StockService;
@@ -41,7 +41,7 @@ public class WatchListService {
     private final ForexWatchRepository forexWatchRepository;
     private final CurrencyRepository currencyRepository;
     private final CryptoAPIService cryptoAPIService;
-    private final UserServiceImpl userService;
+    private final UserService userService;
     private final EODAPIService eodAPIService;
     private final CoinRepository coinRepository;
     private final ModelMapper modelMapper;

@@ -17,6 +17,7 @@ The application requires the following API subscriptions/keys, configured in the
 - [EODHD APIs](https://eodhd.com/) — live stock and ETF prices (requires an active subscription).
 - [CoinGecko](https://www.coingecko.com/en/api) — crypto prices.
 - [Finnhub](https://finnhub.io/) — fundamental data.
+- [MNB](https://www.mnb.hu/arfolyamok.asmx?wsdl) — official HUF exchange rates for the tax report (SOAP, no key required). The service answers over plain http only; a POST to the https host returns 404.
 
 ## Project structure
 

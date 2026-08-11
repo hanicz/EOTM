@@ -11,7 +11,7 @@ import eye.on.the.money.repository.alert.CryptoAlertRepository;
 import eye.on.the.money.repository.alert.StockAlertRepository;
 import eye.on.the.money.service.crypto.CoinService;
 import eye.on.the.money.service.stock.StockService;
-import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -30,7 +30,7 @@ public class AlertService {
     private final StockService stockService;
     private final CoinService coinService;
     private final ModelMapper modelMapper;
-    private final UserServiceImpl userService;
+    private final UserService userService;
 
     public List<StockAlertDTO> getAllStockAlerts(String userEmail) {
         List<StockAlert> stockAlerts = this.stockAlertRepository.findByUserEmailOrderByStockShortName(userEmail);

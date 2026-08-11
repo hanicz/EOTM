@@ -16,7 +16,9 @@ import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.text.MessageFormat;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -29,12 +31,22 @@ public abstract class APIService {
     protected final WebClient webClient;
     protected final ObjectMapper objectMapper;
 
-    protected String createURL(String api, String path, String... params) {
-        String stockAPI = this.configRepository.findById(api).orElseThrow(() -> new NoSuchElementException("API config not found: " + api)).getConfigValue();
-        Object secret = this.credentialRepository.findById(api).orElseThrow(() -> new NoSuchElementException("API credential not found: " + api)).getSecret();
-        Object[] array = Stream.concat(Stream.of(secret), Stream.of(params)).toArray();
+    private final Map<String, String> apiUrlCache = new ConcurrentHashMap<>();
+    private final Map<String, String> secretCache = new ConcurrentHashMap<>();
 
-        return MessageFormat.format(stockAPI + path, array);
+    protected String getApiUrl(String api) {
+        return this.apiUrlCache.computeIfAbsent(api, key -> this.configRepository.findById(key)
+                .orElseThrow(() -> new NoSuchElementException("API config not found: " + key)).getConfigValue());
+    }
+
+    protected String getSecret(String api) {
+        return this.secretCache.computeIfAbsent(api, key -> this.credentialRepository.findById(key)
+                .orElseThrow(() -> new NoSuchElementException("API credential not found: " + key)).getSecret());
+    }
+
+    protected String createURL(String api, String path, String... params) {
+        Object[] array = Stream.concat(Stream.of(this.getSecret(api)), Stream.of(params)).toArray();
+        return MessageFormat.format(this.getApiUrl(api) + path, array);
     }
 
     protected <T> ResponseEntity<T> callGetAPI(String URL, Class<T> cls) {

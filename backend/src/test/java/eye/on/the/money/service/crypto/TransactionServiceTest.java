@@ -12,7 +12,7 @@ import eye.on.the.money.model.crypto.Transaction;
 import eye.on.the.money.repository.UserRepository;
 import eye.on.the.money.repository.crypto.TransactionRepository;
 import eye.on.the.money.service.api.CryptoAPIService;
-import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.service.user.UserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,7 +55,7 @@ class TransactionServiceTest {
     @Autowired
     private UserRepository userRepository;
     @MockitoBean
-    private UserServiceImpl userService;
+    private UserService userService;
     @Autowired
     private ObjectMapper objectMapper;
     private User user;
@@ -190,12 +190,14 @@ class TransactionServiceTest {
         TransactionDTO transactionDTO = this.createNewTransaction();
         TransactionDTO inserted = this.transactionService.createTransaction(transactionDTO, this.user.getUsername());
 
-        Assertions.assertTrue(this.transactionService.deleteTransactionById(this.user.getUsername(), List.of(inserted.getId())));
+        this.transactionService.deleteTransactionById(this.user.getUsername(), List.of(inserted.getId()));
+
+        Assertions.assertTrue(this.transactionRepository.findByIdAndUserEmail(inserted.getId(), this.user.getUsername()).isEmpty());
     }
 
     @Test
     public void deleteTransactionByIdNotExists() {
-        Assertions.assertFalse(this.transactionService.deleteTransactionById(this.user.getUsername(), List.of(123456789L)));
+        Assertions.assertDoesNotThrow(() -> this.transactionService.deleteTransactionById(this.user.getUsername(), List.of(123456789L)));
     }
 
     @Test

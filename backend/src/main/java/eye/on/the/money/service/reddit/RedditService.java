@@ -11,7 +11,7 @@ import eye.on.the.money.model.news.News;
 import eye.on.the.money.model.reddit.Subreddit;
 import eye.on.the.money.repository.reddit.SubredditRepository;
 import eye.on.the.money.service.api.RedditAPIService;
-import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,7 +30,7 @@ public class RedditService {
 
     private final RedditAPIService redditAPIService;
     private final SubredditRepository subredditRepository;
-    private final UserServiceImpl userService;
+    private final UserService userService;
     private final ObjectMapper objectMapper;
     @Value("${reddit.url}")
     private String redditUrl;

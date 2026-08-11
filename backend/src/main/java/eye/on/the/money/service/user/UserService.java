@@ -18,7 +18,7 @@ import static java.util.Collections.emptyList;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserDetailsService {
+public class UserService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
 
@@ -29,10 +29,7 @@ public class UserServiceImpl implements UserDetailsService {
     }
 
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = this.userRepository.findByEmail(email);
-        if (user == null) {
-            throw new UsernameNotFoundException(email);
-        }
+        User user = this.loadUserByEmail(email);
         return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), emptyList());
     }
 

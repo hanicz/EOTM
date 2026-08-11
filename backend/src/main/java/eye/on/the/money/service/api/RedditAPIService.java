@@ -17,7 +17,6 @@ import reactor.core.publisher.Flux;
 
 import java.text.MessageFormat;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -53,8 +52,7 @@ public class RedditAPIService extends APIService {
 
     private Consumer<HttpHeaders> getBasicHttpHeader() {
         return headers -> {
-            headers.add("Authorization", "Basic " +
-                    this.credentialRepository.findById(RedditAPIService.API).orElseThrow(() -> new NoSuchElementException("API credential not found: " + RedditAPIService.API)).getSecret());
+            headers.add("Authorization", "Basic " + this.getSecret(RedditAPIService.API));
         };
     }
 
@@ -72,9 +70,8 @@ public class RedditAPIService extends APIService {
 
     @Override
     protected String createURL(String api, String path, String... params) {
-        String apiURL = this.configRepository.findById(api).orElseThrow(() -> new NoSuchElementException("API config not found: " + api)).getConfigValue();
         Object[] array = Stream.of(params).toArray();
 
-        return MessageFormat.format(apiURL + path, array);
+        return MessageFormat.format(this.getApiUrl(api) + path, array);
     }
 }

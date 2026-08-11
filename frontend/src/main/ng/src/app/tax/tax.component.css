@@ -1,0 +1,107 @@
+.tax-hint {
+    margin: 0 0 1.25rem 0;
+    font-size: 0.85rem;
+    color: #5f5e5a;
+}
+
+.tax-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.tax-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-width: 10rem;
+}
+
+.tax-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #5f5e5a;
+}
+
+/* PrimeNG's host element does not stretch, so the inner input would collapse. */
+:host ::ng-deep .tax-field .p-inputnumber {
+    width: 100%;
+}
+
+:host ::ng-deep .tax-field .p-inputnumber input {
+    width: 100%;
+    min-width: 0;
+}
+
+.tax-add {
+    margin-bottom: 0.1rem;
+}
+
+.tax-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.tax-heading {
+    margin: 2rem 0 0.75rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.tax-total-cell {
+    font-weight: 600;
+}
+
+.tax-fallback {
+    margin-left: 0.35rem;
+    font-size: 0.75rem;
+    color: #a8a49b;
+    cursor: help;
+}
+
+.tax-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.tax-tile {
+    padding: 0.9rem 1rem;
+    border-radius: 0.6rem;
+    background: #faf9f6;
+    border: 1px solid #ece9e0;
+}
+
+.tax-tile-primary {
+    background: #f1efe8;
+    border-color: #ddd8cb;
+}
+
+.tax-tile-label {
+    font-size: 0.75rem;
+    color: #5f5e5a;
+    margin-bottom: 0.35rem;
+}
+
+.tax-tile-value {
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+
+@media screen and (max-width: 640px) {
+    .tax-field {
+        min-width: 100%;
+    }
+
+    .tax-add {
+        width: 100%;
+    }
+}

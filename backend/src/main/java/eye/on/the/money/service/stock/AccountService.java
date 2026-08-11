@@ -3,7 +3,7 @@ package eye.on.the.money.service.stock;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Account;
 import eye.on.the.money.repository.stock.AccountRepository;
-import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ import java.util.List;
 public class AccountService {
 
     private final AccountRepository accountRepository;
-    private final UserServiceImpl userService;
+    private final UserService userService;
 
     public Account save(Account account) {
         return this.accountRepository.save(account);

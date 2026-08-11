@@ -44,8 +44,8 @@ public class TransactionController {
 
     @DeleteMapping()
     public ResponseEntity<Void> deleteByIds(@CurrentUserEmail String userEmail, @RequestParam List<Long> ids) {
-        var isDeleted = this.transactionService.deleteTransactionById(userEmail, ids);
-        return ResponseEntity.status(isDeleted ? HttpStatus.OK : HttpStatus.NOT_FOUND).build();
+        this.transactionService.deleteTransactionById(userEmail, ids);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/csv")

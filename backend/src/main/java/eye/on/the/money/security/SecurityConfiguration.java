@@ -1,6 +1,6 @@
 package eye.on.the.money.security;
 
-import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -24,13 +24,13 @@ import static eye.on.the.money.security.SecurityConstants.SIGN_UP_URL;
 @EnableWebSecurity
 public class SecurityConfiguration {
 
-    private final UserServiceImpl userService;
+    private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final CorsConfigurationSource corsConfigurationSource;
     private final JwtService jwtService;
 
     @Autowired
-    public SecurityConfiguration(UserServiceImpl userService, PasswordEncoder passwordEncoder,
+    public SecurityConfiguration(UserService userService, PasswordEncoder passwordEncoder,
                                  @Qualifier("cors") CorsConfigurationSource corsConfigurationSource,
                                  JwtService jwtService) {
         this.userService = userService;

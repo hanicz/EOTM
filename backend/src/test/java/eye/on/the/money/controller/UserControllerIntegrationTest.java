@@ -1,7 +1,7 @@
 package eye.on.the.money.controller;
 
 import eye.on.the.money.EotmApplication;
-import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.service.user.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ public class UserControllerIntegrationTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private UserServiceImpl userService;
+    private UserService userService;
 
     @Test
     public void validatingTokenOK() throws Exception {

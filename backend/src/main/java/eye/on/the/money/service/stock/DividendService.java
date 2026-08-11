@@ -10,7 +10,7 @@ import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.stock.DividendRepository;
 import eye.on.the.money.repository.stock.StockRepository;
 import eye.on.the.money.service.shared.ICSVService;
-import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +36,7 @@ public class DividendService implements ICSVService {
     private final DividendRepository dividendRepository;
     private final CurrencyRepository currencyRepository;
     private final StockRepository stockRepository;
-    private final UserServiceImpl userService;
+    private final UserService userService;
     private final ModelMapper modelMapper;
     public List<DividendDTO> getDividends(String userEmail) {
         return this.dividendRepository.findByUserEmailOrderByDividendDate(userEmail).stream().map(this::convertToDividendDTO).collect(Collectors.toList());

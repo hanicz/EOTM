@@ -14,7 +14,7 @@ import eye.on.the.money.repository.crypto.CoinRepository;
 import eye.on.the.money.repository.crypto.TransactionRepository;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.service.shared.ICSVService;
-import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
 import eye.on.the.money.service.api.CryptoAPIService;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +40,7 @@ public class TransactionService implements ICSVService {
 
     private final TransactionRepository transactionRepository;
     private final PaymentService paymentService;
-    private final UserServiceImpl userService;
+    private final UserService userService;
     private final CurrencyRepository currencyRepository;
     private final CoinRepository coinRepository;
     private final ModelMapper modelMapper;
@@ -79,8 +79,8 @@ public class TransactionService implements ICSVService {
     }
 
     @Transactional
-    public boolean deleteTransactionById(String userEmail, List<Long> ids) {
-        return this.transactionRepository.deleteByUserEmailAndIdIn(userEmail, ids) == ids.size();
+    public void deleteTransactionById(String userEmail, List<Long> ids) {
+        this.transactionRepository.deleteByUserEmailAndIdIn(userEmail, ids);
     }
 
     @Transactional

@@ -12,6 +12,7 @@ import { AlertComponent } from './alert/alert.component';
 import { SettingsComponent } from './settings/settings.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { SecurityComponent } from './security/security.component';
+import { TaxComponent } from './tax/tax.component';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent },
@@ -26,5 +27,6 @@ export const routes: Routes = [
   { path: 'security', component: SecurityComponent },
   { path: 'etf', component: EtfComponent },
   { path: 'alert', component: AlertComponent },
+  { path: 'tax', component: TaxComponent },
   { path: 'settings', component: SettingsComponent }
 ];

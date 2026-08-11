@@ -9,7 +9,7 @@ import eye.on.the.money.model.security.Security;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.security.InterestRepository;
 import eye.on.the.money.service.shared.ICSVService;
-import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,8 +35,9 @@ public class InterestService implements ICSVService {
     private final InterestRepository interestRepository;
     private final CurrencyRepository currencyRepository;
     private final SecurityService securityService;
-    private final UserServiceImpl userService;
+    private final UserService userService;
     private final ModelMapper modelMapper;
+
     public List<InterestDTO> getInterest(String userEmail) {
         return this.interestRepository.findByUserEmailOrderByInterestDateDesc(userEmail).stream().map(this::convertToDTO).collect(Collectors.toList());
     }

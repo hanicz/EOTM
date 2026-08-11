@@ -68,16 +68,9 @@ class TransactionControllerTest {
 
     @Test
     public void deleteByIds() {
-        when(this.transactionService.deleteTransactionById(any(), any())).thenReturn(true);
+        doNothing().when(this.transactionService).deleteTransactionById(any(), any());
 
         Assertions.assertEquals(HttpStatus.OK, this.transactionController.deleteByIds("email", List.of(1L, 2L, 3L)).getStatusCode());
-    }
-
-    @Test
-    public void deleteByIds404() {
-        when(this.transactionService.deleteTransactionById(any(), any())).thenReturn(false);
-
-        Assertions.assertEquals(HttpStatus.NOT_FOUND, this.transactionController.deleteByIds("email", List.of(1L, 2L, 3L)).getStatusCode());
     }
 
     @Test

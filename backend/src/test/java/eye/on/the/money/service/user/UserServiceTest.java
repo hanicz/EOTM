@@ -18,7 +18,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @SpringBootTest(classes = EotmApplication.class)
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
-class UserServiceImplTest {
+class UserServiceTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -27,7 +27,7 @@ class UserServiceImplTest {
     private UserRepository userRepository;
 
     @Autowired
-    private UserServiceImpl userService;
+    private UserService userService;
 
 
     @Test

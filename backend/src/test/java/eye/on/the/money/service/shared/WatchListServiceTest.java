@@ -13,7 +13,7 @@ import eye.on.the.money.repository.watchlist.StockWatchRepository;
 import eye.on.the.money.service.api.CryptoAPIService;
 import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.stock.StockService;
-import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.service.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +42,7 @@ class WatchListServiceTest {
     @Mock
     private CryptoAPIService cryptoAPIService;
     @Mock
-    private UserServiceImpl userService;
+    private UserService userService;
     @Mock
     private EODAPIService eodAPIService;
     @Mock

@@ -9,7 +9,7 @@ import eye.on.the.money.model.security.SecurityTransaction;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.security.SecurityTransactionRepository;
 import eye.on.the.money.service.shared.ICSVService;
-import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +39,7 @@ public class SecurityTransactionService implements ICSVService {
 
     private final SecurityTransactionRepository securityTransactionRepository;
     private final CurrencyRepository currencyRepository;
-    private final UserServiceImpl userService;
+    private final UserService userService;
     private final ModelMapper modelMapper;
     private final SecurityService securityService;
     public List<SecurityTransactionDTO> getTransactions(String userEmail) {
@@ -139,7 +139,7 @@ public class SecurityTransactionService implements ICSVService {
                     this.createTransaction(transaction, userEmail);
                 }
             }
-        } catch (IOException | DateTimeParseException e) {
+        } catch (IOException | DateTimeParseException | IllegalArgumentException e) {
             log.error("Error while processing CSV", e);
             throw new CSVException("Failed to parse CSV file: " + e.getMessage(), e);
         }

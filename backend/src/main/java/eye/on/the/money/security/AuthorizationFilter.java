@@ -1,6 +1,6 @@
 package eye.on.the.money.security;
 
-import eye.on.the.money.service.user.UserServiceImpl;
+import eye.on.the.money.service.user.UserService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
@@ -23,7 +23,7 @@ import static eye.on.the.money.security.SecurityConstants.HEADER_NAME;
 @RequiredArgsConstructor
 public class AuthorizationFilter extends OncePerRequestFilter {
 
-    private final UserServiceImpl userService;
+    private final UserService userService;
     private final JwtService jwtService;
 
     @Override

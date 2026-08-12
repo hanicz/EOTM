@@ -5,8 +5,8 @@
         <th>Symbol</th>
         <th>Quantity</th>
         <th>Spent</th>
-        <th>Average</th>
         <th>Worth</th>
+        <th>Average</th>
         <th>Price</th>
         <th>Profit</th>
         <th>%</th>
@@ -36,8 +36,8 @@
         <th>Symbol</th>
         <th>Quantity</th>
         <th>Spent</th>
-        <th>Average</th>
         <th>Worth</th>
+        <th>Average</th>
         <th>Price</th>
         <th>Profit</th>
         <th>%</th>
@@ -54,14 +54,14 @@
         </td>
         <td>{{transaction.quantity | number : '0.0-4'}}</td>
         <td>{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</td>
-        <td>{{transaction.amount / transaction.quantity | currency : transaction.currencyId : 'symbol' : '0.0-3'}}
-        </td>
         <td>
           @if (transaction.liveValue != null) {
             {{transaction.liveValue | currency : transaction.currencyId : 'symbol' : '0.0-2'}}
           } @else {
             <span>N/A</span>
           }
+        </td>
+        <td>{{transaction.amount / transaction.quantity | currency : transaction.currencyId : 'symbol' : '0.0-3'}}
         </td>
         <td>
           @if (transaction.liveValue != null) {

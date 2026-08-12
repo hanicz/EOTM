@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -34,7 +35,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class TaxService {
+public class TaxService implements ICSVService {
 
     /** MNB and the exchanges both skip non-trading days; look back far enough to clear a long holiday. */
     private static final int LOOKBACK_DAYS = 14;
@@ -73,6 +74,11 @@ public class TaxService {
                 .reduce(TaxBreakdownDTO.zero(), TaxBreakdownDTO::plus);
 
         return TaxReportDTO.builder().items(items).totalAmountInHuf(totalAmount).totalTax(totalTax).build();
+    }
+
+    public void getCSV(List<RSUDTO> rsus, Writer writer) {
+        log.trace("Enter");
+        this.printRecords(this.calculateTaxForRSUs(rsus).getItems(), writer);
     }
 
     private RSUTaxDTO calculateRSU(RSUDTO rsu, Map<String, String> currencies,

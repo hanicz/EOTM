@@ -2,6 +2,7 @@ package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.in.ChangePasswordDTO;
 import eye.on.the.money.model.User;
+import eye.on.the.money.service.shared.ExportService;
 import eye.on.the.money.service.user.UserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,11 +24,14 @@ class UserControllerTest {
     @Mock
     private UserService userService;
 
+    @Mock
+    private ExportService exportService;
+
     private UserController userController;
 
     @BeforeEach
     public void setUp() {
-        this.userController = new UserController(this.userService);
+        this.userController = new UserController(this.userService, this.exportService);
     }
 
     private final User user = User.builder().id(1L).email("email").build();

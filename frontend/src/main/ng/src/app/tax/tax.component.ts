@@ -104,6 +104,20 @@ export class TaxComponent {
     });
   }
 
+  download(): void {
+    if (this.rsus.length === 0) return;
+
+    this.taxService.downloadRSUCsv(this.rsus).subscribe({
+      next: (data) => {
+        let a = document.createElement('a');
+        a.href = window.URL.createObjectURL(data as Blob);
+        a.download = 'rsu-tax.csv';
+        a.click();
+      },
+      error: (error) => this.showError(error)
+    });
+  }
+
   calculateAmount(): void {
     if (this.amount === null) return;
 

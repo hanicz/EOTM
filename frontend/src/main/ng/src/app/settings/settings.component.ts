@@ -43,6 +43,7 @@ export class SettingsComponent implements OnInit {
 
   // Loading states
   isLoading: boolean = false;
+  exporting: boolean = false;
 
   constructor(
     private newsService: NewsService,
@@ -211,6 +212,25 @@ export class SettingsComponent implements OnInit {
       error: (error) => {
         console.error('Error changing password:', error);
         this.isLoading = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  exportAccount(): void {
+    this.exporting = true;
+    this.userService.exportAccount().subscribe({
+      next: (data) => {
+        let a = document.createElement('a');
+        a.href = window.URL.createObjectURL(data as Blob);
+        a.download = `eotm-export-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        this.exporting = false;
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error exporting account:', error);
+        this.exporting = false;
         this.cdr.markForCheck();
       }
     });

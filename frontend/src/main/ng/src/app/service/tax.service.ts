@@ -21,6 +21,13 @@ export class TaxService {
     });
   }
 
+  downloadRSUCsv(rsus: RSU[]) {
+    return this.http.post(`${this.taxUrl}/rsu/csv`, JSON.stringify(rsus), {
+      headers: this.helper.getHeadersWithToken(),
+      responseType: 'blob'
+    });
+  }
+
   calculateForAmount(amount: number) {
     return this.http.post<TaxBreakdown>(`${this.taxUrl}/amount`, JSON.stringify({ amount }), {
       headers: this.helper.getHeadersWithToken()

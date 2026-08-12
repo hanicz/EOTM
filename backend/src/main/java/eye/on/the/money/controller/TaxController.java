@@ -5,6 +5,8 @@ import eye.on.the.money.dto.in.TaxAmountDTO;
 import eye.on.the.money.dto.out.TaxBreakdownDTO;
 import eye.on.the.money.dto.out.TaxReportDTO;
 import eye.on.the.money.service.shared.TaxService;
+import eye.on.the.money.util.CsvResponseUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -36,5 +39,16 @@ public class TaxController {
     public ResponseEntity<TaxReportDTO> calculateTaxForRSUs(@RequestBody List<@Valid RSUDTO> rsus) {
         log.trace("Enter");
         return ResponseEntity.ok(this.taxService.calculateTaxForRSUs(rsus));
+    }
+
+    /**
+     * A POST rather than the GET the other modules use, because the report is computed from the supplied
+     * rows rather than read back from the database.
+     */
+    @PostMapping("/rsu/csv")
+    public void getCSV(@RequestBody List<@Valid RSUDTO> rsus, HttpServletResponse servletResponse)
+            throws IOException {
+        log.trace("Enter");
+        this.taxService.getCSV(rsus, CsvResponseUtil.prepare(servletResponse, "rsu-tax.csv"));
     }
 }

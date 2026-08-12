@@ -66,6 +66,8 @@
             <div class="tax-actions">
               <button pButton pRipple label="Calculate" icon="pi pi-calculator" class="p-button-rounded"
                 [loading]="calculating" (click)="calculate()"></button>
+              <button pButton pRipple label="Download" icon="pi pi-download" class="p-button-rounded"
+                severity="secondary" pTooltip="Export the report as CSV" (click)="download()"></button>
               <button pButton pRipple label="Clear" icon="pi pi-times" class="p-button-rounded p-button-text"
                 (click)="clear()"></button>
             </div>

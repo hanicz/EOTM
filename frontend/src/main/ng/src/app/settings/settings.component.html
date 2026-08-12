@@ -82,40 +82,63 @@
                 </div>
             </div>
 
-            <!-- Full Width: Security Settings -->
-            <div class="settings-card full-width">
-                <div class="card-header">
-                    <div>
-                        <h2>
-                            <i class="pi pi-lock"></i>
-                            Security
-                        </h2>
-                        <p class="card-description">Update your password and account security</p>
+            <div class="settings-grid">
+                <!-- Left Column: Security Settings -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <div>
+                            <h2>
+                                <i class="pi pi-lock"></i>
+                                Security
+                            </h2>
+                            <p class="card-description">Update your password and account security</p>
+                        </div>
+                    </div>
+
+                    <div class="card-content password-section">
+                        <div class="password-input-group">
+                            <span class="p-float-label">
+                                <p-password [toggleMask]="true" [feedback]="false" [(ngModel)]="oldPassword"
+                                    id="oldPassword">
+                                </p-password>
+                                <label for="oldPassword">Current Password</label>
+                            </span>
+                        </div>
+
+                        <div class="password-input-group">
+                            <span class="p-float-label">
+                                <p-password [toggleMask]="true" [feedback]="false" [(ngModel)]="newPassword"
+                                    id="newPassword">
+                                </p-password>
+                                <label for="newPassword">New Password</label>
+                            </span>
+                        </div>
+
+                        <button pButton pRipple label="Update Password" icon="pi pi-check" class="save-button" severity="info"
+                            (click)="changePassword()">
+                        </button>
                     </div>
                 </div>
 
-                <div class="card-content password-section">
-                    <div class="password-input-group">
-                        <span class="p-float-label">
-                            <p-password [toggleMask]="true" [feedback]="false" [(ngModel)]="oldPassword"
-                                id="oldPassword">
-                            </p-password>
-                            <label for="oldPassword">Current Password</label>
-                        </span>
+                <!-- Right Column: Data Export -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <div>
+                            <h2>
+                                <i class="pi pi-download"></i>
+                                Your data
+                            </h2>
+                            <p class="card-description">
+                                Download every transaction, watchlist and alert on your account as a JSON file
+                            </p>
+                        </div>
                     </div>
 
-                    <div class="password-input-group">
-                        <span class="p-float-label">
-                            <p-password [toggleMask]="true" [feedback]="false" [(ngModel)]="newPassword"
-                                id="newPassword">
-                            </p-password>
-                            <label for="newPassword">New Password</label>
-                        </span>
+                    <div class="card-content">
+                        <button pButton pRipple label="Export Account" icon="pi pi-download" class="save-button"
+                            severity="info" [loading]="exporting" (click)="exportAccount()">
+                        </button>
                     </div>
-
-                    <button pButton pRipple label="Update Password" icon="pi pi-check" class="save-button" severity="info"
-                        (click)="changePassword()">
-                    </button>
                 </div>
             </div>
         </div>

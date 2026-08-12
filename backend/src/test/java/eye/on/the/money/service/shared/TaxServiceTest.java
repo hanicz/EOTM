@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.TreeMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -214,6 +216,31 @@ class TaxServiceTest {
         List<RSUDTO> rsus = List.of(this.rsu(10, VEST_DATE));
 
         assertThrows(TaxException.class, () -> this.taxService.calculateTaxForRSUs(rsus));
+    }
+
+    @Test
+    void getCSV_writesAHeaderAndOneRowPerRsu() {
+        this.stubClose(VEST_DATE, 150.0);
+        this.stubRates(Map.of(VEST_DATE, "350"));
+
+        StringWriter writer = new StringWriter();
+        this.taxService.getCSV(List.of(this.rsu(10, VEST_DATE), this.rsu(5, VEST_DATE)), writer);
+        String[] lines = writer.toString().strip().split("\\R");
+
+        assertEquals(3, lines.length);
+        assertEquals("Ticker,Exchange,Date,Quantity,Currency,Price,Price Date,Value,MNB Rate,Rate Date,"
+                + "Value (HUF),Tax Base,Szocho,Szja,Tax", lines[0]);
+        assertTrue(lines[1].startsWith("AAPL,US,2024-06-03,10,USD,150"), lines[1]);
+        // Value 525 000 Ft, taxed on 89% of it.
+        assertTrue(lines[1].contains("525000.00,467250.00,60743,70088,130831"), lines[1]);
+    }
+
+    @Test
+    void getCSV_writesNothingButAnEmptyFileForNoRows() {
+        StringWriter writer = new StringWriter();
+        this.taxService.getCSV(List.of(), writer);
+
+        assertEquals("", writer.toString().strip());
     }
 
     @Test

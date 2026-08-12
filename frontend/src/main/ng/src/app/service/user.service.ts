@@ -60,6 +60,13 @@ export class UserService {
     });
   }
 
+  exportAccount() {
+    return this.http.get(`${this.userUrl}/export`, {
+      headers: this.helper.getHeadersWithToken(),
+      responseType: 'blob'
+    });
+  }
+
   changePassword(oldPassword: string, newPassword: string) {
     const url = `${this.userUrl}/password`;
     console.log(JSON.stringify({ oldPassword, newPassword }));

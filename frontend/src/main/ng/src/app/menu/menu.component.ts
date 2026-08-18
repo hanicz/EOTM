@@ -8,6 +8,7 @@ import { Menubar } from 'primeng/menubar';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { environment } from '../../environments/environment';
+import { Globals } from '../util/global';
 
 @Component({
     selector: 'menu',
@@ -36,13 +37,18 @@ export class MenuComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private userService: UserService
+    private userService: UserService,
+    private globals: Globals
   ) {
     this.userService.getUserEmail().subscribe(data => this.user = data);
   }
 
   ngOnInit(): void {
     this.items = this.menuItems;
+  }
+
+  toggleWatchlist(): void {
+    this.globals.watchlistToggleEvent.emit();
   }
 
   logOut(): void {

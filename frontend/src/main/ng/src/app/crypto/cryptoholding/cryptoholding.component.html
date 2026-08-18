@@ -1,5 +1,5 @@
 @if (transactionsLoading) {
-  <p-table [value]="[{}]" styleClass="p-datatable-striped" responsiveLayout="scroll">
+  <p-table [value]="[{}]" styleClass="p-datatable-striped table-stack">
     <ng-template pTemplate="header">
       <tr>
         <th>Symbol</th>
@@ -15,14 +15,14 @@
     <ng-template pTemplate="body" let-transaction>
       @for (item of [].constructor(4); track $index) {
         <tr>
-          <td><p-skeleton></p-skeleton></td>
-          <td><p-skeleton></p-skeleton></td>
-          <td><p-skeleton></p-skeleton></td>
-          <td><p-skeleton></p-skeleton></td>
-          <td><p-skeleton></p-skeleton></td>
-          <td><p-skeleton></p-skeleton></td>
-          <td><p-skeleton></p-skeleton></td>
-          <td><p-skeleton></p-skeleton></td>
+          <td data-label="Symbol"><p-skeleton></p-skeleton></td>
+          <td data-label="Quantity"><p-skeleton></p-skeleton></td>
+          <td data-label="Spent"><p-skeleton></p-skeleton></td>
+          <td data-label="Worth"><p-skeleton></p-skeleton></td>
+          <td data-label="Average"><p-skeleton></p-skeleton></td>
+          <td data-label="Price"><p-skeleton></p-skeleton></td>
+          <td data-label="Profit"><p-skeleton></p-skeleton></td>
+          <td data-label="%"><p-skeleton></p-skeleton></td>
         </tr>
       }
     </ng-template>
@@ -30,7 +30,7 @@
 }
 
 @if (!transactionsLoading) {
-  <p-table [value]="transactions" styleClass="p-datatable-striped" responsiveLayout="scroll">
+  <p-table [value]="transactions" styleClass="p-datatable-striped table-stack">
     <ng-template pTemplate="header">
       <tr>
         <th>Symbol</th>
@@ -45,38 +45,38 @@
     </ng-template>
     <ng-template pTemplate="body" let-transaction>
       <tr>
-        <td>
+        <td data-label="Symbol">
           <div class="flex align-items-center">
             <p-image src="{{assetUrl + transaction.symbol + '.svg'}}" width="15"
             class="mr-1"></p-image>
             {{transaction.symbol}}
           </div>
         </td>
-        <td>{{transaction.quantity | number : '0.0-4'}}</td>
-        <td>{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</td>
-        <td>
+        <td data-label="Quantity">{{transaction.quantity | number : '0.0-4'}}</td>
+        <td data-label="Spent">{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</td>
+        <td data-label="Worth">
           @if (transaction.liveValue != null) {
             {{transaction.liveValue | currency : transaction.currencyId : 'symbol' : '0.0-2'}}
           } @else {
             <span>N/A</span>
           }
         </td>
-        <td>{{transaction.amount / transaction.quantity | currency : transaction.currencyId : 'symbol' : '0.0-3'}}
+        <td data-label="Average">{{transaction.amount / transaction.quantity | currency : transaction.currencyId : 'symbol' : '0.0-3'}}
         </td>
-        <td>
+        <td data-label="Price">
           @if (transaction.liveValue != null) {
             {{transaction.liveValue / transaction.quantity | currency : transaction.currencyId : 'symbol' : '0.0-3'}}
           } @else {
             <span>N/A</span>
           }
         </td>
-        <td>
+        <td data-label="Profit">
           @if (transaction.liveValue != null) {
             <p-tag styleClass="p-mr-2" [severity]="(transaction.valueDiff > 0) ? 'success':'danger'"
             value="{{transaction.valueDiff | currency : transaction.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
           }
         </td>
-        <td>
+        <td data-label="%">
           @if (transaction.liveValue != null) {
             <p-tag styleClass="p-mr-2" [severity]="(transaction.valueDiff > 0) ? 'success':'danger'"
             value="{{(transaction.valueDiff / transaction.amount * 100 | number : '0.0-1') + '%'}}"></p-tag>

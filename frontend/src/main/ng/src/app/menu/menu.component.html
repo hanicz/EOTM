@@ -1,16 +1,26 @@
-<p-menubar [model]="items">
+<p-menubar [model]="items" breakpoint="992px">
   <ng-template pTemplate="start">
     <img class="logo" [src]="assetUrl + 'logo-horizontal.png'" alt="Eye OTM">
   </ng-template>
   <ng-template pTemplate="end">
     <div class="toolbar">
       <div class="user-section">
-        <span>{{ user.email }}</span>
+        <span class="user-email">{{ user.email }}</span>
+        <button
+          pButton
+          pRipple
+          type="button"
+          icon="pi pi-star"
+          aria-label="Toggle watchlist"
+          (click)="toggleWatchlist()"
+          class="p-button-rounded p-button-primary watchlist-toggle">
+        </button>
         <button
           pButton
           pRipple
           type="button"
           icon="pi pi-sign-out"
+          aria-label="Log out"
           (click)="logOut()"
           class="p-button-rounded p-button-primary">
         </button>

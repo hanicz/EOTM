@@ -13,7 +13,7 @@
         <button pButton pRipple label="Export" icon="pi pi-upload" severity="info" (click)="download()"></button>
     </ng-template>
 </p-toolbar>
-<p-table #dt1 [value]="interests" responsiveLayout="scroll" styleClass="p-datatable-striped"
+<p-table #dt1 [value]="interests" styleClass="p-datatable-striped table-stack"
     [(selection)]="selectedInterests" [globalFilterFields]="['securityId', 'securityName']">
 
     <ng-template pTemplate="caption">
@@ -45,10 +45,10 @@
             <td>
                 <p-tableCheckbox [value]="interest"></p-tableCheckbox>
             </td>
-            <td>{{interest.securityId}}</td>
-            <td>{{interest.securityName}}</td>
-            <td>{{interest.amount | currency : interest.currencyId : 'symbol' : '0.0-2'}}</td>
-            <td>{{interest.interestDate | date:'mediumDate'}}</td>
+            <td data-label="Security Id">{{interest.securityId}}</td>
+            <td data-label="Security Name">{{interest.securityName}}</td>
+            <td data-label="Amount">{{interest.amount | currency : interest.currencyId : 'symbol' : '0.0-2'}}</td>
+            <td data-label="Date">{{interest.interestDate | date:'mediumDate'}}</td>
             <td>
                 <button pButton pRipple type="button" icon="pi pi-pencil" (click)="editInterest(interest)"
                     class="p-button-rounded p-button-text mr-1" severity="info"></button>
@@ -59,7 +59,7 @@
     </ng-template>
 </p-table>
 
-<p-dialog [(visible)]="interestDialog" [style]="{width: '50vw'}" header="Interest Details" [modal]="true"
+<p-dialog [(visible)]="interestDialog" [style]="{width: '50vw'}" [breakpoints]="{'992px': '75vw', '576px': '100vw'}" header="Interest Details" [modal]="true"
     styleClass="p-fluid">
     <ng-template pTemplate="content">
         <div class="grid">
@@ -69,20 +69,20 @@
                     (onChange)="existingSecurityChanged()" optionLabel="name" [filter]="true" [showClear]="true"
                     placeholder="Select an existing security" [style]="{'width':'100%'}"></p-select>
             </div>
-            <div class="col-6 mb-2">
+            <div class="col-12 sm:col-6 mb-2">
                 <label for="securityId" class="block mb-2 font-medium text-color-secondary">Security Id</label>
                 <input type="text" pInputText id="securityId" [(ngModel)]="interest.securityId" class="w-full" />
             </div>
-            <div class="col-6 mb-2">
+            <div class="col-12 sm:col-6 mb-2">
                 <label for="name" class="block mb-2 font-medium text-color-secondary">Security Name</label>
                 <input type="text" pInputText id="name" [(ngModel)]="interest.securityName" class="w-full" />
             </div>
-            <div class="col-6 mb-2">
+            <div class="col-12 sm:col-6 mb-2">
                 <label for="currency" class="block mb-2 font-medium text-color-secondary">Currency</label>
                 <p-select [options]="currencies" [(ngModel)]="interest.currencyId" id="currency" optionLabel="label"
                     optionValue="value" [style]="{'width':'100%'}"></p-select>
             </div>
-            <div class="col-6 mb-2">
+            <div class="col-12 sm:col-6 mb-2">
                 <label for="amount" class="block mb-2 font-medium text-color-secondary">Amount</label>
                 <input type="number" pInputText id="amount" [(ngModel)]="interest.amount" class="w-full" />
             </div>

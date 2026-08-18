@@ -96,7 +96,7 @@
     font-weight: 600;
 }
 
-@media screen and (max-width: 640px) {
+@media screen and (max-width: 575px) {
     .tax-field {
         min-width: 100%;
     }

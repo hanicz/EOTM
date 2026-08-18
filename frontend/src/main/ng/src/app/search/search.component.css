@@ -213,3 +213,24 @@
 .info-link:hover {
     text-decoration: underline;
 }
+
+/* Replaces the ml-5/mr-5 utilities these rows used to carry: 2rem of gutter is
+   fine on a desktop but eats a quarter of a phone screen. Two classes so it
+   beats PrimeFlex's own negative .grid margins. */
+.grid.search-gutter {
+    margin-left: 2rem;
+    margin-right: 2rem;
+}
+
+@media screen and (max-width: 991px) {
+    .grid.search-gutter {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    /* The vertical rule between the chart and the info panel only reads as a
+       separator while the two sit side by side. */
+    .search-divider {
+        display: none;
+    }
+}

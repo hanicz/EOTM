@@ -2,14 +2,14 @@
   <menu class="pl-0 mb-0"></menu>
   <p-panel>
     <div class="grid">
-      <div class="col-2 ml-4">
+      <div class="col-12 md:col-3">
         <p-select class="searchDropdown" [options]="exchanges" optionLabel="Name" optionValue="Code"
           [virtualScroll]="true" [virtualScrollItemSize]="31" [filter]="true" (onChange)="exchangeChanged($event)"
           [(ngModel)]="globals.selectedExchange" placeholder="Select an Exchange" [style]="{'width':'100%'}"
           [dropdownIcon]="exchangesLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
         </p-select>
       </div>
-      <div class="col-4 ml-4">
+      <div class="col-12 md:col-5">
         <p-select class="searchDropdown" [options]="symbols" optionLabel="Name" optionValue="Code"
           [virtualScroll]="true" [virtualScrollItemSize]="31" [filter]="true" (onChange)="stockChanged($event)"
           [(ngModel)]="globals.selectedStock" placeholder="Select a Ticker" [style]="{'width':'100%'}"
@@ -19,7 +19,7 @@
     </div>
     @if (globals.selectedStock != '') {
       <div>
-        <div class="grid ml-5 mr-5 mt-3">
+        <div class="grid search-gutter mt-3">
           <div class="col-12 pb-0">
             <div class="ticker-header">
               <div class="flex flex-wrap align-items-center">
@@ -53,13 +53,13 @@
             </div>
           </div>
         </div>
-        <div class="grid ml-5 mr-5">
+        <div class="grid search-gutter">
           <div class="col-12 pb-0">
             <p-divider></p-divider>
           </div>
         </div>
-        <div class="grid ml-5 mr-5">
-          <div class="col-8">
+        <div class="grid search-gutter">
+          <div class="col-12 lg:col-8">
             <div class="chart-toolbar">
               <p-selectButton [options]="options" [(ngModel)]="selectedOption" optionLabel="label"
                 optionValue="value" (onChange)="getCandleData()">
@@ -81,10 +81,10 @@
               </apx-chart>
             </div>
           </div>
-          <div class="col-1">
+          <div class="col-1 search-divider">
             <p-divider layout="vertical"></p-divider>
           </div>
-          <div class="col-3">
+          <div class="col-12 lg:col-3">
             <div class="info-card">
               <div class="info-card-title">Company Info</div>
               <div class="info-row">
@@ -158,11 +158,11 @@
             </div>
           </div>
         </div>
-        <div class="grid ml-5 mr-5">
+        <div class="grid search-gutter">
           <div class="col-12 pb-0">
             <p-divider></p-divider>
           </div>
-          <div class="col-8">
+          <div class="col-12 lg:col-8">
             @if (signalResult) {
               <div class="signal-card"
                 [ngClass]="{'signal-card-buy': signalResult.signal === 'BUY', 'signal-card-sell': signalResult.signal === 'SELL', 'signal-card-hold': signalResult.signal === 'HOLD'}">
@@ -195,7 +195,7 @@
               </div>
             }
           </div>
-          <div class="col-4">
+          <div class="col-12 lg:col-4">
             <div class="info-card p-2">
               <apx-chart #recChart [series]=" recChartOptions.series" [chart]="recChartOptions.chart"
                 [xaxis]="recChartOptions.xaxis" [yaxis]="recChartOptions.yaxis"
@@ -206,7 +206,7 @@
             </div>
           </div>
         </div>
-        <div class="grid ml-5 mr-5">
+        <div class="grid search-gutter">
           <div class="col-12">
             <p-divider></p-divider>
           </div>

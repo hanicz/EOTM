@@ -13,7 +13,7 @@
     <button pButton pRipple label="Export" icon="pi pi-upload" severity="info" (click)="download()"></button>
   </ng-template>
 </p-toolbar>
-<p-table #dt1 [value]="forexTransactions" responsiveLayout="scroll" styleClass="p-datatable-striped"
+<p-table #dt1 [value]="forexTransactions" styleClass="p-datatable-striped table-stack"
   [(selection)]="selectedForexTransactions">
 
   <ng-template pTemplate="caption">
@@ -66,9 +66,9 @@
       <td>
         <p-tableCheckbox [value]="forexTransaction"></p-tableCheckbox>
       </td>
-      <td>{{forexTransaction.fromCurrencyId}}</td>
-      <td>{{forexTransaction.toCurrencyId}}</td>
-      <td>
+      <td data-label="From">{{forexTransaction.fromCurrencyId}}</td>
+      <td data-label="To">{{forexTransaction.toCurrencyId}}</td>
+      <td data-label="Type">
         @if (forexTransaction.buySell === 'B') {
           <p-tag styleClass="p-mr-2" severity="info" value="BUY"></p-tag>
         }
@@ -76,11 +76,11 @@
           <p-tag styleClass="p-mr-2" severity="warn" value="SELL"></p-tag>
         }
       </td>
-      <td>{{forexTransaction.fromAmount | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}</td>
-      <td>{{forexTransaction.toAmount | currency : forexTransaction.toCurrencyId : 'symbol' : '0.0-2'}}</td>
-      <td>{{forexTransaction.changeRate | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}
+      <td data-label="Spent">{{forexTransaction.fromAmount | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}</td>
+      <td data-label="Got">{{forexTransaction.toAmount | currency : forexTransaction.toCurrencyId : 'symbol' : '0.0-2'}}</td>
+      <td data-label="Rate">{{forexTransaction.changeRate | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}
       </td>
-      <td>{{forexTransaction.transactionDate | date:'mediumDate'}}</td>
+      <td data-label="Date">{{forexTransaction.transactionDate | date:'mediumDate'}}</td>
       <td>
         <button pButton pRipple type="button" icon="pi pi-pencil" (click)="editForexTransaction(forexTransaction)"
         class="p-button-rounded p-button-text mr-1" severity="info"></button>
@@ -91,19 +91,19 @@
   </ng-template>
 </p-table>
 
-<p-dialog [(visible)]="forexDialog" [style]="{width: '50vw'}" header="Forex Transaction Details" [modal]="true"
+<p-dialog [(visible)]="forexDialog" [style]="{width: '50vw'}" [breakpoints]="{'992px': '75vw', '576px': '100vw'}" header="Forex Transaction Details" [modal]="true"
   styleClass="p-fluid">
   <ng-template pTemplate="content">
     <div class="grid">
-      <div class="col-6 mb-2">
+      <div class="col-12 sm:col-6 mb-2">
         <label for="from" class="block mb-2 font-medium text-color-secondary">From</label>
         <input type="text" pInputText id="from" [(ngModel)]="forexTransaction.fromCurrencyId" class="w-full" />
       </div>
-      <div class="col-6 mb-2">
+      <div class="col-12 sm:col-6 mb-2">
         <label for="to" class="block mb-2 font-medium text-color-secondary">To</label>
         <input type="text" pInputText id="to" [(ngModel)]="forexTransaction.toCurrencyId" class="w-full" />
       </div>
-      <div class="col-6 mb-2">
+      <div class="col-12 sm:col-6 mb-2">
         <label for="type" class="block mb-2 font-medium text-color-secondary">Type</label>
         <p-select [options]="statuses" [(ngModel)]="forexTransaction.buySell" placeholder="Any" id="type"
           [style]="{'width':'100%'}">
@@ -118,16 +118,16 @@
           </ng-template>
         </p-select>
       </div>
-      <div class="col-6 mb-2">
+      <div class="col-12 sm:col-6 mb-2">
         <label for="date" class="block mb-2 font-medium text-color-secondary">Date</label>
         <input type="text" pInputText id="date" placeholder="YYYY-MM-DD"
           [(ngModel)]="forexTransaction.transactionDate" class="w-full" />
       </div>
-      <div class="col-6 mb-2">
+      <div class="col-12 sm:col-6 mb-2">
         <label for="fromAmount" class="block mb-2 font-medium text-color-secondary">Spent</label>
         <input type="number" pInputText id="fromAmount" [(ngModel)]="forexTransaction.fromAmount" class="w-full" />
       </div>
-      <div class="col-6 mb-2">
+      <div class="col-12 sm:col-6 mb-2">
         <label for="toAmount" class="block mb-2 font-medium text-color-secondary">Got</label>
         <input type="number" pInputText id="toAmount" [(ngModel)]="forexTransaction.toAmount" class="w-full" />
       </div>

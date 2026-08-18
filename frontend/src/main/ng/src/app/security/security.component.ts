@@ -49,7 +49,7 @@ export class SecurityComponent implements OnInit {
     series: [],
     chart: {
       type: 'pie',
-      width: 380,
+      width: '100%',
       height: 500
     },
     labels: [],

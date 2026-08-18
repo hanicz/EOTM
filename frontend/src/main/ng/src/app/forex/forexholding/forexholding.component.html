@@ -1,5 +1,5 @@
 @if (transactionsLoading) {
-  <p-table [value]="[{}]" styleClass="p-datatable-striped" responsiveLayout="scroll">
+  <p-table [value]="[{}]" styleClass="p-datatable-striped table-stack">
     <ng-template pTemplate="header">
       <tr>
         <th>From</th>
@@ -15,14 +15,14 @@
     <ng-template pTemplate="body" let-forexTransaction>
       @for (item of [].constructor(4); track $index) {
         <tr>
-          <td><p-skeleton></p-skeleton></td>
-          <td><p-skeleton></p-skeleton></td>
-          <td><p-skeleton></p-skeleton></td>
-          <td><p-skeleton></p-skeleton></td>
-          <td><p-skeleton></p-skeleton></td>
-          <td><p-skeleton></p-skeleton></td>
-          <td><p-skeleton></p-skeleton></td>
-          <td><p-skeleton></p-skeleton></td>
+          <td data-label="From"><p-skeleton></p-skeleton></td>
+          <td data-label="To"><p-skeleton></p-skeleton></td>
+          <td data-label="Spent"><p-skeleton></p-skeleton></td>
+          <td data-label="Worth"><p-skeleton></p-skeleton></td>
+          <td data-label="Rate"><p-skeleton></p-skeleton></td>
+          <td data-label="Live Rate"><p-skeleton></p-skeleton></td>
+          <td data-label="Profit"><p-skeleton></p-skeleton></td>
+          <td data-label="%"><p-skeleton></p-skeleton></td>
         </tr>
       }
     </ng-template>
@@ -30,7 +30,7 @@
 }
 
 @if (!transactionsLoading) {
-  <p-table [value]="forexTransactions" styleClass="p-datatable-striped" responsiveLayout="scroll">
+  <p-table [value]="forexTransactions" styleClass="p-datatable-striped table-stack">
     <ng-template pTemplate="header">
       <tr>
         <th>From</th>
@@ -45,13 +45,13 @@
     </ng-template>
     <ng-template pTemplate="body" let-forexTransaction>
       <tr>
-        <td>{{forexTransaction.fromCurrencyId}}</td>
-        <td>{{forexTransaction.toCurrencyId}}</td>
-        <td>{{forexTransaction.fromAmount | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}</td>
-        <td>{{forexTransaction.toAmount | currency : forexTransaction.toCurrencyId : 'symbol' : '0.0-2'}}</td>
-        <td>{{forexTransaction.changeRate | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}</td>
-        <td>{{forexTransaction.liveChangeRate | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}</td>
-        <td>
+        <td data-label="From">{{forexTransaction.fromCurrencyId}}</td>
+        <td data-label="To">{{forexTransaction.toCurrencyId}}</td>
+        <td data-label="Spent">{{forexTransaction.fromAmount | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}</td>
+        <td data-label="Worth">{{forexTransaction.toAmount | currency : forexTransaction.toCurrencyId : 'symbol' : '0.0-2'}}</td>
+        <td data-label="Rate">{{forexTransaction.changeRate | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}</td>
+        <td data-label="Live Rate">{{forexTransaction.liveChangeRate | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}</td>
+        <td data-label="Profit">
           @if (forexTransaction.liveValue > forexTransaction.fromAmount) {
             <p-tag styleClass="p-mr-2" severity="success" value="{{forexTransaction.liveValue - forexTransaction.fromAmount | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}"></p-tag>
           }
@@ -59,7 +59,7 @@
             <p-tag styleClass="p-mr-2" severity="danger" value="{{forexTransaction.liveValue - forexTransaction.fromAmount | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}"></p-tag>
           }
         </td>
-        <td>
+        <td data-label="%">
           @if (forexTransaction.liveValue > forexTransaction.fromAmount) {
             <p-tag styleClass="p-mr-2" severity="success" value="{{(-100 + forexTransaction.liveValue / forexTransaction.fromAmount * 100 | number : '0.0-1') + '%'}}"></p-tag>
           }

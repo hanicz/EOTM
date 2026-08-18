@@ -93,7 +93,7 @@
     overflow: hidden;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 991px) {
     .news-grid {
         grid-template-columns: 1fr;
     }

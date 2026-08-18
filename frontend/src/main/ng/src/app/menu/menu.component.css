@@ -41,3 +41,38 @@
     color: #f1efe8;
 }
 
+.user-email {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 16rem;
+}
+
+/* The watchlist is a static column at lg and up, so it needs no toggle there. */
+.watchlist-toggle {
+    display: none;
+}
+
+@media screen and (max-width: 991px) {
+    .watchlist-toggle {
+        display: inline-flex;
+    }
+
+    .logo {
+        height: 2.5rem;
+    }
+}
+
+@media screen and (max-width: 575px) {
+    /* A long address squeezes the buttons off the bar; the Settings page shows
+       the signed-in address anyway. */
+    .user-email {
+        display: none;
+    }
+
+    .toolbar {
+        gap: 0.5rem;
+    }
+}
+
+

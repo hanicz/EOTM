@@ -61,7 +61,7 @@ export class CryptoComponent implements OnInit {
     series: [],
     chart: {
       type: 'pie',
-      width: 380
+      width: '100%'
     },
     labels: [],
     legend: {

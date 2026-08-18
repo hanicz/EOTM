@@ -13,7 +13,7 @@
     <button pButton pRipple label="Export" icon="pi pi-upload" severity="info" (click)="download()"></button>
   </ng-template>
 </p-toolbar>
-<p-table #dt1 [value]="transactions" responsiveLayout="scroll" styleClass="p-datatable-striped"
+<p-table #dt1 [value]="transactions" styleClass="p-datatable-striped table-stack"
   [(selection)]="selectedTransactions">
   <ng-template pTemplate="caption">
     <div class="flex justify-content-between flex-wrap">
@@ -73,14 +73,14 @@
         <td>
           <p-tableCheckbox [value]="transaction"></p-tableCheckbox>
         </td>
-        <td>
+        <td data-label="Symbol">
           <div class="flex align-items-center">
             <p-image src="{{assetUrl + transaction.symbol + '.svg'}}" width="15"
             class="mr-1"></p-image>
             {{transaction.symbol}}
           </div>
         </td>
-        <td>
+        <td data-label="Type">
           @if (transaction.buySell === 'B') {
             <p-tag styleClass="p-mr-2" severity="info" value="BUY"></p-tag>
           }
@@ -97,13 +97,13 @@
             </p-tag>
           }
         </td>
-        <td>{{transaction.quantity | number : '0.0-4'}}</td>
-        <td>{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</td>
-        <td>{{(transaction.amount / transaction.quantity) | currency : transaction.currencyId : 'symbol' : '0.0-3'}}
+        <td data-label="Quantity">{{transaction.quantity | number : '0.0-4'}}</td>
+        <td data-label="Spent">{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</td>
+        <td data-label="Average">{{(transaction.amount / transaction.quantity) | currency : transaction.currencyId : 'symbol' : '0.0-3'}}
         </td>
-        <td>{{transaction.transactionDate | date:'mediumDate'}}</td>
-        <td>{{transaction.currencyId}}</td>
-        <td>{{transaction.fee}}</td>
+        <td data-label="Date">{{transaction.transactionDate | date:'mediumDate'}}</td>
+        <td data-label="Currency">{{transaction.currencyId}}</td>
+        <td data-label="Fee">{{transaction.fee}}</td>
         <td>
           <button pButton pRipple type="button" icon="pi pi-pencil" (click)="editTransaction(transaction)"
           class="p-button-rounded p-button-text mr-1" severity="info"></button>
@@ -114,7 +114,7 @@
     </ng-template>
   </p-table>
 
-  <p-dialog [(visible)]="transactionDialog" [style]="{width: '50vw'}" header="Transaction Details" [modal]="true"
+  <p-dialog [(visible)]="transactionDialog" [style]="{width: '50vw'}" [breakpoints]="{'992px': '75vw', '576px': '100vw'}" header="Transaction Details" [modal]="true"
     styleClass="p-fluid">
     <ng-template pTemplate="content">
       <div class="grid">
@@ -122,12 +122,12 @@
           <label for="symbol" class="block mb-2 font-medium text-color-secondary">Symbol</label>
           <input type="text" pInputText id="symbol" [(ngModel)]="transaction.symbol" autofocus class="w-full" />
         </div>
-        <div class="col-6 mb-2">
+        <div class="col-12 sm:col-6 mb-2">
           <label for="currency" class="block mb-2 font-medium text-color-secondary">Currency</label>
           <p-select [options]="currencies" [(ngModel)]="transaction.currencyId" id="currency" optionLabel="label"
             optionValue="value" [style]="{'width':'100%'}"></p-select>
         </div>
-        <div class="col-6 mb-2">
+        <div class="col-12 sm:col-6 mb-2">
           <label for="type" class="block mb-2 font-medium text-color-secondary">Type</label>
           <p-select [options]="statuses" [(ngModel)]="transaction.buySell" placeholder="Any" id="type"
             [style]="{'width':'100%'}">
@@ -149,20 +149,20 @@
             </ng-template>
           </p-select>
         </div>
-        <div class="col-6 mb-2">
+        <div class="col-12 sm:col-6 mb-2">
           <label for="date" class="block mb-2 font-medium text-color-secondary">Date</label>
           <input type="text" pInputText id="date" placeholder="YYYY-MM-DD"
             [(ngModel)]="transaction.transactionDate" class="w-full" />
         </div>
-        <div class="col-4 mb-2">
+        <div class="col-12 sm:col-4 mb-2">
           <label for="quantity" class="block mb-2 font-medium text-color-secondary">Quantity</label>
           <input type="number" pInputText id="quantity" [(ngModel)]="transaction.quantity" class="w-full" />
         </div>
-        <div class="col-4 mb-2">
+        <div class="col-12 sm:col-4 mb-2">
           <label for="amount" class="block mb-2 font-medium text-color-secondary">Amount</label>
           <input type="number" pInputText id="amount" [(ngModel)]="transaction.amount" class="w-full" />
         </div>
-        <div class="col-4 mb-2">
+        <div class="col-12 sm:col-4 mb-2">
           <label for="fee" class="block mb-2 font-medium text-color-secondary">Fee</label>
           <input type="number" pInputText id="fee" [(ngModel)]="transaction.fee" class="w-full" />
         </div>

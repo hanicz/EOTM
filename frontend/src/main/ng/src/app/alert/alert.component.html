@@ -17,7 +17,7 @@
           class="p-button-rounded ml-2 mb-2" severity="success" (click)="showDialog()">
         </button>
         @if (alertsLoading) {
-          <p-table [value]="[{}]" styleClass="p-datatable-striped p-datatable-sm" responsiveLayout="scroll"
+          <p-table [value]="[{}]" styleClass="p-datatable-striped p-datatable-sm table-stack"
             >
             <ng-template pTemplate="header">
               <tr>
@@ -42,7 +42,7 @@
         }
 
         @if (!alertsLoading) {
-          <p-table [value]="stockAlerts" styleClass="p-datatable-striped" responsiveLayout="scroll"
+          <p-table [value]="stockAlerts" styleClass="p-datatable-striped table-stack"
             >
             <ng-template pTemplate="header">
               <tr>
@@ -56,18 +56,18 @@
             <ng-template pTemplate="body" let-alert>
               <tr
                 [ngClass]="{'row-over': alert.type.indexOf('OVER') > 0, 'row-under': alert.type.indexOf('UNDER') > 0 }">
-                <td>
+                <td data-label="Ticker">
                   <p-tag severity="info" value="{{alert.shortName}}.{{alert.exchange}}">
                   </p-tag>
                 </td>
-                <td><p-image src="https://eodhd.com/img/logos/{{alert.exchange}}/{{alert.shortName}}.png"
+                <td data-label="Name"><p-image src="https://eodhd.com/img/logos/{{alert.exchange}}/{{alert.shortName}}.png"
                 width="15" class="mr-1" (onImageError)="globals.errorHandler($event)"></p-image>
               {{alert.name}}</td>
-              <td>{{alert.type | alertTypePipe}}</td>
-              <td [ngStyle]="{'color': (alert.type.indexOf('OVER') > 0) ? '#008002' : '#910101'}">
+              <td data-label="Type">{{alert.type | alertTypePipe}}</td>
+              <td data-label="Value Point" [ngStyle]="{'color': (alert.type.indexOf('OVER') > 0) ? '#008002' : '#910101'}">
               {{alert.valuePoint}}</td>
               <td><i style="cursor: pointer; color: red" (click)="deleteStockAlert(alert)"
-              class="pi pi-times"></i>
+              class="pi pi-times tap-target"></i>
             </td>
           </tr>
         </ng-template>
@@ -79,7 +79,7 @@
       class="p-button-rounded ml-2 mb-2" severity="success" (click)="showCryptoDialog()">
     </button>
     @if (cryptoAlertsLoading) {
-      <p-table [value]="[{}]" styleClass="p-datatable-striped p-datatable-sm" responsiveLayout="scroll"
+      <p-table [value]="[{}]" styleClass="p-datatable-striped p-datatable-sm table-stack"
         >
         <ng-template pTemplate="header">
           <tr>
@@ -104,7 +104,7 @@
     }
 
     @if (!cryptoAlertsLoading) {
-      <p-table [value]="cryptoAlerts" styleClass="p-datatable-striped" responsiveLayout="scroll"
+      <p-table [value]="cryptoAlerts" styleClass="p-datatable-striped table-stack"
         >
         <ng-template pTemplate="header">
           <tr>
@@ -118,19 +118,19 @@
         <ng-template pTemplate="body" let-alert>
           <tr
             [ngClass]="{'row-over': alert.type.indexOf('OVER') > 0, 'row-under': alert.type.indexOf('UNDER') > 0 }">
-            <td>
+            <td data-label="Symbol">
               <div class="flex align-items-center">
                 <p-image src="{{assetUrl + alert.symbol + '.svg'}}" width="15"
                 class="mr-1"></p-image>
                 {{alert.symbol}}
               </div>
             </td>
-            <td>{{alert.name}}</td>
-            <td>{{alert.type | alertTypePipe}}</td>
-            <td [ngStyle]="{'color': (alert.type.indexOf('OVER') > 0) ? '#008002' : '#910101'}">
+            <td data-label="Name">{{alert.name}}</td>
+            <td data-label="Type">{{alert.type | alertTypePipe}}</td>
+            <td data-label="Value Point" [ngStyle]="{'color': (alert.type.indexOf('OVER') > 0) ? '#008002' : '#910101'}">
             {{alert.valuePoint}}</td>
             <td><i style="cursor: pointer; color: red" (click)="deleteCryptoAlert(alert)"
-            class="pi pi-times"></i>
+            class="pi pi-times tap-target"></i>
           </td>
         </tr>
       </ng-template>
@@ -142,7 +142,7 @@
 </p-panel>
 </div>
 
-<p-dialog header="Create Stock Alert" [(visible)]="displayDialog" [breakpoints]="{'960px': '75vw', '640px': '100vw'}"
+<p-dialog header="Create Stock Alert" [(visible)]="displayDialog" [breakpoints]="{'992px': '75vw', '576px': '100vw'}"
   [style]="{width: '28vw'}" [modal]="true" [draggable]="false" [resizable]="false">
   <div class="alert-form">
     <div class="alert-field">
@@ -180,7 +180,7 @@
   </ng-template>
 </p-dialog>
 
-<p-dialog header="Create Crypto Alert" [(visible)]="displayCryptoDialog" [breakpoints]="{'960px': '75vw', '640px': '100vw'}"
+<p-dialog header="Create Crypto Alert" [(visible)]="displayCryptoDialog" [breakpoints]="{'992px': '75vw', '576px': '100vw'}"
   [style]="{width: '28vw'}" [modal]="true" [draggable]="false" [resizable]="false">
   <div class="alert-form">
     <div class="alert-field">

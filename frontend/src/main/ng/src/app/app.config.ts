@@ -33,6 +33,23 @@ const EotmPreset = definePreset(Aura, {
           activeColor: '#f1efe8',
         },
       },
+      // Below the menubar's breakpoint the items move into this panel, which
+      // defaults to {content.background} -- i.e. white. The item colours above
+      // are picked for the dark bar, so on the default panel the inactive
+      // entries came out cream-on-white (1.15:1) and only the orange active
+      // one stayed readable. The panel has to be dark for the same reason the
+      // bar is.
+      submenu: {
+        background: '#1b1b1b',
+        borderColor: 'rgba(255, 255, 255, 0.12)',
+      },
+      // Defaults to {text.muted.color}, a slate grey meant for light surfaces;
+      // it read at 3.62:1 against the dark bar.
+      mobileButton: {
+        color: '#f1efe8',
+        hoverColor: '#f1efe8',
+        hoverBackground: 'rgba(255, 255, 255, 0.08)',
+      },
     },
     togglebutton: {
       colorScheme: {

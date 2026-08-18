@@ -1,5 +1,5 @@
 @if (investmentsLoading) {
-  <p-table [value]="[{}]" styleClass="p-datatable-striped" responsiveLayout="scroll">
+  <p-table [value]="[{}]" styleClass="p-datatable-striped table-stack">
     <ng-template pTemplate="header">
       <tr>
         <th>ETF Name</th>
@@ -15,14 +15,14 @@
     <ng-template pTemplate="body">
       @for (item of [].constructor(4); track $index) {
         <tr>
-          <td><p-skeleton></p-skeleton></td>
-          <td><p-skeleton></p-skeleton></td>
-          <td><p-skeleton></p-skeleton></td>
-          <td><p-skeleton></p-skeleton></td>
-          <td><p-skeleton></p-skeleton></td>
-          <td><p-skeleton></p-skeleton></td>
-          <td><p-skeleton></p-skeleton></td>
-          <td><p-skeleton></p-skeleton></td>
+          <td data-label="ETF Name"><p-skeleton></p-skeleton></td>
+          <td data-label="Quantity"><p-skeleton></p-skeleton></td>
+          <td data-label="Spent"><p-skeleton></p-skeleton></td>
+          <td data-label="Worth"><p-skeleton></p-skeleton></td>
+          <td data-label="Average"><p-skeleton></p-skeleton></td>
+          <td data-label="Price"><p-skeleton></p-skeleton></td>
+          <td data-label="Profit"><p-skeleton></p-skeleton></td>
+          <td data-label="%"><p-skeleton></p-skeleton></td>
         </tr>
       }
     </ng-template>
@@ -30,7 +30,7 @@
 }
 
 @if (!investmentsLoading) {
-  <p-table [value]="investments" styleClass="p-datatable-striped" responsiveLayout="scroll">
+  <p-table [value]="investments" styleClass="p-datatable-striped table-stack">
     <ng-template pTemplate="header">
       <tr>
         <th>ETF Name</th>
@@ -45,25 +45,25 @@
     </ng-template>
     <ng-template pTemplate="body" let-investment>
       <tr>
-        <td>{{investment.shortName}}.{{investment.exchange}}</td>
-        <td>{{investment.quantity}}</td>
-        <td>{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}</td>
-        <td>
+        <td data-label="ETF Name">{{investment.shortName}}.{{investment.exchange}}</td>
+        <td data-label="Quantity">{{investment.quantity}}</td>
+        <td data-label="Spent">{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}</td>
+        <td data-label="Worth">
           @if (investment.liveValue != null) {
             {{investment.liveValue | currency : investment.currencyId : 'symbol' : '0.0-2'}}
           } @else {
             <span>N/A</span>
           }
         </td>
-        <td>{{investment.amount / investment.quantity | currency : investment.currencyId : 'symbol' : '0.0-3'}}</td>
-        <td>
+        <td data-label="Average">{{investment.amount / investment.quantity | currency : investment.currencyId : 'symbol' : '0.0-3'}}</td>
+        <td data-label="Price">
           @if (investment.liveValue != null) {
             {{investment.liveValue / investment.quantity | currency : investment.currencyId : 'symbol' : '0.0-3'}}
           } @else {
             <span>N/A</span>
           }
         </td>
-        <td>
+        <td data-label="Profit">
           @if (investment.valueDiff > 0) {
             <p-tag styleClass="p-mr-2" severity="success" value="{{investment.valueDiff | currency : investment.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
           }
@@ -71,7 +71,7 @@
             <p-tag styleClass="p-mr-2" severity="danger" value="{{investment.valueDiff | currency : investment.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
           }
         </td>
-        <td>
+        <td data-label="%">
           @if (investment.valueDiff > 0) {
             <p-tag styleClass="p-mr-2" severity="success" value="{{(investment.valueDiff / investment.amount * 100 | number : '0.0-1') + '%'}}"></p-tag>
           }

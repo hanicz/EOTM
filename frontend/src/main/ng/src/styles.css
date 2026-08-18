@@ -1,11 +1,165 @@
 /* You can add global styles to this file, and also import other style files */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
 
+/* Responsive breakpoints.
+   These match PrimeFlex's scale, so a `@media (max-width: 991px)` block and a
+   `lg:col-6` utility class break at the same place. Plain CSS can't use custom
+   properties inside a media query, so these are written out numerically -- but
+   use only these four values so the layout stays consistent:
+
+     576px  sm   large phone / small tablet
+     768px  md   tablet
+     992px  lg   small laptop -- watchlist sidebar collapses below here
+    1200px  xl   desktop
+
+   Write max-width queries one pixel below the boundary (max-width: 991px). */
+
 html { background-color: #f6f4ee; }
 
 html, body {
     font-family: 'Poppins', sans-serif;
     font-size: 14px;
+}
+
+/* No page in this app scrolls sideways on purpose; wide content (tables,
+   charts) scrolls inside its own container instead. */
+html {
+    overflow-x: hidden;
+}
+
+/* Set on <body> while the off-canvas watchlist is open so the page behind the
+   backdrop doesn't scroll under the user's finger. Scoped to the widths where
+   the watchlist is actually an overlay -- otherwise widening the viewport with
+   the panel open would leave the page permanently locked. */
+@media screen and (max-width: 991px) {
+    body.no-scroll {
+        overflow: hidden;
+    }
+}
+
+/* Every page wraps its content in p-panel, whose content container is a grid,
+   and most nest a p-tabs, which is a flex row. Grid and flex items default to
+   `min-width: auto`, meaning they refuse to shrink below their widest child --
+   so a single wide table stretched the entire panel past the viewport instead
+   of scrolling inside its own container. Letting these shrink is what allows
+   the table container's own `overflow-x: auto` to do its job. */
+.p-panel-content-wrapper,
+.p-tabpanels,
+.p-tabpanel {
+    min-width: 0;
+}
+
+/* Stacked tables.
+   Add `table-stack` to a p-table's styleClass and give each <td> a data-label.
+   Below md the header row is hidden and every cell becomes its own label/value
+   row, so a wide table reads as one card per record instead of scrolling
+   sideways.
+
+   Hand-rolled on purpose: PrimeNG's responsiveLayout="stack" is deprecated as
+   of v20 ("stack mode needs custom implementation"), and the CSS it generates
+   has no rule hiding the column labels above the breakpoint. */
+@media screen and (max-width: 767px) {
+    .table-stack .p-datatable-thead {
+        display: none;
+    }
+
+    .table-stack .p-datatable-tbody > tr {
+        display: block;
+        border-bottom: 2px solid #e3e0d5;
+    }
+
+    .table-stack .p-datatable-tbody > tr:last-child {
+        border-bottom: none;
+    }
+
+    .table-stack .p-datatable-tbody > tr > td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        width: 100%;
+        border: 0 none;
+        padding: 0.4rem 0.75rem;
+        text-align: right;
+    }
+
+    .table-stack .p-datatable-tbody > tr > td::before {
+        content: attr(data-label);
+        flex: 0 0 auto;
+        font-weight: 600;
+        text-align: left;
+        color: #5f5e5a;
+    }
+
+    /* Cells carrying only controls (action buttons) get the full width. */
+    .table-stack .p-datatable-tbody > tr > td:not([data-label])::before {
+        content: none;
+    }
+}
+
+/* The table search boxes carry an inline `width: 16rem`, which overflows a
+   phone-width column. */
+.p-column-filter {
+    max-width: 100%;
+}
+
+/* Touch targets.
+   Measured at 375px before this block: the menubar hamburger was 25px square,
+   the rounded icon buttons (log out, watchlist, row edit/delete, refresh) 35px,
+   and the tab scroll chevrons 35px wide -- all under the ~44px a fingertip
+   needs. Scoped to the widths where the app is being driven by touch, so the
+   desktop control sizes are untouched. */
+@media screen and (max-width: 991px) {
+    .p-button {
+        min-height: 44px;
+    }
+
+    .p-menubar-button,
+    .p-button.p-button-rounded {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    /* Qualified with the parent because PrimeNG injects its own
+       `.p-tablist-nav-button` rule into <head> at runtime -- that lands after
+       this file, so a bare single-class selector loses the tie. */
+    .p-tablist .p-tablist-nav-button {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    /* Things that take a click without being a button: the delete icon in the
+       alerts table and the percentage shortcuts on the holdings table. Marked
+       with `tap-target` in the template rather than matched by selector, so a
+       decorative icon never gets padded out by accident. */
+    .tap-target {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    /* The watchlist rows navigate on tap. Scoped to the panel rather than to
+       `.p-datatable-sm`, which would also catch the alert and tax tables.
+       `!important` because PrimeNG injects its small-table padding into <head>
+       at runtime, so it lands after this file and wins on cascade order no
+       matter how this selector is weighted. */
+    .app-watchlist .p-datatable-tbody > tr > td {
+        height: 44px;
+        padding-top: 0.6rem !important;
+        padding-bottom: 0.6rem !important;
+    }
+}
+
+/* The allocation pie charts ask ApexCharts for `width: '100%'` so they track
+   the viewport; the cap keeps them at the 380px they used to be hardcoded to
+   on wide screens. */
+.allocation-chart {
+    width: 100%;
+    max-width: 380px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .p-accordion .p-accordioncontent-content {

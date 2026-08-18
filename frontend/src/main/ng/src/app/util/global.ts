@@ -14,6 +14,11 @@ export class Globals {
     stockWatchList: StockWatch[] = [];
     @Output() stockWatchEvent = new EventEmitter<any>();
 
+    /* Raised by the menubar's watchlist button. The watchlist lives in the app
+       shell, outside the router outlet the menubar sits in, so the toggle has
+       to travel through here. */
+    @Output() watchlistToggleEvent = new EventEmitter<void>();
+
     assetUrl: string;
 
     currencies = [

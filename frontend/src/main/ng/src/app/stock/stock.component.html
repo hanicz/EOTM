@@ -53,7 +53,7 @@
           <app-holding (dataLoaded)="loadData($event)"></app-holding>
           @if (allocationChartOptions.series && allocationChartOptions.series.length > 0) {
           <p-divider></p-divider>
-          <div class="flex justify-content-center">
+          <div class="flex justify-content-center allocation-chart">
             <apx-chart [series]="allocationChartOptions.series" [chart]="allocationChartOptions.chart!"
               [labels]="allocationChartOptions.labels!" [legend]="allocationChartOptions.legend!">
             </apx-chart>

@@ -1,4 +1,4 @@
-<p-table #dt1 [value]="investments" responsiveLayout="scroll" styleClass="p-datatable-striped" sortField="quantity" [sortOrder]=-1
+<p-table #dt1 [value]="investments" styleClass="p-datatable-striped table-stack" sortField="quantity" [sortOrder]=-1
   [globalFilterFields]="['shortName', 'accountName']">
   <ng-template pTemplate="caption">
     <div class="flex justify-content-between flex-wrap">
@@ -24,7 +24,7 @@
   </ng-template>
   <ng-template pTemplate="body" let-investment>
     <tr>
-      <td>
+      <td data-label="Stock Name">
         <div class="flex align-items-center">
           <p-image
             src="https://eodhd.com/img/logos/{{investment.exchange}}/{{investment.shortName}}.png"
@@ -32,22 +32,22 @@
           {{investment.shortName}}.{{investment.exchange}}
         </div>
       </td>
-      <td>{{investment.accountName}}</td>
-      <td>
+      <td data-label="Account">{{investment.accountName}}</td>
+      <td data-label="Total Spent">
         @if (investment.quantity > 0) {
           <span>{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}</span>
         }
       </td>
-      <td>
+      <td data-label="Average">
         @if (investment.quantity > 0) {
           <span>{{(investment.amount / investment.quantity) | currency : investment.currencyId : 'symbol' : '0.0-3'}}</span>
         }
       </td>
-      <td>
+      <td data-label="Position">
         <p-tag styleClass="p-mr-2" [severity]="(investment.quantity > 0) ? 'info':'warn'"
         value="{{(investment.quantity > 0) ? (investment.quantity | number: '0.0-4') : 'Closed'}}"></p-tag>
       </td>
-      <td>
+      <td data-label="Profit">
         @if (investment.quantity == 0 && investment.amount < 0) {
           <p-tag styleClass="p-mr-2" severity="success" value="{{myMath.abs(investment.amount) | currency : investment.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
         }

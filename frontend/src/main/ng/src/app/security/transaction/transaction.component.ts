@@ -5,7 +5,8 @@ import { Globals } from '../../util/global';
 import { Security } from 'src/app/model/security';
 import { Bind } from 'primeng/bind';
 import { Toolbar } from 'primeng/toolbar';
-import { PrimeTemplate } from 'primeng/api';
+import { MessageService, PrimeTemplate } from 'primeng/api';
+import { Toast } from 'primeng/toast';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { FileUpload } from 'primeng/fileupload';
@@ -21,7 +22,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
     selector: 'app-security-transaction',
     templateUrl: './transaction.component.html',
     styleUrls: ['./transaction.component.css'],
-    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Tag, Dialog, CurrencyPipe, DatePipe]
+    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Tag, Dialog, CurrencyPipe, DatePipe, Toast]
 })
 export class TransactionComponent implements OnInit {
 
@@ -36,7 +37,7 @@ export class TransactionComponent implements OnInit {
   securities: Security[] = [];
   selectedExistingSecurity: Security | null = null;
 
-  constructor(private securityService: SecurityService, globals: Globals, private cdr: ChangeDetectorRef) {
+  constructor(private securityService: SecurityService, globals: Globals, private cdr: ChangeDetectorRef, private messageService: MessageService) {
     this.globals = globals;
     this.currencies = globals.currencies;
 
@@ -150,6 +151,11 @@ export class TransactionComponent implements OnInit {
         next: () => {
           this.fetchData();
           this.fileUpload.clear();
+          this.messageService.add({ severity: 'success', detail: 'Import finished.' });
+        },
+        error: (error) => {
+          this.fileUpload.clear();
+          this.messageService.add({ severity: 'error', detail: error.error?.error ?? 'Import failed.' });
         }
       });
     }

@@ -5,7 +5,8 @@ import { Globals } from '../../util/global';
 import { environment } from '../../../environments/environment';
 import { Bind } from 'primeng/bind';
 import { Toolbar } from 'primeng/toolbar';
-import { PrimeTemplate } from 'primeng/api';
+import { MessageService, PrimeTemplate } from 'primeng/api';
+import { Toast } from 'primeng/toast';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { FileUpload } from 'primeng/fileupload';
@@ -22,7 +23,7 @@ import { DecimalPipe, CurrencyPipe, DatePipe } from '@angular/common';
     selector: 'app-transaction',
     templateUrl: './transaction.component.html',
     styleUrls: ['./transaction.component.css'],
-    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Tag, Image, Dialog, DecimalPipe, CurrencyPipe, DatePipe]
+    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Tag, Image, Dialog, DecimalPipe, CurrencyPipe, DatePipe, Toast]
 })
 export class TransactionComponent implements OnInit {
 
@@ -35,7 +36,7 @@ export class TransactionComponent implements OnInit {
   @ViewChild('fileUpload') fileUpload: any;
   assetUrl: string;
 
-  constructor(private cryptoService: CryptoService, globals: Globals, private cdr: ChangeDetectorRef) {
+  constructor(private cryptoService: CryptoService, globals: Globals, private cdr: ChangeDetectorRef, private messageService: MessageService) {
     this.currencies = globals.currencies;
     this.statuses = globals.statuses;
     this.assetUrl = environment.assets_url;
@@ -132,6 +133,11 @@ export class TransactionComponent implements OnInit {
         next: () => {
           this.fetchData();
           this.fileUpload.clear();
+          this.messageService.add({ severity: 'success', detail: 'Import finished.' });
+        },
+        error: (error) => {
+          this.fileUpload.clear();
+          this.messageService.add({ severity: 'error', detail: error.error?.error ?? 'Import failed.' });
         }
       });
     }

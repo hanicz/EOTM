@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 
 public final class CsvResponseUtil {
 
@@ -11,7 +12,7 @@ public final class CsvResponseUtil {
     }
 
     public static Writer prepare(HttpServletResponse response, String filename) throws IOException {
-        response.setContentType("text/csv");
+        response.setContentType("text/csv;charset=" + StandardCharsets.UTF_8.name());
         response.addHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
         return response.getWriter();
     }

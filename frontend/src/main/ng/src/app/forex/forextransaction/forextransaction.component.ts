@@ -4,7 +4,8 @@ import { ForexService } from 'src/app/service/forex.service';
 import { Globals } from '../../util/global';
 import { Bind } from 'primeng/bind';
 import { Toolbar } from 'primeng/toolbar';
-import { PrimeTemplate } from 'primeng/api';
+import { MessageService, PrimeTemplate } from 'primeng/api';
+import { Toast } from 'primeng/toast';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { FileUpload } from 'primeng/fileupload';
@@ -20,7 +21,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
     selector: 'app-forextransaction',
     templateUrl: './forextransaction.component.html',
     styleUrls: ['./forextransaction.component.css'],
-    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Tag, Dialog, CurrencyPipe, DatePipe]
+    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Tag, Dialog, CurrencyPipe, DatePipe, Toast]
 })
 export class ForextransactionComponent {
 
@@ -32,7 +33,7 @@ export class ForextransactionComponent {
   forexTransaction: ForexTransaction = {} as ForexTransaction;
   @ViewChild('fileUpload') fileUpload: any;
 
-  constructor(private forexService: ForexService, globals: Globals, private cdr: ChangeDetectorRef) {
+  constructor(private forexService: ForexService, globals: Globals, private cdr: ChangeDetectorRef, private messageService: MessageService) {
     this.currencies = globals.currencies;
 
     this.statuses = [
@@ -129,6 +130,11 @@ export class ForextransactionComponent {
         next: () => {
           this.fetchData();
           this.fileUpload.clear();
+          this.messageService.add({ severity: 'success', detail: 'Import finished.' });
+        },
+        error: (error) => {
+          this.fileUpload.clear();
+          this.messageService.add({ severity: 'error', detail: error.error?.error ?? 'Import failed.' });
         }
       });
     }

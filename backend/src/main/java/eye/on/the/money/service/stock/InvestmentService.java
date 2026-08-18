@@ -197,8 +197,12 @@ public class InvestmentService implements ICSVService {
     public void processCSV(String userEmail, MultipartFile file) {
         try (CSVParser csvParser = this.getParser(file,
                 new String[]{"Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Exchange", "Amount", "Currency", "Fee", "Account"})) {
+            Map<String, Long> accountIdsByName = this.accountRepository.findByUserEmailOrderByAccountName(userEmail).stream()
+                    .collect(Collectors.toMap(Account::getAccountName, Account::getId, (first, ignored) -> first));
+
             for (CSVRecord csvRecord : csvParser) {
                 InvestmentDTO investment = InvestmentDTO.createFromCSVRecord(csvRecord, DateFormats.YYYY_MM_DD);
+                investment.setAccountId(this.resolveAccountId(accountIdsByName, investment.getAccountName()));
 
                 if (investment.getInvestmentId() != null &&
                         this.investmentRepository.findByIdAndUserEmail(investment.getInvestmentId(), userEmail).isPresent()) {
@@ -214,5 +218,16 @@ public class InvestmentService implements ICSVService {
             log.error("Error while processing CSV", e);
             throw new CSVException("Failed to parse CSV file: " + e.getMessage(), e);
         }
+    }
+
+    private Long resolveAccountId(Map<String, Long> accountIdsByName, String accountName) {
+        if (accountName == null || accountName.isBlank()) {
+            throw new CSVException("Account is missing from the CSV file");
+        }
+        Long accountId = accountIdsByName.get(accountName);
+        if (accountId == null) {
+            throw new CSVException("Unknown account: " + accountName);
+        }
+        return accountId;
     }
 }

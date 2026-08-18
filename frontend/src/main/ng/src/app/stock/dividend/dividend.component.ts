@@ -4,7 +4,8 @@ import { DividendService } from 'src/app/service/dividend.service';
 import { Globals } from '../../util/global';
 import { Bind } from 'primeng/bind';
 import { Toolbar } from 'primeng/toolbar';
-import { PrimeTemplate } from 'primeng/api';
+import { MessageService, PrimeTemplate } from 'primeng/api';
+import { Toast } from 'primeng/toast';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { FileUpload } from 'primeng/fileupload';
@@ -20,7 +21,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
     selector: 'app-dividend',
     templateUrl: './dividend.component.html',
     styleUrls: ['./dividend.component.css'],
-    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Dialog, FormsModule, Select, Image, CurrencyPipe, DatePipe]
+    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Dialog, FormsModule, Select, Image, CurrencyPipe, DatePipe, Toast]
 })
 export class DividendComponent implements OnInit {
 
@@ -32,7 +33,7 @@ export class DividendComponent implements OnInit {
   @ViewChild('fileUpload') fileUpload: any;
   globals: Globals;
 
-  constructor(private dividendService: DividendService, globals: Globals, private cdr: ChangeDetectorRef) {
+  constructor(private dividendService: DividendService, globals: Globals, private cdr: ChangeDetectorRef, private messageService: MessageService) {
     this.globals = globals;
     this.currencies = globals.currencies;
 
@@ -125,6 +126,11 @@ export class DividendComponent implements OnInit {
         next: () => {
           this.fetchData();
           this.fileUpload.clear();
+          this.messageService.add({ severity: 'success', detail: 'Import finished.' });
+        },
+        error: (error) => {
+          this.fileUpload.clear();
+          this.messageService.add({ severity: 'error', detail: error.error?.error ?? 'Import failed.' });
         }
       });
     }

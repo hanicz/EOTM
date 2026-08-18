@@ -162,7 +162,7 @@ export class WatchlistComponent implements OnInit {
 
 
   createStockWatch() {
-    this.watchlistService.createNewStockWatch(this.selectedStock, this.selectedExchange).subscribe({
+    this.watchlistService.createNewStockWatch(this.selectedStock.Code, this.selectedStock.Name, this.selectedExchange.Code).subscribe({
       next: () => {
         this.display = false;
         this.fetchData();

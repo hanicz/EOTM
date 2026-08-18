@@ -5,8 +5,6 @@ import { ResourceHelper } from '../util/servicehelper';
 import { ForexWatch } from '../model/forexwatch';
 import { CryptoWatch } from '../model/cryptowatch';
 import { environment } from '../../environments/environment';
-import { Symbol } from '../model/symbol';
-import { Exchange } from '../model/exchange';
 
 @Injectable({
   providedIn: 'root'
@@ -54,9 +52,9 @@ export class WatchlistService {
     });
   };
 
-  createNewStockWatch(symbol: Symbol, exchange: Exchange) {
+  createNewStockWatch(shortName: string, name: string, exchange: string) {
     const url = `${this.watchListUrl}/stock`;
-    let data = {shortName: symbol.Code, name: symbol.Name, exchange: exchange.Code}
+    let data = {shortName: shortName, name: name, exchange: exchange}
     return this.http.post(url, data,{
       headers: this.helper.getHeadersWithToken()
     });

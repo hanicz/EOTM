@@ -367,8 +367,10 @@ export class SearchComponent implements OnInit, AfterViewInit {
   }
 
   addToWatchList() {
-    let stockId = this.stocks.find(s => s.shortName === this.globals.selectedStock)?.id;
-    this.watchlistService.createWatch(`/stock/${stockId}`).subscribe({
+    let name = this.stocks.find(s => s.shortName === this.globals.selectedStock)?.name
+      ?? this.symbols.find(s => s.Code === this.globals.selectedStock)?.Name
+      ?? this.profile.name;
+    this.watchlistService.createNewStockWatch(this.globals.selectedStock, name, this.globals.selectedExchange).subscribe({
       next: () => {
         this.globals.stockWatchEvent.emit();
       }

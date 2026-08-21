@@ -135,6 +135,67 @@ class FireServiceTest {
     }
 
     @Test
+    void project_reportsWhatWasEarnedAtTheAnnualReturn() {
+        this.stubPortfolio(1_000_000);
+
+        FireProjectionResultDTO result = this.fireService.project(USER,
+                this.plan().annualReturn(BigDecimal.valueOf(10)).build());
+
+        assertEquals(0, this.yearOf(result, 0).getGrowth().signum());
+        assertEquals(100_000, this.yearOf(result, 1).getGrowth().doubleValue(), 1.0);
+        assertEquals(110_000, this.yearOf(result, 2).getGrowth().doubleValue(), 1.0);
+    }
+
+    @Test
+    void project_reportsNothingEarnedWhenThereIsNoReturn() {
+        this.stubPortfolio(1_000_000);
+
+        FireProjectionResultDTO result = this.fireService.project(USER, this.plan().build());
+
+        assertEquals(0, this.yearOf(result, 1).getGrowth().signum());
+    }
+
+    @Test
+    void project_reportsALossWhenTheReturnIsNegative() {
+        this.stubPortfolio(1_000_000);
+
+        FireProjectionResultDTO result = this.fireService.project(USER,
+                this.plan().annualReturn(BigDecimal.valueOf(-10)).build());
+
+        assertEquals(-100_000, this.yearOf(result, 1).getGrowth().doubleValue(), 1.0);
+    }
+
+    @Test
+    void project_growthAccountsForTheRestOfTheYearsMovement() {
+        this.stubPortfolio(1_000_000);
+
+        FireProjectionResultDTO result = this.fireService.project(USER,
+                this.plan().annualReturn(BigDecimal.valueOf(10))
+                        .monthlyContribution(BigDecimal.valueOf(100_000)).build());
+
+        FireYearDTO first = this.yearOf(result, 1);
+        assertEquals(first.getBalance().doubleValue(),
+                this.yearOf(result, 0).getBalance().doubleValue()
+                        + first.getContributions().doubleValue()
+                        + first.getGrowth().doubleValue(), TOLERANCE);
+    }
+
+    @Test
+    void project_keepsReportingGrowthOnWhatIsLeftInDrawdown() {
+        this.stubPortfolio(100_000_000);
+
+        FireProjectionResultDTO result = this.fireService.project(USER,
+                this.plan().annualSpending(BigDecimal.valueOf(4_000_000))
+                        .annualReturn(BigDecimal.valueOf(10)).retirementAge(30).build());
+
+        FireYearDTO firstRetired = this.yearOf(result, 1);
+        assertEquals("DRAWDOWN", firstRetired.getPhase());
+        assertEquals(firstRetired.getBalance().doubleValue(),
+                100_000_000 + firstRetired.getGrowth().doubleValue()
+                        - firstRetired.getWithdrawals().doubleValue(), TOLERANCE);
+    }
+
+    @Test
     void project_addsContributionsEveryMonth() {
         FireProjectionResultDTO result = this.fireService.project(USER,
                 this.plan().monthlyContribution(BigDecimal.valueOf(100_000)).build());

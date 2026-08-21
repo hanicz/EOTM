@@ -340,6 +340,11 @@
             <th>Year</th>
             <th>Age</th>
             <th class="text-right">Paid in</th>
+            <th class="text-right">
+              Growth
+              <i class="pi pi-info-circle fire-info"
+                pTooltip="Earned by the pot that year at the annual return, before inflation."></i>
+            </th>
             @if (hasPensionRows) {
               <th class="text-right">Pension</th>
             }
@@ -367,6 +372,7 @@
               }
             </td>
             <td data-label="Paid in" class="text-right">{{row.contributions | number:'1.0-0'}}</td>
+            <td data-label="Growth" class="text-right">{{row.growth | number:'1.0-0'}}</td>
             @if (hasPensionRows) {
               <td data-label="Pension" class="text-right">{{row.pension | number:'1.0-0'}}</td>
             }
@@ -389,6 +395,11 @@
           <ng-template pTemplate="header">
             <tr>
               <th>Age</th>
+              <th class="text-right">
+                Growth
+                <i class="pi pi-info-circle fire-info"
+                  pTooltip="Earned by the pot that year at the annual return, before inflation."></i>
+              </th>
               @if (hasPensionRows) {
                 <th class="text-right">Pension</th>
               }
@@ -400,6 +411,7 @@
           <ng-template pTemplate="body" let-row>
             <tr>
               <td data-label="Age">{{row.age}}</td>
+              <td data-label="Growth" class="text-right">{{row.growth | number:'1.0-0'}}</td>
               @if (hasPensionRows) {
                 <td data-label="Pension" class="text-right">{{row.pension | number:'1.0-0'}}</td>
               }

@@ -32,6 +32,8 @@ public class FireYearDTO implements CSVHelper {
 
     private BigDecimal contributions;
 
+    private BigDecimal growth;
+
     /** Pension paid during the year, which is income the pot does not have to provide. */
     private BigDecimal pension;
 
@@ -50,15 +52,15 @@ public class FireYearDTO implements CSVHelper {
     @Override
     @JsonIgnore
     public Object[] getHeaders() {
-        return new String[]{"Year", "Age", "Phase", "Contributions", "Pension", "Withdrawals", "Balance",
-                "Balance (today's money)", "% of FIRE number"};
+        return new String[]{"Year", "Age", "Phase", "Contributions", "Growth", "Pension", "Withdrawals",
+                "Balance", "Balance (today's money)", "% of FIRE number"};
     }
 
     @Override
     @JsonIgnore
     public Object[] getCSVRecord() {
         return new Object[]{this.getYear(), this.getAge(), this.getPhase(), this.getContributions(),
-                this.getPension(), this.getWithdrawals(), this.getBalance(), this.getRealBalance(),
-                this.getPctOfFireNumber()};
+                this.getGrowth(), this.getPension(), this.getWithdrawals(), this.getBalance(),
+                this.getRealBalance(), this.getPctOfFireNumber()};
     }
 }

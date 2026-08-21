@@ -1,6 +1,8 @@
 <p-menubar [model]="items" breakpoint="992px">
   <ng-template pTemplate="start">
-    <img class="logo" [src]="assetUrl + 'logo-horizontal.png'" alt="Eye OTM">
+    <a class="logo-link" routerLink="/dashboard" aria-label="Dashboard">
+      <img class="logo" [src]="assetUrl + 'logo-horizontal.png'" alt="Eye OTM">
+    </a>
   </ng-template>
   <ng-template pTemplate="end">
     <div class="toolbar">

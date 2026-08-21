@@ -20,6 +20,7 @@ export interface FireYear {
     age: number;
     phase: 'ACCUMULATION' | 'DRAWDOWN';
     contributions: number;
+    growth: number;
     pension: number;
     withdrawals: number;
     balance: number;

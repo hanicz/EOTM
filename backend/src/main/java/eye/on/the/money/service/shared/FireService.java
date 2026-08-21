@@ -128,7 +128,7 @@ public class FireService implements ICSVService {
         double contributionRise = 1 + assumptions.contributionIncrease() / 100.0;
 
         List<FireYearDTO> timeline = new ArrayList<>();
-        timeline.add(this.year(0, assumptions, ACCUMULATION, 0, 0, 0, startingValue));
+        timeline.add(this.year(0, assumptions, ACCUMULATION, 0, 0, 0, 0, startingValue));
 
         double balance = startingValue;
         boolean depleted = false;
@@ -154,8 +154,11 @@ public class FireService implements ICSVService {
             double contributed = 0;
             double pension = 0;
             double withdrawn = 0;
+            double earned = 0;
             for (int month = 0; month < MONTHS_IN_YEAR && !depleted; month++) {
-                balance = balance * monthlyGrowth + monthlyIn - monthlyOut;
+                double growth = balance * (monthlyGrowth - 1);
+                balance = balance + growth + monthlyIn - monthlyOut;
+                earned += growth;
                 contributed += monthlyContribution;
                 pension += monthlyPension;
                 withdrawn += monthlyOut;
@@ -168,13 +171,13 @@ public class FireService implements ICSVService {
             }
 
             timeline.add(this.year(year, assumptions, accumulating ? ACCUMULATION : DRAWDOWN,
-                    contributed, pension, withdrawn, balance));
+                    contributed, earned, pension, withdrawn, balance));
         }
         return timeline;
     }
 
-    private FireYearDTO year(int year, Assumptions assumptions, String phase,
-                             double contributed, double pension, double withdrawn, double balance) {
+    private FireYearDTO year(int year, Assumptions assumptions, String phase, double contributed,
+                             double earned, double pension, double withdrawn, double balance) {
         double real = balance / Math.pow(1 + assumptions.inflation() / 100.0, year);
         double measured = assumptions.targetInTodaysMoney() ? real : balance;
         return FireYearDTO.builder()
@@ -182,6 +185,7 @@ public class FireService implements ICSVService {
                 .age(assumptions.currentAge() + year)
                 .phase(phase)
                 .contributions(this.scaled(contributed))
+                .growth(this.scaled(earned))
                 .pension(this.scaled(pension))
                 .withdrawals(this.scaled(withdrawn))
                 .balance(this.scaled(balance))

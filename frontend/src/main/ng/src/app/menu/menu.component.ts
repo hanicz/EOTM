@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MenuItem, PrimeTemplate } from 'primeng/api';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { User } from '../model/user';
 import { UserService } from '../service/user.service';
 import { Bind } from 'primeng/bind';
@@ -14,7 +15,7 @@ import { Globals } from '../util/global';
     selector: 'menu',
     templateUrl: './menu.component.html',
     styleUrls: ['./menu.component.css'],
-    imports: [Bind, Menubar, PrimeTemplate, ButtonDirective, Ripple]
+    imports: [Bind, Menubar, PrimeTemplate, ButtonDirective, Ripple, RouterLink]
 })
 export class MenuComponent implements OnInit {
   items: MenuItem[] = [];
@@ -22,13 +23,16 @@ export class MenuComponent implements OnInit {
   assetUrl: string = environment.assets_url;
 
   readonly menuItems: MenuItem[] = [
-    { label: 'Dashboard', icon: 'fa-solid fa-gauge', routerLink: ['/dashboard'] },
     { label: 'News', icon: 'far fa-newspaper', routerLink: ['/home'] },
-    { label: 'Stock', icon: 'fa-solid fa-arrow-trend-up', routerLink: ['/stock'] },
-    { label: 'Crypto', icon: 'fab fa-bitcoin', routerLink: ['/crypto'] },
-    { label: 'ETF', icon: 'fas fa-chart-line', routerLink: ['/etf'] },
-    { label: 'Forex', icon: 'fa-solid fa-coins', routerLink: ['/forex'] },
-    { label: 'Securities', icon: 'fa-solid fa-building-columns', routerLink: ['/security'] },
+    {
+      label: 'Portfolio', icon: 'fa-solid fa-briefcase', items: [
+        { label: 'Stock', icon: 'fa-solid fa-arrow-trend-up', routerLink: ['/stock'] },
+        { label: 'Crypto', icon: 'fab fa-bitcoin', routerLink: ['/crypto'] },
+        { label: 'ETF', icon: 'fas fa-chart-line', routerLink: ['/etf'] },
+        { label: 'Forex', icon: 'fa-solid fa-coins', routerLink: ['/forex'] },
+        { label: 'Securities', icon: 'fa-solid fa-building-columns', routerLink: ['/security'] }
+      ]
+    },
     { label: 'Alerts', icon: 'fa-solid fa-bell', routerLink: ['/alert'] },
     { label: 'Tax', icon: 'fa-solid fa-file-invoice-dollar', routerLink: ['/tax'] },
     { label: 'FIRE', icon: 'fa-solid fa-fire', routerLink: ['/fire'] },
@@ -46,6 +50,24 @@ export class MenuComponent implements OnInit {
 
   ngOnInit(): void {
     this.items = this.menuItems;
+    this.markActiveGroups(this.router.url);
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(event => this.markActiveGroups(event.urlAfterRedirects));
+  }
+
+  /* A parent item has no routerLink of its own, so PrimeNG never marks it
+     active while one of its children is the open page. */
+  private markActiveGroups(url: string): void {
+    const path = url.split(/[?#]/)[0];
+    this.items.forEach(item => {
+      if (item.items) {
+        item.styleClass = item.items.some(child => child.routerLink?.[0] === path)
+          ? 'p-menubar-item-group-active'
+          : undefined;
+      }
+    });
+    this.items = [...this.items];
   }
 
   toggleWatchlist(): void {

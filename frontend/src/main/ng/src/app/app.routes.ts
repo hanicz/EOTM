@@ -13,6 +13,7 @@ import { SettingsComponent } from './settings/settings.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { SecurityComponent } from './security/security.component';
 import { TaxComponent } from './tax/tax.component';
+import { FireComponent } from './fire/fire.component';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent },
@@ -28,5 +29,6 @@ export const routes: Routes = [
   { path: 'etf', component: EtfComponent },
   { path: 'alert', component: AlertComponent },
   { path: 'tax', component: TaxComponent },
+  { path: 'fire', component: FireComponent },
   { path: 'settings', component: SettingsComponent }
 ];

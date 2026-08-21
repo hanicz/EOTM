@@ -10,26 +10,10 @@
           <div>Total Worth: <b>{{totalWorth | currency : selectedCurrency : 'symbol' : '0.0-2'}}</b></div>
         </div>
         <div class="flex mr-5">
-          <div>Profit:
-            @if (diffy > 0) {
+          <div>Interest received:
             <p-tag styleClass="p-mr-2" severity="success"
-              value="{{diffy | currency : selectedCurrency : 'symbol' : '0.0-2'}}"></p-tag>
-            }
-            @if (diffy < 0) { <p-tag styleClass="p-mr-2" severity="danger"
-              value="{{diffy | currency : selectedCurrency : 'symbol' : '0.0-2'}}"></p-tag>
-              }
-          </div>
-        </div>
-        <div class="flex mr-5">
-          <div>Percentage:
-            @if (diffy > 0) {
-            <p-tag styleClass="p-mr-2" severity="success" value="{{(percentage | number : '0.0-1') + '%'}}">
-            </p-tag>
-            }
-            @if (diffy < 0) { <p-tag styleClass="p-mr-2" severity="danger"
-              value="{{(percentage | number : '0.0-1') + '%'}}">
-              </p-tag>
-              }
+              value="{{totalInterest | currency : selectedCurrency : 'symbol' : '0.0-2'}}"
+              pTooltip="Already reinvested into the holdings above, so it is not added to the total worth."></p-tag>
           </div>
         </div>
         <div class="flex ml-auto align-items-center">

@@ -14,7 +14,7 @@ import { FormsModule } from '@angular/forms';
 import { HoldingComponent } from './holding/holding.component';
 import { TransactionComponent } from './transaction/transaction.component';
 import { InterestComponent } from './interest/interest.component';
-import { CurrencyPipe, DecimalPipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { DashboardService } from '../service/dashboard.service';
 import { Tag } from 'primeng/tag';
 import { ChartComponent, ApexChart, ApexNonAxisChartSeries, ApexLegend } from 'ng-apexcharts';
@@ -30,7 +30,7 @@ export type AllocationChartOptions = {
     selector: 'app-security',
     templateUrl: './security.component.html',
     styleUrls: ['./security.component.css'],
-    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, Select, FormsModule, HoldingComponent, TransactionComponent, InterestComponent, CurrencyPipe, DecimalPipe, Tag, ChartComponent]
+    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, Select, FormsModule, HoldingComponent, TransactionComponent, InterestComponent, CurrencyPipe, Tag, ChartComponent]
 })
 export class SecurityComponent implements OnInit {
 
@@ -42,8 +42,7 @@ export class SecurityComponent implements OnInit {
   interests: Interest[] = [];
   totalSpent: number = 0;
   totalWorth: number = 0;
-  diffy: number = 0;
-  percentage: number = 0;
+  totalInterest: number = 0;
 
   allocationChartOptions: Partial<AllocationChartOptions> = {
     series: [],
@@ -156,14 +155,14 @@ export class SecurityComponent implements OnInit {
       this.totalSpent += this.convert(t.amount, t.currencyId);
     });
 
-    let totalInterest = 0;
+    this.totalInterest = 0;
     this.interests.forEach(i => {
-      totalInterest += this.convert(i.amount, i.currencyId);
+      this.totalInterest += this.convert(i.amount, i.currencyId);
     });
 
-    this.totalWorth = this.totalSpent + totalInterest;
-    this.diffy = this.totalWorth - this.totalSpent;
-    this.percentage = this.diffy / this.totalSpent * 100;
+    // Securities have no live price, and the interest is reinvested by buying more, which already shows up
+    // as a transaction. Adding it here as well would count the same money twice.
+    this.totalWorth = this.totalSpent;
 
     this.allocationChartOptions.series = this.transactions.map(t => this.convert(t.amount, t.currencyId));
     this.allocationChartOptions.labels = this.transactions.map(t => t.securityName);

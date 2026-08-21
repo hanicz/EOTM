@@ -1,0 +1,345 @@
+.fire-hint-tight {
+    margin: 0.9rem 0 0 0;
+}
+
+.fire-hint {
+    margin: 0 0 1.25rem 0;
+    font-size: 0.85rem;
+    color: #5f5e5a;
+}
+
+.fire-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.fire-section {
+    padding: 1rem 1.1rem 1.1rem 1.1rem;
+    border: 1px solid #ece9e0;
+    border-radius: 0.6rem;
+    background: #faf9f6;
+}
+
+.fire-section-title {
+    margin: 0 0 0.9rem 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #5f5e5a;
+}
+
+.fire-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem;
+}
+
+.fire-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-width: 11rem;
+}
+
+.fire-field-narrow {
+    min-width: 8rem;
+}
+
+.fire-field-check {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    padding-bottom: 0.55rem;
+}
+
+.fire-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #5f5e5a;
+}
+
+.fire-check-label {
+    font-size: 0.8rem;
+    color: #5f5e5a;
+    cursor: pointer;
+}
+
+.fire-info {
+    margin-left: 0.3rem;
+    font-size: 0.75rem;
+    color: #a8a49b;
+    cursor: help;
+}
+
+/* Reads as a value rather than a disabled input, since these are results and not fields. */
+.fire-readonly {
+    padding: 0.55rem 0;
+    font-size: 0.95rem;
+    color: #1b1b1b;
+}
+
+.fire-readonly-strong {
+    font-weight: 600;
+}
+
+/* PrimeNG's host element does not stretch, so the inner input would collapse. */
+:host ::ng-deep .fire-field .p-inputnumber {
+    width: 100%;
+}
+
+:host ::ng-deep .fire-field .p-inputnumber input {
+    width: 100%;
+    min-width: 0;
+}
+
+.fire-warning {
+    margin: 0.9rem 0 0 0;
+    font-size: 0.8rem;
+    color: #8a6d3b;
+}
+
+.fire-warning i {
+    margin-right: 0.35rem;
+}
+
+.fire-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+}
+
+.fire-heading {
+    margin: 2rem 0 0.75rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.fire-total-cell {
+    font-weight: 600;
+}
+
+.fire-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+}
+
+.fire-tile {
+    padding: 0.9rem 1rem;
+    border-radius: 0.6rem;
+    background: #faf9f6;
+    border: 1px solid #ece9e0;
+}
+
+.fire-tile-good {
+    background: #f2f5ec;
+    border-color: #d5dfc4;
+}
+
+.fire-tile-bad {
+    background: #faf1ef;
+    border-color: #e8d3ce;
+}
+
+.fire-tile-label {
+    font-size: 0.75rem;
+    color: #5f5e5a;
+    margin-bottom: 0.35rem;
+}
+
+.fire-tile-value {
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+
+.fire-tile-note {
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: #8a887f;
+}
+
+.fire-chart-wrap {
+    position: relative;
+    padding: 0.5rem 0 0 0;
+}
+
+.fire-chart {
+    width: 100%;
+    height: 280px;
+    display: block;
+    overflow: visible;
+}
+
+.fire-gridline {
+    stroke: #ece9e0;
+    stroke-width: 1;
+}
+
+.fire-axis-label {
+    font-size: 11px;
+    fill: #8a887f;
+}
+
+.fire-marker-label {
+    font-size: 10px;
+    fill: #8a887f;
+}
+
+.fire-target-line {
+    stroke: #7a8c5c;
+    stroke-width: 1.5;
+    stroke-dasharray: 5 4;
+}
+
+.fire-retirement-line {
+    stroke: #b4b2a9;
+    stroke-width: 1.5;
+    stroke-dasharray: 3 3;
+}
+
+.fire-pension-line {
+    stroke: #7a8c5c;
+    stroke-width: 1.5;
+    stroke-dasharray: 2 4;
+}
+
+.fire-hover-line {
+    stroke: #b4b2a9;
+    stroke-width: 1;
+}
+
+.fire-line {
+    fill: none;
+    stroke-width: 2.5;
+    /* The plot is stretched horizontally by preserveAspectRatio="none"; this keeps the stroke even. */
+    vector-effect: non-scaling-stroke;
+}
+
+.fire-line-nominal {
+    stroke: #ef9f27;
+}
+
+.fire-line-real {
+    stroke: #1b1b1b;
+}
+
+.fire-dot-nominal {
+    fill: #ef9f27;
+}
+
+.fire-dot-real {
+    fill: #1b1b1b;
+}
+
+.fire-chart-readout {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: 0.5rem;
+    background: #ffffff;
+    border: 1px solid #ece9e0;
+    box-shadow: 0 2px 8px rgba(27, 27, 27, 0.08);
+    font-size: 0.78rem;
+    pointer-events: none;
+}
+
+.fire-readout-title {
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+}
+
+.fire-readout-phase {
+    margin-left: 0.35rem;
+    font-weight: 400;
+    color: #8a887f;
+}
+
+.fire-readout-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    line-height: 1.5;
+}
+
+.fire-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.78rem;
+    color: #5f5e5a;
+}
+
+.fire-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.fire-swatch {
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 0.15rem;
+    flex-shrink: 0;
+}
+
+.fire-swatch-nominal {
+    background: #ef9f27;
+}
+
+.fire-swatch-real {
+    background: #1b1b1b;
+}
+
+.fire-caveat {
+    margin: 1.75rem 0 0 0;
+    font-size: 0.78rem;
+    line-height: 1.6;
+    color: #8a887f;
+}
+
+.fire-caveat i {
+    margin-right: 0.35rem;
+}
+
+/* The year the target is cleared sits among the fixed horizons; it should be findable at a glance. */
+:host ::ng-deep .fire-row-fi > td {
+    background: #f2f5ec;
+    font-weight: 600;
+}
+
+@media screen and (max-width: 575px) {
+    .fire-field,
+    .fire-field-narrow {
+        min-width: 100%;
+    }
+
+    .fire-field-check {
+        min-width: 100%;
+    }
+
+    .fire-actions button {
+        width: 100%;
+    }
+
+    .fire-chart {
+        height: 220px;
+    }
+
+    /* Pinned to a corner it would cover the curve on a narrow screen. */
+    .fire-chart-readout {
+        position: static;
+        margin-top: 0.5rem;
+    }
+}

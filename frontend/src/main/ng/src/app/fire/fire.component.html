@@ -1,0 +1,422 @@
+<p-toast position="bottom-center"></p-toast>
+<div class="shadow-5">
+  <menu class="pl-0 mb-0"></menu>
+  <p-panel>
+    <ng-template pTemplate="icons">
+      <p-select [options]="currencyOptions" [(ngModel)]="currency" (onChange)="onCurrencyChange()"
+        styleClass="currency-select" [style]="{'width':'90px'}"></p-select>
+    </ng-template>
+
+    <p class="fire-hint">
+      Grows what you hold today at the return you set, then draws an inflation-linked income from it once you
+      stop paying in. Every figure is an assumption, not a forecast.
+    </p>
+
+    <div class="fire-sections">
+
+      <section class="fire-section">
+        <h3 class="fire-section-title">Starting point</h3>
+        <div class="fire-form">
+          <div class="fire-field">
+            <label class="fire-label">Portfolio (live)</label>
+            @if (portfolioLoading) {
+              <p-skeleton height="2.5rem"></p-skeleton>
+            } @else {
+              <div class="fire-readonly">{{portfolioValue | number:'1.0-0'}} {{currency}}</div>
+            }
+          </div>
+          <div class="fire-field">
+            <label for="otherAssets" class="fire-label">Cash / other assets</label>
+            <p-inputnumber inputId="otherAssets" [(ngModel)]="otherAssets" [min]="0" placeholder="0"
+              (keyup.enter)="calculate()"></p-inputnumber>
+          </div>
+          <div class="fire-field">
+            <label class="fire-label">Starting value</label>
+            <div class="fire-readonly fire-readonly-strong">{{startingValue | number:'1.0-0'}} {{currency}}</div>
+          </div>
+        </div>
+        @if (unconvertedCurrencies.length > 0) {
+          <p class="fire-warning">
+            <i class="pi pi-exclamation-triangle"></i>
+            No rate available for {{unconvertedCurrencies.join(', ')}} &mdash; holdings in
+            {{unconvertedCurrencies.length === 1 ? 'that currency are' : 'those currencies are'}} missing from
+            the portfolio figure.
+          </p>
+        }
+      </section>
+
+      <section class="fire-section">
+        <h3 class="fire-section-title">Contributions and growth</h3>
+        <div class="fire-form">
+          <div class="fire-field">
+            <label for="monthlyContribution" class="fire-label">Monthly contribution</label>
+            <p-inputnumber inputId="monthlyContribution" [(ngModel)]="monthlyContribution" [min]="0"
+              (keyup.enter)="calculate()"></p-inputnumber>
+          </div>
+          <div class="fire-field">
+            <label for="contributionIncrease" class="fire-label">Annual increase</label>
+            <p-inputnumber inputId="contributionIncrease" [(ngModel)]="annualContributionIncrease"
+              suffix=" %" [minFractionDigits]="0" [maxFractionDigits]="1" [min]="-100" [max]="100"
+              (keyup.enter)="calculate()"></p-inputnumber>
+          </div>
+          <div class="fire-field">
+            <label for="annualReturn" class="fire-label">
+              Annual return
+              <i class="pi pi-info-circle fire-info"
+                pTooltip="Nominal, before inflation. Compounded monthly."></i>
+            </label>
+            <p-inputnumber inputId="annualReturn" [(ngModel)]="annualReturn" suffix=" %"
+              [minFractionDigits]="0" [maxFractionDigits]="1" [min]="-100" [max]="100"
+              (keyup.enter)="calculate()"></p-inputnumber>
+          </div>
+          <div class="fire-field">
+            <label for="inflation" class="fire-label">Inflation</label>
+            <p-inputnumber inputId="inflation" [(ngModel)]="inflation" suffix=" %"
+              [minFractionDigits]="0" [maxFractionDigits]="1" [min]="-100" [max]="100"
+              (keyup.enter)="calculate()"></p-inputnumber>
+          </div>
+        </div>
+      </section>
+
+      <section class="fire-section">
+        <h3 class="fire-section-title">Target</h3>
+        <div class="fire-form">
+          <div class="fire-field">
+            <label for="withdrawalRate" class="fire-label">
+              Withdrawal rate
+              <i class="pi pi-info-circle fire-info"
+                pTooltip="Share of the pot taken in the first year of retirement. 4% is the usual rule of thumb."></i>
+            </label>
+            <p-inputnumber inputId="withdrawalRate" [(ngModel)]="withdrawalRate" suffix=" %"
+              [minFractionDigits]="0" [maxFractionDigits]="2" [min]="0.1" [max]="100"
+              (keyup.enter)="calculate()"></p-inputnumber>
+          </div>
+
+          @if (!useCustomFireNumber) {
+            <div class="fire-field">
+              <label for="annualSpending" class="fire-label">
+                Annual spending
+                <i class="pi pi-info-circle fire-info" pTooltip="In today's money."></i>
+              </label>
+              <p-inputnumber inputId="annualSpending" [(ngModel)]="annualSpending" [min]="0"
+                (keyup.enter)="calculate()"></p-inputnumber>
+            </div>
+            <div class="fire-field">
+              <label class="fire-label">FIRE number</label>
+              <div class="fire-readonly fire-readonly-strong">{{derivedFireNumber | number:'1.0-0'}} {{currency}}</div>
+            </div>
+          } @else {
+            <div class="fire-field">
+              <label for="customFireNumber" class="fire-label">
+                FIRE number
+                <i class="pi pi-info-circle fire-info"
+                  pTooltip="The balance you want to see in the account. Taken at face value, not adjusted for inflation."></i>
+              </label>
+              <p-inputnumber inputId="customFireNumber" [(ngModel)]="customFireNumber" [min]="0"
+                (keyup.enter)="calculate()"></p-inputnumber>
+            </div>
+            <div class="fire-field">
+              <label class="fire-label">
+                Supports spending of
+                <i class="pi pi-info-circle fire-info"
+                  pTooltip="In the money of the year you get there, which buys less than the same figure would today."></i>
+              </label>
+              <div class="fire-readonly fire-readonly-strong">{{impliedSpending | number:'1.0-0'}} {{currency}}/yr</div>
+            </div>
+          }
+
+          <div class="fire-field fire-field-check">
+            <p-checkbox inputId="customTarget" [(ngModel)]="useCustomFireNumber" [binary]="true"></p-checkbox>
+            <label for="customTarget" class="fire-check-label">Set the target directly</label>
+          </div>
+        </div>
+      </section>
+
+      <section class="fire-section">
+        <h3 class="fire-section-title">Pension</h3>
+        <div class="fire-form">
+          <div class="fire-field fire-field-check">
+            <p-checkbox inputId="hasPension" [(ngModel)]="hasPension" [binary]="true"></p-checkbox>
+            <label for="hasPension" class="fire-check-label">I will get a pension</label>
+          </div>
+          @if (hasPension) {
+            <div class="fire-field">
+              <label for="monthlyPension" class="fire-label">
+                Monthly pension
+                <i class="pi pi-info-circle fire-info"
+                  pTooltip="What you expect to receive each month, in today's money, rising with inflation like your spending."></i>
+              </label>
+              <p-inputnumber inputId="monthlyPension" [(ngModel)]="monthlyPension" [min]="0"
+                (keyup.enter)="calculate()"></p-inputnumber>
+            </div>
+            <div class="fire-field fire-field-narrow">
+              <label for="pensionAge" class="fire-label">Starts at age</label>
+              <p-inputnumber inputId="pensionAge" [(ngModel)]="pensionAge" [min]="0" [max]="120"
+                (keyup.enter)="calculate()"></p-inputnumber>
+            </div>
+          }
+        </div>
+        @if (hasPension) {
+          <p class="fire-hint fire-hint-tight">
+            Counted as income from that age on. It covers your spending first, so the Taken out column shows
+            only the shortfall the pot has to cover &mdash; anything left over goes into it.
+          </p>
+        }
+      </section>
+
+      <section class="fire-section">
+        <h3 class="fire-section-title">Timing</h3>
+        <div class="fire-form">
+          <div class="fire-field fire-field-narrow">
+            <label for="currentAge" class="fire-label">Current age</label>
+            <p-inputnumber inputId="currentAge" [(ngModel)]="currentAge" [min]="0" [max]="120"
+              (keyup.enter)="calculate()"></p-inputnumber>
+          </div>
+          @if (!retireWhenReady) {
+            <div class="fire-field fire-field-narrow">
+              <label for="retirementAge" class="fire-label">Retirement age</label>
+              <p-inputnumber inputId="retirementAge" [(ngModel)]="retirementAge" [min]="0" [max]="120"
+                (keyup.enter)="calculate()"></p-inputnumber>
+            </div>
+          }
+          <div class="fire-field fire-field-narrow">
+            <label for="lifeExpectancy" class="fire-label">
+              Plan until age
+              <i class="pi pi-info-circle fire-info" pTooltip="How long the money has to last."></i>
+            </label>
+            <p-inputnumber inputId="lifeExpectancy" [(ngModel)]="lifeExpectancy" [min]="1" [max]="130"
+              (keyup.enter)="calculate()"></p-inputnumber>
+          </div>
+          <div class="fire-field fire-field-check">
+            <p-checkbox inputId="retireWhenReady" [(ngModel)]="retireWhenReady" [binary]="true"></p-checkbox>
+            <label for="retireWhenReady" class="fire-check-label">Retire as soon as the target is reached</label>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="fire-actions">
+      <button pButton pRipple label="Calculate" icon="pi pi-calculator" class="p-button-rounded"
+        [loading]="calculating" [disabled]="!canCalculate" (click)="calculate()"></button>
+      @if (projection) {
+        <button pButton pRipple label="Download" icon="pi pi-download" class="p-button-rounded"
+          severity="secondary" pTooltip="Export the full year-by-year timeline as CSV"
+          (click)="download()"></button>
+      }
+    </div>
+
+    @if (projection) {
+      <div class="fire-summary">
+        <div class="fire-tile">
+          <div class="fire-tile-label">FIRE number</div>
+          <div class="fire-tile-value">{{projection.fireNumber | number:'1.0-0'}} {{projection.currency}}</div>
+          @if (projection.fireNumberInTodaysMoney) {
+            <div class="fire-tile-note">
+              {{projection.annualSpending | number:'1.0-0'}}/yr at {{projection.withdrawalRate | number:'1.0-2'}}%,
+              in today's money
+            </div>
+          } @else {
+            <div class="fire-tile-note">
+              A balance of {{projection.fireNumber | number:'1.0-0'}}, taken at face value
+              @if (projection.retirementAge != null) {
+                &mdash; worth {{projection.annualSpending | number:'1.0-0'}}/yr in today's money
+              }
+            </div>
+          }
+        </div>
+        <div class="fire-tile" [class.fire-tile-good]="projection.fiReached"
+          [class.fire-tile-bad]="!projection.fiReached">
+          <div class="fire-tile-label">Financial independence</div>
+          @if (projection.fiReached) {
+            <div class="fire-tile-value">Year {{projection.fiYear}}</div>
+            <div class="fire-tile-note">at age {{projection.fiAge}}</div>
+          } @else {
+            <div class="fire-tile-value">Not reached</div>
+            <div class="fire-tile-note">not by age {{projection.finalAge}} on these assumptions</div>
+          }
+        </div>
+        @if (projection.retirementAge != null) {
+          <div class="fire-tile">
+            <div class="fire-tile-label">Retires at</div>
+            <div class="fire-tile-value">Age {{projection.retirementAge}}</div>
+            <div class="fire-tile-note">after {{projection.retirementYear}} years</div>
+          </div>
+          <div class="fire-tile" [class.fire-tile-good]="projection.lastsThroughRetirement"
+            [class.fire-tile-bad]="!projection.lastsThroughRetirement">
+            <div class="fire-tile-label">Money lasts</div>
+            @if (projection.lastsThroughRetirement) {
+              <div class="fire-tile-value">To age {{projection.finalAge}}</div>
+              <div class="fire-tile-note">
+                {{projection.finalRealBalance | number:'1.0-0'}} left in today's money
+              </div>
+            } @else {
+              <div class="fire-tile-value">Runs out at {{projection.depletedAtAge}}</div>
+              <div class="fire-tile-note">short of age {{projection.finalAge}}</div>
+            }
+          </div>
+        }
+      </div>
+
+      @if (chart) {
+        <h3 class="fire-heading">Projection</h3>
+        <div class="fire-chart-wrap">
+          <svg class="fire-chart" [attr.viewBox]="'0 0 ' + chartBox.width + ' ' + chartBox.height"
+            preserveAspectRatio="none" (mousemove)="onChartMove($event)" (mouseleave)="setHoveredYear(null)">
+
+            @for (tick of chart.yTicks; track tick.label) {
+              <line [attr.x1]="chartBox.left" [attr.x2]="chartBox.width - chartBox.right"
+                [attr.y1]="tick.position" [attr.y2]="tick.position" class="fire-gridline"></line>
+              <text [attr.x]="chartBox.left - 8" [attr.y]="tick.position + 4"
+                class="fire-axis-label" text-anchor="end">{{tick.label}}</text>
+            }
+
+            @for (tick of chart.xTicks; track tick.label) {
+              <text [attr.x]="tick.position" [attr.y]="chartBox.height - 8"
+                class="fire-axis-label" text-anchor="middle">{{tick.label}}</text>
+            }
+
+            @if (chart.pensionX != null) {
+              <line [attr.x1]="chart.pensionX" [attr.x2]="chart.pensionX" [attr.y1]="chartBox.top"
+                [attr.y2]="chartBox.height - chartBox.bottom" class="fire-pension-line"></line>
+              <text [attr.x]="chart.pensionX + 5" [attr.y]="chartBox.top + 26"
+                class="fire-marker-label">Pension</text>
+            }
+
+            @if (chart.retirementX != null) {
+              <line [attr.x1]="chart.retirementX" [attr.x2]="chart.retirementX" [attr.y1]="chartBox.top"
+                [attr.y2]="chartBox.height - chartBox.bottom" class="fire-retirement-line"></line>
+              <text [attr.x]="chart.retirementX + 5" [attr.y]="chartBox.top + 12"
+                class="fire-marker-label">Retire</text>
+            }
+
+            @if (chart.fireY != null) {
+              <line [attr.x1]="chartBox.left" [attr.x2]="chartBox.width - chartBox.right"
+                [attr.y1]="chart.fireY" [attr.y2]="chart.fireY" class="fire-target-line"></line>
+              <text [attr.x]="chartBox.left + 5" [attr.y]="chart.fireY - 6"
+                class="fire-marker-label">FIRE number</text>
+            }
+
+            <path [attr.d]="chart.nominalPath" class="fire-line fire-line-nominal"></path>
+            <path [attr.d]="chart.realPath" class="fire-line fire-line-real"></path>
+
+            @if (hoveredPoint) {
+              <line [attr.x1]="hoveredPoint.x" [attr.x2]="hoveredPoint.x" [attr.y1]="chartBox.top"
+                [attr.y2]="chartBox.height - chartBox.bottom" class="fire-hover-line"></line>
+              <circle [attr.cx]="hoveredPoint.x" [attr.cy]="hoveredPoint.nominalY" r="4"
+                class="fire-dot fire-dot-nominal"></circle>
+              <circle [attr.cx]="hoveredPoint.x" [attr.cy]="hoveredPoint.realY" r="4"
+                class="fire-dot fire-dot-real"></circle>
+            }
+          </svg>
+
+          @if (hoveredPoint) {
+            <div class="fire-chart-readout">
+              <div class="fire-readout-title">
+                Year {{hoveredPoint.year}} &middot; age {{hoveredPoint.age}}
+                <span class="fire-readout-phase">{{hoveredPoint.phase === 'DRAWDOWN' ? 'drawdown' : 'saving'}}</span>
+              </div>
+              <div class="fire-readout-row">
+                <span class="fire-swatch fire-swatch-nominal"></span>
+                <span>{{hoveredPoint.balance | number:'1.0-0'}} {{projection.currency}}</span>
+              </div>
+              <div class="fire-readout-row">
+                <span class="fire-swatch fire-swatch-real"></span>
+                <span>{{hoveredPoint.realBalance | number:'1.0-0'}} in today's money</span>
+              </div>
+            </div>
+          }
+
+          <div class="fire-legend">
+            <span class="fire-legend-item"><span class="fire-swatch fire-swatch-nominal"></span>Balance</span>
+            <span class="fire-legend-item"><span class="fire-swatch fire-swatch-real"></span>In today's money</span>
+          </div>
+        </div>
+      }
+
+      <h3 class="fire-heading">Milestones</h3>
+      <p-table [value]="projection.milestones" styleClass="p-datatable-striped p-datatable-sm table-stack">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Year</th>
+            <th>Age</th>
+            <th class="text-right">Paid in</th>
+            @if (hasPensionRows) {
+              <th class="text-right">Pension</th>
+            }
+            <th class="text-right">Taken out</th>
+            <th class="text-right">Balance</th>
+            <th class="text-right">In today's money</th>
+            <th class="text-right">
+              Of FIRE number
+              <i class="pi pi-info-circle fire-info" [pTooltip]="fireNumberBasisHint"></i>
+            </th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr [class.fire-row-fi]="isFiYear(row)">
+            <td data-label="Year">
+              {{row.year}}
+              @if (isFiYear(row)) {
+                <p-tag severity="success" value="target met"></p-tag>
+              }
+            </td>
+            <td data-label="Age">
+              {{row.age}}
+              @if (isDrawdown(row)) {
+                <p-tag severity="warn" value="drawdown"></p-tag>
+              }
+            </td>
+            <td data-label="Paid in" class="text-right">{{row.contributions | number:'1.0-0'}}</td>
+            @if (hasPensionRows) {
+              <td data-label="Pension" class="text-right">{{row.pension | number:'1.0-0'}}</td>
+            }
+            <td data-label="Taken out" class="text-right">{{row.withdrawals | number:'1.0-0'}}</td>
+            <td data-label="Balance" class="text-right fire-total-cell">{{row.balance | number:'1.0-0'}}</td>
+            <td data-label="In today's money" class="text-right">{{row.realBalance | number:'1.0-0'}}</td>
+            <td data-label="Of FIRE number" class="text-right">{{row.pctOfFireNumber | number:'1.0-0'}}%</td>
+          </tr>
+        </ng-template>
+      </p-table>
+
+      @if (drawdownRows.length > 0) {
+        <h3 class="fire-heading">Retirement</h3>
+        <p class="fire-hint">
+          From age {{projection.retirementAge}} the contributions stop and
+          {{projection.annualSpending | number:'1.0-0'}} {{projection.currency}} a year, in today's money, comes
+          out instead &mdash; rising with inflation each year.
+        </p>
+        <p-table [value]="drawdownRows" styleClass="p-datatable-striped p-datatable-sm table-stack">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Age</th>
+              @if (hasPensionRows) {
+                <th class="text-right">Pension</th>
+              }
+              <th class="text-right">Taken out</th>
+              <th class="text-right">Balance</th>
+              <th class="text-right">In today's money</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-row>
+            <tr>
+              <td data-label="Age">{{row.age}}</td>
+              @if (hasPensionRows) {
+                <td data-label="Pension" class="text-right">{{row.pension | number:'1.0-0'}}</td>
+              }
+              <td data-label="Taken out" class="text-right">{{row.withdrawals | number:'1.0-0'}}</td>
+              <td data-label="Balance" class="text-right fire-total-cell">{{row.balance | number:'1.0-0'}}</td>
+              <td data-label="In today's money" class="text-right">{{row.realBalance | number:'1.0-0'}}</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      }
+
+      <p class="fire-caveat">
+        <i class="pi pi-info-circle"></i>
+        A single fixed return every year is a simplification. Real markets vary, and a run of bad years early
+        in retirement does far more damage than the same years later on, so treat the drawdown as an
+        illustration of these assumptions rather than a probability.
+      </p>
+    }
+  </p-panel>
+</div>

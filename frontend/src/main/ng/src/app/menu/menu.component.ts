@@ -31,6 +31,7 @@ export class MenuComponent implements OnInit {
     { label: 'Securities', icon: 'fa-solid fa-building-columns', routerLink: ['/security'] },
     { label: 'Alerts', icon: 'fa-solid fa-bell', routerLink: ['/alert'] },
     { label: 'Tax', icon: 'fa-solid fa-file-invoice-dollar', routerLink: ['/tax'] },
+    { label: 'FIRE', icon: 'fa-solid fa-fire', routerLink: ['/fire'] },
     { label: 'Lookup', icon: 'fas fa-search', routerLink: ['/search'] },
     { label: 'Settings', icon: 'fa-solid fa-gear', routerLink: ['/settings'] }
   ];

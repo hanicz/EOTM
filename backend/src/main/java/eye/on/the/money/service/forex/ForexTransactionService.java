@@ -92,6 +92,8 @@ public class ForexTransactionService implements ICSVService {
     public List<ForexTransactionDTO> getAllForexHoldings(String userEmail) {
         Map<String, ForexTransactionDTO> forexTransactionMap = this.getCalculated(userEmail);
         List<ForexTransactionDTO> forexTransactions = new ArrayList<>(forexTransactionMap.values());
+        if (forexTransactions.isEmpty()) return forexTransactions;
+
         String joinedList = forexTransactions.stream().map(f -> (f.getToCurrencyId() + f.getFromCurrencyId() + ".FOREX")).collect(Collectors.joining(","));
 
         try {

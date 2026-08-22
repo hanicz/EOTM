@@ -1,31 +1,32 @@
 package eye.on.the.money.service.mail;
 
 
+import eye.on.the.money.config.MailConfig;
 import eye.on.the.money.exception.EmailException;
+import eye.on.the.money.model.Credential;
 import eye.on.the.money.repository.CredentialRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 import static java.lang.String.format;
 
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+@DependsOnDatabaseInitialization
 public class EmailService {
 
     private final JavaMailSender javaMailSender;
 
-    private final CredentialRepository credentialRepository;
+    private final String from;
 
     private static final Map<String, String> TYPE_LABELS = new HashMap<>();
     private static final Map<String, String> CONDITION_PHRASES = new HashMap<>();
@@ -42,7 +43,23 @@ public class EmailService {
         EmailService.CONDITION_PHRASES.put("PRICE_UNDER", "is under %s");
     }
 
+    public EmailService(JavaMailSender javaMailSender, CredentialRepository credentialRepository) {
+        this.javaMailSender = javaMailSender;
+        this.from = credentialRepository.findById(MailConfig.EMAIL_USER)
+                .filter(credential -> credentialRepository.findById(MailConfig.EMAIL_PASSWORD).isPresent())
+                .map(Credential::getSecret)
+                .orElse(null);
+    }
+
+    public boolean isEnabled() {
+        return this.from != null;
+    }
+
     public void sendAlertMail(String sendTo, String symbolOrTicker, String type, double valuePoint, double actualValue, double actualChange) {
+        if (!this.isEnabled()) {
+            log.warn("Email is not configured, skipping alert email to {}", sendTo);
+            return;
+        }
         boolean isPercentType = type.startsWith("PERCENT");
         boolean isOverType = type.endsWith("OVER");
         double currentValue = isPercentType ? actualChange : actualValue;
@@ -59,12 +76,11 @@ public class EmailService {
     }
 
     private void send(String sendTo, String subject, String plainText, String html) {
-        String from = this.credentialRepository.findById("email_user").orElseThrow(() -> new NoSuchElementException("Credential not found: email_user")).getSecret();
         try {
             MimeMessage mimeMessage = this.javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");
             helper.setTo(sendTo);
-            helper.setFrom(from);
+            helper.setFrom(this.from);
             helper.setSubject(subject);
             helper.setText(plainText, html);
 

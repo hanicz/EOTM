@@ -70,6 +70,8 @@ public class InvestmentService implements ICSVService {
         Map<String, InvestmentDTO> investmentMap = this.getCalculated(investments);
         List<InvestmentDTO> investmentDTOList = (new ArrayList<>(investmentMap.values()))
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
+        if (investmentDTOList.isEmpty()) return investmentDTOList;
+
         String joinedList = investmentDTOList.stream().map(i -> (i.getShortName() + "." + i.getExchange())).distinct().collect(Collectors.joining(","));
 
         JsonNode responseBody;

@@ -19,7 +19,6 @@ import java.util.List;
 public class TaxReportDTO {
 
     private List<RSUTaxDTO> items;
-
     private BigDecimal totalAmountInHuf;
     private TaxBreakdownDTO totalTax;
 }

@@ -55,6 +55,8 @@ public class ETFInvestmentService implements ICSVService {
         Map<String, ETFInvestmentDTO> investmentMap = this.getCalculated(userEmail);
         List<ETFInvestmentDTO> etfInvestmentDTOList = (new ArrayList<>(investmentMap.values()))
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
+        if (etfInvestmentDTOList.isEmpty()) return etfInvestmentDTOList;
+
         String joinedList = etfInvestmentDTOList.stream().map(i -> (i.getShortName() + "." + i.getExchange())).collect(Collectors.joining(","));
 
         try {

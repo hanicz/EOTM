@@ -71,8 +71,9 @@ public class NetWorthService {
 
         Holdings holdings = this.loadHoldings(userEmail);
         Set<String> currencies = this.currenciesIn(holdings, target);
-        Converter converter = new Converter(
-                this.dashboardService.getConversionRates(new ArrayList<>(currencies)).getRates(), target);
+        Map<String, Double> rates = holdings.isEmpty() ? Map.of()
+                : this.dashboardService.getConversionRates(new ArrayList<>(currencies)).getRates();
+        Converter converter = new Converter(rates, target);
 
         List<AssetClassValueDTO> assets = List.of(
                 this.value(STOCK, holdings.stock(), InvestmentDTO::getAmount, InvestmentDTO::getCurrencyId,
@@ -183,6 +184,11 @@ public class NetWorthService {
 
     private record Holdings(List<InvestmentDTO> stock, List<TransactionDTO> crypto, List<ETFInvestmentDTO> etf,
                             List<ForexTransactionDTO> forex, List<SecurityTransactionDTO> securities) {
+
+        private boolean isEmpty() {
+            return this.stock.isEmpty() && this.crypto.isEmpty() && this.etf.isEmpty()
+                    && this.forex.isEmpty() && this.securities.isEmpty();
+        }
     }
 
     /**
@@ -194,16 +200,11 @@ public class NetWorthService {
 
         private final Map<String, Double> rates;
         private final String target;
-        private final double targetRate;
         private final Set<String> unconverted = new TreeSet<>();
 
         private Converter(Map<String, Double> rates, String target) {
             this.rates = rates;
             this.target = target;
-            this.targetRate = this.rateFor(target);
-            if (this.targetRate == 0) {
-                throw new APIException("No exchange rate available for " + target);
-            }
         }
 
         private double convert(Double amount, String from) {
@@ -217,7 +218,15 @@ public class NetWorthService {
                 this.unconverted.add(from.toUpperCase());
                 return 0;
             }
-            return amount / fromRate * this.targetRate;
+            return amount / fromRate * this.targetRate();
+        }
+
+        private double targetRate() {
+            double rate = this.rateFor(this.target);
+            if (rate == 0) {
+                throw new APIException("No exchange rate available for " + this.target);
+            }
+            return rate;
         }
 
         private double rateFor(String currency) {

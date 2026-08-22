@@ -88,6 +88,11 @@ export class CryptoComponent implements OnInit {
   }
 
   private loadRatesAndCalculate(): void {
+    if (this.transactions.length === 0) {
+      this.calculateTotals();
+      return;
+    }
+
     const neededCurrencies = new Set<string>([this.selectedCurrency, ...this.transactions.map(t => t.currencyId)]);
     const missing = [...neededCurrencies].filter(currency => !(currency in this.rates));
 

@@ -59,10 +59,6 @@ public class TaxController {
         return ResponseEntity.ok(this.taxService.calculateTaxForRSUs(rsus));
     }
 
-    /**
-     * A POST rather than the GET the other modules use, because the report is computed from the supplied
-     * rows rather than read back from the database.
-     */
     @PostMapping("/rsu/csv")
     public void getCSV(@RequestBody List<@Valid RSUDTO> rsus, HttpServletResponse servletResponse)
             throws IOException {

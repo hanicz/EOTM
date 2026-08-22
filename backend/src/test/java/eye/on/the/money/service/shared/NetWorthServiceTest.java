@@ -35,6 +35,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -196,8 +197,19 @@ class NetWorthServiceTest {
     @Test
     void getNetWorth_throwsWhenTheTargetCurrencyHasNoRate() {
         this.stubRates(Map.of("USD", 1.10));
+        when(this.investmentService.getCurrentHoldings(USER)).thenReturn(List.of(
+                InvestmentDTO.builder().amount(100.0).liveValue(150.0).currencyId("USD").build()));
 
         assertThrows(APIException.class, () -> this.netWorthService.getNetWorth(USER, "JPY"));
+    }
+
+    @Test
+    void getNetWorth_doesNotLookUpRatesWhenNothingIsHeld() {
+        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "HUF");
+
+        assertEquals(0, result.getTotalWorth().signum());
+        assertEquals(0, result.getTotalSpent().signum());
+        verifyNoInteractions(this.dashboardService);
     }
 
     @Test
@@ -205,6 +217,7 @@ class NetWorthServiceTest {
         NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR");
 
         assertEquals(0, result.getTotalSpent().signum());
+        assertEquals(0, result.getTotalWorth().signum());
         assertEquals(0, result.getTotalChangePct().signum());
     }
 }

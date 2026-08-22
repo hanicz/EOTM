@@ -35,6 +35,10 @@ public class AlertScheduler {
     @Scheduled(fixedDelay = 300000)
     public void checkAlerts() {
         log.trace("Enter");
+        if (!this.emailServiceImpl.isEnabled()) {
+            log.info("Email is not configured, skipping alert check.");
+            return;
+        }
         Thread stockThread = Thread.ofVirtual().start(this::checkStockAlerts);
         Thread cryptoThread = Thread.ofVirtual().start(this::checkCryptoAlerts);
         try {

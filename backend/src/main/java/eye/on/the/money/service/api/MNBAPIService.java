@@ -34,20 +34,6 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-/**
- * Client for the MNB (Hungarian National Bank) official exchange rate SOAP service.
- * <p>
- * The service has a few quirks worth knowing about:
- * <ul>
- *     <li>It only answers over plain http - a POST to the https host returns 404, and the WSDL's own
- *         soap:address points at http.</li>
- *     <li>GetExchangeRatesResult holds the payload as an escaped XML <i>string</i>, so the response
- *         needs two parse passes.</li>
- *     <li>Rates use a comma as decimal separator and carry a unit attribute (JPY is quoted per 100).</li>
- *     <li>Only banking days are published. Weekends and public holidays are absent from the response
- *         entirely, so a lookup has to fall back to the last rate published before the date.</li>
- * </ul>
- */
 @Service
 @Slf4j
 public class MNBAPIService extends APIService {
@@ -79,13 +65,6 @@ public class MNBAPIService extends APIService {
         super(credentialRepository, configRepository, webClient, mapper);
     }
 
-    /**
-     * Fetches the official rates for the given currencies over a date range, as HUF per one unit of currency.
-     * The returned maps are sorted by date, so callers can resolve a non-banking day with
-     * {@link NavigableMap#floorEntry(Object)}.
-     *
-     * @return one entry per requested currency; a currency the service knows nothing about is absent
-     */
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public Map<String, NavigableMap<LocalDate, BigDecimal>> getExchangeRates(Collection<String> currencies,
                                                                             LocalDate startDate, LocalDate endDate) {
@@ -108,10 +87,6 @@ public class MNBAPIService extends APIService {
         return this.parseRates(this.unwrapSoapResult((String) response.getBody()));
     }
 
-    /**
-     * Pulls the escaped rate document out of the SOAP envelope. The XML parser unescapes it for us,
-     * so the returned string is a plain MNBExchangeRates document.
-     */
     private String unwrapSoapResult(String soapResponse) {
         Document envelope = this.parseXml(soapResponse);
         NodeList results = envelope.getElementsByTagNameNS("*", MNBAPIService.RESULT_ELEMENT);
@@ -142,10 +117,6 @@ public class MNBAPIService extends APIService {
         return ratesByCurrency;
     }
 
-    /**
-     * Normalises a quoted rate to HUF per single unit: the value uses a comma as decimal separator and is
-     * quoted per the unit attribute (for example 242,88 HUF per 100 JPY).
-     */
     private BigDecimal toRatePerUnit(Element rate) {
         String value = rate.getTextContent().trim().replace(',', '.');
         String unit = rate.getAttribute("unit");

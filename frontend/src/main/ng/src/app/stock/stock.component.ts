@@ -91,6 +91,11 @@ export class StockComponent implements OnInit {
   }
 
   private loadRatesAndCalculate(): void {
+    if (this.investments.length === 0) {
+      this.calculateTotals();
+      return;
+    }
+
     const neededCurrencies = new Set<string>([this.selectedCurrency, ...this.investments.map(i => i.currencyId)]);
     const missing = [...neededCurrencies].filter(currency => !(currency in this.rates));
 

@@ -97,6 +97,11 @@ export class SecurityComponent implements OnInit {
   }
 
   private loadRatesAndCalculate(): void {
+    if (this.transactions.length === 0 && this.interests.length === 0) {
+      this.calculateTotals();
+      return;
+    }
+
     const neededCurrencies = new Set<string>([
       this.selectedCurrency,
       ...this.transactions.map(t => t.currencyId),

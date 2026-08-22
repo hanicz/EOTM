@@ -50,6 +50,7 @@ public class WatchListService {
     public List<CryptoWatchDTO> getCryptoWatchlistByUserId(String userEmail, String currency) {
         List<CryptoWatchDTO> cryptoList = this.cryptoWatchRepository.findByUserEmailOrderByCoin_Symbol(userEmail).stream()
                 .map(this::convertToCryptoWatchDTO).collect(Collectors.toList());
+        if (cryptoList.isEmpty()) return cryptoList;
 
         String ids = cryptoList.stream().map(CryptoWatchDTO::getCoinId).collect(Collectors.joining(","));
         JsonNode root = this.cryptoAPIService.getLiveValueForCoins(currency, ids);
@@ -65,6 +66,8 @@ public class WatchListService {
     public List<StockWatchDTO> getStockWatchlistByUserId(String userEmail) {
         List<StockWatchDTO> stockList = this.stockWatchRepository.findByUserEmailOrderByStockShortName(userEmail).stream()
                 .map(this::convertToStockWatchDTO).collect(Collectors.toList());
+        if (stockList.isEmpty()) return stockList;
+
         String joinedList = stockList.stream().map(s -> (s.getStockShortName() + "." + s.getStockExchange())).collect(Collectors.joining(","));
         JsonNode responseBody = this.eodAPIService.getLiveStockValue(joinedList);
 
@@ -89,6 +92,8 @@ public class WatchListService {
     public List<ForexWatchDTO> getForexWatchlistByUserId(String userEmail) {
         List<ForexWatchDTO> forexList = this.forexWatchRepository.findByUserEmailOrderByFromCurrencyAscToCurrencyAsc(userEmail).stream()
                 .map(this::convertToForexDTO).collect(Collectors.toList());
+        if (forexList.isEmpty()) return forexList;
+
         String joinedList = forexList.stream().map(f -> (f.getFromCurrencyId() + f.getToCurrencyId() + ".FOREX")).collect(Collectors.joining(","));
         JsonNode responseBody = this.eodAPIService.getLiveForexValue(joinedList);
 

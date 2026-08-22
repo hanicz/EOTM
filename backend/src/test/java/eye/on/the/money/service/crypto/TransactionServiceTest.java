@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -108,6 +109,15 @@ class TransactionServiceTest {
                 () -> assertEquals("B", testObject.getBuySell()),
                 () -> assertEquals(0.0, testObject.getQuantity()),
                 () -> assertEquals(-1031.24, testObject.getAmount(), this.epsilon));
+    }
+
+    @Test
+    public void getCurrentHoldingsWithoutTransactions() {
+        List<TransactionDTO> result = this.transactionService.getCurrentHoldings("nobody@test.test",
+                TransactionQuery.builder().currency("EUR").build());
+
+        assertTrue(result.isEmpty());
+        verifyNoInteractions(this.cryptoAPIService);
     }
 
     @Test

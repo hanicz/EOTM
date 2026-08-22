@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @SpringBootTest(classes = EotmApplication.class)
 @ActiveProfiles("test")
@@ -101,6 +102,14 @@ class InvestmentServiceTest {
                 () -> assertEquals("B", testObject.getBuySell()),
                 () -> assertEquals(0, testObject.getQuantity()),
                 () -> assertEquals(-100.0, testObject.getAmount(), this.epsilon));
+    }
+
+    @Test
+    public void getCurrentHoldingsWithoutInvestments() {
+        List<InvestmentDTO> result = this.investmentService.getCurrentHoldings("nobody@test.test");
+
+        Assertions.assertTrue(result.isEmpty());
+        verifyNoInteractions(this.eodAPIService);
     }
 
     @Test

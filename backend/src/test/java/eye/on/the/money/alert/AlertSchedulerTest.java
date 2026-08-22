@@ -14,6 +14,7 @@ import eye.on.the.money.repository.stock.StockRepository;
 import eye.on.the.money.service.mail.EmailService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,11 @@ class AlertSchedulerTest {
     private AlertScheduler alertScheduler;
 
     private final ObjectMapper om = new ObjectMapper();
+
+    @BeforeEach
+    public void setUpEach() {
+        when(this.emailService.isEnabled()).thenReturn(true);
+    }
 
     @AfterEach
     public void cleanUpEach(){
@@ -189,6 +195,19 @@ class AlertSchedulerTest {
         this.alertScheduler.checkAlerts();
 
         verify(this.eodapiService, times(0)).getLiveStockValue(anyString());
+    }
+
+    @Test
+    public void checkAlertsEmailDisabled() throws JsonProcessingException {
+        StockAlert sa = this.createNewAlert("PRICE_OVER", 50.0);
+        sa = this.stockAlertRepository.save(sa);
+        when(this.emailService.isEnabled()).thenReturn(false);
+
+        this.alertScheduler.checkAlerts();
+
+        verify(this.eodapiService, times(0)).getLiveStockValue(anyString());
+        verify(this.emailService, times(0)).sendAlertMail(anyString(), anyString(), anyString(), anyDouble(), anyDouble(), anyDouble());
+        Assertions.assertTrue(this.stockAlertRepository.existsById(sa.getId()));
     }
 
     private StockAlert createNewAlert(String type, Double vp) {

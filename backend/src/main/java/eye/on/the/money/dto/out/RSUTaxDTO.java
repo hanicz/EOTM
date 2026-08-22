@@ -25,11 +25,8 @@ public class RSUTaxDTO implements CSVHelper {
     private LocalDate date;
     private Integer quantity;
     private String currency;
-
     private BigDecimal price;
-    /** The trading day the close came from - earlier than date if that was not a trading day. */
     private LocalDate priceDate;
-
     private BigDecimal amount;
     private BigDecimal rate;
     private LocalDate rateDate;

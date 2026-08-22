@@ -17,9 +17,7 @@ import java.math.BigDecimal;
 @Generated
 public class TaxBreakdownDTO {
 
-    /** The amount the tax was worked out from. */
     private BigDecimal amount;
-    /** 89% of the amount - the base both taxes are charged on. */
     private BigDecimal taxBase;
     private BigDecimal szocho;
     private BigDecimal szja;

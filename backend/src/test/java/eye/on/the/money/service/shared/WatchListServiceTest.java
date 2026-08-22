@@ -25,6 +25,8 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
@@ -105,6 +107,31 @@ class WatchListServiceTest {
         assertEquals(3.637176879372967, resultList.get(1).getChange());
         assertEquals(2345.27, resultList.get(2).getLiveValue());
         assertEquals(1.7125094576440063, resultList.get(2).getChange());
+    }
+
+    @Test
+    public void testGetCryptoWatchlistByUserIdEmpty() {
+        when(this.cryptoWatchRepository.findByUserEmailOrderByCoin_Symbol("test@example.com")).thenReturn(List.of());
+
+        assertTrue(this.watchListService.getCryptoWatchlistByUserId("test@example.com", "EUR").isEmpty());
+        verifyNoInteractions(this.cryptoAPIService);
+    }
+
+    @Test
+    public void testGetStockWatchlistByUserIdEmpty() {
+        when(this.stockWatchRepository.findByUserEmailOrderByStockShortName("test@example.com")).thenReturn(List.of());
+
+        assertTrue(this.watchListService.getStockWatchlistByUserId("test@example.com").isEmpty());
+        verifyNoInteractions(this.eodAPIService);
+        verifyNoInteractions(this.stockService);
+    }
+
+    @Test
+    public void testGetForexWatchlistByUserIdEmpty() {
+        when(this.forexWatchRepository.findByUserEmailOrderByFromCurrencyAscToCurrencyAsc("test@example.com")).thenReturn(List.of());
+
+        assertTrue(this.watchListService.getForexWatchlistByUserId("test@example.com").isEmpty());
+        verifyNoInteractions(this.eodAPIService);
     }
 
 }

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = EotmApplication.class)
@@ -56,6 +57,14 @@ class ForexTransactionServiceTest {
         when(this.userService.loadUserByEmail(this.user.getUsername())).thenReturn(this.user);
     }
 
+
+    @Test
+    public void getAllForexHoldingsWithoutTransactions() {
+        List<ForexTransactionDTO> result = this.forexTransactionService.getAllForexHoldings("nobody@test.test");
+
+        Assertions.assertTrue(result.isEmpty());
+        verifyNoInteractions(this.eodapiService);
+    }
 
     @Test
     public void getForexTransactionsByUserId() {

@@ -59,6 +59,8 @@ public class TransactionService implements ICSVService {
         Map<String, TransactionDTO> transactionMap = this.getCalculated(userEmail);
         List<TransactionDTO> transactionDTOList = (new ArrayList<>(transactionMap.values()))
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
+        if (transactionDTOList.isEmpty()) return transactionDTOList;
+
         String ids = transactionDTOList.stream().map(TransactionDTO::getCoinId).collect(Collectors.joining(","));
 
         try {

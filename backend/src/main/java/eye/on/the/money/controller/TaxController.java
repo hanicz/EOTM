@@ -4,6 +4,9 @@ import eye.on.the.money.dto.in.RSUDTO;
 import eye.on.the.money.dto.in.TaxAmountDTO;
 import eye.on.the.money.dto.out.TaxBreakdownDTO;
 import eye.on.the.money.dto.out.TaxReportDTO;
+import eye.on.the.money.dto.out.TaxableEventReportDTO;
+import eye.on.the.money.security.CurrentUserEmail;
+import eye.on.the.money.service.financial.TaxableEventService;
 import eye.on.the.money.service.shared.TaxService;
 import eye.on.the.money.util.CsvResponseUtil;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +32,20 @@ import java.util.List;
 public class TaxController {
 
     private final TaxService taxService;
+    private final TaxableEventService taxableEventService;
+
+    @GetMapping("/transaction")
+    public ResponseEntity<TaxableEventReportDTO> getTaxableEvents(@CurrentUserEmail String userEmail) {
+        log.trace("Enter");
+        return ResponseEntity.ok(this.taxableEventService.getTaxableEvents(userEmail));
+    }
+
+    @GetMapping("/transaction/csv")
+    public void getTaxableEventsCSV(@CurrentUserEmail String userEmail, HttpServletResponse servletResponse)
+            throws IOException {
+        log.trace("Enter");
+        this.taxableEventService.getCSV(userEmail, CsvResponseUtil.prepare(servletResponse, "taxable-events.csv"));
+    }
 
     @PostMapping("/amount")
     public ResponseEntity<TaxBreakdownDTO> calculateTax(@RequestBody @Valid TaxAmountDTO amountDTO) {

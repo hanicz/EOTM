@@ -1,0 +1,27 @@
+.memo-cell {
+  max-width: 22rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.amount-in {
+  color: var(--p-green-600);
+  font-weight: 600;
+}
+
+.amount-out {
+  color: var(--p-red-600);
+  font-weight: 600;
+}
+
+.row-excluded td {
+  opacity: 0.55;
+}
+
+@media screen and (max-width: 992px) {
+  .memo-cell {
+    max-width: none;
+    white-space: normal;
+  }
+}

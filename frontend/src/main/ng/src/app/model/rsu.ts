@@ -34,3 +34,24 @@ export interface TaxReport {
     totalAmountInHuf: number;
     totalTax: TaxBreakdown;
 }
+
+export interface TaxableEvent {
+    id: number;
+    bookingDate: string;
+    type: string;
+    partnerName: string;
+    memo: string;
+    amount: number;
+    currencyId: string;
+    rate: number;
+    rateDate: string;
+    amountInHuf: number;
+    calculatedOn: string;
+    tax: TaxBreakdown;
+}
+
+export interface TaxableEventReport {
+    items: TaxableEvent[];
+    totalAmountInHuf: number;
+    totalTax: TaxBreakdown;
+}

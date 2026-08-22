@@ -261,7 +261,7 @@
         <h3 class="fire-heading">Projection</h3>
         <div class="fire-chart-wrap">
           <svg class="fire-chart" [attr.viewBox]="'0 0 ' + chartBox.width + ' ' + chartBox.height"
-            preserveAspectRatio="none" (mousemove)="onChartMove($event)" (mouseleave)="setHoveredYear(null)">
+            preserveAspectRatio="xMidYMid meet" (mousemove)="onChartMove($event)" (mouseleave)="setHoveredYear(null)">
 
             @for (tick of chart.yTicks; track tick.label) {
               <line [attr.x1]="chartBox.left" [attr.x2]="chartBox.width - chartBox.right"

@@ -175,7 +175,9 @@
 
 .fire-chart {
     width: 100%;
-    height: 280px;
+    /* Height follows the viewBox aspect so the chart scales uniformly. A fixed height here would
+       need preserveAspectRatio="none", which stretches the labels and strokes on wide screens. */
+    height: auto;
     display: block;
     overflow: visible;
 }
@@ -331,10 +333,6 @@
 
     .fire-actions button {
         width: 100%;
-    }
-
-    .fire-chart {
-        height: 220px;
     }
 
     /* Pinned to a corner it would cover the curve on a narrow screen. */

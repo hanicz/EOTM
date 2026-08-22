@@ -2,10 +2,11 @@
 <div class="shadow-5">
   <menu class="pl-0 mb-0"></menu>
   <p-panel>
-    <p-tabs value="0">
+    <p-tabs value="0" (valueChange)="onTabChange($event)">
       <p-tablist>
         <p-tab value="0">RSU</p-tab>
         <p-tab value="1">Amount</p-tab>
+        <p-tab value="2">Transactions</p-tab>
       </p-tablist>
       <p-tabpanels>
 
@@ -183,6 +184,98 @@
                 <div class="tax-tile-value">{{amountTax.total | number:'1.0-0'}} Ft</div>
               </div>
             </div>
+          }
+        </p-tabpanel>
+
+        <p-tabpanel value="2">
+          <p class="tax-hint">
+            The bank transactions you flagged as taxable events on the Financials page. The tax is worked out
+            once, when you flag the transaction, at the MNB rate of the booking date - flag it again to
+            recalculate it.
+          </p>
+
+          <div class="tax-actions">
+            <button pButton pRipple label="Refresh" icon="pi pi-refresh" class="p-button-rounded"
+              [loading]="taxableLoading" (click)="loadTaxableEvents()"></button>
+            <button pButton pRipple label="Download" icon="pi pi-download" class="p-button-rounded"
+              severity="secondary" pTooltip="Export the report as CSV" (click)="downloadTaxableEvents()"></button>
+          </div>
+
+          @if (taxableReport) {
+            <p-table [value]="taxableReport.items" styleClass="p-datatable-striped p-datatable-sm table-stack">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>Booked</th>
+                  <th>Type</th>
+                  <th>Partner</th>
+                  <th class="text-right">Amount</th>
+                  <th class="text-right">MNB rate</th>
+                  <th class="text-right">Value (Ft)</th>
+                  <th class="text-right">Tax base</th>
+                  <th class="text-right">Szocho</th>
+                  <th class="text-right">Szja</th>
+                  <th class="text-right">Tax</th>
+                  <th>Calculated</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-item>
+                <tr>
+                  <td data-label="Booked">{{item.bookingDate | date:'mediumDate'}}</td>
+                  <td data-label="Type">{{item.type}}</td>
+                  <td data-label="Partner" [title]="item.memo">{{item.partnerName}}</td>
+                  <td data-label="Amount" class="text-right">
+                    {{item.amount | number:'1.2-2'}} {{item.currencyId}}
+                  </td>
+                  <td data-label="MNB rate" class="text-right">
+                    {{item.rate | number:'1.2-4'}}
+                    @if (isFallback(item.bookingDate, item.rateDate)) {
+                      <i class="pi pi-info-circle tax-fallback"
+                        pTooltip="No MNB rate for {{item.bookingDate}}, using the one from {{item.rateDate}}"></i>
+                    }
+                  </td>
+                  <td data-label="Value (Ft)" class="text-right">{{item.amountInHuf | number:'1.0-0'}} Ft</td>
+                  <td data-label="Tax base" class="text-right">{{item.tax.taxBase | number:'1.0-0'}} Ft</td>
+                  <td data-label="Szocho" class="text-right">{{item.tax.szocho | number:'1.0-0'}} Ft</td>
+                  <td data-label="Szja" class="text-right">{{item.tax.szja | number:'1.0-0'}} Ft</td>
+                  <td data-label="Tax" class="text-right tax-total-cell">{{item.tax.total | number:'1.0-0'}} Ft</td>
+                  <td data-label="Calculated" class="text-color-secondary text-sm">
+                    {{item.calculatedOn | date:'mediumDate'}}
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="emptymessage">
+                <tr>
+                  <td colspan="11">
+                    No taxable events yet. Flag a bank transaction as taxable on the Financials page.
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+
+            @if (taxableReport.items.length > 0) {
+              <div class="tax-summary">
+                <div class="tax-tile">
+                  <div class="tax-tile-label">Total value</div>
+                  <div class="tax-tile-value">{{taxableReport.totalAmountInHuf | number:'1.0-0'}} Ft</div>
+                </div>
+                <div class="tax-tile">
+                  <div class="tax-tile-label">Tax base (89%)</div>
+                  <div class="tax-tile-value">{{taxableReport.totalTax.taxBase | number:'1.0-0'}} Ft</div>
+                </div>
+                <div class="tax-tile">
+                  <div class="tax-tile-label">Szocho (13%)</div>
+                  <div class="tax-tile-value">{{taxableReport.totalTax.szocho | number:'1.0-0'}} Ft</div>
+                </div>
+                <div class="tax-tile">
+                  <div class="tax-tile-label">Szja (15%)</div>
+                  <div class="tax-tile-value">{{taxableReport.totalTax.szja | number:'1.0-0'}} Ft</div>
+                </div>
+                <div class="tax-tile tax-tile-primary">
+                  <div class="tax-tile-label">Total tax</div>
+                  <div class="tax-tile-value">{{taxableReport.totalTax.total | number:'1.0-0'}} Ft</div>
+                </div>
+              </div>
+            }
           }
         </p-tabpanel>
 

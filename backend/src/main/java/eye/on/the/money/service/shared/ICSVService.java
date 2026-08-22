@@ -10,7 +10,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -30,11 +32,15 @@ public interface ICSVService {
     }
 
     default CSVParser getParser(MultipartFile file, String[] headers) throws IOException {
-        BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+        return this.getParser(file, headers, ',', StandardCharsets.UTF_8);
+    }
+
+    default CSVParser getParser(MultipartFile file, String[] headers, char delimiter, Charset charset) throws IOException {
+        Reader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream(), charset));
         return new CSVParser(fileReader, CSVFormat.Builder.create()
                 .setHeader(headers)
                 .setSkipHeaderRecord(true)
-                .setDelimiter(",")
+                .setDelimiter(delimiter)
                 .setTrim(true)
                 .setIgnoreHeaderCase(true).get());
     }

@@ -1,0 +1,80 @@
+<p-toolbar styleClass="p-mb-4">
+  <ng-template pTemplate="left">
+    <span class="text-color-secondary">
+      Every credit on the account, grouped by month and by who paid it. Records marked excluded on the
+      Transactions tab are left out.
+    </span>
+  </ng-template>
+  <ng-template pTemplate="right">
+    <button pButton pRipple icon="pi pi-refresh" class="p-button-rounded p-button-text mr-2" pTooltip="Refresh"
+      (click)="refresh()"></button>
+    <button pButton pRipple label="Export" icon="pi pi-upload" severity="info" [disabled]="!blocks.length"
+      (click)="download()"></button>
+  </ng-template>
+</p-toolbar>
+
+@if (loaded && !blocks.length) {
+  <p class="p-4 text-color-secondary">
+    No income to report yet. Import a K&amp;H account history export on the Transactions tab.
+  </p>
+}
+
+@for (block of blocks; track block.currencyId; let last = $last) {
+  <div class="income-block">
+    <div class="flex flex-row flex-wrap align-items-center mb-3">
+      <h3 class="mt-0 mb-0 mr-4">{{block.currencyId}}</h3>
+      <div class="mr-4">Total: <b class="amount-in">{{block.total | currency : block.currencyId : 'symbol' : '0.0-2'}}</b></div>
+      <div class="mr-4">Monthly average: <b>{{block.average | currency : block.currencyId : 'symbol' : '0.0-2'}}</b></div>
+      <div>Months: <b>{{block.months}}</b></div>
+    </div>
+
+    <apx-chart [series]="block.chartOptions.series!" [chart]="block.chartOptions.chart!"
+      [xaxis]="block.chartOptions.xaxis!" [yaxis]="block.chartOptions.yaxis!"
+      [legend]="block.chartOptions.legend!" [dataLabels]="block.chartOptions.dataLabels!"
+      [tooltip]="block.chartOptions.tooltip!">
+    </apx-chart>
+
+    <p-table [value]="block.rows" styleClass="p-datatable-striped p-datatable-sm table-stack"
+      rowGroupMode="subheader" groupRowsBy="monthKey" [groupRowsByOrder]="-1">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Source</th>
+          <th>Amount</th>
+          <th>Share</th>
+          <th>Transactions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="groupheader" let-row>
+        <tr pRowGroupHeader>
+          <td colspan="4" class="month-header">
+            <span class="month-label">{{row.monthKey}}</span>
+            <span class="month-total amount-in">
+              {{row.monthTotal | currency : row.currencyId : 'symbol' : '0.0-2'}}
+            </span>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-row>
+        <tr>
+          <td data-label="Source">{{row.source}}</td>
+          <td data-label="Amount" class="amount-in">
+            {{row.amount | currency : row.currencyId : 'symbol' : '0.0-2'}}
+          </td>
+          <td data-label="Share">
+            <div class="share-cell">
+              <div class="share-bar" [style.width.%]="row.share"></div>
+              <span class="share-value">{{row.share | number : '1.0-1'}}%</span>
+            </div>
+          </td>
+          <td data-label="Transactions">{{row.transactionCount}}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  @if (!last) {
+    <p-divider></p-divider>
+  }
+}

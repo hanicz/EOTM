@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { MessageService, PrimeTemplate } from 'primeng/api';
-import { RSU, TaxBreakdown, TaxReport } from '../model/rsu';
+import { RSU, TaxBreakdown, TaxReport, TaxableEventReport } from '../model/rsu';
 import { TaxService } from '../service/tax.service';
 import { StockService } from '../service/stock.service';
 import { Exchange } from '../model/exchange';
@@ -18,7 +18,7 @@ import { Select } from 'primeng/select';
 import { Tag } from 'primeng/tag';
 import { Toast } from 'primeng/toast';
 import { FormsModule } from '@angular/forms';
-import { DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 
 @Component({
     selector: 'app-tax',
@@ -26,9 +26,11 @@ import { DecimalPipe } from '@angular/common';
     styleUrls: ['./tax.component.css'],
     imports: [MenuComponent, Bind, Panel, Tabs, TabList, Tab, TabPanels, TabPanel, ButtonDirective, Ripple,
         Tooltip, TableModule, PrimeTemplate, InputText, InputNumber, Select, Tag, Toast,
-        FormsModule, DecimalPipe]
+        FormsModule, DecimalPipe, DatePipe]
 })
 export class TaxComponent {
+
+  private static readonly TRANSACTION_TAB = '2';
 
   rsus: RSU[] = [];
   report: TaxReport | null = null;
@@ -45,6 +47,9 @@ export class TaxComponent {
   amountTax: TaxBreakdown | null = null;
   amountCalculating: boolean = false;
 
+  taxableReport: TaxableEventReport | null = null;
+  taxableLoading: boolean = false;
+
   constructor(private taxService: TaxService, private stockService: StockService,
     private messageService: MessageService, private cdr: ChangeDetectorRef) {
     this.stockService.getAllExchanges().subscribe({
@@ -52,6 +57,41 @@ export class TaxComponent {
         this.exchanges = data;
         this.cdr.markForCheck();
       }
+    });
+  }
+
+  onTabChange(value: string | number | undefined): void {
+    if (String(value) === TaxComponent.TRANSACTION_TAB && this.taxableReport === null) {
+      this.loadTaxableEvents();
+    }
+  }
+
+  loadTaxableEvents(): void {
+    this.taxableLoading = true;
+    this.taxService.getTaxableEvents().subscribe({
+      next: (data) => {
+        this.taxableLoading = false;
+        this.taxableReport = data;
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        this.taxableLoading = false;
+        this.taxableReport = null;
+        this.showError(error);
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  downloadTaxableEvents(): void {
+    this.taxService.downloadTaxableEventsCsv().subscribe({
+      next: (data) => {
+        let a = document.createElement('a');
+        a.href = window.URL.createObjectURL(data as Blob);
+        a.download = 'taxable-events.csv';
+        a.click();
+      },
+      error: (error) => this.showError(error)
     });
   }
 

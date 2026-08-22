@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { RSU, TaxBreakdown, TaxReport } from '../model/rsu';
+import { RSU, TaxBreakdown, TaxReport, TaxableEventReport } from '../model/rsu';
 import { ResourceHelper } from '../util/servicehelper';
 import { environment } from '../../environments/environment';
 
@@ -31,6 +31,19 @@ export class TaxService {
   calculateForAmount(amount: number) {
     return this.http.post<TaxBreakdown>(`${this.taxUrl}/amount`, JSON.stringify({ amount }), {
       headers: this.helper.getHeadersWithToken()
+    });
+  }
+
+  getTaxableEvents() {
+    return this.http.get<TaxableEventReport>(`${this.taxUrl}/transaction`, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  }
+
+  downloadTaxableEventsCsv() {
+    return this.http.get(`${this.taxUrl}/transaction/csv`, {
+      headers: this.helper.getHeadersWithToken(),
+      responseType: 'blob'
     });
   }
 }

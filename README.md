@@ -61,6 +61,27 @@ plan what they add up to.
   out of the pot; anything left over goes into it.
 - Every year is shown in both nominal and today's money, with a growth chart and CSV export.
 
+### Financials
+
+- Imports the **account history CSV exported from K&H netbank** (tab separated), keeping the booking date,
+  the bank's transaction id, the type, both account numbers and names, the amount, the currency and the memo.
+- The file is read whether it comes out as UTF-8 or Latin-2, and amounts are parsed in Hungarian notation
+  (`-1.234.567,89`).
+- **Re-importing is safe.** The bank's transaction id is not unique on its own — a fee and the tax charged on
+  it share one id — so a record is identified by the id together with its booking date, type, amount and memo.
+  Loading the same export again updates those rows instead of duplicating them.
+- **Monthly cash flow** — money in, money out, the net and what share of the month's income was kept, held
+  apart per currency so nothing is summed across HUF and EUR. Shown as a chart and a table, and exports to
+  CSV. Alongside it, the **average monthly saving over the last 3, 6, 12 and 24 months**, counted back from
+  the most recent month with data and showing how many months of each window actually contributed.
+- **Monthly income** — every credit broken down by who paid it, per month and per currency, with each source's
+  share of that month and how many payments it took. Where the bank leaves the partner blank, the transaction
+  type stands in as the source. Shown as a stacked chart and a grouped table, and exports to CSV.
+- Individual records can be **left out of the reports** — a transfer between your own accounts is real money
+  leaving one account, but counting it distorts what you actually spent. The flag is per record and survives
+  re-importing the export.
+- The history exports back out to CSV.
+
 ### Data in and out
 
 - **CSV import and export** on every transaction type, so records can be moved in bulk.

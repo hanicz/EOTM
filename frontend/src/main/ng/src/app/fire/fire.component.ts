@@ -50,7 +50,7 @@ interface Chart {
 const DEFAULT_CURRENCY = 'HUF';
 
 /** The plot area inside the SVG viewBox, leaving room for the axis labels. */
-const CHART = { width: 820, height: 280, left: 68, right: 16, top: 16, bottom: 30 };
+const CHART = { width: 820, height: 340, left: 68, right: 16, top: 16, bottom: 30 };
 
 @Component({
     selector: 'app-fire',
@@ -71,18 +71,18 @@ export class FireComponent {
   unconvertedCurrencies: string[] = [];
 
   otherAssets: number = 0;
-  monthlyContribution: number = 200000;
+  monthlyContribution: number = 1000000;
   annualContributionIncrease: number = 3;
   annualReturn: number = 4;
   inflation: number = 3;
 
   annualSpending: number = 6000000;
   withdrawalRate: number = 3;
-  useCustomFireNumber: boolean = false;
-  customFireNumber: number | null = null;
+  useCustomFireNumber: boolean = true;
+  customFireNumber: number | null = 450000000;
 
-  hasPension: boolean = false;
-  monthlyPension: number | null = null;
+  hasPension: boolean = true;
+  monthlyPension: number | null = 700000;
   pensionAge: number | null = 65;
 
   currentAge: number = 32;

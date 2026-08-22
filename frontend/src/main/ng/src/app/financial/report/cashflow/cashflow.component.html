@@ -1,0 +1,105 @@
+<p-toolbar styleClass="p-mb-4">
+  <ng-template pTemplate="left">
+    <span class="text-color-secondary">
+      Money in and out per month. Records marked excluded on the Transactions tab are left out.
+    </span>
+  </ng-template>
+  <ng-template pTemplate="right">
+    <button pButton pRipple icon="pi pi-refresh" class="p-button-rounded p-button-text mr-2" pTooltip="Refresh"
+      (click)="refresh()"></button>
+    <button pButton pRipple label="Export" icon="pi pi-upload" severity="info" [disabled]="!blocks.length"
+      (click)="download()"></button>
+  </ng-template>
+</p-toolbar>
+
+@if (loaded && !blocks.length) {
+  <p class="p-4 text-color-secondary">
+    Nothing to report yet. Import a K&amp;H account history export on the Transactions tab, and make sure at
+    least one record is still counted.
+  </p>
+}
+
+@for (block of blocks; track block.currencyId; let last = $last) {
+  <div class="cash-flow-block">
+    <div class="flex flex-row flex-wrap align-items-center mb-3">
+      <h3 class="mt-0 mb-0 mr-4">{{block.currencyId}}</h3>
+      <div class="mr-4">In: <b class="amount-in">{{block.totalIn | currency : block.currencyId : 'symbol' : '0.0-2'}}</b></div>
+      <div class="mr-4">Out: <b class="amount-out">{{block.totalOut | currency : block.currencyId : 'symbol' : '0.0-2'}}</b></div>
+      <div>Net: <b>{{(block.totalIn + block.totalOut) | currency : block.currencyId : 'symbol' : '0.0-2'}}</b></div>
+    </div>
+
+    <apx-chart [series]="block.chartOptions.series!" [chart]="block.chartOptions.chart!"
+      [xaxis]="block.chartOptions.xaxis!" [yaxis]="block.chartOptions.yaxis!"
+      [legend]="block.chartOptions.legend!" [dataLabels]="block.chartOptions.dataLabels!"
+      [tooltip]="block.chartOptions.tooltip!" [stroke]="block.chartOptions.stroke!"
+      [colors]="block.chartOptions.colors!">
+    </apx-chart>
+
+    <p-table [value]="block.rows" styleClass="p-datatable-striped p-datatable-sm table-stack">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Month</th>
+          <th>In</th>
+          <th>Out</th>
+          <th>Net</th>
+          <th pTooltip="What share of the month's income was left over.">Saved %</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-row>
+        <tr>
+          <td data-label="Month">{{label(row)}}</td>
+          <td data-label="In" class="amount-in">{{row.moneyIn | currency : row.currencyId : 'symbol' : '0.0-2'}}</td>
+          <td data-label="Out" class="amount-out">{{row.moneyOut | currency : row.currencyId : 'symbol' : '0.0-2'}}</td>
+          <td data-label="Net" [class.amount-in]="row.net > 0" [class.amount-out]="row.net < 0">
+            {{row.net | currency : row.currencyId : 'symbol' : '0.0-2'}}
+          </td>
+          <td data-label="Saved %">
+            @if (row.savedPercent === null) {
+              <span class="muted" pTooltip="No income booked this month, so there is nothing to divide by.">
+                &ndash;
+              </span>
+            } @else {
+              <b [class.amount-in]="row.savedPercent > 0" [class.amount-out]="row.savedPercent < 0">
+                {{row.savedPercent | number : '1.0-1'}}%
+              </b>
+            }
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <h4 class="mb-2 mt-4">Average monthly saving</h4>
+    <p-table [value]="block.averages" styleClass="p-datatable-striped p-datatable-sm table-stack">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Period</th>
+          <th>Average per month</th>
+          <th pTooltip="Counted back from the most recent month with data, not from today.">Months counted</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-average>
+        <tr>
+          <td data-label="Period">{{average.label}}</td>
+          <td data-label="Average per month">
+            @if (average.average === null) {
+              <span class="muted">&ndash;</span>
+            } @else {
+              <b [class.amount-in]="average.average > 0" [class.amount-out]="average.average < 0">
+                {{average.average | currency : block.currencyId : 'symbol' : '0.0-2'}}
+              </b>
+            }
+          </td>
+          <td data-label="Months counted">
+            <span [class.muted]="average.monthsCounted < average.windowMonths">
+              {{average.monthsCounted}} of {{average.windowMonths}}
+            </span>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  @if (!last) {
+    <p-divider></p-divider>
+  }
+}

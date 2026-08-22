@@ -52,9 +52,21 @@ public class TaxableEventService implements ICSVService {
 
         Map<String, NavigableMap<LocalDate, BigDecimal>> rates = taxable ? this.fetchRates(transactions) : Map.of();
         for (BankTransaction transaction : transactions) {
+            boolean paid = transaction.getTaxDetails() != null && transaction.getTaxDetails().isPaid();
             transaction.setTaxable(taxable);
-            transaction.setTaxDetails(taxable ? this.calculate(transaction, rates) : null);
+            transaction.setTaxDetails(taxable ? this.calculate(transaction, rates, paid) : null);
         }
+        this.bankTransactionRepository.saveAll(transactions);
+    }
+
+    @Transactional
+    public void setTaxPaid(String userEmail, List<Long> ids, boolean paid) {
+        log.trace("Enter");
+        List<BankTransaction> transactions = this.bankTransactionRepository.findByUserEmailAndIdIn(userEmail, ids).stream()
+                .filter(transaction -> transaction.getTaxDetails() != null).toList();
+        if (transactions.isEmpty()) return;
+
+        transactions.forEach(transaction -> transaction.getTaxDetails().setPaid(paid));
         this.bankTransactionRepository.saveAll(transactions);
     }
 
@@ -81,7 +93,7 @@ public class TaxableEventService implements ICSVService {
     }
 
     private TaxDetails calculate(BankTransaction transaction,
-                                 Map<String, NavigableMap<LocalDate, BigDecimal>> rates) {
+                                 Map<String, NavigableMap<LocalDate, BigDecimal>> rates, boolean paid) {
         Map.Entry<LocalDate, BigDecimal> rate = this.rateOn(rates, transaction.getCurrency().getId(),
                 transaction.getBookingDate());
         BigDecimal amountInHuf = BigDecimal.valueOf(transaction.getAmount())
@@ -97,6 +109,7 @@ public class TaxableEventService implements ICSVService {
                 .szja(tax.getSzja())
                 .total(tax.getTotal())
                 .calculatedOn(LocalDate.now())
+                .paid(paid)
                 .build();
     }
 
@@ -114,6 +127,7 @@ public class TaxableEventService implements ICSVService {
                 .rateDate(details.getRateDate())
                 .amountInHuf(details.getAmountInHuf())
                 .calculatedOn(details.getCalculatedOn())
+                .paid(details.isPaid())
                 .tax(TaxBreakdownDTO.builder()
                         .amount(details.getAmountInHuf())
                         .taxBase(details.getTaxBase())

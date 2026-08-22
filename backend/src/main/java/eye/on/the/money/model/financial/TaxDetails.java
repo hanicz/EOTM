@@ -48,4 +48,7 @@ public class TaxDetails {
 
     @Column(name = "tax_calculated_on")
     private LocalDate calculatedOn;
+
+    @Column(name = "tax_paid")
+    private boolean paid;
 }

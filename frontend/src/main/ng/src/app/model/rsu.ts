@@ -48,6 +48,7 @@ export interface TaxableEvent {
     amountInHuf: number;
     calculatedOn: string;
     tax: TaxBreakdown;
+    paid: boolean;
 }
 
 export interface TaxableEventReport {

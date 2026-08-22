@@ -215,7 +215,9 @@
                   <th class="text-right">Szocho</th>
                   <th class="text-right">Szja</th>
                   <th class="text-right">Tax</th>
+                  <th>Paid</th>
                   <th>Calculated</th>
+                  <th></th>
                 </tr>
               </ng-template>
               <ng-template pTemplate="body" let-item>
@@ -238,14 +240,27 @@
                   <td data-label="Szocho" class="text-right">{{item.tax.szocho | number:'1.0-0'}} Ft</td>
                   <td data-label="Szja" class="text-right">{{item.tax.szja | number:'1.0-0'}} Ft</td>
                   <td data-label="Tax" class="text-right tax-total-cell">{{item.tax.total | number:'1.0-0'}} Ft</td>
+                  <td data-label="Paid">
+                    @if (item.paid) {
+                      <p-tag severity="success" value="Paid"></p-tag>
+                    } @else {
+                      <p-tag severity="warn" value="Unpaid"></p-tag>
+                    }
+                  </td>
                   <td data-label="Calculated" class="text-color-secondary text-sm">
                     {{item.calculatedOn | date:'mediumDate'}}
+                  </td>
+                  <td>
+                    <button pButton pRipple type="button" [icon]="item.paid ? 'pi pi-undo' : 'pi pi-check'"
+                      [pTooltip]="item.paid ? 'Mark as not paid' : 'Mark as paid'"
+                      (click)="setPaid(item.id, !item.paid)"
+                      class="p-button-rounded p-button-text" severity="secondary"></button>
                   </td>
                 </tr>
               </ng-template>
               <ng-template pTemplate="emptymessage">
                 <tr>
-                  <td colspan="11">
+                  <td colspan="13">
                     No taxable events yet. Flag a bank transaction as taxable on the Financials page.
                   </td>
                 </tr>

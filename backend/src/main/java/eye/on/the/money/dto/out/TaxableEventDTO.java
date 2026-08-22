@@ -40,12 +40,13 @@ public class TaxableEventDTO implements CSVHelper {
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate calculatedOn;
     private TaxBreakdownDTO tax;
+    private boolean paid;
 
     @Override
     @JsonIgnore
     public Object[] getHeaders() {
         return new String[]{"Id", "Booking Date", "Type", "Partner Name", "Memo", "Amount", "Currency",
-                "MNB Rate", "Rate Date", "Amount (HUF)", "Tax Base", "Szocho", "Szja", "Tax", "Calculated On"};
+                "MNB Rate", "Rate Date", "Amount (HUF)", "Tax Base", "Szocho", "Szja", "Tax", "Calculated On", "Paid"};
     }
 
     @Override
@@ -54,6 +55,6 @@ public class TaxableEventDTO implements CSVHelper {
         return new Object[]{this.getId(), this.getBookingDate(), this.getType(), this.getPartnerName(),
                 this.getMemo(), this.getAmount(), this.getCurrencyId(), this.getRate(), this.getRateDate(),
                 this.getAmountInHuf(), this.getTax().getTaxBase(), this.getTax().getSzocho(),
-                this.getTax().getSzja(), this.getTax().getTotal(), this.getCalculatedOn()};
+                this.getTax().getSzja(), this.getTax().getTotal(), this.getCalculatedOn(), this.isPaid()};
     }
 }

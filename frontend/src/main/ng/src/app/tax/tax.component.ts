@@ -83,6 +83,18 @@ export class TaxComponent {
     });
   }
 
+  setPaid(id: number, paid: boolean): void {
+    this.taxService.setTaxPaid(String(id), paid).subscribe({
+      next: () => this.loadTaxableEvents(),
+      error: () => this.messageService.add({
+        severity: 'error',
+        summary: 'Could not update',
+        detail: 'Could not update the payment status.',
+        life: 8000
+      })
+    });
+  }
+
   downloadTaxableEvents(): void {
     this.taxService.downloadTaxableEventsCsv().subscribe({
       next: (data) => {

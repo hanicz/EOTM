@@ -4,6 +4,7 @@ import eye.on.the.money.EotmApplication;
 import eye.on.the.money.dto.out.RSUTaxDTO;
 import eye.on.the.money.dto.out.TaxBreakdownDTO;
 import eye.on.the.money.dto.out.TaxReportDTO;
+import eye.on.the.money.service.financial.TaxableEventService;
 import eye.on.the.money.service.shared.TaxService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,11 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(classes = EotmApplication.class)
@@ -35,6 +39,9 @@ class TaxControllerIntegrationTest {
 
     @MockitoBean
     private TaxService taxService;
+
+    @MockitoBean
+    private TaxableEventService taxableEventService;
 
     /**
      * Guards the wire format: a LocalDate has to reach the UI as "2026-08-04", not as [2026,8,4], which
@@ -60,5 +67,15 @@ class TaxControllerIntegrationTest {
         assertTrue(json.contains("\"date\":\"2026-08-04\""), "date was not an ISO string: " + json);
         assertTrue(json.contains("\"priceDate\":\"2026-08-04\""), "priceDate was not an ISO string: " + json);
         assertTrue(json.contains("\"rateDate\":\"2026-08-04\""), "rateDate was not an ISO string: " + json);
+    }
+
+    @Test
+    void bindsTheIdListWhenMarkingTaxAsPaid() throws Exception {
+        this.mockMvc.perform(put("/api/v1/tax/transaction/paid")
+                        .param("ids", "1,2")
+                        .param("paid", "true"))
+                .andExpect(status().isOk());
+
+        verify(this.taxableEventService).setTaxPaid(any(), eq(List.of(1L, 2L)), eq(true));
     }
 }

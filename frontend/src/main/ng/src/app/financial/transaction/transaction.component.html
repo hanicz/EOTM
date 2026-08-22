@@ -29,7 +29,7 @@
   </ng-template>
 </p-toolbar>
 
-<p-table #dt1 [value]="transactions" styleClass="p-datatable-striped table-stack"
+<p-table #dt1 [value]="filteredTransactions" styleClass="p-datatable-striped table-stack"
   [(selection)]="selectedTransactions" [paginator]="true" [rows]="25"
   [rowsPerPageOptions]="[25, 50, 100]" sortField="bookingDate" [sortOrder]="-1"
   [globalFilterFields]="['partnerName', 'partnerAccount', 'memo', 'type', 'bankTransactionId']">
@@ -47,6 +47,18 @@
               (onChange)="filter($any($event)?.value)" [showClear]="true" placeholder="Any type"></p-select>
           </ng-template>
         </p-columnFilter>
+        <span class="ml-2">
+          <input pInputText type="date" [(ngModel)]="fromDate" (ngModelChange)="dateFilterChanged()"
+            [max]="toDate || null" class="p-column-filter" aria-label="Booked from">
+        </span>
+        <span class="ml-2">
+          <input pInputText type="date" [(ngModel)]="toDate" (ngModelChange)="dateFilterChanged()"
+            [min]="fromDate || null" class="p-column-filter" aria-label="Booked to">
+        </span>
+        @if (hasDateFilter) {
+          <button pButton pRipple type="button" icon="pi pi-filter-slash" severity="secondary"
+            pTooltip="Clear the date range" class="p-button-text ml-2" (click)="clearDateFilter()"></button>
+        }
       </div>
     </div>
   </ng-template>
@@ -114,7 +126,11 @@
 
   <ng-template pTemplate="emptymessage">
     <tr>
-      <td colspan="9">No bank transactions yet. Import a K&amp;H account history export to get started.</td>
+      @if (hasDateFilter) {
+        <td colspan="9">No bank transactions in the selected period.</td>
+      } @else {
+        <td colspan="9">No bank transactions yet. Import a K&amp;H account history export to get started.</td>
+      }
     </tr>
   </ng-template>
 </p-table>

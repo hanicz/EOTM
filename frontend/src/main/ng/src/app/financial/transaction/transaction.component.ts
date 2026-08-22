@@ -28,8 +28,11 @@ export class FinancialTransactionComponent {
   @Output() dataChanged = new EventEmitter<void>();
 
   transactions: BankTransaction[] = [];
+  filteredTransactions: BankTransaction[] = [];
   selectedTransactions: BankTransaction[] = [];
   types: { label: string, value: string }[] = [];
+  fromDate: string = '';
+  toDate: string = '';
   @ViewChild('fileUpload') fileUpload: any;
 
 
@@ -47,12 +50,42 @@ export class FinancialTransactionComponent {
       next: (data) => {
         this.transactions = data;
         this.types = [...new Set(data.map(t => t.type))].sort().map(type => ({ label: type, value: type }));
+        this.applyDateFilter();
         this.cdr.markForCheck();
       },
       error: (error) => {
         console.log(error);
       }
     });
+  }
+
+  get hasDateFilter(): boolean {
+    return !!this.fromDate || !!this.toDate;
+  }
+
+  dateFilterChanged(): void {
+    this.selectedTransactions = [];
+    this.applyDateFilter();
+  }
+
+  clearDateFilter(): void {
+    this.fromDate = '';
+    this.toDate = '';
+    this.dateFilterChanged();
+  }
+
+  private applyDateFilter(): void {
+    this.filteredTransactions = this.transactions.filter(transaction => {
+      const booked = this.bookedOn(transaction);
+      return (!this.fromDate || booked >= this.fromDate) && (!this.toDate || booked <= this.toDate);
+    });
+  }
+
+  private bookedOn(transaction: BankTransaction): string {
+    const booked: unknown = transaction.bookingDate;
+    return typeof booked === 'string'
+      ? booked.substring(0, 10)
+      : new Date(booked as Date).toLocaleDateString('en-CA');
   }
 
   excludeClicked(excluded: boolean): void {

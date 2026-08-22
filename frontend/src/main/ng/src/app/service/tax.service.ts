@@ -40,6 +40,13 @@ export class TaxService {
     });
   }
 
+  setTaxPaid(ids: string, paid: boolean) {
+    const url = `${this.taxUrl}/transaction/paid?ids=${ids}&paid=${paid}`;
+    return this.http.put(url, null, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  }
+
   downloadTaxableEventsCsv() {
     return this.http.get(`${this.taxUrl}/transaction/csv`, {
       headers: this.helper.getHeadersWithToken(),

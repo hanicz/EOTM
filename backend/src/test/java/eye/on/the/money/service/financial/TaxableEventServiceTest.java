@@ -242,6 +242,69 @@ class TaxableEventServiceTest {
     }
 
     @Test
+    void marksTheTaxAsPaid() {
+        BankTransaction transaction = this.taxed(1L, LocalDate.of(2025, 12, 1), "HUF", 1000000.0,
+                BigDecimal.ONE, "1000000.00", "890000.00", "115700", "133500", "249200");
+        when(this.bankTransactionRepository.findByUserEmailAndIdIn(USER_EMAIL, List.of(1L)))
+                .thenReturn(List.of(transaction));
+
+        this.service().setTaxPaid(USER_EMAIL, List.of(1L), true);
+
+        assertTrue(transaction.getTaxDetails().isPaid());
+        verify(this.bankTransactionRepository).saveAll(List.of(transaction));
+    }
+
+    @Test
+    void clearsThePaidFlagAgain() {
+        BankTransaction transaction = this.taxed(1L, LocalDate.of(2025, 12, 1), "HUF", 1000000.0,
+                BigDecimal.ONE, "1000000.00", "890000.00", "115700", "133500", "249200");
+        transaction.getTaxDetails().setPaid(true);
+        when(this.bankTransactionRepository.findByUserEmailAndIdIn(USER_EMAIL, List.of(1L)))
+                .thenReturn(List.of(transaction));
+
+        this.service().setTaxPaid(USER_EMAIL, List.of(1L), false);
+
+        assertFalse(transaction.getTaxDetails().isPaid());
+    }
+
+    @Test
+    void ignoresTransactionsThatAreNotTaxableEventsWhenMarkingAsPaid() {
+        BankTransaction transaction = this.transaction(1L, LocalDate.of(2025, 12, 1), "HUF", 1000000.0);
+        when(this.bankTransactionRepository.findByUserEmailAndIdIn(USER_EMAIL, List.of(1L)))
+                .thenReturn(List.of(transaction));
+
+        this.service().setTaxPaid(USER_EMAIL, List.of(1L), true);
+
+        assertNull(transaction.getTaxDetails());
+        verify(this.bankTransactionRepository, never()).saveAll(any());
+    }
+
+    @Test
+    void keepsThePaidFlagWhenTheTaxIsRecalculated() {
+        BankTransaction transaction = this.taxed(1L, LocalDate.of(2025, 12, 1), "HUF", 1000000.0,
+                BigDecimal.ONE, "1.00", "1.00", "1", "1", "2");
+        transaction.getTaxDetails().setPaid(true);
+        when(this.bankTransactionRepository.findByUserEmailAndIdIn(USER_EMAIL, List.of(1L)))
+                .thenReturn(List.of(transaction));
+
+        this.service().setTaxable(USER_EMAIL, List.of(1L), true);
+
+        assertEquals(0, new BigDecimal("249200").compareTo(transaction.getTaxDetails().getTotal()));
+        assertTrue(transaction.getTaxDetails().isPaid());
+    }
+
+    @Test
+    void reportsWhetherTheTaxWasPaid() {
+        BankTransaction transaction = this.taxed(1L, LocalDate.of(2025, 12, 1), "HUF", 1000000.0,
+                BigDecimal.ONE, "1000000.00", "890000.00", "115700", "133500", "249200");
+        transaction.getTaxDetails().setPaid(true);
+        when(this.bankTransactionRepository.findByUserEmailAndTaxableTrueOrderByBookingDateDesc(USER_EMAIL))
+                .thenReturn(List.of(transaction));
+
+        assertTrue(this.service().getTaxableEvents(USER_EMAIL).getItems().getFirst().isPaid());
+    }
+
+    @Test
     void writesTheReportAsCsv() {
         when(this.bankTransactionRepository.findByUserEmailAndTaxableTrueOrderByBookingDateDesc(USER_EMAIL))
                 .thenReturn(List.of(this.taxed(1L, LocalDate.of(2025, 12, 1), "HUF", 1000000.0, BigDecimal.ONE,

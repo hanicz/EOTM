@@ -3,6 +3,14 @@
   <ng-template pTemplate="left">
     <button pButton pRipple label="New" icon="pi pi-plus" class="mr-2" severity="success"
     (click)="openNew()"></button>
+    <button pButton pRipple label="RSU" icon="pi pi-percentage" severity="secondary" class="mr-2"
+      pTooltip="Flag the selected buys as RSUs and tax them on the tax page"
+      [disabled]="!selectedInvestments || !selectedInvestments.length"
+      (click)="rsuClicked(true)"></button>
+    <button pButton pRipple label="Not RSU" icon="pi pi-ban" severity="secondary" class="mr-2"
+      pTooltip="Leave the selected buys out of the RSU tax report"
+      [disabled]="!selectedInvestments || !selectedInvestments.length"
+      (click)="rsuClicked(false)"></button>
     <button pButton pRipple icon="pi pi-trash" severity="danger"
     [disabled]="!selectedInvestments || !selectedInvestments.length" (click)="deleteClicked()"></button>
   </ng-template>
@@ -61,6 +69,7 @@
       <th>Account</th>
       <th>Currency</th>
       <th>Fee</th>
+      <th>RSU</th>
       <th></th>
     </tr>
   </ng-template>
@@ -92,7 +101,18 @@
       <td data-label="Account">{{investment.accountName}}</td>
       <td data-label="Currency">{{investment.currencyId}}</td>
       <td data-label="Fee">{{investment.fee}}</td>
+      <td data-label="RSU">
+        @if (investment.rsu) {
+          <p-tag severity="warn" value="RSU"></p-tag>
+        }
+      </td>
       <td>
+        @if (investment.buySell === 'B') {
+          <button pButton pRipple type="button" [icon]="investment.rsu ? 'pi pi-ban' : 'pi pi-percentage'"
+            [pTooltip]="investment.rsu ? 'Leave out of the RSU tax report' : 'Flag as an RSU'"
+            (click)="setRSU(investment.investmentId, !investment.rsu)"
+            class="p-button-rounded p-button-text mr-1" severity="secondary"></button>
+        }
         <button pButton pRipple type="button" icon="pi pi-pencil" (click)="editInvestment(investment)"
         class="p-button-rounded p-button-text mr-1" severity="info"></button>
         <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(investment.investmentId)"

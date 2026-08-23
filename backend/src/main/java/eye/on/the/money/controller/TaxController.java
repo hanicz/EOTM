@@ -2,12 +2,14 @@ package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.in.RSUDTO;
 import eye.on.the.money.dto.in.TaxAmountDTO;
+import eye.on.the.money.dto.out.RSUTaxEventReportDTO;
 import eye.on.the.money.dto.out.TaxBreakdownDTO;
 import eye.on.the.money.dto.out.TaxReportDTO;
 import eye.on.the.money.dto.out.TaxableEventReportDTO;
 import eye.on.the.money.security.CurrentUserEmail;
 import eye.on.the.money.service.financial.TaxableEventService;
 import eye.on.the.money.service.shared.TaxService;
+import eye.on.the.money.service.stock.RSUTaxService;
 import eye.on.the.money.util.CsvResponseUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -35,6 +37,7 @@ public class TaxController {
 
     private final TaxService taxService;
     private final TaxableEventService taxableEventService;
+    private final RSUTaxService rsuTaxService;
 
     @GetMapping("/transaction")
     public ResponseEntity<TaxableEventReportDTO> getTaxableEvents(@CurrentUserEmail String userEmail) {
@@ -54,6 +57,27 @@ public class TaxController {
                                            @RequestParam boolean paid) {
         log.trace("Enter");
         this.taxableEventService.setTaxPaid(userEmail, ids, paid);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/stock")
+    public ResponseEntity<RSUTaxEventReportDTO> getRSUTaxEvents(@CurrentUserEmail String userEmail) {
+        log.trace("Enter");
+        return ResponseEntity.ok(this.rsuTaxService.getRSUTaxEvents(userEmail));
+    }
+
+    @GetMapping("/stock/csv")
+    public void getRSUTaxEventsCSV(@CurrentUserEmail String userEmail, HttpServletResponse servletResponse)
+            throws IOException {
+        log.trace("Enter");
+        this.rsuTaxService.getCSV(userEmail, CsvResponseUtil.prepare(servletResponse, "rsu-transactions.csv"));
+    }
+
+    @PutMapping("/stock/paid")
+    public ResponseEntity<Void> setRSUTaxPaid(@CurrentUserEmail String userEmail, @RequestParam List<Long> ids,
+                                              @RequestParam boolean paid) {
+        log.trace("Enter");
+        this.rsuTaxService.setTaxPaid(userEmail, ids, paid);
         return ResponseEntity.ok().build();
     }
 

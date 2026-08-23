@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { RSU, TaxBreakdown, TaxReport, TaxableEventReport } from '../model/rsu';
+import { RSU, StockRSUTaxReport, TaxBreakdown, TaxReport, TaxableEventReport } from '../model/rsu';
 import { ResourceHelper } from '../util/servicehelper';
 import { environment } from '../../environments/environment';
 
@@ -49,6 +49,26 @@ export class TaxService {
 
   downloadTaxableEventsCsv() {
     return this.http.get(`${this.taxUrl}/transaction/csv`, {
+      headers: this.helper.getHeadersWithToken(),
+      responseType: 'blob'
+    });
+  }
+
+  getStockRSUEvents() {
+    return this.http.get<StockRSUTaxReport>(`${this.taxUrl}/stock`, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  }
+
+  setStockRSUPaid(ids: string, paid: boolean) {
+    const url = `${this.taxUrl}/stock/paid?ids=${ids}&paid=${paid}`;
+    return this.http.put(url, null, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  }
+
+  downloadStockRSUCsv() {
+    return this.http.get(`${this.taxUrl}/stock/csv`, {
       headers: this.helper.getHeadersWithToken(),
       responseType: 'blob'
     });

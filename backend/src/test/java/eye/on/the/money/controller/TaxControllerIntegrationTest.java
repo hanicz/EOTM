@@ -2,10 +2,13 @@ package eye.on.the.money.controller;
 
 import eye.on.the.money.EotmApplication;
 import eye.on.the.money.dto.out.RSUTaxDTO;
+import eye.on.the.money.dto.out.RSUTaxEventDTO;
+import eye.on.the.money.dto.out.RSUTaxEventReportDTO;
 import eye.on.the.money.dto.out.TaxBreakdownDTO;
 import eye.on.the.money.dto.out.TaxReportDTO;
 import eye.on.the.money.service.financial.TaxableEventService;
 import eye.on.the.money.service.shared.TaxService;
+import eye.on.the.money.service.stock.RSUTaxService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,6 +28,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -42,6 +46,9 @@ class TaxControllerIntegrationTest {
 
     @MockitoBean
     private TaxableEventService taxableEventService;
+
+    @MockitoBean
+    private RSUTaxService rsuTaxService;
 
     /**
      * Guards the wire format: a LocalDate has to reach the UI as "2026-08-04", not as [2026,8,4], which
@@ -77,5 +84,46 @@ class TaxControllerIntegrationTest {
                 .andExpect(status().isOk());
 
         verify(this.taxableEventService).setTaxPaid(any(), eq(List.of(1L, 2L)), eq(true));
+    }
+
+    @Test
+    void serializesTheStockRSUReportWithIsoDates() throws Exception {
+        LocalDate date = LocalDate.of(2026, 8, 4);
+        when(this.rsuTaxService.getRSUTaxEvents(any())).thenReturn(RSUTaxEventReportDTO.builder()
+                .items(List.of(RSUTaxEventDTO.builder()
+                        .id(1L).shortName("AAPL").exchange("US").transactionDate(date).priceDate(date)
+                        .rateDate(date).calculatedOn(date).quantity(10).currency("USD")
+                        .amountInHuf(new BigDecimal("1000")).paid(true).tax(TaxBreakdownDTO.zero()).build()))
+                .totalAmountInHuf(new BigDecimal("1000")).totalTax(TaxBreakdownDTO.zero()).build());
+
+        MvcResult response = this.mockMvc.perform(get("/api/v1/tax/stock"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String json = response.getResponse().getContentAsString();
+        assertTrue(json.contains("\"transactionDate\":\"2026-08-04\""),
+                "transactionDate was not an ISO string: " + json);
+        assertTrue(json.contains("\"priceDate\":\"2026-08-04\""), "priceDate was not an ISO string: " + json);
+        assertTrue(json.contains("\"calculatedOn\":\"2026-08-04\""),
+                "calculatedOn was not an ISO string: " + json);
+        assertTrue(json.contains("\"paid\":true"), "paid was missing: " + json);
+    }
+
+    @Test
+    void bindsTheIdListWhenMarkingStockRSUTaxAsPaid() throws Exception {
+        this.mockMvc.perform(put("/api/v1/tax/stock/paid")
+                        .param("ids", "1,2")
+                        .param("paid", "true"))
+                .andExpect(status().isOk());
+
+        verify(this.rsuTaxService).setTaxPaid(any(), eq(List.of(1L, 2L)), eq(true));
+    }
+
+    @Test
+    void streamsTheStockRSUReportAsCsv() throws Exception {
+        this.mockMvc.perform(get("/api/v1/tax/stock/csv"))
+                .andExpect(status().isOk());
+
+        verify(this.rsuTaxService).getCSV(any(), any());
     }
 }

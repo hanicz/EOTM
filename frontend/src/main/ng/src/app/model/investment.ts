@@ -13,4 +13,5 @@ export interface Investment {
     name: string;
     accountId: number;
     accoutName: string;
+    rsu: boolean;
 }

@@ -2,6 +2,7 @@ package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.service.stock.InvestmentService;
+import eye.on.the.money.service.stock.RSUTaxService;
 import eye.on.the.money.util.CsvResponseUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import java.util.List;
 public class InvestmentController {
 
     private final InvestmentService investmentService;
+    private final RSUTaxService rsuTaxService;
 
     @GetMapping()
     public ResponseEntity<List<InvestmentDTO>> getAllInvestments(@CurrentUserEmail String userEmail) {
@@ -74,6 +76,13 @@ public class InvestmentController {
     @PutMapping
     public ResponseEntity<InvestmentDTO> updateInvestment(@CurrentUserEmail String userEmail, @RequestBody InvestmentDTO investmentDTO) {
         return ResponseEntity.ok(this.investmentService.updateInvestment(investmentDTO, userEmail));
+    }
+
+    @PutMapping("/rsu")
+    public ResponseEntity<Void> setRSU(@CurrentUserEmail String userEmail, @RequestParam List<Long> ids,
+                                       @RequestParam boolean rsu) {
+        this.rsuTaxService.setRSU(userEmail, ids, rsu);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/process/csv")

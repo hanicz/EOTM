@@ -56,3 +56,27 @@ export interface TaxableEventReport {
     totalAmountInHuf: number;
     totalTax: TaxBreakdown;
 }
+
+export interface StockRSUTaxEvent {
+    id: number;
+    shortName: string;
+    exchange: string;
+    transactionDate: string;
+    quantity: number;
+    currency: string;
+    price: number;
+    priceDate: string;
+    amount: number;
+    rate: number;
+    rateDate: string;
+    amountInHuf: number;
+    calculatedOn: string;
+    tax: TaxBreakdown;
+    paid: boolean;
+}
+
+export interface StockRSUTaxReport {
+    items: StockRSUTaxEvent[];
+    totalAmountInHuf: number;
+    totalTax: TaxBreakdown;
+}

@@ -40,6 +40,7 @@ public class InvestmentDTO implements CSVHelper, Serializable {
     private String name;
     private String accountName;
     private Long accountId;
+    private boolean rsu;
 
     public InvestmentDTO mergeInvestments(InvestmentDTO other) {
         if (!this.getShortName().equals(other.getShortName()) || !this.getAccountId().equals(other.getAccountId()))

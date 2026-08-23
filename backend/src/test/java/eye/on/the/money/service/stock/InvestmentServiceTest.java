@@ -5,9 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eye.on.the.money.EotmApplication;
 import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.model.User;
+import eye.on.the.money.model.financial.TaxDetails;
 import eye.on.the.money.model.stock.Investment;
+import eye.on.the.money.model.stock.RSUTaxDetails;
 import eye.on.the.money.repository.UserRepository;
 import eye.on.the.money.repository.stock.InvestmentRepository;
+import eye.on.the.money.repository.stock.RSUTaxDetailsRepository;
 import eye.on.the.money.service.api.EODAPIService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +23,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,6 +42,8 @@ class InvestmentServiceTest {
 
     @Autowired
     private InvestmentRepository investmentRepository;
+    @Autowired
+    private RSUTaxDetailsRepository rsuTaxDetailsRepository;
     @MockitoBean
     private StockPaymentService stockPaymentService;
     @MockitoBean
@@ -151,6 +159,63 @@ class InvestmentServiceTest {
                 () -> assertEquals(1, googHoldings.size()),
                 () -> assertEquals(5, googHoldings.get(0).getQuantity()),
                 () -> assertEquals(50.0, googHoldings.get(0).getAmount(), this.epsilon));
+    }
+
+    @Test
+    @Transactional
+    public void updateInvestmentClearsTheRSUFreezeWhenTheValuationInputsChange() {
+        Investment investment = this.flagAsRSU();
+        InvestmentDTO investmentDTO = this.convertToInvestmentDTO(investment);
+        investmentDTO.setTransactionDate(investmentDTO.getTransactionDate().plusDays(1));
+        when(this.stockService.getOrCreateStock(anyString(), anyString(), anyString()))
+                .thenReturn(investment.getStock());
+
+        this.investmentService.updateInvestment(investmentDTO, this.user.getUsername());
+
+        Assertions.assertFalse(investment.isRsu());
+        Assertions.assertTrue(this.rsuTaxDetailsRepository
+                .findByUserEmailAndInvestmentIdIn(this.user.getUsername(), List.of(investment.getId())).isEmpty());
+    }
+
+    @Test
+    @Transactional
+    public void updateInvestmentKeepsTheRSUFreezeWhenTheValuationInputsAreUnchanged() {
+        Investment investment = this.flagAsRSU();
+        InvestmentDTO investmentDTO = this.convertToInvestmentDTO(investment);
+        investmentDTO.setFee(9.99);
+        when(this.stockService.getOrCreateStock(anyString(), anyString(), anyString()))
+                .thenReturn(investment.getStock());
+
+        this.investmentService.updateInvestment(investmentDTO, this.user.getUsername());
+
+        Assertions.assertTrue(investment.isRsu());
+        Assertions.assertEquals(1, this.rsuTaxDetailsRepository
+                .findByUserEmailAndInvestmentIdIn(this.user.getUsername(), List.of(investment.getId())).size());
+    }
+
+    private Investment flagAsRSU() {
+        Investment investment = this.investmentRepository
+                .findByUserEmailOrderByTransactionDateDesc(this.user.getUsername()).stream()
+                .filter(i -> "B".equals(i.getBuySell())).findFirst().orElseThrow();
+        investment.setRsu(true);
+        this.investmentRepository.save(investment);
+        this.rsuTaxDetailsRepository.save(RSUTaxDetails.builder()
+                .investment(investment)
+                .price(new BigDecimal("214.50"))
+                .priceDate(investment.getTransactionDate())
+                .currency("USD")
+                .taxDetails(TaxDetails.builder()
+                        .rate(new BigDecimal("368.42"))
+                        .rateDate(investment.getTransactionDate())
+                        .amountInHuf(new BigDecimal("3951304.50"))
+                        .taxBase(new BigDecimal("3516661.01"))
+                        .szocho(new BigDecimal("457166"))
+                        .szja(new BigDecimal("527499"))
+                        .total(new BigDecimal("984665"))
+                        .calculatedOn(LocalDate.now())
+                        .build())
+                .build());
+        return investment;
     }
 
     private InvestmentDTO convertToInvestmentDTO(Investment investment) {

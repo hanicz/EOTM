@@ -83,6 +83,13 @@ export class StockService {
     });
   }
 
+  setRSU(ids: string, rsu: boolean) {
+    const url = `${this.investmentUrl}/rsu?ids=${ids}&rsu=${rsu}`;
+    return this.http.put(url, null, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  }
+
   download() {
     const url = `${this.investmentUrl}/csv`;
     return this.http.get(url, {

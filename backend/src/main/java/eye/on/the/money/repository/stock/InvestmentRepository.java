@@ -14,6 +14,10 @@ public interface InvestmentRepository extends JpaRepository<Investment, Long> {
 
     List<Investment> findByUserEmailAndBuySellAndTransactionDateBetween(String userEmail, String buySell, Date transactionDateStart, Date transactionDateEnd);
 
+    List<Investment> findByUserEmailAndRsuTrueOrderByTransactionDateDesc(String userEmail);
+
+    List<Investment> findByUserEmailAndIdIn(String userEmail, List<Long> ids);
+
     Optional<Investment> findByIdAndUserEmail(Long id, String userEmail);
 
     void deleteByUserEmailAndIdIn(String userEmail, List<Long> ids);

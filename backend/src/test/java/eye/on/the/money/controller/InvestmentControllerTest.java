@@ -3,6 +3,7 @@ package eye.on.the.money.controller;
 import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.service.stock.InvestmentService;
+import eye.on.the.money.service.stock.RSUTaxService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,9 @@ class InvestmentControllerTest {
 
     @Mock
     private InvestmentService investmentService;
+
+    @Mock
+    private RSUTaxService rsuTaxService;
 
     @InjectMocks
     private InvestmentController investmentController;
@@ -89,6 +93,15 @@ class InvestmentControllerTest {
         doNothing().when(this.investmentService).deleteInvestmentById(any(), any());
 
         Assertions.assertEquals(HttpStatus.OK, this.investmentController.deleteByIds("email", List.of(1L, 2L, 3L)).getStatusCode());
+    }
+
+    @Test
+    public void setRSU() {
+        doNothing().when(this.rsuTaxService).setRSU(any(), any(), anyBoolean());
+
+        Assertions.assertEquals(HttpStatus.OK,
+                this.investmentController.setRSU("email", List.of(1L, 2L), true).getStatusCode());
+        verify(this.rsuTaxService).setRSU("email", List.of(1L, 2L), true);
     }
 
     @Test

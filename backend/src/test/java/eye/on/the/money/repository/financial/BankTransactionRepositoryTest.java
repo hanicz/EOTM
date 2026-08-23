@@ -6,6 +6,7 @@ import eye.on.the.money.dto.out.MonthlyIncomeDTO;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.financial.BankTransaction;
+import eye.on.the.money.model.financial.BankTransactionTax;
 import eye.on.the.money.model.financial.TaxDetails;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.service.user.UserService;
@@ -39,6 +40,9 @@ class BankTransactionRepositoryTest {
     private BankTransactionRepository bankTransactionRepository;
 
     @Autowired
+    private BankTransactionTaxRepository bankTransactionTaxRepository;
+
+    @Autowired
     private CurrencyRepository currencyRepository;
 
     @Autowired
@@ -62,17 +66,20 @@ class BankTransactionRepositoryTest {
     private BankTransaction persistTaxable(LocalDate bookingDate, Currency currency, double amount) {
         BankTransaction transaction = this.persist(bookingDate, currency, amount, false);
         transaction.setTaxable(true);
-        transaction.setTaxDetails(TaxDetails.builder()
-                .rate(BigDecimal.ONE)
-                .rateDate(bookingDate)
-                .amountInHuf(BigDecimal.valueOf(amount).setScale(2, RoundingMode.HALF_UP))
-                .taxBase(new BigDecimal("890000.00"))
-                .szocho(new BigDecimal("115700"))
-                .szja(new BigDecimal("133500"))
-                .total(new BigDecimal("249200"))
-                .calculatedOn(LocalDate.of(2026, 1, 1))
-                .build());
         this.bankTransactionRepository.save(transaction);
+        this.bankTransactionTaxRepository.save(BankTransactionTax.builder()
+                .bankTransaction(transaction)
+                .taxDetails(TaxDetails.builder()
+                        .rate(BigDecimal.ONE)
+                        .rateDate(bookingDate)
+                        .amountInHuf(BigDecimal.valueOf(amount).setScale(2, RoundingMode.HALF_UP))
+                        .taxBase(new BigDecimal("890000.00"))
+                        .szocho(new BigDecimal("115700"))
+                        .szja(new BigDecimal("133500"))
+                        .total(new BigDecimal("249200"))
+                        .calculatedOn(LocalDate.of(2026, 1, 1))
+                        .build())
+                .build());
         this.entityManager.flush();
         this.entityManager.clear();
         return transaction;
@@ -299,12 +306,23 @@ class BankTransactionRepositoryTest {
     void findTaxable_readsBackTheStoredTax() {
         this.persistTaxable(LocalDate.of(2025, 12, 1), this.huf, 1000000.0);
 
-        BankTransaction stored = this.bankTransactionRepository
-                .findByUserEmailAndTaxableTrueOrderByBookingDateDesc(USER_EMAIL).getFirst();
+        TaxDetails stored = this.bankTransactionTaxRepository.findTaxableByUserEmail(USER_EMAIL)
+                .getFirst().getTaxDetails();
 
-        assertEquals(0, new BigDecimal("1000000.00").compareTo(stored.getTaxDetails().getAmountInHuf()));
-        assertEquals(0, new BigDecimal("249200").compareTo(stored.getTaxDetails().getTotal()));
-        assertEquals(LocalDate.of(2026, 1, 1), stored.getTaxDetails().getCalculatedOn());
+        assertEquals(0, new BigDecimal("1000000.00").compareTo(stored.getAmountInHuf()));
+        assertEquals(0, new BigDecimal("249200").compareTo(stored.getTotal()));
+        assertEquals(LocalDate.of(2026, 1, 1), stored.getCalculatedOn());
+    }
+
+    @Test
+    void deletingATransactionRemovesItsTaxRow() {
+        BankTransaction transaction = this.persistTaxable(LocalDate.of(2025, 12, 1), this.huf, 1000000.0);
+
+        this.bankTransactionRepository.deleteByUserEmailAndIdIn(USER_EMAIL, List.of(transaction.getId()));
+        this.entityManager.flush();
+        this.entityManager.clear();
+
+        assertTrue(this.bankTransactionTaxRepository.findTaxableByUserEmail(USER_EMAIL).isEmpty());
     }
 
     @Test

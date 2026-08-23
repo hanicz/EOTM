@@ -6,6 +6,7 @@ import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDate;
 
@@ -29,6 +30,10 @@ public class Investment {
     private LocalDate creationDate;
     private LocalDate transactionDate;
     private Double fee;
+
+    @Column(name = "rsu", nullable = false)
+    @ColumnDefault("false")
+    private boolean rsu;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { MessageService, PrimeTemplate } from 'primeng/api';
-import { RSU, TaxBreakdown, TaxReport, TaxableEventReport } from '../model/rsu';
+import { RSU, StockRSUTaxReport, TaxBreakdown, TaxReport, TaxableEventReport } from '../model/rsu';
 import { TaxService } from '../service/tax.service';
 import { StockService } from '../service/stock.service';
 import { Exchange } from '../model/exchange';
@@ -31,6 +31,7 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 export class TaxComponent {
 
   private static readonly TRANSACTION_TAB = '2';
+  private static readonly STOCK_TAB = '3';
 
   rsus: RSU[] = [];
   report: TaxReport | null = null;
@@ -50,6 +51,9 @@ export class TaxComponent {
   taxableReport: TaxableEventReport | null = null;
   taxableLoading: boolean = false;
 
+  stockReport: StockRSUTaxReport | null = null;
+  stockLoading: boolean = false;
+
   constructor(private taxService: TaxService, private stockService: StockService,
     private messageService: MessageService, private cdr: ChangeDetectorRef) {
     this.stockService.getAllExchanges().subscribe({
@@ -63,6 +67,9 @@ export class TaxComponent {
   onTabChange(value: string | number | undefined): void {
     if (String(value) === TaxComponent.TRANSACTION_TAB && this.taxableReport === null) {
       this.loadTaxableEvents();
+    }
+    if (String(value) === TaxComponent.STOCK_TAB && this.stockReport === null) {
+      this.loadStockRSUEvents();
     }
   }
 
@@ -101,6 +108,47 @@ export class TaxComponent {
         let a = document.createElement('a');
         a.href = window.URL.createObjectURL(data as Blob);
         a.download = 'taxable-events.csv';
+        a.click();
+      },
+      error: (error) => this.showError(error)
+    });
+  }
+
+  loadStockRSUEvents(): void {
+    this.stockLoading = true;
+    this.taxService.getStockRSUEvents().subscribe({
+      next: (data) => {
+        this.stockLoading = false;
+        this.stockReport = data;
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        this.stockLoading = false;
+        this.stockReport = null;
+        this.showError(error);
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  setStockPaid(id: number, paid: boolean): void {
+    this.taxService.setStockRSUPaid(String(id), paid).subscribe({
+      next: () => this.loadStockRSUEvents(),
+      error: () => this.messageService.add({
+        severity: 'error',
+        summary: 'Could not update',
+        detail: 'Could not update the payment status.',
+        life: 8000
+      })
+    });
+  }
+
+  downloadStockRSUEvents(): void {
+    this.taxService.downloadStockRSUCsv().subscribe({
+      next: (data) => {
+        let a = document.createElement('a');
+        a.href = window.URL.createObjectURL(data as Blob);
+        a.download = 'rsu-transactions.csv';
         a.click();
       },
       error: (error) => this.showError(error)

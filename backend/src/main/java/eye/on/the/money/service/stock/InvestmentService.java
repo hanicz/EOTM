@@ -13,6 +13,7 @@ import eye.on.the.money.model.stock.StockPayment;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.stock.AccountRepository;
 import eye.on.the.money.repository.stock.InvestmentRepository;
+import eye.on.the.money.repository.stock.RSUTaxDetailsRepository;
 import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.user.UserService;
@@ -42,6 +43,7 @@ import java.util.stream.Collectors;
 public class InvestmentService implements ICSVService {
 
     private final InvestmentRepository investmentRepository;
+    private final RSUTaxDetailsRepository rsuTaxDetailsRepository;
     private final CurrencyRepository currencyRepository;
     private final StockPaymentService stockPaymentService;
     private final AccountRepository accountRepository;
@@ -184,6 +186,11 @@ public class InvestmentService implements ICSVService {
         StockPayment stockPayment = investment.getStockPayment();
         Account account = this.accountRepository.findByUserEmailAndId(userEmail, investmentDTO.getAccountId()).orElseThrow(() -> new NoSuchElementException("Account not found: " + investmentDTO.getAccountId()));
 
+        if (investment.isRsu() && this.rsuValuationChanged(investment, investmentDTO, stock)) {
+            investment.setRsu(false);
+            this.rsuTaxDetailsRepository.deleteByInvestmentIdIn(List.of(investment.getId()));
+        }
+
         investment.setBuySell(investmentDTO.getBuySell());
         investment.setTransactionDate(investmentDTO.getTransactionDate());
         investment.setQuantity(investmentDTO.getQuantity());
@@ -194,6 +201,13 @@ public class InvestmentService implements ICSVService {
         stockPayment.setCurrency(currency);
 
         return this.convertToInvestmentDTO(investment);
+    }
+
+    private boolean rsuValuationChanged(Investment investment, InvestmentDTO investmentDTO, Stock stock) {
+        return !Objects.equals(investment.getTransactionDate(), investmentDTO.getTransactionDate())
+                || !Objects.equals(investment.getQuantity(), investmentDTO.getQuantity())
+                || !Objects.equals(investment.getStock().getId(), stock.getId())
+                || !"B".equals(investmentDTO.getBuySell());
     }
 
     @CacheEvict(cacheNames = "holdings-stock", key = "#userEmail")

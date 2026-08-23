@@ -6,12 +6,15 @@ import eye.on.the.money.exception.TaxException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.financial.BankTransaction;
+import eye.on.the.money.model.financial.BankTransactionTax;
 import eye.on.the.money.model.financial.TaxDetails;
 import eye.on.the.money.repository.financial.BankTransactionRepository;
+import eye.on.the.money.repository.financial.BankTransactionTaxRepository;
 import eye.on.the.money.service.api.MNBAPIService;
 import eye.on.the.money.service.shared.TaxCalculator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
@@ -26,11 +29,12 @@ import java.util.TreeMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,12 +49,16 @@ class TaxableEventServiceTest {
     private BankTransactionRepository bankTransactionRepository;
 
     @Mock
+    private BankTransactionTaxRepository bankTransactionTaxRepository;
+
+    @Mock
     private MNBAPIService mnbAPIService;
 
     private final TaxCalculator taxCalculator = new TaxCalculator();
 
     private TaxableEventService service() {
-        return new TaxableEventService(this.bankTransactionRepository, this.mnbAPIService, this.taxCalculator);
+        return new TaxableEventService(this.bankTransactionRepository, this.bankTransactionTaxRepository,
+                this.mnbAPIService, this.taxCalculator);
     }
 
     private BankTransaction transaction(long id, LocalDate bookingDate, String currencyId, double amount) {
@@ -67,22 +75,31 @@ class TaxableEventServiceTest {
                 .build();
     }
 
-    private BankTransaction taxed(long id, LocalDate bookingDate, String currencyId, double amount,
-                                  BigDecimal rate, String amountInHuf, String taxBase, String szocho,
-                                  String szja, String total) {
+    private BankTransactionTax taxed(long id, LocalDate bookingDate, String currencyId, double amount,
+                                     BigDecimal rate, String amountInHuf, String taxBase, String szocho,
+                                     String szja, String total) {
         BankTransaction transaction = this.transaction(id, bookingDate, currencyId, amount);
         transaction.setTaxable(true);
-        transaction.setTaxDetails(TaxDetails.builder()
-                .rate(rate)
-                .rateDate(bookingDate)
-                .amountInHuf(new BigDecimal(amountInHuf))
-                .taxBase(new BigDecimal(taxBase))
-                .szocho(new BigDecimal(szocho))
-                .szja(new BigDecimal(szja))
-                .total(new BigDecimal(total))
-                .calculatedOn(LocalDate.of(2026, 1, 1))
-                .build());
-        return transaction;
+        return BankTransactionTax.builder()
+                .id(id)
+                .bankTransaction(transaction)
+                .taxDetails(TaxDetails.builder()
+                        .rate(rate)
+                        .rateDate(bookingDate)
+                        .amountInHuf(new BigDecimal(amountInHuf))
+                        .taxBase(new BigDecimal(taxBase))
+                        .szocho(new BigDecimal(szocho))
+                        .szja(new BigDecimal(szja))
+                        .total(new BigDecimal(total))
+                        .calculatedOn(LocalDate.of(2026, 1, 1))
+                        .build())
+                .build();
+    }
+
+    private List<BankTransactionTax> savedTaxes() {
+        ArgumentCaptor<List<BankTransactionTax>> captor = ArgumentCaptor.captor();
+        verify(this.bankTransactionTaxRepository).saveAll(captor.capture());
+        return captor.getValue();
     }
 
     @Test
@@ -90,11 +107,13 @@ class TaxableEventServiceTest {
         BankTransaction transaction = this.transaction(1L, LocalDate.of(2025, 12, 1), "HUF", 1000000.0);
         when(this.bankTransactionRepository.findByUserEmailAndIdIn(USER_EMAIL, List.of(1L)))
                 .thenReturn(List.of(transaction));
+        when(this.bankTransactionTaxRepository.findByUserEmailAndBankTransactionIdIn(anyString(), anyList()))
+                .thenReturn(List.of());
 
         this.service().setTaxable(USER_EMAIL, List.of(1L), true);
 
         assertTrue(transaction.isTaxable());
-        TaxDetails details = transaction.getTaxDetails();
+        TaxDetails details = this.savedTaxes().getFirst().getTaxDetails();
         assertEquals(BigDecimal.ONE, details.getRate());
         assertEquals(0, new BigDecimal("1000000.00").compareTo(details.getAmountInHuf()));
         assertEquals(0, new BigDecimal("890000.00").compareTo(details.getTaxBase()));
@@ -102,7 +121,6 @@ class TaxableEventServiceTest {
         assertEquals(0, new BigDecimal("133500").compareTo(details.getSzja()));
         assertEquals(0, new BigDecimal("249200").compareTo(details.getTotal()));
         assertEquals(LocalDate.now(), details.getCalculatedOn());
-        verify(this.bankTransactionRepository).saveAll(List.of(transaction));
         verify(this.mnbAPIService, never()).getExchangeRates(anyCollection(), any(), any());
     }
 
@@ -111,13 +129,15 @@ class TaxableEventServiceTest {
         BankTransaction transaction = this.transaction(1L, LocalDate.of(2025, 12, 1), "EUR", 1000.0);
         when(this.bankTransactionRepository.findByUserEmailAndIdIn(USER_EMAIL, List.of(1L)))
                 .thenReturn(List.of(transaction));
+        when(this.bankTransactionTaxRepository.findByUserEmailAndBankTransactionIdIn(anyString(), anyList()))
+                .thenReturn(List.of());
         NavigableMap<LocalDate, BigDecimal> eur = new TreeMap<>();
         eur.put(LocalDate.of(2025, 12, 1), new BigDecimal("400"));
         when(this.mnbAPIService.getExchangeRates(anyCollection(), any(), any())).thenReturn(Map.of("EUR", eur));
 
         this.service().setTaxable(USER_EMAIL, List.of(1L), true);
 
-        TaxDetails details = transaction.getTaxDetails();
+        TaxDetails details = this.savedTaxes().getFirst().getTaxDetails();
         assertEquals(0, new BigDecimal("400000.00").compareTo(details.getAmountInHuf()));
         assertEquals(LocalDate.of(2025, 12, 1), details.getRateDate());
         assertEquals(0, new BigDecimal("99680").compareTo(details.getTotal()));
@@ -125,66 +145,75 @@ class TaxableEventServiceTest {
 
     @Test
     void fallsBackToTheLastRatePublishedBeforeTheBookingDate() {
-        BankTransaction transaction = this.transaction(1L, LocalDate.of(2025, 12, 7), "EUR", 1000.0);
         when(this.bankTransactionRepository.findByUserEmailAndIdIn(USER_EMAIL, List.of(1L)))
-                .thenReturn(List.of(transaction));
+                .thenReturn(List.of(this.transaction(1L, LocalDate.of(2025, 12, 7), "EUR", 1000.0)));
+        when(this.bankTransactionTaxRepository.findByUserEmailAndBankTransactionIdIn(anyString(), anyList()))
+                .thenReturn(List.of());
         NavigableMap<LocalDate, BigDecimal> eur = new TreeMap<>();
         eur.put(LocalDate.of(2025, 12, 5), new BigDecimal("400"));
         when(this.mnbAPIService.getExchangeRates(anyCollection(), any(), any())).thenReturn(Map.of("EUR", eur));
 
         this.service().setTaxable(USER_EMAIL, List.of(1L), true);
 
-        assertEquals(LocalDate.of(2025, 12, 5), transaction.getTaxDetails().getRateDate());
-        assertEquals(0, new BigDecimal("400000.00").compareTo(transaction.getTaxDetails().getAmountInHuf()));
+        TaxDetails details = this.savedTaxes().getFirst().getTaxDetails();
+        assertEquals(LocalDate.of(2025, 12, 5), details.getRateDate());
+        assertEquals(0, new BigDecimal("400000.00").compareTo(details.getAmountInHuf()));
     }
 
     @Test
     void complainsWhenNoRateIsAvailable() {
         when(this.bankTransactionRepository.findByUserEmailAndIdIn(USER_EMAIL, List.of(1L)))
                 .thenReturn(List.of(this.transaction(1L, LocalDate.of(2025, 12, 1), "EUR", 1000.0)));
+        when(this.bankTransactionTaxRepository.findByUserEmailAndBankTransactionIdIn(anyString(), anyList()))
+                .thenReturn(List.of());
         when(this.mnbAPIService.getExchangeRates(anyCollection(), any(), any())).thenReturn(Map.of());
 
         TaxableEventService service = this.service();
         List<Long> ids = List.of(1L);
 
         assertThrows(TaxException.class, () -> service.setTaxable(USER_EMAIL, ids, true));
-        verify(this.bankTransactionRepository, never()).saveAll(any());
+        verify(this.bankTransactionTaxRepository, never()).saveAll(any());
     }
 
     @Test
     void leavesOutgoingTransactionsUntaxed() {
-        BankTransaction transaction = this.transaction(1L, LocalDate.of(2025, 12, 1), "HUF", -1000.0);
         when(this.bankTransactionRepository.findByUserEmailAndIdIn(USER_EMAIL, List.of(1L)))
-                .thenReturn(List.of(transaction));
+                .thenReturn(List.of(this.transaction(1L, LocalDate.of(2025, 12, 1), "HUF", -1000.0)));
+        when(this.bankTransactionTaxRepository.findByUserEmailAndBankTransactionIdIn(anyString(), anyList()))
+                .thenReturn(List.of());
 
         this.service().setTaxable(USER_EMAIL, List.of(1L), true);
 
-        assertEquals(0, BigDecimal.ZERO.compareTo(transaction.getTaxDetails().getTotal()));
+        assertEquals(0, BigDecimal.ZERO.compareTo(this.savedTaxes().getFirst().getTaxDetails().getTotal()));
     }
 
     @Test
     void recalculatesWhenAnAlreadyFlaggedTransactionIsFlaggedAgain() {
-        BankTransaction transaction = this.taxed(1L, LocalDate.of(2025, 12, 1), "HUF", 1000000.0,
+        BankTransactionTax existing = this.taxed(1L, LocalDate.of(2025, 12, 1), "HUF", 1000000.0,
                 BigDecimal.ONE, "1.00", "1.00", "1", "1", "2");
         when(this.bankTransactionRepository.findByUserEmailAndIdIn(USER_EMAIL, List.of(1L)))
-                .thenReturn(List.of(transaction));
+                .thenReturn(List.of(existing.getBankTransaction()));
+        when(this.bankTransactionTaxRepository.findByUserEmailAndBankTransactionIdIn(USER_EMAIL, List.of(1L)))
+                .thenReturn(List.of(existing));
 
         this.service().setTaxable(USER_EMAIL, List.of(1L), true);
 
-        assertEquals(0, new BigDecimal("249200").compareTo(transaction.getTaxDetails().getTotal()));
+        assertEquals(0, new BigDecimal("249200").compareTo(existing.getTaxDetails().getTotal()));
+        assertEquals(1, this.savedTaxes().size());
     }
 
     @Test
     void dropsTheStoredTaxWhenTheFlagIsRemoved() {
-        BankTransaction transaction = this.taxed(1L, LocalDate.of(2025, 12, 1), "HUF", 1000000.0,
-                BigDecimal.ONE, "1000000.00", "890000.00", "115700", "133500", "249200");
+        BankTransaction transaction = this.transaction(1L, LocalDate.of(2025, 12, 1), "HUF", 1000000.0);
+        transaction.setTaxable(true);
         when(this.bankTransactionRepository.findByUserEmailAndIdIn(USER_EMAIL, List.of(1L)))
                 .thenReturn(List.of(transaction));
 
         this.service().setTaxable(USER_EMAIL, List.of(1L), false);
 
         assertFalse(transaction.isTaxable());
-        assertNull(transaction.getTaxDetails());
+        verify(this.bankTransactionTaxRepository).deleteByBankTransactionIdIn(List.of(1L));
+        verify(this.bankTransactionTaxRepository, never()).saveAll(any());
         verify(this.mnbAPIService, never()).getExchangeRates(anyCollection(), any(), any());
     }
 
@@ -196,12 +225,12 @@ class TaxableEventServiceTest {
         this.service().setTaxable(USER_EMAIL, List.of(1L), true);
 
         verify(this.bankTransactionRepository, never()).saveAll(any());
+        verify(this.bankTransactionTaxRepository, never()).saveAll(any());
     }
 
     @Test
     void returnsAnEmptyReportWhenNothingIsFlagged() {
-        when(this.bankTransactionRepository.findByUserEmailAndTaxableTrueOrderByBookingDateDesc(USER_EMAIL))
-                .thenReturn(List.of());
+        when(this.bankTransactionTaxRepository.findTaxableByUserEmail(USER_EMAIL)).thenReturn(List.of());
 
         TaxableEventReportDTO report = this.service().getTaxableEvents(USER_EMAIL);
 
@@ -212,12 +241,13 @@ class TaxableEventServiceTest {
 
     @Test
     void reportsTheStoredTaxWithoutRecalculating() {
-        when(this.bankTransactionRepository.findByUserEmailAndTaxableTrueOrderByBookingDateDesc(USER_EMAIL))
+        when(this.bankTransactionTaxRepository.findTaxableByUserEmail(USER_EMAIL))
                 .thenReturn(List.of(this.taxed(1L, LocalDate.of(2025, 12, 1), "EUR", 1000.0,
                         new BigDecimal("400"), "400000.00", "356000.00", "46280", "53400", "99680")));
 
         TaxableEventDTO item = this.service().getTaxableEvents(USER_EMAIL).getItems().getFirst();
 
+        assertEquals(1L, item.getId());
         assertEquals(0, new BigDecimal("400").compareTo(item.getRate()));
         assertEquals(0, new BigDecimal("400000.00").compareTo(item.getAmountInHuf()));
         assertEquals(0, new BigDecimal("99680").compareTo(item.getTax().getTotal()));
@@ -227,7 +257,7 @@ class TaxableEventServiceTest {
 
     @Test
     void addsUpTheTaxOfEveryFlaggedTransaction() {
-        when(this.bankTransactionRepository.findByUserEmailAndTaxableTrueOrderByBookingDateDesc(USER_EMAIL))
+        when(this.bankTransactionTaxRepository.findTaxableByUserEmail(USER_EMAIL))
                 .thenReturn(List.of(
                         this.taxed(1L, LocalDate.of(2025, 12, 1), "HUF", 1000000.0, BigDecimal.ONE,
                                 "1000000.00", "890000.00", "115700", "133500", "249200"),
@@ -243,70 +273,69 @@ class TaxableEventServiceTest {
 
     @Test
     void marksTheTaxAsPaid() {
-        BankTransaction transaction = this.taxed(1L, LocalDate.of(2025, 12, 1), "HUF", 1000000.0,
+        BankTransactionTax tax = this.taxed(1L, LocalDate.of(2025, 12, 1), "HUF", 1000000.0,
                 BigDecimal.ONE, "1000000.00", "890000.00", "115700", "133500", "249200");
-        when(this.bankTransactionRepository.findByUserEmailAndIdIn(USER_EMAIL, List.of(1L)))
-                .thenReturn(List.of(transaction));
+        when(this.bankTransactionTaxRepository.findByUserEmailAndBankTransactionIdIn(USER_EMAIL, List.of(1L)))
+                .thenReturn(List.of(tax));
 
         this.service().setTaxPaid(USER_EMAIL, List.of(1L), true);
 
-        assertTrue(transaction.getTaxDetails().isPaid());
-        verify(this.bankTransactionRepository).saveAll(List.of(transaction));
+        assertTrue(tax.getTaxDetails().isPaid());
+        verify(this.bankTransactionTaxRepository).saveAll(List.of(tax));
     }
 
     @Test
     void clearsThePaidFlagAgain() {
-        BankTransaction transaction = this.taxed(1L, LocalDate.of(2025, 12, 1), "HUF", 1000000.0,
+        BankTransactionTax tax = this.taxed(1L, LocalDate.of(2025, 12, 1), "HUF", 1000000.0,
                 BigDecimal.ONE, "1000000.00", "890000.00", "115700", "133500", "249200");
-        transaction.getTaxDetails().setPaid(true);
-        when(this.bankTransactionRepository.findByUserEmailAndIdIn(USER_EMAIL, List.of(1L)))
-                .thenReturn(List.of(transaction));
+        tax.getTaxDetails().setPaid(true);
+        when(this.bankTransactionTaxRepository.findByUserEmailAndBankTransactionIdIn(USER_EMAIL, List.of(1L)))
+                .thenReturn(List.of(tax));
 
         this.service().setTaxPaid(USER_EMAIL, List.of(1L), false);
 
-        assertFalse(transaction.getTaxDetails().isPaid());
+        assertFalse(tax.getTaxDetails().isPaid());
     }
 
     @Test
     void ignoresTransactionsThatAreNotTaxableEventsWhenMarkingAsPaid() {
-        BankTransaction transaction = this.transaction(1L, LocalDate.of(2025, 12, 1), "HUF", 1000000.0);
-        when(this.bankTransactionRepository.findByUserEmailAndIdIn(USER_EMAIL, List.of(1L)))
-                .thenReturn(List.of(transaction));
+        when(this.bankTransactionTaxRepository.findByUserEmailAndBankTransactionIdIn(USER_EMAIL, List.of(1L)))
+                .thenReturn(List.of());
 
         this.service().setTaxPaid(USER_EMAIL, List.of(1L), true);
 
-        assertNull(transaction.getTaxDetails());
-        verify(this.bankTransactionRepository, never()).saveAll(any());
+        verify(this.bankTransactionTaxRepository, never()).saveAll(any());
     }
 
     @Test
     void keepsThePaidFlagWhenTheTaxIsRecalculated() {
-        BankTransaction transaction = this.taxed(1L, LocalDate.of(2025, 12, 1), "HUF", 1000000.0,
+        BankTransactionTax existing = this.taxed(1L, LocalDate.of(2025, 12, 1), "HUF", 1000000.0,
                 BigDecimal.ONE, "1.00", "1.00", "1", "1", "2");
-        transaction.getTaxDetails().setPaid(true);
+        existing.getTaxDetails().setPaid(true);
         when(this.bankTransactionRepository.findByUserEmailAndIdIn(USER_EMAIL, List.of(1L)))
-                .thenReturn(List.of(transaction));
+                .thenReturn(List.of(existing.getBankTransaction()));
+        when(this.bankTransactionTaxRepository.findByUserEmailAndBankTransactionIdIn(USER_EMAIL, List.of(1L)))
+                .thenReturn(List.of(existing));
 
         this.service().setTaxable(USER_EMAIL, List.of(1L), true);
 
-        assertEquals(0, new BigDecimal("249200").compareTo(transaction.getTaxDetails().getTotal()));
-        assertTrue(transaction.getTaxDetails().isPaid());
+        assertEquals(0, new BigDecimal("249200").compareTo(existing.getTaxDetails().getTotal()));
+        assertTrue(existing.getTaxDetails().isPaid());
     }
 
     @Test
     void reportsWhetherTheTaxWasPaid() {
-        BankTransaction transaction = this.taxed(1L, LocalDate.of(2025, 12, 1), "HUF", 1000000.0,
+        BankTransactionTax tax = this.taxed(1L, LocalDate.of(2025, 12, 1), "HUF", 1000000.0,
                 BigDecimal.ONE, "1000000.00", "890000.00", "115700", "133500", "249200");
-        transaction.getTaxDetails().setPaid(true);
-        when(this.bankTransactionRepository.findByUserEmailAndTaxableTrueOrderByBookingDateDesc(USER_EMAIL))
-                .thenReturn(List.of(transaction));
+        tax.getTaxDetails().setPaid(true);
+        when(this.bankTransactionTaxRepository.findTaxableByUserEmail(USER_EMAIL)).thenReturn(List.of(tax));
 
         assertTrue(this.service().getTaxableEvents(USER_EMAIL).getItems().getFirst().isPaid());
     }
 
     @Test
     void writesTheReportAsCsv() {
-        when(this.bankTransactionRepository.findByUserEmailAndTaxableTrueOrderByBookingDateDesc(USER_EMAIL))
+        when(this.bankTransactionTaxRepository.findTaxableByUserEmail(USER_EMAIL))
                 .thenReturn(List.of(this.taxed(1L, LocalDate.of(2025, 12, 1), "HUF", 1000000.0, BigDecimal.ONE,
                         "1000000.00", "890000.00", "115700", "133500", "249200")));
         StringWriter writer = new StringWriter();

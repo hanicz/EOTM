@@ -20,13 +20,14 @@ import { FormsModule } from '@angular/forms';
 import { Tag } from 'primeng/tag';
 import { Image } from 'primeng/image';
 import { Dialog } from 'primeng/dialog';
+import { Tooltip } from 'primeng/tooltip';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-investment',
     templateUrl: './investment.component.html',
     styleUrls: ['./investment.component.css'],
-    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Tag, Image, Dialog, CurrencyPipe, DatePipe, Toast]
+    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Tag, Image, Dialog, Tooltip, CurrencyPipe, DatePipe, Toast]
 })
 export class InvestmentComponent implements OnInit {
 
@@ -119,6 +120,29 @@ export class InvestmentComponent implements OnInit {
       next: () => {
         this.selectedInvestments = [];
         this.fetchData();
+      }
+    });
+  }
+
+  rsuClicked(rsu: boolean) {
+    const ids = this.selectedInvestments.filter(i => i.buySell === 'B')
+      .map(i => i.investmentId).join(',');
+    if (!ids) return;
+    this.setRSU(ids, rsu);
+  }
+
+  setRSU(ids: string, rsu: boolean) {
+    this.stockService.setRSU(ids, rsu).subscribe({
+      next: () => {
+        this.selectedInvestments = [];
+        this.fetchData();
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          detail: error.error?.error ?? 'Could not update the RSU flag.',
+          life: 8000
+        });
       }
     });
   }

@@ -53,9 +53,6 @@ public class BankTransaction {
     @Column(name = "taxable", nullable = false)
     private boolean taxable;
 
-    @Embedded
-    private TaxDetails taxDetails;
-
     @Column(name = "memo", nullable = false, length = MEMO_MAX_LENGTH)
     private String memo;
 

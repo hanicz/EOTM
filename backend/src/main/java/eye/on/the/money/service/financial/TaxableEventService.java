@@ -5,8 +5,10 @@ import eye.on.the.money.dto.out.TaxableEventDTO;
 import eye.on.the.money.dto.out.TaxableEventReportDTO;
 import eye.on.the.money.exception.TaxException;
 import eye.on.the.money.model.financial.BankTransaction;
+import eye.on.the.money.model.financial.BankTransactionTax;
 import eye.on.the.money.model.financial.TaxDetails;
 import eye.on.the.money.repository.financial.BankTransactionRepository;
+import eye.on.the.money.repository.financial.BankTransactionTaxRepository;
 import eye.on.the.money.service.api.MNBAPIService;
 import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.shared.TaxCalculator;
@@ -19,16 +21,18 @@ import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
  * Taxes the bank transactions the user flagged as taxable events, with the same tax method as the tax page.
  * <p>
- * The tax is worked out once, when the transaction is flagged, and stored with it - flagging an already
+ * The tax is worked out once, when the transaction is flagged, and stored alongside it - flagging an already
  * flagged transaction again is what recalculates it. The report is then a plain read, so it neither depends
  * on MNB being reachable nor changes under the user when a rate is revised.
  */
@@ -41,6 +45,7 @@ public class TaxableEventService implements ICSVService {
     private static final int LOOKBACK_DAYS = 14;
 
     private final BankTransactionRepository bankTransactionRepository;
+    private final BankTransactionTaxRepository bankTransactionTaxRepository;
     private final MNBAPIService mnbAPIService;
     private final TaxCalculator taxCalculator;
 
@@ -50,33 +55,42 @@ public class TaxableEventService implements ICSVService {
         List<BankTransaction> transactions = this.bankTransactionRepository.findByUserEmailAndIdIn(userEmail, ids);
         if (transactions.isEmpty()) return;
 
-        Map<String, NavigableMap<LocalDate, BigDecimal>> rates = taxable ? this.fetchRates(transactions) : Map.of();
-        for (BankTransaction transaction : transactions) {
-            boolean paid = transaction.getTaxDetails() != null && transaction.getTaxDetails().isPaid();
-            transaction.setTaxable(taxable);
-            transaction.setTaxDetails(taxable ? this.calculate(transaction, rates, paid) : null);
-        }
+        transactions.forEach(transaction -> transaction.setTaxable(taxable));
         this.bankTransactionRepository.saveAll(transactions);
+
+        List<Long> transactionIds = transactions.stream().map(BankTransaction::getId).toList();
+        if (!taxable) {
+            this.bankTransactionTaxRepository.deleteByBankTransactionIdIn(transactionIds);
+            return;
+        }
+
+        Map<Long, BankTransactionTax> existing = this.bankTransactionTaxRepository
+                .findByUserEmailAndBankTransactionIdIn(userEmail, transactionIds).stream()
+                .collect(Collectors.toMap(tax -> tax.getBankTransaction().getId(), Function.identity()));
+
+        Map<String, NavigableMap<LocalDate, BigDecimal>> rates = this.fetchRates(transactions);
+        List<BankTransactionTax> taxes = transactions.stream()
+                .map(transaction -> this.toTax(transaction, rates, existing.get(transaction.getId()))).toList();
+        this.bankTransactionTaxRepository.saveAll(taxes);
     }
 
     @Transactional
     public void setTaxPaid(String userEmail, List<Long> ids, boolean paid) {
         log.trace("Enter");
-        List<BankTransaction> transactions = this.bankTransactionRepository.findByUserEmailAndIdIn(userEmail, ids).stream()
-                .filter(transaction -> transaction.getTaxDetails() != null).toList();
-        if (transactions.isEmpty()) return;
+        List<BankTransactionTax> taxes =
+                this.bankTransactionTaxRepository.findByUserEmailAndBankTransactionIdIn(userEmail, ids);
+        if (taxes.isEmpty()) return;
 
-        transactions.forEach(transaction -> transaction.getTaxDetails().setPaid(paid));
-        this.bankTransactionRepository.saveAll(transactions);
+        taxes.forEach(tax -> tax.getTaxDetails().setPaid(paid));
+        this.bankTransactionTaxRepository.saveAll(taxes);
     }
 
     public TaxableEventReportDTO getTaxableEvents(String userEmail) {
         log.trace("Enter");
-        List<BankTransaction> transactions =
-                this.bankTransactionRepository.findByUserEmailAndTaxableTrueOrderByBookingDateDesc(userEmail);
-        if (transactions.isEmpty()) return TaxableEventReportDTO.empty();
+        List<BankTransactionTax> taxes = this.bankTransactionTaxRepository.findTaxableByUserEmail(userEmail);
+        if (taxes.isEmpty()) return TaxableEventReportDTO.empty();
 
-        List<TaxableEventDTO> items = transactions.stream().map(this::convertToDTO).toList();
+        List<TaxableEventDTO> items = taxes.stream().map(this::convertToDTO).toList();
 
         BigDecimal totalAmount = items.stream().map(TaxableEventDTO::getAmountInHuf)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -90,6 +104,19 @@ public class TaxableEventService implements ICSVService {
     public void getCSV(String userEmail, Writer writer) {
         log.trace("Enter");
         this.printRecords(this.getTaxableEvents(userEmail).getItems(), writer);
+    }
+
+    private BankTransactionTax toTax(BankTransaction transaction,
+                                     Map<String, NavigableMap<LocalDate, BigDecimal>> rates,
+                                     BankTransactionTax existing) {
+        boolean paid = existing != null && existing.getTaxDetails() != null && existing.getTaxDetails().isPaid();
+        TaxDetails details = this.calculate(transaction, rates, paid);
+
+        if (existing != null) {
+            existing.setTaxDetails(details);
+            return existing;
+        }
+        return BankTransactionTax.builder().bankTransaction(transaction).taxDetails(details).build();
     }
 
     private TaxDetails calculate(BankTransaction transaction,
@@ -113,8 +140,9 @@ public class TaxableEventService implements ICSVService {
                 .build();
     }
 
-    private TaxableEventDTO convertToDTO(BankTransaction transaction) {
-        TaxDetails details = transaction.getTaxDetails();
+    private TaxableEventDTO convertToDTO(BankTransactionTax tax) {
+        BankTransaction transaction = tax.getBankTransaction();
+        TaxDetails details = tax.getTaxDetails();
         return TaxableEventDTO.builder()
                 .id(transaction.getId())
                 .bookingDate(transaction.getBookingDate())
@@ -143,7 +171,7 @@ public class TaxableEventService implements ICSVService {
                 .map(transaction -> transaction.getCurrency().getId())
                 .filter(currency -> !MNBAPIService.HUF.equalsIgnoreCase(currency))
                 .collect(Collectors.toSet());
-        if (needed.isEmpty()) return Map.of();
+        if (needed.isEmpty()) return new HashMap<>();
 
         LocalDate earliest = transactions.stream().map(BankTransaction::getBookingDate)
                 .min(LocalDate::compareTo).orElseThrow();

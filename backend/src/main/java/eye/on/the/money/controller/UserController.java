@@ -1,8 +1,8 @@
 package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.in.ChangePasswordDTO;
+import eye.on.the.money.dto.in.SignUpDTO;
 import eye.on.the.money.dto.out.ExportDTO;
-import eye.on.the.money.model.User;
 import eye.on.the.money.service.shared.ExportService;
 import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
@@ -28,8 +28,8 @@ public class UserController {
     private final ExportService exportService;
 
     @PostMapping("/signup")
-    public ResponseEntity<Void> createNewUser(@RequestBody User user) {
-        this.userService.signUp(user);
+    public ResponseEntity<Void> createNewUser(@RequestBody @Valid SignUpDTO signUpDTO) {
+        this.userService.signUp(signUpDTO);
         return ResponseEntity.ok().build();
     }
 

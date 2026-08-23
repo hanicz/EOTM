@@ -2,7 +2,9 @@ package eye.on.the.money.service.user;
 
 import eye.on.the.money.EotmApplication;
 import eye.on.the.money.dto.in.ChangePasswordDTO;
+import eye.on.the.money.dto.in.SignUpDTO;
 import eye.on.the.money.exception.PasswordException;
+import eye.on.the.money.exception.UserAlreadyExistsException;
 import eye.on.the.money.model.User;
 import eye.on.the.money.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
@@ -32,10 +34,39 @@ class UserServiceTest {
 
     @Test
     public void signUp() {
-        User user = User.builder().email("newuser@mail.com").password("testPassword").build();
-        this.userService.signUp(user);
+        this.userService.signUp(new SignUpDTO("newuser@mail.com", "testPassword"));
 
-        Assertions.assertEquals(user.getEmail(), this.userRepository.findByEmail("newuser@mail.com").getEmail());
+        User created = this.userRepository.findByEmail("newuser@mail.com");
+        Assertions.assertEquals("newuser@mail.com", created.getEmail());
+        Assertions.assertTrue(this.passwordEncoder.matches("testPassword", created.getPassword()));
+    }
+
+    @Test
+    public void signUpRejectsExistingEmail() {
+        this.userService.signUp(new SignUpDTO("duplicate@mail.com", "testPassword"));
+
+        Assertions.assertThrows(UserAlreadyExistsException.class, () ->
+                this.userService.signUp(new SignUpDTO("duplicate@mail.com", "otherPassword")));
+    }
+
+    @Test
+    public void signUpRejectsExistingEmailIgnoringCase() {
+        this.userService.signUp(new SignUpDTO("casing@mail.com", "testPassword"));
+
+        Assertions.assertThrows(UserAlreadyExistsException.class, () ->
+                this.userService.signUp(new SignUpDTO("CaSiNg@mail.com", "otherPassword")));
+    }
+
+    @Test
+    public void signUpDoesNotOverwriteAnExistingUser() {
+        this.userService.signUp(new SignUpDTO("victim@mail.com", "victimPassword"));
+        Long victimId = this.userRepository.findByEmail("victim@mail.com").getId();
+
+        this.userService.signUp(new SignUpDTO("attacker@mail.com", "attackerPassword"));
+
+        User victim = this.userRepository.findById(victimId).orElseThrow();
+        Assertions.assertEquals("victim@mail.com", victim.getEmail());
+        Assertions.assertTrue(this.passwordEncoder.matches("victimPassword", victim.getPassword()));
     }
 
     @Test
@@ -68,8 +99,7 @@ class UserServiceTest {
 
     @Test
     public void changePassword() {
-        User user = User.builder().email("changePassword@mail.com").password("testPassword").build();
-        this.userService.signUp(user);
+        this.userService.signUp(new SignUpDTO("changePassword@mail.com", "testPassword"));
         this.userService.changePassword("changePassword@mail.com", new ChangePasswordDTO("newPassword", "testPassword"));
 
         Assertions.assertTrue(this.passwordEncoder.matches("newPassword", this.userRepository.findByEmail("changePassword@mail.com").getPassword()));

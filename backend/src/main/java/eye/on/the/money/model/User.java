@@ -15,16 +15,23 @@ import java.util.Collection;
 @Slf4j
 @Builder
 @ToString
-@Table(name = "EOTM_USER")
+@Table(name = "EOTM_USER", uniqueConstraints = @UniqueConstraint(name = "UK_EOTM_USER_EMAIL", columnNames = "email"))
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
 public class User implements UserDetails {
 
+    public static final int EMAIL_MAX_LENGTH = 255;
+    public static final int PASSWORD_MIN_LENGTH = 8;
+    public static final int PASSWORD_MAX_LENGTH = 72;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "email", nullable = false, length = EMAIL_MAX_LENGTH)
     private String email;
+
     private String password;
 
     @Override

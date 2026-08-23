@@ -1,11 +1,14 @@
 package eye.on.the.money.service.user;
 
 import eye.on.the.money.dto.in.ChangePasswordDTO;
+import eye.on.the.money.dto.in.SignUpDTO;
 import eye.on.the.money.exception.PasswordException;
+import eye.on.the.money.exception.UserAlreadyExistsException;
 import eye.on.the.money.model.User;
 import eye.on.the.money.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,9 +25,23 @@ public class UserService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
 
-    public void signUp(User user) {
-        user.setPassword(this.passwordEncoder.encode(user.getPassword()));
-        this.userRepository.save(user);
+    public void signUp(SignUpDTO signUpDTO) {
+        if (this.userRepository.existsByEmailIgnoreCase(signUpDTO.email())) {
+            log.info("Sign up rejected, email already registered: {}", signUpDTO.email());
+            throw new UserAlreadyExistsException("An account already exists for this email address");
+        }
+
+        User user = User.builder()
+                .email(signUpDTO.email())
+                .password(this.passwordEncoder.encode(signUpDTO.password()))
+                .build();
+
+        try {
+            this.userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            log.info("Sign up rejected, email already registered: {}", signUpDTO.email());
+            throw new UserAlreadyExistsException("An account already exists for this email address", e);
+        }
         log.info("User created: {}", user.getEmail());
     }
 

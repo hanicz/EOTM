@@ -1,6 +1,7 @@
 package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.in.ChangePasswordDTO;
+import eye.on.the.money.dto.in.SignUpDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.service.shared.ExportService;
 import eye.on.the.money.service.user.UserService;
@@ -38,10 +39,11 @@ class UserControllerTest {
 
     @Test
     void createNewUser() {
-        doNothing().when(this.userService).signUp(this.user);
+        SignUpDTO signUpDTO = new SignUpDTO("new@mail.com", "password123");
+        doNothing().when(this.userService).signUp(signUpDTO);
 
-        Assertions.assertEquals(HttpStatus.OK, this.userController.createNewUser(this.user).getStatusCode());
-        verify(this.userService, times(1)).signUp(this.user);
+        Assertions.assertEquals(HttpStatus.OK, this.userController.createNewUser(signUpDTO).getStatusCode());
+        verify(this.userService, times(1)).signUp(signUpDTO);
     }
 
     @Test

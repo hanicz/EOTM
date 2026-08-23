@@ -59,6 +59,18 @@ html {
    of v20 ("stack mode needs custom implementation"), and the CSS it generates
    has no rule hiding the column labels above the breakpoint. */
 @media screen and (max-width: 767px) {
+    /* Take the table out of table layout entirely. With the rows turned into
+       blocks below, the browser otherwise wraps them all in one anonymous table
+       cell and sizes the auto-layout table from that cell's content, so a long
+       unbreakable value (a memo, a 24-digit account number) widens the table
+       past its container no matter what the cells themselves do. */
+    .table-stack .p-datatable-table,
+    .table-stack .p-datatable-tbody {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+    }
+
     .table-stack .p-datatable-thead {
         display: none;
     }

@@ -1,9 +1,14 @@
 .memo-cell {
   max-width: 22rem;
+  cursor: text;
+}
+
+.memo-cell p-celleditor {
+  display: block;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  cursor: text;
 }
 
 .memo-cell:hover {
@@ -13,6 +18,13 @@
 
 .memo-input {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.partner-value {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .amount-in {
@@ -39,7 +51,13 @@
 @media screen and (max-width: 991px) {
   .memo-cell {
     max-width: none;
+  }
+
+  .memo-cell p-celleditor {
+    overflow: visible;
+    text-overflow: clip;
     white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   .memo-cell:hover {

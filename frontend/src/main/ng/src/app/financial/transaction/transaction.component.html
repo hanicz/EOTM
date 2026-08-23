@@ -81,10 +81,12 @@
       <td data-label="Booked">{{transaction.bookingDate | date:'mediumDate'}}</td>
       <td data-label="Type">{{transaction.type}}</td>
       <td data-label="Partner">
-        {{transaction.partnerName}}
-        @if (transaction.partnerAccount) {
-          <div class="text-color-secondary text-sm">{{transaction.partnerAccount}}</div>
-        }
+        <div class="partner-value">
+          {{transaction.partnerName}}
+          @if (transaction.partnerAccount) {
+            <div class="text-color-secondary text-sm">{{transaction.partnerAccount}}</div>
+          }
+        </div>
       </td>
       <td data-label="Memo" class="memo-cell" [pEditableColumn]="transaction" [pEditableColumnField]="'memo'"
         pTooltip="Click to edit, Enter to save, Escape to cancel">

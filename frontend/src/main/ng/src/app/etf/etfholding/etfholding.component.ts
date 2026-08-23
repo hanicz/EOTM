@@ -30,15 +30,15 @@ export class EtfholdingComponent implements OnInit {
 
   refresh(): void {
     this.investmentsLoading = true;
-    this.fetchData();
+    this.fetchData(true);
   }
 
   markForCheck(): void {
     this.cdr.markForCheck();
   }
 
-  private fetchData(): void {
-    this.etfService.getHolding().subscribe({
+  private fetchData(forceRefresh = false): void {
+    this.etfService.getHolding(forceRefresh).subscribe({
       next: (data) => {
         this.investmentsLoading = false;
         this.investments = data;

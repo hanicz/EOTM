@@ -1,5 +1,7 @@
 package eye.on.the.money.service.stock;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eye.on.the.money.EotmApplication;
 import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.model.User;
@@ -23,6 +25,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 @SpringBootTest(classes = EotmApplication.class)
@@ -110,6 +114,16 @@ class InvestmentServiceTest {
 
         Assertions.assertTrue(result.isEmpty());
         verifyNoInteractions(this.eodAPIService);
+    }
+
+    @Test
+    public void refreshCurrentHoldingsMatchesGetCurrentHoldings() throws JsonProcessingException {
+        when(this.eodAPIService.getLiveStockValue(anyString())).thenReturn(new ObjectMapper().readTree("[]"));
+
+        List<InvestmentDTO> cached = this.investmentService.getCurrentHoldings(this.user.getUsername());
+        List<InvestmentDTO> refreshed = this.investmentService.refreshCurrentHoldings(this.user.getUsername());
+
+        Assertions.assertIterableEquals(cached, refreshed);
     }
 
     @Test

@@ -18,6 +18,8 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
@@ -47,7 +49,17 @@ class ForexControllerTest {
 
         when(this.forexTransactionService.getAllForexHoldings("email")).thenReturn(ftDTO);
 
-        Assertions.assertIterableEquals(ftDTO, this.forexController.getForexHoldings("email").getBody());
+        Assertions.assertIterableEquals(ftDTO, this.forexController.getForexHoldings("email", false).getBody());
+    }
+
+    @Test
+    public void getForexHoldings_refreshBypassesTheCache() {
+        List<ForexTransactionDTO> ftDTO = this.createTransactionList();
+
+        when(this.forexTransactionService.refreshAllForexHoldings("email")).thenReturn(ftDTO);
+
+        Assertions.assertIterableEquals(ftDTO, this.forexController.getForexHoldings("email", true).getBody());
+        verify(this.forexTransactionService, never()).getAllForexHoldings("email");
     }
 
     @Test

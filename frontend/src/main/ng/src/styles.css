@@ -103,6 +103,21 @@ html {
     max-width: 100%;
 }
 
+@media screen and (max-width: 767px) {
+    .p-toolbar-start,
+    .p-toolbar-center,
+    .p-toolbar-end {
+        flex: 1 1 100%;
+        flex-wrap: wrap;
+        row-gap: 0.5rem;
+    }
+
+    .p-paginator-pages {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
 /* Touch targets.
    Measured at 375px before this block: the menubar hamburger was 25px square,
    the rounded icon buttons (log out, watchlist, row edit/delete, refresh) 35px,

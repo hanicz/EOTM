@@ -5,6 +5,8 @@ import eye.on.the.money.dto.out.DashboardRatesDTO;
 import eye.on.the.money.service.api.EODAPIService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -22,7 +24,17 @@ public class DashboardService {
 
     private final EODAPIService eodAPIService;
 
+    @Cacheable(cacheNames = "rates", key = "T(String).join(',', new java.util.TreeSet(#currencies))")
     public DashboardRatesDTO getConversionRates(List<String> currencies) {
+        return this.conversionRates(currencies);
+    }
+
+    @CachePut(cacheNames = "rates", key = "T(String).join(',', new java.util.TreeSet(#currencies))")
+    public DashboardRatesDTO refreshConversionRates(List<String> currencies) {
+        return this.conversionRates(currencies);
+    }
+
+    private DashboardRatesDTO conversionRates(List<String> currencies) {
         log.trace("Enter");
         Set<String> targetCurrencies = currencies.stream()
                 .map(String::toUpperCase)

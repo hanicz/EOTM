@@ -29,8 +29,10 @@ public class ForexController {
     }
 
     @GetMapping("/holding")
-    public ResponseEntity<List<ForexTransactionDTO>> getForexHoldings(@CurrentUserEmail String userEmail) {
-        return ResponseEntity.ok(this.forexTransactionService.getAllForexHoldings(userEmail));
+    public ResponseEntity<List<ForexTransactionDTO>> getForexHoldings(@CurrentUserEmail String userEmail,
+                                                                      @RequestParam(defaultValue = "false") boolean refresh) {
+        return ResponseEntity.ok(refresh ? this.forexTransactionService.refreshAllForexHoldings(userEmail)
+                : this.forexTransactionService.getAllForexHoldings(userEmail));
     }
 
     @DeleteMapping()

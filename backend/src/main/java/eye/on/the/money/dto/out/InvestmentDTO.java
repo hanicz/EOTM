@@ -11,6 +11,7 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVRecord;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -22,7 +23,7 @@ import java.time.format.DateTimeFormatter;
 @AllArgsConstructor
 @EqualsAndHashCode
 @NoArgsConstructor
-public class InvestmentDTO implements CSVHelper {
+public class InvestmentDTO implements CSVHelper, Serializable {
     private Long investmentId;
     private Integer quantity;
     private String buySell;

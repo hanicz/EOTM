@@ -22,8 +22,8 @@ export class ForexService {
     });
   };
 
-  getHolding() {
-    const url = `${this.forexUrl}/holding`;
+  getHolding(refresh = false) {
+    const url = `${this.forexUrl}/holding${refresh ? '?refresh=true' : ''}`;
     return this.http.get<ForexTransaction[]>(url, {
       headers: this.helper.getHeadersWithToken()
     });

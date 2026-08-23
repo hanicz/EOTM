@@ -33,15 +33,15 @@ export class CryptoholdingComponent implements OnInit {
 
   refresh(): void {
     this.transactionsLoading = true;
-    this.fetchData();
+    this.fetchData(true);
   }
 
   markForCheck(): void {
     this.cdr.markForCheck();
   }
 
-  private fetchData(): void {
-    this.cryptoService.getHoldings().subscribe({
+  private fetchData(forceRefresh = false): void {
+    this.cryptoService.getHoldings(forceRefresh).subscribe({
       next: (data) => {
         this.transactionsLoading = false;
         this.transactions = data;

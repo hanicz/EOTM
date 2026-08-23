@@ -67,7 +67,7 @@ public class FireService implements ICSVService {
         log.trace("Enter");
         Assumptions assumptions = this.validate(input);
 
-        NetWorthDTO portfolio = this.netWorthService.getNetWorth(userEmail, input.getCurrency());
+        NetWorthDTO portfolio = this.netWorthService.getNetWorth(userEmail, input.getCurrency(), false);
         double startingValue = portfolio.getTotalWorth().doubleValue() + assumptions.otherAssets();
 
         // The retirement year is only known once we know when the target is cleared, so accumulation is run

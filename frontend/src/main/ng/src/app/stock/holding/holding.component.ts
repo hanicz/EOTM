@@ -36,15 +36,15 @@ export class HoldingComponent implements OnInit {
 
   refresh(): void {
     this.investmentsLoading = true;
-    this.fetchData();
+    this.fetchData(true);
   }
 
   markForCheck(): void {
     this.cdr.markForCheck();
   }
 
-  private fetchData(): void {
-    this.stockService.getHolding().subscribe({
+  private fetchData(forceRefresh = false): void {
+    this.stockService.getHolding(forceRefresh).subscribe({
       next: (data) => {
         this.investmentsLoading = false;
         this.investments = data;

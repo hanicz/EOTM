@@ -88,7 +88,7 @@ class NetWorthServiceTest {
         when(this.investmentService.getCurrentHoldings(USER)).thenReturn(List.of(
                 InvestmentDTO.builder().amount(100.0).liveValue(150.0).currencyId("USD").build()));
 
-        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR");
+        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
 
         // 150 USD / 1.10 = 136.36 EUR
         assertEquals(0, this.assetOf(result, NetWorthService.STOCK).getWorth().compareTo(
@@ -105,7 +105,7 @@ class NetWorthServiceTest {
         when(this.transactionService.getCurrentHoldings(anyString(), any())).thenReturn(List.of(
                 TransactionDTO.builder().amount(44000.0).liveValue(200.0).currencyId("HUF").build()));
 
-        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR");
+        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
 
         // The live value is already EUR, so it stays 200 rather than being divided by the HUF rate.
         assertEquals(0, this.assetOf(result, NetWorthService.CRYPTO).getWorth().compareTo(
@@ -117,7 +117,7 @@ class NetWorthServiceTest {
 
     @Test
     void getNetWorth_requestsCryptoHoldingsInBaseCurrency() {
-        this.netWorthService.getNetWorth(USER, "HUF");
+        this.netWorthService.getNetWorth(USER, "HUF", false);
 
         ArgumentCaptor<TransactionQuery> captor = ArgumentCaptor.forClass(TransactionQuery.class);
         verify(this.transactionService).getCurrentHoldings(eq(USER), captor.capture());
@@ -130,7 +130,7 @@ class NetWorthServiceTest {
         when(this.etfInvestmentService.getCurrentETFHoldings(USER)).thenReturn(List.of(
                 ETFInvestmentDTO.builder().amount(500.0).liveValue(null).currencyId("EUR").build()));
 
-        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR");
+        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
 
         assertEquals(0, this.assetOf(result, NetWorthService.ETF).getWorth().compareTo(
                 new BigDecimal("500.00")));
@@ -142,7 +142,7 @@ class NetWorthServiceTest {
                 ForexTransactionDTO.builder().fromAmount(1000.0).liveValue(1100.0)
                         .fromCurrencyId("EUR").toCurrencyId("USD").build()));
 
-        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR");
+        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
 
         assertEquals(0, this.assetOf(result, NetWorthService.FOREX).getWorth().compareTo(
                 new BigDecimal("1100.00")));
@@ -157,7 +157,7 @@ class NetWorthServiceTest {
         when(this.securityTransactionService.getCurrentHoldings(USER)).thenReturn(List.of(
                 SecurityTransactionDTO.builder().amount(1000.0).currencyId("EUR").build()));
 
-        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR");
+        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
 
         AssetClassValueDTO securities = this.assetOf(result, NetWorthService.SECURITIES);
         assertEquals(0, securities.getSpent().compareTo(new BigDecimal("1000.00")));
@@ -171,7 +171,7 @@ class NetWorthServiceTest {
         when(this.investmentService.getCurrentHoldings(USER)).thenReturn(List.of(
                 InvestmentDTO.builder().amount(100.0).liveValue(100.0).currencyId("GBP").build()));
 
-        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR");
+        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
 
         assertEquals(List.of("GBP"), result.getUnconvertedCurrencies());
         assertEquals(0, result.getTotalWorth().signum());
@@ -182,14 +182,14 @@ class NetWorthServiceTest {
         when(this.investmentService.getCurrentHoldings(USER)).thenReturn(List.of(
                 InvestmentDTO.builder().amount(10.0).liveValue(10.0).currencyId("USD").build()));
 
-        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "HUF");
+        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "HUF", false);
 
         assertTrue(result.getAvailableCurrencies().containsAll(List.of("EUR", "HUF", "USD")));
     }
 
     @Test
     void getNetWorth_defaultsToBaseCurrencyWhenNoneIsGiven() {
-        NetWorthDTO result = this.netWorthService.getNetWorth(USER, null);
+        NetWorthDTO result = this.netWorthService.getNetWorth(USER, null, false);
 
         assertEquals("EUR", result.getCurrency());
     }
@@ -200,12 +200,12 @@ class NetWorthServiceTest {
         when(this.investmentService.getCurrentHoldings(USER)).thenReturn(List.of(
                 InvestmentDTO.builder().amount(100.0).liveValue(150.0).currencyId("USD").build()));
 
-        assertThrows(APIException.class, () -> this.netWorthService.getNetWorth(USER, "JPY"));
+        assertThrows(APIException.class, () -> this.netWorthService.getNetWorth(USER, "JPY", false));
     }
 
     @Test
     void getNetWorth_doesNotLookUpRatesWhenNothingIsHeld() {
-        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "HUF");
+        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "HUF", false);
 
         assertEquals(0, result.getTotalWorth().signum());
         assertEquals(0, result.getTotalSpent().signum());
@@ -214,7 +214,7 @@ class NetWorthServiceTest {
 
     @Test
     void getNetWorth_reportsZeroChangeWhenNothingWasSpent() {
-        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR");
+        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
 
         assertEquals(0, result.getTotalSpent().signum());
         assertEquals(0, result.getTotalWorth().signum());

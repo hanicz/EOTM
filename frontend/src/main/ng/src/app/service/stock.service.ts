@@ -55,8 +55,8 @@ export class StockService {
     });
   };
 
-  getHolding() {
-    const url = `${this.investmentUrl}/holding`;
+  getHolding(refresh = false) {
+    const url = `${this.investmentUrl}/holding${refresh ? '?refresh=true' : ''}`;
     return this.http.get<Investment[]>(url, {
       headers: this.helper.getHeadersWithToken()
     });

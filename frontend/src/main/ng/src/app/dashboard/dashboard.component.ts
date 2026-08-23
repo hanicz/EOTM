@@ -98,7 +98,7 @@ export class DashboardComponent implements OnInit {
 
   refresh(): void {
     this.loading = true;
-    this.loadData();
+    this.loadData(true);
   }
 
   onCurrencyChange(): void {
@@ -106,9 +106,9 @@ export class DashboardComponent implements OnInit {
     this.loadNetWorth();
   }
 
-  private loadData(): void {
+  private loadData(forceRefresh = false): void {
     forkJoin({
-      netWorth: this.netWorthService.getNetWorth(this.selectedCurrency),
+      netWorth: this.netWorthService.getNetWorth(this.selectedCurrency, forceRefresh),
       stockAlerts: this.alertService.getStockAlerts(),
       cryptoAlerts: this.alertService.getCryptoAlerts(),
     }).subscribe({

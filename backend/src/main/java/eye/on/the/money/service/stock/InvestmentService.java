@@ -22,6 +22,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -55,7 +58,17 @@ public class InvestmentService implements ICSVService {
                 .stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
     }
 
+    @Cacheable(cacheNames = "holdings-stock", key = "#userEmail")
     public List<InvestmentDTO> getCurrentHoldings(String userEmail) {
+        return this.currentHoldings(userEmail);
+    }
+
+    @CachePut(cacheNames = "holdings-stock", key = "#userEmail")
+    public List<InvestmentDTO> refreshCurrentHoldings(String userEmail) {
+        return this.currentHoldings(userEmail);
+    }
+
+    private List<InvestmentDTO> currentHoldings(String userEmail) {
         List<InvestmentDTO> investments = this.investmentRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToInvestmentDTO).toList();
         return this.getLiveDataForInvestments(investments);
     }
@@ -138,6 +151,7 @@ public class InvestmentService implements ICSVService {
         return this.modelMapper.map(investment, InvestmentDTO.class);
     }
 
+    @CacheEvict(cacheNames = "holdings-stock", key = "#userEmail")
     @Transactional
     public InvestmentDTO createInvestment(InvestmentDTO investmentDTO, String userEmail) {
         Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + investmentDTO.getCurrencyId()));
@@ -161,6 +175,7 @@ public class InvestmentService implements ICSVService {
         return this.convertToInvestmentDTO(investment);
     }
 
+    @CacheEvict(cacheNames = "holdings-stock", key = "#userEmail")
     @Transactional
     public InvestmentDTO updateInvestment(InvestmentDTO investmentDTO, String userEmail) {
         Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + investmentDTO.getCurrencyId()));
@@ -181,6 +196,7 @@ public class InvestmentService implements ICSVService {
         return this.convertToInvestmentDTO(investment);
     }
 
+    @CacheEvict(cacheNames = "holdings-stock", key = "#userEmail")
     @Transactional
     public void deleteInvestmentById(String userEmail, List<Long> ids) {
         this.investmentRepository.deleteByUserEmailAndIdIn(userEmail, ids);
@@ -195,6 +211,7 @@ public class InvestmentService implements ICSVService {
         this.printRecords(investmentList, writer);
     }
 
+    @CacheEvict(cacheNames = "holdings-stock", key = "#userEmail")
     @Transactional
     public void processCSV(String userEmail, MultipartFile file) {
         try (CSVParser csvParser = this.getParser(file,

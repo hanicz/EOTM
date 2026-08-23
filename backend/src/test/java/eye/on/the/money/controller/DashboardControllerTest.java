@@ -13,6 +13,8 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.List;
 import java.util.Map;
 
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
@@ -32,7 +34,7 @@ class DashboardControllerTest {
                 .build();
         when(this.dashboardService.getConversionRates(List.of("USD", "GBP"))).thenReturn(dto);
 
-        Assertions.assertEquals(dto, this.dashboardController.getConversionRates(List.of("USD", "GBP")).getBody());
+        Assertions.assertEquals(dto, this.dashboardController.getConversionRates(List.of("USD", "GBP"), false).getBody());
     }
 
     @Test
@@ -40,7 +42,7 @@ class DashboardControllerTest {
         DashboardRatesDTO dto = DashboardRatesDTO.builder().rates(Map.of()).build();
         when(this.dashboardService.getConversionRates(List.of())).thenReturn(dto);
 
-        Assertions.assertEquals(dto, this.dashboardController.getConversionRates(null).getBody());
+        Assertions.assertEquals(dto, this.dashboardController.getConversionRates(null, false).getBody());
     }
 
     @Test
@@ -48,6 +50,15 @@ class DashboardControllerTest {
         DashboardRatesDTO dto = DashboardRatesDTO.builder().rates(Map.of()).build();
         when(this.dashboardService.getConversionRates(List.of())).thenReturn(dto);
 
-        Assertions.assertEquals(dto, this.dashboardController.getConversionRates(List.of()).getBody());
+        Assertions.assertEquals(dto, this.dashboardController.getConversionRates(List.of(), false).getBody());
+    }
+
+    @Test
+    void getConversionRates_refreshBypassesTheCache() {
+        DashboardRatesDTO dto = DashboardRatesDTO.builder().rates(Map.of("USD", 1.08)).build();
+        when(this.dashboardService.refreshConversionRates(List.of("USD"))).thenReturn(dto);
+
+        Assertions.assertEquals(dto, this.dashboardController.getConversionRates(List.of("USD"), true).getBody());
+        verify(this.dashboardService, never()).getConversionRates(List.of("USD"));
     }
 }

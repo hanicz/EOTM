@@ -22,6 +22,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -55,7 +58,19 @@ public class TransactionService implements ICSVService {
         return new ArrayList<>(transactionMap.values());
     }
 
+    @Cacheable(cacheNames = "holdings-crypto", key = "#userEmail",
+            condition = "#query.currency != null and #query.currency.equalsIgnoreCase('EUR')")
     public List<TransactionDTO> getCurrentHoldings(String userEmail, TransactionQuery query) {
+        return this.currentHoldings(userEmail, query);
+    }
+
+    @CachePut(cacheNames = "holdings-crypto", key = "#userEmail",
+            condition = "#query.currency != null and #query.currency.equalsIgnoreCase('EUR')")
+    public List<TransactionDTO> refreshCurrentHoldings(String userEmail, TransactionQuery query) {
+        return this.currentHoldings(userEmail, query);
+    }
+
+    private List<TransactionDTO> currentHoldings(String userEmail, TransactionQuery query) {
         Map<String, TransactionDTO> transactionMap = this.getCalculated(userEmail);
         List<TransactionDTO> transactionDTOList = (new ArrayList<>(transactionMap.values()))
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
@@ -80,11 +95,13 @@ public class TransactionService implements ICSVService {
         return this.modelMapper.map(transaction, TransactionDTO.class);
     }
 
+    @CacheEvict(cacheNames = "holdings-crypto", key = "#userEmail")
     @Transactional
     public void deleteTransactionById(String userEmail, List<Long> ids) {
         this.transactionRepository.deleteByUserEmailAndIdIn(userEmail, ids);
     }
 
+    @CacheEvict(cacheNames = "holdings-crypto", key = "#userEmail")
     @Transactional
     public TransactionDTO createTransaction(TransactionDTO transactionDTO, String userEmail) {
         Currency currency = this.currencyRepository.findById(transactionDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + transactionDTO.getCurrencyId()));
@@ -108,6 +125,7 @@ public class TransactionService implements ICSVService {
         return this.convertToTransactionDTO(transaction);
     }
 
+    @CacheEvict(cacheNames = "holdings-crypto", key = "#userEmail")
     @Transactional
     public TransactionDTO updateTransaction(TransactionDTO transactionDTO, String userEmail) {
         Currency currency = this.currencyRepository.findById(transactionDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + transactionDTO.getCurrencyId()));
@@ -151,6 +169,7 @@ public class TransactionService implements ICSVService {
         this.printRecords(transactionList, writer);
     }
 
+    @CacheEvict(cacheNames = "holdings-crypto", key = "#userEmail")
     @Transactional
     public void processCSV(String userEmail, MultipartFile file) {
         try (CSVParser csvParser = this.getParser(file,

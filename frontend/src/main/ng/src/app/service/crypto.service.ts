@@ -38,9 +38,9 @@ export class CryptoService {
     });
   };
 
-  getHoldings() {
+  getHoldings(refresh = false) {
     var data = { "currency": "EUR" }
-    const url = `${this.transactionUrl}/holding`;
+    const url = `${this.transactionUrl}/holding${refresh ? '?refresh=true' : ''}`;
     return this.http.post<Transaction[]>(url, JSON.stringify(data), {
       headers: this.helper.getHeadersWithToken()
     });

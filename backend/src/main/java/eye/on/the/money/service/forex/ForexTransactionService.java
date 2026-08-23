@@ -18,6 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -46,11 +49,13 @@ public class ForexTransactionService implements ICSVService {
         return this.modelMapper.map(forexTransaction, ForexTransactionDTO.class);
     }
 
+    @CacheEvict(cacheNames = "holdings-forex", key = "#userEmail")
     @Transactional
     public void deleteForexTransactionById(String userEmail, List<Long> ids) {
         this.forexTransactionRepository.deleteByUserEmailAndIdIn(userEmail, ids);
     }
 
+    @CacheEvict(cacheNames = "holdings-forex", key = "#userEmail")
     @Transactional
     public ForexTransactionDTO createForexTransaction(ForexTransactionDTO forexTransactionDTO, String userEmail) {
         Currency toCurrency = this.currencyRepository.findById(forexTransactionDTO.getToCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + forexTransactionDTO.getToCurrencyId()));
@@ -72,6 +77,7 @@ public class ForexTransactionService implements ICSVService {
         return this.convertToForexTransactionDTO(forexTransaction);
     }
 
+    @CacheEvict(cacheNames = "holdings-forex", key = "#userEmail")
     @Transactional
     public ForexTransactionDTO updateForexTransaction(ForexTransactionDTO forexTransactionDTO, String userEmail) {
         Currency toCurrency = this.currencyRepository.findById(forexTransactionDTO.getToCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + forexTransactionDTO.getToCurrencyId()));
@@ -89,7 +95,17 @@ public class ForexTransactionService implements ICSVService {
         return this.convertToForexTransactionDTO(forexTransaction);
     }
 
+    @Cacheable(cacheNames = "holdings-forex", key = "#userEmail")
     public List<ForexTransactionDTO> getAllForexHoldings(String userEmail) {
+        return this.allForexHoldings(userEmail);
+    }
+
+    @CachePut(cacheNames = "holdings-forex", key = "#userEmail")
+    public List<ForexTransactionDTO> refreshAllForexHoldings(String userEmail) {
+        return this.allForexHoldings(userEmail);
+    }
+
+    private List<ForexTransactionDTO> allForexHoldings(String userEmail) {
         Map<String, ForexTransactionDTO> forexTransactionMap = this.getCalculated(userEmail);
         List<ForexTransactionDTO> forexTransactions = new ArrayList<>(forexTransactionMap.values());
         if (forexTransactions.isEmpty()) return forexTransactions;
@@ -132,6 +148,7 @@ public class ForexTransactionService implements ICSVService {
         this.printRecords(forexList, writer);
     }
 
+    @CacheEvict(cacheNames = "holdings-forex", key = "#userEmail")
     @Transactional
     public void processCSV(String userEmail, MultipartFile file) {
         try (CSVParser csvParser = this.getParser(file,

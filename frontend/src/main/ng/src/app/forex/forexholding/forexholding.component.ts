@@ -30,11 +30,11 @@ export class ForexholdingComponent {
 
   refresh(): void {
     this.transactionsLoading = true;
-    this.fetchData();
+    this.fetchData(true);
   }
 
-  private fetchData(): void {
-    this.forexService.getHolding().subscribe({
+  private fetchData(forceRefresh = false): void {
+    this.forexService.getHolding(forceRefresh).subscribe({
       next: (data) => {
         this.transactionsLoading = false;
         this.forexTransactions = data;

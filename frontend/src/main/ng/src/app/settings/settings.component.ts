@@ -15,14 +15,13 @@ import { Password } from 'primeng/password';
 import { FormsModule } from '@angular/forms';
 import { Dialog } from 'primeng/dialog';
 import { InputText } from 'primeng/inputtext';
-import { DatePicker } from 'primeng/datepicker';
 import { DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-settings',
     templateUrl: './settings.component.html',
     styleUrls: ['./settings.component.css'],
-    imports: [MenuComponent, Bind, Panel, ButtonDirective, Ripple, DataView, PrimeTemplate, Password, FormsModule, Dialog, InputText, DatePicker, DatePipe]
+    imports: [MenuComponent, Bind, Panel, ButtonDirective, Ripple, DataView, PrimeTemplate, Password, FormsModule, Dialog, InputText, DatePipe]
 })
 export class SettingsComponent implements OnInit {
 
@@ -141,7 +140,7 @@ export class SettingsComponent implements OnInit {
   }
 
   openAccountDialog(): void {
-    this.newAccount = { creationDate: new Date() } as Account;
+    this.newAccount = { creationDate: new Date().toLocaleDateString('en-CA') } as Account;
     this.createAccountDialog = true;
   }
 

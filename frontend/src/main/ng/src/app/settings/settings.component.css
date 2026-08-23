@@ -246,8 +246,7 @@
   font-size: 0.95rem;
 }
 
-.dialog-field input,
-.dialog-field ::ng-deep .p-datepicker {
+.dialog-field input {
   width: 100%;
 }
 

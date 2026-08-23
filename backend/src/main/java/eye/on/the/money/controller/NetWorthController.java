@@ -21,8 +21,9 @@ public class NetWorthController {
 
     @GetMapping
     public ResponseEntity<NetWorthDTO> getNetWorth(@CurrentUserEmail String userEmail,
-                                                   @RequestParam(required = false) String currency) {
+                                                   @RequestParam(required = false) String currency,
+                                                   @RequestParam(defaultValue = "false") boolean refresh) {
         log.trace("Enter");
-        return ResponseEntity.ok(this.netWorthService.getNetWorth(userEmail, currency));
+        return ResponseEntity.ok(this.netWorthService.getNetWorth(userEmail, currency, refresh));
     }
 }

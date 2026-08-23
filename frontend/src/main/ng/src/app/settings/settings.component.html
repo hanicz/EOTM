@@ -180,9 +180,7 @@
         </div>
         <div class="dialog-field">
             <label for="creationDate">Creation Date</label>
-            <p-datepicker [(ngModel)]="newAccount.creationDate" dateFormat="yy-mm-dd" [showIcon]="true"
-                placeholder="Select a date">
-            </p-datepicker>
+            <input type="date" pInputText id="creationDate" [(ngModel)]="newAccount.creationDate" />
         </div>
     </ng-template>
 

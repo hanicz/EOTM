@@ -65,6 +65,13 @@ export class FinancialService {
     });
   }
 
+  updateMemo(id: number, memo: string) {
+    const url = `${this.transactionUrl}/${id}/memo`;
+    return this.http.put(url, { memo }, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  }
+
   deleteByIds(ids: string) {
     const url = `${this.transactionUrl}?ids=${ids}`;
     return this.http.delete(url, {

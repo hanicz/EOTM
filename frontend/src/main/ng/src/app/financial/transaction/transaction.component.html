@@ -1,5 +1,5 @@
 <p-toast position="bottom-center"></p-toast>
-<p-toolbar styleClass="p-mb-4">
+<p-toolbar styleClass="mb-4">
   <ng-template pTemplate="left">
     <button pButton pRipple label="Exclude" icon="pi pi-eye-slash" severity="secondary" class="mr-2"
       pTooltip="Leave the selected records out of the reports, for example transfers between your own accounts"
@@ -32,34 +32,28 @@
 <p-table #dt1 [value]="filteredTransactions" styleClass="p-datatable-striped table-stack"
   [(selection)]="selectedTransactions" [paginator]="true" [rows]="25"
   [rowsPerPageOptions]="[25, 50, 100]" sortField="bookingDate" [sortOrder]="-1"
-  [globalFilterFields]="['partnerName', 'partnerAccount', 'memo', 'type', 'bankTransactionId']">
+  [globalFilterFields]="['partnerName', 'partnerAccount', 'memo', 'type', 'bankTransactionId']"
+  (onEditInit)="onMemoEditInit($event)" (onEditCancel)="onMemoEditCancel($event)"
+  (onEditComplete)="onMemoEditComplete($event)">
 
   <ng-template pTemplate="caption">
-    <div class="flex justify-content-between flex-wrap">
-      <div class="flex flex-row flex-wrap">
-        <span class="mr-2">
-          <input pInputText type="text" (input)="dt1.filterGlobal($any($event.target)?.value, 'contains')"
-            placeholder="Search partner or memo" class="p-column-filter">
-        </span>
-        <p-columnFilter field="type" matchMode="equals" [showMenu]="false">
-          <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-            <p-select [ngModel]="value" [options]="types" optionLabel="label" optionValue="value"
-              (onChange)="filter($any($event)?.value)" [showClear]="true" placeholder="Any type"></p-select>
-          </ng-template>
-        </p-columnFilter>
-        <span class="ml-2">
-          <input pInputText type="date" [(ngModel)]="fromDate" (ngModelChange)="dateFilterChanged()"
-            [max]="toDate || null" class="p-column-filter" aria-label="Booked from">
-        </span>
-        <span class="ml-2">
-          <input pInputText type="date" [(ngModel)]="toDate" (ngModelChange)="dateFilterChanged()"
-            [min]="fromDate || null" class="p-column-filter" aria-label="Booked to">
-        </span>
-        @if (hasDateFilter) {
-          <button pButton pRipple type="button" icon="pi pi-filter-slash" severity="secondary"
-            pTooltip="Clear the date range" class="p-button-text ml-2" (click)="clearDateFilter()"></button>
-        }
-      </div>
+    <div class="filter-bar">
+      <input pInputText type="text" (input)="dt1.filterGlobal($any($event.target)?.value, 'contains')"
+        placeholder="Search partner or memo" class="p-column-filter filter-input">
+      <p-columnFilter field="type" matchMode="equals" [showMenu]="false" class="filter-type">
+        <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+          <p-select [ngModel]="value" [options]="types" optionLabel="label" optionValue="value"
+            (onChange)="filter($any($event)?.value)" [showClear]="true" placeholder="Any type"></p-select>
+        </ng-template>
+      </p-columnFilter>
+      <input pInputText type="date" [(ngModel)]="fromDate" (ngModelChange)="dateFilterChanged()"
+        [max]="toDate || null" class="p-column-filter filter-input" aria-label="Booked from">
+      <input pInputText type="date" [(ngModel)]="toDate" (ngModelChange)="dateFilterChanged()"
+        [min]="fromDate || null" class="p-column-filter filter-input" aria-label="Booked to">
+      @if (hasDateFilter) {
+        <button pButton pRipple type="button" icon="pi pi-filter-slash" severity="secondary"
+          pTooltip="Clear the date range" class="p-button-text filter-clear" (click)="clearDateFilter()"></button>
+      }
     </div>
   </ng-template>
 
@@ -92,7 +86,18 @@
           <div class="text-color-secondary text-sm">{{transaction.partnerAccount}}</div>
         }
       </td>
-      <td data-label="Memo" class="memo-cell" [title]="transaction.memo">{{transaction.memo}}</td>
+      <td data-label="Memo" class="memo-cell" [pEditableColumn]="transaction" [pEditableColumnField]="'memo'"
+        pTooltip="Click to edit, Enter to save, Escape to cancel">
+        <p-cellEditor>
+          <ng-template pTemplate="input">
+            <input pInputText type="text" [(ngModel)]="transaction.memo" [maxlength]="memoMaxLength"
+              class="memo-input" aria-label="Memo">
+          </ng-template>
+          <ng-template pTemplate="output">
+            <span class="memo-text" [title]="transaction.memo">{{transaction.memo}}</span>
+          </ng-template>
+        </p-cellEditor>
+      </td>
       <td data-label="Amount" [class.amount-in]="transaction.amount > 0"
         [class.amount-out]="transaction.amount < 0">
         {{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}

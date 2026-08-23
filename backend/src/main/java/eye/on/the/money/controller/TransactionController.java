@@ -37,9 +37,12 @@ public class TransactionController {
     }
 
     @PostMapping("/holding")
-    public ResponseEntity<List<TransactionDTO>> getAllHoldings(@CurrentUserEmail String userEmail, @RequestBody TransactionQuery query) {
+    public ResponseEntity<List<TransactionDTO>> getAllHoldings(@CurrentUserEmail String userEmail,
+                                                               @RequestBody TransactionQuery query,
+                                                               @RequestParam(defaultValue = "false") boolean refresh) {
         log.trace("Enter");
-        return ResponseEntity.ok(this.transactionService.getCurrentHoldings(userEmail, query));
+        return ResponseEntity.ok(refresh ? this.transactionService.refreshCurrentHoldings(userEmail, query)
+                : this.transactionService.getCurrentHoldings(userEmail, query));
     }
 
     @DeleteMapping()

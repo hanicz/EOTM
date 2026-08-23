@@ -33,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -65,6 +66,14 @@ public class BankTransactionService implements ICSVService {
     @Transactional
     public void setExcluded(String userEmail, List<Long> ids, boolean excluded) {
         this.bankTransactionRepository.updateExcludedByUserEmailAndIdIn(userEmail, ids, excluded);
+    }
+
+    @Transactional
+    public void updateMemo(String userEmail, Long id, String memo) {
+        BankTransaction transaction = this.bankTransactionRepository.findByIdAndUserEmail(id, userEmail)
+                .orElseThrow(() -> new NoSuchElementException("Bank transaction not found: " + id));
+        transaction.setMemo(memo.trim());
+        this.bankTransactionRepository.save(transaction);
     }
 
     @Transactional

@@ -49,7 +49,17 @@ class ETFControllerTest {
 
         when(this.etfInvestmentService.getCurrentETFHoldings("email")).thenReturn(eiDTO);
 
-        Assertions.assertIterableEquals(eiDTO, this.etfController.getETFHoldings("email").getBody());
+        Assertions.assertIterableEquals(eiDTO, this.etfController.getETFHoldings("email", false).getBody());
+    }
+
+    @Test
+    public void getETFHoldings_refreshBypassesTheCache() {
+        List<ETFInvestmentDTO> eiDTO = this.createETFList();
+
+        when(this.etfInvestmentService.refreshCurrentETFHoldings("email")).thenReturn(eiDTO);
+
+        Assertions.assertIterableEquals(eiDTO, this.etfController.getETFHoldings("email", true).getBody());
+        verify(this.etfInvestmentService, never()).getCurrentETFHoldings("email");
     }
 
     @Test

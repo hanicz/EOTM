@@ -27,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -168,6 +169,49 @@ class BankTransactionServiceTest {
                 this.file(StandardCharsets.UTF_8, this.row("2025.12.31", BANK_ID, "Kamatado", "-5", "Ref.")));
 
         assertTrue(existing.isExcluded());
+    }
+
+    @Test
+    void processCSV_createsANewRowWhenTheMemoWasEdited() {
+        BankTransaction edited = BankTransaction.builder().id(7L).bankTransactionId(BANK_ID)
+                .bookingDate(BOOKING_DATE).type("Kamatado").amount(-5.0).memo("Rent for December")
+                .user(this.user).currency(this.huf).build();
+
+        when(this.bankTransactionRepository
+                .findByUserEmailAndBankTransactionIdAndBookingDateAndTypeAndAmountAndMemo(
+                        USER_EMAIL, BANK_ID, BOOKING_DATE, "Kamatado", -5.0, "Rent for December"))
+                .thenReturn(Optional.of(edited));
+
+        ImportResultDTO result = this.bankTransactionService.processCSV(USER_EMAIL,
+                this.file(StandardCharsets.UTF_8, this.row("2025.12.31", BANK_ID, "Kamatado", "-5", "Ref.")));
+
+        assertEquals(1, result.getCreated());
+        assertEquals(0, result.getUpdated());
+        assertEquals("Ref.", this.captureSingleSave().getMemo());
+        assertEquals("Rent for December", edited.getMemo());
+    }
+
+    @Test
+    void updateMemo_savesTheTrimmedMemo() {
+        BankTransaction existing = BankTransaction.builder().id(7L).memo("Ref.")
+                .user(this.user).currency(this.huf).build();
+        when(this.bankTransactionRepository.findByIdAndUserEmail(7L, USER_EMAIL))
+                .thenReturn(Optional.of(existing));
+
+        this.bankTransactionService.updateMemo(USER_EMAIL, 7L, "  Rent for December  ");
+
+        assertEquals("Rent for December", existing.getMemo());
+        verify(this.bankTransactionRepository).save(existing);
+    }
+
+    @Test
+    void updateMemo_throwsWhenTheTransactionBelongsToSomeoneElse() {
+        when(this.bankTransactionRepository.findByIdAndUserEmail(7L, USER_EMAIL))
+                .thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class,
+                () -> this.bankTransactionService.updateMemo(USER_EMAIL, 7L, "Rent"));
+        verify(this.bankTransactionRepository, never()).save(any());
     }
 
     @Test

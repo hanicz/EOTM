@@ -15,8 +15,8 @@ export class NetWorthService {
 
   constructor(private http: HttpClient) { }
 
-  getNetWorth(currency: string) {
-    return this.http.get<NetWorth>(`${this.netWorthUrl}?currency=${encodeURIComponent(currency)}`, {
+  getNetWorth(currency: string, refresh = false) {
+    return this.http.get<NetWorth>(`${this.netWorthUrl}?currency=${encodeURIComponent(currency)}${refresh ? '&refresh=true' : ''}`, {
       headers: this.helper.getHeadersWithToken()
     });
   }

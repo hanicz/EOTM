@@ -34,8 +34,10 @@ public class InvestmentController {
     }
 
     @GetMapping("/holding")
-    public ResponseEntity<List<InvestmentDTO>> getHoldings(@CurrentUserEmail String userEmail) {
-        return ResponseEntity.ok(this.investmentService.getCurrentHoldings(userEmail));
+    public ResponseEntity<List<InvestmentDTO>> getHoldings(@CurrentUserEmail String userEmail,
+                                                          @RequestParam(defaultValue = "false") boolean refresh) {
+        return ResponseEntity.ok(refresh ? this.investmentService.refreshCurrentHoldings(userEmail)
+                : this.investmentService.getCurrentHoldings(userEmail));
     }
 
     @GetMapping("/holding/account/{accountId}")

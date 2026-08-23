@@ -63,7 +63,18 @@ class TransactionControllerTest {
 
         when(this.transactionService.getCurrentHoldings("email", query)).thenReturn(tDTO);
 
-        Assertions.assertIterableEquals(tDTO, this.transactionController.getAllHoldings("email", query).getBody());
+        Assertions.assertIterableEquals(tDTO, this.transactionController.getAllHoldings("email", query, false).getBody());
+    }
+
+    @Test
+    public void getAllHoldings_refreshBypassesTheCache() {
+        TransactionQuery query = TransactionQuery.builder().currency("eur").build();
+        List<TransactionDTO> tDTO = this.createTransactionList();
+
+        when(this.transactionService.refreshCurrentHoldings("email", query)).thenReturn(tDTO);
+
+        Assertions.assertIterableEquals(tDTO, this.transactionController.getAllHoldings("email", query, true).getBody());
+        verify(this.transactionService, never()).getCurrentHoldings("email", query);
     }
 
     @Test

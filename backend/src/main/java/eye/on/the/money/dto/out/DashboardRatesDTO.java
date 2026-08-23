@@ -4,6 +4,7 @@ import eye.on.the.money.util.Generated;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.Serializable;
 import java.util.Map;
 
 @Getter
@@ -15,7 +16,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
-public class DashboardRatesDTO {
+public class DashboardRatesDTO implements Serializable {
 
     private Map<String, Double> rates;
 }

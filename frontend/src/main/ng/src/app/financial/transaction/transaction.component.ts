@@ -16,6 +16,11 @@ import { Tag } from 'primeng/tag';
 import { FormsModule } from '@angular/forms';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 
+interface MemoEditEvent {
+    field?: string;
+    data?: BankTransaction;
+}
+
 @Component({
     selector: 'app-financial-transaction',
     templateUrl: './transaction.component.html',
@@ -33,6 +38,8 @@ export class FinancialTransactionComponent {
   types: { label: string, value: string }[] = [];
   fromDate: string = '';
   toDate: string = '';
+  readonly memoMaxLength = 500;
+  private memoBeforeEdit = '';
   @ViewChild('fileUpload') fileUpload: any;
 
 
@@ -120,6 +127,41 @@ export class FinancialTransactionComponent {
       },
       error: (error) => {
         this.messageService.add({ severity: 'error', detail: error.error?.error ?? 'Could not update the taxable flag.' });
+      }
+    });
+  }
+
+  onMemoEditInit(event: MemoEditEvent): void {
+    if (event.field !== 'memo' || !event.data) return;
+    this.memoBeforeEdit = event.data.memo ?? '';
+  }
+
+  onMemoEditCancel(event: MemoEditEvent): void {
+    if (event.field !== 'memo' || !event.data) return;
+    event.data.memo = this.memoBeforeEdit;
+  }
+
+  onMemoEditComplete(event: MemoEditEvent): void {
+    if (event.field !== 'memo' || !event.data) return;
+
+    const transaction = event.data;
+    const previous = this.memoBeforeEdit;
+    const memo = (transaction.memo ?? '').trim();
+
+    if (memo === previous) {
+      transaction.memo = previous;
+      return;
+    }
+
+    transaction.memo = memo;
+    this.financialService.updateMemo(transaction.id, memo).subscribe({
+      error: (error) => {
+        transaction.memo = previous;
+        this.cdr.markForCheck();
+        this.messageService.add({
+          severity: 'error',
+          detail: error.error?.error ?? 'Could not save the memo.'
+        });
       }
     });
   }

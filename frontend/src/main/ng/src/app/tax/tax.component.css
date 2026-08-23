@@ -105,3 +105,9 @@
         width: 100%;
     }
 }
+
+@media screen and (max-width: 767px) {
+    .tax-actions {
+        margin-bottom: 1.25rem;
+    }
+}

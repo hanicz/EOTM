@@ -121,6 +121,17 @@ class TransactionServiceTest {
     }
 
     @Test
+    public void refreshCurrentHoldingsMatchesGetCurrentHoldings() throws JsonProcessingException {
+        when(this.cryptoAPIService.getLiveValueForCoins(anyString(), anyString())).thenReturn(this.getCryptoApiResponse());
+        TransactionQuery query = TransactionQuery.builder().currency("EUR").build();
+
+        List<TransactionDTO> cached = this.transactionService.getCurrentHoldings(this.user.getUsername(), query);
+        List<TransactionDTO> refreshed = this.transactionService.refreshCurrentHoldings(this.user.getUsername(), query);
+
+        Assertions.assertIterableEquals(cached, refreshed);
+    }
+
+    @Test
     public void getCurrentHoldings() throws JsonProcessingException {
         when(this.cryptoAPIService.getLiveValueForCoins(anyString(), anyString())).thenReturn(this.getCryptoApiResponse());
         List<TransactionDTO> result = this.transactionService.getCurrentHoldings(this.user.getUsername(), TransactionQuery.builder().currency("EUR").build());

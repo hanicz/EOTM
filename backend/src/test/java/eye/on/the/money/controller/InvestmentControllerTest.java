@@ -52,7 +52,17 @@ class InvestmentControllerTest {
 
         when(this.investmentService.getCurrentHoldings("email")).thenReturn(iDTO);
 
-        Assertions.assertIterableEquals(iDTO, this.investmentController.getHoldings("email").getBody());
+        Assertions.assertIterableEquals(iDTO, this.investmentController.getHoldings("email", false).getBody());
+    }
+
+    @Test
+    public void getHoldings_refreshBypassesTheCache() {
+        List<InvestmentDTO> iDTO = this.createInvestmentList();
+
+        when(this.investmentService.refreshCurrentHoldings("email")).thenReturn(iDTO);
+
+        Assertions.assertIterableEquals(iDTO, this.investmentController.getHoldings("email", true).getBody());
+        verify(this.investmentService, never()).getCurrentHoldings("email");
     }
 
     @Test

@@ -21,8 +21,11 @@ public class DashboardController {
     private final DashboardService dashboardService;
 
     @GetMapping("rates")
-    public ResponseEntity<DashboardRatesDTO> getConversionRates(@RequestParam(required = false) List<String> currencies) {
+    public ResponseEntity<DashboardRatesDTO> getConversionRates(@RequestParam(required = false) List<String> currencies,
+                                                                @RequestParam(defaultValue = "false") boolean refresh) {
         log.trace("Enter");
-        return ResponseEntity.ok(this.dashboardService.getConversionRates(currencies == null ? List.of() : currencies));
+        List<String> requested = currencies == null ? List.of() : currencies;
+        return ResponseEntity.ok(refresh ? this.dashboardService.refreshConversionRates(requested)
+                : this.dashboardService.getConversionRates(requested));
     }
 }

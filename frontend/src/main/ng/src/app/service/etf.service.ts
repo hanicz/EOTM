@@ -22,8 +22,8 @@ export class EtfService {
     });
   };
 
-  getHolding() {
-    const url = `${this.etfUrl}/holding`;
+  getHolding(refresh = false) {
+    const url = `${this.etfUrl}/holding${refresh ? '?refresh=true' : ''}`;
     return this.http.get<ETFInvestment[]>(url, {
       headers: this.helper.getHeadersWithToken()
     });

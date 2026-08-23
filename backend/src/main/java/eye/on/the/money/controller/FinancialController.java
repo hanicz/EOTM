@@ -1,5 +1,6 @@
 package eye.on.the.money.controller;
 
+import eye.on.the.money.dto.in.BankTransactionMemoDTO;
 import eye.on.the.money.dto.out.BankTransactionDTO;
 import eye.on.the.money.dto.out.ImportResultDTO;
 import eye.on.the.money.dto.out.MonthlyCashFlowDTO;
@@ -9,9 +10,11 @@ import eye.on.the.money.service.financial.BankTransactionService;
 import eye.on.the.money.service.financial.TaxableEventService;
 import eye.on.the.money.util.CsvResponseUtil;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,6 +24,7 @@ import java.util.List;
 @RestController
 @RequestMapping("api/v1/financial/transaction")
 @Slf4j
+@Validated
 @RequiredArgsConstructor
 public class FinancialController {
 
@@ -65,6 +69,13 @@ public class FinancialController {
     public ResponseEntity<Void> setTaxable(@CurrentUserEmail String userEmail, @RequestParam List<Long> ids,
                                            @RequestParam boolean taxable) {
         this.taxableEventService.setTaxable(userEmail, ids, taxable);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}/memo")
+    public ResponseEntity<Void> updateMemo(@CurrentUserEmail String userEmail, @PathVariable Long id,
+                                           @RequestBody @Valid BankTransactionMemoDTO memoDTO) {
+        this.bankTransactionService.updateMemo(userEmail, id, memoDTO.memo());
         return ResponseEntity.ok().build();
     }
 

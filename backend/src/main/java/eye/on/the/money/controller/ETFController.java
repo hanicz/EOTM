@@ -35,9 +35,11 @@ public class ETFController {
     }
 
     @GetMapping("/holding")
-    public ResponseEntity<List<ETFInvestmentDTO>> getETFHoldings(@CurrentUserEmail String userEmail) {
+    public ResponseEntity<List<ETFInvestmentDTO>> getETFHoldings(@CurrentUserEmail String userEmail,
+                                                                 @RequestParam(defaultValue = "false") boolean refresh) {
         log.trace("Enter getETFHoldings");
-        return ResponseEntity.ok(this.etfInvestmentService.getCurrentETFHoldings(userEmail));
+        return ResponseEntity.ok(refresh ? this.etfInvestmentService.refreshCurrentETFHoldings(userEmail)
+                : this.etfInvestmentService.getCurrentETFHoldings(userEmail));
     }
 
     @GetMapping("/position")

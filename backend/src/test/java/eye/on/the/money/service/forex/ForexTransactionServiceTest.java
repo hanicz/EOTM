@@ -67,6 +67,14 @@ class ForexTransactionServiceTest {
     }
 
     @Test
+    public void refreshAllForexHoldingsMatchesGetAllForexHoldings() {
+        List<ForexTransactionDTO> cached = this.forexTransactionService.getAllForexHoldings("nobody@test.test");
+        List<ForexTransactionDTO> refreshed = this.forexTransactionService.refreshAllForexHoldings("nobody@test.test");
+
+        Assertions.assertIterableEquals(cached, refreshed);
+    }
+
+    @Test
     public void getForexTransactionsByUserId() {
         List<ForexTransactionDTO> result = this.forexTransactionService.getForexTransactionsByUserId(this.user.getUsername());
         List<ForexTransaction> actual = this.forexTransactionRepository.findByUserEmailOrderByTransactionDate(this.user.getUsername());

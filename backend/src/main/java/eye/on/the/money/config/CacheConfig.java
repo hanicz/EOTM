@@ -22,6 +22,16 @@ public class CacheConfig {
                 .withCacheConfiguration("symbols",
                         RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofDays(3L)))
                 .withCacheConfiguration("token",
-                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(23L)));
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(23L)))
+                .withCacheConfiguration("holdings-stock",
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(8L)))
+                .withCacheConfiguration("holdings-crypto",
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(8L)))
+                .withCacheConfiguration("holdings-etf",
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(8L)))
+                .withCacheConfiguration("holdings-forex",
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(8L)))
+                .withCacheConfiguration("rates",
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(8L)));
     }
 }

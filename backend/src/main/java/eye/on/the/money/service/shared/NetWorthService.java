@@ -2,6 +2,7 @@ package eye.on.the.money.service.shared;
 
 import eye.on.the.money.dto.in.TransactionQuery;
 import eye.on.the.money.dto.out.AssetClassValueDTO;
+import eye.on.the.money.dto.out.DashboardRatesDTO;
 import eye.on.the.money.dto.out.ETFInvestmentDTO;
 import eye.on.the.money.dto.out.ForexTransactionDTO;
 import eye.on.the.money.dto.out.InvestmentDTO;
@@ -65,14 +66,14 @@ public class NetWorthService {
     private final SecurityTransactionService securityTransactionService;
     private final DashboardService dashboardService;
 
-    public NetWorthDTO getNetWorth(String userEmail, String currency) {
+    public NetWorthDTO getNetWorth(String userEmail, String currency, boolean refresh) {
         log.trace("Enter");
         String target = (currency == null || currency.isBlank()) ? BASE_CURRENCY : currency.toUpperCase();
 
-        Holdings holdings = this.loadHoldings(userEmail);
+        Holdings holdings = this.loadHoldings(userEmail, refresh);
         Set<String> currencies = this.currenciesIn(holdings, target);
         Map<String, Double> rates = holdings.isEmpty() ? Map.of()
-                : this.dashboardService.getConversionRates(new ArrayList<>(currencies)).getRates();
+                : this.conversionRates(new ArrayList<>(currencies), refresh).getRates();
         Converter converter = new Converter(rates, target);
 
         List<AssetClassValueDTO> assets = List.of(
@@ -102,14 +103,23 @@ public class NetWorthService {
                 .build();
     }
 
-    private Holdings loadHoldings(String userEmail) {
+    private Holdings loadHoldings(String userEmail, boolean refresh) {
+        TransactionQuery cryptoQuery = TransactionQuery.builder().currency(BASE_CURRENCY).build();
         return new Holdings(
-                this.investmentService.getCurrentHoldings(userEmail),
-                this.transactionService.getCurrentHoldings(userEmail,
-                        TransactionQuery.builder().currency(BASE_CURRENCY).build()),
-                this.etfInvestmentService.getCurrentETFHoldings(userEmail),
-                this.forexTransactionService.getAllForexHoldings(userEmail),
+                refresh ? this.investmentService.refreshCurrentHoldings(userEmail)
+                        : this.investmentService.getCurrentHoldings(userEmail),
+                refresh ? this.transactionService.refreshCurrentHoldings(userEmail, cryptoQuery)
+                        : this.transactionService.getCurrentHoldings(userEmail, cryptoQuery),
+                refresh ? this.etfInvestmentService.refreshCurrentETFHoldings(userEmail)
+                        : this.etfInvestmentService.getCurrentETFHoldings(userEmail),
+                refresh ? this.forexTransactionService.refreshAllForexHoldings(userEmail)
+                        : this.forexTransactionService.getAllForexHoldings(userEmail),
                 this.securityTransactionService.getCurrentHoldings(userEmail));
+    }
+
+    private DashboardRatesDTO conversionRates(List<String> currencies, boolean refresh) {
+        return refresh ? this.dashboardService.refreshConversionRates(currencies)
+                : this.dashboardService.getConversionRates(currencies);
     }
 
     /**

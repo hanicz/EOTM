@@ -1,10 +1,8 @@
 #docker-compose.yml
-version: '3'
 
 services:
   app:
-    image: 'thanicz/eotm:latest'
-    restart: always
+    image: 'xx/eotm:latest'
     ports:
       - 8080:8080
     build:
@@ -14,39 +12,38 @@ services:
       - db
       - redis
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/.
-      - SPRING_DATASOURCE_USERNAME=.
-      - SPRING_DATASOURCE_PASSWORD=.
+      - SPRING_DATASOURCE_URL=xx
+      - SPRING_DATASOURCE_USERNAME=xx
+      - SPRING_DATASOURCE_PASSWORD=xx
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      - EOTM_KEY=.
+      - EOTM_KEY=xx
       - SPRING_DATA_REDIS_HOST=redis
   db:
     image: 'amd64/postgres:15-bullseye'
     container_name: db
     environment:
-      - POSTGRES_USER=.
-      - POSTGRES_PASSWORD=.
-      - POSTGRES_DB=.
+      - POSTGRES_USER=xx
+      - POSTGRES_PASSWORD=xx
+      - POSTGRES_DB=xx
     volumes:
        - ./postgres-data:/var/lib/postgresql/data
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
   nginx:
     image: nginx:latest
     container_name: nginx
-    restart: no
+    restart: unless-stopped
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - /etc/letsencrypt:/etc/letsencrypt
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ./certbot-www:/var/www/certbot:ro
     ports:
       - 80:80
       - 443:443
     depends_on:
       - app
-    links:
-      - app
-  redis:
-    image: redis:latest
-    ports:
-      - "6379:6379"
   teamspeak:
     image: teamspeak:latest
     environment:

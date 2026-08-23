@@ -21,6 +21,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,7 +54,17 @@ public class ETFInvestmentService implements ICSVService {
         return this.modelMapper.map(etfInvestment, ETFInvestmentDTO.class);
     }
 
+    @Cacheable(cacheNames = "holdings-etf", key = "#userEmail")
     public List<ETFInvestmentDTO> getCurrentETFHoldings(String userEmail) {
+        return this.currentETFHoldings(userEmail);
+    }
+
+    @CachePut(cacheNames = "holdings-etf", key = "#userEmail")
+    public List<ETFInvestmentDTO> refreshCurrentETFHoldings(String userEmail) {
+        return this.currentETFHoldings(userEmail);
+    }
+
+    private List<ETFInvestmentDTO> currentETFHoldings(String userEmail) {
         Map<String, ETFInvestmentDTO> investmentMap = this.getCalculated(userEmail);
         List<ETFInvestmentDTO> etfInvestmentDTOList = (new ArrayList<>(investmentMap.values()))
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
@@ -93,11 +106,13 @@ public class ETFInvestmentService implements ICSVService {
     }
 
 
+    @CacheEvict(cacheNames = "holdings-etf", key = "#userEmail")
     @Transactional
     public void deleteInvestmentById(String userEmail, List<Long> ids) {
         this.etfInvestmentRepository.deleteByUserEmailAndIdIn(userEmail, ids);
     }
 
+    @CacheEvict(cacheNames = "holdings-etf", key = "#userEmail")
     @Transactional
     public ETFInvestmentDTO createInvestment(ETFInvestmentDTO investmentDTO, String userEmail) {
         Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + investmentDTO.getCurrencyId()));
@@ -119,6 +134,7 @@ public class ETFInvestmentService implements ICSVService {
         return this.convertToETFInvestmentDTO(investment);
     }
 
+    @CacheEvict(cacheNames = "holdings-etf", key = "#userEmail")
     @Transactional
     public ETFInvestmentDTO updateInvestment(ETFInvestmentDTO investmentDTO, String userEmail) {
         Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + investmentDTO.getCurrencyId()));
@@ -146,6 +162,7 @@ public class ETFInvestmentService implements ICSVService {
         this.printRecords(investmentList, writer);
     }
 
+    @CacheEvict(cacheNames = "holdings-etf", key = "#userEmail")
     @Transactional
     public void processCSV(String userEmail, MultipartFile file) {
         try (CSVParser csvParser = this.getParser(file,

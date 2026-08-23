@@ -3,8 +3,6 @@
 services:
   app:
     image: 'xx/eotm:latest'
-    ports:
-      - 8080:8080
     build:
       context: .
     container_name: app
@@ -29,8 +27,11 @@ services:
        - ./postgres-data:/var/lib/postgresql/data
   redis:
     image: redis:latest
-    ports:
-      - "6379:6379"
+    container_name: redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--appendfsync", "everysec"]
+    volumes:
+      - ./redis-data:/data
   nginx:
     image: nginx:latest
     container_name: nginx

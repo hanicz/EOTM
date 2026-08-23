@@ -84,3 +84,7 @@ node
 
 # logs
 logs/
+
+# Docker runtime data
+docker/postgres-data/
+docker/redis-data/

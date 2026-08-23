@@ -50,3 +50,7 @@ docker login
 docker pull thanicz/eotm:latest
 docker-compose up -d
 docker image prune -a -f
+
+#Flush Redis cache - required after a deploy that changes any cached DTO
+#(JDK serialization, no serialVersionUID: stale entries throw InvalidClassException)
+docker compose exec redis redis-cli FLUSHALL

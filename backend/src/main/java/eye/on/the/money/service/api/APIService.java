@@ -50,52 +50,81 @@ public abstract class APIService {
     }
 
     protected <T> ResponseEntity<T> callGetAPI(String URL, Class<T> cls) {
-        log.trace("Call to {}", URL);
-        ResponseEntity<T> responseEntity = this.webClient
-                .get()
-                .uri(URI.create(URL))
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, response -> {
-                    log.error("GET call to {} failed with status {}", URL, response.statusCode());
-                    throw new APIException("Unable to make GET call" + response.statusCode());
-                })
-                .toEntity(cls)
-                .block();
+        log.trace("Call to {}", this.endpoint(URL));
+        long start = System.nanoTime();
+        ResponseEntity<T> responseEntity;
+        try {
+            responseEntity = this.webClient
+                    .get()
+                    .uri(URI.create(URL))
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, response -> {
+                        log.error("GET call to {} failed with status {}", this.endpoint(URL), response.statusCode());
+                        throw new APIException("Unable to make GET call" + response.statusCode());
+                    })
+                    .toEntity(cls)
+                    .block();
+        } finally {
+            this.logElapsed("GET", URL, start);
+        }
         this.checkForEmptyBody(responseEntity);
 
         return responseEntity;
     }
 
     protected <T> Mono<T> callNonBlockingGetAPI(String URL, Class<T> cls, Consumer<HttpHeaders> headersConsumer) {
-        log.info("Call to {}", URL);
-        return this.webClient.get()
-                .uri(URI.create(URL))
-                .headers(headersConsumer)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, response -> {
-                    log.error("GET call to {} failed with status {}", URL, response.statusCode());
-                    throw new APIException("Unable to make GET call" + response.statusCode());
-                })
-                .bodyToMono(cls);
+        log.trace("Call to {}", this.endpoint(URL));
+        return Mono.defer(() -> {
+            long start = System.nanoTime();
+            return this.webClient.get()
+                    .uri(URI.create(URL))
+                    .headers(headersConsumer)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, response -> {
+                        log.error("GET call to {} failed with status {}", this.endpoint(URL), response.statusCode());
+                        throw new APIException("Unable to make GET call" + response.statusCode());
+                    })
+                    .bodyToMono(cls)
+                    .doFinally(signal -> this.logElapsed("GET", URL, start));
+        });
     }
 
     protected <T> ResponseEntity<T> callPostAPI(String URL, Class<T> cls, Consumer<HttpHeaders> headersConsumer, Object body) {
-        log.trace("Call to {}", URL);
-        ResponseEntity<T> responseEntity = this.webClient
-                .post()
-                .uri(URI.create(URL))
-                .headers(headersConsumer)
-                .bodyValue(body)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, response -> {
-                    log.error("POST call to {} failed with status {}", URL, response.statusCode());
-                    throw new APIException("Unable to make POST call" + response.statusCode());
-                })
-                .toEntity(cls)
-                .block();
+        log.trace("Call to {}", this.endpoint(URL));
+        long start = System.nanoTime();
+        ResponseEntity<T> responseEntity;
+        try {
+            responseEntity = this.webClient
+                    .post()
+                    .uri(URI.create(URL))
+                    .headers(headersConsumer)
+                    .bodyValue(body)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, response -> {
+                        log.error("POST call to {} failed with status {}", this.endpoint(URL), response.statusCode());
+                        throw new APIException("Unable to make POST call" + response.statusCode());
+                    })
+                    .toEntity(cls)
+                    .block();
+        } finally {
+            this.logElapsed("POST", URL, start);
+        }
         this.checkForEmptyBody(responseEntity);
 
         return responseEntity;
+    }
+
+    private void logElapsed(String method, String URL, long startNanos) {
+        log.info("{} {} took {} ms", method, this.endpoint(URL), (System.nanoTime() - startNanos) / 1_000_000);
+    }
+
+    protected String endpoint(String URL) {
+        try {
+            URI uri = URI.create(URL);
+            return (uri.getHost() == null ? "" : uri.getHost()) + (uri.getPath() == null ? "" : uri.getPath());
+        } catch (IllegalArgumentException e) {
+            return "(unparsed url)";
+        }
     }
 
     protected void checkForEmptyBody(ResponseEntity<?> response) {

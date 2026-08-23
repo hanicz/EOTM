@@ -38,7 +38,7 @@ public class RedditAPIService extends APIService {
     @Cacheable("token")
     public JsonNode getToken() {
         String url = this.createURL(RedditAPIService.TOKEN_API, "access_token");
-        log.trace(url);
+        log.trace("Token call to {}", this.endpoint(url));
         ResponseEntity<?> response = this.callPostAPI(url, String.class,
                 this.getBasicHttpHeader(), this.getFormMap());
         return this.getJsonNodeFromBody((String) response.getBody());

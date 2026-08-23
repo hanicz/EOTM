@@ -35,7 +35,7 @@ public class NewsAPIService extends APIService {
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public List<News> getNews(String category) {
         log.trace("Enter");
-        String url = this.createURL(NewsAPIService.API, NEWS_PATH, category);
+        String url = this.createURL(NewsAPIService.API, NEWS_PATH, this.encodeQuery(category));
         ResponseEntity<?> response = this.callGetAPI(url, News[].class);
         return Arrays.asList((News[]) response.getBody());
     }
@@ -45,7 +45,7 @@ public class NewsAPIService extends APIService {
         log.trace("Enter getCompanyNews");
         String fromDate = LocalDate.now().minusDays(30).format(DateFormats.YYYY_MM_DD);
         String toDate = LocalDate.now().format(DateFormats.YYYY_MM_DD);
-        String url = this.createURL(NewsAPIService.API, COMPANY_NEWS_PATH, symbol, fromDate, toDate);
+        String url = this.createURL(NewsAPIService.API, COMPANY_NEWS_PATH, this.encodeQuery(symbol), fromDate, toDate);
         ResponseEntity<?> response = this.callGetAPI(url, News[].class);
         return Arrays.asList((News[]) response.getBody());
     }

@@ -18,16 +18,50 @@ import java.util.List;
 
 public interface ICSVService {
 
+    String FORMULA_TRIGGERS = "=@\t\r";
+    String SIGN_TRIGGERS = "-+";
+
     default <T extends CSVHelper> void printRecords(List<T> dtoList, Writer writer) {
         try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
             if (!dtoList.isEmpty()) {
-                csvPrinter.printRecord(dtoList.getFirst().getHeaders());
+                csvPrinter.printRecord(this.neutralize(dtoList.getFirst().getHeaders()));
             }
             for (CSVHelper record : dtoList) {
-                csvPrinter.printRecord(record.getCSVRecord());
+                csvPrinter.printRecord(this.neutralize(record.getCSVRecord()));
             }
         } catch (IOException e) {
             throw new CSVException("Failed to create CSV file: " + e.getMessage(), e);
+        }
+    }
+
+    private Object[] neutralize(Object[] cells) {
+        Object[] neutralized = new Object[cells.length];
+        for (int index = 0; index < cells.length; index++) {
+            neutralized[index] = (cells[index] instanceof String text) ? this.neutralizeCell(text) : cells[index];
+        }
+        return neutralized;
+    }
+
+    private String neutralizeCell(String cell) {
+        if (cell.isEmpty()) {
+            return cell;
+        }
+        char first = cell.charAt(0);
+        if (FORMULA_TRIGGERS.indexOf(first) >= 0) {
+            return "'" + cell;
+        }
+        if (SIGN_TRIGGERS.indexOf(first) >= 0 && !this.isNumeric(cell)) {
+            return "'" + cell;
+        }
+        return cell;
+    }
+
+    private boolean isNumeric(String cell) {
+        try {
+            Double.parseDouble(cell);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 

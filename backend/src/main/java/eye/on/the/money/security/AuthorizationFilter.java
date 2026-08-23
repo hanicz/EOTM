@@ -1,8 +1,7 @@
 package eye.on.the.money.security;
 
 import eye.on.the.money.service.user.UserService;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.security.SignatureException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -35,17 +36,21 @@ public class AuthorizationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+        UserDetails userDetails;
         try {
             String subject = this.jwtService.extractUsername(token);
-            UsernamePasswordAuthenticationToken upa =
-                    new UsernamePasswordAuthenticationToken(this.userService.loadUserByUsername(subject), null, new ArrayList<>());
-            SecurityContextHolder.getContext().setAuthentication(upa);
-            filterChain.doFilter(request, response);
-        } catch (SignatureException | ExpiredJwtException e) {
+            userDetails = this.userService.loadUserByUsername(subject);
+        } catch (JwtException | IllegalArgumentException | UsernameNotFoundException e) {
             log.warn("Auth failed: {}", e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             PrintWriter pw = response.getWriter();
             pw.write("HTTP Status 401 - Authorization failed");
+            return;
         }
+
+        UsernamePasswordAuthenticationToken upa =
+                new UsernamePasswordAuthenticationToken(userDetails, null, new ArrayList<>());
+        SecurityContextHolder.getContext().setAuthentication(upa);
+        filterChain.doFilter(request, response);
     }
 }

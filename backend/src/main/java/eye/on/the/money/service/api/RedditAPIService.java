@@ -15,7 +15,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -46,7 +45,7 @@ public class RedditAPIService extends APIService {
 
     public Flux<JsonNode> getHotRedditNews(List<String> subreddits, String bearerToken) {
         return Flux.fromIterable(subreddits).flatMap(s ->
-                this.callNonBlockingGetAPI(this.createURL(RedditAPIService.API, SUBREDDIT_PATH, s),
+                this.callNonBlockingGetAPI(this.createURL(RedditAPIService.API, SUBREDDIT_PATH, this.encodePath(s)),
                         JsonNode.class, this.getBearerHttpHeader(bearerToken)));
     }
 
@@ -70,8 +69,6 @@ public class RedditAPIService extends APIService {
 
     @Override
     protected String createURL(String api, String path, String... params) {
-        Object[] array = Stream.of(params).toArray();
-
-        return MessageFormat.format(this.getApiUrl(api) + path, array);
+        return this.expandTemplate(this.getApiUrl(api) + path, Stream.of(params).toArray());
     }
 }

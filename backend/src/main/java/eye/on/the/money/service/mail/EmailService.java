@@ -106,7 +106,7 @@ public class EmailService {
             + "</td></tr>"
             + "<tr><td style=\"padding:28px;\">"
             + "<p style=\"margin:0 0 6px;font-size:12px;color:#888780;text-transform:uppercase;letter-spacing:0.05em;\">Price alert triggered</p>"
-            + "<h1 style=\"margin:0 0 20px;font-size:21px;color:#1b1b1b;\">" + symbolOrTicker + " " + conditionPhrase + "</h1>"
+            + "<h1 style=\"margin:0 0 20px;font-size:21px;color:#1b1b1b;\">" + escapeHtml(symbolOrTicker) + " " + escapeHtml(conditionPhrase) + "</h1>"
             + "<table role=\"presentation\" style=\"width:100%;border-collapse:collapse;\">"
             + row("Condition", typeLabel, "#1b1b1b")
             + row("Target", target, "#1b1b1b")
@@ -120,8 +120,19 @@ public class EmailService {
 
     private String row(String label, String value, String valueColor) {
         return "<tr>"
-            + "<td style=\"padding:10px 0;border-top:1px solid #f1efe8;color:#5f5e5a;font-size:13px;\">" + label + "</td>"
-            + "<td style=\"padding:10px 0;border-top:1px solid #f1efe8;text-align:right;font-weight:600;color:" + valueColor + ";\">" + value + "</td>"
+            + "<td style=\"padding:10px 0;border-top:1px solid #f1efe8;color:#5f5e5a;font-size:13px;\">" + escapeHtml(label) + "</td>"
+            + "<td style=\"padding:10px 0;border-top:1px solid #f1efe8;text-align:right;font-weight:600;color:" + valueColor + ";\">" + escapeHtml(value) + "</td>"
             + "</tr>";
+    }
+
+    private static String escapeHtml(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
     }
 }

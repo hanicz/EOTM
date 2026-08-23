@@ -30,7 +30,7 @@ public class CryptoAPIService extends APIService {
     public JsonNode getLiveValueForCoins(String currency, String ids) {
         log.trace("Enter");
         String url = this.createURL(CryptoAPIService.API,
-                CRYPTO_PATH, ids, currency, Boolean.TRUE.toString());
+                CRYPTO_PATH, this.encodeQuery(ids), this.encodeQuery(currency), Boolean.TRUE.toString());
         ResponseEntity<?> response = this.callGetAPI(url, String.class);
         return this.getJsonNodeFromBody((String) response.getBody());
     }

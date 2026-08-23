@@ -47,26 +47,26 @@ public class EODAPIService extends APIService {
 
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public JsonNode getLiveStockValue(String tickerList) {
-        String url = this.createURL(EODAPIService.API, MULTIPLE_TICKER_PATH, "stock", tickerList);
+        String url = this.createURL(EODAPIService.API, MULTIPLE_TICKER_PATH, "stock", this.encodeQuery(tickerList));
         return this.getLiveValue(url);
     }
 
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public JsonNode getLiveEtfValue(String tickerList) {
-        String url = this.createURL(EODAPIService.API, MULTIPLE_TICKER_PATH, "etf", tickerList);
+        String url = this.createURL(EODAPIService.API, MULTIPLE_TICKER_PATH, "etf", this.encodeQuery(tickerList));
         return this.getLiveValue(url);
     }
 
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public JsonNode getLiveForexValue(String tickerList) {
-        String url = this.createURL(EODAPIService.API, MULTIPLE_TICKER_PATH, "forex", tickerList);
+        String url = this.createURL(EODAPIService.API, MULTIPLE_TICKER_PATH, "forex", this.encodeQuery(tickerList));
         return this.getLiveValue(url);
     }
 
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public JsonNode getLiveValueForSingle(String ticker) {
         log.trace("Enter");
-        String url = this.createURL(EODAPIService.API, SINGLE_TICKER_PATH, ticker);
+        String url = this.createURL(EODAPIService.API, SINGLE_TICKER_PATH, this.encodePath(ticker));
         ResponseEntity<?> response = this.callGetAPI(url, String.class);
         return this.getJsonNodeFromBody((String) response.getBody());
     }
@@ -76,7 +76,7 @@ public class EODAPIService extends APIService {
         log.trace("Enter");
         String from = (months <= 60) ? "&from=" + LocalDate.now().minusMonths(months).format(DateFormats.YYYY_MM_DD) : "";
         String period = (months > 23) ? ((months > 60) ? "m" : "w") : "d";
-        String url = this.createURL(EODAPIService.API, CANDLE_PATH, shortname, period, from);
+        String url = this.createURL(EODAPIService.API, CANDLE_PATH, this.encodePath(shortname), period, from);
         ResponseEntity<?> response = this.callGetAPI(url,
                 EODCandleQuoteDTO[].class);
         return Arrays.asList((EODCandleQuoteDTO[]) response.getBody());
@@ -85,7 +85,7 @@ public class EODAPIService extends APIService {
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public List<EODCandleQuoteDTO> getHistoricalQuotes(String ticker, LocalDate from, LocalDate to) {
         log.trace("Enter");
-        String url = this.createURL(EODAPIService.API, HISTORICAL_PATH, ticker,
+        String url = this.createURL(EODAPIService.API, HISTORICAL_PATH, this.encodePath(ticker),
                 from.format(DateFormats.YYYY_MM_DD), to.format(DateFormats.YYYY_MM_DD));
         ResponseEntity<?> response = this.callGetAPI(url, EODCandleQuoteDTO[].class);
         return Arrays.asList((EODCandleQuoteDTO[]) response.getBody());
@@ -94,7 +94,7 @@ public class EODAPIService extends APIService {
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public List<Symbol> getAllSymbols(String exchange) {
         log.trace("Enter");
-        String url = this.createURL(EODAPIService.API, EXCHANGE_SYMBOL_LIST_PATH, exchange);
+        String url = this.createURL(EODAPIService.API, EXCHANGE_SYMBOL_LIST_PATH, this.encodePath(exchange));
         ResponseEntity<?> response = this.callGetAPI(url,
                 Symbol[].class);
         return Arrays.asList((Symbol[]) response.getBody());

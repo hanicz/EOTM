@@ -12,10 +12,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriUtils;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
-import java.text.MessageFormat;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,8 +46,24 @@ public abstract class APIService {
     }
 
     protected String createURL(String api, String path, String... params) {
-        Object[] array = Stream.concat(Stream.of(this.getSecret(api)), Stream.of(params)).toArray();
-        return MessageFormat.format(this.getApiUrl(api) + path, array);
+        Object[] array = Stream.concat(Stream.of(this.encodeQuery(this.getSecret(api))), Stream.of(params)).toArray();
+        return this.expandTemplate(this.getApiUrl(api) + path, array);
+    }
+
+    protected String expandTemplate(String template, Object[] args) {
+        String url = template;
+        for (int index = 0; index < args.length; index++) {
+            url = url.replace("{" + index + "}", String.valueOf(args[index]));
+        }
+        return url;
+    }
+
+    protected String encodePath(String value) {
+        return UriUtils.encodePathSegment(value, StandardCharsets.UTF_8);
+    }
+
+    protected String encodeQuery(String value) {
+        return UriUtils.encodeQueryParam(value, StandardCharsets.UTF_8);
     }
 
     protected <T> ResponseEntity<T> callGetAPI(String URL, Class<T> cls) {

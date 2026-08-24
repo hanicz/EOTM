@@ -1,5 +1,6 @@
 package eye.on.the.money.service.financial;
 
+import eye.on.the.money.dto.in.BankTransactionEditDTO;
 import eye.on.the.money.dto.out.BankTransactionDTO;
 import eye.on.the.money.dto.out.ImportResultDTO;
 import eye.on.the.money.exception.CSVException;
@@ -192,25 +193,27 @@ class BankTransactionServiceTest {
     }
 
     @Test
-    void updateMemo_savesTheTrimmedMemo() {
-        BankTransaction existing = BankTransaction.builder().id(7L).memo("Ref.")
+    void updateTransaction_savesTheBookingDateAndTheTrimmedMemo() {
+        BankTransaction existing = BankTransaction.builder().id(7L).bookingDate(BOOKING_DATE).memo("Ref.")
                 .user(this.user).currency(this.huf).build();
         when(this.bankTransactionRepository.findByIdAndUserEmail(7L, USER_EMAIL))
                 .thenReturn(Optional.of(existing));
 
-        this.bankTransactionService.updateMemo(USER_EMAIL, 7L, "  Rent for December  ");
+        this.bankTransactionService.updateTransaction(USER_EMAIL, 7L,
+                new BankTransactionEditDTO(LocalDate.of(2026, 1, 15), "  Rent for December  "));
 
+        assertEquals(LocalDate.of(2026, 1, 15), existing.getBookingDate());
         assertEquals("Rent for December", existing.getMemo());
         verify(this.bankTransactionRepository).save(existing);
     }
 
     @Test
-    void updateMemo_throwsWhenTheTransactionBelongsToSomeoneElse() {
+    void updateTransaction_throwsWhenTheTransactionBelongsToSomeoneElse() {
         when(this.bankTransactionRepository.findByIdAndUserEmail(7L, USER_EMAIL))
                 .thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class,
-                () -> this.bankTransactionService.updateMemo(USER_EMAIL, 7L, "Rent"));
+        assertThrows(NoSuchElementException.class, () -> this.bankTransactionService.updateTransaction(USER_EMAIL, 7L,
+                new BankTransactionEditDTO(BOOKING_DATE, "Rent")));
         verify(this.bankTransactionRepository, never()).save(any());
     }
 

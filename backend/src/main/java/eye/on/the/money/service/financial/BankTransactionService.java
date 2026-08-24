@@ -1,5 +1,6 @@
 package eye.on.the.money.service.financial;
 
+import eye.on.the.money.dto.in.BankTransactionEditDTO;
 import eye.on.the.money.dto.out.BankTransactionDTO;
 import eye.on.the.money.dto.out.ImportResultDTO;
 import eye.on.the.money.dto.out.MonthlyCashFlowDTO;
@@ -69,10 +70,11 @@ public class BankTransactionService implements ICSVService {
     }
 
     @Transactional
-    public void updateMemo(String userEmail, Long id, String memo) {
+    public void updateTransaction(String userEmail, Long id, BankTransactionEditDTO editDTO) {
         BankTransaction transaction = this.bankTransactionRepository.findByIdAndUserEmail(id, userEmail)
                 .orElseThrow(() -> new NoSuchElementException("Bank transaction not found: " + id));
-        transaction.setMemo(memo.trim());
+        transaction.setBookingDate(editDTO.bookingDate());
+        transaction.setMemo(editDTO.memo().trim());
         this.bankTransactionRepository.save(transaction);
     }
 

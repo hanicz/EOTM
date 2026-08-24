@@ -1,6 +1,6 @@
 export interface BankTransaction {
     id: number;
-    bookingDate: Date;
+    bookingDate: string;
     bankTransactionId: string;
     type: string;
     accountNumber: string;

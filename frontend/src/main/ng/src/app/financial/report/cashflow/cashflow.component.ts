@@ -37,6 +37,7 @@ export interface CurrencyCashFlow {
   totalIn: number;
   totalOut: number;
   averages: AverageSaving[];
+  spendingAverages: AverageSaving[];
   chartOptions: Partial<CashFlowChartOptions>;
 }
 
@@ -89,7 +90,8 @@ export class FinancialCashFlowComponent {
         rows,
         totalIn: rows.reduce((sum, row) => sum + row.moneyIn, 0),
         totalOut: rows.reduce((sum, row) => sum + row.moneyOut, 0),
-        averages: this.buildAverages(rows),
+        averages: this.buildAverages(rows, row => row.net),
+        spendingAverages: this.buildAverages(rows, row => row.moneyOut),
         chartOptions: this.buildChart(oldestFirst)
       };
     });
@@ -97,7 +99,7 @@ export class FinancialCashFlowComponent {
 
   /* Windows are counted back from the most recent month that has data, not from today. Anchoring to today
      would quietly pad the average with empty months whenever the export is a few weeks old. */
-  private buildAverages(rows: MonthlyCashFlow[]): AverageSaving[] {
+  private buildAverages(rows: MonthlyCashFlow[], value: (row: MonthlyCashFlow) => number): AverageSaving[] {
     if (rows.length === 0) {
       return [];
     }
@@ -114,7 +116,7 @@ export class FinancialCashFlowComponent {
         windowMonths,
         monthsCounted: inWindow.length,
         average: inWindow.length === 0 ? null
-          : inWindow.reduce((sum, row) => sum + row.net, 0) / inWindow.length
+          : inWindow.reduce((sum, row) => sum + value(row), 0) / inWindow.length
       };
     });
   }

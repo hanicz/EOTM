@@ -1,3 +1,18 @@
+.booked-cell {
+  cursor: text;
+  white-space: nowrap;
+}
+
+.booked-cell:hover {
+  outline: 1px dashed var(--p-content-border-color);
+  outline-offset: -1px;
+}
+
+.booked-input {
+  width: 100%;
+  min-width: 9rem;
+}
+
 .memo-cell {
   max-width: 22rem;
   cursor: text;
@@ -61,6 +76,10 @@
   }
 
   .memo-cell:hover {
+    outline: none;
+  }
+
+  .booked-cell:hover {
     outline: none;
   }
 }

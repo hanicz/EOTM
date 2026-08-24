@@ -80,11 +80,42 @@
       <ng-template pTemplate="body" let-average>
         <tr>
           <td data-label="Period">{{average.label}}</td>
-          <td data-label="Average per month">
+          <td data-label="Average per month" class="average-cell">
             @if (average.average === null) {
               <span class="muted">&ndash;</span>
             } @else {
-              <b [class.amount-in]="average.average > 0" [class.amount-out]="average.average < 0">
+              <b class="average-value" [class.amount-in]="average.average > 0"
+                [class.amount-out]="average.average < 0">
+                {{average.average | currency : block.currencyId : 'symbol' : '0.0-2'}}
+              </b>
+            }
+          </td>
+          <td data-label="Months counted">
+            <span [class.muted]="average.monthsCounted < average.windowMonths">
+              {{average.monthsCounted}} of {{average.windowMonths}}
+            </span>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <h4 class="mb-2 mt-4">Average monthly spending</h4>
+    <p-table [value]="block.spendingAverages" styleClass="p-datatable-striped p-datatable-sm table-stack">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Period</th>
+          <th>Average per month</th>
+          <th pTooltip="Counted back from the most recent month with data, not from today.">Months counted</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-average>
+        <tr>
+          <td data-label="Period">{{average.label}}</td>
+          <td data-label="Average per month" class="average-cell">
+            @if (average.average === null) {
+              <span class="muted">&ndash;</span>
+            } @else {
+              <b class="average-value amount-out">
                 {{average.average | currency : block.currencyId : 'symbol' : '0.0-2'}}
               </b>
             }

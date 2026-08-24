@@ -65,9 +65,9 @@ export class FinancialService {
     });
   }
 
-  updateMemo(id: number, memo: string) {
-    const url = `${this.transactionUrl}/${id}/memo`;
-    return this.http.put(url, { memo }, {
+  updateTransaction(id: number, bookingDate: string, memo: string) {
+    const url = `${this.transactionUrl}/${id}`;
+    return this.http.put(url, { bookingDate, memo }, {
       headers: this.helper.getHeadersWithToken()
     });
   }

@@ -16,9 +16,14 @@ import { Tag } from 'primeng/tag';
 import { FormsModule } from '@angular/forms';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 
-interface MemoEditEvent {
+interface TransactionEditEvent {
     field?: string;
     data?: BankTransaction;
+}
+
+interface TransactionEditValues {
+    bookingDate: string;
+    memo: string;
 }
 
 @Component({
@@ -39,7 +44,8 @@ export class FinancialTransactionComponent {
   fromDate: string = '';
   toDate: string = '';
   readonly memoMaxLength = 500;
-  private memoBeforeEdit = '';
+  private readonly editableFields = ['bookingDate', 'memo'];
+  private beforeEdit: TransactionEditValues | null = null;
   @ViewChild('fileUpload') fileUpload: any;
 
 
@@ -89,10 +95,7 @@ export class FinancialTransactionComponent {
   }
 
   private bookedOn(transaction: BankTransaction): string {
-    const booked: unknown = transaction.bookingDate;
-    return typeof booked === 'string'
-      ? booked.substring(0, 10)
-      : new Date(booked as Date).toLocaleDateString('en-CA');
+    return transaction.bookingDate.substring(0, 10);
   }
 
   excludeClicked(excluded: boolean): void {
@@ -131,39 +134,57 @@ export class FinancialTransactionComponent {
     });
   }
 
-  onMemoEditInit(event: MemoEditEvent): void {
-    if (event.field !== 'memo' || !event.data) return;
-    this.memoBeforeEdit = event.data.memo ?? '';
+  onEditInit(event: TransactionEditEvent): void {
+    if (!this.isEditable(event) || !event.data) return;
+    this.beforeEdit = { bookingDate: event.data.bookingDate, memo: event.data.memo ?? '' };
   }
 
-  onMemoEditCancel(event: MemoEditEvent): void {
-    if (event.field !== 'memo' || !event.data) return;
-    event.data.memo = this.memoBeforeEdit;
+  onEditCancel(event: TransactionEditEvent): void {
+    if (!this.isEditable(event) || !event.data || !this.beforeEdit) return;
+    event.data.bookingDate = this.beforeEdit.bookingDate;
+    event.data.memo = this.beforeEdit.memo;
   }
 
-  onMemoEditComplete(event: MemoEditEvent): void {
-    if (event.field !== 'memo' || !event.data) return;
+  onEditComplete(event: TransactionEditEvent): void {
+    if (!this.isEditable(event) || !event.data || !this.beforeEdit) return;
 
     const transaction = event.data;
-    const previous = this.memoBeforeEdit;
+    const previous = this.beforeEdit;
+    const bookingDate = transaction.bookingDate;
     const memo = (transaction.memo ?? '').trim();
 
-    if (memo === previous) {
-      transaction.memo = previous;
+    if (!bookingDate) {
+      transaction.bookingDate = previous.bookingDate;
+      return;
+    }
+
+    if (bookingDate === previous.bookingDate && memo === previous.memo) {
+      transaction.memo = previous.memo;
       return;
     }
 
     transaction.memo = memo;
-    this.financialService.updateMemo(transaction.id, memo).subscribe({
+    this.financialService.updateTransaction(transaction.id, bookingDate, memo).subscribe({
+      next: () => {
+        if (bookingDate !== previous.bookingDate) {
+          this.applyDateFilter();
+          this.dataChanged.emit();
+        }
+      },
       error: (error) => {
-        transaction.memo = previous;
+        transaction.bookingDate = previous.bookingDate;
+        transaction.memo = previous.memo;
         this.cdr.markForCheck();
         this.messageService.add({
           severity: 'error',
-          detail: error.error?.error ?? 'Could not save the memo.'
+          detail: error.error?.error ?? 'Could not save the change.'
         });
       }
     });
+  }
+
+  private isEditable(event: TransactionEditEvent): boolean {
+    return !!event.field && this.editableFields.includes(event.field);
   }
 
   deleteClicked(): void {

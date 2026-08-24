@@ -33,8 +33,8 @@
   [(selection)]="selectedTransactions" [paginator]="true" [rows]="25"
   [rowsPerPageOptions]="[25, 50, 100]" sortField="bookingDate" [sortOrder]="-1"
   [globalFilterFields]="['partnerName', 'partnerAccount', 'memo', 'type', 'bankTransactionId']"
-  (onEditInit)="onMemoEditInit($event)" (onEditCancel)="onMemoEditCancel($event)"
-  (onEditComplete)="onMemoEditComplete($event)">
+  (onEditInit)="onEditInit($event)" (onEditCancel)="onEditCancel($event)"
+  (onEditComplete)="onEditComplete($event)">
 
   <ng-template pTemplate="caption">
     <div class="filter-bar">
@@ -78,7 +78,18 @@
       <td>
         <p-tableCheckbox [value]="transaction"></p-tableCheckbox>
       </td>
-      <td data-label="Booked">{{transaction.bookingDate | date:'mediumDate'}}</td>
+      <td data-label="Booked" class="booked-cell" [pEditableColumn]="transaction"
+        [pEditableColumnField]="'bookingDate'" pTooltip="Click to edit, Enter to save, Escape to cancel">
+        <p-cellEditor>
+          <ng-template pTemplate="input">
+            <input pInputText type="date" [(ngModel)]="transaction.bookingDate" class="booked-input"
+              aria-label="Booked">
+          </ng-template>
+          <ng-template pTemplate="output">
+            <span class="booked-text">{{transaction.bookingDate | date:'mediumDate'}}</span>
+          </ng-template>
+        </p-cellEditor>
+      </td>
       <td data-label="Type">{{transaction.type}}</td>
       <td data-label="Partner">
         <div class="partner-value">

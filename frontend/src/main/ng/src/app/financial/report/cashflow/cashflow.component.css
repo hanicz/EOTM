@@ -15,3 +15,14 @@
 .muted {
   color: var(--p-text-muted-color);
 }
+
+@media screen and (max-width: 767px) {
+  :host .average-cell::before {
+    flex: 0 1 auto;
+  }
+
+  .average-value {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+}

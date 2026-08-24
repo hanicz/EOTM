@@ -1,6 +1,6 @@
 package eye.on.the.money.controller;
 
-import eye.on.the.money.dto.in.BankTransactionMemoDTO;
+import eye.on.the.money.dto.in.BankTransactionEditDTO;
 import eye.on.the.money.dto.out.BankTransactionDTO;
 import eye.on.the.money.dto.out.ImportResultDTO;
 import eye.on.the.money.dto.out.MonthlyCashFlowDTO;
@@ -72,10 +72,10 @@ public class FinancialController {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/{id}/memo")
-    public ResponseEntity<Void> updateMemo(@CurrentUserEmail String userEmail, @PathVariable Long id,
-                                           @RequestBody @Valid BankTransactionMemoDTO memoDTO) {
-        this.bankTransactionService.updateMemo(userEmail, id, memoDTO.memo());
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> updateTransaction(@CurrentUserEmail String userEmail, @PathVariable Long id,
+                                                  @RequestBody @Valid BankTransactionEditDTO editDTO) {
+        this.bankTransactionService.updateTransaction(userEmail, id, editDTO);
         return ResponseEntity.ok().build();
     }
 

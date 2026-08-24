@@ -25,4 +25,6 @@ public class Symbol implements Serializable {
     private String code;
     @JsonProperty("Type")
     private String type;
+    @JsonProperty("Isin")
+    private String isin;
 }

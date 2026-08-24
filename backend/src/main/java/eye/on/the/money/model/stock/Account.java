@@ -32,7 +32,10 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String accountName;
+
+    @Column(nullable = false)
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate creationDate;

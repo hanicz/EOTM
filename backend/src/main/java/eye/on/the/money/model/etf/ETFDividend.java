@@ -16,7 +16,10 @@ import java.time.LocalDate;
 @Builder
 @Slf4j
 @ToString
-@Table(name = "EOTM_ETF_DIVIDEND")
+@Table(name = "EOTM_ETF_DIVIDEND", indexes = {
+        @Index(name = "IDX_ETF_DIVIDEND_USER_DATE", columnList = "user_id, dividend_date"),
+        @Index(name = "IDX_ETF_DIVIDEND_ETF", columnList = "etf_id"),
+        @Index(name = "IDX_ETF_DIVIDEND_CURRENCY", columnList = "currency_id")})
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
@@ -25,7 +28,10 @@ public class ETFDividend {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(nullable = false)
     private Double amount;
+
+    @Column(nullable = false)
     private LocalDate dividendDate;
 
     @ManyToOne

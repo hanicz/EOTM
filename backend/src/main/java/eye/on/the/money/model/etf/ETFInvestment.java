@@ -15,7 +15,9 @@ import java.time.LocalDate;
 @Builder
 @Slf4j
 @ToString
-@Table(name = "EOTM_ETF_INVESTMENT")
+@Table(name = "EOTM_ETF_INVESTMENT", indexes = {
+        @Index(name = "IDX_ETF_INVESTMENT_USER_DATE", columnList = "user_id, transaction_date"),
+        @Index(name = "IDX_ETF_INVESTMENT_ETF", columnList = "etf_id")})
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
@@ -24,10 +26,19 @@ public class ETFInvestment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private Integer quantity;
+
+    @Column(nullable = false)
     private String buySell;
+
+    @Column(nullable = false)
     private LocalDate creationDate;
+
+    @Column(nullable = false)
     private LocalDate transactionDate;
+
     private Double fee;
 
     @ManyToOne

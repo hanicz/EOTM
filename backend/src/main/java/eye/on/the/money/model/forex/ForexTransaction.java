@@ -16,7 +16,10 @@ import java.time.LocalDate;
 @Builder
 @Slf4j
 @ToString
-@Table(name = "EOTM_FOREX_TRANSACTION")
+@Table(name = "EOTM_FOREX_TRANSACTION", indexes = {
+        @Index(name = "IDX_FOREX_TRANSACTION_USER_DATE", columnList = "user_id, transaction_date"),
+        @Index(name = "IDX_FOREX_TRANSACTION_FROM_CURRENCY", columnList = "from_currency_id"),
+        @Index(name = "IDX_FOREX_TRANSACTION_TO_CURRENCY", columnList = "to_currency_id")})
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
@@ -25,10 +28,20 @@ public class ForexTransaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private Double fromAmount;
+
+    @Column(nullable = false)
     private Double toAmount;
+
+    @Column(nullable = false)
     private LocalDate transactionDate;
+
+    @Column(nullable = false)
     private String buySell;
+
+    @Column(nullable = false)
     private Double changeRate;
 
     @ManyToOne

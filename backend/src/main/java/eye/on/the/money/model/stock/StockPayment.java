@@ -21,6 +21,7 @@ public class StockPayment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(nullable = false)
     private Double amount;
 
     @OneToOne(mappedBy = "stockPayment")

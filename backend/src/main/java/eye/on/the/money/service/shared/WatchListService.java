@@ -129,8 +129,9 @@ public class WatchListService {
         Stock stock = this.stockService.getOrCreateStock(wStock.getShortName(), wStock.getExchange(), wStock.getName());
         User user = this.userService.loadUserByEmail(userEmail);
 
-        TickerWatch tickerWatch = TickerWatch.builder().stock(stock).user(user).build();
-        this.stockWatchRepository.save(tickerWatch);
+        TickerWatch tickerWatch = this.stockWatchRepository.findByUserEmailAndStockId(userEmail, stock.getId())
+                .orElseGet(() -> this.stockWatchRepository.save(
+                        TickerWatch.builder().stock(stock).user(user).build()));
         return this.convertToStockWatchDTO(tickerWatch);
     }
 
@@ -139,8 +140,9 @@ public class WatchListService {
         Coin coin = this.coinRepository.findById(coinId).orElseThrow(() -> new NoSuchElementException("Coin not found: " + coinId));
         User user = this.userService.loadUserByEmail(userEmail);
 
-        CryptoWatch cryptoWatch = CryptoWatch.builder().coin(coin).user(user).build();
-        this.cryptoWatchRepository.save(cryptoWatch);
+        CryptoWatch cryptoWatch = this.cryptoWatchRepository.findByUserEmailAndCoinId(userEmail, coin.getId())
+                .orElseGet(() -> this.cryptoWatchRepository.save(
+                        CryptoWatch.builder().coin(coin).user(user).build()));
         return this.convertToCryptoWatchDTO(cryptoWatch);
     }
 
@@ -150,8 +152,10 @@ public class WatchListService {
         Currency fromCurrency = this.currencyRepository.findById(fromCurrencyId).orElseThrow(() -> new NoSuchElementException("Currency not found: " + fromCurrencyId));
         Currency toCurrency = this.currencyRepository.findById(toCurrencyId).orElseThrow(() -> new NoSuchElementException("Currency not found: " + toCurrencyId));
 
-        ForexWatch forexWatch = ForexWatch.builder().fromCurrency(fromCurrency).toCurrency(toCurrency).user(user).build();
-        this.forexWatchRepository.save(forexWatch);
+        ForexWatch forexWatch = this.forexWatchRepository
+                .findByUserEmailAndFromCurrencyIdAndToCurrencyId(userEmail, fromCurrencyId, toCurrencyId)
+                .orElseGet(() -> this.forexWatchRepository.save(
+                        ForexWatch.builder().fromCurrency(fromCurrency).toCurrency(toCurrency).user(user).build()));
         return this.convertToForexDTO(forexWatch);
     }
 

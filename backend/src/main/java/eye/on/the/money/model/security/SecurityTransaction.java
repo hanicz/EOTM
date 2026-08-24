@@ -16,7 +16,10 @@ import java.time.LocalDate;
 @Builder
 @Slf4j
 @ToString
-@Table(name = "EOTM_SECURITY_TRANSACTION")
+@Table(name = "EOTM_SECURITY_TRANSACTION", indexes = {
+        @Index(name = "IDX_SECURITY_TRANSACTION_USER_DATE", columnList = "user_id, transaction_date"),
+        @Index(name = "IDX_SECURITY_TRANSACTION_SECURITY", columnList = "security_id"),
+        @Index(name = "IDX_SECURITY_TRANSACTION_CURRENCY", columnList = "currency_id")})
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
@@ -25,10 +28,20 @@ public class SecurityTransaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private Integer quantity;
+
+    @Column(nullable = false)
     private String buySell;
+
+    @Column(nullable = false)
     private LocalDate creationDate;
+
+    @Column(nullable = false)
     private LocalDate transactionDate;
+
+    @Column(nullable = false)
     private Double amount;
 
     @ManyToOne

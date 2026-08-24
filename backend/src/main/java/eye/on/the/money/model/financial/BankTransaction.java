@@ -18,7 +18,10 @@ import java.time.LocalDate;
 @ToString
 @Table(name = "EOTM_BANK_TRANSACTION",
         uniqueConstraints = @UniqueConstraint(name = "UK_BANK_TRANSACTION_NATURAL",
-                columnNames = {"user_id", "bank_transaction_id", "booking_date", "type", "amount", "memo"}))
+                columnNames = {"user_id", "bank_transaction_id", "booking_date", "type", "amount", "memo"}),
+        indexes = {
+                @Index(name = "IDX_BANK_TRANSACTION_USER_DATE", columnList = "user_id, booking_date"),
+                @Index(name = "IDX_BANK_TRANSACTION_CURRENCY", columnList = "currency_id")})
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
@@ -56,6 +59,7 @@ public class BankTransaction {
     @Column(name = "memo", nullable = false, length = MEMO_MAX_LENGTH)
     private String memo;
 
+    @Column(name = "creation_date", nullable = false)
     private LocalDate creationDate;
 
     @ManyToOne

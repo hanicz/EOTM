@@ -14,7 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 @Builder
 @Slf4j
 @ToString
-@Table(name = "EOTM_COIN_WATCH")
+@Table(name = "EOTM_COIN_WATCH",
+        uniqueConstraints = @UniqueConstraint(name = "UK_COIN_WATCH_USER_COIN",
+                columnNames = {"user_id", "coin_id"}))
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated

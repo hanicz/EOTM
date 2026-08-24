@@ -148,7 +148,9 @@
     <div class="alert-field">
       <label class="alert-label" htmlFor="exchange">Exchange</label>
       <p-select inputId="exchange" class="searchDropdown" [options]="exchanges" optionLabel="Name" [virtualScroll]="true"
-        [virtualScrollItemSize]="31" [filter]="true" (onChange)="exchangeChanged($event)" [(ngModel)]="selectedExchange"
+        [virtualScrollItemSize]="31" [filter]="true" filterBy="Name,Code"
+        filterPlaceholder="Search by name or code"
+        (onChange)="exchangeChanged($event)" [(ngModel)]="selectedExchange"
         placeholder="Select an Exchange" [style]="{'width':'100%'}" [appendTo]="'body'"
         [dropdownIcon]="exchangesLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
       </p-select>
@@ -156,7 +158,9 @@
     <div class="alert-field">
       <label class="alert-label" htmlFor="ticker">Ticker</label>
       <p-select inputId="ticker" class="searchDropdown" [options]="symbols" optionLabel="Name" [virtualScroll]="true"
-        [virtualScrollItemSize]="31" [filter]="true" [(ngModel)]="selectedStock" placeholder="Select a Ticker"
+        [virtualScrollItemSize]="31" [filter]="true" filterBy="Name,Code,Isin"
+        filterPlaceholder="Search by name, code or ISIN"
+        [(ngModel)]="selectedStock" placeholder="Select a Ticker"
         [style]="{'width':'100%'}" [appendTo]="'body'"
         [dropdownIcon]="stocksLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
       </p-select>

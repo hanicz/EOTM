@@ -129,7 +129,9 @@
       <div class="col-12 mb-2">
         <label for="exchange" class="block mb-2 font-medium text-color-secondary">Exchange</label>
         <p-select class="searchDropdown" [options]="exchanges" optionLabel="Name" [virtualScroll]="true"
-          [virtualScrollItemSize]="31" [filter]="true" (onChange)="exchangeChanged($event)" [(ngModel)]="selectedExchange"
+          [virtualScrollItemSize]="31" [filter]="true" filterBy="Name,Code"
+          filterPlaceholder="Search by name or code"
+          (onChange)="exchangeChanged($event)" [(ngModel)]="selectedExchange"
           placeholder="Select an Exchange" [style]="{'width':'100%'}"
           [dropdownIcon]="exchangesLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
         </p-select>
@@ -137,7 +139,9 @@
       <div class="col-12 mb-2">
         <label for="ticker" class="block mb-2 font-medium text-color-secondary">Ticker</label>
         <p-select class="searchDropdown" [options]="symbols" optionLabel="Name" [virtualScroll]="true"
-          [virtualScrollItemSize]="31" [filter]="true" [(ngModel)]="selectedStock" placeholder="Select a Ticker"
+          [virtualScrollItemSize]="31" [filter]="true" filterBy="Name,Code,Isin"
+          filterPlaceholder="Search by name, code or ISIN"
+          [(ngModel)]="selectedStock" placeholder="Select a Ticker"
           [style]="{'width':'100%'}"
           [dropdownIcon]="stocksLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
         </p-select>

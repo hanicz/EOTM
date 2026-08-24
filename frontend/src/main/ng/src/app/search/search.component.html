@@ -3,19 +3,33 @@
   <p-panel>
     <div class="grid">
       <div class="col-12 md:col-3">
-        <p-select class="searchDropdown" [options]="exchanges" optionLabel="Name" optionValue="Code"
+        <label class="lookup-label" htmlFor="lookupExchange">Exchange</label>
+        <p-select inputId="lookupExchange" class="searchDropdown" [options]="exchanges" optionLabel="Name" optionValue="Code"
           [virtualScroll]="true" [virtualScrollItemSize]="31" [filter]="true" filterBy="Name,Code"
           filterPlaceholder="Search by name or code" (onChange)="exchangeChanged($event)"
           [(ngModel)]="globals.selectedExchange" placeholder="Select an Exchange" [style]="{'width':'100%'}"
           [dropdownIcon]="exchangesLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+          <ng-template let-option pTemplate="item">
+            <app-exchange-option [exchange]="option"></app-exchange-option>
+          </ng-template>
+          <ng-template let-option pTemplate="selectedItem">
+            <app-exchange-option [exchange]="option" [dense]="true"></app-exchange-option>
+          </ng-template>
         </p-select>
       </div>
       <div class="col-12 md:col-5">
-        <p-select class="searchDropdown" [options]="symbols" optionLabel="Name" optionValue="Code"
-          [virtualScroll]="true" [virtualScrollItemSize]="31" [filter]="true" filterBy="Name,Code,Isin"
+        <label class="lookup-label" htmlFor="lookupTicker">Ticker</label>
+        <p-select inputId="lookupTicker" class="searchDropdown" [options]="symbols" optionLabel="Name" optionValue="Code"
+          [virtualScroll]="true" [virtualScrollItemSize]="46" [filter]="true" filterBy="Name,Code,Isin"
           filterPlaceholder="Search by name, code or ISIN" (onChange)="stockChanged($event)"
           [(ngModel)]="globals.selectedStock" placeholder="Select a Ticker" [style]="{'width':'100%'}"
           [dropdownIcon]="stocksLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+          <ng-template let-option pTemplate="item">
+            <app-symbol-option [symbol]="option"></app-symbol-option>
+          </ng-template>
+          <ng-template let-option pTemplate="selectedItem">
+            <app-symbol-option [symbol]="option" [dense]="true"></app-symbol-option>
+          </ng-template>
         </p-select>
       </div>
     </div>
@@ -25,31 +39,38 @@
           <div class="col-12 pb-0">
             <div class="ticker-header">
               <div class="flex flex-wrap align-items-center">
-                <p-image
-                  src="https://eodhd.com/img/logos/{{globals.selectedExchange}}/{{globals.selectedStock}}.png"
-                  width="42" class="ticker-logo mr-3"
-                (onImageError)="globals.errorHandler($event)"></p-image>
-                <div>
-                  <div class="flex flex-wrap align-items-center">
-                    <div class="ticker-name">{{profile.name}}</div>
-                    <p-tag styleClass="ml-2" [rounded]="true" severity="contrast" value="{{profile.ticker}}"></p-tag>
+                <app-ticker-logo class="ticker-logo mr-3" [size]="42"
+                  [exchange]="globals.selectedExchange"
+                  [symbol]="globals.selectedStock"></app-ticker-logo>
+                @if (profileLoading) {
+                  <div>
+                    <p-skeleton width="12rem" height="1.2rem" styleClass="mb-2"></p-skeleton>
+                    <p-skeleton width="5rem" height="0.8rem"></p-skeleton>
                   </div>
-                  <div class="ticker-subline mt-1">{{profile.exchange}}</div>
-                </div>
-                <div class="ticker-price ml-4">
-                  {{endPrice | currency : profile.currency : 'symbol' : '0.0-2'}}
-                </div>
+                  <p-skeleton width="6rem" height="1.5rem" styleClass="ml-4"></p-skeleton>
+                } @else {
+                  <div>
+                    <div class="flex flex-wrap align-items-center">
+                      <div class="ticker-name">{{profile.name}}</div>
+                      <p-tag styleClass="ml-2" [rounded]="true" severity="contrast" value="{{profile.ticker}}"></p-tag>
+                    </div>
+                    <div class="ticker-subline mt-1">{{profile.exchange}}</div>
+                  </div>
+                  <div class="ticker-price ml-4">
+                    {{endPrice | currency : profile.currency : 'symbol' : '0.0-2'}}
+                  </div>
+                }
               </div>
               <div class="flex flex-wrap mt-1">
-                @if (!(checkStockContain())) {
-                  <button pButton pRipple type="button" icon="far fa-bookmark"
-                    label="Add to Watchlist" class="p-button-outlined" severity="secondary"
-                  (click)="addToWatchList()"></button>
-                }
                 @if (checkStockContain()) {
-                  <button pButton pRipple type="button" icon="pi pi-times"
-                    (click)="removeFromWatchList()" label="Remove from Watchlist"
-                  class="p-button-outlined" severity="danger"></button>
+                  <button pButton pRipple type="button" icon="pi pi-star-fill"
+                    (click)="removeFromWatchList()" label="Watching"
+                    pTooltip="Remove from watchlist" class="p-button-outlined watchlist-toggle-button"
+                    severity="warn"></button>
+                } @else {
+                  <button pButton pRipple type="button" icon="pi pi-star"
+                    label="Add to Watchlist" class="p-button-outlined watchlist-toggle-button"
+                    severity="secondary" (click)="addToWatchList()"></button>
                 }
               </div>
             </div>
@@ -67,7 +88,7 @@
                 optionValue="value" (onChange)="getCandleData()">
               </p-selectButton>
               <div class="flex align-items-center">
-                <p-tag styleClass="mr-2" severity="info"
+                <p-tag styleClass="mr-2" severity="secondary"
                   value="{{(startPrice | currency : profile.currency : 'symbol' : '0.0-1') + ' - ' + (endPrice | currency : profile.currency : 'symbol' : '0.0-1')}}">
                 </p-tag>
                 <p-tag styleClass="mr-2" [severity]="(difference > 0) ? 'success':'danger'"
@@ -87,6 +108,17 @@
             <p-divider layout="vertical"></p-divider>
           </div>
           <div class="col-12 lg:col-3">
+            @if (profileLoading) {
+              <div class="info-card">
+                <div class="info-card-title">Company Info</div>
+                @for (row of [].constructor(8); track $index) {
+                  <div class="info-row">
+                    <p-skeleton width="7rem" height="0.8rem"></p-skeleton>
+                    <p-skeleton width="4rem" height="0.8rem"></p-skeleton>
+                  </div>
+                }
+              </div>
+            } @else {
             <div class="info-card">
               <div class="info-card-title">Company Info</div>
               <div class="info-row">
@@ -108,15 +140,16 @@
               </div>
               <div class="info-row">
                 <div class="info-label"><i class="pi pi-link"></i>WebUrl<i class="pi pi-question-circle info-tooltip-icon" pTooltip="The company's official website." tooltipPosition="top"></i></div>
-                <div class="info-value"><a href="{{profile.weburl}}" target="_blank" class="info-link">{{profile.weburl}}</a></div>
+                <div class="info-value info-value-truncate">
+                  <a href="{{profile.weburl}}" target="_blank" class="info-link"
+                    [pTooltip]="profile.weburl">{{hostName(profile.weburl)}}</a>
+                </div>
               </div>
               <div class="info-row">
                 <div class="info-label"><i class="pi pi-users"></i>Peers<i class="pi pi-question-circle info-tooltip-icon" pTooltip="Other companies commonly compared to this one, e.g. competitors in the same industry." tooltipPosition="top"></i></div>
                 <div class="info-value info-value-wrap">
                   @for (peer of profile.peers; track peer) {
-                    <div class="text-xs">
-                      {{peer}},
-                    </div>
+                    <span class="peer-chip">{{peer}}</span>
                   }
                 </div>
               </div>
@@ -158,6 +191,7 @@
                 (metric.yearLowDate | date:'mediumDate')}}</div>
               </div>
             </div>
+            }
           </div>
         </div>
         <div class="grid search-gutter">
@@ -213,7 +247,18 @@
             <p-divider></p-divider>
           </div>
         </div>
-        <app-news [type]="newsType"></app-news>
+        <div class="grid search-gutter">
+          <div class="col-12">
+            <app-news [type]="newsType"></app-news>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <div class="lookup-empty">
+        <i class="pi pi-chart-line"></i>
+        <div class="lookup-empty-title">Look up a ticker</div>
+        <div class="lookup-empty-text">Pick an exchange, then a ticker to see its price history,
+          company profile, algorithmic recommendation and latest news.</div>
       </div>
     }
   </p-panel>

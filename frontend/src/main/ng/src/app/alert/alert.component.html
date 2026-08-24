@@ -1,149 +1,188 @@
+<p-toast position="bottom-center"></p-toast>
 <div class="shadow-5">
   <menu class="pl-0 mb-0"></menu>
   <p-panel>
     <ng-template pTemplate="icons">
       <button pButton pRipple icon="pi pi-refresh" class="p-button-rounded p-button-text"
-        pTooltip="Refresh" (click)="fetchData()"></button>
+        pTooltip="Refresh" (click)="refresh()"></button>
     </ng-template>
     <p-tabs value="0">
-    <p-tablist>
-      <p-tab value="0">Stock</p-tab>
-      <p-tab value="1">Crypto</p-tab>
-    </p-tablist>
-    <p-tabpanels>
-      <p-tabpanel value="0">
+      <p-tablist>
+        <p-tab value="0">Stock</p-tab>
+        <p-tab value="1">Crypto</p-tab>
+      </p-tablist>
+      <p-tabpanels>
+        <p-tabpanel value="0">
 
-        <button pButton pRipple label="Create" icon="pi pi-plus"
-          class="p-button-rounded ml-2 mb-2" severity="success" (click)="showDialog()">
-        </button>
-        @if (alertsLoading) {
-          <p-table [value]="[{}]" styleClass="p-datatable-striped p-datatable-sm table-stack"
-            >
-            <ng-template pTemplate="header">
-              <tr>
-                <th>Ticker</th>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Value Point</th>
-                <th></th>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="body">
-              @for (item of [].constructor(4); track $index) {
+          <button pButton pRipple label="Create" icon="pi pi-plus"
+            class="p-button-rounded ml-2 mb-2" severity="success" (click)="showDialog()">
+          </button>
+
+          @if (alertsLoading) {
+            <p-table [value]="[{}]" styleClass="p-datatable-striped p-datatable-sm table-stack">
+              <ng-template pTemplate="header">
                 <tr>
-                  <td><p-skeleton></p-skeleton></td>
-                  <td><p-skeleton></p-skeleton></td>
-                  <td><p-skeleton></p-skeleton></td>
-                  <td><p-skeleton></p-skeleton></td>
+                  <th>Ticker</th>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Value Point</th>
+                  <th class="alert-action-column"></th>
                 </tr>
-              }
-            </ng-template>
-          </p-table>
-        }
-
-        @if (!alertsLoading) {
-          <p-table [value]="stockAlerts" styleClass="p-datatable-striped table-stack"
-            >
-            <ng-template pTemplate="header">
-              <tr>
-                <th>Ticker</th>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Value Point</th>
-                <th><i class="pi pi-pencil"></i></th>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-alert>
-              <tr
-                [ngClass]="{'row-over': alert.type.indexOf('OVER') > 0, 'row-under': alert.type.indexOf('UNDER') > 0 }">
-                <td data-label="Ticker">
-                  <p-tag severity="info" value="{{alert.shortName}}.{{alert.exchange}}">
-                  </p-tag>
-                </td>
-                <td data-label="Name"><p-image src="https://eodhd.com/img/logos/{{alert.exchange}}/{{alert.shortName}}.png"
-                width="15" class="mr-1" (onImageError)="globals.errorHandler($event)"></p-image>
-              {{alert.name}}</td>
-              <td data-label="Type">{{alert.type | alertTypePipe}}</td>
-              <td data-label="Value Point" [ngStyle]="{'color': (alert.type.indexOf('OVER') > 0) ? '#008002' : '#910101'}">
-              {{alert.valuePoint}}</td>
-              <td><i style="cursor: pointer; color: red" (click)="deleteStockAlert(alert)"
-              class="pi pi-times tap-target"></i>
-            </td>
-          </tr>
-        </ng-template>
-      </p-table>
-    }
-  </p-tabpanel>
-  <p-tabpanel value="1">
-    <button pButton pRipple label="Create" icon="pi pi-plus"
-      class="p-button-rounded ml-2 mb-2" severity="success" (click)="showCryptoDialog()">
-    </button>
-    @if (cryptoAlertsLoading) {
-      <p-table [value]="[{}]" styleClass="p-datatable-striped p-datatable-sm table-stack"
-        >
-        <ng-template pTemplate="header">
-          <tr>
-            <th>Symbol</th>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Value Point</th>
-            <th></th>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="body">
-          @for (item of [].constructor(4); track $index) {
-            <tr>
-              <td><p-skeleton></p-skeleton></td>
-              <td><p-skeleton></p-skeleton></td>
-              <td><p-skeleton></p-skeleton></td>
-              <td><p-skeleton></p-skeleton></td>
-            </tr>
+              </ng-template>
+              <ng-template pTemplate="body">
+                @for (item of [].constructor(4); track $index) {
+                  <tr>
+                    <td><p-skeleton></p-skeleton></td>
+                    <td><p-skeleton></p-skeleton></td>
+                    <td><p-skeleton></p-skeleton></td>
+                    <td><p-skeleton></p-skeleton></td>
+                    <td><p-skeleton></p-skeleton></td>
+                  </tr>
+                }
+              </ng-template>
+            </p-table>
+          } @else if (alertsError) {
+            <div class="alert-message">
+              <span>Could not load your stock alerts.</span>
+              <button pButton pRipple type="button" label="Retry" (click)="refresh()"
+                class="p-button-text p-button-sm" severity="secondary"></button>
+            </div>
+          } @else {
+            <p-table [value]="stockAlerts" styleClass="p-datatable-striped table-stack">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>Ticker</th>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Value Point</th>
+                  <th class="alert-action-column"></th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-alert>
+                <tr>
+                  <td data-label="Ticker">
+                    <p-tag severity="contrast" value="{{alert.shortName}}.{{alert.exchange}}"></p-tag>
+                  </td>
+                  <td data-label="Name">
+                    <div class="flex align-items-center">
+                      <app-ticker-logo class="mr-1" [exchange]="alert.exchange"
+                        [symbol]="alert.shortName"></app-ticker-logo>
+                      {{alert.name}}
+                    </div>
+                  </td>
+                  <td data-label="Type">
+                    <span class="alert-type" [ngClass]="directionClass(alert.type)">
+                      <i class="pi" [ngClass]="directionIcon(alert.type)"></i>{{alert.type | alertTypePipe}}
+                    </span>
+                  </td>
+                  <td data-label="Value Point">
+                    <span class="alert-value">{{formatValuePoint(alert.type, alert.valuePoint)}}</span>
+                  </td>
+                  <td class="alert-action-column">
+                    <button pButton pRipple type="button" icon="pi pi-trash" severity="danger"
+                      class="p-button-rounded p-button-text" pTooltip="Delete alert"
+                      [attr.aria-label]="'Delete the ' + alert.shortName + ' alert'"
+                      [loading]="isDeleting('stock', alert.id)" [disabled]="isDeleting('stock', alert.id)"
+                      (click)="deleteStockAlert(alert)"></button>
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="emptymessage">
+                <tr>
+                  <td colspan="5" class="alert-message">No stock alerts yet. Use Create to add one.</td>
+                </tr>
+              </ng-template>
+            </p-table>
           }
-        </ng-template>
-      </p-table>
-    }
+        </p-tabpanel>
 
-    @if (!cryptoAlertsLoading) {
-      <p-table [value]="cryptoAlerts" styleClass="p-datatable-striped table-stack"
-        >
-        <ng-template pTemplate="header">
-          <tr>
-            <th>Symbol</th>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Value Point</th>
-            <th><i class="pi pi-pencil"></i></th>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-alert>
-          <tr
-            [ngClass]="{'row-over': alert.type.indexOf('OVER') > 0, 'row-under': alert.type.indexOf('UNDER') > 0 }">
-            <td data-label="Symbol">
-              <div class="flex align-items-center">
-                <p-image src="{{assetUrl + alert.symbol + '.svg'}}" width="15"
-                class="mr-1"></p-image>
-                {{alert.symbol}}
-              </div>
-            </td>
-            <td data-label="Name">{{alert.name}}</td>
-            <td data-label="Type">{{alert.type | alertTypePipe}}</td>
-            <td data-label="Value Point" [ngStyle]="{'color': (alert.type.indexOf('OVER') > 0) ? '#008002' : '#910101'}">
-            {{alert.valuePoint}}</td>
-            <td><i style="cursor: pointer; color: red" (click)="deleteCryptoAlert(alert)"
-            class="pi pi-times tap-target"></i>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
-  }
-</p-tabpanel>
-    </p-tabpanels>
+        <p-tabpanel value="1">
+          <button pButton pRipple label="Create" icon="pi pi-plus"
+            class="p-button-rounded ml-2 mb-2" severity="success" (click)="showCryptoDialog()">
+          </button>
+
+          @if (cryptoAlertsLoading) {
+            <p-table [value]="[{}]" styleClass="p-datatable-striped p-datatable-sm table-stack">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>Symbol</th>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Value Point</th>
+                  <th class="alert-action-column"></th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body">
+                @for (item of [].constructor(4); track $index) {
+                  <tr>
+                    <td><p-skeleton></p-skeleton></td>
+                    <td><p-skeleton></p-skeleton></td>
+                    <td><p-skeleton></p-skeleton></td>
+                    <td><p-skeleton></p-skeleton></td>
+                    <td><p-skeleton></p-skeleton></td>
+                  </tr>
+                }
+              </ng-template>
+            </p-table>
+          } @else if (cryptoAlertsError) {
+            <div class="alert-message">
+              <span>Could not load your crypto alerts.</span>
+              <button pButton pRipple type="button" label="Retry" (click)="refresh()"
+                class="p-button-text p-button-sm" severity="secondary"></button>
+            </div>
+          } @else {
+            <p-table [value]="cryptoAlerts" styleClass="p-datatable-striped table-stack">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>Symbol</th>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Value Point</th>
+                  <th class="alert-action-column"></th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-alert>
+                <tr>
+                  <td data-label="Symbol">
+                    <div class="flex align-items-center">
+                      <app-ticker-logo class="mr-1" [src]="assetUrl + alert.symbol + '.svg'"
+                        [symbol]="alert.symbol"></app-ticker-logo>
+                      {{alert.symbol | uppercase}}
+                    </div>
+                  </td>
+                  <td data-label="Name">{{alert.name}}</td>
+                  <td data-label="Type">
+                    <span class="alert-type" [ngClass]="directionClass(alert.type)">
+                      <i class="pi" [ngClass]="directionIcon(alert.type)"></i>{{alert.type | alertTypePipe}}
+                    </span>
+                  </td>
+                  <td data-label="Value Point">
+                    <span class="alert-value">{{formatValuePoint(alert.type, alert.valuePoint)}}</span>
+                  </td>
+                  <td class="alert-action-column">
+                    <button pButton pRipple type="button" icon="pi pi-trash" severity="danger"
+                      class="p-button-rounded p-button-text" pTooltip="Delete alert"
+                      [attr.aria-label]="'Delete the ' + alert.symbol + ' alert'"
+                      [loading]="isDeleting('crypto', alert.id)" [disabled]="isDeleting('crypto', alert.id)"
+                      (click)="deleteCryptoAlert(alert)"></button>
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="emptymessage">
+                <tr>
+                  <td colspan="5" class="alert-message">No crypto alerts yet. Use Create to add one.</td>
+                </tr>
+              </ng-template>
+            </p-table>
+          }
+        </p-tabpanel>
+      </p-tabpanels>
     </p-tabs>
-</p-panel>
+  </p-panel>
 </div>
 
 <p-dialog header="Create Stock Alert" [(visible)]="displayDialog" [breakpoints]="{'992px': '75vw', '576px': '100vw'}"
-  [style]="{width: '28vw'}" [modal]="true" [draggable]="false" [resizable]="false">
+  [style]="{width: '28vw', minWidth: '26rem'}" [modal]="true" [draggable]="false" [resizable]="false">
   <div class="alert-form">
     <div class="alert-field">
       <label class="alert-label" htmlFor="exchange">Exchange</label>
@@ -153,17 +192,32 @@
         (onChange)="exchangeChanged($event)" [(ngModel)]="selectedExchange"
         placeholder="Select an Exchange" [style]="{'width':'100%'}" [appendTo]="'body'"
         [dropdownIcon]="exchangesLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+        <ng-template let-option pTemplate="item">
+          <app-exchange-option [exchange]="option"></app-exchange-option>
+        </ng-template>
+        <ng-template let-option pTemplate="selectedItem">
+          <app-exchange-option [exchange]="option" [dense]="true"></app-exchange-option>
+        </ng-template>
       </p-select>
     </div>
     <div class="alert-field">
       <label class="alert-label" htmlFor="ticker">Ticker</label>
       <p-select inputId="ticker" class="searchDropdown" [options]="symbols" optionLabel="Name" [virtualScroll]="true"
-        [virtualScrollItemSize]="31" [filter]="true" filterBy="Name,Code,Isin"
+        [virtualScrollItemSize]="46" [filter]="true" filterBy="Name,Code,Isin"
         filterPlaceholder="Search by name, code or ISIN"
         [(ngModel)]="selectedStock" placeholder="Select a Ticker"
-        [style]="{'width':'100%'}" [appendTo]="'body'"
+        [style]="{'width':'100%'}" [appendTo]="'body'" [disabled]="!selectedExchange.Code"
         [dropdownIcon]="stocksLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+        <ng-template let-option pTemplate="item">
+          <app-symbol-option [symbol]="option"></app-symbol-option>
+        </ng-template>
+        <ng-template let-option pTemplate="selectedItem">
+          <app-symbol-option [symbol]="option" [dense]="true"></app-symbol-option>
+        </ng-template>
       </p-select>
+      @if (!selectedExchange.Code) {
+        <small class="alert-hint">Pick an exchange first.</small>
+      }
     </div>
     <div class="alert-field">
       <label class="alert-label" htmlFor="type">Type</label>
@@ -171,26 +225,31 @@
       optionValue="code" [style]="{'width':'100%'}" [appendTo]="'body'" placeholder="Select a Type"></p-select>
     </div>
     <div class="alert-field">
-      <label class="alert-label" htmlFor="valuePoint">Value</label>
+      <label class="alert-label" htmlFor="valuePoint">{{isPercent(selectedType) ? 'Percent' : 'Price'}}</label>
       <p-inputNumber inputId="valuePoint" [(ngModel)]="valuePoint" mode="decimal" [minFractionDigits]="0"
-        [maxFractionDigits]="2" [style]="{'width':'100%'}" inputStyleClass="w-full">
+        [maxFractionDigits]="2" [min]="0" [suffix]="isPercent(selectedType) ? ' %' : ''"
+        [style]="{'width':'100%'}" inputStyleClass="w-full">
       </p-inputNumber>
+      <small class="alert-hint">{{alertSummary(selectedStock.Code, selectedType, valuePoint)}}</small>
     </div>
   </div>
   <ng-template pTemplate="footer">
     <button pButton pRipple label="Create" icon="pi pi-plus" class="p-button-rounded" severity="success"
+      [disabled]="!stockAlertValid || creatingStockAlert" [loading]="creatingStockAlert"
       (click)="createStockAlert()">
     </button>
   </ng-template>
 </p-dialog>
 
 <p-dialog header="Create Crypto Alert" [(visible)]="displayCryptoDialog" [breakpoints]="{'992px': '75vw', '576px': '100vw'}"
-  [style]="{width: '28vw'}" [modal]="true" [draggable]="false" [resizable]="false">
+  [style]="{width: '28vw', minWidth: '26rem'}" [modal]="true" [draggable]="false" [resizable]="false">
   <div class="alert-form">
     <div class="alert-field">
       <label class="alert-label" htmlFor="crypto">Coin</label>
       <p-select inputId="crypto" class="searchDropdown" [options]="cryptos" optionLabel="name" [virtualScroll]="true"
-        [virtualScrollItemSize]="31" [filter]="true" [(ngModel)]="selectedCrypto" placeholder="Select a Coin"
+        [virtualScrollItemSize]="31" [filter]="true" filterBy="name,symbol"
+        filterPlaceholder="Search by name or symbol"
+        [(ngModel)]="selectedCrypto" placeholder="Select a Coin"
         [style]="{'width':'100%'}" [appendTo]="'body'"
         [dropdownIcon]="cryptosLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
       </p-select>
@@ -201,14 +260,17 @@
       optionValue="code" [style]="{'width':'100%'}" [appendTo]="'body'" placeholder="Select a Type"></p-select>
     </div>
     <div class="alert-field">
-      <label class="alert-label" htmlFor="cryptoValuePoint">Value</label>
+      <label class="alert-label" htmlFor="cryptoValuePoint">{{isPercent(selectedCryptoType) ? 'Percent' : 'Price'}}</label>
       <p-inputNumber inputId="cryptoValuePoint" [(ngModel)]="cryptoValuePoint" mode="decimal" [minFractionDigits]="0"
-        [maxFractionDigits]="2" [style]="{'width':'100%'}" inputStyleClass="w-full">
+        [maxFractionDigits]="2" [min]="0" [suffix]="isPercent(selectedCryptoType) ? ' %' : ''"
+        [style]="{'width':'100%'}" inputStyleClass="w-full">
       </p-inputNumber>
+      <small class="alert-hint">{{alertSummary(selectedCrypto.symbol, selectedCryptoType, cryptoValuePoint)}}</small>
     </div>
   </div>
   <ng-template pTemplate="footer">
     <button pButton pRipple label="Create" icon="pi pi-plus" class="p-button-rounded" severity="success"
+      [disabled]="!cryptoAlertValid || creatingCryptoAlert" [loading]="creatingCryptoAlert"
       (click)="createCryptoAlert()">
     </button>
   </ng-template>

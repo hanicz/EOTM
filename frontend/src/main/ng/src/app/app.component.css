@@ -22,7 +22,6 @@
 .app-watchlist {
     flex: 0 0 16.6667%;
     min-width: 0;
-    padding-top: 0.5rem;
 }
 
 /* Declared outside the media query below: if the viewport is widened while the
@@ -58,7 +57,6 @@
         width: min(20rem, 85vw);
         height: 100dvh;
         overflow-y: auto;
-        padding-top: 0;
         background-color: #f6f4ee;
         box-shadow: -2px 0 12px rgba(0, 0, 0, 0.18);
         transform: translateX(100%);

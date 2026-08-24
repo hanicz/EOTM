@@ -27,10 +27,14 @@ import { Panel } from 'primeng/panel';
 import { Select } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { Tag } from 'primeng/tag';
-import { Image } from 'primeng/image';
+import { TickerLogoComponent } from '../util/ticker-logo.component';
+import { ExchangeOptionComponent } from '../util/exchange-option.component';
+import { SymbolOptionComponent } from '../util/symbol-option.component';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { Divider } from 'primeng/divider';
+import { Skeleton } from 'primeng/skeleton';
+import { PrimeTemplate } from 'primeng/api';
 import { SelectButton } from 'primeng/selectbutton';
 import { Tooltip } from 'primeng/tooltip';
 import { NewsComponent } from '../news/news.component';
@@ -48,7 +52,7 @@ export type ChartOptions = {
     selector: 'app-search',
     templateUrl: './search.component.html',
     styleUrls: ['./search.component.css'],
-    imports: [MenuComponent, Bind, Panel, Select, FormsModule, Tag, Image, ButtonDirective, Ripple, Divider, SelectButton, ChartComponent, NewsComponent, DecimalPipe, CurrencyPipe, DatePipe, NgClass, Tooltip]
+    imports: [MenuComponent, Bind, Panel, PrimeTemplate, Select, FormsModule, Tag, ButtonDirective, Ripple, Divider, Skeleton, SelectButton, ChartComponent, NewsComponent, DecimalPipe, CurrencyPipe, DatePipe, NgClass, Tooltip, TickerLogoComponent, ExchangeOptionComponent, SymbolOptionComponent]
 })
 export class SearchComponent implements OnInit, AfterViewInit {
 
@@ -77,6 +81,7 @@ export class SearchComponent implements OnInit, AfterViewInit {
 
   exchangesLoading: boolean = true;
   stocksLoading: boolean = false;
+  profileLoading: boolean = false;
 
   @ViewChild("chart") chart: ChartComponent | any;
   public chartOptions: Partial<ChartOptions> | any;
@@ -253,6 +258,11 @@ export class SearchComponent implements OnInit, AfterViewInit {
   }
 
   stockChanged(event: any) {
+    this.profileLoading = true;
+    this.profile = {} as Profile;
+    this.metric = {} as Metric;
+    this.signalResult = undefined;
+
     this.metricService.getMetrics(this.globals.selectedStock).subscribe({
       next: (data) => {
         this.metric = data;
@@ -262,7 +272,12 @@ export class SearchComponent implements OnInit, AfterViewInit {
 
     this.metricService.getProfile(this.globals.selectedStock).subscribe({
       next: (data) => {
+        this.profileLoading = false;
         this.profile = data;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.profileLoading = false;
         this.cdr.markForCheck();
       }
     });
@@ -363,7 +378,15 @@ export class SearchComponent implements OnInit, AfterViewInit {
   }
 
   checkStockContain() {
-    return this.globals.stockWatchList.some(s => s.stockShortName === this.globals.selectedStock);
+    return this.globals.stockWatchList.some(s => s.stockShortName === this.globals.selectedStock
+      && s.stockExchange === this.globals.selectedExchange);
+  }
+
+  hostName(url: string): string {
+    if (!url) {
+      return '';
+    }
+    return url.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
   }
 
   addToWatchList() {

@@ -80,8 +80,8 @@
       </td>
       <td data-label="Stock Name">
         <div class="flex align-items-center">
-          <p-image src="https://eodhd.com/img/logos/{{investment.exchange}}/{{investment.shortName}}.png"
-          width="15" class="mr-1" (onImageError)="globals.errorHandler($event)"></p-image>
+          <app-ticker-logo class="mr-1" [exchange]="investment.exchange"
+            [symbol]="investment.shortName"></app-ticker-logo>
           {{investment.shortName}}.{{investment.exchange}}
         </div>
       </td>
@@ -134,16 +134,28 @@
           (onChange)="exchangeChanged($event)" [(ngModel)]="selectedExchange"
           placeholder="Select an Exchange" [style]="{'width':'100%'}"
           [dropdownIcon]="exchangesLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+          <ng-template let-option pTemplate="item">
+            <app-exchange-option [exchange]="option"></app-exchange-option>
+          </ng-template>
+          <ng-template let-option pTemplate="selectedItem">
+            <app-exchange-option [exchange]="option" [dense]="true"></app-exchange-option>
+          </ng-template>
         </p-select>
       </div>
       <div class="col-12 mb-2">
         <label for="ticker" class="block mb-2 font-medium text-color-secondary">Ticker</label>
         <p-select class="searchDropdown" [options]="symbols" optionLabel="Name" [virtualScroll]="true"
-          [virtualScrollItemSize]="31" [filter]="true" filterBy="Name,Code,Isin"
+          [virtualScrollItemSize]="46" [filter]="true" filterBy="Name,Code,Isin"
           filterPlaceholder="Search by name, code or ISIN"
           [(ngModel)]="selectedStock" placeholder="Select a Ticker"
           [style]="{'width':'100%'}"
           [dropdownIcon]="stocksLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+          <ng-template let-option pTemplate="item">
+            <app-symbol-option [symbol]="option"></app-symbol-option>
+          </ng-template>
+          <ng-template let-option pTemplate="selectedItem">
+            <app-symbol-option [symbol]="option" [dense]="true"></app-symbol-option>
+          </ng-template>
         </p-select>
       </div>
       <div class="col-12 sm:col-6 mb-2">

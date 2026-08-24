@@ -7,15 +7,19 @@ import { Bind } from 'primeng/bind';
 import { TableModule } from 'primeng/table';
 import { PrimeTemplate } from 'primeng/api';
 import { Skeleton } from 'primeng/skeleton';
-import { Image } from 'primeng/image';
+import { TickerLogoComponent } from '../../util/ticker-logo.component';
 import { Tag } from 'primeng/tag';
+import { ButtonDirective } from 'primeng/button';
+import { Ripple } from 'primeng/ripple';
+import { Tooltip } from 'primeng/tooltip';
 import { DecimalPipe, CurrencyPipe } from '@angular/common';
 
 @Component({
     selector: 'app-holding',
     templateUrl: './holding.component.html',
     styleUrls: ['./holding.component.css'],
-    imports: [Bind, TableModule, PrimeTemplate, Skeleton, Image, Tag, DecimalPipe, CurrencyPipe]
+    imports: [Bind, TableModule, PrimeTemplate, Skeleton, Tag, ButtonDirective, Ripple, Tooltip, DecimalPipe,
+        CurrencyPipe, TickerLogoComponent]
 })
 export class HoldingComponent implements OnInit {
 
@@ -24,6 +28,11 @@ export class HoldingComponent implements OnInit {
   globals: Globals;
 
   investmentsLoading: boolean = true;
+
+  readonly alertSteps = [0.05, 0.1];
+
+  private readonly pendingAlerts = new Set<string>();
+  private readonly createdAlerts = new Set<string>();
 
   constructor(private stockService: StockService, globals: Globals, private alertService: AlertService, private cdr: ChangeDetectorRef) {
     this.globals = globals;
@@ -57,13 +66,42 @@ export class HoldingComponent implements OnInit {
     });
   }
 
-  alertClicked(investment: Investment, modulo: number){
-    let average = investment.amount / investment.quantity;
-    let data = {shortName: investment.shortName, exchange: investment.exchange, type: 'PRICE_OVER', valuePoint: (average + average * modulo).toFixed(2), name: investment.name}
+  alertTarget(investment: Investment, modulo: number): number {
+    const average = investment.amount / investment.quantity;
+    return average + average * modulo;
+  }
+
+  alertPending(investment: Investment, modulo: number): boolean {
+    return this.pendingAlerts.has(this.alertKey(investment, modulo));
+  }
+
+  alertCreated(investment: Investment, modulo: number): boolean {
+    return this.createdAlerts.has(this.alertKey(investment, modulo));
+  }
+
+  alertClicked(investment: Investment, modulo: number) {
+    const key = this.alertKey(investment, modulo);
+    if (this.pendingAlerts.has(key) || this.createdAlerts.has(key)) {
+      return;
+    }
+    this.pendingAlerts.add(key);
+
+    let data = {shortName: investment.shortName, exchange: investment.exchange, type: 'PRICE_OVER', valuePoint: this.alertTarget(investment, modulo).toFixed(2), name: investment.name}
 
     this.alertService.createNewStockAlert(data).subscribe({
-      next: (data) => {
+      next: () => {
+        this.pendingAlerts.delete(key);
+        this.createdAlerts.add(key);
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.pendingAlerts.delete(key);
+        this.cdr.markForCheck();
       }
     });
+  }
+
+  private alertKey(investment: Investment, modulo: number): string {
+    return investment.shortName + '.' + investment.exchange + '@' + modulo;
   }
 }

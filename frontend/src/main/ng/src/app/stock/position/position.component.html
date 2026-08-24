@@ -26,9 +26,8 @@
     <tr>
       <td data-label="Stock Name">
         <div class="flex align-items-center">
-          <p-image
-            src="https://eodhd.com/img/logos/{{investment.exchange}}/{{investment.shortName}}.png"
-          width="15" class="mr-1" (onImageError)="globals.errorHandler($event)"></p-image>
+          <app-ticker-logo class="mr-1" [exchange]="investment.exchange"
+            [symbol]="investment.shortName"></app-ticker-logo>
           {{investment.shortName}}.{{investment.exchange}}
         </div>
       </td>

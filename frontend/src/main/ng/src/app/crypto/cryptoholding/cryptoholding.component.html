@@ -10,6 +10,7 @@
         <th>Price</th>
         <th>Profit</th>
         <th>%</th>
+        <th>Alerts</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-transaction>
@@ -23,6 +24,7 @@
           <td data-label="Price"><p-skeleton></p-skeleton></td>
           <td data-label="Profit"><p-skeleton></p-skeleton></td>
           <td data-label="%"><p-skeleton></p-skeleton></td>
+          <td data-label="Alerts"><p-skeleton></p-skeleton></td>
         </tr>
       }
     </ng-template>
@@ -41,6 +43,7 @@
         <th>Price</th>
         <th>Profit</th>
         <th>%</th>
+        <th>Alerts</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-transaction>
@@ -81,6 +84,21 @@
             <p-tag styleClass="p-mr-2" [severity]="(transaction.valueDiff > 0) ? 'success':'danger'"
             value="{{(transaction.valueDiff / transaction.amount * 100 | number : '0.0-1') + '%'}}"></p-tag>
           }
+        </td>
+        <td data-label="Alerts">
+          <div class="alert-actions">
+            @for (step of alertSteps; track step) {
+              <button pButton pRipple type="button" size="small" severity="secondary" [outlined]="true"
+                class="alert-button" label="+{{step * 100}}%"
+                [icon]="alertCreated(transaction, step) ? 'pi pi-check' : ''"
+                [loading]="alertPending(transaction, step)"
+                [disabled]="alertCreated(transaction, step)"
+                [pTooltip]="alertCreated(transaction, step) ? 'Alert created'
+                  : 'Alert me above ' + (alertTarget(transaction, step) | currency : transaction.currencyId : 'symbol' : '0.0-2')"
+                [attr.aria-label]="'Create a price alert ' + (step * 100) + '% above average for ' + transaction.symbol"
+                (click)="alertClicked(transaction, step)"></button>
+            }
+          </div>
         </td>
       </tr>
     </ng-template>

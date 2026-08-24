@@ -1,250 +1,274 @@
-<div class="shadow-5">
+<div class="shadow-5 watchlist-panel">
   <p-toolbar styleClass="p-1">
     <ng-template pTemplate="left">
-      <h4 class="p-0 m-0 pl-1">Watchlist</h4>
+      <h4 class="p-0 m-0 pl-1 watchlist-heading"><i class="pi pi-star-fill"></i>Watchlist</h4>
     </ng-template>
     <ng-template pTemplate="right">
-      <button pButton pRipple type="button" icon="pi pi-pencil" (click)="showDialog()"
-      class="p-button-rounded p-button-text ml-2" severity="info"></button>
+      <button pButton pRipple type="button" icon="pi pi-plus" (click)="showDialog()"
+        pTooltip="Add to watchlist" aria-label="Add to watchlist"
+      class="p-button-rounded p-button-text ml-2"></button>
     </ng-template>
   </p-toolbar>
   <p-accordion [value]="['0', '1', '2']" [multiple]="true">
     <p-accordion-panel value="0" styleClass="p-0 m-0" class="p-0 m-0">
-    <p-accordion-header>Stock</p-accordion-header>
-    <p-accordion-content>
-      @if (stockLoading) {
-        <p-table [value]="[{}]" #dt44 styleClass="p-datatable-sm">
-          <ng-template pTemplate="body">
-            @for (item of [].constructor(3); track $index) {
-              <tr>
-                <td><p-skeleton></p-skeleton></td>
-                <td><p-skeleton></p-skeleton></td>
-                <td><p-skeleton></p-skeleton></td>
-                <td><p-skeleton></p-skeleton></td>
-              </tr>
+      <p-accordion-header>
+        <span class="section-title"><i class="pi pi-chart-line section-icon section-icon-stock"></i>Stock</span>
+      </p-accordion-header>
+      <p-accordion-content>
+        @if (stockLoading && !stockLoaded) {
+          <ul class="quote-list">
+            @for (row of skeletonRows; track $index) {
+              <li class="quote-row">
+                <p-skeleton width="7rem" height="0.9rem" styleClass="mb-1"></p-skeleton>
+                <p-skeleton width="4rem" height="0.9rem" styleClass="mb-1"></p-skeleton>
+                <p-skeleton width="5rem" height="0.7rem"></p-skeleton>
+                <p-skeleton width="3rem" height="0.7rem"></p-skeleton>
+              </li>
             }
-          </ng-template>
-        </p-table>
-      }
-      @if (!stockLoading) {
-        <p-table #dt1 [value]="globals.stockWatchList" responsiveLayout="scroll" styleClass="p-datatable-sm"
->
-          <ng-template pTemplate="body" let-stockWatch>
-            <tr (click)="stockSelected(stockWatch)" style="cursor: pointer;"
-              [ngClass]="{'row-over': (stockWatch.change > 0), 'row-under': (stockWatch.change < 0) }">
-              <td class="text-sm">
-                <div class="flex align-items-center">
-                  <p-image
-                    src="https://eodhd.com/img/logos/{{stockWatch.stockExchange}}/{{stockWatch.stockShortName}}.png"
-                  width="15" class="mr-1" (onImageError)="globals.errorHandler($event)"></p-image>
-                  {{stockWatch.stockShortName}}
+          </ul>
+        } @else if (stockError) {
+          <div class="quote-message">
+            <span>Could not load your stocks.</span>
+            <button pButton pRipple type="button" label="Retry" (click)="fetchStockWatchList()"
+              class="p-button-text p-button-sm" severity="secondary"></button>
+          </div>
+        } @else if (!globals.stockWatchList.length) {
+          <p class="quote-message">Nothing watched yet. Use + to add a ticker.</p>
+        } @else {
+          <ul class="quote-list">
+            @for (stockWatch of globals.stockWatchList; track stockWatch.tickerWatchId) {
+              <li class="quote-row quote-row-clickable" role="button" tabindex="0"
+                [attr.aria-label]="'Open ' + stockWatch.stockShortName + ' in Lookup'"
+                (click)="stockSelected(stockWatch)" (keydown.enter)="stockSelected(stockWatch)"
+                (keydown.space)="stockSelected(stockWatch); $event.preventDefault()">
+                <div class="quote-identity">
+                  <app-ticker-logo [exchange]="stockWatch.stockExchange"
+                    [symbol]="stockWatch.stockShortName"></app-ticker-logo>
+                  <span class="quote-symbol">{{stockWatch.stockShortName}}</span>
                 </div>
-              </td>
-              <td class="text-sm font-bold"
-                [ngStyle]="{'color': (stockWatch.change > 0) ? '#008002' : (stockWatch.change === 0) ? '#999999' : '#910101'}">
-              {{stockWatch.liveValue | currency : stockWatch.currencyId : 'symbol' : '0.0-2'}}</td>
-              <td class="text-sm font-bold"
-                [ngStyle]="{'color': (stockWatch.change > 0) ? '#008002' : (stockWatch.change === 0) ? '#999999' : '#910101'}">
-              {{stockWatch.change | number : '0.0-2'}}</td>
-              <td class="text-sm font-bold"
-                [ngStyle]="{'color': (stockWatch.change > 0) ? '#008002' : (stockWatch.change === 0) ? '#999999' : '#910101'}">
-              {{stockWatch.pchange | number : '0.0-2'}}%</td>
-            </tr>
-          </ng-template>
-        </p-table>
-      }
-    </p-accordion-content>
+                <span class="quote-price">
+                  {{stockWatch.liveValue | currency : stockWatch.currencyId : 'symbol' : '0.0-2'}}
+                </span>
+                <span class="quote-name">{{stockWatch.stockName}}</span>
+                <span class="quote-delta">
+                  <span class="quote-change" [ngClass]="deltaClass(stockWatch.change)">{{stockWatch.change | number : '1.2-2'}}</span>
+                  <span class="delta-pill" [ngClass]="deltaClass(stockWatch.change)">
+                    <i class="pi quote-caret" [ngClass]="caretClass(stockWatch.change)"></i>{{signed(stockWatch.pchange)}}%
+                  </span>
+                </span>
+                <button pButton pRipple type="button" icon="pi pi-times" class="quote-remove p-button-text"
+                  severity="danger" [attr.aria-label]="'Remove ' + stockWatch.stockShortName"
+                  (click)="removeStockWatch(stockWatch, $event)"></button>
+              </li>
+            }
+          </ul>
+        }
+      </p-accordion-content>
     </p-accordion-panel>
+
     <p-accordion-panel value="1">
-    <p-accordion-header>Crypto</p-accordion-header>
-    <p-accordion-content>
-      @if (cryptoLoading) {
-        <p-table [value]="[{}]" #dt44 styleClass="p-datatable-sm">
-          <ng-template pTemplate="body">
-            @for (item of [].constructor(3); track $index) {
-              <tr>
-                <td><p-skeleton></p-skeleton></td>
-                <td><p-skeleton></p-skeleton></td>
-                <td><p-skeleton></p-skeleton></td>
-                <td><p-skeleton></p-skeleton></td>
-              </tr>
+      <p-accordion-header>
+        <span class="section-title"><i class="pi pi-bitcoin section-icon section-icon-crypto"></i>Crypto</span>
+      </p-accordion-header>
+      <p-accordion-content>
+        @if (cryptoLoading && !cryptoLoaded) {
+          <ul class="quote-list">
+            @for (row of skeletonRows; track $index) {
+              <li class="quote-row">
+                <p-skeleton width="7rem" height="0.9rem" styleClass="mb-1"></p-skeleton>
+                <p-skeleton width="4rem" height="0.9rem" styleClass="mb-1"></p-skeleton>
+                <p-skeleton width="5rem" height="0.7rem"></p-skeleton>
+                <p-skeleton width="3rem" height="0.7rem"></p-skeleton>
+              </li>
             }
-          </ng-template>
-        </p-table>
-      }
-      @if (!cryptoLoading) {
-        <p-table #dt2 [value]="cryptoWatchList" responsiveLayout="scroll" styleClass="p-datatable-sm"
->
-          <ng-template pTemplate="body" let-cryptoWatch>
-            <tr [ngClass]="{'row-over': (cryptoWatch.change > 0), 'row-under': (cryptoWatch.change < 0) }">
-              <td class="text-xs">
-                <div class="flex align-items-center">
-                  <p-image src="{{assetUrl + cryptoWatch.symbol + '.svg'}}" width="15"
-                  class="mr-1"></p-image>
-                  {{cryptoWatch.name}}
+          </ul>
+        } @else if (cryptoError) {
+          <div class="quote-message">
+            <span>Could not load your coins.</span>
+            <button pButton pRipple type="button" label="Retry" (click)="fetchCryptoWatchList()"
+              class="p-button-text p-button-sm" severity="secondary"></button>
+          </div>
+        } @else if (!cryptoWatchList.length) {
+          <p class="quote-message">Nothing watched yet. Use + to add a coin.</p>
+        } @else {
+          <ul class="quote-list">
+            @for (cryptoWatch of cryptoWatchList; track cryptoWatch.cryptoWatchId) {
+              <li class="quote-row">
+                <div class="quote-identity">
+                  <app-ticker-logo [src]="assetUrl + cryptoWatch.symbol + '.svg'"
+                    [symbol]="cryptoWatch.symbol"></app-ticker-logo>
+                  <span class="quote-symbol">{{cryptoWatch.symbol | uppercase}}</span>
                 </div>
-              </td>
-              <td class="text-sm font-bold"
-                [ngStyle]="{'color': (cryptoWatch.change > 0) ? '#008002' : (cryptoWatch.change === 0) ? '#999999' : '#910101'}">
-              {{cryptoWatch.liveValue | currency : 'EUR' : 'symbol' : '0.0-2'}}</td>
-              <td class="text-sm font-bold"
-                [ngStyle]="{'color': (cryptoWatch.change > 0) ? '#008002' : (cryptoWatch.change === 0) ? '#999999' : '#910101'}">
-              {{cryptoWatch.change | number : '0.0-2'}}%</td>
-            </tr>
-          </ng-template>
-        </p-table>
-      }
-    </p-accordion-content>
-    </p-accordion-panel>
-    <p-accordion-panel value="2">
-    <p-accordion-header>Forex</p-accordion-header>
-    <p-accordion-content>
-      @if (forexLoading) {
-        <p-table [value]="[{}]" #dt44 styleClass="p-datatable-sm">
-          <ng-template pTemplate="body">
-            @for (item of [].constructor(3); track $index) {
-              <tr>
-                <td><p-skeleton></p-skeleton></td>
-                <td><p-skeleton></p-skeleton></td>
-                <td><p-skeleton></p-skeleton></td>
-                <td><p-skeleton></p-skeleton></td>
-              </tr>
+                <span class="quote-price">
+                  {{cryptoWatch.liveValue | currency : cryptoCurrency : 'symbol' : '0.0-2'}}
+                </span>
+                <span class="quote-name">{{cryptoWatch.name}}</span>
+                <span class="quote-delta">
+                  <span class="delta-pill" [ngClass]="deltaClass(cryptoWatch.change)">
+                    <i class="pi quote-caret" [ngClass]="caretClass(cryptoWatch.change)"></i>{{signed(cryptoWatch.change)}}%
+                  </span>
+                </span>
+                <button pButton pRipple type="button" icon="pi pi-times" class="quote-remove p-button-text"
+                  severity="danger" [attr.aria-label]="'Remove ' + cryptoWatch.name"
+                  (click)="removeCryptoWatch(cryptoWatch, $event)"></button>
+              </li>
             }
-          </ng-template>
-        </p-table>
-      }
-      @if (!forexLoading) {
-        <p-table #dt3 [value]="forexWatchList" responsiveLayout="scroll" styleClass="p-datatable-sm"
->
-          <ng-template pTemplate="body" let-forexWatch>
-            <tr [ngClass]="{'row-over': (forexWatch.change > 0), 'row-under': (forexWatch.change < 0) }">
-              <td>
-                <p-tag severity="info" value="{{forexWatch.fromCurrencyId + forexWatch.toCurrencyId}}">
-                </p-tag>
-              </td>
-              <td></td>
-              <td class="text-sm font-bold"
-                [ngStyle]="{'color': (forexWatch.change > 0) ? '#008002' : (forexWatch.change === 0) ? '#999999' : '#910101'}">
-              {{forexWatch.liveValue | currency : forexWatch.toCurrencyId : 'symbol' : '0.0-2'}}</td>
-              <td class="text-sm font-bold"
-                [ngStyle]="{'color': (forexWatch.change > 0) ? '#008002' : (forexWatch.change === 0) ? '#999999' : '#910101'}">
-              {{forexWatch.change | number : '0.0-2'}}</td>
-              <td class="text-sm font-bold"
-                [ngStyle]="{'color': (forexWatch.change > 0) ? '#008002' : (forexWatch.change === 0) ? '#999999' : '#910101'}">
-              {{forexWatch.pchange | number : '0.0-2'}}%</td>
-            </tr>
-          </ng-template>
-        </p-table>
-      }
-    </p-accordion-content>
+          </ul>
+          <p class="quote-footnote">Change over 24h.</p>
+        }
+      </p-accordion-content>
+    </p-accordion-panel>
+
+    <p-accordion-panel value="2">
+      <p-accordion-header>
+        <span class="section-title"><i class="pi pi-arrow-right-arrow-left section-icon section-icon-forex"></i>Forex</span>
+      </p-accordion-header>
+      <p-accordion-content>
+        @if (forexLoading && !forexLoaded) {
+          <ul class="quote-list">
+            @for (row of skeletonRows; track $index) {
+              <li class="quote-row">
+                <p-skeleton width="7rem" height="0.9rem" styleClass="mb-1"></p-skeleton>
+                <p-skeleton width="4rem" height="0.9rem" styleClass="mb-1"></p-skeleton>
+                <p-skeleton width="5rem" height="0.7rem"></p-skeleton>
+                <p-skeleton width="3rem" height="0.7rem"></p-skeleton>
+              </li>
+            }
+          </ul>
+        } @else if (forexError) {
+          <div class="quote-message">
+            <span>Could not load your pairs.</span>
+            <button pButton pRipple type="button" label="Retry" (click)="fetchForexWatchList()"
+              class="p-button-text p-button-sm" severity="secondary"></button>
+          </div>
+        } @else if (!forexWatchList.length) {
+          <p class="quote-message">Nothing watched yet. Use + to add a pair.</p>
+        } @else {
+          <ul class="quote-list">
+            @for (forexWatch of forexWatchList; track forexWatch.forexWatchID) {
+              <li class="quote-row">
+                <div class="quote-identity">
+                  <i class="pi pi-arrow-right-arrow-left quote-pair-icon"></i>
+                  <span class="quote-symbol">{{forexWatch.fromCurrencyId}}/{{forexWatch.toCurrencyId}}</span>
+                </div>
+                <span class="quote-price">
+                  {{forexWatch.liveValue | currency : forexWatch.toCurrencyId : 'symbol' : '0.0-4'}}
+                </span>
+                <span class="quote-name">1 {{forexWatch.fromCurrencyId}} buys</span>
+                <span class="quote-delta">
+                  <span class="quote-change" [ngClass]="deltaClass(forexWatch.change)">{{forexWatch.change | number : '1.2-4'}}</span>
+                  <span class="delta-pill" [ngClass]="deltaClass(forexWatch.change)">
+                    <i class="pi quote-caret" [ngClass]="caretClass(forexWatch.change)"></i>{{signed(forexWatch.pchange)}}%
+                  </span>
+                </span>
+                <button pButton pRipple type="button" icon="pi pi-times" class="quote-remove p-button-text"
+                  severity="danger"
+                  [attr.aria-label]="'Remove ' + forexWatch.fromCurrencyId + forexWatch.toCurrencyId"
+                  (click)="removeForexWatch(forexWatch, $event)"></button>
+              </li>
+            }
+          </ul>
+        }
+      </p-accordion-content>
     </p-accordion-panel>
   </p-accordion>
 </div>
 
-<p-dialog [(visible)]="display" [breakpoints]="{'992px': '75vw', '576px': '100vw'}"
-  [style]="{width: '25vw', height: '30vw'}" [draggable]="false" [resizable]="false">
+<p-dialog [(visible)]="display" header="Add to watchlist" [modal]="true"
+  [breakpoints]="{'1400px': '40vw', '992px': '75vw', '576px': '100vw'}"
+  [style]="{width: '32vw', minWidth: '26rem'}"
+  [draggable]="false" [resizable]="false">
   <p-tabs value="0">
-  <p-tablist>
-    <p-tab value="0">Stock</p-tab>
-    <p-tab value="1">Crypto</p-tab>
-    <p-tab value="2">Forex</p-tab>
-  </p-tablist>
-  <p-tabpanels>
-    <p-tabpanel value="0">
-
-      <div class="grid">
-        <div class="col-12">
+    <p-tablist>
+      <p-tab value="0">Stock</p-tab>
+      <p-tab value="1">Crypto</p-tab>
+      <p-tab value="2">Forex</p-tab>
+    </p-tablist>
+    <p-tabpanels>
+      <p-tabpanel value="0">
+        <div class="add-form">
           <p-select class="searchDropdown" [options]="exchanges" optionLabel="Name" [virtualScroll]="true"
             [virtualScrollItemSize]="31" [filter]="true" filterBy="Name,Code"
             filterPlaceholder="Search by name or code" (onChange)="exchangeChanged($event)"
             [(ngModel)]="selectedExchange" placeholder="Select an Exchange" [style]="{'width':'100%'}"
+            [appendTo]="'body'"
             [dropdownIcon]="exchangesLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+            <ng-template let-option pTemplate="item">
+              <app-exchange-option [exchange]="option"></app-exchange-option>
+            </ng-template>
+            <ng-template let-option pTemplate="selectedItem">
+              <app-exchange-option [exchange]="option" [dense]="true"></app-exchange-option>
+            </ng-template>
           </p-select>
-        </div>
-        <div class="col-12">
           <p-select class="searchDropdown" [options]="symbols" optionLabel="Name" [virtualScroll]="true"
-            [virtualScrollItemSize]="31" [filter]="true" filterBy="Name,Code,Isin"
+            [virtualScrollItemSize]="46" [filter]="true" filterBy="Name,Code,Isin"
             filterPlaceholder="Search by name, code or ISIN"
             [(ngModel)]="selectedStock" placeholder="Select a Ticker"
-            [style]="{'width':'100%'}"
+            [style]="{'width':'100%'}" [appendTo]="'body'"
             [dropdownIcon]="stocksLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+            <ng-template let-option pTemplate="item">
+              <app-symbol-option [symbol]="option"></app-symbol-option>
+            </ng-template>
+            <ng-template let-option pTemplate="selectedItem">
+              <app-symbol-option [symbol]="option" [dense]="true"></app-symbol-option>
+            </ng-template>
           </p-select>
-        </div>
-        <div class="col-2 col-offset-5">
-          @if (!checkStockContain() && selectedStock.Code != undefined) {
-            <button pButton pRipple type="button" icon="fas fa-plus" (click)="createStockWatch()"
-              class="p-button-rounded p-button-text ml-2" severity="success"
-            >Add</button>
+          @if (stockAlreadyWatched) {
+            <small class="add-hint">{{selectedStock.Code}} is already on your watchlist.</small>
           }
+          <button pButton pRipple type="button" icon="pi pi-plus" label="Add to watchlist" class="w-full"
+            severity="success" [disabled]="!selectedStock.Code || stockAlreadyWatched"
+            (click)="createStockWatch()"></button>
         </div>
-        <div class="col-2 col-offset-5">
-          @if (checkStockContain()) {
-            <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteStockWatch()"
-              class="p-button-rounded p-button-text ml-2" severity="danger"
-            >Delete</button>
-          }
-        </div>
-      </div>
-    </p-tabpanel>
-    <p-tabpanel value="1">
-      <p-table #dt5 [value]="cryptos" responsiveLayout="scroll" styleClass="p-datatable-sm">
-        <ng-template pTemplate="body" let-crypto>
-          <tr>
-            <td>
-              @if (!(checkCryptoContain(crypto.name))) {
-                <button pButton pRipple type="button"
-                  icon="fas fa-plus" (click)="createCryptoWatch(crypto.id)"
-                class="p-button-rounded p-button-text ml-2" severity="success"></button>
+      </p-tabpanel>
+
+      <p-tabpanel value="1">
+        <ul class="add-list">
+          @for (crypto of cryptos; track crypto.id) {
+            <li class="add-row">
+              <app-ticker-logo [src]="assetUrl + crypto.symbol + '.svg'"
+                [symbol]="crypto.symbol"></app-ticker-logo>
+              <span class="quote-symbol">{{crypto.symbol | uppercase}}</span>
+              <span class="quote-name">{{crypto.name}}</span>
+              @if (isCryptoWatched(crypto.name)) {
+                <span class="add-added" [attr.aria-label]="crypto.name + ' is already on your watchlist'"
+                  [pTooltip]="'Already on your watchlist'"><i class="pi pi-check"></i></span>
+              } @else {
+                <button pButton pRipple type="button" icon="pi pi-plus" severity="success"
+                  class="p-button-rounded p-button-text" [attr.aria-label]="'Add ' + crypto.name"
+                  (click)="createCryptoWatch(crypto.id)"></button>
               }
-              @if (checkCryptoContain(crypto.name)) {
-                <button pButton pRipple type="button"
-                  icon="pi pi-times" (click)="deleteCryptoWatch(crypto.name)"
-                class="p-button-rounded p-button-text ml-2" severity="danger"></button>
-              }
-            </td>
-            <td>
-              <p-tag severity="info" value="{{crypto.symbol}}">
-              </p-tag>
-            </td>
-            <td>
-              <div class="flex align-items-center">
-                <p-image src="{{assetUrl + crypto.symbol + '.svg'}}" width="15" class="mr-1"></p-image>
-                {{crypto.name}}
-              </div>
-            </td>
-          </tr>
-        </ng-template>
-      </p-table>
-    </p-tabpanel>
-    <p-tabpanel value="2">
-      <div class="grid mt-2">
-        <div class="col-5">
-          <label htmlFor="fromForex" class="block text-sm text-color-secondary mb-1 font-medium">From</label>
-          <input type="text" pInputText [(ngModel)]="fromForex" id="fromForex" placeholder="USD"
-            maxlength="3" class="w-full text-uppercase text-center"/>
-        </div>
-        <div class="col-2 flex align-items-center justify-content-center" style="margin-top: 1.75rem;">
-          <i class="pi pi-arrow-right text-color-secondary"></i>
-        </div>
-        <div class="col-5">
-          <label htmlFor="toForex" class="block text-sm text-color-secondary mb-1 font-medium">To</label>
-          <input type="text" pInputText [(ngModel)]="toForex" id="toForex" placeholder="EUR"
-            maxlength="3" class="w-full text-uppercase text-center"/>
-        </div>
-        <div class="col-12 mt-3">
-          @if (!checkForexContain()) {
-            <button pButton pRipple type="button" icon="fas fa-plus" (click)="createForexWatch()"
-              class="w-full" severity="success" label="Add to Watchlist">
-            </button>
+            </li>
           }
-          @if (checkForexContain()) {
-            <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteForexWatch()"
-              class="w-full" severity="danger" label="Remove from Watchlist">
-            </button>
+        </ul>
+      </p-tabpanel>
+
+      <p-tabpanel value="2">
+        <div class="add-form">
+          <div class="forex-pair">
+            <div>
+              <label htmlFor="fromForex" class="block text-sm text-color-secondary mb-1 font-medium">From</label>
+              <input type="text" pInputText [(ngModel)]="fromForex" id="fromForex" placeholder="USD"
+                maxlength="3" class="w-full text-uppercase text-center"/>
+            </div>
+            <i class="pi pi-arrow-right text-color-secondary"></i>
+            <div>
+              <label htmlFor="toForex" class="block text-sm text-color-secondary mb-1 font-medium">To</label>
+              <input type="text" pInputText [(ngModel)]="toForex" id="toForex" placeholder="EUR"
+                maxlength="3" class="w-full text-uppercase text-center"/>
+            </div>
+          </div>
+          @if (forexPairTouched && !forexPairValid) {
+            <small class="add-hint">Enter two different three-letter currency codes.</small>
           }
+          @if (forexAlreadyWatched) {
+            <small class="add-hint">That pair is already on your watchlist.</small>
+          }
+          <button pButton pRipple type="button" icon="pi pi-plus" label="Add to watchlist" class="w-full"
+            severity="success" [disabled]="!forexPairValid || forexAlreadyWatched"
+            (click)="createForexWatch()"></button>
         </div>
-      </div>
-    </p-tabpanel>
-  </p-tabpanels>
+      </p-tabpanel>
+    </p-tabpanels>
   </p-tabs>
 </p-dialog>

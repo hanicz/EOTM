@@ -53,9 +53,8 @@
       <tr>
         <td data-label="Stock Name">
           <div class="flex align-items-center">
-            <p-image
-              src="https://eodhd.com/img/logos/{{investment.exchange}}/{{investment.shortName}}.png"
-            width="15" class="mr-1" (onImageError)="globals.errorHandler($event)"></p-image>
+            <app-ticker-logo class="mr-1" [exchange]="investment.exchange"
+              [symbol]="investment.shortName"></app-ticker-logo>
             {{investment.shortName}}.{{investment.exchange}}
           </div>
         </td>
@@ -98,8 +97,19 @@
           }
         </td>
         <td data-label="Alerts">
-          <p-tag (click)="alertClicked(investment, 0.05)" class="cursor-pointer tap-target" severity="success" value="5%"></p-tag>
-          <p-tag (click)="alertClicked(investment, 0.1)" class="ml-2 cursor-pointer tap-target" severity="success" value="10%"></p-tag>
+          <div class="alert-actions">
+            @for (step of alertSteps; track step) {
+              <button pButton pRipple type="button" size="small" severity="secondary" [outlined]="true"
+                class="alert-button" label="+{{step * 100}}%"
+                [icon]="alertCreated(investment, step) ? 'pi pi-check' : ''"
+                [loading]="alertPending(investment, step)"
+                [disabled]="alertCreated(investment, step)"
+                [pTooltip]="alertCreated(investment, step) ? 'Alert created'
+                  : 'Alert me above ' + (alertTarget(investment, step) | currency : investment.currencyId : 'symbol' : '0.0-2')"
+                [attr.aria-label]="'Create a price alert ' + (step * 100) + '% above average for ' + investment.shortName"
+                (click)="alertClicked(investment, step)"></button>
+            }
+          </div>
         </td>
       </tr>
     </ng-template>

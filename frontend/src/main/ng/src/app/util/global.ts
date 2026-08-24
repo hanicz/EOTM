@@ -38,16 +38,4 @@ export class Globals {
     constructor() {
         this.assetUrl = environment.assets_url;
     }
-
-    private readonly fallbackImage = 'data:image/svg+xml;utf8,' +
-        encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><rect width="24" height="24" rx="4" fill="#d8d3c4"/></svg>');
-
-    errorHandler(event: any) {
-        const target = event.target as HTMLImageElement;
-        if (target.dataset['fallbackApplied']) {
-            return;
-        }
-        target.dataset['fallbackApplied'] = 'true';
-        target.src = this.fallbackImage;
-    }
 }

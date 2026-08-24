@@ -8,13 +8,18 @@ import { PrimeTemplate } from 'primeng/api';
 import { Skeleton } from 'primeng/skeleton';
 import { Image } from 'primeng/image';
 import { Tag } from 'primeng/tag';
+import { ButtonDirective } from 'primeng/button';
+import { Ripple } from 'primeng/ripple';
+import { Tooltip } from 'primeng/tooltip';
+import { AlertService } from '../../service/alert.service';
 import { DecimalPipe, CurrencyPipe } from '@angular/common';
 
 @Component({
     selector: 'app-cryptoholding',
     templateUrl: './cryptoholding.component.html',
     styleUrls: ['./cryptoholding.component.css'],
-    imports: [Bind, TableModule, PrimeTemplate, Skeleton, Image, Tag, DecimalPipe, CurrencyPipe]
+    imports: [Bind, TableModule, PrimeTemplate, Skeleton, Image, Tag, ButtonDirective, Ripple, Tooltip,
+        DecimalPipe, CurrencyPipe]
 })
 export class CryptoholdingComponent implements OnInit {
 
@@ -23,7 +28,13 @@ export class CryptoholdingComponent implements OnInit {
   assetUrl: string;
   transactionsLoading: boolean = true;
 
-  constructor(private cryptoService: CryptoService, private cdr: ChangeDetectorRef) {
+  readonly alertSteps = [0.05, 0.1];
+
+  private readonly pendingAlerts = new Set<string>();
+  private readonly createdAlerts = new Set<string>();
+
+  constructor(private cryptoService: CryptoService, private alertService: AlertService,
+    private cdr: ChangeDetectorRef) {
     this.assetUrl = environment.assets_url;
     this.fetchData();
   }
@@ -38,6 +49,45 @@ export class CryptoholdingComponent implements OnInit {
 
   markForCheck(): void {
     this.cdr.markForCheck();
+  }
+
+  alertTarget(transaction: Transaction, modulo: number): number {
+    const average = transaction.amount / transaction.quantity;
+    return average + average * modulo;
+  }
+
+  alertPending(transaction: Transaction, modulo: number): boolean {
+    return this.pendingAlerts.has(this.alertKey(transaction, modulo));
+  }
+
+  alertCreated(transaction: Transaction, modulo: number): boolean {
+    return this.createdAlerts.has(this.alertKey(transaction, modulo));
+  }
+
+  alertClicked(transaction: Transaction, modulo: number) {
+    const key = this.alertKey(transaction, modulo);
+    if (this.pendingAlerts.has(key) || this.createdAlerts.has(key)) {
+      return;
+    }
+    this.pendingAlerts.add(key);
+
+    let data = {symbol: transaction.symbol, type: 'PRICE_OVER', valuePoint: this.alertTarget(transaction, modulo).toFixed(2)}
+
+    this.alertService.createNewCryptoAlert(data).subscribe({
+      next: () => {
+        this.pendingAlerts.delete(key);
+        this.createdAlerts.add(key);
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.pendingAlerts.delete(key);
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  private alertKey(transaction: Transaction, modulo: number): string {
+    return transaction.symbol + '@' + modulo;
   }
 
   private fetchData(forceRefresh = false): void {

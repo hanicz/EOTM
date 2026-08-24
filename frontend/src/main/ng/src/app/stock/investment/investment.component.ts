@@ -18,7 +18,9 @@ import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { Tag } from 'primeng/tag';
-import { Image } from 'primeng/image';
+import { TickerLogoComponent } from '../../util/ticker-logo.component';
+import { ExchangeOptionComponent } from '../../util/exchange-option.component';
+import { SymbolOptionComponent } from '../../util/symbol-option.component';
 import { Dialog } from 'primeng/dialog';
 import { Tooltip } from 'primeng/tooltip';
 import { CurrencyPipe, DatePipe } from '@angular/common';
@@ -27,7 +29,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
     selector: 'app-investment',
     templateUrl: './investment.component.html',
     styleUrls: ['./investment.component.css'],
-    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Tag, Image, Dialog, Tooltip, CurrencyPipe, DatePipe, Toast]
+    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Tag, Dialog, Tooltip, CurrencyPipe, DatePipe, Toast, TickerLogoComponent, ExchangeOptionComponent, SymbolOptionComponent]
 })
 export class InvestmentComponent implements OnInit {
 

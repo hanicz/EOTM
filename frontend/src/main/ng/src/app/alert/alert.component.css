@@ -17,10 +17,50 @@
     color: #5f5e5a;
 }
 
-:host ::ng-deep .row-over {
-    background-color: rgba(188, 248, 206, 0.15) !important;
+.alert-hint {
+    color: var(--p-text-muted-color, #5f5e5a);
+    font-size: 0.75rem;
 }
 
-:host ::ng-deep .row-under {
-    background-color: rgba(248, 184, 184, 0.15) !important;
+.alert-type {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 0.65rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.alert-type i {
+    font-size: 0.65rem;
+}
+
+.alert-over {
+    color: #14713f;
+    background-color: rgba(20, 113, 63, 0.14);
+}
+
+.alert-under {
+    color: #a32a30;
+    background-color: rgba(163, 42, 48, 0.14);
+}
+
+.alert-value {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.alert-action-column {
+    width: 3.5rem;
+    text-align: right;
+}
+
+.alert-message {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    color: var(--p-text-muted-color, #5f5e5a);
 }

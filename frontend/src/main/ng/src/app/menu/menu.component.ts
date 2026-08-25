@@ -23,7 +23,6 @@ export class MenuComponent implements OnInit {
   assetUrl: string = environment.assets_url;
 
   readonly menuItems: MenuItem[] = [
-    { label: 'News', icon: 'far fa-newspaper', routerLink: ['/home'] },
     {
       label: 'Portfolio', icon: 'fa-solid fa-briefcase', items: [
         { label: 'Securities', icon: 'fa-solid fa-building-columns', routerLink: ['/security'] },
@@ -33,12 +32,12 @@ export class MenuComponent implements OnInit {
         { label: 'Crypto', icon: 'fab fa-bitcoin', routerLink: ['/crypto'] }
       ]
     },
-    { label: 'Alerts', icon: 'fa-solid fa-bell', routerLink: ['/alert'] },
-    { label: 'Tax', icon: 'fa-solid fa-file-invoice-dollar', routerLink: ['/tax'] },
     { label: 'Financials', icon: 'fa-solid fa-receipt', routerLink: ['/financial'] },
     { label: 'FIRE', icon: 'fa-solid fa-fire', routerLink: ['/fire'] },
+    { label: 'Tax', icon: 'fa-solid fa-file-invoice-dollar', routerLink: ['/tax'] },
+    { label: 'Alerts & Reports', icon: 'fa-solid fa-bell', routerLink: ['/alert'] },
     { label: 'Lookup', icon: 'fas fa-search', routerLink: ['/search'] },
-    { label: 'Settings', icon: 'fa-solid fa-gear', routerLink: ['/settings'] }
+    { label: 'News', icon: 'far fa-newspaper', routerLink: ['/home'] }
   ];
 
   constructor(

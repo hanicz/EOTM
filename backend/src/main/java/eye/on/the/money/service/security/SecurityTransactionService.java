@@ -50,6 +50,11 @@ public class SecurityTransactionService implements ICSVService {
                 .stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
+    public List<SecurityTransactionDTO> getTransactionsBetween(String userEmail, LocalDate from, LocalDate to) {
+        return this.securityTransactionRepository.findByUserEmailAndTransactionDateBetweenOrderByTransactionDate(userEmail, from, to)
+                .stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+
     public List<SecurityTransactionDTO> getCurrentHoldings(String userEmail) {
         List<SecurityTransactionDTO> transactions = this.securityTransactionRepository.findByUserEmailOrderByTransactionDate(userEmail)
                 .stream().map(this::convertToDTO).toList();

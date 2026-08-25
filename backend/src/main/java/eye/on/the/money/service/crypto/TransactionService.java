@@ -53,6 +53,11 @@ public class TransactionService implements ICSVService {
                 .map(this::convertToTransactionDTO).collect(Collectors.toList());
     }
 
+    public List<TransactionDTO> getTransactionsBetween(String userEmail, LocalDate from, LocalDate to) {
+        return this.transactionRepository.findByUserEmailAndTransactionDateBetweenOrderByTransactionDate(userEmail, from, to)
+                .stream().map(this::convertToTransactionDTO).collect(Collectors.toList());
+    }
+
     public List<TransactionDTO> getAllPositions(String userEmail) {
         Map<String, TransactionDTO> transactionMap = this.getCalculated(userEmail);
         return new ArrayList<>(transactionMap.values());

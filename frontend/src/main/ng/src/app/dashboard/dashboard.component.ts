@@ -37,7 +37,7 @@ interface DonutSegment {
 
 const DEFAULT_CURRENCY = 'HUF';
 
-/** Matches the asset class names the backend reports, and fixes the order they are drawn in. */
+/** Matches the asset class names the backend reports. */
 const ASSET_COLOURS: { [assetClass: string]: string } = {
   'Stock': '#ef9f27',
   'Crypto': '#5f5e5a',
@@ -175,7 +175,7 @@ export class DashboardComponent implements OnInit {
       value: asset.worth,
       percentage: 0,
       color: ASSET_COLOURS[asset.assetClass] ?? '#b4b2a9',
-    }));
+    })).sort((a, b) => b.value - a.value);
 
     const total = raw.reduce((sum, slice) => sum + slice.value, 0);
     if (total <= 0) {

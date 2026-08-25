@@ -49,6 +49,22 @@ public interface BankTransactionRepository extends JpaRepository<BankTransaction
     List<MonthlyCashFlowDTO> findMonthlyCashFlow(@Param("userEmail") String userEmail);
 
     @Query("""
+            SELECT new eye.on.the.money.dto.out.MonthlyCashFlowDTO(
+                YEAR(b.bookingDate),
+                MONTH(b.bookingDate),
+                b.currency.id,
+                SUM(CASE WHEN b.amount > 0 THEN b.amount ELSE 0.0 END),
+                SUM(CASE WHEN b.amount < 0 THEN b.amount ELSE 0.0 END))
+            FROM BankTransaction b
+            WHERE b.user.email = :userEmail AND b.excluded = false
+                AND b.bookingDate BETWEEN :from AND :to
+            GROUP BY YEAR(b.bookingDate), MONTH(b.bookingDate), b.currency.id
+            ORDER BY YEAR(b.bookingDate) DESC, MONTH(b.bookingDate) DESC, b.currency.id
+            """)
+    List<MonthlyCashFlowDTO> findCashFlowBetween(@Param("userEmail") String userEmail,
+                                                 @Param("from") LocalDate from, @Param("to") LocalDate to);
+
+    @Query("""
             SELECT new eye.on.the.money.dto.out.MonthlyIncomeDTO(
                 YEAR(b.bookingDate),
                 MONTH(b.bookingDate),

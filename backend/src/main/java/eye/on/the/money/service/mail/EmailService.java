@@ -4,7 +4,9 @@ package eye.on.the.money.service.mail;
 import eye.on.the.money.config.MailConfig;
 import eye.on.the.money.exception.EmailException;
 import eye.on.the.money.model.Credential;
+import eye.on.the.money.dto.out.MonthlyReportDTO;
 import eye.on.the.money.repository.CredentialRepository;
+import eye.on.the.money.util.HtmlUtil;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +16,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.format;
@@ -25,6 +28,7 @@ import static java.lang.String.format;
 public class EmailService {
 
     private final JavaMailSender javaMailSender;
+    private final MonthlyReportHtmlBuilder reportHtmlBuilder;
 
     private final String from;
 
@@ -43,8 +47,10 @@ public class EmailService {
         EmailService.CONDITION_PHRASES.put("PRICE_UNDER", "is under %s");
     }
 
-    public EmailService(JavaMailSender javaMailSender, CredentialRepository credentialRepository) {
+    public EmailService(JavaMailSender javaMailSender, MonthlyReportHtmlBuilder reportHtmlBuilder,
+                        CredentialRepository credentialRepository) {
         this.javaMailSender = javaMailSender;
+        this.reportHtmlBuilder = reportHtmlBuilder;
         this.from = credentialRepository.findById(MailConfig.EMAIL_USER)
                 .filter(credential -> credentialRepository.findById(MailConfig.EMAIL_PASSWORD).isPresent())
                 .map(Credential::getSecret)
@@ -72,10 +78,21 @@ public class EmailService {
         String plainText = format("%s %s\nCondition: %s\nTarget: %s\nCurrent: %s", symbolOrTicker, conditionPhrase, typeLabel, target, current);
         String html = buildHtml(symbolOrTicker, conditionPhrase, typeLabel, target, current, accentColor);
 
-        this.send(sendTo, subject, plainText, html);
+        this.send(new String[]{sendTo}, subject, plainText, html);
     }
 
-    private void send(String sendTo, String subject, String plainText, String html) {
+    public void sendMonthlyReportMail(List<String> sendTo, MonthlyReportDTO report) {
+        if (!this.isEnabled()) {
+            log.warn("Email is not configured, skipping monthly report to {}", sendTo);
+            return;
+        }
+        String subject = format("Eye OTM: your %s report", this.reportHtmlBuilder.periodLabel(report));
+        this.send(sendTo.toArray(new String[0]), subject,
+                this.reportHtmlBuilder.plainText(report), this.reportHtmlBuilder.html(report));
+    }
+
+    private void send(String[] sendTo, String subject, String plainText, String html) {
+        String recipients = String.join(", ", sendTo);
         try {
             MimeMessage mimeMessage = this.javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");
@@ -84,10 +101,10 @@ public class EmailService {
             helper.setSubject(subject);
             helper.setText(plainText, html);
 
-            log.info("Sending alert email to {} with subject: {}", sendTo, subject);
+            log.info("Sending email to {} with subject: {}", recipients, subject);
             this.javaMailSender.send(mimeMessage);
         } catch (MessagingException e) {
-            throw new EmailException("Unable to send alert email to " + sendTo, e);
+            throw new EmailException("Unable to send email to " + recipients, e);
         }
     }
 
@@ -126,13 +143,6 @@ public class EmailService {
     }
 
     private static String escapeHtml(String value) {
-        if (value == null) {
-            return "";
-        }
-        return value.replace("&", "&amp;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
-                .replace("\"", "&quot;")
-                .replace("'", "&#39;");
+        return HtmlUtil.escape(value);
     }
 }

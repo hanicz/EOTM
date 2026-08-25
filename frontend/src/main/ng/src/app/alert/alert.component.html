@@ -6,10 +6,11 @@
       <button pButton pRipple icon="pi pi-refresh" class="p-button-rounded p-button-text"
         pTooltip="Refresh" (click)="refresh()"></button>
     </ng-template>
-    <p-tabs value="0">
+    <p-tabs value="0" (valueChange)="tabChanged($event)">
       <p-tablist>
         <p-tab value="0">Stock</p-tab>
         <p-tab value="1">Crypto</p-tab>
+        <p-tab value="2">Monthly Report</p-tab>
       </p-tablist>
       <p-tabpanels>
         <p-tabpanel value="0">
@@ -174,6 +175,75 @@
                 </tr>
               </ng-template>
             </p-table>
+          }
+        </p-tabpanel>
+
+        <p-tabpanel value="2">
+          @if (reportLoading) {
+            <div class="alert-message"><span>Loading your report settings…</span></div>
+          } @else if (reportError) {
+            <div class="alert-message">
+              <span>Could not load your report settings.</span>
+              <button pButton pRipple type="button" label="Retry" (click)="loadReport()"
+                class="p-button-text p-button-sm" severity="secondary"></button>
+            </div>
+          } @else {
+            <div class="report-form">
+              <p class="alert-hint report-intro">
+                A summary of what your portfolio is worth, what you traded, and how your bank month went,
+                emailed on the 10th of every month for the month just finished.
+              </p>
+
+              <div class="alert-field report-toggle">
+                <div class="flex align-items-center">
+                  <p-checkbox inputId="reportEnabled" [(ngModel)]="report.enabled" [binary]="true"></p-checkbox>
+                  <label class="alert-label ml-2 mb-0" for="reportEnabled">Send me the monthly report</label>
+                </div>
+              </div>
+
+              <div class="alert-field report-currency">
+                <label class="alert-label" for="reportCurrency">Report currency</label>
+                <p-select inputId="reportCurrency" [options]="currencyOptions" [(ngModel)]="report.currency"
+                  [style]="{'width':'100%'}" [appendTo]="'body'" placeholder="Select a Currency"
+                  [dropdownIcon]="currenciesLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'"></p-select>
+                <small class="alert-hint">Everything in the email is converted to this currency.</small>
+              </div>
+
+              <div class="alert-field">
+                <label class="alert-label" for="newRecipient">Also send to</label>
+                <div class="report-recipient-add">
+                  <input pInputText id="newRecipient" type="email" class="w-full" placeholder="name@example.com"
+                    [(ngModel)]="newRecipient" (keyup.enter)="addRecipient()">
+                  <button pButton pRipple type="button" icon="pi pi-plus" label="Add" severity="secondary"
+                    class="p-button-sm" [disabled]="!canAddRecipient" (click)="addRecipient()"></button>
+                </div>
+                <small class="alert-hint">
+                  Your own address always receives the report. Up to {{maxRecipients}} extra addresses.
+                </small>
+
+                @if (report.recipients.length) {
+                  <ul class="report-recipients">
+                    @for (recipient of report.recipients; track recipient) {
+                      <li>
+                        <span>{{recipient}}</span>
+                        <button pButton pRipple type="button" icon="pi pi-times" severity="danger"
+                          class="p-button-rounded p-button-text p-button-sm" pTooltip="Remove recipient"
+                          [attr.aria-label]="'Remove ' + recipient" (click)="removeRecipient(recipient)"></button>
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+
+              <div class="report-actions">
+                <button pButton pRipple type="button" label="Save" icon="pi pi-check" severity="success"
+                  class="p-button-rounded" [loading]="reportSaving" [disabled]="reportSaving"
+                  (click)="saveReport()"></button>
+                <button pButton pRipple type="button" label="Send now" icon="pi pi-send" severity="secondary"
+                  class="p-button-rounded" [loading]="reportSending" [disabled]="reportSending"
+                  (click)="sendReportNow()"></button>
+              </div>
+            </div>
           }
         </p-tabpanel>
       </p-tabpanels>

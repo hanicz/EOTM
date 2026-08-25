@@ -51,6 +51,11 @@ public class ETFInvestmentService implements ICSVService {
         return this.etfInvestmentRepository.findByUserEmailOrderByTransactionDateDesc(userEmail).stream().map(this::convertToETFInvestmentDTO).collect(Collectors.toList());
     }
 
+    public List<ETFInvestmentDTO> getETFInvestmentsBetween(String userEmail, LocalDate from, LocalDate to) {
+        return this.etfInvestmentRepository.findByUserEmailAndTransactionDateBetweenOrderByTransactionDate(userEmail, from, to)
+                .stream().map(this::convertToETFInvestmentDTO).collect(Collectors.toList());
+    }
+
     private ETFInvestmentDTO convertToETFInvestmentDTO(ETFInvestment etfInvestment) {
         return this.modelMapper.map(etfInvestment, ETFInvestmentDTO.class);
     }

@@ -1,6 +1,10 @@
 package eye.on.the.money.mail;
 
 import eye.on.the.money.EotmApplication;
+import eye.on.the.money.dto.out.AssetClassValueDTO;
+import eye.on.the.money.dto.out.InvestmentDTO;
+import eye.on.the.money.dto.out.MonthlyReportDTO;
+import eye.on.the.money.dto.out.NetWorthDTO;
 import eye.on.the.money.service.mail.EmailService;
 import jakarta.mail.BodyPart;
 import jakarta.mail.Session;
@@ -21,6 +25,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -82,6 +89,91 @@ class EmailServiceTest {
         Assertions.assertAll("Check escaping",
                 () -> assertFalse(html.contains("<script>")),
                 () -> assertTrue(html.contains("&lt;script&gt;")));
+    }
+
+    @Test
+    public void sendMonthlyReportMail() throws Exception {
+        MimeMessage mimeMessage = new JavaMailSenderImpl().createMimeMessage();
+        when(this.javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
+        doNothing().when(this.javaMailSender).send(ArgumentMatchers.any(MimeMessage.class));
+
+        this.emailService.sendMonthlyReportMail(List.of("owner@test.test", "partner@test.test"),
+                this.report("Corsair"));
+
+        ArgumentCaptor<MimeMessage> argument = ArgumentCaptor.forClass(MimeMessage.class);
+        verify(this.javaMailSender).send(argument.capture());
+
+        MimeMessage sentMessage = argument.getValue();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        sentMessage.writeTo(out);
+        String rawContent = out.toString();
+
+        Assertions.assertAll("Check monthly report email",
+                () -> assertEquals(2, sentMessage.getAllRecipients().length),
+                () -> assertEquals("owner@test.test", sentMessage.getAllRecipients()[0].toString()),
+                () -> assertEquals("partner@test.test", sentMessage.getAllRecipients()[1].toString()),
+                () -> assertEquals("user", sentMessage.getFrom()[0].toString()),
+                () -> assertTrue(sentMessage.getSubject().contains("September 2023")),
+                () -> assertTrue(rawContent.contains("Eye OTM")),
+                () -> assertTrue(rawContent.contains("text/html")));
+    }
+
+    @Test
+    public void sendMonthlyReportMailEscapesHtmlInTradeNames() throws Exception {
+        MimeMessage mimeMessage = new JavaMailSenderImpl().createMimeMessage();
+        when(this.javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
+        doNothing().when(this.javaMailSender).send(ArgumentMatchers.any(MimeMessage.class));
+
+        this.emailService.sendMonthlyReportMail(List.of("owner@test.test"),
+                this.report("<script>alert(1)</script>"));
+
+        ArgumentCaptor<MimeMessage> argument = ArgumentCaptor.forClass(MimeMessage.class);
+        verify(this.javaMailSender).send(argument.capture());
+
+        MimeMessage sent = argument.getValue();
+        sent.saveChanges();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        sent.writeTo(out);
+        MimeMessage parsed = new MimeMessage(Session.getInstance(new Properties()),
+                new ByteArrayInputStream(out.toByteArray()));
+        String html = this.findHtml(parsed.getContent());
+
+        Assertions.assertAll("Check escaping",
+                () -> assertFalse(html.contains("<script>")),
+                () -> assertTrue(html.contains("&lt;script&gt;")));
+    }
+
+    private MonthlyReportDTO report(String tradeName) {
+        InvestmentDTO trade = InvestmentDTO.builder()
+                .transactionDate(LocalDate.of(2023, 9, 8))
+                .buySell("B")
+                .shortName(tradeName)
+                .amount(200.17)
+                .currencyId("USD")
+                .build();
+
+        return MonthlyReportDTO.builder()
+                .year(2023)
+                .month(9)
+                .currency("EUR")
+                .netWorth(NetWorthDTO.builder()
+                        .currency("EUR")
+                        .totalSpent(BigDecimal.valueOf(1000))
+                        .totalWorth(BigDecimal.valueOf(1200))
+                        .totalChangePct(BigDecimal.valueOf(20))
+                        .assets(List.of(AssetClassValueDTO.builder()
+                                .assetClass("Stock")
+                                .spent(BigDecimal.valueOf(1000))
+                                .worth(BigDecimal.valueOf(1200))
+                                .changePct(BigDecimal.valueOf(20))
+                                .build()))
+                        .availableCurrencies(List.of("EUR"))
+                        .unconvertedCurrencies(List.of())
+                        .build())
+                .activity(new MonthlyReportDTO.ActivitySection(List.of(trade), List.of(), List.of(), List.of(),
+                        List.of(), List.of(), List.of(), List.of(), List.of(), List.of()))
+                .cashFlow(List.of())
+                .build();
     }
 
     private String htmlPartOf(String symbolOrTicker, String type) throws Exception {

@@ -60,6 +60,10 @@ public class BankTransactionService implements ICSVService {
         return this.bankTransactionRepository.findMonthlyCashFlow(userEmail);
     }
 
+    public List<MonthlyCashFlowDTO> getCashFlowBetween(String userEmail, LocalDate from, LocalDate to) {
+        return this.bankTransactionRepository.findCashFlowBetween(userEmail, from, to);
+    }
+
     public List<MonthlyIncomeDTO> getMonthlyIncome(String userEmail) {
         return this.bankTransactionRepository.findMonthlyIncome(userEmail);
     }

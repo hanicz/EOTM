@@ -56,6 +56,11 @@ public class InvestmentService implements ICSVService {
         return this.investmentRepository.findByUserEmailOrderByTransactionDateDesc(userEmail).stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
     }
 
+    public List<InvestmentDTO> getInvestmentsBetween(String userEmail, LocalDate from, LocalDate to) {
+        return this.investmentRepository.findByUserEmailAndTransactionDateBetweenOrderByTransactionDate(userEmail, from, to)
+                .stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
+    }
+
     public List<InvestmentDTO> getInvestmentsByAccountId(String userEmail, Long accountId) {
         return this.investmentRepository.findByUserEmailAndAccountIdOrderByTransactionDateDesc(userEmail, accountId)
                 .stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());

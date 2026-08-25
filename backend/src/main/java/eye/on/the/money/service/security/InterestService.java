@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -40,6 +41,11 @@ public class InterestService implements ICSVService {
 
     public List<InterestDTO> getInterest(String userEmail) {
         return this.interestRepository.findByUserEmailOrderByInterestDateDesc(userEmail).stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+
+    public List<InterestDTO> getInterestBetween(String userEmail, LocalDate from, LocalDate to) {
+        return this.interestRepository.findByUserEmailAndInterestDateBetweenOrderByInterestDate(userEmail, from, to)
+                .stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
     private InterestDTO convertToDTO(Interest interest) {

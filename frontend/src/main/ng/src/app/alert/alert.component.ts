@@ -30,6 +30,14 @@ import { Select } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { InputNumber } from 'primeng/inputnumber';
 import { AlertTypePipe } from '../util/pipe';
+import { Checkbox } from 'primeng/checkbox';
+import { InputText } from 'primeng/inputtext';
+import { ReportSubscription } from '../model/reportsubscription';
+import { ReportService } from '../service/report.service';
+import { NetWorthService } from '../service/networth.service';
+
+const MAX_RECIPIENTS = 5;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 @Component({
     selector: 'app-alert',
@@ -37,7 +45,8 @@ import { AlertTypePipe } from '../util/pipe';
     styleUrls: ['./alert.component.css'],
     imports: [MenuComponent, Bind, Panel, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip,
         TableModule, PrimeTemplate, Skeleton, NgClass, Tag, Toast, Dialog, Select, FormsModule, InputNumber,
-        UpperCasePipe, AlertTypePipe, TickerLogoComponent, ExchangeOptionComponent, SymbolOptionComponent]
+        UpperCasePipe, AlertTypePipe, TickerLogoComponent, ExchangeOptionComponent, SymbolOptionComponent,
+        Checkbox, InputText]
 })
 export class AlertComponent implements OnInit {
 
@@ -68,11 +77,23 @@ export class AlertComponent implements OnInit {
   creatingCryptoAlert: boolean = false;
   assetUrl: string;
 
+  report: ReportSubscription = { enabled: false, currency: 'HUF', recipients: [] };
+  reportLoading: boolean = true;
+  reportError: boolean = false;
+  reportSaving: boolean = false;
+  reportSending: boolean = false;
+  reportLoaded: boolean = false;
+  currencyOptions: string[] = [];
+  currenciesLoading: boolean = false;
+  newRecipient: string = '';
+  readonly maxRecipients = MAX_RECIPIENTS;
+
   private readonly deleting = new Set<string>();
 
   constructor(private alertService: AlertService, private stockService: StockService,
     private cryptoService: CryptoService, globals: Globals, private cdr: ChangeDetectorRef,
-    private messageService: MessageService) {
+    private messageService: MessageService, private reportService: ReportService,
+    private netWorthService: NetWorthService) {
     this.fetchData();
     this.globals = globals;
     this.assetUrl = environment.assets_url;
@@ -291,5 +312,104 @@ export class AlertComponent implements OnInit {
     this.selectedCryptoType = '';
     this.cryptoValuePoint = 0.0;
     this.displayCryptoDialog = true;
+  }
+
+  tabChanged(value: string | number | undefined) {
+    if (String(value) === '2' && !this.reportLoaded) {
+      this.loadReport();
+    }
+  }
+
+  loadReport() {
+    this.reportLoading = true;
+    this.reportError = false;
+
+    this.reportService.getSubscription().subscribe({
+      next: (data) => {
+        this.report = { ...data, recipients: data.recipients ?? [] };
+        this.reportLoading = false;
+        this.reportLoaded = true;
+        this.loadCurrencies();
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.reportLoading = false;
+        this.reportError = true;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  private loadCurrencies() {
+    if (this.currencyOptions.length) {
+      return;
+    }
+    this.currenciesLoading = true;
+    this.netWorthService.getNetWorth(this.report.currency).subscribe({
+      next: (data) => {
+        this.currenciesLoading = false;
+        this.currencyOptions = data.availableCurrencies ?? [];
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.currenciesLoading = false;
+        this.currencyOptions = [this.report.currency];
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  get canAddRecipient(): boolean {
+    const email = this.newRecipient.trim().toLowerCase();
+    return EMAIL_PATTERN.test(email)
+      && !this.report.recipients.some(r => r.toLowerCase() === email)
+      && this.report.recipients.length < MAX_RECIPIENTS;
+  }
+
+  addRecipient() {
+    if (!this.canAddRecipient) {
+      return;
+    }
+    this.report.recipients = [...this.report.recipients, this.newRecipient.trim().toLowerCase()];
+    this.newRecipient = '';
+  }
+
+  removeRecipient(email: string) {
+    this.report.recipients = this.report.recipients.filter(r => r !== email);
+  }
+
+  saveReport() {
+    this.reportSaving = true;
+
+    this.reportService.updateSubscription(this.report).subscribe({
+      next: (data) => {
+        this.reportSaving = false;
+        this.report = { ...data, recipients: data.recipients ?? [] };
+        this.cdr.markForCheck();
+        this.messageService.add({ severity: 'success', detail: 'Report settings saved.' });
+      },
+      error: (error) => {
+        this.reportSaving = false;
+        this.cdr.markForCheck();
+        this.messageService.add({ severity: 'error', detail: error.error?.error ?? 'Could not save the report settings.' });
+      }
+    });
+  }
+
+  sendReportNow() {
+    this.reportSending = true;
+
+    this.reportService.sendNow().subscribe({
+      next: () => {
+        this.reportSending = false;
+        this.cdr.markForCheck();
+        this.messageService.add({ severity: 'success', detail: 'Report sent.' });
+      },
+      error: (error) => {
+        this.reportSending = false;
+        this.cdr.markForCheck();
+        this.messageService.add({ severity: 'error', detail: error.error?.error ?? 'Could not send the report.' });
+      }
+    });
   }
 }

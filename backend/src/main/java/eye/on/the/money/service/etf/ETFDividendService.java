@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -40,6 +41,11 @@ public class ETFDividendService implements ICSVService {
     private final ModelMapper modelMapper;
     public List<ETFDividendDTO> getDividends(String userEmail) {
         return this.etfDividendRepository.findByUserEmailOrderByDividendDateDesc(userEmail).stream().map(this::convertToETFDividendDTO).collect(Collectors.toList());
+    }
+
+    public List<ETFDividendDTO> getDividendsBetween(String userEmail, LocalDate from, LocalDate to) {
+        return this.etfDividendRepository.findByUserEmailAndDividendDateBetweenOrderByDividendDate(userEmail, from, to)
+                .stream().map(this::convertToETFDividendDTO).collect(Collectors.toList());
     }
 
     private ETFDividendDTO convertToETFDividendDTO(ETFDividend dividend) {

@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -44,6 +45,11 @@ public class ForexTransactionService implements ICSVService {
     private final EODAPIService eodAPIService;
     public List<ForexTransactionDTO> getForexTransactionsByUserId(String userEmail) {
         return this.forexTransactionRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToForexTransactionDTO).collect(Collectors.toList());
+    }
+
+    public List<ForexTransactionDTO> getForexTransactionsBetween(String userEmail, LocalDate from, LocalDate to) {
+        return this.forexTransactionRepository.findByUserEmailAndTransactionDateBetweenOrderByTransactionDate(userEmail, from, to)
+                .stream().map(this::convertToForexTransactionDTO).collect(Collectors.toList());
     }
 
     private ForexTransactionDTO convertToForexTransactionDTO(ForexTransaction forexTransaction) {

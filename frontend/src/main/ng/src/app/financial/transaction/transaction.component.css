@@ -56,13 +56,6 @@
   opacity: 0.55;
 }
 
-.filter-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-}
-
 @media screen and (max-width: 991px) {
   .memo-cell {
     max-width: none;
@@ -85,21 +78,7 @@
 }
 
 @media screen and (max-width: 767px) {
-  .filter-bar > * {
-    flex: 1 1 100%;
-  }
-
   .filter-bar > .filter-clear {
     flex: 0 0 auto;
-  }
-
-  .filter-input {
-    width: 100%;
-  }
-
-  .filter-type,
-  :host ::ng-deep .filter-type > div,
-  :host ::ng-deep .filter-type .p-select {
-    width: 100%;
   }
 }

@@ -19,7 +19,6 @@ export interface UpcomingPayment {
   currencyId: string;
   nextPaymentDate: Date;
   nextPaymentAmount: number;
-  zeroCoupon: boolean;
   daysUntil: number;
 }
 
@@ -96,7 +95,6 @@ export class HoldingComponent implements OnInit {
         currencyId: t.currencyId,
         nextPaymentDate: t.nextPaymentDate!,
         nextPaymentAmount: t.nextPaymentAmount!,
-        zeroCoupon: t.zeroCoupon === true,
         daysUntil: this.daysUntil(t.nextPaymentDate!)
       }))
       .sort((a, b) => a.daysUntil - b.daysUntil);

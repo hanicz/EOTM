@@ -65,7 +65,7 @@
         </td>
         <td data-label="Next Payment Amount">
           @if (transaction.nextPaymentAmount != null) {
-            <b>{{transaction.nextPaymentAmount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</b>
+            <b class="amount">{{transaction.nextPaymentAmount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</b>
           } @else {
             <span class="text-color-secondary">-</span>
           }
@@ -100,14 +100,8 @@
             <p-tag styleClass="p-mr-2" [severity]="payment.daysUntil <= soonInDays ? 'success' : 'secondary'"
               value="{{dueInLabel(payment.daysUntil)}}"></p-tag>
           </td>
-          <td data-label="Security Name">
-            {{payment.securityName}}
-            @if (payment.zeroCoupon) {
-              <p-tag styleClass="p-mr-2 ml-2" severity="warn" value="redemption"
-                pTooltip="Discount bill maturing: the full nominal is repaid, there is no coupon."></p-tag>
-            }
-          </td>
-          <td data-label="Amount"><b>{{payment.nextPaymentAmount | currency : payment.currencyId : 'symbol' : '0.0-2'}}</b></td>
+          <td data-label="Security Name">{{payment.securityName}}</td>
+          <td data-label="Amount"><b class="amount">{{payment.nextPaymentAmount | currency : payment.currencyId : 'symbol' : '0.0-2'}}</b></td>
         </tr>
       </ng-template>
     </p-table>

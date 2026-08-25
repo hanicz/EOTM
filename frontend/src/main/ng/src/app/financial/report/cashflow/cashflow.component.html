@@ -1,13 +1,13 @@
-<p-toolbar styleClass="mb-4">
+﻿<p-toolbar styleClass="table-toolbar">
   <ng-template pTemplate="left">
     <span class="text-color-secondary">
       Money in and out per month. Records marked excluded on the Transactions tab are left out.
     </span>
   </ng-template>
   <ng-template pTemplate="right">
-    <button pButton pRipple icon="pi pi-refresh" class="p-button-rounded p-button-text mr-2" pTooltip="Refresh"
+    <button pButton pRipple icon="pi pi-refresh" class="p-button-rounded p-button-text" pTooltip="Refresh"
       (click)="refresh()"></button>
-    <button pButton pRipple label="Export" icon="pi pi-upload" severity="info" [disabled]="!blocks.length"
+    <button pButton pRipple label="Export" icon="pi pi-upload" severity="secondary" class="p-button-outlined" [disabled]="!blocks.length"
       (click)="download()"></button>
   </ng-template>
 </p-toolbar>

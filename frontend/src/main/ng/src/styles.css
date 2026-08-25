@@ -52,6 +52,10 @@ html {
 /* Marks a price the provider had no live quote for, so it fell back to the
    previous close. Deliberately quiet -- the number is still usable, it is just
    not current. */
+.amount {
+    white-space: nowrap;
+}
+
 .stale-price {
     margin-left: 0.35rem;
     font-size: 0.75rem;
@@ -108,7 +112,8 @@ html {
 
     .table-stack .p-datatable-tbody > tr > td::before {
         content: attr(data-label);
-        flex: 0 0 auto;
+        flex: 0 1 auto;
+        min-width: 0;
         font-weight: 600;
         text-align: left;
         color: #5f5e5a;
@@ -126,13 +131,99 @@ html {
     max-width: 100%;
 }
 
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.page-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 3rem;
+}
+
+.summary-stat {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.summary-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
 @media screen and (max-width: 767px) {
-    .p-toolbar-start,
-    .p-toolbar-center,
-    .p-toolbar-end {
+    .filter-bar > * {
         flex: 1 1 100%;
-        flex-wrap: wrap;
-        row-gap: 0.5rem;
+    }
+
+    .filter-input {
+        width: 100%;
+    }
+
+    .filter-type,
+    .filter-type > div,
+    .filter-type .p-select {
+        width: 100%;
+    }
+
+    .page-summary {
+        gap: 0;
+    }
+
+    .summary-stat {
+        width: 100%;
+        justify-content: space-between;
+        padding: 0.4rem 0;
+    }
+
+    .summary-stat + .summary-stat {
+        border-top: 1px solid #e3e0d5;
+    }
+
+    .summary-actions {
+        width: 100%;
+        margin-left: 0;
+        padding-top: 0.5rem;
+    }
+
+    .summary-actions > p-select {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+}
+
+.table-toolbar {
+    margin-bottom: 1rem;
+    padding: 0.6rem 0.75rem;
+}
+
+.table-toolbar .p-toolbar-start,
+.table-toolbar .p-toolbar-center,
+.table-toolbar .p-toolbar-end {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+@media screen and (max-width: 767px) {
+    .table-toolbar {
+        margin-bottom: 0.75rem;
+    }
+
+    .table-toolbar .p-toolbar-start,
+    .table-toolbar .p-toolbar-center,
+    .table-toolbar .p-toolbar-end {
+        flex: 1 1 100%;
+    }
+
+    .table-toolbar .p-button {
+        padding-inline: 0.65rem;
     }
 
     .p-paginator-pages {

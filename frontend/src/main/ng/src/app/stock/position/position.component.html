@@ -1,15 +1,11 @@
 <p-table #dt1 [value]="investments" styleClass="p-datatable-striped table-stack" sortField="quantity" [sortOrder]=-1
   [globalFilterFields]="['shortName', 'accountName']">
   <ng-template pTemplate="caption">
-    <div class="flex justify-content-between flex-wrap">
-      <div class="flex flex-row flex-wrap">
-        <span class="mr-2">
-          <input pInputText type="text"
-            (input)="dt1.filterGlobal($any($event.target)?.value, 'contains')"
-            [value]="$any(dt1.filters['global'])?.value ?? ''" placeholder="Search by Name or Account"
-            class="p-column-filter" style="width: 16rem">
-        </span>
-      </div>
+    <div class="filter-bar">
+      <input pInputText type="text"
+        (input)="dt1.filterGlobal($any($event.target)?.value, 'contains')"
+        [value]="$any(dt1.filters['global'])?.value ?? ''" placeholder="Search by Name or Account"
+        class="p-column-filter filter-input">
     </div>
   </ng-template>
   <ng-template pTemplate="header">

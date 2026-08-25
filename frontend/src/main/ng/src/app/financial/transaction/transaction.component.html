@@ -1,31 +1,31 @@
-<p-toast position="bottom-center"></p-toast>
-<p-toolbar styleClass="mb-4">
+﻿<p-toast position="bottom-center"></p-toast>
+<p-toolbar styleClass="table-toolbar">
   <ng-template pTemplate="left">
-    <button pButton pRipple label="Exclude" icon="pi pi-eye-slash" severity="secondary" class="mr-2"
+    <button pButton pRipple label="Exclude" icon="pi pi-eye-slash" severity="secondary" class="p-button-outlined"
       pTooltip="Leave the selected records out of the reports, for example transfers between your own accounts"
       [disabled]="!selectedTransactions || !selectedTransactions.length"
       (click)="excludeClicked(true)"></button>
-    <button pButton pRipple label="Include" icon="pi pi-eye" severity="secondary" class="mr-2"
+    <button pButton pRipple label="Include" icon="pi pi-eye" severity="secondary" class="p-button-outlined"
       pTooltip="Count the selected records in the reports again"
       [disabled]="!selectedTransactions || !selectedTransactions.length"
       (click)="excludeClicked(false)"></button>
-    <button pButton pRipple label="Taxable" icon="pi pi-percentage" severity="secondary" class="mr-2"
+    <button pButton pRipple label="Taxable" icon="pi pi-percentage" severity="secondary" class="p-button-outlined"
       pTooltip="Flag the selected records as taxable events and tax them on the tax page"
       [disabled]="!selectedTransactions || !selectedTransactions.length"
       (click)="taxableClicked(true)"></button>
-    <button pButton pRipple label="Not taxable" icon="pi pi-ban" severity="secondary" class="mr-2"
+    <button pButton pRipple label="Not taxable" icon="pi pi-ban" severity="secondary" class="p-button-outlined"
       pTooltip="Leave the selected records out of the tax report"
       [disabled]="!selectedTransactions || !selectedTransactions.length"
       (click)="taxableClicked(false)"></button>
-    <button pButton pRipple icon="pi pi-trash" severity="danger"
+    <button pButton pRipple icon="pi pi-trash" severity="danger" class="p-button-outlined"
       [disabled]="!selectedTransactions || !selectedTransactions.length" (click)="deleteClicked()"></button>
   </ng-template>
 
   <ng-template pTemplate="right">
     <p-fileUpload mode="basic" #fileUpload accept=".csv" [customUpload]="true" [auto]="true" label="Import"
-      chooseLabel="Import" class="mr-2 p-d-inline-block" (uploadHandler)="onUpload($event)">
+      chooseLabel="Import" chooseStyleClass="p-button-outlined p-button-secondary" (uploadHandler)="onUpload($event)">
     </p-fileUpload>
-    <button pButton pRipple label="Export" icon="pi pi-upload" severity="info" (click)="download()"></button>
+    <button pButton pRipple label="Export" icon="pi pi-upload" severity="secondary" class="p-button-outlined" (click)="download()"></button>
   </ng-template>
 </p-toolbar>
 

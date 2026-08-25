@@ -1,58 +1,50 @@
-<p-toast position="bottom-center"></p-toast>
-<p-toolbar styleClass="p-mb-4">
+﻿<p-toast position="bottom-center"></p-toast>
+<p-toolbar styleClass="table-toolbar">
   <ng-template pTemplate="left">
-    <button pButton pRipple label="New" icon="pi pi-plus" class="mr-2" severity="success"
+    <button pButton pRipple label="New" icon="pi pi-plus"
     (click)="openNew()"></button>
-    <button pButton pRipple label="RSU" icon="pi pi-percentage" severity="secondary" class="mr-2"
+    <button pButton pRipple label="RSU" icon="pi pi-percentage" severity="secondary" class="p-button-outlined"
       pTooltip="Flag the selected buys as RSUs and tax them on the tax page"
       [disabled]="!selectedInvestments || !selectedInvestments.length"
       (click)="rsuClicked(true)"></button>
-    <button pButton pRipple label="Not RSU" icon="pi pi-ban" severity="secondary" class="mr-2"
+    <button pButton pRipple label="Not RSU" icon="pi pi-ban" severity="secondary" class="p-button-outlined"
       pTooltip="Leave the selected buys out of the RSU tax report"
       [disabled]="!selectedInvestments || !selectedInvestments.length"
       (click)="rsuClicked(false)"></button>
-    <button pButton pRipple icon="pi pi-trash" severity="danger"
+    <button pButton pRipple icon="pi pi-trash" severity="danger" class="p-button-outlined"
     [disabled]="!selectedInvestments || !selectedInvestments.length" (click)="deleteClicked()"></button>
   </ng-template>
 
   <ng-template pTemplate="right">
-    <p-fileUpload mode="basic" #fileUpload accept=".csv" [customUpload]="true" [auto]="true" label="Import" chooseLabel="Import"
-      class="mr-2 p-d-inline-block" (uploadHandler)="onUpload($event)">
+    <p-fileUpload mode="basic" #fileUpload accept=".csv" [customUpload]="true" [auto]="true" label="Import" chooseLabel="Import" chooseStyleClass="p-button-outlined p-button-secondary" (uploadHandler)="onUpload($event)">
     </p-fileUpload>
-    <button pButton pRipple label="Export" icon="pi pi-upload" severity="info" (click)="download()"></button>
+    <button pButton pRipple label="Export" icon="pi pi-upload" severity="secondary" class="p-button-outlined" (click)="download()"></button>
   </ng-template>
 </p-toolbar>
 <p-table #dt1 [value]="investments" styleClass="p-datatable-striped table-stack"
   [(selection)]="selectedInvestments">
 
   <ng-template pTemplate="caption">
-    <div class="flex justify-content-between flex-wrap">
-      <div class="flex flex-row flex-wrap">
-        <span class="mr-2">
-          <input pInputText type="text"
-            (input)="dt1.filter($any($event.target)?.value, 'shortName', 'contains')"
-            [value]="$any(dt1.filters['shortName'])?.value ?? ''" placeholder="Search by Name"
-            class="p-column-filter">
-        </span>
-        <p-columnFilter field="buySell" matchMode="equals" [showMenu]="false">
-          <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-            <p-select [ngModel]="value" [options]="statuses" (onChange)="filter($any($event)?.value)"
-              [showClear]="true" placeholder="Any">
-              <ng-template let-option pTemplate="item">
-
-                @if (option.label === 'BUY') {
-                  <p-tag styleClass="p-mr-2" severity="info" value="BUY">
-                  </p-tag>
-                }
-                @if (option.label === 'SELL') {
-                  <p-tag styleClass="p-mr-2" severity="warn"
-                  value="SELL"></p-tag>
-                }
-              </ng-template>
-            </p-select>
-          </ng-template>
-        </p-columnFilter>
-      </div>
+    <div class="filter-bar">
+      <input pInputText type="text"
+        (input)="dt1.filter($any($event.target)?.value, 'shortName', 'contains')"
+        [value]="$any(dt1.filters['shortName'])?.value ?? ''" placeholder="Search by Name"
+        class="p-column-filter filter-input">
+      <p-columnFilter field="buySell" matchMode="equals" [showMenu]="false" class="filter-type">
+        <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+          <p-select [ngModel]="value" [options]="statuses" (onChange)="filter($any($event)?.value)"
+            [showClear]="true" placeholder="Any">
+            <ng-template let-option pTemplate="item">
+              @if (option.label === 'BUY') {
+                <p-tag styleClass="p-mr-2" severity="info" value="BUY"></p-tag>
+              }
+              @if (option.label === 'SELL') {
+                <p-tag styleClass="p-mr-2" severity="warn" value="SELL"></p-tag>
+              }
+            </ng-template>
+          </p-select>
+        </ng-template>
+      </p-columnFilter>
     </div>
   </ng-template>
   <ng-template pTemplate="header">

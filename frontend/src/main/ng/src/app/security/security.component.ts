@@ -16,6 +16,7 @@ import { TransactionComponent } from './transaction/transaction.component';
 import { InterestComponent } from './interest/interest.component';
 import { CurrencyPipe } from '@angular/common';
 import { DashboardService } from '../service/dashboard.service';
+import { SecurityService } from '../service/security.service';
 import { Tag } from 'primeng/tag';
 import { ChartComponent, ApexChart, ApexNonAxisChartSeries, ApexLegend } from 'ng-apexcharts';
 
@@ -71,7 +72,9 @@ export class SecurityComponent implements OnInit {
   private ratesRequestInFlight: boolean = false;
   private pendingRecalculation: boolean = false;
 
-  constructor(private dashboardService: DashboardService) { }
+  ratesRefreshing: boolean = false;
+
+  constructor(private dashboardService: DashboardService, private securityService: SecurityService) { }
 
   ngOnInit(): void {
   }
@@ -80,6 +83,20 @@ export class SecurityComponent implements OnInit {
     this.holding?.refresh();
     this.transaction?.refresh();
     this.interest?.refresh();
+  }
+
+  refreshRates(): void {
+    this.ratesRefreshing = true;
+    this.securityService.refreshRates().subscribe({
+      next: () => {
+        this.ratesRefreshing = false;
+        this.holding?.refresh();
+      },
+      error: (error) => {
+        this.ratesRefreshing = false;
+        console.log(error);
+      }
+    });
   }
 
   onCurrencyChange(): void {

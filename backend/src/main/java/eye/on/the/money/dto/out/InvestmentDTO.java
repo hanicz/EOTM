@@ -35,6 +35,7 @@ public class InvestmentDTO implements CSVHelper, Serializable {
     private Double amount;
     private String currencyId;
     private Double liveValue;
+    private Boolean stalePrice;
     private Double valueDiff;
     private Double fee;
     private String name;

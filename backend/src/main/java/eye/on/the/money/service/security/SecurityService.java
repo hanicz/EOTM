@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -18,6 +20,12 @@ public class SecurityService {
     public List<Security> getAllSecurities() {
         log.trace("Enter getAllSecurities");
         return this.securityRepository.findAllByOrderByNameAsc();
+    }
+
+    public Map<String, String> getIsinBySecurityId() {
+        log.trace("Enter getIsinBySecurityId");
+        return this.securityRepository.findByIsinIsNotNull().stream()
+                .collect(Collectors.toMap(Security::getId, Security::getIsin));
     }
 
     public Security getOrCreateSecurity(String id, String name) {

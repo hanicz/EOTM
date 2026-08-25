@@ -29,25 +29,23 @@
               {{netWorthChangePct >= 0 ? '+' : ''}}{{netWorthChangePct | number : '0.0-1'}}%
             </div>
           </div>
-          <div class="metric-tile metric-tile-clickable" (click)="navigateTo('/stock')">
-            <div class="metric-label">Stock</div>
-            <div class="metric-value">{{stockTotal | currency : selectedCurrency : 'symbol' : '0.0-2'}}</div>
-            <div class="metric-change" [class.positive]="stockChangePct >= 0" [class.negative]="stockChangePct < 0">
-              {{stockChangePct >= 0 ? '+' : ''}}{{stockChangePct | number : '0.0-1'}}%
-            </div>
-          </div>
-          <div class="metric-tile metric-tile-clickable" (click)="navigateTo('/crypto')">
-            <div class="metric-label">Crypto</div>
-            <div class="metric-value">{{cryptoTotal | currency : selectedCurrency : 'symbol' : '0.0-2'}}</div>
-            <div class="metric-change" [class.positive]="cryptoChangePct >= 0" [class.negative]="cryptoChangePct < 0">
-              {{cryptoChangePct >= 0 ? '+' : ''}}{{cryptoChangePct | number : '0.0-1'}}%
-            </div>
+          <div class="metric-tile metric-tile-clickable" (click)="navigateTo('/security')">
+            <div class="metric-label">Securities</div>
+            <div class="metric-value">{{securityTotal | currency : selectedCurrency : 'symbol' : '0.0-2'}}</div>
+            <div class="metric-note">at cost</div>
           </div>
           <div class="metric-tile metric-tile-clickable" (click)="navigateTo('/etf')">
             <div class="metric-label">ETF</div>
             <div class="metric-value">{{etfTotal | currency : selectedCurrency : 'symbol' : '0.0-2'}}</div>
             <div class="metric-change" [class.positive]="etfChangePct >= 0" [class.negative]="etfChangePct < 0">
               {{etfChangePct >= 0 ? '+' : ''}}{{etfChangePct | number : '0.0-1'}}%
+            </div>
+          </div>
+          <div class="metric-tile metric-tile-clickable" (click)="navigateTo('/stock')">
+            <div class="metric-label">Stock</div>
+            <div class="metric-value">{{stockTotal | currency : selectedCurrency : 'symbol' : '0.0-2'}}</div>
+            <div class="metric-change" [class.positive]="stockChangePct >= 0" [class.negative]="stockChangePct < 0">
+              {{stockChangePct >= 0 ? '+' : ''}}{{stockChangePct | number : '0.0-1'}}%
             </div>
           </div>
           <div class="metric-tile metric-tile-clickable" (click)="navigateTo('/forex')">
@@ -57,11 +55,11 @@
               {{forexChangePct >= 0 ? '+' : ''}}{{forexChangePct | number : '0.0-1'}}%
             </div>
           </div>
-          <div class="metric-tile metric-tile-clickable" (click)="navigateTo('/security')">
-            <div class="metric-label">Securities</div>
-            <div class="metric-value">{{securityTotal | currency : selectedCurrency : 'symbol' : '0.0-2'}}</div>
-            <div class="metric-change" [class.positive]="securityChangePct >= 0" [class.negative]="securityChangePct < 0">
-              {{securityChangePct >= 0 ? '+' : ''}}{{securityChangePct | number : '0.0-1'}}%
+          <div class="metric-tile metric-tile-clickable" (click)="navigateTo('/crypto')">
+            <div class="metric-label">Crypto</div>
+            <div class="metric-value">{{cryptoTotal | currency : selectedCurrency : 'symbol' : '0.0-2'}}</div>
+            <div class="metric-change" [class.positive]="cryptoChangePct >= 0" [class.negative]="cryptoChangePct < 0">
+              {{cryptoChangePct >= 0 ? '+' : ''}}{{cryptoChangePct | number : '0.0-1'}}%
             </div>
           </div>
         </div>

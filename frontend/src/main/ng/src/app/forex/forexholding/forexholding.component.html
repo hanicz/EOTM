@@ -50,7 +50,12 @@
         <td data-label="Spent">{{forexTransaction.fromAmount | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}</td>
         <td data-label="Worth">{{forexTransaction.toAmount | currency : forexTransaction.toCurrencyId : 'symbol' : '0.0-2'}}</td>
         <td data-label="Rate">{{forexTransaction.changeRate | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}</td>
-        <td data-label="Live Rate">{{forexTransaction.liveChangeRate | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}</td>
+        <td data-label="Live Rate">
+          {{forexTransaction.liveChangeRate != null ? (forexTransaction.liveChangeRate | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2') : 'N/A'}}
+          @if (forexTransaction.stalePrice) {
+            <i class="pi pi-clock stale-price" pTooltip="No live quote right now, valued at the previous close."></i>
+          }
+        </td>
         <td data-label="Profit">
           @if (forexTransaction.liveValue > forexTransaction.fromAmount) {
             <p-tag styleClass="p-mr-2" severity="success" value="{{forexTransaction.liveValue - forexTransaction.fromAmount | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}"></p-tag>

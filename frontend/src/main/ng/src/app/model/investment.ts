@@ -7,6 +7,7 @@ export interface Investment {
     amount: number;
     currencyId: string;
     liveValue?: number;
+    stalePrice?: boolean;
     valueDiff?: number;
     fee: number;
     exchange: string;

@@ -6,12 +6,13 @@ import { TableModule } from 'primeng/table';
 import { PrimeTemplate } from 'primeng/api';
 import { Tag } from 'primeng/tag';
 import { DecimalPipe, CurrencyPipe } from '@angular/common';
+import { TickerLogoComponent } from '../../util/ticker-logo.component';
 
 @Component({
     selector: 'app-etfposition',
     templateUrl: './etfposition.component.html',
     styleUrls: ['./etfposition.component.css'],
-    imports: [Bind, TableModule, PrimeTemplate, Tag, DecimalPipe, CurrencyPipe]
+    imports: [Bind, TableModule, PrimeTemplate, Tag, DecimalPipe, CurrencyPipe, TickerLogoComponent]
 })
 export class EtfpositionComponent implements OnInit {
 

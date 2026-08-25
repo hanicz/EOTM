@@ -1,6 +1,7 @@
 package eye.on.the.money.controller;
 
 import eye.on.the.money.model.security.Security;
+import eye.on.the.money.service.security.SecurityRateService;
 import eye.on.the.money.service.security.SecurityService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,8 @@ class SecurityControllerTest {
 
     @Mock
     private SecurityService securityService;
+    @Mock
+    private SecurityRateService securityRateService;
 
     @InjectMocks
     private SecurityController securityController;

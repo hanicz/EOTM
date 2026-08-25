@@ -7,6 +7,7 @@ export interface ForexTransaction {
     fromCurrencyId: string;
     toCurrencyId: string;
     liveValue?: number;
+    stalePrice?: boolean;
     liveChangeRate?: number;
     changeRate: number;
 }

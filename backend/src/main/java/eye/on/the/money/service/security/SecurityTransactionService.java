@@ -5,6 +5,7 @@ import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.security.Security;
+import eye.on.the.money.model.security.SecurityRate;
 import eye.on.the.money.model.security.SecurityTransaction;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.security.SecurityTransactionRepository;
@@ -42,6 +43,8 @@ public class SecurityTransactionService implements ICSVService {
     private final UserService userService;
     private final ModelMapper modelMapper;
     private final SecurityService securityService;
+    private final SecurityRateService securityRateService;
+
     public List<SecurityTransactionDTO> getTransactions(String userEmail) {
         return this.securityTransactionRepository.findByUserEmailOrderByTransactionDateDesc(userEmail)
                 .stream().map(this::convertToDTO).collect(Collectors.toList());
@@ -51,10 +54,36 @@ public class SecurityTransactionService implements ICSVService {
         List<SecurityTransactionDTO> transactions = this.securityTransactionRepository.findByUserEmailOrderByTransactionDate(userEmail)
                 .stream().map(this::convertToDTO).toList();
         Map<String, SecurityTransactionDTO> holdingsMap = this.getCalculated(transactions);
-        return new ArrayList<>(holdingsMap.values()).stream()
+        List<SecurityTransactionDTO> holdings = new ArrayList<>(holdingsMap.values()).stream()
                 .filter(t -> t.getQuantity() > 0)
                 .sorted(Comparator.comparing(SecurityTransactionDTO::getAmount).reversed())
                 .collect(Collectors.toList());
+        this.enrichWithRates(holdings);
+        return holdings;
+    }
+
+    private void enrichWithRates(List<SecurityTransactionDTO> holdings) {
+        Map<String, String> isinBySecurityId = this.securityService.getIsinBySecurityId();
+        Map<String, SecurityRate> ratesByIsin =
+                this.securityRateService.getNextPaymentByIsin(isinBySecurityId.values());
+
+        for (SecurityTransactionDTO holding : holdings) {
+            String isin = isinBySecurityId.get(holding.getSecurityId());
+            if (isin == null) continue;
+            SecurityRate rate = ratesByIsin.get(isin);
+            if (rate == null) continue;
+
+            holding.setNextPaymentDate(rate.getPaymentDate());
+            holding.setZeroCoupon(rate.getZeroCoupon());
+            if (rate.getZeroCoupon()) {
+                holding.setNextPaymentAmount(holding.getQuantity().doubleValue());
+                holding.setRate((holding.getQuantity() / holding.getAmount() - 1.0) * 100.0);
+            } else {
+                holding.setRate(rate.getRate());
+                holding.setNextPaymentAmount(
+                        holding.getQuantity() * rate.getRate() / 100.0 * this.securityRateService.periodFraction(rate));
+            }
+        }
     }
 
     private Map<String, SecurityTransactionDTO> getCalculated(List<SecurityTransactionDTO> transactions) {

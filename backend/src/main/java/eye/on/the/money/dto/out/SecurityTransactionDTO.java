@@ -32,6 +32,12 @@ public class SecurityTransactionDTO implements CSVHelper {
     private String securityName;
     private Double amount;
     private String currencyId;
+    private Double rate;
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    private LocalDate nextPaymentDate;
+    private Double nextPaymentAmount;
+    private Boolean zeroCoupon;
 
     public SecurityTransactionDTO mergeInvestments(SecurityTransactionDTO other) {
         if (!this.getSecurityId().equals(other.getSecurityId()))

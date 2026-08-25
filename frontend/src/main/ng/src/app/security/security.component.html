@@ -19,6 +19,10 @@
         <div class="flex ml-auto align-items-center">
           <p-select [options]="currencyOptions" [(ngModel)]="selectedCurrency" optionLabel="label" optionValue="value"
             (onChange)="onCurrencyChange()" class="mr-2"></p-select>
+          <button pButton pRipple icon="pi pi-cloud-download" class="p-button-rounded p-button-text"
+            [loading]="ratesRefreshing" [disabled]="ratesRefreshing"
+            pTooltip="Fetch the latest interest rates now. Otherwise they refresh once a week."
+            (click)="refreshRates()"></button>
           <button pButton pRipple icon="pi pi-refresh" class="p-button-rounded p-button-text"
             pTooltip="Refresh" (click)="refreshAll()"></button>
         </div>

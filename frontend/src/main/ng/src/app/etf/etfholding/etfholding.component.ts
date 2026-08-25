@@ -6,13 +6,15 @@ import { TableModule } from 'primeng/table';
 import { PrimeTemplate } from 'primeng/api';
 import { Skeleton } from 'primeng/skeleton';
 import { Tag } from 'primeng/tag';
+import { Tooltip } from 'primeng/tooltip';
 import { DecimalPipe, CurrencyPipe } from '@angular/common';
+import { TickerLogoComponent } from '../../util/ticker-logo.component';
 
 @Component({
     selector: 'app-etfholding',
     templateUrl: './etfholding.component.html',
     styleUrls: ['./etfholding.component.css'],
-    imports: [Bind, TableModule, PrimeTemplate, Skeleton, Tag, DecimalPipe, CurrencyPipe]
+    imports: [Bind, TableModule, PrimeTemplate, Skeleton, Tag, Tooltip, DecimalPipe, CurrencyPipe, TickerLogoComponent]
 })
 export class EtfholdingComponent implements OnInit {
 

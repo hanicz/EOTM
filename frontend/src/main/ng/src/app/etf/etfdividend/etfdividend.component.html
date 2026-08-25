@@ -45,7 +45,13 @@
             <td>
                 <p-tableCheckbox [value]="dividend"></p-tableCheckbox>
             </td>
-            <td data-label="Stock Name">{{dividend.shortName}}.{{dividend.exchange}}</td>
+            <td data-label="ETF Name">
+                <div class="flex align-items-center">
+                    <app-ticker-logo class="mr-1" [exchange]="dividend.exchange"
+                        [symbol]="dividend.shortName"></app-ticker-logo>
+                    {{dividend.shortName}}.{{dividend.exchange}}
+                </div>
+            </td>
             <td data-label="Amount">{{dividend.amount | currency : dividend.currencyId : 'symbol' : '0.0-2'}}</td>
             <td data-label="Date">{{dividend.dividendDate | date:'mediumDate'}}</td>
             <td>

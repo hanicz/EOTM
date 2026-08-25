@@ -3,6 +3,7 @@ export interface StockWatch {
     stockName: string;
     stockShortName: string;
     liveValue: number;
+    stalePrice?: boolean;
     currencyId: string;
     change: number;
     pchange: number;

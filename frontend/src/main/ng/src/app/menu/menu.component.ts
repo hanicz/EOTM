@@ -26,11 +26,11 @@ export class MenuComponent implements OnInit {
     { label: 'News', icon: 'far fa-newspaper', routerLink: ['/home'] },
     {
       label: 'Portfolio', icon: 'fa-solid fa-briefcase', items: [
-        { label: 'Stock', icon: 'fa-solid fa-arrow-trend-up', routerLink: ['/stock'] },
-        { label: 'Crypto', icon: 'fab fa-bitcoin', routerLink: ['/crypto'] },
+        { label: 'Securities', icon: 'fa-solid fa-building-columns', routerLink: ['/security'] },
         { label: 'ETF', icon: 'fas fa-chart-line', routerLink: ['/etf'] },
+        { label: 'Stock', icon: 'fa-solid fa-arrow-trend-up', routerLink: ['/stock'] },
         { label: 'Forex', icon: 'fa-solid fa-coins', routerLink: ['/forex'] },
-        { label: 'Securities', icon: 'fa-solid fa-building-columns', routerLink: ['/security'] }
+        { label: 'Crypto', icon: 'fab fa-bitcoin', routerLink: ['/crypto'] }
       ]
     },
     { label: 'Alerts', icon: 'fa-solid fa-bell', routerLink: ['/alert'] },

@@ -49,6 +49,17 @@ html {
     min-width: 0;
 }
 
+/* Marks a price the provider had no live quote for, so it fell back to the
+   previous close. Deliberately quiet -- the number is still usable, it is just
+   not current. */
+.stale-price {
+    margin-left: 0.35rem;
+    font-size: 0.75rem;
+    color: var(--p-text-muted-color);
+    vertical-align: middle;
+    cursor: help;
+}
+
 /* Stacked tables.
    Add `table-stack` to a p-table's styleClass and give each <td> a data-label.
    Below md the header row is hidden and every cell becomes its own label/value

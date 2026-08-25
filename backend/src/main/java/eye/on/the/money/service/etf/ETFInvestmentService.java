@@ -16,6 +16,7 @@ import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
+import eye.on.the.money.util.LiveQuote;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVParser;
@@ -47,7 +48,7 @@ public class ETFInvestmentService implements ICSVService {
     private final ModelMapper modelMapper;
     private final ETFPaymentService etfPaymentService;
     public List<ETFInvestmentDTO> getETFInvestments(String userEmail) {
-        return this.etfInvestmentRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToETFInvestmentDTO).collect(Collectors.toList());
+        return this.etfInvestmentRepository.findByUserEmailOrderByTransactionDateDesc(userEmail).stream().map(this::convertToETFInvestmentDTO).collect(Collectors.toList());
     }
 
     private ETFInvestmentDTO convertToETFInvestmentDTO(ETFInvestment etfInvestment) {
@@ -78,8 +79,15 @@ public class ETFInvestmentService implements ICSVService {
                 Optional<ETFInvestmentDTO> etfInvestmentDTO = etfInvestmentDTOList.stream().filter
                         (i -> (i.getShortName() + "." + i.getExchange()).equals(etf.findValue("code").textValue())).findFirst();
                 if (etfInvestmentDTO.isEmpty()) continue;
-                etfInvestmentDTO.get().setLiveValue(etf.findValue("close").doubleValue() * etfInvestmentDTO.get().getQuantity());
+                Optional<LiveQuote.Price> price = LiveQuote.price(etf);
+                if (price.isEmpty()) {
+                    log.warn("No live or previous close for {}, leaving holding without live data",
+                            etf.findValue("code").textValue());
+                    continue;
+                }
+                etfInvestmentDTO.get().setLiveValue(price.get().value() * etfInvestmentDTO.get().getQuantity());
                 etfInvestmentDTO.get().setValueDiff(etfInvestmentDTO.get().getLiveValue() - etfInvestmentDTO.get().getAmount());
+                etfInvestmentDTO.get().setStalePrice(price.get().stale());
             }
         } catch (APIException e) {
             log.error("Unable to fetch live ETF values, returning holdings without live data", e);

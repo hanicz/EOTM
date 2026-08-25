@@ -68,7 +68,13 @@
       <td>
         <p-tableCheckbox [value]="investment"></p-tableCheckbox>
       </td>
-      <td data-label="ETF Name">{{investment.shortName}}.{{investment.exchange}}</td>
+      <td data-label="ETF Name">
+        <div class="flex align-items-center">
+          <app-ticker-logo class="mr-1" [exchange]="investment.exchange"
+            [symbol]="investment.shortName"></app-ticker-logo>
+          {{investment.shortName}}.{{investment.exchange}}
+        </div>
+      </td>
       <td data-label="Type">
         @if (investment.buySell === 'B') {
           <p-tag styleClass="p-mr-2" severity="info" value="BUY"></p-tag>

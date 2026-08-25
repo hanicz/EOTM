@@ -24,6 +24,9 @@ public class Security {
     private String id;
     private String name;
 
+    @Column(unique = true)
+    private String isin;
+
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "security")
     @JsonIgnore
     @ToString.Exclude

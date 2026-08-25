@@ -10,4 +10,8 @@ public interface SecurityRepository extends JpaRepository<Security, String> {
     Optional<Security> findByName(String name);
 
     List<Security> findAllByOrderByNameAsc();
+
+    List<Security> findByIsinIsNull();
+
+    List<Security> findByIsinIsNotNull();
 }

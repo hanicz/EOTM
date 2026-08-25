@@ -64,6 +64,9 @@
         <td data-label="Worth">
           @if (investment.liveValue != null) {
             {{investment.liveValue | currency : investment.currencyId : 'symbol' : '0.0-2'}}
+            @if (investment.stalePrice) {
+              <i class="pi pi-clock stale-price" pTooltip="No live quote right now, valued at the previous close."></i>
+            }
           } @else {
             <span>N/A</span>
           }

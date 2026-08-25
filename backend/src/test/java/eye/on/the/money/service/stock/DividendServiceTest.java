@@ -57,7 +57,7 @@ class DividendServiceTest {
     @Test
     public void getDividends() {
         List<DividendDTO> dividends = this.dividendService.getDividends(this.user.getUsername());
-        List<Dividend> dividendsActual = this.dividendRepository.findByUserEmailOrderByDividendDate("test@test.test");
+        List<Dividend> dividendsActual = this.dividendRepository.findByUserEmailOrderByDividendDateDesc("test@test.test");
 
         Assertions.assertIterableEquals(dividendsActual.stream()
                 .map(this::convertToDividendDTO).collect(Collectors.toList()), dividends);

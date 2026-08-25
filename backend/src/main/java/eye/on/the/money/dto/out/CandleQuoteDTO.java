@@ -3,6 +3,7 @@ package eye.on.the.money.dto.out;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.in.EODCandleQuoteDTO;
+import eye.on.the.money.util.LiveQuote;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,7 +29,7 @@ public class CandleQuoteDTO {
     private Long[] t;
     private Long[] v;
 
-    public static CandleQuoteDTO createFromEODResponse(int size, List<EODCandleQuoteDTO> eodList, JsonNode sameDay) {
+    public static CandleQuoteDTO createFromEODResponse(int size, List<EODCandleQuoteDTO> eodList, JsonNode liveQuote) {
         Double[] c = new Double[size];
         Double[] o = new Double[size];
         Double[] l = new Double[size];
@@ -45,13 +46,15 @@ public class CandleQuoteDTO {
             t[i] = eodList.get(i).getDate().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
         }
 
-        if (sameDay != null) {
-            LocalDate date = Instant.ofEpochSecond(sameDay.findValue("timestamp").longValue()).atZone(ZoneId.systemDefault()).toLocalDate();
-            c[eodList.size()] = sameDay.findValue("close").doubleValue();
-            o[eodList.size()] = sameDay.findValue("open").doubleValue();
-            l[eodList.size()] = sameDay.findValue("low").doubleValue();
-            h[eodList.size()] = sameDay.findValue("high").doubleValue();
-            v[eodList.size()] = sameDay.findValue("volume").longValue();
+        if (liveQuote != null) {
+            double close = LiveQuote.price(liveQuote).orElseThrow().value();
+            LocalDate date = Instant.ofEpochSecond((long) LiveQuote.numericOrZero(liveQuote, "timestamp"))
+                    .atZone(ZoneId.systemDefault()).toLocalDate();
+            c[eodList.size()] = close;
+            o[eodList.size()] = LiveQuote.numeric(liveQuote, "open").orElse(close);
+            l[eodList.size()] = LiveQuote.numeric(liveQuote, "low").orElse(close);
+            h[eodList.size()] = LiveQuote.numeric(liveQuote, "high").orElse(close);
+            v[eodList.size()] = (long) LiveQuote.numericOrZero(liveQuote, "volume");
             t[eodList.size()] = date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
         }
 

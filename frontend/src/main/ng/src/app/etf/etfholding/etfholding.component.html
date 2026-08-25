@@ -45,12 +45,21 @@
     </ng-template>
     <ng-template pTemplate="body" let-investment>
       <tr>
-        <td data-label="ETF Name">{{investment.shortName}}.{{investment.exchange}}</td>
+        <td data-label="ETF Name">
+          <div class="flex align-items-center">
+            <app-ticker-logo class="mr-1" [exchange]="investment.exchange"
+              [symbol]="investment.shortName"></app-ticker-logo>
+            {{investment.shortName}}.{{investment.exchange}}
+          </div>
+        </td>
         <td data-label="Quantity">{{investment.quantity}}</td>
         <td data-label="Spent">{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}</td>
         <td data-label="Worth">
           @if (investment.liveValue != null) {
             {{investment.liveValue | currency : investment.currencyId : 'symbol' : '0.0-2'}}
+            @if (investment.stalePrice) {
+              <i class="pi pi-clock stale-price" pTooltip="No live quote right now, valued at the previous close."></i>
+            }
           } @else {
             <span>N/A</span>
           }

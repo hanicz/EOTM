@@ -34,6 +34,7 @@ public class ForexTransactionDTO implements CSVHelper, Serializable {
     private Double changeRate;
     private Double liveValue;
     private Double liveChangeRate;
+    private Boolean stalePrice;
     private Double valueDiff;
     private String fromCurrencyId;
     private String toCurrencyId;

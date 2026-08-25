@@ -66,6 +66,12 @@
     margin-top: 2px;
 }
 
+.metric-note {
+    font-size: 11px;
+    margin-top: 2px;
+    color: #888780;
+}
+
 .metric-change.positive {
     color: #3b6d11;
 }

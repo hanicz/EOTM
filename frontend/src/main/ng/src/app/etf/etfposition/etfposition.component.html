@@ -10,7 +10,13 @@
   </ng-template>
   <ng-template pTemplate="body" let-investment>
     <tr>
-      <td data-label="Stock Name">{{investment.shortName}}.{{investment.exchange}}</td>
+      <td data-label="ETF Name">
+        <div class="flex align-items-center">
+          <app-ticker-logo class="mr-1" [exchange]="investment.exchange"
+            [symbol]="investment.shortName"></app-ticker-logo>
+          {{investment.shortName}}.{{investment.exchange}}
+        </div>
+      </td>
       <td data-label="Total Spent">
         @if (investment.quantity > 0) {
           <span>{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}</span>

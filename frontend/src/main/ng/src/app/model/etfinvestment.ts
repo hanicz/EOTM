@@ -8,6 +8,7 @@ export interface ETFInvestment {
     amount: number;
     currencyId: string;
     liveValue?: number;
+    stalePrice?: boolean;
     valueDiff?: number;
     fee: number;
     eodDate: Date;

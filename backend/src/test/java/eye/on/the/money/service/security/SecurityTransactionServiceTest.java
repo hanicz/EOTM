@@ -39,6 +39,8 @@ class SecurityTransactionServiceTest {
     private ModelMapper modelMapper;
     @Mock
     private SecurityService securityService;
+    @Mock
+    private SecurityRateService securityRateService;
 
     @InjectMocks
     private SecurityTransactionService securityTransactionService;

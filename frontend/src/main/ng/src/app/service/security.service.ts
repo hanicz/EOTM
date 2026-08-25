@@ -40,6 +40,13 @@ export class SecurityService {
     });
   };
 
+  refreshRates() {
+    const url = `${this.securityUrl}/rate/refresh`;
+    return this.http.post(url, null, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  };
+
   getTransactions() {
     return this.http.get<SecurityTransaction[]>(this.transactionUrl, {
       headers: this.helper.getHeadersWithToken()

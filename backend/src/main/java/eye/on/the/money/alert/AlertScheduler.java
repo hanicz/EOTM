@@ -15,10 +15,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import eye.on.the.money.util.LiveQuote;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -92,8 +95,18 @@ public class AlertScheduler {
         stockAlertList.parallelStream().forEach(alert -> {
             String ticker = alert.getStock().getShortName() + "." + alert.getStock().getExchange();
             alert.setSymbolOrTicker(ticker);
-            alert.setActualChange(stockMap.get(ticker).findValue("change_p").asDouble());
-            alert.setActualValue(stockMap.get(ticker).findValue("close").asDouble());
+            JsonNode stock = stockMap.get(ticker);
+            if (stock == null) {
+                log.warn("No quote returned for {}, skipping alert check", ticker);
+                return;
+            }
+            Optional<LiveQuote.Price> price = LiveQuote.price(stock);
+            if (price.isEmpty()) {
+                log.warn("No live or previous close for {}, skipping alert check", ticker);
+                return;
+            }
+            alert.setActualChange(LiveQuote.numericOrZero(stock, "change_p"));
+            alert.setActualValue(price.get().value());
             this.evaluateAlert(alert);
         });
         log.trace("Exit");

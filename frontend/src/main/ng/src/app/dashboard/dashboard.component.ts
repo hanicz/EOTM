@@ -68,7 +68,6 @@ export class DashboardComponent implements OnInit {
   forexTotal: number = 0;
   forexChangePct: number = 0;
   securityTotal: number = 0;
-  securityChangePct: number = 0;
 
   netWorth: number = 0;
   netWorthChangePct: number = 0;
@@ -155,7 +154,6 @@ export class DashboardComponent implements OnInit {
     this.forexTotal = this.worthOf(netWorth, 'Forex');
     this.forexChangePct = this.changeOf(netWorth, 'Forex');
     this.securityTotal = this.worthOf(netWorth, 'Securities');
-    this.securityChangePct = this.changeOf(netWorth, 'Securities');
 
     this.netWorth = netWorth.totalWorth;
     this.netWorthChangePct = netWorth.totalChangePct;

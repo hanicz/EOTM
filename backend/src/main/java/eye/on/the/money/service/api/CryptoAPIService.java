@@ -18,7 +18,7 @@ public class CryptoAPIService extends APIService {
 
     private final static String API = "coingecko";
 
-    private final static String CRYPTO_PATH = "/simple/price?ids={1}&vs_currencies={2}&include_24hr_change={3}&token={0}";
+    private final static String CRYPTO_PATH = "/simple/price?ids={0}&vs_currencies={1}&include_24hr_change={2}";
 
     @Autowired
     public CryptoAPIService(CredentialRepository credentialRepository, ConfigRepository configRepository,
@@ -29,8 +29,8 @@ public class CryptoAPIService extends APIService {
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public JsonNode getLiveValueForCoins(String currency, String ids) {
         log.trace("Enter");
-        String url = this.createURL(CryptoAPIService.API,
-                CRYPTO_PATH, this.encodeQuery(ids), this.encodeQuery(currency), Boolean.TRUE.toString());
+        String url = this.getApiUrl(CryptoAPIService.API) + this.expandTemplate(CryptoAPIService.CRYPTO_PATH,
+                new Object[]{this.encodeQuery(ids), this.encodeQuery(currency), Boolean.TRUE.toString()});
         ResponseEntity<?> response = this.callGetAPI(url, String.class);
         return this.getJsonNodeFromBody((String) response.getBody());
     }

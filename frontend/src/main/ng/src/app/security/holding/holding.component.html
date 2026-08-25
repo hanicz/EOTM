@@ -6,6 +6,9 @@
         <th>Quantity</th>
         <th>Spent</th>
         <th>Average</th>
+        <th>Rate</th>
+        <th>Next Payment</th>
+        <th>Next Payment Amount</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body">
@@ -15,6 +18,9 @@
           <td data-label="Quantity"><p-skeleton></p-skeleton></td>
           <td data-label="Spent"><p-skeleton></p-skeleton></td>
           <td data-label="Average"><p-skeleton></p-skeleton></td>
+          <td data-label="Rate"><p-skeleton></p-skeleton></td>
+          <td data-label="Next Payment"><p-skeleton></p-skeleton></td>
+          <td data-label="Next Payment Amount"><p-skeleton></p-skeleton></td>
         </tr>
       }
     </ng-template>
@@ -29,6 +35,9 @@
         <th>Quantity</th>
         <th>Spent</th>
         <th>Average</th>
+        <th>Rate</th>
+        <th>Next Payment</th>
+        <th>Next Payment Amount</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-transaction>
@@ -37,7 +46,70 @@
         <td data-label="Quantity">{{transaction.quantity | number : '0.0-2'}} {{transaction.currencyId}}</td>
         <td data-label="Spent">{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</td>
         <td data-label="Average">{{(transaction.amount / transaction.quantity | number : '0.0-4') + '%'}}</td>
+        <td data-label="Rate">
+          @if (transaction.rate != null) {
+            <p-tag styleClass="p-mr-2" [severity]="transaction.zeroCoupon ? 'warn' : 'info'"
+              value="{{(transaction.rate | number : '0.2-2') + '%'}}"
+              [pTooltip]="transaction.zeroCoupon ? 'Discount bill: return over the whole holding period, not an annual rate.' : 'Annual rate for the current interest period.'"></p-tag>
+          } @else {
+            <span class="text-color-secondary">-</span>
+          }
+        </td>
+        <td data-label="Next Payment">
+          @if (transaction.nextPaymentDate) {
+            <p-tag styleClass="p-mr-2" [severity]="isPaymentSoon(transaction) ? 'success' : 'secondary'"
+              value="{{transaction.nextPaymentDate | date : 'yyyy-MM-dd'}}"></p-tag>
+          } @else {
+            <span class="text-color-secondary">-</span>
+          }
+        </td>
+        <td data-label="Next Payment Amount">
+          @if (transaction.nextPaymentAmount != null) {
+            <b>{{transaction.nextPaymentAmount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</b>
+          } @else {
+            <span class="text-color-secondary">-</span>
+          }
+        </td>
       </tr>
     </ng-template>
   </p-table>
+
+  @if (upcomingPayments.length > 0) {
+    <p-divider></p-divider>
+    <div class="flex flex-row flex-wrap align-items-center mb-3 upcoming-header">
+      <h3 class="mt-0 mb-0 mr-4">Upcoming payments</h3>
+      @for (total of paymentTotals; track total.currencyId) {
+        <p-tag styleClass="p-mr-2 mr-2" severity="success"
+          value="{{total.total | currency : total.currencyId : 'symbol' : '0.0-2'}}"
+          pTooltip="Total of the next payment on every holding in this currency."></p-tag>
+      }
+    </div>
+    <p-table [value]="upcomingPayments" styleClass="p-datatable-striped p-datatable-sm table-stack">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Date</th>
+          <th>Due In</th>
+          <th>Security Name</th>
+          <th>Amount</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-payment>
+        <tr [class.payment-soon]="payment.daysUntil <= soonInDays">
+          <td data-label="Date">{{payment.nextPaymentDate | date : 'yyyy-MM-dd'}}</td>
+          <td data-label="Due In">
+            <p-tag styleClass="p-mr-2" [severity]="payment.daysUntil <= soonInDays ? 'success' : 'secondary'"
+              value="{{dueInLabel(payment.daysUntil)}}"></p-tag>
+          </td>
+          <td data-label="Security Name">
+            {{payment.securityName}}
+            @if (payment.zeroCoupon) {
+              <p-tag styleClass="p-mr-2 ml-2" severity="warn" value="redemption"
+                pTooltip="Discount bill maturing: the full nominal is repaid, there is no coupon."></p-tag>
+            }
+          </td>
+          <td data-label="Amount"><b>{{payment.nextPaymentAmount | currency : payment.currencyId : 'symbol' : '0.0-2'}}</b></td>
+        </tr>
+      </ng-template>
+    </p-table>
+  }
 }

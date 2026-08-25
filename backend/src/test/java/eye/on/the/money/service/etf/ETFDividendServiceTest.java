@@ -50,7 +50,7 @@ class ETFDividendServiceTest {
     @Test
     public void getDividends() {
         List<ETFDividendDTO> dividends = this.etfDividendService.getDividends(this.user.getUsername());
-        List<ETFDividend> dividendsActual = this.etfDividendRepository.findByUserEmailOrderByDividendDate("test@test.test");
+        List<ETFDividend> dividendsActual = this.etfDividendRepository.findByUserEmailOrderByDividendDateDesc("test@test.test");
         Assertions.assertIterableEquals(dividendsActual.stream()
                 .map(this::convertToETFDividendDTO).collect(Collectors.toList()), dividends);
     }

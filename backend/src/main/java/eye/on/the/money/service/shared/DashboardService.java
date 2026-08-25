@@ -9,9 +9,12 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import eye.on.the.money.util.LiveQuote;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -53,10 +56,14 @@ public class DashboardService {
         JsonNode responseBody = this.eodAPIService.getLiveForexValue(tickers);
         for (JsonNode forex : responseBody) {
             String code = forex.findValue("code").textValue();
-            double close = forex.findValue("close").doubleValue();
+            Optional<LiveQuote.Price> rate = LiveQuote.price(forex);
+            if (rate.isEmpty()) {
+                log.warn("No live or previous close for {}, leaving it unconverted", code);
+                continue;
+            }
             for (String currency : targetCurrencies) {
                 if (code.startsWith(BASE_CURRENCY + currency)) {
-                    rates.put(currency, close);
+                    rates.put(currency, rate.get().value());
                     break;
                 }
             }

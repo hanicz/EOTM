@@ -26,6 +26,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import eye.on.the.money.util.LiveQuote;
+
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -81,9 +83,12 @@ public class WatchListService {
                     (s -> (s.getStockShortName() + "." + s.getStockExchange()).equals(stock.findValue("code").textValue())).findFirst();
             if (stockWatchDTO.isEmpty()) continue;
 
-            stockWatchDTO.get().setLiveValue(stock.findValue("close").doubleValue());
-            stockWatchDTO.get().setChange(stock.findValue("change").doubleValue());
-            stockWatchDTO.get().setPChange(stock.findValue("change_p").doubleValue());
+            LiveQuote.price(stock).ifPresent(price -> {
+                stockWatchDTO.get().setLiveValue(price.value());
+                stockWatchDTO.get().setStalePrice(price.stale());
+            });
+            stockWatchDTO.get().setChange(LiveQuote.numericOrZero(stock, "change"));
+            stockWatchDTO.get().setPChange(LiveQuote.numericOrZero(stock, "change_p"));
         }
 
         return stockList;
@@ -101,9 +106,12 @@ public class WatchListService {
             Optional<ForexWatchDTO> forexWatchDTO = forexList.stream().filter
                     (f -> (f.getFromCurrencyId() + f.getToCurrencyId() + ".FOREX").equals(forex.findValue("code").textValue())).findFirst();
             if (forexWatchDTO.isEmpty()) continue;
-            forexWatchDTO.get().setLiveValue(forex.findValue("close").doubleValue());
-            forexWatchDTO.get().setChange(forex.findValue("change").doubleValue() * -1);
-            forexWatchDTO.get().setPChange(forex.findValue("change_p").doubleValue() * -1);
+            LiveQuote.price(forex).ifPresent(price -> {
+                forexWatchDTO.get().setLiveValue(price.value());
+                forexWatchDTO.get().setStalePrice(price.stale());
+            });
+            forexWatchDTO.get().setChange(LiveQuote.numericOrZero(forex, "change") * -1);
+            forexWatchDTO.get().setPChange(LiveQuote.numericOrZero(forex, "change_p") * -1);
         }
 
         return forexList;

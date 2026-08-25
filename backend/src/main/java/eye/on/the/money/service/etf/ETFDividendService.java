@@ -39,7 +39,7 @@ public class ETFDividendService implements ICSVService {
     private final UserService userService;
     private final ModelMapper modelMapper;
     public List<ETFDividendDTO> getDividends(String userEmail) {
-        return this.etfDividendRepository.findByUserEmailOrderByDividendDate(userEmail).stream().map(this::convertToETFDividendDTO).collect(Collectors.toList());
+        return this.etfDividendRepository.findByUserEmailOrderByDividendDateDesc(userEmail).stream().map(this::convertToETFDividendDTO).collect(Collectors.toList());
     }
 
     private ETFDividendDTO convertToETFDividendDTO(ETFDividend dividend) {

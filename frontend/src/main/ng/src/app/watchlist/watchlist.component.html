@@ -47,7 +47,10 @@
                   <span class="quote-symbol">{{stockWatch.stockShortName}}</span>
                 </div>
                 <span class="quote-price">
-                  {{stockWatch.liveValue | currency : stockWatch.currencyId : 'symbol' : '0.0-2'}}
+                  {{stockWatch.liveValue != null ? (stockWatch.liveValue | currency : stockWatch.currencyId : 'symbol' : '0.0-2') : 'N/A'}}
+                  @if (stockWatch.stalePrice) {
+                    <i class="pi pi-clock stale-price" pTooltip="No live quote right now, showing the previous close."></i>
+                  }
                 </span>
                 <span class="quote-name">{{stockWatch.stockName}}</span>
                 <span class="quote-delta">
@@ -152,7 +155,10 @@
                   <span class="quote-symbol">{{forexWatch.fromCurrencyId}}/{{forexWatch.toCurrencyId}}</span>
                 </div>
                 <span class="quote-price">
-                  {{forexWatch.liveValue | currency : forexWatch.toCurrencyId : 'symbol' : '0.0-4'}}
+                  {{forexWatch.liveValue != null ? (forexWatch.liveValue | currency : forexWatch.toCurrencyId : 'symbol' : '0.0-4') : 'N/A'}}
+                  @if (forexWatch.stalePrice) {
+                    <i class="pi pi-clock stale-price" pTooltip="No live quote right now, showing the previous close."></i>
+                  }
                 </span>
                 <span class="quote-name">1 {{forexWatch.fromCurrencyId}} buys</span>
                 <span class="quote-delta">

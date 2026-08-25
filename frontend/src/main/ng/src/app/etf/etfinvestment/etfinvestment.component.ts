@@ -16,12 +16,13 @@ import { FormsModule } from '@angular/forms';
 import { Tag } from 'primeng/tag';
 import { Dialog } from 'primeng/dialog';
 import { CurrencyPipe, DatePipe } from '@angular/common';
+import { TickerLogoComponent } from '../../util/ticker-logo.component';
 
 @Component({
     selector: 'app-etfinvestment',
     templateUrl: './etfinvestment.component.html',
     styleUrls: ['./etfinvestment.component.css'],
-    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Tag, Dialog, CurrencyPipe, DatePipe, Toast]
+    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Tag, Dialog, CurrencyPipe, DatePipe, Toast, TickerLogoComponent]
 })
 export class EtfinvestmentComponent implements OnInit {
 

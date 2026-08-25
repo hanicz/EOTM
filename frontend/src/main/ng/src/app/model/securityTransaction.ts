@@ -7,4 +7,8 @@ export interface SecurityTransaction {
     securityName: string;
     amount: number;
     currencyId: string;
+    rate?: number;
+    nextPaymentDate?: Date;
+    nextPaymentAmount?: number;
+    zeroCoupon?: boolean;
 }

@@ -13,6 +13,7 @@ import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
+import eye.on.the.money.util.LiveQuote;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVParser;
@@ -118,8 +119,15 @@ public class ForexTransactionService implements ICSVService {
                 Optional<ForexTransactionDTO> forexTransactionDTO = forexTransactions.stream().filter
                         (f -> (f.getToCurrencyId() + f.getFromCurrencyId() + ".FOREX").equals(forex.findValue("code").textValue())).findFirst();
                 if (forexTransactionDTO.isEmpty()) continue;
-                forexTransactionDTO.get().setLiveValue(forex.findValue("close").doubleValue() * forexTransactionDTO.get().getToAmount());
-                forexTransactionDTO.get().setLiveChangeRate(forex.findValue("close").doubleValue());
+                Optional<LiveQuote.Price> rate = LiveQuote.price(forex);
+                if (rate.isEmpty()) {
+                    log.warn("No live or previous close for {}, leaving holding without live data",
+                            forex.findValue("code").textValue());
+                    continue;
+                }
+                forexTransactionDTO.get().setLiveValue(rate.get().value() * forexTransactionDTO.get().getToAmount());
+                forexTransactionDTO.get().setLiveChangeRate(rate.get().value());
+                forexTransactionDTO.get().setStalePrice(rate.get().stale());
                 forexTransactionDTO.get().setValueDiff(forexTransactionDTO.get().getLiveValue() - forexTransactionDTO.get().getFromAmount());
             }
         } catch (APIException e) {

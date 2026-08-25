@@ -1,0 +1,14 @@
+.upcoming-header h3 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.payment-soon > td {
+  background: var(--p-content-hover-background);
+}
+
+@media screen and (min-width: 768px) {
+  .payment-soon > td:first-child {
+    box-shadow: inset 3px 0 0 0 var(--p-green-500);
+  }
+}

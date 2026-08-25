@@ -18,6 +18,7 @@ import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
+import eye.on.the.money.util.LiveQuote;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVParser;
@@ -99,12 +100,17 @@ public class InvestmentService implements ICSVService {
 
         for (JsonNode stock : responseBody) {
             String code = stock.findValue("code").textValue();
-            double close = stock.findValue("close").doubleValue();
+            Optional<LiveQuote.Price> price = LiveQuote.price(stock);
+            if (price.isEmpty()) {
+                log.warn("No live or previous close for {}, leaving holding without live data", code);
+                continue;
+            }
             investmentDTOList.stream()
                     .filter(i -> (i.getShortName() + "." + i.getExchange()).equals(code))
                     .forEach(i -> {
-                        i.setLiveValue(close * i.getQuantity());
+                        i.setLiveValue(price.get().value() * i.getQuantity());
                         i.setValueDiff(i.getLiveValue() - i.getAmount());
+                        i.setStalePrice(price.get().stale());
                     });
         }
 

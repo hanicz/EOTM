@@ -18,6 +18,7 @@ import { NetWorth } from '../model/networth';
 import { StockAlert } from '../model/stockalert';
 import { CryptoAlert } from '../model/cryptoalert';
 import { AlertTypePipe } from '../util/pipe';
+import { MarketStatusComponent } from './market-status/market-status.component';
 
 interface AssetSlice {
   label: string;
@@ -50,7 +51,7 @@ const ASSET_COLOURS: { [assetClass: string]: string } = {
     selector: 'app-dashboard',
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.css'],
-    imports: [MenuComponent, Bind, Panel, ButtonDirective, Ripple, Tooltip, PrimeTemplate, Skeleton, Select, FormsModule, DecimalPipe, CurrencyPipe, AlertTypePipe]
+    imports: [MenuComponent, Bind, Panel, ButtonDirective, Ripple, Tooltip, PrimeTemplate, Skeleton, Select, FormsModule, DecimalPipe, CurrencyPipe, AlertTypePipe, MarketStatusComponent]
 })
 export class DashboardComponent implements OnInit {
 

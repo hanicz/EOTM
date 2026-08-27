@@ -82,7 +82,7 @@
 
 .detail-grid {
     display: grid;
-    grid-template-columns: 1.3fr 1fr;
+    grid-template-columns: 1.3fr 1fr 1fr;
     gap: 16px;
 }
 
@@ -237,6 +237,11 @@
 @media (max-width: 1199px) {
     .metric-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    /* Three panels are too tight below desktop, so Markets wraps onto its own row. */
+    .detail-grid {
+        grid-template-columns: 1.3fr 1fr;
     }
 }
 

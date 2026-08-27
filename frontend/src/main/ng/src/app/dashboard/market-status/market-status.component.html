@@ -1,0 +1,36 @@
+@if (loading()) {
+  @for (row of skeletonRows; track $index) {
+    <div class="market-row">
+      <p-skeleton width="4rem" height="0.9rem"></p-skeleton>
+      <p-skeleton width="5rem" height="0.9rem"></p-skeleton>
+    </div>
+  }
+} @else if (rows().length === 0) {
+  <div class="empty-state">No exchanges configured</div>
+} @else {
+  @for (row of rows(); track row.code) {
+    <div class="market-row">
+      <div class="market-identity">
+        <span class="market-code">{{row.code}}</span>
+        <span class="cell-sub">{{row.hours}} &middot; {{row.localTime}} local</span>
+      </div>
+      <div class="market-state">
+        <span class="state-chip" [class.state-buy]="row.status.open"
+          [class.state-neutral]="!row.status.open">{{row.status.open ? 'Open' : 'Closed'}}</span>
+        <span class="cell-sub">{{row.status.detail}}</span>
+      </div>
+    </div>
+  }
+  @if (upcoming().length > 0) {
+    <div class="market-upcoming">
+      <div class="cell-sub">Next holidays</div>
+      @for (item of upcoming(); track item.code + item.holiday.holidayDate) {
+        <div class="market-holiday">
+          <span class="market-code">{{item.code}}</span>
+          <span class="market-holiday-name">{{item.holiday.name}}</span>
+          <span class="cell-sub">{{item.holiday.holidayDate | date : 'MMM d'}}</span>
+        </div>
+      }
+    </div>
+  }
+}

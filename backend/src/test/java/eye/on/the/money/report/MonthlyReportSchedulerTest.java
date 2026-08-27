@@ -28,6 +28,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -61,7 +62,7 @@ class MonthlyReportSchedulerTest {
     @BeforeEach
     public void setUpEach() {
         when(this.emailService.isEnabled()).thenReturn(true);
-        when(this.monthlyReportService.build(anyString(), any(), anyString()))
+        when(this.monthlyReportService.build(anyLong(), any(), anyString()))
                 .thenReturn(MonthlyReportDTO.builder().year(2023).month(9).currency("EUR").build());
     }
 
@@ -127,7 +128,7 @@ class MonthlyReportSchedulerTest {
         this.reportSubscriptionRepository.save(ReportSubscription.builder()
                 .user(other).enabled(true).currency("EUR").recipients(new ArrayList<>()).build());
 
-        when(this.monthlyReportService.build(eq(USER), any(), anyString()))
+        when(this.monthlyReportService.build(eq(this.userRepository.findByEmail(USER).getId()), any(), anyString()))
                 .thenThrow(new APIException("EODHD is down"));
 
         this.monthlyReportScheduler.sendReportsFor(PERIOD);

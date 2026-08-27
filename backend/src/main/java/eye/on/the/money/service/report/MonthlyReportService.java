@@ -45,21 +45,21 @@ public class MonthlyReportService {
     private final ETFDividendService etfDividendService;
     private final InterestService interestService;
 
-    public MonthlyReportDTO build(String userEmail, YearMonth period, String currency) {
+    public MonthlyReportDTO build(Long userId, YearMonth period, String currency) {
         log.trace("Enter");
         LocalDate from = period.atDay(1);
         LocalDate to = period.atEndOfMonth();
 
-        List<DividendDTO> dividends = this.dividendService.getDividendsBetween(userEmail, from, to);
-        List<ETFDividendDTO> etfDividends = this.etfDividendService.getDividendsBetween(userEmail, from, to);
-        List<InterestDTO> interest = this.interestService.getInterestBetween(userEmail, from, to);
+        List<DividendDTO> dividends = this.dividendService.getDividendsBetween(userId, from, to);
+        List<ETFDividendDTO> etfDividends = this.etfDividendService.getDividendsBetween(userId, from, to);
+        List<InterestDTO> interest = this.interestService.getInterestBetween(userId, from, to);
 
         MonthlyReportDTO.ActivitySection activity = new MonthlyReportDTO.ActivitySection(
-                this.investmentService.getInvestmentsBetween(userEmail, from, to),
-                this.etfInvestmentService.getETFInvestmentsBetween(userEmail, from, to),
-                this.transactionService.getTransactionsBetween(userEmail, from, to),
-                this.forexTransactionService.getForexTransactionsBetween(userEmail, from, to),
-                this.securityTransactionService.getTransactionsBetween(userEmail, from, to),
+                this.investmentService.getInvestmentsBetween(userId, from, to),
+                this.etfInvestmentService.getETFInvestmentsBetween(userId, from, to),
+                this.transactionService.getTransactionsBetween(userId, from, to),
+                this.forexTransactionService.getForexTransactionsBetween(userId, from, to),
+                this.securityTransactionService.getTransactionsBetween(userId, from, to),
                 dividends,
                 etfDividends,
                 interest,
@@ -70,9 +70,9 @@ public class MonthlyReportService {
                 .year(period.getYear())
                 .month(period.getMonthValue())
                 .currency(currency)
-                .netWorth(this.netWorthService.getNetWorth(userEmail, currency, true))
+                .netWorth(this.netWorthService.getNetWorth(userId, currency, true))
                 .activity(activity)
-                .cashFlow(this.bankTransactionService.getCashFlowBetween(userEmail, from, to))
+                .cashFlow(this.bankTransactionService.getCashFlowBetween(userId, from, to))
                 .build();
 
         log.trace("Exit");

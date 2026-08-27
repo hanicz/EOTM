@@ -54,13 +54,13 @@ class ForexTransactionServiceTest {
     @BeforeEach
     public void init() {
         this.user = this.userRepository.findByEmail("test@test.test");
-        when(this.userService.loadUserByEmail(this.user.getUsername())).thenReturn(this.user);
+        when(this.userService.getReference(this.user.getId())).thenReturn(this.user);
     }
 
 
     @Test
     public void getAllForexHoldingsWithoutTransactions() {
-        List<ForexTransactionDTO> result = this.forexTransactionService.getAllForexHoldings("nobody@test.test");
+        List<ForexTransactionDTO> result = this.forexTransactionService.getAllForexHoldings(-1L);
 
         Assertions.assertTrue(result.isEmpty());
         verifyNoInteractions(this.eodapiService);
@@ -68,16 +68,16 @@ class ForexTransactionServiceTest {
 
     @Test
     public void refreshAllForexHoldingsMatchesGetAllForexHoldings() {
-        List<ForexTransactionDTO> cached = this.forexTransactionService.getAllForexHoldings("nobody@test.test");
-        List<ForexTransactionDTO> refreshed = this.forexTransactionService.refreshAllForexHoldings("nobody@test.test");
+        List<ForexTransactionDTO> cached = this.forexTransactionService.getAllForexHoldings(-1L);
+        List<ForexTransactionDTO> refreshed = this.forexTransactionService.refreshAllForexHoldings(-1L);
 
         Assertions.assertIterableEquals(cached, refreshed);
     }
 
     @Test
     public void getForexTransactionsByUserId() {
-        List<ForexTransactionDTO> result = this.forexTransactionService.getForexTransactionsByUserId(this.user.getUsername());
-        List<ForexTransaction> actual = this.forexTransactionRepository.findByUserEmailOrderByTransactionDate(this.user.getUsername());
+        List<ForexTransactionDTO> result = this.forexTransactionService.getForexTransactionsByUserId(this.user.getId());
+        List<ForexTransaction> actual = this.forexTransactionRepository.findByUserIdOrderByTransactionDate(this.user.getId());
 
         Assertions.assertIterableEquals(actual.stream().map(this::convertToForexTransactionDTO).collect(Collectors.toList()), result);
     }
@@ -86,7 +86,7 @@ class ForexTransactionServiceTest {
     public void createForexTransactionBuy() {
         ForexTransactionDTO ftDTO = this.getFTDTO();
 
-        ForexTransactionDTO result = this.forexTransactionService.createForexTransaction(ftDTO, this.user.getUsername());
+        ForexTransactionDTO result = this.forexTransactionService.createForexTransaction(ftDTO, this.user.getId());
 
         Assertions.assertAll("Assert all values",
                 () -> Assertions.assertNotNull(result.getForexTransactionId()),
@@ -105,7 +105,7 @@ class ForexTransactionServiceTest {
         ForexTransactionDTO ftDTO = this.getFTDTO();
         ftDTO.setBuySell("S");
 
-        ForexTransactionDTO result = this.forexTransactionService.createForexTransaction(ftDTO, this.user.getUsername());
+        ForexTransactionDTO result = this.forexTransactionService.createForexTransaction(ftDTO, this.user.getId());
 
         Assertions.assertAll("Assert all values",
                 () -> Assertions.assertNotNull(result.getForexTransactionId()),
@@ -125,7 +125,7 @@ class ForexTransactionServiceTest {
         ftDTO.setFromCurrencyId("NOT_EXISTS");
 
         Assertions.assertThrows(NoSuchElementException.class,
-                () -> this.forexTransactionService.createForexTransaction(ftDTO, this.user.getUsername()));
+                () -> this.forexTransactionService.createForexTransaction(ftDTO, this.user.getId()));
     }
 
     @Test
@@ -134,7 +134,7 @@ class ForexTransactionServiceTest {
         ftDTO.setToCurrencyId("NOT_EXISTS");
 
         Assertions.assertThrows(NoSuchElementException.class,
-                () -> this.forexTransactionService.createForexTransaction(ftDTO, this.user.getUsername()));
+                () -> this.forexTransactionService.createForexTransaction(ftDTO, this.user.getId()));
     }
 
     private ForexTransactionDTO convertToForexTransactionDTO(ForexTransaction transaction) {

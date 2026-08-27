@@ -50,8 +50,8 @@ public class WatchListService {
     private final ModelMapper modelMapper;
     private final StockService stockService;
 
-    public List<CryptoWatchDTO> getCryptoWatchlistByUserId(String userEmail, String currency) {
-        List<CryptoWatchDTO> cryptoList = this.cryptoWatchRepository.findByUserEmailOrderByCoin_Symbol(userEmail).stream()
+    public List<CryptoWatchDTO> getCryptoWatchlistByUserId(Long userId, String currency) {
+        List<CryptoWatchDTO> cryptoList = this.cryptoWatchRepository.findByUserIdOrderByCoin_Symbol(userId).stream()
                 .map(this::convertToCryptoWatchDTO).collect(Collectors.toList());
         if (cryptoList.isEmpty()) return cryptoList;
 
@@ -66,8 +66,8 @@ public class WatchListService {
         return cryptoList;
     }
 
-    public List<StockWatchDTO> getStockWatchlistByUserId(String userEmail) {
-        List<StockWatchDTO> stockList = this.stockWatchRepository.findByUserEmailOrderByStockShortName(userEmail).stream()
+    public List<StockWatchDTO> getStockWatchlistByUserId(Long userId) {
+        List<StockWatchDTO> stockList = this.stockWatchRepository.findByUserIdOrderByStockShortName(userId).stream()
                 .map(this::convertToStockWatchDTO).collect(Collectors.toList());
         if (stockList.isEmpty()) return stockList;
 
@@ -95,8 +95,8 @@ public class WatchListService {
         return stockList;
     }
 
-    public List<ForexWatchDTO> getForexWatchlistByUserId(String userEmail) {
-        List<ForexWatchDTO> forexList = this.forexWatchRepository.findByUserEmailOrderByFromCurrencyAscToCurrencyAsc(userEmail).stream()
+    public List<ForexWatchDTO> getForexWatchlistByUserId(Long userId) {
+        List<ForexWatchDTO> forexList = this.forexWatchRepository.findByUserIdOrderByFromCurrencyAscToCurrencyAsc(userId).stream()
                 .map(this::convertToForexDTO).collect(Collectors.toList());
         if (forexList.isEmpty()) return forexList;
 
@@ -119,50 +119,50 @@ public class WatchListService {
     }
 
     @Transactional
-    public void deleteStockWatchById(String userEmail, Long id) {
-        this.stockWatchRepository.deleteByIdAndUserEmail(id, userEmail);
+    public void deleteStockWatchById(Long userId, Long id) {
+        this.stockWatchRepository.deleteByIdAndUserId(id, userId);
     }
 
     @Transactional
-    public void deleteCryptoWatchById(String userEmail, Long id) {
-        this.cryptoWatchRepository.deleteByIdAndUserEmail(id, userEmail);
+    public void deleteCryptoWatchById(Long userId, Long id) {
+        this.cryptoWatchRepository.deleteByIdAndUserId(id, userId);
     }
 
     @Transactional
-    public void deleteForexWatchById(String userEmail, Long id) {
-        this.forexWatchRepository.deleteByIdAndUserEmail(id, userEmail);
+    public void deleteForexWatchById(Long userId, Long id) {
+        this.forexWatchRepository.deleteByIdAndUserId(id, userId);
     }
 
     @Transactional
-    public StockWatchDTO createNewStockWatch(String userEmail, Stock wStock) {
+    public StockWatchDTO createNewStockWatch(Long userId, Stock wStock) {
         Stock stock = this.stockService.getOrCreateStock(wStock.getShortName(), wStock.getExchange(), wStock.getName());
-        User user = this.userService.loadUserByEmail(userEmail);
+        User user = this.userService.getReference(userId);
 
-        TickerWatch tickerWatch = this.stockWatchRepository.findByUserEmailAndStockId(userEmail, stock.getId())
+        TickerWatch tickerWatch = this.stockWatchRepository.findByUserIdAndStockId(userId, stock.getId())
                 .orElseGet(() -> this.stockWatchRepository.save(
                         TickerWatch.builder().stock(stock).user(user).build()));
         return this.convertToStockWatchDTO(tickerWatch);
     }
 
     @Transactional
-    public CryptoWatchDTO createNewCryptoWatch(String userEmail, String coinId) {
+    public CryptoWatchDTO createNewCryptoWatch(Long userId, String coinId) {
         Coin coin = this.coinRepository.findById(coinId).orElseThrow(() -> new NoSuchElementException("Coin not found: " + coinId));
-        User user = this.userService.loadUserByEmail(userEmail);
+        User user = this.userService.getReference(userId);
 
-        CryptoWatch cryptoWatch = this.cryptoWatchRepository.findByUserEmailAndCoinId(userEmail, coin.getId())
+        CryptoWatch cryptoWatch = this.cryptoWatchRepository.findByUserIdAndCoinId(userId, coin.getId())
                 .orElseGet(() -> this.cryptoWatchRepository.save(
                         CryptoWatch.builder().coin(coin).user(user).build()));
         return this.convertToCryptoWatchDTO(cryptoWatch);
     }
 
     @Transactional
-    public ForexWatchDTO createNewForexWatch(String userEmail, String fromCurrencyId, String toCurrencyId) {
-        User user = this.userService.loadUserByEmail(userEmail);
+    public ForexWatchDTO createNewForexWatch(Long userId, String fromCurrencyId, String toCurrencyId) {
+        User user = this.userService.getReference(userId);
         Currency fromCurrency = this.currencyRepository.findById(fromCurrencyId).orElseThrow(() -> new NoSuchElementException("Currency not found: " + fromCurrencyId));
         Currency toCurrency = this.currencyRepository.findById(toCurrencyId).orElseThrow(() -> new NoSuchElementException("Currency not found: " + toCurrencyId));
 
         ForexWatch forexWatch = this.forexWatchRepository
-                .findByUserEmailAndFromCurrencyIdAndToCurrencyId(userEmail, fromCurrencyId, toCurrencyId)
+                .findByUserIdAndFromCurrencyIdAndToCurrencyId(userId, fromCurrencyId, toCurrencyId)
                 .orElseGet(() -> this.forexWatchRepository.save(
                         ForexWatch.builder().fromCurrency(fromCurrency).toCurrency(toCurrency).user(user).build()));
         return this.convertToForexDTO(forexWatch);

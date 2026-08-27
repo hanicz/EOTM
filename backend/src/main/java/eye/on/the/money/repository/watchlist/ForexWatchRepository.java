@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ForexWatchRepository extends JpaRepository<ForexWatch, Long> {
-    List<ForexWatch> findByUserEmailOrderByFromCurrencyAscToCurrencyAsc(String userEmail);
+    List<ForexWatch> findByUserIdOrderByFromCurrencyAscToCurrencyAsc(Long userId);
 
-    Optional<ForexWatch> findByUserEmailAndFromCurrencyIdAndToCurrencyId(String userEmail, String fromCurrencyId,
+    Optional<ForexWatch> findByUserIdAndFromCurrencyIdAndToCurrencyId(Long userId, String fromCurrencyId,
                                                                         String toCurrencyId);
 
-    void deleteByIdAndUserEmail(Long id, String userEmail);
+    void deleteByIdAndUserId(Long id, Long userId);
 }

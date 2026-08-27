@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CryptoWatchRepository extends JpaRepository<CryptoWatch, Long> {
-    List<CryptoWatch> findByUserEmailOrderByCoin_Symbol(String userEMail);
+    List<CryptoWatch> findByUserIdOrderByCoin_Symbol(Long userId);
 
-    Optional<CryptoWatch> findByUserEmailAndCoinId(String userEmail, String coinId);
+    Optional<CryptoWatch> findByUserIdAndCoinId(Long userId, String coinId);
 
-    void deleteByIdAndUserEmail(Long id, String userEmail);
+    void deleteByIdAndUserId(Long id, Long userId);
 }

@@ -9,7 +9,7 @@ public interface CryptoAlertRepository extends JpaRepository<CryptoAlert, Long> 
 
     List<CryptoAlert> findAll();
 
-    List<CryptoAlert> findByUserEmailOrderByCoinSymbol(String userEmail);
+    List<CryptoAlert> findByUserIdOrderByCoinSymbol(Long userId);
 
-    int deleteByIdAndUserEmail(Long id, String userEmail);
+    int deleteByIdAndUserId(Long id, Long userId);
 }

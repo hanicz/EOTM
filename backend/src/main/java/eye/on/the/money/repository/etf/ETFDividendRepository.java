@@ -8,14 +8,14 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ETFDividendRepository extends JpaRepository<ETFDividend, Long> {
-    List<ETFDividend> findByUserEmailOrderByDividendDate(String userEmail);
+    List<ETFDividend> findByUserIdOrderByDividendDate(Long userId);
 
-    List<ETFDividend> findByUserEmailAndDividendDateBetweenOrderByDividendDate(
-            String userEmail, LocalDate from, LocalDate to);
+    List<ETFDividend> findByUserIdAndDividendDateBetweenOrderByDividendDate(
+            Long userId, LocalDate from, LocalDate to);
 
-    List<ETFDividend> findByUserEmailOrderByDividendDateDesc(String userEmail);
+    List<ETFDividend> findByUserIdOrderByDividendDateDesc(Long userId);
 
-    void deleteByUserEmailAndIdIn(String userEmail, List<Long> ids);
+    void deleteByUserIdAndIdIn(Long userId, List<Long> ids);
 
-    Optional<ETFDividend> findByIdAndUserEmail(Long id, String userEmail);
+    Optional<ETFDividend> findByIdAndUserId(Long id, Long userId);
 }

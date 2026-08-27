@@ -23,16 +23,16 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class FireServiceTest {
 
-    private static final String USER = "user@eotm.com";
+    private static final Long USER = 1L;
     private static final double TOLERANCE = 0.01;
 
     @Mock
@@ -47,7 +47,7 @@ class FireServiceTest {
     }
 
     private void stubPortfolio(double worth) {
-        when(this.netWorthService.getNetWorth(anyString(), any(), anyBoolean())).thenReturn(NetWorthDTO.builder()
+        when(this.netWorthService.getNetWorth(anyLong(), any(), anyBoolean())).thenReturn(NetWorthDTO.builder()
                 .currency("HUF")
                 .totalWorth(BigDecimal.valueOf(worth))
                 .unconvertedCurrencies(List.of())
@@ -676,7 +676,7 @@ class FireServiceTest {
 
     @Test
     void project_passesThroughCurrenciesTheValuationCouldNotConvert() {
-        when(this.netWorthService.getNetWorth(anyString(), any(), anyBoolean())).thenReturn(NetWorthDTO.builder()
+        when(this.netWorthService.getNetWorth(anyLong(), any(), anyBoolean())).thenReturn(NetWorthDTO.builder()
                 .currency("HUF").totalWorth(BigDecimal.ZERO)
                 .unconvertedCurrencies(List.of("GBP")).build());
 

@@ -43,12 +43,12 @@ public class ForexTransactionService implements ICSVService {
     private final UserService userService;
     private final ModelMapper modelMapper;
     private final EODAPIService eodAPIService;
-    public List<ForexTransactionDTO> getForexTransactionsByUserId(String userEmail) {
-        return this.forexTransactionRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToForexTransactionDTO).collect(Collectors.toList());
+    public List<ForexTransactionDTO> getForexTransactionsByUserId(Long userId) {
+        return this.forexTransactionRepository.findByUserIdOrderByTransactionDate(userId).stream().map(this::convertToForexTransactionDTO).collect(Collectors.toList());
     }
 
-    public List<ForexTransactionDTO> getForexTransactionsBetween(String userEmail, LocalDate from, LocalDate to) {
-        return this.forexTransactionRepository.findByUserEmailAndTransactionDateBetweenOrderByTransactionDate(userEmail, from, to)
+    public List<ForexTransactionDTO> getForexTransactionsBetween(Long userId, LocalDate from, LocalDate to) {
+        return this.forexTransactionRepository.findByUserIdAndTransactionDateBetweenOrderByTransactionDate(userId, from, to)
                 .stream().map(this::convertToForexTransactionDTO).collect(Collectors.toList());
     }
 
@@ -56,18 +56,18 @@ public class ForexTransactionService implements ICSVService {
         return this.modelMapper.map(forexTransaction, ForexTransactionDTO.class);
     }
 
-    @CacheEvict(cacheNames = "holdings-forex", key = "#userEmail")
+    @CacheEvict(cacheNames = "holdings-forex", key = "#userId")
     @Transactional
-    public void deleteForexTransactionById(String userEmail, List<Long> ids) {
-        this.forexTransactionRepository.deleteByUserEmailAndIdIn(userEmail, ids);
+    public void deleteForexTransactionById(Long userId, List<Long> ids) {
+        this.forexTransactionRepository.deleteByUserIdAndIdIn(userId, ids);
     }
 
-    @CacheEvict(cacheNames = "holdings-forex", key = "#userEmail")
+    @CacheEvict(cacheNames = "holdings-forex", key = "#userId")
     @Transactional
-    public ForexTransactionDTO createForexTransaction(ForexTransactionDTO forexTransactionDTO, String userEmail) {
+    public ForexTransactionDTO createForexTransaction(ForexTransactionDTO forexTransactionDTO, Long userId) {
         Currency toCurrency = this.currencyRepository.findById(forexTransactionDTO.getToCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + forexTransactionDTO.getToCurrencyId()));
         Currency fromCurrency = this.currencyRepository.findById(forexTransactionDTO.getFromCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + forexTransactionDTO.getFromCurrencyId()));
-        User user = this.userService.loadUserByEmail(userEmail);
+        User user = this.userService.getReference(userId);
 
         ForexTransaction forexTransaction = ForexTransaction.builder()
                 .buySell(forexTransactionDTO.getBuySell())
@@ -84,12 +84,12 @@ public class ForexTransactionService implements ICSVService {
         return this.convertToForexTransactionDTO(forexTransaction);
     }
 
-    @CacheEvict(cacheNames = "holdings-forex", key = "#userEmail")
+    @CacheEvict(cacheNames = "holdings-forex", key = "#userId")
     @Transactional
-    public ForexTransactionDTO updateForexTransaction(ForexTransactionDTO forexTransactionDTO, String userEmail) {
+    public ForexTransactionDTO updateForexTransaction(ForexTransactionDTO forexTransactionDTO, Long userId) {
         Currency toCurrency = this.currencyRepository.findById(forexTransactionDTO.getToCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + forexTransactionDTO.getToCurrencyId()));
         Currency fromCurrency = this.currencyRepository.findById(forexTransactionDTO.getFromCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + forexTransactionDTO.getFromCurrencyId()));
-        ForexTransaction forexTransaction = this.forexTransactionRepository.findByIdAndUserEmail(forexTransactionDTO.getForexTransactionId(), userEmail).orElseThrow(() -> new NoSuchElementException("Forex transaction not found: " + forexTransactionDTO.getForexTransactionId()));
+        ForexTransaction forexTransaction = this.forexTransactionRepository.findByIdAndUserId(forexTransactionDTO.getForexTransactionId(), userId).orElseThrow(() -> new NoSuchElementException("Forex transaction not found: " + forexTransactionDTO.getForexTransactionId()));
 
         forexTransaction.setBuySell(forexTransactionDTO.getBuySell());
         forexTransaction.setTransactionDate(forexTransactionDTO.getTransactionDate());
@@ -102,18 +102,18 @@ public class ForexTransactionService implements ICSVService {
         return this.convertToForexTransactionDTO(forexTransaction);
     }
 
-    @Cacheable(cacheNames = "holdings-forex", key = "#userEmail")
-    public List<ForexTransactionDTO> getAllForexHoldings(String userEmail) {
-        return this.allForexHoldings(userEmail);
+    @Cacheable(cacheNames = "holdings-forex", key = "#userId")
+    public List<ForexTransactionDTO> getAllForexHoldings(Long userId) {
+        return this.allForexHoldings(userId);
     }
 
-    @CachePut(cacheNames = "holdings-forex", key = "#userEmail")
-    public List<ForexTransactionDTO> refreshAllForexHoldings(String userEmail) {
-        return this.allForexHoldings(userEmail);
+    @CachePut(cacheNames = "holdings-forex", key = "#userId")
+    public List<ForexTransactionDTO> refreshAllForexHoldings(Long userId) {
+        return this.allForexHoldings(userId);
     }
 
-    private List<ForexTransactionDTO> allForexHoldings(String userEmail) {
-        Map<String, ForexTransactionDTO> forexTransactionMap = this.getCalculated(userEmail);
+    private List<ForexTransactionDTO> allForexHoldings(Long userId) {
+        Map<String, ForexTransactionDTO> forexTransactionMap = this.getCalculated(userId);
         List<ForexTransactionDTO> forexTransactions = new ArrayList<>(forexTransactionMap.values());
         if (forexTransactions.isEmpty()) return forexTransactions;
 
@@ -143,8 +143,8 @@ public class ForexTransactionService implements ICSVService {
         return forexTransactions;
     }
 
-    private Map<String, ForexTransactionDTO> getCalculated(String userEmail) {
-        List<ForexTransactionDTO> forexTransactions = this.forexTransactionRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToForexTransactionDTO).collect(Collectors.toList());
+    private Map<String, ForexTransactionDTO> getCalculated(Long userId) {
+        List<ForexTransactionDTO> forexTransactions = this.forexTransactionRepository.findByUserIdOrderByTransactionDate(userId).stream().map(this::convertToForexTransactionDTO).collect(Collectors.toList());
         Map<String, ForexTransactionDTO> forexTransactionMap = new HashMap<>();
         for (ForexTransactionDTO ft : forexTransactions) {
             String symbol = ft.getFromCurrencyId() + ft.getToCurrencyId();
@@ -153,31 +153,31 @@ public class ForexTransactionService implements ICSVService {
         return forexTransactionMap;
     }
 
-    public void getCSV(String userEmail, Writer writer) {
+    public void getCSV(Long userId, Writer writer) {
         List<ForexTransactionDTO> forexList =
-                this.forexTransactionRepository.findByUserEmailOrderByTransactionDate(userEmail)
+                this.forexTransactionRepository.findByUserIdOrderByTransactionDate(userId)
                         .stream()
                         .map(this::convertToForexTransactionDTO)
                         .toList();
         this.printRecords(forexList, writer);
     }
 
-    @CacheEvict(cacheNames = "holdings-forex", key = "#userEmail")
+    @CacheEvict(cacheNames = "holdings-forex", key = "#userId")
     @Transactional
-    public void processCSV(String userEmail, MultipartFile file) {
+    public void processCSV(Long userId, MultipartFile file) {
         try (CSVParser csvParser = this.getParser(file,
                 new String[]{"Transaction Id", "From Amount", "To Amount", "Type", "Transaction Date", "Change Rate", "From Currency", "To Currency"})) {
             for (CSVRecord csvRecord : csvParser) {
                 ForexTransactionDTO transaction = ForexTransactionDTO.createFromCSVRecord(csvRecord, DateFormats.YYYY_MM_DD);
 
                 if (transaction.getForexTransactionId() != null &&
-                        this.forexTransactionRepository.findByIdAndUserEmail(transaction.getForexTransactionId(), userEmail).isPresent()) {
+                        this.forexTransactionRepository.findByIdAndUserId(transaction.getForexTransactionId(), userId).isPresent()) {
                     log.trace("Update forex transaction {}", transaction);
-                    this.updateForexTransaction(transaction, userEmail);
+                    this.updateForexTransaction(transaction, userId);
                 } else {
                     transaction.setForexTransactionId(null);
                     log.trace("Create forex transaction {}", transaction);
-                    this.createForexTransaction(transaction, userEmail);
+                    this.createForexTransaction(transaction, userId);
                 }
             }
         } catch (IOException | DateTimeParseException | IllegalArgumentException e) {

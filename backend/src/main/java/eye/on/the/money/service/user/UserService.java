@@ -16,8 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static java.util.Collections.emptyList;
-
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -46,8 +44,16 @@ public class UserService implements UserDetailsService {
     }
 
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = this.loadUserByEmail(email);
-        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), emptyList());
+        return this.loadUserByEmail(email);
+    }
+
+    public User getReference(Long id) {
+        return this.userRepository.getReferenceById(id);
+    }
+
+    public User loadUserById(Long id) throws UsernameNotFoundException {
+        return this.userRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException(String.valueOf(id)));
     }
 
     public User loadUserByEmail(String email) throws UsernameNotFoundException {
@@ -59,8 +65,8 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public void changePassword(String userEmail, ChangePasswordDTO passwordDTO) {
-        User user = this.loadUserByEmail(userEmail);
+    public void changePassword(Long userId, ChangePasswordDTO passwordDTO) {
+        User user = this.loadUserById(userId);
 
         if(this.passwordEncoder.matches(passwordDTO.oldPassword(), user.getPassword())) {
             user.setPassword(this.passwordEncoder.encode(passwordDTO.newPassword()));

@@ -7,6 +7,7 @@ import eye.on.the.money.model.report.ReportSubscription;
 import eye.on.the.money.report.MonthlyReportScheduler;
 import eye.on.the.money.repository.report.ReportSubscriptionRepository;
 import eye.on.the.money.security.CurrentUserEmail;
+import eye.on.the.money.security.CurrentUserId;
 import eye.on.the.money.service.mail.EmailService;
 import eye.on.the.money.service.report.MonthlyReportService;
 import eye.on.the.money.service.report.ReportSubscriptionService;
@@ -39,20 +40,21 @@ public class ReportController {
     private final EmailService emailService;
 
     @GetMapping("monthly/subscription")
-    public ResponseEntity<ReportSubscriptionDTO> getSubscription(@CurrentUserEmail String userEmail) {
+    public ResponseEntity<ReportSubscriptionDTO> getSubscription(@CurrentUserId Long userId) {
         log.trace("Enter");
-        return ResponseEntity.ok(this.reportSubscriptionService.get(userEmail));
+        return ResponseEntity.ok(this.reportSubscriptionService.get(userId));
     }
 
     @PutMapping("monthly/subscription")
-    public ResponseEntity<ReportSubscriptionDTO> updateSubscription(@CurrentUserEmail String userEmail,
+    public ResponseEntity<ReportSubscriptionDTO> updateSubscription(@CurrentUserId Long userId,
                                                                     @Valid @RequestBody ReportSubscriptionUpdateDTO update) {
         log.trace("Enter");
-        return ResponseEntity.ok(this.reportSubscriptionService.update(userEmail, update));
+        return ResponseEntity.ok(this.reportSubscriptionService.update(userId, update));
     }
 
     @PostMapping("monthly/send")
-    public ResponseEntity<Object> sendNow(@CurrentUserEmail String userEmail,
+    public ResponseEntity<Object> sendNow(@CurrentUserId Long userId,
+                                          @CurrentUserEmail String userEmail,
                                           @RequestParam(required = false) Integer year,
                                           @RequestParam(required = false) Integer month) {
         log.trace("Enter");
@@ -65,14 +67,14 @@ public class ReportController {
                 ? YearMonth.of(year, month)
                 : YearMonth.now(MonthlyReportScheduler.ZONE).minusMonths(1);
 
-        Optional<ReportSubscription> subscription = this.reportSubscriptionRepository.findByUserEmail(userEmail);
+        Optional<ReportSubscription> subscription = this.reportSubscriptionRepository.findByUserId(userId);
         String currency = subscription.map(ReportSubscription::getCurrency)
                 .orElse(ReportSubscription.DEFAULT_CURRENCY);
         List<String> recipients = subscription.map(this.reportSubscriptionService::recipientsOf)
                 .orElse(List.of(userEmail));
 
         this.emailService.sendMonthlyReportMail(recipients,
-                this.monthlyReportService.build(userEmail, period, currency));
+                this.monthlyReportService.build(userId, period, currency));
         return ResponseEntity.ok().build();
     }
 }

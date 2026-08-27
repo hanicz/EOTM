@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
@@ -73,7 +74,11 @@ class UserServiceTest {
     public void loadUserByUsername() {
         User user = User.builder().email("loaduser@mail.com").password("testPassword").build();
         this.userRepository.save(user);
-        Assertions.assertEquals(user.getEmail(), this.userService.loadUserByUsername("loaduser@mail.com").getUsername());
+        UserDetails loaded = this.userService.loadUserByUsername("loaduser@mail.com");
+        Assertions.assertAll("The principal carries the id and authenticates",
+                () -> Assertions.assertEquals(user.getEmail(), loaded.getUsername()),
+                () -> Assertions.assertEquals(user.getId(), ((User) loaded).getId()),
+                () -> Assertions.assertTrue(loaded.isEnabled()));
     }
 
     @Test
@@ -100,7 +105,8 @@ class UserServiceTest {
     @Test
     public void changePassword() {
         this.userService.signUp(new SignUpDTO("changePassword@mail.com", "testPassword"));
-        this.userService.changePassword("changePassword@mail.com", new ChangePasswordDTO("newPassword", "testPassword"));
+        Long userId = this.userRepository.findByEmail("changePassword@mail.com").getId();
+        this.userService.changePassword(userId, new ChangePasswordDTO("newPassword", "testPassword"));
 
         Assertions.assertTrue(this.passwordEncoder.matches("newPassword", this.userRepository.findByEmail("changePassword@mail.com").getPassword()));
     }
@@ -108,7 +114,8 @@ class UserServiceTest {
     @Test
     public void changePasswordIncorrectOldPassword() {
        Assertions.assertThrows(PasswordException.class, () -> {
-           this.userService.changePassword("test@test.test", new ChangePasswordDTO("newPassword", "incorrectOldPassword"));
+           Long userId = this.userRepository.findByEmail("test@test.test").getId();
+           this.userService.changePassword(userId, new ChangePasswordDTO("newPassword", "incorrectOldPassword"));
        });
     }
 }

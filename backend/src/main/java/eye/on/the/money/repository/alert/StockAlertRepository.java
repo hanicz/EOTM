@@ -8,7 +8,7 @@ import java.util.List;
 public interface StockAlertRepository extends JpaRepository<StockAlert, Long> {
     List<StockAlert> findAll();
 
-    List<StockAlert> findByUserEmailOrderByStockShortName(String userEmail);
+    List<StockAlert> findByUserIdOrderByStockShortName(Long userId);
 
-    int deleteByIdAndUserEmail(Long id, String userEmail);
+    int deleteByIdAndUserId(Long id, Long userId);
 }

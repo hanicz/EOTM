@@ -65,10 +65,10 @@ class SecurityTransactionServiceTest {
     void getTransactions_returnsMappedDTOs() {
         SecurityTransaction tx = this.buildTransaction(1L, "B", 10, 500.0);
         SecurityTransactionDTO dto = this.buildDTO(1L, "B", 10, 500.0);
-        when(this.securityTransactionRepository.findByUserEmailOrderByTransactionDateDesc("test@email.com")).thenReturn(List.of(tx));
+        when(this.securityTransactionRepository.findByUserIdOrderByTransactionDateDesc(1L)).thenReturn(List.of(tx));
         when(this.modelMapper.map(tx, SecurityTransactionDTO.class)).thenReturn(dto);
 
-        List<SecurityTransactionDTO> result = this.securityTransactionService.getTransactions("test@email.com");
+        List<SecurityTransactionDTO> result = this.securityTransactionService.getTransactions(1L);
 
         assertEquals(1, result.size());
         assertEquals(500.0, result.get(0).getAmount());
@@ -76,9 +76,9 @@ class SecurityTransactionServiceTest {
 
     @Test
     void getTransactions_returnsEmptyList() {
-        when(this.securityTransactionRepository.findByUserEmailOrderByTransactionDateDesc("test@email.com")).thenReturn(List.of());
+        when(this.securityTransactionRepository.findByUserIdOrderByTransactionDateDesc(1L)).thenReturn(List.of());
 
-        List<SecurityTransactionDTO> result = this.securityTransactionService.getTransactions("test@email.com");
+        List<SecurityTransactionDTO> result = this.securityTransactionService.getTransactions(1L);
 
         assertTrue(result.isEmpty());
     }
@@ -93,13 +93,13 @@ class SecurityTransactionServiceTest {
         SecurityTransactionDTO buyDTO2 = this.buildDTO(2L, "B", 5, 300.0);
         SecurityTransactionDTO sellDTO = this.buildDTO(3L, "S", 3, 180.0);
 
-        when(this.securityTransactionRepository.findByUserEmailOrderByTransactionDate("test@email.com"))
+        when(this.securityTransactionRepository.findByUserIdOrderByTransactionDate(1L))
                 .thenReturn(List.of(buy1, buy2, sell));
         when(this.modelMapper.map(buy1, SecurityTransactionDTO.class)).thenReturn(buyDTO1);
         when(this.modelMapper.map(buy2, SecurityTransactionDTO.class)).thenReturn(buyDTO2);
         when(this.modelMapper.map(sell, SecurityTransactionDTO.class)).thenReturn(sellDTO);
 
-        List<SecurityTransactionDTO> result = this.securityTransactionService.getCurrentHoldings("test@email.com");
+        List<SecurityTransactionDTO> result = this.securityTransactionService.getCurrentHoldings(1L);
 
         assertEquals(1, result.size());
         assertEquals(12, result.get(0).getQuantity());
@@ -114,12 +114,12 @@ class SecurityTransactionServiceTest {
         SecurityTransactionDTO buyDTO = this.buildDTO(1L, "B", 10, 500.0);
         SecurityTransactionDTO sellDTO = this.buildDTO(2L, "S", 10, 500.0);
 
-        when(this.securityTransactionRepository.findByUserEmailOrderByTransactionDate("test@email.com"))
+        when(this.securityTransactionRepository.findByUserIdOrderByTransactionDate(1L))
                 .thenReturn(List.of(buy, sell));
         when(this.modelMapper.map(buy, SecurityTransactionDTO.class)).thenReturn(buyDTO);
         when(this.modelMapper.map(sell, SecurityTransactionDTO.class)).thenReturn(sellDTO);
 
-        List<SecurityTransactionDTO> result = this.securityTransactionService.getCurrentHoldings("test@email.com");
+        List<SecurityTransactionDTO> result = this.securityTransactionService.getCurrentHoldings(1L);
 
         assertTrue(result.isEmpty());
     }
@@ -136,12 +136,12 @@ class SecurityTransactionServiceTest {
         SecurityTransactionDTO dto2 = SecurityTransactionDTO.builder().transactionId(2L).buySell("B").quantity(5).amount(1000.0)
                 .transactionDate(LocalDate.of(2025, 6, 1)).currencyId("EUR").securityId("SEC2").securityName("Security Two").build();
 
-        when(this.securityTransactionRepository.findByUserEmailOrderByTransactionDate("test@email.com"))
+        when(this.securityTransactionRepository.findByUserIdOrderByTransactionDate(1L))
                 .thenReturn(List.of(tx1, tx2));
         when(this.modelMapper.map(tx1, SecurityTransactionDTO.class)).thenReturn(dto1);
         when(this.modelMapper.map(tx2, SecurityTransactionDTO.class)).thenReturn(dto2);
 
-        List<SecurityTransactionDTO> result = this.securityTransactionService.getCurrentHoldings("test@email.com");
+        List<SecurityTransactionDTO> result = this.securityTransactionService.getCurrentHoldings(1L);
 
         assertEquals(2, result.size());
         assertEquals(1000.0, result.get(0).getAmount());
@@ -156,11 +156,11 @@ class SecurityTransactionServiceTest {
 
         when(this.currencyRepository.findById("EUR")).thenReturn(Optional.of(this.currency));
         when(this.securityService.getOrCreateSecurity("SEC1", "Security One")).thenReturn(this.security);
-        when(this.userService.loadUserByEmail("test@email.com")).thenReturn(this.user);
+        when(this.userService.getReference(1L)).thenReturn(this.user);
         when(this.securityTransactionRepository.save(any(SecurityTransaction.class))).thenReturn(savedTx);
         when(this.modelMapper.map(savedTx, SecurityTransactionDTO.class)).thenReturn(outputDTO);
 
-        SecurityTransactionDTO result = this.securityTransactionService.createTransaction(inputDTO, "test@email.com");
+        SecurityTransactionDTO result = this.securityTransactionService.createTransaction(inputDTO, 1L);
 
         assertEquals(1L, result.getTransactionId());
         verify(this.securityTransactionRepository, times(1)).save(any(SecurityTransaction.class));
@@ -171,7 +171,7 @@ class SecurityTransactionServiceTest {
         SecurityTransactionDTO inputDTO = this.buildDTO(null, "B", 10, 500.0);
         when(this.currencyRepository.findById("EUR")).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> this.securityTransactionService.createTransaction(inputDTO, "test@email.com"));
+        assertThrows(NoSuchElementException.class, () -> this.securityTransactionService.createTransaction(inputDTO, 1L));
     }
 
     @Test
@@ -182,10 +182,10 @@ class SecurityTransactionServiceTest {
 
         when(this.currencyRepository.findById("EUR")).thenReturn(Optional.of(this.currency));
         when(this.securityService.getOrCreateSecurity("SEC1", "Security One")).thenReturn(this.security);
-        when(this.securityTransactionRepository.findByIdAndUserEmail(1L, "test@email.com")).thenReturn(Optional.of(existingTx));
+        when(this.securityTransactionRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingTx));
         when(this.modelMapper.map(existingTx, SecurityTransactionDTO.class)).thenReturn(outputDTO);
 
-        SecurityTransactionDTO result = this.securityTransactionService.updateTransaction(inputDTO, "test@email.com");
+        SecurityTransactionDTO result = this.securityTransactionService.updateTransaction(inputDTO, 1L);
 
         assertEquals(1L, result.getTransactionId());
         assertEquals(15, result.getQuantity());
@@ -196,18 +196,18 @@ class SecurityTransactionServiceTest {
         SecurityTransactionDTO inputDTO = this.buildDTO(1L, "B", 10, 500.0);
         when(this.currencyRepository.findById("EUR")).thenReturn(Optional.of(this.currency));
         when(this.securityService.getOrCreateSecurity("SEC1", "Security One")).thenReturn(this.security);
-        when(this.securityTransactionRepository.findByIdAndUserEmail(1L, "test@email.com")).thenReturn(Optional.empty());
+        when(this.securityTransactionRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> this.securityTransactionService.updateTransaction(inputDTO, "test@email.com"));
+        assertThrows(NoSuchElementException.class, () -> this.securityTransactionService.updateTransaction(inputDTO, 1L));
     }
 
     @Test
     void deleteTransactionById_delegatesToRepository() {
         List<Long> ids = List.of(1L, 2L);
-        doNothing().when(this.securityTransactionRepository).deleteByUserEmailAndIdIn("test@email.com", ids);
+        doNothing().when(this.securityTransactionRepository).deleteByUserIdAndIdIn(1L, ids);
 
-        this.securityTransactionService.deleteTransactionById("test@email.com", ids);
+        this.securityTransactionService.deleteTransactionById(1L, ids);
 
-        verify(this.securityTransactionRepository, times(1)).deleteByUserEmailAndIdIn("test@email.com", ids);
+        verify(this.securityTransactionRepository, times(1)).deleteByUserIdAndIdIn(1L, ids);
     }
 }

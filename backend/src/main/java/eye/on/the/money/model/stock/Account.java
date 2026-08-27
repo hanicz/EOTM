@@ -22,7 +22,7 @@ import java.util.Set;
 @Builder
 @ToString
 @EqualsAndHashCode
-@Table(name = "EOTM_USER_ACCOUNT")
+@Table(name = "EOTM_USER_ACCOUNT", indexes = @Index(name = "IDX_USER_ACCOUNT_USER", columnList = "user_id"))
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated

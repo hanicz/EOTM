@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import eye.on.the.money.security.CurrentUserEmail;
+import eye.on.the.money.security.CurrentUserId;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -46,17 +47,17 @@ public class UserController {
     }
 
     @PutMapping("/password")
-    public ResponseEntity<Void> changePassword(@RequestBody @Valid ChangePasswordDTO passwordDTO, @CurrentUserEmail String userEmail) {
-        this.userService.changePassword(userEmail, passwordDTO);
+    public ResponseEntity<Void> changePassword(@RequestBody @Valid ChangePasswordDTO passwordDTO, @CurrentUserId Long userId) {
+        this.userService.changePassword(userId, passwordDTO);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/export")
-    public ResponseEntity<ExportDTO> export(@CurrentUserEmail String userEmail) {
+    public ResponseEntity<ExportDTO> export(@CurrentUserId Long userId) {
         log.trace("Enter");
         String filename = "eotm-export-" + LocalDate.now().format(DateFormats.YYYY_MM_DD) + ".json";
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
-                .body(this.exportService.export(userEmail));
+                .body(this.exportService.export(userId));
     }
 }

@@ -35,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
@@ -47,6 +48,7 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class BankTransactionServiceTest {
 
+    private static final Long USER_ID = 1L;
     private static final String USER_EMAIL = "test@email.com";
     private static final String BANK_ID = "AAACT253654SV4TMYZ";
     private static final String ACCOUNT = "104040278676776881541004";
@@ -69,11 +71,11 @@ class BankTransactionServiceTest {
 
     @BeforeEach
     void setUp() {
-        when(this.userService.loadUserByEmail(USER_EMAIL)).thenReturn(this.user);
+        when(this.userService.getReference(USER_ID)).thenReturn(this.user);
         when(this.currencyRepository.findById("HUF")).thenReturn(Optional.of(this.huf));
         when(this.bankTransactionRepository
-                .findByUserEmailAndBankTransactionIdAndBookingDateAndTypeAndAmountAndMemo(
-                        anyString(), anyString(), any(), anyString(), any(), anyString()))
+                .findByUserIdAndBankTransactionIdAndBookingDateAndTypeAndAmountAndMemo(
+                        anyLong(), anyString(), any(), anyString(), any(), anyString()))
                 .thenReturn(Optional.empty());
     }
 
@@ -114,7 +116,7 @@ class BankTransactionServiceTest {
                 this.row("2025.12.31", BANK_ID, "Mobilinfo uzenetdij", "-275", "Ref.: " + BANK_ID + " 5 uz."),
                 this.row("2025.12.31", BANK_ID, "Kamatado", "-5", "Ref.: " + BANK_ID));
 
-        ImportResultDTO result = this.bankTransactionService.processCSV(USER_EMAIL, file);
+        ImportResultDTO result = this.bankTransactionService.processCSV(USER_ID, file);
 
         assertEquals(2, result.getCreated());
         assertEquals(0, result.getUpdated());
@@ -142,11 +144,11 @@ class BankTransactionServiceTest {
                 .accountNumber("stale").user(this.user).currency(this.huf).build();
 
         when(this.bankTransactionRepository
-                .findByUserEmailAndBankTransactionIdAndBookingDateAndTypeAndAmountAndMemo(
-                        USER_EMAIL, BANK_ID, BOOKING_DATE, "Kamatado", -5.0, "Ref."))
+                .findByUserIdAndBankTransactionIdAndBookingDateAndTypeAndAmountAndMemo(
+                        USER_ID, BANK_ID, BOOKING_DATE, "Kamatado", -5.0, "Ref."))
                 .thenReturn(Optional.of(existing));
 
-        ImportResultDTO result = this.bankTransactionService.processCSV(USER_EMAIL,
+        ImportResultDTO result = this.bankTransactionService.processCSV(USER_ID,
                 this.file(StandardCharsets.UTF_8, this.row("2025.12.31", BANK_ID, "Kamatado", "-5", "Ref.")));
 
         assertEquals(0, result.getCreated());
@@ -162,11 +164,11 @@ class BankTransactionServiceTest {
                 .excluded(true).user(this.user).currency(this.huf).build();
 
         when(this.bankTransactionRepository
-                .findByUserEmailAndBankTransactionIdAndBookingDateAndTypeAndAmountAndMemo(
-                        USER_EMAIL, BANK_ID, BOOKING_DATE, "Kamatado", -5.0, "Ref."))
+                .findByUserIdAndBankTransactionIdAndBookingDateAndTypeAndAmountAndMemo(
+                        USER_ID, BANK_ID, BOOKING_DATE, "Kamatado", -5.0, "Ref."))
                 .thenReturn(Optional.of(existing));
 
-        this.bankTransactionService.processCSV(USER_EMAIL,
+        this.bankTransactionService.processCSV(USER_ID,
                 this.file(StandardCharsets.UTF_8, this.row("2025.12.31", BANK_ID, "Kamatado", "-5", "Ref.")));
 
         assertTrue(existing.isExcluded());
@@ -179,11 +181,11 @@ class BankTransactionServiceTest {
                 .user(this.user).currency(this.huf).build();
 
         when(this.bankTransactionRepository
-                .findByUserEmailAndBankTransactionIdAndBookingDateAndTypeAndAmountAndMemo(
-                        USER_EMAIL, BANK_ID, BOOKING_DATE, "Kamatado", -5.0, "Rent for December"))
+                .findByUserIdAndBankTransactionIdAndBookingDateAndTypeAndAmountAndMemo(
+                        USER_ID, BANK_ID, BOOKING_DATE, "Kamatado", -5.0, "Rent for December"))
                 .thenReturn(Optional.of(edited));
 
-        ImportResultDTO result = this.bankTransactionService.processCSV(USER_EMAIL,
+        ImportResultDTO result = this.bankTransactionService.processCSV(USER_ID,
                 this.file(StandardCharsets.UTF_8, this.row("2025.12.31", BANK_ID, "Kamatado", "-5", "Ref.")));
 
         assertEquals(1, result.getCreated());
@@ -196,10 +198,10 @@ class BankTransactionServiceTest {
     void updateTransaction_savesTheBookingDateAndTheTrimmedMemo() {
         BankTransaction existing = BankTransaction.builder().id(7L).bookingDate(BOOKING_DATE).memo("Ref.")
                 .user(this.user).currency(this.huf).build();
-        when(this.bankTransactionRepository.findByIdAndUserEmail(7L, USER_EMAIL))
+        when(this.bankTransactionRepository.findByIdAndUserId(7L, USER_ID))
                 .thenReturn(Optional.of(existing));
 
-        this.bankTransactionService.updateTransaction(USER_EMAIL, 7L,
+        this.bankTransactionService.updateTransaction(USER_ID, 7L,
                 new BankTransactionEditDTO(LocalDate.of(2026, 1, 15), "  Rent for December  "));
 
         assertEquals(LocalDate.of(2026, 1, 15), existing.getBookingDate());
@@ -209,17 +211,17 @@ class BankTransactionServiceTest {
 
     @Test
     void updateTransaction_throwsWhenTheTransactionBelongsToSomeoneElse() {
-        when(this.bankTransactionRepository.findByIdAndUserEmail(7L, USER_EMAIL))
+        when(this.bankTransactionRepository.findByIdAndUserId(7L, USER_ID))
                 .thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> this.bankTransactionService.updateTransaction(USER_EMAIL, 7L,
+        assertThrows(NoSuchElementException.class, () -> this.bankTransactionService.updateTransaction(USER_ID, 7L,
                 new BankTransactionEditDTO(BOOKING_DATE, "Rent")));
         verify(this.bankTransactionRepository, never()).save(any());
     }
 
     @Test
     void processCSV_createsRecordsIncluded() {
-        this.bankTransactionService.processCSV(USER_EMAIL, this.file(StandardCharsets.UTF_8,
+        this.bankTransactionService.processCSV(USER_ID, this.file(StandardCharsets.UTF_8,
                 this.row("2025.12.31", BANK_ID, "Kamatado", "-5", "memo")));
 
         assertFalse(this.captureSingleSave().isExcluded());
@@ -227,7 +229,7 @@ class BankTransactionServiceTest {
 
     @Test
     void processCSV_parsesHungarianNumberFormat() {
-        this.bankTransactionService.processCSV(USER_EMAIL, this.file(StandardCharsets.UTF_8,
+        this.bankTransactionService.processCSV(USER_ID, this.file(StandardCharsets.UTF_8,
                 this.row("2025.01.02", BANK_ID, "Utalas", "-1.234.567,89", "memo")));
 
         assertEquals(-1234567.89, this.captureSingleSave().getAmount());
@@ -237,7 +239,7 @@ class BankTransactionServiceTest {
     void processCSV_fallsBackToLatin2ForAccentedText() {
         String accented = "Kamatad" + (char) 0x00F3;
 
-        this.bankTransactionService.processCSV(USER_EMAIL, this.file(Charset.forName("ISO-8859-2"),
+        this.bankTransactionService.processCSV(USER_ID, this.file(Charset.forName("ISO-8859-2"),
                 this.row("2025.12.31", BANK_ID, accented, "-5", "memo")));
 
         assertEquals(accented, this.captureSingleSave().getType());
@@ -247,7 +249,7 @@ class BankTransactionServiceTest {
     void processCSV_readsUtf8AccentedText() {
         String accented = "Kamatad" + (char) 0x00F3;
 
-        this.bankTransactionService.processCSV(USER_EMAIL, this.file(StandardCharsets.UTF_8,
+        this.bankTransactionService.processCSV(USER_ID, this.file(StandardCharsets.UTF_8,
                 this.row("2025.12.31", BANK_ID, accented, "-5", "memo")));
 
         assertEquals(accented, this.captureSingleSave().getType());
@@ -255,7 +257,7 @@ class BankTransactionServiceTest {
 
     @Test
     void processCSV_skipsBlankRows() {
-        ImportResultDTO result = this.bankTransactionService.processCSV(USER_EMAIL, this.file(StandardCharsets.UTF_8,
+        ImportResultDTO result = this.bankTransactionService.processCSV(USER_ID, this.file(StandardCharsets.UTF_8,
                 this.row("2025.12.31", BANK_ID, "Kamatado", "-5", "memo"), this.blankRow()));
 
         assertEquals(1, result.getCreated());
@@ -266,7 +268,7 @@ class BankTransactionServiceTest {
     void processCSV_truncatesOverlongMemo() {
         String longMemo = "x".repeat(BankTransaction.MEMO_MAX_LENGTH + 50);
 
-        this.bankTransactionService.processCSV(USER_EMAIL, this.file(StandardCharsets.UTF_8,
+        this.bankTransactionService.processCSV(USER_ID, this.file(StandardCharsets.UTF_8,
                 this.row("2025.12.31", BANK_ID, "Kamatado", "-5", longMemo)));
 
         assertEquals(BankTransaction.MEMO_MAX_LENGTH, this.captureSingleSave().getMemo().length());
@@ -276,13 +278,13 @@ class BankTransactionServiceTest {
     void processCSV_rejectsUnknownCurrency() {
         when(this.currencyRepository.findById("HUF")).thenReturn(Optional.empty());
 
-        assertThrows(CSVException.class, () -> this.bankTransactionService.processCSV(USER_EMAIL,
+        assertThrows(CSVException.class, () -> this.bankTransactionService.processCSV(USER_ID,
                 this.file(StandardCharsets.UTF_8, this.row("2025.12.31", BANK_ID, "Kamatado", "-5", "memo"))));
     }
 
     @Test
     void processCSV_rejectsMalformedDate() {
-        assertThrows(CSVException.class, () -> this.bankTransactionService.processCSV(USER_EMAIL,
+        assertThrows(CSVException.class, () -> this.bankTransactionService.processCSV(USER_ID,
                 this.file(StandardCharsets.UTF_8, this.row("31/12/2025", BANK_ID, "Kamatado", "-5", "memo"))));
     }
 
@@ -290,10 +292,10 @@ class BankTransactionServiceTest {
     void getTransactions_returnsMappedDTOs() {
         BankTransaction transaction = BankTransaction.builder().id(1L).amount(-275.0).build();
         BankTransactionDTO dto = BankTransactionDTO.builder().id(1L).amount(-275.0).build();
-        when(this.bankTransactionRepository.findByUserEmailOrderByBookingDateDesc(USER_EMAIL)).thenReturn(List.of(transaction));
+        when(this.bankTransactionRepository.findByUserIdOrderByBookingDateDesc(USER_ID)).thenReturn(List.of(transaction));
         when(this.modelMapper.map(transaction, BankTransactionDTO.class)).thenReturn(dto);
 
-        List<BankTransactionDTO> result = this.bankTransactionService.getTransactions(USER_EMAIL);
+        List<BankTransactionDTO> result = this.bankTransactionService.getTransactions(USER_ID);
 
         assertEquals(1, result.size());
         assertEquals(-275.0, result.getFirst().getAmount());

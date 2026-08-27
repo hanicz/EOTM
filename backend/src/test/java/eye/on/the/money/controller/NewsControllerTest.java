@@ -59,9 +59,9 @@ class NewsControllerTest {
     @Test
     public void getRedditNews() {
         List<News> newsList = this.createNewsList();
-        when(this.redditService.getHotNewsFromSubreddits(this.user.getEmail())).thenReturn(newsList);
+        when(this.redditService.getHotNewsFromSubreddits(this.user.getId())).thenReturn(newsList);
 
-        ResponseEntity<List<News>> result = this.newsController.getHotPosts("email");
+        ResponseEntity<List<News>> result = this.newsController.getHotPosts(1L);
         Assertions.assertEquals(newsList, result.getBody());
     }
 
@@ -73,23 +73,23 @@ class NewsControllerTest {
         subReddits.add(Subreddit.builder().id(2L).description("desc2").subreddit("subreddit2").build());
         subReddits.add(Subreddit.builder().id(3L).description("desc3").subreddit("subreddit3").build());
 
-        when(this.redditService.getSubredditsByUser(this.user.getEmail())).thenReturn(subReddits);
+        when(this.redditService.getSubredditsByUser(this.user.getId())).thenReturn(subReddits);
 
-        ResponseEntity<List<Subreddit>> result = this.newsController.getSubreddits("email");
+        ResponseEntity<List<Subreddit>> result = this.newsController.getSubreddits(1L);
         Assertions.assertIterableEquals(subReddits, result.getBody());
     }
 
     @Test
     public void deleteSubreddit() {
-        when(this.redditService.deleteSubreddit(1L, this.user.getEmail())).thenReturn(true);
-        ResponseEntity<Void> result = this.newsController.deleteSubreddit(1L, "email");
+        when(this.redditService.deleteSubreddit(1L, this.user.getId())).thenReturn(true);
+        ResponseEntity<Void> result = this.newsController.deleteSubreddit(1L, 1L);
         Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
     }
 
     @Test
     public void deleteSubreddit404() {
-        when(this.redditService.deleteSubreddit(1L, this.user.getEmail())).thenReturn(false);
-        ResponseEntity<Void> result = this.newsController.deleteSubreddit(1L, "email");
+        when(this.redditService.deleteSubreddit(1L, this.user.getId())).thenReturn(false);
+        ResponseEntity<Void> result = this.newsController.deleteSubreddit(1L, 1L);
         Assertions.assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
     }
 
@@ -97,8 +97,8 @@ class NewsControllerTest {
     public void addSubreddit() {
         SubredditDTO sDTO = new SubredditDTO("subreddit", "description");
         Subreddit subreddit = new Subreddit(1L, "description", "subreddit", null);
-        when(this.redditService.addSubreddit(sDTO, this.user.getEmail())).thenReturn(subreddit);
-        ResponseEntity<Subreddit> result = this.newsController.addSubreddit(sDTO, "email");
+        when(this.redditService.addSubreddit(sDTO, this.user.getId())).thenReturn(subreddit);
+        ResponseEntity<Subreddit> result = this.newsController.addSubreddit(sDTO, 1L);
         Assertions.assertEquals(subreddit, result.getBody());
     }
 

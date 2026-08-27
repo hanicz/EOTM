@@ -29,9 +29,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -41,6 +41,7 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles("test")
 class RSUTaxServiceTest {
 
+    private static final Long USER_ID = 1L;
     private static final String USER_EMAIL = "test@test.test";
     private static final LocalDate VEST_DATE = LocalDate.of(2025, 3, 14);
 
@@ -122,13 +123,13 @@ class RSUTaxServiceTest {
     @Test
     void storesTheValuationAndTheTaxWhenABuyIsFlagged() {
         Investment investment = this.investment(1L, "B", VEST_DATE, 50);
-        when(this.investmentRepository.findByUserEmailAndIdIn(USER_EMAIL, List.of(1L)))
+        when(this.investmentRepository.findByUserIdAndIdIn(USER_ID, List.of(1L)))
                 .thenReturn(List.of(investment));
-        when(this.rsuTaxDetailsRepository.findByUserEmailAndInvestmentIdIn(anyString(), anyList()))
+        when(this.rsuTaxDetailsRepository.findByUserIdAndInvestmentIdIn(anyLong(), anyList()))
                 .thenReturn(List.of());
         this.stubValuation(this.valued());
 
-        this.service().setRSU(USER_EMAIL, List.of(1L), true);
+        this.service().setRSU(USER_ID, List.of(1L), true);
 
         assertTrue(investment.isRsu());
         RSUTaxDetails saved = this.savedDetails().getFirst();
@@ -146,13 +147,13 @@ class RSUTaxServiceTest {
 
     @Test
     void valuesTheGrantFromTheStockTheDateAndTheQuantity() {
-        when(this.investmentRepository.findByUserEmailAndIdIn(USER_EMAIL, List.of(1L)))
+        when(this.investmentRepository.findByUserIdAndIdIn(USER_ID, List.of(1L)))
                 .thenReturn(List.of(this.investment(1L, "B", VEST_DATE, 50)));
-        when(this.rsuTaxDetailsRepository.findByUserEmailAndInvestmentIdIn(anyString(), anyList()))
+        when(this.rsuTaxDetailsRepository.findByUserIdAndInvestmentIdIn(anyLong(), anyList()))
                 .thenReturn(List.of());
         this.stubValuation(this.valued());
 
-        this.service().setRSU(USER_EMAIL, List.of(1L), true);
+        this.service().setRSU(USER_ID, List.of(1L), true);
 
         ArgumentCaptor<List<RSUDTO>> captor = ArgumentCaptor.captor();
         verify(this.taxService).calculateTaxForRSUs(captor.capture());
@@ -165,10 +166,10 @@ class RSUTaxServiceTest {
 
     @Test
     void skipsSellTransactions() {
-        when(this.investmentRepository.findByUserEmailAndIdIn(USER_EMAIL, List.of(1L)))
+        when(this.investmentRepository.findByUserIdAndIdIn(USER_ID, List.of(1L)))
                 .thenReturn(List.of(this.investment(1L, "S", VEST_DATE, 50)));
 
-        this.service().setRSU(USER_EMAIL, List.of(1L), true);
+        this.service().setRSU(USER_ID, List.of(1L), true);
 
         verifyNoInteractions(this.taxService);
         verifyNoInteractions(this.rsuTaxDetailsRepository);
@@ -179,13 +180,13 @@ class RSUTaxServiceTest {
     void flagsOnlyTheBuysInAMixedSelection() {
         Investment buy = this.investment(1L, "B", VEST_DATE, 50);
         Investment sell = this.investment(2L, "S", VEST_DATE, 10);
-        when(this.investmentRepository.findByUserEmailAndIdIn(USER_EMAIL, List.of(1L, 2L)))
+        when(this.investmentRepository.findByUserIdAndIdIn(USER_ID, List.of(1L, 2L)))
                 .thenReturn(List.of(buy, sell));
-        when(this.rsuTaxDetailsRepository.findByUserEmailAndInvestmentIdIn(anyString(), anyList()))
+        when(this.rsuTaxDetailsRepository.findByUserIdAndInvestmentIdIn(anyLong(), anyList()))
                 .thenReturn(List.of());
         this.stubValuation(this.valued());
 
-        this.service().setRSU(USER_EMAIL, List.of(1L, 2L), true);
+        this.service().setRSU(USER_ID, List.of(1L, 2L), true);
 
         assertTrue(buy.isRsu());
         assertFalse(sell.isRsu());
@@ -197,10 +198,10 @@ class RSUTaxServiceTest {
     void dropsTheStoredTaxWhenTheFlagIsRemoved() {
         Investment investment = this.investment(1L, "B", VEST_DATE, 50);
         investment.setRsu(true);
-        when(this.investmentRepository.findByUserEmailAndIdIn(USER_EMAIL, List.of(1L)))
+        when(this.investmentRepository.findByUserIdAndIdIn(USER_ID, List.of(1L)))
                 .thenReturn(List.of(investment));
 
-        this.service().setRSU(USER_EMAIL, List.of(1L), false);
+        this.service().setRSU(USER_ID, List.of(1L), false);
 
         assertFalse(investment.isRsu());
         verify(this.rsuTaxDetailsRepository).deleteByInvestmentIdIn(List.of(1L));
@@ -211,13 +212,13 @@ class RSUTaxServiceTest {
     @Test
     void keepsThePaidFlagWhenTheTaxIsRecalculated() {
         RSUTaxDetails existing = this.flagged(1L, true);
-        when(this.investmentRepository.findByUserEmailAndIdIn(USER_EMAIL, List.of(1L)))
+        when(this.investmentRepository.findByUserIdAndIdIn(USER_ID, List.of(1L)))
                 .thenReturn(List.of(existing.getInvestment()));
-        when(this.rsuTaxDetailsRepository.findByUserEmailAndInvestmentIdIn(USER_EMAIL, List.of(1L)))
+        when(this.rsuTaxDetailsRepository.findByUserIdAndInvestmentIdIn(USER_ID, List.of(1L)))
                 .thenReturn(List.of(existing));
         this.stubValuation(this.valued());
 
-        this.service().setRSU(USER_EMAIL, List.of(1L), true);
+        this.service().setRSU(USER_ID, List.of(1L), true);
 
         RSUTaxDetails saved = this.savedDetails().getFirst();
         assertEquals(existing, saved);
@@ -227,9 +228,9 @@ class RSUTaxServiceTest {
 
     @Test
     void ignoresIdsThatBelongToAnotherUser() {
-        when(this.investmentRepository.findByUserEmailAndIdIn(USER_EMAIL, List.of(1L))).thenReturn(List.of());
+        when(this.investmentRepository.findByUserIdAndIdIn(USER_ID, List.of(1L))).thenReturn(List.of());
 
-        this.service().setRSU(USER_EMAIL, List.of(1L), true);
+        this.service().setRSU(USER_ID, List.of(1L), true);
 
         verifyNoInteractions(this.taxService);
         verifyNoInteractions(this.rsuTaxDetailsRepository);
@@ -237,9 +238,9 @@ class RSUTaxServiceTest {
 
     @Test
     void returnsAnEmptyReportWhenNothingIsFlagged() {
-        when(this.rsuTaxDetailsRepository.findFlaggedByUserEmail(USER_EMAIL)).thenReturn(List.of());
+        when(this.rsuTaxDetailsRepository.findFlaggedByUserId(USER_ID)).thenReturn(List.of());
 
-        RSUTaxEventReportDTO report = this.service().getRSUTaxEvents(USER_EMAIL);
+        RSUTaxEventReportDTO report = this.service().getRSUTaxEvents(USER_ID);
 
         assertTrue(report.getItems().isEmpty());
         assertEquals(BigDecimal.ZERO, report.getTotalAmountInHuf());
@@ -248,10 +249,10 @@ class RSUTaxServiceTest {
 
     @Test
     void reportsTheStoredTaxWithoutRevaluing() {
-        when(this.rsuTaxDetailsRepository.findFlaggedByUserEmail(USER_EMAIL))
+        when(this.rsuTaxDetailsRepository.findFlaggedByUserId(USER_ID))
                 .thenReturn(List.of(this.flagged(1L, false)));
 
-        RSUTaxEventDTO item = this.service().getRSUTaxEvents(USER_EMAIL).getItems().getFirst();
+        RSUTaxEventDTO item = this.service().getRSUTaxEvents(USER_ID).getItems().getFirst();
 
         assertEquals(1L, item.getId());
         assertEquals("AAPL", item.getShortName());
@@ -268,10 +269,10 @@ class RSUTaxServiceTest {
 
     @Test
     void addsUpTheTaxOfEveryFlaggedTransaction() {
-        when(this.rsuTaxDetailsRepository.findFlaggedByUserEmail(USER_EMAIL))
+        when(this.rsuTaxDetailsRepository.findFlaggedByUserId(USER_ID))
                 .thenReturn(List.of(this.flagged(1L, false), this.flagged(2L, false)));
 
-        RSUTaxEventReportDTO report = this.service().getRSUTaxEvents(USER_EMAIL);
+        RSUTaxEventReportDTO report = this.service().getRSUTaxEvents(USER_ID);
 
         assertEquals(2, report.getItems().size());
         assertEquals(0, new BigDecimal("7902609.00").compareTo(report.getTotalAmountInHuf()));
@@ -281,10 +282,10 @@ class RSUTaxServiceTest {
     @Test
     void marksTheTaxAsPaid() {
         RSUTaxDetails details = this.flagged(1L, false);
-        when(this.rsuTaxDetailsRepository.findByUserEmailAndInvestmentIdIn(USER_EMAIL, List.of(1L)))
+        when(this.rsuTaxDetailsRepository.findByUserIdAndInvestmentIdIn(USER_ID, List.of(1L)))
                 .thenReturn(List.of(details));
 
-        this.service().setTaxPaid(USER_EMAIL, List.of(1L), true);
+        this.service().setTaxPaid(USER_ID, List.of(1L), true);
 
         assertTrue(details.getTaxDetails().isPaid());
         verify(this.rsuTaxDetailsRepository).saveAll(List.of(details));
@@ -293,39 +294,39 @@ class RSUTaxServiceTest {
     @Test
     void clearsThePaidFlagAgain() {
         RSUTaxDetails details = this.flagged(1L, true);
-        when(this.rsuTaxDetailsRepository.findByUserEmailAndInvestmentIdIn(USER_EMAIL, List.of(1L)))
+        when(this.rsuTaxDetailsRepository.findByUserIdAndInvestmentIdIn(USER_ID, List.of(1L)))
                 .thenReturn(List.of(details));
 
-        this.service().setTaxPaid(USER_EMAIL, List.of(1L), false);
+        this.service().setTaxPaid(USER_ID, List.of(1L), false);
 
         assertFalse(details.getTaxDetails().isPaid());
     }
 
     @Test
     void ignoresTransactionsThatAreNotRSUsWhenMarkingAsPaid() {
-        when(this.rsuTaxDetailsRepository.findByUserEmailAndInvestmentIdIn(USER_EMAIL, List.of(1L)))
+        when(this.rsuTaxDetailsRepository.findByUserIdAndInvestmentIdIn(USER_ID, List.of(1L)))
                 .thenReturn(List.of());
 
-        this.service().setTaxPaid(USER_EMAIL, List.of(1L), true);
+        this.service().setTaxPaid(USER_ID, List.of(1L), true);
 
         verify(this.rsuTaxDetailsRepository, never()).saveAll(any());
     }
 
     @Test
     void reportsWhetherTheTaxWasPaid() {
-        when(this.rsuTaxDetailsRepository.findFlaggedByUserEmail(USER_EMAIL))
+        when(this.rsuTaxDetailsRepository.findFlaggedByUserId(USER_ID))
                 .thenReturn(List.of(this.flagged(1L, true)));
 
-        assertTrue(this.service().getRSUTaxEvents(USER_EMAIL).getItems().getFirst().isPaid());
+        assertTrue(this.service().getRSUTaxEvents(USER_ID).getItems().getFirst().isPaid());
     }
 
     @Test
     void writesTheReportAsCsv() {
-        when(this.rsuTaxDetailsRepository.findFlaggedByUserEmail(USER_EMAIL))
+        when(this.rsuTaxDetailsRepository.findFlaggedByUserId(USER_ID))
                 .thenReturn(List.of(this.flagged(1L, false)));
         StringWriter writer = new StringWriter();
 
-        this.service().getCSV(USER_EMAIL, writer);
+        this.service().getCSV(USER_ID, writer);
 
         String csv = writer.toString();
         assertTrue(csv.contains("Value (HUF)"));

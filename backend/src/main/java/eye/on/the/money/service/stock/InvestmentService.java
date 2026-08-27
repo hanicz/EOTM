@@ -50,37 +50,37 @@ public class InvestmentService implements ICSVService {
     private final ModelMapper modelMapper;
     private final EODAPIService eodAPIService;
     private final StockService stockService;
-    public List<InvestmentDTO> getInvestments(String userEmail) {
-        return this.investmentRepository.findByUserEmailOrderByTransactionDateDesc(userEmail).stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
+    public List<InvestmentDTO> getInvestments(Long userId) {
+        return this.investmentRepository.findByUserIdOrderByTransactionDateDesc(userId).stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
     }
 
-    public List<InvestmentDTO> getInvestmentsBetween(String userEmail, LocalDate from, LocalDate to) {
-        return this.investmentRepository.findByUserEmailAndTransactionDateBetweenOrderByTransactionDate(userEmail, from, to)
+    public List<InvestmentDTO> getInvestmentsBetween(Long userId, LocalDate from, LocalDate to) {
+        return this.investmentRepository.findByUserIdAndTransactionDateBetweenOrderByTransactionDate(userId, from, to)
                 .stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
     }
 
-    public List<InvestmentDTO> getInvestmentsByAccountId(String userEmail, Long accountId) {
-        return this.investmentRepository.findByUserEmailAndAccountIdOrderByTransactionDateDesc(userEmail, accountId)
+    public List<InvestmentDTO> getInvestmentsByAccountId(Long userId, Long accountId) {
+        return this.investmentRepository.findByUserIdAndAccountIdOrderByTransactionDateDesc(userId, accountId)
                 .stream().map(this::convertToInvestmentDTO).collect(Collectors.toList());
     }
 
-    @Cacheable(cacheNames = "holdings-stock", key = "#userEmail")
-    public List<InvestmentDTO> getCurrentHoldings(String userEmail) {
-        return this.currentHoldings(userEmail);
+    @Cacheable(cacheNames = "holdings-stock", key = "#userId")
+    public List<InvestmentDTO> getCurrentHoldings(Long userId) {
+        return this.currentHoldings(userId);
     }
 
-    @CachePut(cacheNames = "holdings-stock", key = "#userEmail")
-    public List<InvestmentDTO> refreshCurrentHoldings(String userEmail) {
-        return this.currentHoldings(userEmail);
+    @CachePut(cacheNames = "holdings-stock", key = "#userId")
+    public List<InvestmentDTO> refreshCurrentHoldings(Long userId) {
+        return this.currentHoldings(userId);
     }
 
-    private List<InvestmentDTO> currentHoldings(String userEmail) {
-        List<InvestmentDTO> investments = this.investmentRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToInvestmentDTO).toList();
+    private List<InvestmentDTO> currentHoldings(Long userId) {
+        List<InvestmentDTO> investments = this.investmentRepository.findByUserIdOrderByTransactionDate(userId).stream().map(this::convertToInvestmentDTO).toList();
         return this.getLiveDataForInvestments(investments);
     }
 
-    public List<InvestmentDTO> getHoldingsByAccountId(String userEmail, Long accountId) {
-        List<InvestmentDTO> investments = this.investmentRepository.findByUserEmailAndAccountIdOrderByTransactionDateDesc(userEmail, accountId)
+    public List<InvestmentDTO> getHoldingsByAccountId(Long userId, Long accountId) {
+        List<InvestmentDTO> investments = this.investmentRepository.findByUserIdAndAccountIdOrderByTransactionDateDesc(userId, accountId)
                 .stream().map(this::convertToInvestmentDTO).toList();
         return this.getLiveDataForInvestments(investments);
     }
@@ -120,15 +120,15 @@ public class InvestmentService implements ICSVService {
         return investmentDTOList;
     }
 
-    public List<InvestmentDTO> getAllPositions(String userEmail) {
-        List<InvestmentDTO> investments = this.investmentRepository.findByUserEmailOrderByTransactionDate(userEmail)
+    public List<InvestmentDTO> getAllPositions(Long userId) {
+        List<InvestmentDTO> investments = this.investmentRepository.findByUserIdOrderByTransactionDate(userId)
                 .stream().map(this::convertToInvestmentDTO).toList();
         Map<String, InvestmentDTO> investmentMap = this.getCalculated(investments);
         return new ArrayList<>(investmentMap.values());
     }
 
-    public List<InvestmentDTO> getPositionsByAccountId(String userEmail, Long accountId) {
-        List<InvestmentDTO> investments = this.investmentRepository.findByUserEmailAndAccountIdOrderByTransactionDateDesc(userEmail, accountId)
+    public List<InvestmentDTO> getPositionsByAccountId(Long userId, Long accountId) {
+        List<InvestmentDTO> investments = this.investmentRepository.findByUserIdAndAccountIdOrderByTransactionDateDesc(userId, accountId)
                 .stream().map(this::convertToInvestmentDTO).toList();
         Map<String, InvestmentDTO> investmentMap = this.getCalculated(investments);
         return new ArrayList<>(investmentMap.values());
@@ -162,13 +162,13 @@ public class InvestmentService implements ICSVService {
         return this.modelMapper.map(investment, InvestmentDTO.class);
     }
 
-    @CacheEvict(cacheNames = "holdings-stock", key = "#userEmail")
+    @CacheEvict(cacheNames = "holdings-stock", key = "#userId")
     @Transactional
-    public InvestmentDTO createInvestment(InvestmentDTO investmentDTO, String userEmail) {
+    public InvestmentDTO createInvestment(InvestmentDTO investmentDTO, Long userId) {
         Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + investmentDTO.getCurrencyId()));
         Stock stock = this.stockService.getOrCreateStock(investmentDTO.getShortName(), investmentDTO.getExchange(), investmentDTO.getName());
-        User user = this.userService.loadUserByEmail(userEmail);
-        Account account = this.accountService.getAccount(userEmail, investmentDTO.getAccountId());
+        User user = this.userService.getReference(userId);
+        Account account = this.accountService.getAccount(userId, investmentDTO.getAccountId());
 
         Investment investment = Investment.builder()
                 .buySell(investmentDTO.getBuySell())
@@ -186,13 +186,13 @@ public class InvestmentService implements ICSVService {
         return this.convertToInvestmentDTO(investment);
     }
 
-    @CacheEvict(cacheNames = "holdings-stock", key = "#userEmail")
+    @CacheEvict(cacheNames = "holdings-stock", key = "#userId")
     @Transactional
-    public InvestmentDTO updateInvestment(InvestmentDTO investmentDTO, String userEmail) {
+    public InvestmentDTO updateInvestment(InvestmentDTO investmentDTO, Long userId) {
         Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + investmentDTO.getCurrencyId()));
         Stock stock = this.stockService.getOrCreateStock(investmentDTO.getShortName(), investmentDTO.getExchange(), investmentDTO.getName());
-        Investment investment = this.investmentRepository.findByIdAndUserEmail(investmentDTO.getInvestmentId(), userEmail).orElseThrow(() -> new NoSuchElementException("Investment not found: " + investmentDTO.getInvestmentId()));
-        Account account = this.accountService.getAccount(userEmail, investmentDTO.getAccountId());
+        Investment investment = this.investmentRepository.findByIdAndUserId(investmentDTO.getInvestmentId(), userId).orElseThrow(() -> new NoSuchElementException("Investment not found: " + investmentDTO.getInvestmentId()));
+        Account account = this.accountService.getAccount(userId, investmentDTO.getAccountId());
 
         if (investment.isRsu() && this.rsuValuationChanged(investment, investmentDTO, stock)) {
             investment.setRsu(false);
@@ -218,40 +218,40 @@ public class InvestmentService implements ICSVService {
                 || !"B".equals(investmentDTO.getBuySell());
     }
 
-    @CacheEvict(cacheNames = "holdings-stock", key = "#userEmail")
+    @CacheEvict(cacheNames = "holdings-stock", key = "#userId")
     @Transactional
-    public void deleteInvestmentById(String userEmail, List<Long> ids) {
-        this.investmentRepository.deleteByUserEmailAndIdIn(userEmail, ids);
+    public void deleteInvestmentById(Long userId, List<Long> ids) {
+        this.investmentRepository.deleteByUserIdAndIdIn(userId, ids);
     }
 
-    public void getCSV(String userEmail, Writer writer) {
+    public void getCSV(Long userId, Writer writer) {
         List<InvestmentDTO> investmentList =
-                this.investmentRepository.findByUserEmailOrderByTransactionDate(userEmail)
+                this.investmentRepository.findByUserIdOrderByTransactionDate(userId)
                         .stream()
                         .map(this::convertToInvestmentDTO)
                         .toList();
         this.printRecords(investmentList, writer);
     }
 
-    @CacheEvict(cacheNames = "holdings-stock", key = "#userEmail")
+    @CacheEvict(cacheNames = "holdings-stock", key = "#userId")
     @Transactional
-    public void processCSV(String userEmail, MultipartFile file) {
+    public void processCSV(Long userId, MultipartFile file) {
         try (CSVParser csvParser = this.getParser(file,
                 new String[]{"Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Exchange", "Amount", "Currency", "Fee", "Account"})) {
-            Map<String, Long> accountIdsByName = this.accountService.getAccountIdsByName(userEmail);
+            Map<String, Long> accountIdsByName = this.accountService.getAccountIdsByName(userId);
 
             for (CSVRecord csvRecord : csvParser) {
                 InvestmentDTO investment = InvestmentDTO.createFromCSVRecord(csvRecord, DateFormats.YYYY_MM_DD);
                 investment.setAccountId(this.resolveAccountId(accountIdsByName, investment.getAccountName()));
 
                 if (investment.getInvestmentId() != null &&
-                        this.investmentRepository.findByIdAndUserEmail(investment.getInvestmentId(), userEmail).isPresent()) {
+                        this.investmentRepository.findByIdAndUserId(investment.getInvestmentId(), userId).isPresent()) {
                     log.trace("Update investment {}", investment);
-                    this.updateInvestment(investment, userEmail);
+                    this.updateInvestment(investment, userId);
                 } else {
                     investment.setInvestmentId(null);
                     log.trace("Create investment {}", investment);
-                    this.createInvestment(investment, userEmail);
+                    this.createInvestment(investment, userId);
                 }
             }
         } catch (IOException | DateTimeParseException | IllegalArgumentException e) {

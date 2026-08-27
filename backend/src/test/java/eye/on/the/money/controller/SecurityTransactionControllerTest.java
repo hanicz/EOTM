@@ -43,43 +43,43 @@ class SecurityTransactionControllerTest {
     @Test
     void getAllTransactions() {
         List<SecurityTransactionDTO> transactions = this.createTransactionList();
-        when(this.securityTransactionService.getTransactions("email")).thenReturn(transactions);
+        when(this.securityTransactionService.getTransactions(1L)).thenReturn(transactions);
 
-        Assertions.assertIterableEquals(transactions, this.securityTransactionController.getAllTransactions("email").getBody());
+        Assertions.assertIterableEquals(transactions, this.securityTransactionController.getAllTransactions(1L).getBody());
     }
 
     @Test
     void getHoldings() {
         List<SecurityTransactionDTO> holdings = this.createTransactionList();
-        when(this.securityTransactionService.getCurrentHoldings("email")).thenReturn(holdings);
+        when(this.securityTransactionService.getCurrentHoldings(1L)).thenReturn(holdings);
 
-        Assertions.assertIterableEquals(holdings, this.securityTransactionController.getHoldings("email").getBody());
+        Assertions.assertIterableEquals(holdings, this.securityTransactionController.getHoldings(1L).getBody());
     }
 
     @Test
     void createTransaction() {
         SecurityTransactionDTO dto = SecurityTransactionDTO.builder().transactionId(1L).buySell("B").quantity(10)
                 .amount(500.0).transactionDate(LocalDate.now()).securityId("SEC1").securityName("Security One").currencyId("EUR").build();
-        when(this.securityTransactionService.createTransaction(dto, "email")).thenReturn(dto);
+        when(this.securityTransactionService.createTransaction(dto, 1L)).thenReturn(dto);
 
-        Assertions.assertEquals(HttpStatus.CREATED, this.securityTransactionController.createTransaction("email", dto).getStatusCode());
-        Assertions.assertEquals(dto, this.securityTransactionController.createTransaction("email", dto).getBody());
+        Assertions.assertEquals(HttpStatus.CREATED, this.securityTransactionController.createTransaction(1L, dto).getStatusCode());
+        Assertions.assertEquals(dto, this.securityTransactionController.createTransaction(1L, dto).getBody());
     }
 
     @Test
     void updateTransaction() {
         SecurityTransactionDTO dto = SecurityTransactionDTO.builder().transactionId(1L).buySell("B").quantity(15)
                 .amount(750.0).transactionDate(LocalDate.now()).securityId("SEC1").securityName("Security One").currencyId("EUR").build();
-        when(this.securityTransactionService.updateTransaction(dto, "email")).thenReturn(dto);
+        when(this.securityTransactionService.updateTransaction(dto, 1L)).thenReturn(dto);
 
-        Assertions.assertEquals(dto, this.securityTransactionController.updateTransaction("email", dto).getBody());
+        Assertions.assertEquals(dto, this.securityTransactionController.updateTransaction(1L, dto).getBody());
     }
 
     @Test
     void deleteByIds() {
         doNothing().when(this.securityTransactionService).deleteTransactionById(any(), any());
 
-        Assertions.assertEquals(HttpStatus.OK, this.securityTransactionController.deleteByIds("email", List.of(1L, 2L)).getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, this.securityTransactionController.deleteByIds(1L, List.of(1L, 2L)).getStatusCode());
     }
 
     @Test
@@ -87,7 +87,7 @@ class SecurityTransactionControllerTest {
         HttpServletResponse httpSR = new MockHttpServletResponse();
         doNothing().when(this.securityTransactionService).getCSV(any(), any());
 
-        this.securityTransactionController.getCSV("email", httpSR);
+        this.securityTransactionController.getCSV(1L, httpSR);
 
         verify(this.securityTransactionService, times(1)).getCSV(any(), any());
     }
@@ -96,6 +96,6 @@ class SecurityTransactionControllerTest {
     void processCSV() throws IOException {
         doNothing().when(this.securityTransactionService).processCSV(any(), any());
 
-        Assertions.assertEquals(HttpStatus.CREATED, this.securityTransactionController.processCSV("email", null).getStatusCode());
+        Assertions.assertEquals(HttpStatus.CREATED, this.securityTransactionController.processCSV(1L, null).getStatusCode());
     }
 }

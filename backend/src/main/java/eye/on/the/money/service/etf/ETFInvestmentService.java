@@ -48,17 +48,17 @@ public class ETFInvestmentService implements ICSVService {
     private final UserService userService;
     private final ModelMapper modelMapper;
     private final AccountService accountService;
-    public List<ETFInvestmentDTO> getETFInvestments(String userEmail) {
-        return this.etfInvestmentRepository.findByUserEmailOrderByTransactionDateDesc(userEmail).stream().map(this::convertToETFInvestmentDTO).collect(Collectors.toList());
+    public List<ETFInvestmentDTO> getETFInvestments(Long userId) {
+        return this.etfInvestmentRepository.findByUserIdOrderByTransactionDateDesc(userId).stream().map(this::convertToETFInvestmentDTO).collect(Collectors.toList());
     }
 
-    public List<ETFInvestmentDTO> getETFInvestmentsByAccountId(String userEmail, Long accountId) {
-        return this.etfInvestmentRepository.findByUserEmailAndAccountIdOrderByTransactionDateDesc(userEmail, accountId)
+    public List<ETFInvestmentDTO> getETFInvestmentsByAccountId(Long userId, Long accountId) {
+        return this.etfInvestmentRepository.findByUserIdAndAccountIdOrderByTransactionDateDesc(userId, accountId)
                 .stream().map(this::convertToETFInvestmentDTO).collect(Collectors.toList());
     }
 
-    public List<ETFInvestmentDTO> getETFInvestmentsBetween(String userEmail, LocalDate from, LocalDate to) {
-        return this.etfInvestmentRepository.findByUserEmailAndTransactionDateBetweenOrderByTransactionDate(userEmail, from, to)
+    public List<ETFInvestmentDTO> getETFInvestmentsBetween(Long userId, LocalDate from, LocalDate to) {
+        return this.etfInvestmentRepository.findByUserIdAndTransactionDateBetweenOrderByTransactionDate(userId, from, to)
                 .stream().map(this::convertToETFInvestmentDTO).collect(Collectors.toList());
     }
 
@@ -66,24 +66,24 @@ public class ETFInvestmentService implements ICSVService {
         return this.modelMapper.map(etfInvestment, ETFInvestmentDTO.class);
     }
 
-    @Cacheable(cacheNames = "holdings-etf", key = "#userEmail")
-    public List<ETFInvestmentDTO> getCurrentETFHoldings(String userEmail) {
-        return this.currentETFHoldings(userEmail);
+    @Cacheable(cacheNames = "holdings-etf", key = "#userId")
+    public List<ETFInvestmentDTO> getCurrentETFHoldings(Long userId) {
+        return this.currentETFHoldings(userId);
     }
 
-    @CachePut(cacheNames = "holdings-etf", key = "#userEmail")
-    public List<ETFInvestmentDTO> refreshCurrentETFHoldings(String userEmail) {
-        return this.currentETFHoldings(userEmail);
+    @CachePut(cacheNames = "holdings-etf", key = "#userId")
+    public List<ETFInvestmentDTO> refreshCurrentETFHoldings(Long userId) {
+        return this.currentETFHoldings(userId);
     }
 
-    private List<ETFInvestmentDTO> currentETFHoldings(String userEmail) {
-        List<ETFInvestmentDTO> investments = this.etfInvestmentRepository.findByUserEmailOrderByTransactionDate(userEmail)
+    private List<ETFInvestmentDTO> currentETFHoldings(Long userId) {
+        List<ETFInvestmentDTO> investments = this.etfInvestmentRepository.findByUserIdOrderByTransactionDate(userId)
                 .stream().map(this::convertToETFInvestmentDTO).toList();
         return this.getLiveDataForInvestments(investments);
     }
 
-    public List<ETFInvestmentDTO> getHoldingsByAccountId(String userEmail, Long accountId) {
-        List<ETFInvestmentDTO> investments = this.etfInvestmentRepository.findByUserEmailAndAccountIdOrderByTransactionDateDesc(userEmail, accountId)
+    public List<ETFInvestmentDTO> getHoldingsByAccountId(Long userId, Long accountId) {
+        List<ETFInvestmentDTO> investments = this.etfInvestmentRepository.findByUserIdAndAccountIdOrderByTransactionDateDesc(userId, accountId)
                 .stream().map(this::convertToETFInvestmentDTO).toList();
         return this.getLiveDataForInvestments(investments);
     }
@@ -119,15 +119,15 @@ public class ETFInvestmentService implements ICSVService {
         return etfInvestmentDTOList;
     }
 
-    public List<ETFInvestmentDTO> getAllPositions(String userEmail) {
-        List<ETFInvestmentDTO> investments = this.etfInvestmentRepository.findByUserEmailOrderByTransactionDate(userEmail)
+    public List<ETFInvestmentDTO> getAllPositions(Long userId) {
+        List<ETFInvestmentDTO> investments = this.etfInvestmentRepository.findByUserIdOrderByTransactionDate(userId)
                 .stream().map(this::convertToETFInvestmentDTO).toList();
         Map<String, ETFInvestmentDTO> investmentMap = this.getCalculated(investments);
         return new ArrayList<>(investmentMap.values());
     }
 
-    public List<ETFInvestmentDTO> getPositionsByAccountId(String userEmail, Long accountId) {
-        List<ETFInvestmentDTO> investments = this.etfInvestmentRepository.findByUserEmailAndAccountIdOrderByTransactionDateDesc(userEmail, accountId)
+    public List<ETFInvestmentDTO> getPositionsByAccountId(Long userId, Long accountId) {
+        List<ETFInvestmentDTO> investments = this.etfInvestmentRepository.findByUserIdAndAccountIdOrderByTransactionDateDesc(userId, accountId)
                 .stream().map(this::convertToETFInvestmentDTO).toList();
         Map<String, ETFInvestmentDTO> investmentMap = this.getCalculated(investments);
         return new ArrayList<>(investmentMap.values());
@@ -146,19 +146,19 @@ public class ETFInvestmentService implements ICSVService {
     }
 
 
-    @CacheEvict(cacheNames = "holdings-etf", key = "#userEmail")
+    @CacheEvict(cacheNames = "holdings-etf", key = "#userId")
     @Transactional
-    public void deleteInvestmentById(String userEmail, List<Long> ids) {
-        this.etfInvestmentRepository.deleteByUserEmailAndIdIn(userEmail, ids);
+    public void deleteInvestmentById(Long userId, List<Long> ids) {
+        this.etfInvestmentRepository.deleteByUserIdAndIdIn(userId, ids);
     }
 
-    @CacheEvict(cacheNames = "holdings-etf", key = "#userEmail")
+    @CacheEvict(cacheNames = "holdings-etf", key = "#userId")
     @Transactional
-    public ETFInvestmentDTO createInvestment(ETFInvestmentDTO investmentDTO, String userEmail) {
+    public ETFInvestmentDTO createInvestment(ETFInvestmentDTO investmentDTO, Long userId) {
         Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + investmentDTO.getCurrencyId()));
         ETF etf = this.etfService.getOrCreateETF(investmentDTO.getShortName(), investmentDTO.getExchange(), investmentDTO.getName());
-        User user = this.userService.loadUserByEmail(userEmail);
-        Account account = this.accountService.getAccount(userEmail, investmentDTO.getAccountId());
+        User user = this.userService.getReference(userId);
+        Account account = this.accountService.getAccount(userId, investmentDTO.getAccountId());
 
         ETFInvestment investment = ETFInvestment.builder()
                 .buySell(investmentDTO.getBuySell())
@@ -176,13 +176,13 @@ public class ETFInvestmentService implements ICSVService {
         return this.convertToETFInvestmentDTO(investment);
     }
 
-    @CacheEvict(cacheNames = "holdings-etf", key = "#userEmail")
+    @CacheEvict(cacheNames = "holdings-etf", key = "#userId")
     @Transactional
-    public ETFInvestmentDTO updateInvestment(ETFInvestmentDTO investmentDTO, String userEmail) {
+    public ETFInvestmentDTO updateInvestment(ETFInvestmentDTO investmentDTO, Long userId) {
         Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + investmentDTO.getCurrencyId()));
         ETF etf = this.etfService.getOrCreateETF(investmentDTO.getShortName(), investmentDTO.getExchange(), investmentDTO.getName());
-        ETFInvestment investment = this.etfInvestmentRepository.findByIdAndUserEmail(investmentDTO.getId(), userEmail).orElseThrow(() -> new NoSuchElementException("ETF investment not found: " + investmentDTO.getId()));
-        Account account = this.accountService.getAccount(userEmail, investmentDTO.getAccountId());
+        ETFInvestment investment = this.etfInvestmentRepository.findByIdAndUserId(investmentDTO.getId(), userId).orElseThrow(() -> new NoSuchElementException("ETF investment not found: " + investmentDTO.getId()));
+        Account account = this.accountService.getAccount(userId, investmentDTO.getAccountId());
 
         investment.setBuySell(investmentDTO.getBuySell());
         investment.setTransactionDate(investmentDTO.getTransactionDate());
@@ -196,34 +196,34 @@ public class ETFInvestmentService implements ICSVService {
         return this.convertToETFInvestmentDTO(investment);
     }
 
-    public void getCSV(String userEmail, Writer writer) {
+    public void getCSV(Long userId, Writer writer) {
         List<ETFInvestmentDTO> investmentList =
-                this.etfInvestmentRepository.findByUserEmailOrderByTransactionDate(userEmail)
+                this.etfInvestmentRepository.findByUserIdOrderByTransactionDate(userId)
                         .stream()
                         .map(this::convertToETFInvestmentDTO).
                         toList();
         this.printRecords(investmentList, writer);
     }
 
-    @CacheEvict(cacheNames = "holdings-etf", key = "#userEmail")
+    @CacheEvict(cacheNames = "holdings-etf", key = "#userId")
     @Transactional
-    public void processCSV(String userEmail, MultipartFile file) {
+    public void processCSV(Long userId, MultipartFile file) {
         try (CSVParser csvParser = this.getParser(file,
                 new String[]{"Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Exchange", "Amount", "Currency", "Fee", "Account"})) {
-            Map<String, Long> accountIdsByName = this.accountService.getAccountIdsByName(userEmail);
+            Map<String, Long> accountIdsByName = this.accountService.getAccountIdsByName(userId);
 
             for (CSVRecord csvRecord : csvParser) {
                 ETFInvestmentDTO investment = ETFInvestmentDTO.createFromCSVRecord(csvRecord, DateFormats.YYYY_MM_DD);
                 investment.setAccountId(this.resolveAccountId(accountIdsByName, investment.getAccountName()));
 
                 if (investment.getId() != null &&
-                        this.etfInvestmentRepository.findByIdAndUserEmail(investment.getId(), userEmail).isPresent()) {
+                        this.etfInvestmentRepository.findByIdAndUserId(investment.getId(), userId).isPresent()) {
                     log.trace("Update etf investment {}", investment);
-                    this.updateInvestment(investment, userEmail);
+                    this.updateInvestment(investment, userId);
                 } else {
                     investment.setId(null);
                     log.trace("Create etf investment {}", investment);
-                    this.createInvestment(investment, userEmail);
+                    this.createInvestment(investment, userId);
                 }
             }
         } catch (IOException | DateTimeParseException | IllegalArgumentException e) {

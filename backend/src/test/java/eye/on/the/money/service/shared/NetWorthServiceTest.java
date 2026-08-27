@@ -31,8 +31,8 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -42,7 +42,7 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class NetWorthServiceTest {
 
-    private static final String USER = "user@eotm.com";
+    private static final Long USER = 1L;
 
     @Mock
     private InvestmentService investmentService;
@@ -66,11 +66,11 @@ class NetWorthServiceTest {
                 this.dashboardService);
 
         this.stubRates(Map.of("USD", 1.10, "HUF", 400.0));
-        when(this.investmentService.getCurrentHoldings(anyString())).thenReturn(List.of());
-        when(this.transactionService.getCurrentHoldings(anyString(), any())).thenReturn(List.of());
-        when(this.etfInvestmentService.getCurrentETFHoldings(anyString())).thenReturn(List.of());
-        when(this.forexTransactionService.getAllForexHoldings(anyString())).thenReturn(List.of());
-        when(this.securityTransactionService.getCurrentHoldings(anyString())).thenReturn(List.of());
+        when(this.investmentService.getCurrentHoldings(anyLong())).thenReturn(List.of());
+        when(this.transactionService.getCurrentHoldings(anyLong(), any())).thenReturn(List.of());
+        when(this.etfInvestmentService.getCurrentETFHoldings(anyLong())).thenReturn(List.of());
+        when(this.forexTransactionService.getAllForexHoldings(anyLong())).thenReturn(List.of());
+        when(this.securityTransactionService.getCurrentHoldings(anyLong())).thenReturn(List.of());
     }
 
     private void stubRates(Map<String, Double> rates) {
@@ -102,7 +102,7 @@ class NetWorthServiceTest {
      */
     @Test
     void getNetWorth_treatsCryptoLiveValueAsEurNotAsThePurchaseCurrency() {
-        when(this.transactionService.getCurrentHoldings(anyString(), any())).thenReturn(List.of(
+        when(this.transactionService.getCurrentHoldings(anyLong(), any())).thenReturn(List.of(
                 TransactionDTO.builder().amount(44000.0).liveValue(200.0).currencyId("HUF").build()));
 
         NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);

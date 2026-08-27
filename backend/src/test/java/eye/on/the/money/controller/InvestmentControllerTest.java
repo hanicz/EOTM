@@ -45,37 +45,37 @@ class InvestmentControllerTest {
     public void getAllInvestments() {
         List<InvestmentDTO> iDTO = this.createInvestmentList();
 
-        when(this.investmentService.getInvestments("email")).thenReturn(iDTO);
+        when(this.investmentService.getInvestments(1L)).thenReturn(iDTO);
 
-        Assertions.assertIterableEquals(iDTO, this.investmentController.getAllInvestments("email").getBody());
+        Assertions.assertIterableEquals(iDTO, this.investmentController.getAllInvestments(1L).getBody());
     }
 
     @Test
     public void getHoldings() {
         List<InvestmentDTO> iDTO = this.createInvestmentList();
 
-        when(this.investmentService.getCurrentHoldings("email")).thenReturn(iDTO);
+        when(this.investmentService.getCurrentHoldings(1L)).thenReturn(iDTO);
 
-        Assertions.assertIterableEquals(iDTO, this.investmentController.getHoldings("email", false).getBody());
+        Assertions.assertIterableEquals(iDTO, this.investmentController.getHoldings(1L, false).getBody());
     }
 
     @Test
     public void getHoldings_refreshBypassesTheCache() {
         List<InvestmentDTO> iDTO = this.createInvestmentList();
 
-        when(this.investmentService.refreshCurrentHoldings("email")).thenReturn(iDTO);
+        when(this.investmentService.refreshCurrentHoldings(1L)).thenReturn(iDTO);
 
-        Assertions.assertIterableEquals(iDTO, this.investmentController.getHoldings("email", true).getBody());
-        verify(this.investmentService, never()).getCurrentHoldings("email");
+        Assertions.assertIterableEquals(iDTO, this.investmentController.getHoldings(1L, true).getBody());
+        verify(this.investmentService, never()).getCurrentHoldings(1L);
     }
 
     @Test
     public void getPositions() {
         List<InvestmentDTO> iDTO = this.createInvestmentList();
 
-        when(this.investmentService.getAllPositions("email")).thenReturn(iDTO);
+        when(this.investmentService.getAllPositions(1L)).thenReturn(iDTO);
 
-        Assertions.assertIterableEquals(iDTO, this.investmentController.getPositions("email").getBody());
+        Assertions.assertIterableEquals(iDTO, this.investmentController.getPositions(1L).getBody());
     }
 
     @Test
@@ -83,16 +83,16 @@ class InvestmentControllerTest {
         InvestmentDTO iDTO = InvestmentDTO.builder().buySell("b").amount(3213.0).fee(7.8).quantity(33).name("n1")
                 .exchange("e1").shortName("s1").transactionDate(LocalDate.now()).currencyId("eur").liveValue(674.1).valueDiff(4.0).build();
 
-        when(this.investmentService.createInvestment(iDTO, "email")).thenReturn(iDTO);
+        when(this.investmentService.createInvestment(iDTO, 1L)).thenReturn(iDTO);
 
-        Assertions.assertEquals(iDTO, this.investmentController.createInvestment("email", iDTO).getBody());
+        Assertions.assertEquals(iDTO, this.investmentController.createInvestment(1L, iDTO).getBody());
     }
 
     @Test
     public void deleteByIds() {
         doNothing().when(this.investmentService).deleteInvestmentById(any(), any());
 
-        Assertions.assertEquals(HttpStatus.OK, this.investmentController.deleteByIds("email", List.of(1L, 2L, 3L)).getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, this.investmentController.deleteByIds(1L, List.of(1L, 2L, 3L)).getStatusCode());
     }
 
     @Test
@@ -100,8 +100,8 @@ class InvestmentControllerTest {
         doNothing().when(this.rsuTaxService).setRSU(any(), any(), anyBoolean());
 
         Assertions.assertEquals(HttpStatus.OK,
-                this.investmentController.setRSU("email", List.of(1L, 2L), true).getStatusCode());
-        verify(this.rsuTaxService).setRSU("email", List.of(1L, 2L), true);
+                this.investmentController.setRSU(1L, List.of(1L, 2L), true).getStatusCode());
+        verify(this.rsuTaxService).setRSU(1L, List.of(1L, 2L), true);
     }
 
     @Test
@@ -109,7 +109,7 @@ class InvestmentControllerTest {
         HttpServletResponse httpSR = new MockHttpServletResponse();
 
         doNothing().when(this.investmentService).getCSV(any(), any());
-        this.investmentController.getCSV("email", httpSR);
+        this.investmentController.getCSV(1L, httpSR);
 
         verify(this.investmentService, times(1)).getCSV(any(), any());
     }
@@ -119,18 +119,18 @@ class InvestmentControllerTest {
         InvestmentDTO iDTO = InvestmentDTO.builder().investmentId(1L).buySell("b").amount(3213.0).fee(7.8).quantity(33).name("n1")
                 .exchange("e1").shortName("s1").transactionDate(LocalDate.now()).currencyId("eur").liveValue(674.1).valueDiff(4.0).build();
 
-        when(this.investmentService.updateInvestment(iDTO, "email")).thenReturn(iDTO);
+        when(this.investmentService.updateInvestment(iDTO, 1L)).thenReturn(iDTO);
 
-        Assertions.assertEquals(iDTO, this.investmentController.updateInvestment("email", iDTO).getBody());
+        Assertions.assertEquals(iDTO, this.investmentController.updateInvestment(1L, iDTO).getBody());
     }
 
     @Test
     public void processCSV() throws IOException {
         MultipartFile mpf = new MockMultipartFile("mpf", "mpf.csv", MediaType.TEXT_PLAIN_VALUE, "content".getBytes());
 
-        doNothing().when(this.investmentService).processCSV("email", mpf);
+        doNothing().when(this.investmentService).processCSV(1L, mpf);
 
-        Assertions.assertEquals(HttpStatus.CREATED, this.investmentController.processCSV("email", mpf).getStatusCode());
+        Assertions.assertEquals(HttpStatus.CREATED, this.investmentController.processCSV(1L, mpf).getStatusCode());
     }
 
     private List<InvestmentDTO> createInvestmentList() {

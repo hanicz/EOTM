@@ -38,12 +38,12 @@ public class DividendService implements ICSVService {
     private final StockService stockService;
     private final UserService userService;
     private final ModelMapper modelMapper;
-    public List<DividendDTO> getDividends(String userEmail) {
-        return this.dividendRepository.findByUserEmailOrderByDividendDateDesc(userEmail).stream().map(this::convertToDividendDTO).collect(Collectors.toList());
+    public List<DividendDTO> getDividends(Long userId) {
+        return this.dividendRepository.findByUserIdOrderByDividendDateDesc(userId).stream().map(this::convertToDividendDTO).collect(Collectors.toList());
     }
 
-    public List<DividendDTO> getDividendsBetween(String userEmail, LocalDate from, LocalDate to) {
-        return this.dividendRepository.findByUserEmailAndDividendDateBetweenOrderByDividendDate(userEmail, from, to)
+    public List<DividendDTO> getDividendsBetween(Long userId, LocalDate from, LocalDate to) {
+        return this.dividendRepository.findByUserIdAndDividendDateBetweenOrderByDividendDate(userId, from, to)
                 .stream().map(this::convertToDividendDTO).collect(Collectors.toList());
     }
 
@@ -52,10 +52,10 @@ public class DividendService implements ICSVService {
     }
 
     @Transactional
-    public DividendDTO createDividend(DividendDTO dividendDTO, String userEmail) {
+    public DividendDTO createDividend(DividendDTO dividendDTO, Long userId) {
         Currency currency = this.currencyRepository.findById(dividendDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + dividendDTO.getCurrencyId()));
         Stock stock = this.stockService.getOrCreateStock(dividendDTO.getShortName(), dividendDTO.getExchange(), dividendDTO.getName());
-        User user = this.userService.loadUserByEmail(userEmail);
+        User user = this.userService.getReference(userId);
 
         Dividend dividend = Dividend.builder()
                 .amount(dividendDTO.getAmount())
@@ -70,10 +70,10 @@ public class DividendService implements ICSVService {
     }
 
     @Transactional
-    public DividendDTO updateDividend(DividendDTO dividendDTO, String userEmail) {
+    public DividendDTO updateDividend(DividendDTO dividendDTO, Long userId) {
         Currency currency = this.currencyRepository.findById(dividendDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + dividendDTO.getCurrencyId()));
         Stock stock = this.stockService.getOrCreateStock(dividendDTO.getShortName(), dividendDTO.getExchange(), dividendDTO.getName());
-        Dividend dividend = this.dividendRepository.findByIdAndUserEmail(dividendDTO.getDividendId(), userEmail).orElseThrow(() -> new NoSuchElementException("Dividend not found: " + dividendDTO.getDividendId()));
+        Dividend dividend = this.dividendRepository.findByIdAndUserId(dividendDTO.getDividendId(), userId).orElseThrow(() -> new NoSuchElementException("Dividend not found: " + dividendDTO.getDividendId()));
 
         dividend.setDividendDate(dividendDTO.getDividendDate());
         dividend.setCurrency(currency);
@@ -84,13 +84,13 @@ public class DividendService implements ICSVService {
     }
 
     @Transactional
-    public void deleteDividendById(List<Long> ids, String userEmail) {
-        this.dividendRepository.deleteByUserEmailAndIdIn(userEmail, ids);
+    public void deleteDividendById(List<Long> ids, Long userId) {
+        this.dividendRepository.deleteByUserIdAndIdIn(userId, ids);
     }
 
-    public void getCSV(String userEmail, Writer writer) {
+    public void getCSV(Long userId, Writer writer) {
         List<DividendDTO> dividendListList =
-                this.dividendRepository.findByUserEmailOrderByDividendDate(userEmail)
+                this.dividendRepository.findByUserIdOrderByDividendDate(userId)
                         .stream()
                         .map(this::convertToDividendDTO)
                         .toList();
@@ -98,18 +98,18 @@ public class DividendService implements ICSVService {
     }
 
     @Transactional
-    public void processCSV(String userEmail, MultipartFile file) {
+    public void processCSV(Long userId, MultipartFile file) {
         try (CSVParser csvParser = this.getParser(file,
                 new String[]{"Dividend Id", "Amount", "Dividend Date", "Short Name", "Exchange", "Currency"})) {
             for (CSVRecord csvRecord : csvParser) {
                 DividendDTO dividend = DividendDTO.createFromCSVRecord(csvRecord, DateFormats.YYYY_MM_DD);
 
                 if (dividend.getDividendId() != null &&
-                        this.dividendRepository.findByIdAndUserEmail(dividend.getDividendId(), userEmail).isPresent()) {
-                    this.updateDividend(dividend, userEmail);
+                        this.dividendRepository.findByIdAndUserId(dividend.getDividendId(), userId).isPresent()) {
+                    this.updateDividend(dividend, userId);
                 } else {
                     dividend.setDividendId(null);
-                    this.createDividend(dividend, userEmail);
+                    this.createDividend(dividend, userId);
                 }
             }
         } catch (IOException | DateTimeParseException | IllegalArgumentException e) {

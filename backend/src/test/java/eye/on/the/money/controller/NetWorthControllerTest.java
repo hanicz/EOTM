@@ -28,25 +28,25 @@ class NetWorthControllerTest {
     @Test
     void getNetWorth_readsThroughTheCacheByDefault() {
         NetWorthDTO dto = this.netWorth();
-        when(this.netWorthService.getNetWorth("email", "EUR", false)).thenReturn(dto);
+        when(this.netWorthService.getNetWorth(1L, "EUR", false)).thenReturn(dto);
 
-        Assertions.assertEquals(dto, this.netWorthController.getNetWorth("email", "EUR", false).getBody());
+        Assertions.assertEquals(dto, this.netWorthController.getNetWorth(1L, "EUR", false).getBody());
     }
 
     @Test
     void getNetWorth_refreshBypassesTheCache() {
         NetWorthDTO dto = this.netWorth();
-        when(this.netWorthService.getNetWorth("email", "EUR", true)).thenReturn(dto);
+        when(this.netWorthService.getNetWorth(1L, "EUR", true)).thenReturn(dto);
 
-        Assertions.assertEquals(dto, this.netWorthController.getNetWorth("email", "EUR", true).getBody());
+        Assertions.assertEquals(dto, this.netWorthController.getNetWorth(1L, "EUR", true).getBody());
     }
 
     @Test
     void getNetWorth_acceptsAMissingCurrency() {
         NetWorthDTO dto = this.netWorth();
-        when(this.netWorthService.getNetWorth("email", null, false)).thenReturn(dto);
+        when(this.netWorthService.getNetWorth(1L, null, false)).thenReturn(dto);
 
-        Assertions.assertEquals(dto, this.netWorthController.getNetWorth("email", null, false).getBody());
+        Assertions.assertEquals(dto, this.netWorthController.getNetWorth(1L, null, false).getBody());
     }
 
     private NetWorthDTO netWorth() {

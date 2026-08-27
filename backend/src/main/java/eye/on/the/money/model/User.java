@@ -9,12 +9,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
+import static java.util.Collections.emptyList;
+
 @Entity
 @Getter
 @Setter
 @Slf4j
 @Builder
-@ToString
+@ToString(exclude = "password")
 @Table(name = "EOTM_USER", uniqueConstraints = @UniqueConstraint(name = "UK_EOTM_USER_EMAIL", columnNames = "email"))
 @AllArgsConstructor
 @NoArgsConstructor
@@ -36,7 +38,7 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return emptyList();
     }
 
     @Override
@@ -46,22 +48,22 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return true;
     }
 }
 

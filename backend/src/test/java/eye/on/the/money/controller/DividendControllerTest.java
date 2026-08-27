@@ -44,24 +44,24 @@ class DividendControllerTest {
         dividends.add(DividendDTO.builder().dividendId(2L).exchange("e2").dividendDate(LocalDate.now()).amount(51.2).currencyId("c2").shortName("s2").build());
         dividends.add(DividendDTO.builder().dividendId(3L).exchange("e3").dividendDate(LocalDate.now()).amount(50.3).currencyId("c3").shortName("s3").build());
 
-        when(this.dividendService.getDividends("email")).thenReturn(dividends);
+        when(this.dividendService.getDividends(1L)).thenReturn(dividends);
 
-        Assertions.assertIterableEquals(dividends, this.dividendController.getAllDividends("email").getBody());
+        Assertions.assertIterableEquals(dividends, this.dividendController.getAllDividends(1L).getBody());
     }
 
     @Test
     public void createDividend() {
         DividendDTO dividendDTO = DividendDTO.builder().dividendId(1L).exchange("e1").dividendDate(LocalDate.now()).amount(55.1).currencyId("c1").shortName("s1").build();
-        when(this.dividendService.createDividend(dividendDTO, "email")).thenReturn(dividendDTO);
+        when(this.dividendService.createDividend(dividendDTO, 1L)).thenReturn(dividendDTO);
 
-        Assertions.assertEquals(dividendDTO, this.dividendController.createDividend("email", dividendDTO).getBody());
+        Assertions.assertEquals(dividendDTO, this.dividendController.createDividend(1L, dividendDTO).getBody());
     }
 
     @Test
     public void deleteByIds() {
         doNothing().when(this.dividendService).deleteDividendById(any(), any());
 
-        Assertions.assertEquals(HttpStatus.OK, this.dividendController.deleteByIds("email", List.of(1L, 2L, 3L)).getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, this.dividendController.deleteByIds(1L, List.of(1L, 2L, 3L)).getStatusCode());
     }
 
     @Test
@@ -69,7 +69,7 @@ class DividendControllerTest {
         HttpServletResponse httpSR = new MockHttpServletResponse();
 
         doNothing().when(this.dividendService).getCSV(any(), any());
-        this.dividendController.getCSV("email", httpSR);
+        this.dividendController.getCSV(1L, httpSR);
 
         verify(this.dividendService, times(1)).getCSV(any(), any());
     }
@@ -77,17 +77,17 @@ class DividendControllerTest {
     @Test
     public void updateDividend() {
         DividendDTO dividendDTO = DividendDTO.builder().dividendId(1L).exchange("e1").dividendDate(LocalDate.now()).amount(55.1).currencyId("c1").shortName("s1").build();
-        when(this.dividendService.updateDividend(dividendDTO, "email")).thenReturn(dividendDTO);
+        when(this.dividendService.updateDividend(dividendDTO, 1L)).thenReturn(dividendDTO);
 
-        Assertions.assertEquals(dividendDTO, this.dividendController.updateDividend("email", dividendDTO).getBody());
+        Assertions.assertEquals(dividendDTO, this.dividendController.updateDividend(1L, dividendDTO).getBody());
     }
 
     @Test
     public void processCSV() throws IOException {
         MultipartFile mpf = new MockMultipartFile("mpf", "mpf.csv", MediaType.TEXT_PLAIN_VALUE, "content".getBytes());
 
-        doNothing().when(this.dividendService).processCSV("email", mpf);
+        doNothing().when(this.dividendService).processCSV(1L, mpf);
 
-        Assertions.assertEquals(HttpStatus.CREATED, this.dividendController.processCSV("email", mpf).getStatusCode());
+        Assertions.assertEquals(HttpStatus.CREATED, this.dividendController.processCSV(1L, mpf).getStatusCode());
     }
 }

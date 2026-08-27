@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface StockWatchRepository extends JpaRepository<TickerWatch, Long> {
-    List<TickerWatch> findByUserEmailOrderByStockShortName(String userEmail);
+    List<TickerWatch> findByUserIdOrderByStockShortName(Long userId);
 
-    Optional<TickerWatch> findByUserEmailAndStockId(String userEmail, String stockId);
+    Optional<TickerWatch> findByUserIdAndStockId(Long userId, String stockId);
 
-    void deleteByIdAndUserEmail(Long id, String userEmail);
+    void deleteByIdAndUserId(Long id, Long userId);
 }

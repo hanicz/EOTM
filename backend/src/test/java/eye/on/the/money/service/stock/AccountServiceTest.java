@@ -36,15 +36,15 @@ class AccountServiceTest {
     }
 
     @Test
-    public void getAccountsByUserEmail() {
-        List<Account> result = this.accountService.getAccountsByUserEmail(this.user.getEmail());
-        int actualSize = this.accountRepository.findByUserEmailOrderByAccountName(this.user.getEmail()).size();
+    public void getAccountsByUserId() {
+        List<Account> result = this.accountService.getAccountsByUserId(this.user.getId());
+        int actualSize = this.accountRepository.findByUserIdOrderByAccountName(this.user.getId()).size();
         Assertions.assertEquals(actualSize, result.size());
     }
 
     @Test
     public void deleteById() {
-        boolean result = this.accountService.deleteById(this.user.getEmail(), 1L);
+        boolean result = this.accountService.deleteById(this.user.getId(), 1L);
         Assertions.assertTrue(result);
     }
 
@@ -52,8 +52,8 @@ class AccountServiceTest {
     public void createAccount() {
         Account account = Account.builder().accountName("Test Account").creationDate(LocalDate.now()).user(this.user).build();
 
-        Account result = this.accountService.createAccount(account, this.user.getEmail());
-        Account dbResult = this.accountRepository.findByUserEmailAndId(this.user.getEmail(), result.getId()).get();
+        Account result = this.accountService.createAccount(account, this.user.getId());
+        Account dbResult = this.accountRepository.findByUserIdAndId(this.user.getId(), result.getId()).get();
         Assertions.assertEquals(dbResult.getAccountName(), account.getAccountName());
         Assertions.assertEquals(dbResult.getCreationDate(), account.getCreationDate());
         Assertions.assertEquals(dbResult.getUser().getId(), account.getUser().getId());

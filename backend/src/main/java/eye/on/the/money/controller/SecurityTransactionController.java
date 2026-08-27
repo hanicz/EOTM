@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import eye.on.the.money.security.CurrentUserEmail;
+import eye.on.the.money.security.CurrentUserId;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,39 +24,39 @@ public class SecurityTransactionController {
     private final SecurityTransactionService securityTransactionService;
 
     @GetMapping()
-    public ResponseEntity<List<SecurityTransactionDTO>> getAllTransactions(@CurrentUserEmail String userEmail) {
-        return ResponseEntity.ok(this.securityTransactionService.getTransactions(userEmail));
+    public ResponseEntity<List<SecurityTransactionDTO>> getAllTransactions(@CurrentUserId Long userId) {
+        return ResponseEntity.ok(this.securityTransactionService.getTransactions(userId));
     }
 
     @GetMapping("/holding")
-    public ResponseEntity<List<SecurityTransactionDTO>> getHoldings(@CurrentUserEmail String userEmail) {
-        return ResponseEntity.ok(this.securityTransactionService.getCurrentHoldings(userEmail));
+    public ResponseEntity<List<SecurityTransactionDTO>> getHoldings(@CurrentUserId Long userId) {
+        return ResponseEntity.ok(this.securityTransactionService.getCurrentHoldings(userId));
     }
 
     @PostMapping
-    public ResponseEntity<SecurityTransactionDTO> createTransaction(@CurrentUserEmail String userEmail, @RequestBody SecurityTransactionDTO transactionDTO) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(this.securityTransactionService.createTransaction(transactionDTO, userEmail));
+    public ResponseEntity<SecurityTransactionDTO> createTransaction(@CurrentUserId Long userId, @RequestBody SecurityTransactionDTO transactionDTO) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.securityTransactionService.createTransaction(transactionDTO, userId));
     }
 
     @PutMapping
-    public ResponseEntity<SecurityTransactionDTO> updateTransaction(@CurrentUserEmail String userEmail, @RequestBody SecurityTransactionDTO transactionDTO) {
-        return ResponseEntity.ok(this.securityTransactionService.updateTransaction(transactionDTO, userEmail));
+    public ResponseEntity<SecurityTransactionDTO> updateTransaction(@CurrentUserId Long userId, @RequestBody SecurityTransactionDTO transactionDTO) {
+        return ResponseEntity.ok(this.securityTransactionService.updateTransaction(transactionDTO, userId));
     }
 
     @DeleteMapping()
-    public ResponseEntity<Void> deleteByIds(@CurrentUserEmail String userEmail, @RequestParam List<Long> ids) {
-        this.securityTransactionService.deleteTransactionById(userEmail, ids);
+    public ResponseEntity<Void> deleteByIds(@CurrentUserId Long userId, @RequestParam List<Long> ids) {
+        this.securityTransactionService.deleteTransactionById(userId, ids);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/csv")
-    public void getCSV(@CurrentUserEmail String userEmail, HttpServletResponse servletResponse) throws IOException {
-        this.securityTransactionService.getCSV(userEmail, CsvResponseUtil.prepare(servletResponse, "security_transactions.csv"));
+    public void getCSV(@CurrentUserId Long userId, HttpServletResponse servletResponse) throws IOException {
+        this.securityTransactionService.getCSV(userId, CsvResponseUtil.prepare(servletResponse, "security_transactions.csv"));
     }
 
     @PostMapping("/process/csv")
-    public ResponseEntity<Void> processCSV(@CurrentUserEmail String userEmail, @RequestParam("file") MultipartFile file) throws IOException {
-        this.securityTransactionService.processCSV(userEmail, file);
+    public ResponseEntity<Void> processCSV(@CurrentUserId Long userId, @RequestParam("file") MultipartFile file) throws IOException {
+        this.securityTransactionService.processCSV(userId, file);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

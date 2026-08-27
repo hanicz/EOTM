@@ -61,10 +61,10 @@ class InterestServiceTest {
     void getInterest_returnsMappedDTOs() {
         Interest interest = this.buildInterest(1L);
         InterestDTO dto = this.buildInterestDTO(1L);
-        when(this.interestRepository.findByUserEmailOrderByInterestDateDesc("test@email.com")).thenReturn(List.of(interest));
+        when(this.interestRepository.findByUserIdOrderByInterestDateDesc(1L)).thenReturn(List.of(interest));
         when(this.modelMapper.map(interest, InterestDTO.class)).thenReturn(dto);
 
-        List<InterestDTO> result = this.interestService.getInterest("test@email.com");
+        List<InterestDTO> result = this.interestService.getInterest(1L);
 
         assertEquals(1, result.size());
         assertEquals(100.0, result.get(0).getAmount());
@@ -72,9 +72,9 @@ class InterestServiceTest {
 
     @Test
     void getInterest_returnsEmptyList() {
-        when(this.interestRepository.findByUserEmailOrderByInterestDateDesc("test@email.com")).thenReturn(List.of());
+        when(this.interestRepository.findByUserIdOrderByInterestDateDesc(1L)).thenReturn(List.of());
 
-        List<InterestDTO> result = this.interestService.getInterest("test@email.com");
+        List<InterestDTO> result = this.interestService.getInterest(1L);
 
         assertTrue(result.isEmpty());
     }
@@ -87,11 +87,11 @@ class InterestServiceTest {
 
         when(this.currencyRepository.findById("EUR")).thenReturn(Optional.of(this.currency));
         when(this.securityService.getOrCreateSecurity("SEC1", "Security One")).thenReturn(this.security);
-        when(this.userService.loadUserByEmail("test@email.com")).thenReturn(this.user);
+        when(this.userService.getReference(1L)).thenReturn(this.user);
         when(this.interestRepository.save(any(Interest.class))).thenReturn(savedInterest);
         when(this.modelMapper.map(savedInterest, InterestDTO.class)).thenReturn(outputDTO);
 
-        InterestDTO result = this.interestService.createInterest(inputDTO, "test@email.com");
+        InterestDTO result = this.interestService.createInterest(inputDTO, 1L);
 
         assertEquals(1L, result.getInterestId());
         assertEquals(100.0, result.getAmount());
@@ -103,7 +103,7 @@ class InterestServiceTest {
         InterestDTO inputDTO = this.buildInterestDTO(null);
         when(this.currencyRepository.findById("EUR")).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> this.interestService.createInterest(inputDTO, "test@email.com"));
+        assertThrows(NoSuchElementException.class, () -> this.interestService.createInterest(inputDTO, 1L));
     }
 
     @Test
@@ -114,10 +114,10 @@ class InterestServiceTest {
 
         when(this.currencyRepository.findById("EUR")).thenReturn(Optional.of(this.currency));
         when(this.securityService.getOrCreateSecurity("SEC1", "Security One")).thenReturn(this.security);
-        when(this.interestRepository.findByIdAndUserEmail(1L, "test@email.com")).thenReturn(Optional.of(existingInterest));
+        when(this.interestRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingInterest));
         when(this.modelMapper.map(existingInterest, InterestDTO.class)).thenReturn(outputDTO);
 
-        InterestDTO result = this.interestService.updateInterest(inputDTO, "test@email.com");
+        InterestDTO result = this.interestService.updateInterest(inputDTO, 1L);
 
         assertEquals(1L, result.getInterestId());
     }
@@ -127,18 +127,18 @@ class InterestServiceTest {
         InterestDTO inputDTO = this.buildInterestDTO(1L);
         when(this.currencyRepository.findById("EUR")).thenReturn(Optional.of(this.currency));
         when(this.securityService.getOrCreateSecurity("SEC1", "Security One")).thenReturn(this.security);
-        when(this.interestRepository.findByIdAndUserEmail(1L, "test@email.com")).thenReturn(Optional.empty());
+        when(this.interestRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> this.interestService.updateInterest(inputDTO, "test@email.com"));
+        assertThrows(NoSuchElementException.class, () -> this.interestService.updateInterest(inputDTO, 1L));
     }
 
     @Test
     void deleteInterestById_delegatesToRepository() {
         List<Long> ids = List.of(1L, 2L, 3L);
-        doNothing().when(this.interestRepository).deleteByUserEmailAndIdIn("test@email.com", ids);
+        doNothing().when(this.interestRepository).deleteByUserIdAndIdIn(1L, ids);
 
-        this.interestService.deleteInterestById(ids, "test@email.com");
+        this.interestService.deleteInterestById(ids, 1L);
 
-        verify(this.interestRepository, times(1)).deleteByUserEmailAndIdIn("test@email.com", ids);
+        verify(this.interestRepository, times(1)).deleteByUserIdAndIdIn(1L, ids);
     }
 }

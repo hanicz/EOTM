@@ -10,12 +10,12 @@ import java.util.List;
 public interface RSUTaxDetailsRepository extends JpaRepository<RSUTaxDetails, Long> {
 
     @Query("select r from RSUTaxDetails r join fetch r.investment i join fetch i.stock "
-            + "where i.user.email = :userEmail and i.rsu = true order by i.transactionDate desc")
-    List<RSUTaxDetails> findFlaggedByUserEmail(@Param("userEmail") String userEmail);
+            + "where i.user.id = :userId and i.rsu = true order by i.transactionDate desc")
+    List<RSUTaxDetails> findFlaggedByUserId(@Param("userId") Long userId);
 
     @Query("select r from RSUTaxDetails r join fetch r.investment i join fetch i.stock "
-            + "where i.user.email = :userEmail and i.id in :ids")
-    List<RSUTaxDetails> findByUserEmailAndInvestmentIdIn(@Param("userEmail") String userEmail,
+            + "where i.user.id = :userId and i.id in :ids")
+    List<RSUTaxDetails> findByUserIdAndInvestmentIdIn(@Param("userId") Long userId,
                                                          @Param("ids") List<Long> ids);
 
     void deleteByInvestmentIdIn(List<Long> ids);

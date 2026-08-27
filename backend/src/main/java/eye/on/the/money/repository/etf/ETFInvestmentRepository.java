@@ -8,16 +8,16 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ETFInvestmentRepository extends JpaRepository<ETFInvestment, Long> {
-    Optional<ETFInvestment> findByIdAndUserEmail(Long id, String userEmail);
+    Optional<ETFInvestment> findByIdAndUserId(Long id, Long userId);
 
-    List<ETFInvestment> findByUserEmailAndTransactionDateBetweenOrderByTransactionDate(
-            String userEmail, LocalDate from, LocalDate to);
+    List<ETFInvestment> findByUserIdAndTransactionDateBetweenOrderByTransactionDate(
+            Long userId, LocalDate from, LocalDate to);
 
-    List<ETFInvestment> findByUserEmailOrderByTransactionDate(String userEmail);
+    List<ETFInvestment> findByUserIdOrderByTransactionDate(Long userId);
 
-    List<ETFInvestment> findByUserEmailOrderByTransactionDateDesc(String userEmail);
+    List<ETFInvestment> findByUserIdOrderByTransactionDateDesc(Long userId);
 
-    List<ETFInvestment> findByUserEmailAndAccountIdOrderByTransactionDateDesc(String userEmail, Long accountId);
+    List<ETFInvestment> findByUserIdAndAccountIdOrderByTransactionDateDesc(Long userId, Long accountId);
 
-    void deleteByUserEmailAndIdIn(String userEmail, List<Long> ids);
+    void deleteByUserIdAndIdIn(Long userId, List<Long> ids);
 }

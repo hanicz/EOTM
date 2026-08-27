@@ -14,6 +14,7 @@ import eye.on.the.money.service.security.SecurityTransactionService;
 import eye.on.the.money.service.stock.AccountService;
 import eye.on.the.money.service.stock.DividendService;
 import eye.on.the.money.service.stock.InvestmentService;
+import eye.on.the.money.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,7 @@ public class ExportService {
 
     private static final int SCHEMA_VERSION = 1;
 
+    private final UserService userService;
     private final AccountService accountService;
     private final InvestmentService investmentService;
     private final DividendService dividendService;
@@ -52,56 +54,57 @@ public class ExportService {
     private final RedditService redditService;
 
     @Transactional(readOnly = true)
-    public ExportDTO export(String userEmail) {
+    public ExportDTO export(Long userId) {
         log.trace("Enter");
+        String userEmail = this.userService.loadUserById(userId).getEmail();
         return ExportDTO.builder()
                 .schemaVersion(SCHEMA_VERSION)
                 .exportedAt(Instant.now())
                 .email(userEmail)
-                .accounts(this.accounts(userEmail))
+                .accounts(this.accounts(userId))
                 .stock(new ExportDTO.StockSection(
-                        this.investmentService.getInvestments(userEmail),
-                        this.dividendService.getDividends(userEmail)))
+                        this.investmentService.getInvestments(userId),
+                        this.dividendService.getDividends(userId)))
                 .etf(new ExportDTO.EtfSection(
-                        this.etfInvestmentService.getETFInvestments(userEmail),
-                        this.etfDividendService.getDividends(userEmail)))
+                        this.etfInvestmentService.getETFInvestments(userId),
+                        this.etfDividendService.getDividends(userId)))
                 .crypto(new ExportDTO.CryptoSection(
-                        this.transactionService.getTransactionsByUserId(userEmail)))
+                        this.transactionService.getTransactionsByUserId(userId)))
                 .forex(new ExportDTO.ForexSection(
-                        this.forexTransactionService.getForexTransactionsByUserId(userEmail)))
+                        this.forexTransactionService.getForexTransactionsByUserId(userId)))
                 .securities(new ExportDTO.SecuritiesSection(
-                        this.securityTransactionService.getTransactions(userEmail),
-                        this.interestService.getInterest(userEmail)))
-                .watchlists(this.watchlists(userEmail))
+                        this.securityTransactionService.getTransactions(userId),
+                        this.interestService.getInterest(userId)))
+                .watchlists(this.watchlists(userId))
                 .alerts(new ExportDTO.AlertSection(
-                        this.alertService.getAllStockAlerts(userEmail),
-                        this.alertService.getAllCryptoAlerts(userEmail)))
-                .preferences(this.preferences(userEmail))
+                        this.alertService.getAllStockAlerts(userId),
+                        this.alertService.getAllCryptoAlerts(userId)))
+                .preferences(this.preferences(userId))
                 .build();
     }
 
-    private List<ExportDTO.AccountRow> accounts(String userEmail) {
-        return this.accountService.getAccountsByUserEmail(userEmail).stream()
+    private List<ExportDTO.AccountRow> accounts(Long userId) {
+        return this.accountService.getAccountsByUserId(userId).stream()
                 .map(account -> new ExportDTO.AccountRow(
                         account.getId(), account.getAccountName(), account.getCreationDate()))
                 .toList();
     }
 
-    private ExportDTO.WatchlistSection watchlists(String userEmail) {
+    private ExportDTO.WatchlistSection watchlists(Long userId) {
         List<ExportDTO.StockWatchRow> stock =
-                this.stockWatchRepository.findByUserEmailOrderByStockShortName(userEmail).stream()
+                this.stockWatchRepository.findByUserIdOrderByStockShortName(userId).stream()
                         .map(watch -> new ExportDTO.StockWatchRow(watch.getId(), watch.getStock().getShortName(),
                                 watch.getStock().getExchange(), watch.getStock().getName()))
                         .toList();
 
         List<ExportDTO.CryptoWatchRow> crypto =
-                this.cryptoWatchRepository.findByUserEmailOrderByCoin_Symbol(userEmail).stream()
+                this.cryptoWatchRepository.findByUserIdOrderByCoin_Symbol(userId).stream()
                         .map(watch -> new ExportDTO.CryptoWatchRow(watch.getId(), watch.getCoin().getId(),
                                 watch.getCoin().getSymbol(), watch.getCoin().getName()))
                         .toList();
 
         List<ExportDTO.ForexWatchRow> forex =
-                this.forexWatchRepository.findByUserEmailOrderByFromCurrencyAscToCurrencyAsc(userEmail).stream()
+                this.forexWatchRepository.findByUserIdOrderByFromCurrencyAscToCurrencyAsc(userId).stream()
                         .map(watch -> new ExportDTO.ForexWatchRow(watch.getId(),
                                 watch.getFromCurrency().getId(), watch.getToCurrency().getId()))
                         .toList();
@@ -109,9 +112,9 @@ public class ExportService {
         return new ExportDTO.WatchlistSection(stock, crypto, forex);
     }
 
-    private ExportDTO.PreferencesSection preferences(String userEmail) {
+    private ExportDTO.PreferencesSection preferences(Long userId) {
         return new ExportDTO.PreferencesSection(
-                this.redditService.getSubredditsByUser(userEmail).stream()
+                this.redditService.getSubredditsByUser(userId).stream()
                         .map(subreddit -> new ExportDTO.SubredditRow(
                                 subreddit.getId(), subreddit.getSubreddit(), subreddit.getDescription()))
                         .toList());

@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import eye.on.the.money.security.CurrentUserEmail;
+import eye.on.the.money.security.CurrentUserId;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,18 +20,18 @@ public class AccountController {
     private final AccountService accountService;
 
     @GetMapping
-    public ResponseEntity<List<Account>> getAccounts(@CurrentUserEmail String userEmail) {
-        return ResponseEntity.ok(this.accountService.getAccountsByUserEmail(userEmail));
+    public ResponseEntity<List<Account>> getAccounts(@CurrentUserId Long userId) {
+        return ResponseEntity.ok(this.accountService.getAccountsByUserId(userId));
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> deleteAccount(@CurrentUserEmail String userEmail, @PathVariable Long id) {
-        var isDeleted = this.accountService.deleteById(userEmail, id);
+    public ResponseEntity<Void> deleteAccount(@CurrentUserId Long userId, @PathVariable Long id) {
+        var isDeleted = this.accountService.deleteById(userId, id);
         return ResponseEntity.status(isDeleted ? HttpStatus.OK : HttpStatus.NOT_FOUND).build();
     }
 
     @PostMapping
-    public ResponseEntity<Account> createAccount(@RequestBody Account account, @CurrentUserEmail String userEmail) {
-        return ResponseEntity.ok(this.accountService.createAccount(account, userEmail));
+    public ResponseEntity<Account> createAccount(@RequestBody Account account, @CurrentUserId Long userId) {
+        return ResponseEntity.ok(this.accountService.createAccount(account, userId));
     }
 }

@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ForexTransactionRepository extends JpaRepository<ForexTransaction, Long> {
-    List<ForexTransaction> findByUserEmailOrderByTransactionDate(String userEmail);
+    List<ForexTransaction> findByUserIdOrderByTransactionDate(Long userId);
 
-    List<ForexTransaction> findByUserEmailAndTransactionDateBetweenOrderByTransactionDate(
-            String userEmail, LocalDate from, LocalDate to);
+    List<ForexTransaction> findByUserIdAndTransactionDateBetweenOrderByTransactionDate(
+            Long userId, LocalDate from, LocalDate to);
 
-    void deleteByUserEmailAndIdIn(String userEmail, List<Long> ids);
+    void deleteByUserIdAndIdIn(Long userId, List<Long> ids);
 
-    Optional<ForexTransaction> findByIdAndUserEmail(Long id, String userEmail);
+    Optional<ForexTransaction> findByIdAndUserId(Long id, Long userId);
 }

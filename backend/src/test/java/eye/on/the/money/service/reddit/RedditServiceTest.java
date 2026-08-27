@@ -4,11 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eye.on.the.money.EotmApplication;
+import eye.on.the.money.model.User;
+import eye.on.the.money.repository.UserRepository;
 import eye.on.the.money.dto.in.SubredditDTO;
 import eye.on.the.money.model.news.News;
 import eye.on.the.money.model.reddit.Subreddit;
 import eye.on.the.money.repository.reddit.SubredditRepository;
 import eye.on.the.money.service.api.RedditAPIService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +36,11 @@ class RedditServiceTest {
 
 
     @Autowired
+    private UserRepository userRepository;
+
+    private User user;
+
+    @Autowired
     private RedditService redditService;
 
     @MockitoBean
@@ -47,23 +55,28 @@ class RedditServiceTest {
     @Value("${reddit.logo}")
     private String redditLogo;
 
+    @BeforeEach
+    public void setUpEach() {
+        this.user = this.userRepository.findByEmail("test@test.test");
+    }
+
     @Test
     public void deleteSubreddit() {
-        boolean result = this.redditService.deleteSubreddit(1L, "test@test.test");
+        boolean result = this.redditService.deleteSubreddit(1L, this.user.getId());
         Assertions.assertTrue(result);
     }
 
     @Test
     public void deleteSubredditDoesntExist() {
-        boolean result = this.redditService.deleteSubreddit(100000L, "test@test.test");
+        boolean result = this.redditService.deleteSubreddit(100000L, this.user.getId());
         Assertions.assertFalse(result);
     }
 
     @Test
     public void addSubReddit() {
         SubredditDTO subreddit = new SubredditDTO("test", "test");
-        this.redditService.addSubreddit(subreddit, "test@test.test");
-        var dbResult = this.subredditRepository.findBySubredditAndUserEmail("test", "test@test.test");
+        this.redditService.addSubreddit(subreddit, this.user.getId());
+        var dbResult = this.subredditRepository.findBySubredditAndUserId("test", this.user.getId());
         Assertions.assertAll("Assert response",
                 () -> Assertions.assertTrue(dbResult.isPresent()),
                 () -> Assertions.assertEquals(subreddit.subReddit(), dbResult.get().getSubreddit()),
@@ -73,8 +86,8 @@ class RedditServiceTest {
 
     @Test
     public void getSubredditsByUser() {
-        List<Subreddit> actual = this.subredditRepository.findByUserEmailOrderBySubredditAsc("test@test.test");
-        List<Subreddit> result = this.redditService.getSubredditsByUser("test@test.test");
+        List<Subreddit> actual = this.subredditRepository.findByUserIdOrderBySubredditAsc(this.user.getId());
+        List<Subreddit> result = this.redditService.getSubredditsByUser(this.user.getId());
         Assertions.assertEquals(actual.size(), result.size());
     }
 
@@ -84,7 +97,7 @@ class RedditServiceTest {
         when(this.redditAPIService.getToken()).thenReturn(token);
         when(this.redditAPIService.getHotRedditNews(any(), anyString())).thenReturn(Flux.just(this.createSubRedditJson()));
 
-        List<News> result = this.redditService.getHotNewsFromSubreddits("test@test.test");
+        List<News> result = this.redditService.getHotNewsFromSubreddits(this.user.getId());
 
         Assertions.assertAll("Assert response",
                 () -> Assertions.assertEquals(3, result.size()),

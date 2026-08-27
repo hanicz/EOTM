@@ -50,9 +50,9 @@ public class TaxableEventService implements ICSVService {
     private final TaxCalculator taxCalculator;
 
     @Transactional
-    public void setTaxable(String userEmail, List<Long> ids, boolean taxable) {
+    public void setTaxable(Long userId, List<Long> ids, boolean taxable) {
         log.trace("Enter");
-        List<BankTransaction> transactions = this.bankTransactionRepository.findByUserEmailAndIdIn(userEmail, ids);
+        List<BankTransaction> transactions = this.bankTransactionRepository.findByUserIdAndIdIn(userId, ids);
         if (transactions.isEmpty()) return;
 
         transactions.forEach(transaction -> transaction.setTaxable(taxable));
@@ -65,7 +65,7 @@ public class TaxableEventService implements ICSVService {
         }
 
         Map<Long, BankTransactionTax> existing = this.bankTransactionTaxRepository
-                .findByUserEmailAndBankTransactionIdIn(userEmail, transactionIds).stream()
+                .findByUserIdAndBankTransactionIdIn(userId, transactionIds).stream()
                 .collect(Collectors.toMap(tax -> tax.getBankTransaction().getId(), Function.identity()));
 
         Map<String, NavigableMap<LocalDate, BigDecimal>> rates = this.fetchRates(transactions);
@@ -75,19 +75,19 @@ public class TaxableEventService implements ICSVService {
     }
 
     @Transactional
-    public void setTaxPaid(String userEmail, List<Long> ids, boolean paid) {
+    public void setTaxPaid(Long userId, List<Long> ids, boolean paid) {
         log.trace("Enter");
         List<BankTransactionTax> taxes =
-                this.bankTransactionTaxRepository.findByUserEmailAndBankTransactionIdIn(userEmail, ids);
+                this.bankTransactionTaxRepository.findByUserIdAndBankTransactionIdIn(userId, ids);
         if (taxes.isEmpty()) return;
 
         taxes.forEach(tax -> tax.getTaxDetails().setPaid(paid));
         this.bankTransactionTaxRepository.saveAll(taxes);
     }
 
-    public TaxableEventReportDTO getTaxableEvents(String userEmail) {
+    public TaxableEventReportDTO getTaxableEvents(Long userId) {
         log.trace("Enter");
-        List<BankTransactionTax> taxes = this.bankTransactionTaxRepository.findTaxableByUserEmail(userEmail);
+        List<BankTransactionTax> taxes = this.bankTransactionTaxRepository.findTaxableByUserId(userId);
         if (taxes.isEmpty()) return TaxableEventReportDTO.empty();
 
         List<TaxableEventDTO> items = taxes.stream().map(this::convertToDTO).toList();
@@ -101,9 +101,9 @@ public class TaxableEventService implements ICSVService {
                 .totalAmountInHuf(totalAmount).totalTax(totalTax).build();
     }
 
-    public void getCSV(String userEmail, Writer writer) {
+    public void getCSV(Long userId, Writer writer) {
         log.trace("Enter");
-        this.printRecords(this.getTaxableEvents(userEmail).getItems(), writer);
+        this.printRecords(this.getTaxableEvents(userId).getItems(), writer);
     }
 
     private BankTransactionTax toTax(BankTransaction transaction,

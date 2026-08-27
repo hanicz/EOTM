@@ -32,30 +32,30 @@ public class AlertService {
     private final ModelMapper modelMapper;
     private final UserService userService;
 
-    public List<StockAlertDTO> getAllStockAlerts(String userEmail) {
-        List<StockAlert> stockAlerts = this.stockAlertRepository.findByUserEmailOrderByStockShortName(userEmail);
+    public List<StockAlertDTO> getAllStockAlerts(Long userId) {
+        List<StockAlert> stockAlerts = this.stockAlertRepository.findByUserIdOrderByStockShortName(userId);
         return stockAlerts.stream().map(this::convertToStockAlertDTO).collect(Collectors.toList());
     }
 
-    public List<CryptoAlertDTO> getAllCryptoAlerts(String userEmail) {
-        List<CryptoAlert> cryptoAlerts = this.cryptoAlertRepository.findByUserEmailOrderByCoinSymbol(userEmail);
+    public List<CryptoAlertDTO> getAllCryptoAlerts(Long userId) {
+        List<CryptoAlert> cryptoAlerts = this.cryptoAlertRepository.findByUserIdOrderByCoinSymbol(userId);
         return cryptoAlerts.stream().map(this::convertToCryptoAlertDTO).collect(Collectors.toList());
     }
 
     @Transactional
-    public boolean deleteCryptoAlert(String userEmail, Long id) {
-        return this.cryptoAlertRepository.deleteByIdAndUserEmail(id, userEmail) > 0;
+    public boolean deleteCryptoAlert(Long userId, Long id) {
+        return this.cryptoAlertRepository.deleteByIdAndUserId(id, userId) > 0;
     }
 
     @Transactional
-    public boolean deleteStockAlert(String userEmail, Long id) {
-        return this.stockAlertRepository.deleteByIdAndUserEmail(id, userEmail) > 0;
+    public boolean deleteStockAlert(Long userId, Long id) {
+        return this.stockAlertRepository.deleteByIdAndUserId(id, userId) > 0;
     }
 
     @Transactional
-    public StockAlertDTO createNewStockAlert(String userEmail, StockAlertDTO stockAlertDTO) {
+    public StockAlertDTO createNewStockAlert(Long userId, StockAlertDTO stockAlertDTO) {
         Stock stock = this.stockService.getOrCreateStock(stockAlertDTO.getShortName(), stockAlertDTO.getExchange(), stockAlertDTO.getName());
-        User user = this.userService.loadUserByEmail(userEmail);
+        User user = this.userService.getReference(userId);
 
         StockAlert stockAlert = StockAlert.builder()
                 .stock(stock)
@@ -69,9 +69,9 @@ public class AlertService {
     }
 
     @Transactional
-    public CryptoAlertDTO createNewCryptoAlert(String userEmail, CryptoAlertDTO cryptoAlertDTO) {
+    public CryptoAlertDTO createNewCryptoAlert(Long userId, CryptoAlertDTO cryptoAlertDTO) {
         Coin coin = this.coinService.getCoinBySymbol(cryptoAlertDTO.getSymbol());
-        User user = this.userService.loadUserByEmail(userEmail);
+        User user = this.userService.getReference(userId);
 
         CryptoAlert cryptoAlert = CryptoAlert.builder()
                 .coin(coin)

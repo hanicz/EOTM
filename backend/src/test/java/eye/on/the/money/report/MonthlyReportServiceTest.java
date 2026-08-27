@@ -1,6 +1,7 @@
 package eye.on.the.money.report;
 
 import eye.on.the.money.EotmApplication;
+import eye.on.the.money.repository.UserRepository;
 import eye.on.the.money.dto.out.MonthlyReportDTO;
 import eye.on.the.money.dto.out.NetWorthDTO;
 import eye.on.the.money.service.report.MonthlyReportService;
@@ -21,6 +22,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,7 +32,12 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 class MonthlyReportServiceTest {
 
-    private static final String USER = "test@test.test";
+    private static final String USER_EMAIL = "test@test.test";
+
+    @Autowired
+    private UserRepository userRepository;
+
+    private Long user;
 
     @MockitoBean
     private NetWorthService netWorthService;
@@ -40,13 +47,14 @@ class MonthlyReportServiceTest {
 
     @BeforeEach
     public void setUpEach() {
-        when(this.netWorthService.getNetWorth(anyString(), anyString(), anyBoolean()))
+        this.user = this.userRepository.findByEmail(USER_EMAIL).getId();
+        when(this.netWorthService.getNetWorth(anyLong(), anyString(), anyBoolean()))
                 .thenReturn(NetWorthDTO.builder().currency("EUR").assets(List.of()).build());
     }
 
     @Test
     public void buildKeepsOnlyTheReportMonthsTrades() {
-        MonthlyReportDTO report = this.monthlyReportService.build(USER, YearMonth.of(2023, 9), "EUR");
+        MonthlyReportDTO report = this.monthlyReportService.build(this.user, YearMonth.of(2023, 9), "EUR");
 
         Assertions.assertAll("September 2023",
                 () -> assertEquals(2023, report.getYear()),
@@ -61,7 +69,7 @@ class MonthlyReportServiceTest {
 
     @Test
     public void buildKeepsOnlyTheReportMonthsDividends() {
-        MonthlyReportDTO report = this.monthlyReportService.build(USER, YearMonth.of(2021, 6), "EUR");
+        MonthlyReportDTO report = this.monthlyReportService.build(this.user, YearMonth.of(2021, 6), "EUR");
 
         Assertions.assertAll("June 2021",
                 () -> assertEquals(1, report.getActivity().dividends().size()),
@@ -74,7 +82,7 @@ class MonthlyReportServiceTest {
 
     @Test
     public void buildFindsCryptoTradesInTheirOwnMonth() {
-        MonthlyReportDTO report = this.monthlyReportService.build(USER, YearMonth.of(2021, 5), "EUR");
+        MonthlyReportDTO report = this.monthlyReportService.build(this.user, YearMonth.of(2021, 5), "EUR");
 
         Assertions.assertAll("May 2021",
                 () -> assertEquals(6, report.getActivity().cryptoTrades().size()),
@@ -84,7 +92,7 @@ class MonthlyReportServiceTest {
 
     @Test
     public void buildReportsAnEmptyMonthAsEmpty() {
-        MonthlyReportDTO report = this.monthlyReportService.build(USER, YearMonth.of(2020, 1), "EUR");
+        MonthlyReportDTO report = this.monthlyReportService.build(this.user, YearMonth.of(2020, 1), "EUR");
 
         Assertions.assertAll("January 2020",
                 () -> assertTrue(report.getActivity().isEmpty()),
@@ -94,8 +102,8 @@ class MonthlyReportServiceTest {
 
     @Test
     public void buildAsksForFreshPrices() {
-        this.monthlyReportService.build(USER, YearMonth.of(2023, 9), "HUF");
+        this.monthlyReportService.build(this.user, YearMonth.of(2023, 9), "HUF");
 
-        verify(this.netWorthService).getNetWorth(USER, "HUF", true);
+        verify(this.netWorthService).getNetWorth(this.user, "HUF", true);
     }
 }

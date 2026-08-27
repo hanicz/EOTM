@@ -50,16 +50,16 @@ public class AlertServiceTest {
 
     @Test
     public void getAllStockAlerts() {
-        List<StockAlert> alertsInDB = this.stockAlertRepository.findByUserEmailOrderByStockShortName(this.user.getUsername());
-        List<StockAlertDTO> alertsResponse = this.alertService.getAllStockAlerts(this.user.getUsername());
+        List<StockAlert> alertsInDB = this.stockAlertRepository.findByUserIdOrderByStockShortName(this.user.getId());
+        List<StockAlertDTO> alertsResponse = this.alertService.getAllStockAlerts(this.user.getId());
 
         Assertions.assertEquals(alertsInDB.stream().map(this::convertToStockAlertDTO).collect(Collectors.toList()), alertsResponse);
     }
 
     @Test
     public void getAllCryptoAlerts() {
-        List<CryptoAlert> alertsInDB = this.cryptoAlertRepository.findByUserEmailOrderByCoinSymbol(this.user.getUsername());
-        List<CryptoAlertDTO> alertsResponse = this.alertService.getAllCryptoAlerts(this.user.getUsername());
+        List<CryptoAlert> alertsInDB = this.cryptoAlertRepository.findByUserIdOrderByCoinSymbol(this.user.getId());
+        List<CryptoAlertDTO> alertsResponse = this.alertService.getAllCryptoAlerts(this.user.getId());
 
         Assertions.assertEquals(alertsInDB.stream().map(this::convertToCryptoAlertDTO).collect(Collectors.toList()), alertsResponse);
     }
@@ -67,7 +67,7 @@ public class AlertServiceTest {
     @Test
     public void createNewStockAlert() {
         StockAlertDTO sDTO = this.getStockAlertDTO();
-        StockAlertDTO createdDTO = this.alertService.createNewStockAlert(this.user.getUsername(), sDTO);
+        StockAlertDTO createdDTO = this.alertService.createNewStockAlert(this.user.getId(), sDTO);
         sDTO.setId(createdDTO.getId());
         StockAlert expected = this.stockAlertRepository.findById(createdDTO.getId()).get();
 
@@ -77,7 +77,7 @@ public class AlertServiceTest {
     @Test
     public void createNewCryptoAlert() {
         CryptoAlertDTO cDTO = this.getCryptoAlertDTO();
-        CryptoAlertDTO createdDTO = this.alertService.createNewCryptoAlert(this.user.getUsername(), cDTO);
+        CryptoAlertDTO createdDTO = this.alertService.createNewCryptoAlert(this.user.getId(), cDTO);
         cDTO.setId(createdDTO.getId());
         CryptoAlert expected = this.cryptoAlertRepository.findById(createdDTO.getId()).get();
 
@@ -87,9 +87,9 @@ public class AlertServiceTest {
     @Test
     public void deleteStockAlert() {
         StockAlertDTO sDTO = this.getStockAlertDTO();
-        StockAlertDTO createdDTO = this.alertService.createNewStockAlert(this.user.getUsername(), sDTO);
+        StockAlertDTO createdDTO = this.alertService.createNewStockAlert(this.user.getId(), sDTO);
         Optional<StockAlert> beforeDelete = this.stockAlertRepository.findById(createdDTO.getId());
-        var deleted = this.alertService.deleteStockAlert("test@test.test", createdDTO.getId());
+        var deleted = this.alertService.deleteStockAlert(this.user.getId(), createdDTO.getId());
         Optional<StockAlert> afterDelete = this.stockAlertRepository.findById(createdDTO.getId());
 
         Assertions.assertTrue(deleted);
@@ -100,9 +100,9 @@ public class AlertServiceTest {
     @Test
     public void deleteCryptoAlert() {
         CryptoAlertDTO cDTO = this.getCryptoAlertDTO();
-        CryptoAlertDTO createdDTO = this.alertService.createNewCryptoAlert(this.user.getUsername(), cDTO);
+        CryptoAlertDTO createdDTO = this.alertService.createNewCryptoAlert(this.user.getId(), cDTO);
         Optional<CryptoAlert> beforeDelete = this.cryptoAlertRepository.findById(createdDTO.getId());
-        var deleted = this.alertService.deleteCryptoAlert("test@test.test", createdDTO.getId());
+        var deleted = this.alertService.deleteCryptoAlert(this.user.getId(), createdDTO.getId());
         Optional<CryptoAlert> afterDelete = this.cryptoAlertRepository.findById(createdDTO.getId());
 
         Assertions.assertTrue(deleted);
@@ -112,12 +112,12 @@ public class AlertServiceTest {
 
     @Test
     public void deleteStockAlertNotFound() {
-        Assertions.assertFalse(this.alertService.deleteStockAlert("test@test.test", 200L));
+        Assertions.assertFalse(this.alertService.deleteStockAlert(this.user.getId(), 200L));
     }
 
     @Test
     public void deleteCryptoAlertNotFound() {
-        Assertions.assertFalse(this.alertService.deleteCryptoAlert("test@test.test", 200L));
+        Assertions.assertFalse(this.alertService.deleteCryptoAlert(this.user.getId(), 200L));
     }
 
     private StockAlertDTO getStockAlertDTO() {

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ReportSubscriptionRepository extends JpaRepository<ReportSubscription, Long> {
-    Optional<ReportSubscription> findByUserEmail(String userEmail);
+    Optional<ReportSubscription> findByUserId(Long userId);
 
     List<ReportSubscription> findByEnabledTrue();
 }

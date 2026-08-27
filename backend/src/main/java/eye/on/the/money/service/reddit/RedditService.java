@@ -38,8 +38,8 @@ public class RedditService {
     private String redditLogo;
 
 
-    public List<News> getHotNewsFromSubreddits(String userEmail) {
-        List<Subreddit> subredditList = this.subredditRepository.findByUserEmailOrderBySubredditAsc(userEmail);
+    public List<News> getHotNewsFromSubreddits(Long userId) {
+        List<Subreddit> subredditList = this.subredditRepository.findByUserIdOrderBySubredditAsc(userId);
         JsonNode token = this.redditAPIService.getToken();
         Flux<JsonNode> subRedditsFlux = this.redditAPIService.getHotRedditNews(
                 subredditList.stream().map(Subreddit::getSubreddit).collect(Collectors.toList()),
@@ -57,13 +57,13 @@ public class RedditService {
     }
 
     @Transactional
-    public boolean deleteSubreddit(Long id, String userEmail) {
-        return this.subredditRepository.deleteByIdAndUserEmail(id, userEmail) > 0;
+    public boolean deleteSubreddit(Long id, Long userId) {
+        return this.subredditRepository.deleteByIdAndUserId(id, userId) > 0;
     }
 
     @Transactional
-    public Subreddit addSubreddit(SubredditDTO subreddit, String userEmail) {
-        User user = this.userService.loadUserByEmail(userEmail);
+    public Subreddit addSubreddit(SubredditDTO subreddit, Long userId) {
+        User user = this.userService.getReference(userId);
         return this.subredditRepository.save(Subreddit.builder()
                 .subreddit(subreddit.subReddit())
                 .description(subreddit.description())
@@ -71,8 +71,8 @@ public class RedditService {
                 .build());
     }
 
-    public List<Subreddit> getSubredditsByUser(String userEmail) {
-        return this.subredditRepository.findByUserEmailOrderBySubredditAsc(userEmail);
+    public List<Subreddit> getSubredditsByUser(Long userId) {
+        return this.subredditRepository.findByUserIdOrderBySubredditAsc(userId);
     }
 
     private <T> T convert(JsonNode json, Class<T> cls) {

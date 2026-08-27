@@ -38,12 +38,12 @@ public class ETFDividendService implements ICSVService {
     private final ETFService etfService;
     private final UserService userService;
     private final ModelMapper modelMapper;
-    public List<ETFDividendDTO> getDividends(String userEmail) {
-        return this.etfDividendRepository.findByUserEmailOrderByDividendDateDesc(userEmail).stream().map(this::convertToETFDividendDTO).collect(Collectors.toList());
+    public List<ETFDividendDTO> getDividends(Long userId) {
+        return this.etfDividendRepository.findByUserIdOrderByDividendDateDesc(userId).stream().map(this::convertToETFDividendDTO).collect(Collectors.toList());
     }
 
-    public List<ETFDividendDTO> getDividendsBetween(String userEmail, LocalDate from, LocalDate to) {
-        return this.etfDividendRepository.findByUserEmailAndDividendDateBetweenOrderByDividendDate(userEmail, from, to)
+    public List<ETFDividendDTO> getDividendsBetween(Long userId, LocalDate from, LocalDate to) {
+        return this.etfDividendRepository.findByUserIdAndDividendDateBetweenOrderByDividendDate(userId, from, to)
                 .stream().map(this::convertToETFDividendDTO).collect(Collectors.toList());
     }
 
@@ -52,10 +52,10 @@ public class ETFDividendService implements ICSVService {
     }
 
     @Transactional
-    public ETFDividendDTO createETFDividend(ETFDividendDTO dividendDTO, String userEmail) {
+    public ETFDividendDTO createETFDividend(ETFDividendDTO dividendDTO, Long userId) {
         Currency currency = this.currencyRepository.findById(dividendDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + dividendDTO.getCurrencyId()));
         ETF etf = this.etfService.getOrCreateETF(dividendDTO.getShortName(), dividendDTO.getExchange(), dividendDTO.getName());
-        User user = this.userService.loadUserByEmail(userEmail);
+        User user = this.userService.getReference(userId);
 
         ETFDividend dividend = ETFDividend.builder()
                 .amount(dividendDTO.getAmount())
@@ -70,10 +70,10 @@ public class ETFDividendService implements ICSVService {
     }
 
     @Transactional
-    public ETFDividendDTO updateETFDividend(ETFDividendDTO dividendDTO, String userEmail) {
+    public ETFDividendDTO updateETFDividend(ETFDividendDTO dividendDTO, Long userId) {
         Currency currency = this.currencyRepository.findById(dividendDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + dividendDTO.getCurrencyId()));
         ETF etf = this.etfService.getOrCreateETF(dividendDTO.getShortName(), dividendDTO.getExchange(), dividendDTO.getName());
-        ETFDividend dividend = this.etfDividendRepository.findByIdAndUserEmail(dividendDTO.getId(), userEmail).orElseThrow(() -> new NoSuchElementException("ETF dividend not found: " + dividendDTO.getId()));
+        ETFDividend dividend = this.etfDividendRepository.findByIdAndUserId(dividendDTO.getId(), userId).orElseThrow(() -> new NoSuchElementException("ETF dividend not found: " + dividendDTO.getId()));
 
         dividend.setDividendDate(dividendDTO.getDividendDate());
         dividend.setCurrency(currency);
@@ -84,13 +84,13 @@ public class ETFDividendService implements ICSVService {
     }
 
     @Transactional
-    public void deleteETFDividendById(List<Long> ids, String userEmail) {
-        this.etfDividendRepository.deleteByUserEmailAndIdIn(userEmail, ids);
+    public void deleteETFDividendById(List<Long> ids, Long userId) {
+        this.etfDividendRepository.deleteByUserIdAndIdIn(userId, ids);
     }
 
-    public void getCSV(String userEmail, Writer writer) {
+    public void getCSV(Long userId, Writer writer) {
         List<ETFDividendDTO> dividendListList =
-                this.etfDividendRepository.findByUserEmailOrderByDividendDate(userEmail)
+                this.etfDividendRepository.findByUserIdOrderByDividendDate(userId)
                         .stream()
                         .map(this::convertToETFDividendDTO)
                         .toList();
@@ -98,18 +98,18 @@ public class ETFDividendService implements ICSVService {
     }
 
     @Transactional
-    public void processCSV(String userEmail, MultipartFile file) {
+    public void processCSV(Long userId, MultipartFile file) {
         try (CSVParser csvParser = this.getParser(file,
                 new String[]{"Dividend Id", "Amount", "Dividend Date", "Short Name","Exchange", "Currency"})) {
             for (CSVRecord csvRecord : csvParser) {
                 ETFDividendDTO dividend = ETFDividendDTO.createFromCSVRecord(csvRecord, DateFormats.YYYY_MM_DD);
 
                 if (dividend.getId() != null &&
-                        this.etfDividendRepository.findByIdAndUserEmail(dividend.getId(), userEmail).isPresent()) {
-                    this.updateETFDividend(dividend, userEmail);
+                        this.etfDividendRepository.findByIdAndUserId(dividend.getId(), userId).isPresent()) {
+                    this.updateETFDividend(dividend, userId);
                 } else {
                     dividend.setId(null);
-                    this.createETFDividend(dividend, userEmail);
+                    this.createETFDividend(dividend, userId);
                 }
             }
         } catch (IOException | DateTimeParseException | IllegalArgumentException e) {

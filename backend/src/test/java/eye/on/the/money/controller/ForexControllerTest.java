@@ -38,35 +38,35 @@ class ForexControllerTest {
     public void getForexTransactionsByUserId() {
         List<ForexTransactionDTO> ftDTO = new ArrayList<>();
 
-        when(this.forexTransactionService.getForexTransactionsByUserId("email")).thenReturn(ftDTO);
+        when(this.forexTransactionService.getForexTransactionsByUserId(1L)).thenReturn(ftDTO);
 
-        Assertions.assertIterableEquals(ftDTO, this.forexController.getForexTransactionsByUserId("email").getBody());
+        Assertions.assertIterableEquals(ftDTO, this.forexController.getForexTransactionsByUserId(1L).getBody());
     }
 
     @Test
     public void getForexHoldings() {
         List<ForexTransactionDTO> ftDTO = new ArrayList<>();
 
-        when(this.forexTransactionService.getAllForexHoldings("email")).thenReturn(ftDTO);
+        when(this.forexTransactionService.getAllForexHoldings(1L)).thenReturn(ftDTO);
 
-        Assertions.assertIterableEquals(ftDTO, this.forexController.getForexHoldings("email", false).getBody());
+        Assertions.assertIterableEquals(ftDTO, this.forexController.getForexHoldings(1L, false).getBody());
     }
 
     @Test
     public void getForexHoldings_refreshBypassesTheCache() {
         List<ForexTransactionDTO> ftDTO = this.createTransactionList();
 
-        when(this.forexTransactionService.refreshAllForexHoldings("email")).thenReturn(ftDTO);
+        when(this.forexTransactionService.refreshAllForexHoldings(1L)).thenReturn(ftDTO);
 
-        Assertions.assertIterableEquals(ftDTO, this.forexController.getForexHoldings("email", true).getBody());
-        verify(this.forexTransactionService, never()).getAllForexHoldings("email");
+        Assertions.assertIterableEquals(ftDTO, this.forexController.getForexHoldings(1L, true).getBody());
+        verify(this.forexTransactionService, never()).getAllForexHoldings(1L);
     }
 
     @Test
     public void deleteByIds() {
         doNothing().when(this.forexTransactionService).deleteForexTransactionById(any(), any());
 
-        Assertions.assertEquals(HttpStatus.OK, this.forexController.deleteByIds("email", List.of(1L, 2L, 3L)).getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, this.forexController.deleteByIds(1L, List.of(1L, 2L, 3L)).getStatusCode());
     }
 
     @Test
@@ -74,9 +74,9 @@ class ForexControllerTest {
         ForexTransactionDTO ftDTO = ForexTransactionDTO.builder().toAmount(1.0).fromAmount(3.0).transactionDate(LocalDate.now())
                 .buySell("b").changeRate(55.6).liveChangeRate(66.7).liveValue(100.1).valueDiff(5.6).fromCurrencyId("eur").toCurrencyId("usd").build();
 
-        when(this.forexTransactionService.createForexTransaction(ftDTO, "email")).thenReturn(ftDTO);
+        when(this.forexTransactionService.createForexTransaction(ftDTO, 1L)).thenReturn(ftDTO);
 
-        Assertions.assertEquals(ftDTO, this.forexController.createTransaction("email", ftDTO).getBody());
+        Assertions.assertEquals(ftDTO, this.forexController.createTransaction(1L, ftDTO).getBody());
     }
 
     @Test
@@ -84,9 +84,9 @@ class ForexControllerTest {
         ForexTransactionDTO ftDTO = ForexTransactionDTO.builder().toAmount(1.0).fromAmount(3.0).transactionDate(LocalDate.now())
                 .buySell("b").changeRate(55.6).liveChangeRate(66.7).liveValue(100.1).valueDiff(5.6).fromCurrencyId("eur").toCurrencyId("usd").build();
 
-        when(this.forexTransactionService.updateForexTransaction(ftDTO, "email")).thenReturn(ftDTO);
+        when(this.forexTransactionService.updateForexTransaction(ftDTO, 1L)).thenReturn(ftDTO);
 
-        Assertions.assertEquals(ftDTO, this.forexController.updateTransaction("email", ftDTO).getBody());
+        Assertions.assertEquals(ftDTO, this.forexController.updateTransaction(1L, ftDTO).getBody());
     }
 
     private List<ForexTransactionDTO> createTransactionList() {

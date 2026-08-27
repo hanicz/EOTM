@@ -46,35 +46,35 @@ public class TransactionService implements ICSVService {
     private final CoinRepository coinRepository;
     private final ModelMapper modelMapper;
     private final CryptoAPIService cryptoAPIService;
-    public List<TransactionDTO> getTransactionsByUserId(String userEmail) {
-        return this.transactionRepository.findByUserEmailOrderByTransactionDateDesc(userEmail).stream()
+    public List<TransactionDTO> getTransactionsByUserId(Long userId) {
+        return this.transactionRepository.findByUserIdOrderByTransactionDateDesc(userId).stream()
                 .map(this::convertToTransactionDTO).collect(Collectors.toList());
     }
 
-    public List<TransactionDTO> getTransactionsBetween(String userEmail, LocalDate from, LocalDate to) {
-        return this.transactionRepository.findByUserEmailAndTransactionDateBetweenOrderByTransactionDate(userEmail, from, to)
+    public List<TransactionDTO> getTransactionsBetween(Long userId, LocalDate from, LocalDate to) {
+        return this.transactionRepository.findByUserIdAndTransactionDateBetweenOrderByTransactionDate(userId, from, to)
                 .stream().map(this::convertToTransactionDTO).collect(Collectors.toList());
     }
 
-    public List<TransactionDTO> getAllPositions(String userEmail) {
-        Map<String, TransactionDTO> transactionMap = this.getCalculated(userEmail);
+    public List<TransactionDTO> getAllPositions(Long userId) {
+        Map<String, TransactionDTO> transactionMap = this.getCalculated(userId);
         return new ArrayList<>(transactionMap.values());
     }
 
-    @Cacheable(cacheNames = "holdings-crypto", key = "#userEmail",
+    @Cacheable(cacheNames = "holdings-crypto", key = "#userId",
             condition = "#query.currency != null and #query.currency.equalsIgnoreCase('EUR')")
-    public List<TransactionDTO> getCurrentHoldings(String userEmail, TransactionQuery query) {
-        return this.currentHoldings(userEmail, query);
+    public List<TransactionDTO> getCurrentHoldings(Long userId, TransactionQuery query) {
+        return this.currentHoldings(userId, query);
     }
 
-    @CachePut(cacheNames = "holdings-crypto", key = "#userEmail",
+    @CachePut(cacheNames = "holdings-crypto", key = "#userId",
             condition = "#query.currency != null and #query.currency.equalsIgnoreCase('EUR')")
-    public List<TransactionDTO> refreshCurrentHoldings(String userEmail, TransactionQuery query) {
-        return this.currentHoldings(userEmail, query);
+    public List<TransactionDTO> refreshCurrentHoldings(Long userId, TransactionQuery query) {
+        return this.currentHoldings(userId, query);
     }
 
-    private List<TransactionDTO> currentHoldings(String userEmail, TransactionQuery query) {
-        Map<String, TransactionDTO> transactionMap = this.getCalculated(userEmail);
+    private List<TransactionDTO> currentHoldings(Long userId, TransactionQuery query) {
+        Map<String, TransactionDTO> transactionMap = this.getCalculated(userId);
         List<TransactionDTO> transactionDTOList = (new ArrayList<>(transactionMap.values()))
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
         if (transactionDTOList.isEmpty()) return transactionDTOList;
@@ -98,18 +98,18 @@ public class TransactionService implements ICSVService {
         return this.modelMapper.map(transaction, TransactionDTO.class);
     }
 
-    @CacheEvict(cacheNames = "holdings-crypto", key = "#userEmail")
+    @CacheEvict(cacheNames = "holdings-crypto", key = "#userId")
     @Transactional
-    public void deleteTransactionById(String userEmail, List<Long> ids) {
-        this.transactionRepository.deleteByUserEmailAndIdIn(userEmail, ids);
+    public void deleteTransactionById(Long userId, List<Long> ids) {
+        this.transactionRepository.deleteByUserIdAndIdIn(userId, ids);
     }
 
-    @CacheEvict(cacheNames = "holdings-crypto", key = "#userEmail")
+    @CacheEvict(cacheNames = "holdings-crypto", key = "#userId")
     @Transactional
-    public TransactionDTO createTransaction(TransactionDTO transactionDTO, String userEmail) {
+    public TransactionDTO createTransaction(TransactionDTO transactionDTO, Long userId) {
         Currency currency = this.currencyRepository.findById(transactionDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + transactionDTO.getCurrencyId()));
         Coin coin = this.coinRepository.findBySymbol(transactionDTO.getSymbol()).orElseThrow(() -> new NoSuchElementException("Coin not found: " + transactionDTO.getSymbol()));
-        User user = this.userService.loadUserByEmail(userEmail);
+        User user = this.userService.getReference(userId);
 
         Transaction transaction = Transaction.builder()
                 .buySell(transactionDTO.getBuySell())
@@ -128,12 +128,12 @@ public class TransactionService implements ICSVService {
         return this.convertToTransactionDTO(transaction);
     }
 
-    @CacheEvict(cacheNames = "holdings-crypto", key = "#userEmail")
+    @CacheEvict(cacheNames = "holdings-crypto", key = "#userId")
     @Transactional
-    public TransactionDTO updateTransaction(TransactionDTO transactionDTO, String userEmail) {
+    public TransactionDTO updateTransaction(TransactionDTO transactionDTO, Long userId) {
         Currency currency = this.currencyRepository.findById(transactionDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + transactionDTO.getCurrencyId()));
         Coin coin = this.coinRepository.findBySymbol(transactionDTO.getSymbol()).orElseThrow(() -> new NoSuchElementException("Coin not found: " + transactionDTO.getSymbol()));
-        Transaction transaction = this.transactionRepository.findByIdAndUserEmail(transactionDTO.getId(), userEmail).orElseThrow(() -> new NoSuchElementException("Transaction not found: " + transactionDTO.getId()));
+        Transaction transaction = this.transactionRepository.findByIdAndUserId(transactionDTO.getId(), userId).orElseThrow(() -> new NoSuchElementException("Transaction not found: " + transactionDTO.getId()));
 
         transaction.setBuySell(transactionDTO.getBuySell());
         transaction.setTransactionString(transactionDTO.getTransactionString());
@@ -149,8 +149,8 @@ public class TransactionService implements ICSVService {
 
 
 
-    private Map<String, TransactionDTO> getCalculated(String userEmail) {
-        List<TransactionDTO> transactions = this.transactionRepository.findByUserEmailOrderByTransactionDate(userEmail).stream()
+    private Map<String, TransactionDTO> getCalculated(Long userId) {
+        List<TransactionDTO> transactions = this.transactionRepository.findByUserIdOrderByTransactionDate(userId).stream()
                 .map(this::convertToTransactionDTO).toList();
         Map<String, TransactionDTO> transactionMap = new HashMap<>();
         for (TransactionDTO t : transactions) {
@@ -162,29 +162,29 @@ public class TransactionService implements ICSVService {
         return transactionMap;
     }
 
-    public void getCSV(String userEmail, Writer writer) {
+    public void getCSV(Long userId, Writer writer) {
         List<TransactionDTO> transactionList =
-                this.transactionRepository.findByUserEmailOrderByTransactionDate(userEmail)
+                this.transactionRepository.findByUserIdOrderByTransactionDate(userId)
                         .stream()
                         .map(this::convertToTransactionDTO)
                         .toList();
         this.printRecords(transactionList, writer);
     }
 
-    @CacheEvict(cacheNames = "holdings-crypto", key = "#userEmail")
+    @CacheEvict(cacheNames = "holdings-crypto", key = "#userId")
     @Transactional
-    public void processCSV(String userEmail, MultipartFile file) {
+    public void processCSV(Long userId, MultipartFile file) {
         try (CSVParser csvParser = this.getParser(file,
                 new String[]{"Transaction Id", "Quantity", "Type", "Transaction Date", "Symbol", "Amount", "Currency", "Fee"})) {
             for (CSVRecord csvRecord : csvParser) {
                 TransactionDTO transaction = TransactionDTO.createFromCSVRecord(csvRecord, DateFormats.YYYY_MM_DD);
 
                 if (transaction.getId() != null &&
-                        this.transactionRepository.findByIdAndUserEmail(transaction.getId(), userEmail).isPresent()) {
-                    this.updateTransaction(transaction, userEmail);
+                        this.transactionRepository.findByIdAndUserId(transaction.getId(), userId).isPresent()) {
+                    this.updateTransaction(transaction, userId);
                 } else {
                     transaction.setId(null);
-                    this.createTransaction(transaction, userEmail);
+                    this.createTransaction(transaction, userId);
                 }
             }
         } catch (IOException | DateTimeParseException | IllegalArgumentException e) {

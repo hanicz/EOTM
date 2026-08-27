@@ -8,18 +8,18 @@ import java.util.List;
 import java.util.Optional;
 
 public interface InvestmentRepository extends JpaRepository<Investment, Long> {
-    List<Investment> findByUserEmailOrderByTransactionDateDesc(String userEmail);
+    List<Investment> findByUserIdOrderByTransactionDateDesc(Long userId);
 
-    List<Investment> findByUserEmailAndTransactionDateBetweenOrderByTransactionDate(
-            String userEmail, LocalDate from, LocalDate to);
-    List<Investment> findByUserEmailOrderByTransactionDate(String userEmail);
-    List<Investment> findByUserEmailAndAccountIdOrderByTransactionDateDesc(String userEmail, Long accountId);
+    List<Investment> findByUserIdAndTransactionDateBetweenOrderByTransactionDate(
+            Long userId, LocalDate from, LocalDate to);
+    List<Investment> findByUserIdOrderByTransactionDate(Long userId);
+    List<Investment> findByUserIdAndAccountIdOrderByTransactionDateDesc(Long userId, Long accountId);
 
-    List<Investment> findByUserEmailAndRsuTrueOrderByTransactionDateDesc(String userEmail);
+    List<Investment> findByUserIdAndRsuTrueOrderByTransactionDateDesc(Long userId);
 
-    List<Investment> findByUserEmailAndIdIn(String userEmail, List<Long> ids);
+    List<Investment> findByUserIdAndIdIn(Long userId, List<Long> ids);
 
-    Optional<Investment> findByIdAndUserEmail(Long id, String userEmail);
+    Optional<Investment> findByIdAndUserId(Long id, Long userId);
 
-    void deleteByUserEmailAndIdIn(String userEmail, List<Long> ids);
+    void deleteByUserIdAndIdIn(Long userId, List<Long> ids);
 }

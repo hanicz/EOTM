@@ -43,26 +43,26 @@ class InterestControllerTest {
     @Test
     void getAllInterest() {
         List<InterestDTO> interests = this.createInterestList();
-        when(this.interestService.getInterest("email")).thenReturn(interests);
+        when(this.interestService.getInterest(1L)).thenReturn(interests);
 
-        Assertions.assertIterableEquals(interests, this.interestController.getAllInterest("email").getBody());
+        Assertions.assertIterableEquals(interests, this.interestController.getAllInterest(1L).getBody());
     }
 
     @Test
     void createInterest() {
         InterestDTO dto = InterestDTO.builder().interestId(1L).amount(50.0).interestDate(LocalDate.now())
                 .securityId("SEC1").securityName("Security One").currencyId("EUR").build();
-        when(this.interestService.createInterest(dto, "email")).thenReturn(dto);
+        when(this.interestService.createInterest(dto, 1L)).thenReturn(dto);
 
-        Assertions.assertEquals(HttpStatus.CREATED, this.interestController.createInterest("email", dto).getStatusCode());
-        Assertions.assertEquals(dto, this.interestController.createInterest("email", dto).getBody());
+        Assertions.assertEquals(HttpStatus.CREATED, this.interestController.createInterest(1L, dto).getStatusCode());
+        Assertions.assertEquals(dto, this.interestController.createInterest(1L, dto).getBody());
     }
 
     @Test
     void deleteByIds() {
         doNothing().when(this.interestService).deleteInterestById(any(), any());
 
-        Assertions.assertEquals(HttpStatus.OK, this.interestController.deleteByIds("email", List.of(1L, 2L)).getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, this.interestController.deleteByIds(1L, List.of(1L, 2L)).getStatusCode());
     }
 
     @Test
@@ -70,7 +70,7 @@ class InterestControllerTest {
         HttpServletResponse httpSR = new MockHttpServletResponse();
         doNothing().when(this.interestService).getCSV(any(), any());
 
-        this.interestController.getCSV("email", httpSR);
+        this.interestController.getCSV(1L, httpSR);
 
         verify(this.interestService, times(1)).getCSV(any(), any());
     }
@@ -79,15 +79,15 @@ class InterestControllerTest {
     void updateInterest() {
         InterestDTO dto = InterestDTO.builder().interestId(1L).amount(75.0).interestDate(LocalDate.now())
                 .securityId("SEC1").securityName("Security One").currencyId("EUR").build();
-        when(this.interestService.updateInterest(dto, "email")).thenReturn(dto);
+        when(this.interestService.updateInterest(dto, 1L)).thenReturn(dto);
 
-        Assertions.assertEquals(dto, this.interestController.updateInterest("email", dto).getBody());
+        Assertions.assertEquals(dto, this.interestController.updateInterest(1L, dto).getBody());
     }
 
     @Test
     void processCSV() throws IOException {
         doNothing().when(this.interestService).processCSV(any(), any());
 
-        Assertions.assertEquals(HttpStatus.CREATED, this.interestController.processCSV("email", null).getStatusCode());
+        Assertions.assertEquals(HttpStatus.CREATED, this.interestController.processCSV(1L, null).getStatusCode());
     }
 }

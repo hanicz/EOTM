@@ -66,13 +66,13 @@ class TransactionServiceTest {
     @BeforeEach
     public void init() {
         this.user = this.userRepository.findByEmail("test@test.test");
-        when(this.userService.loadUserByEmail(this.user.getUsername())).thenReturn(this.user);
+        when(this.userService.getReference(this.user.getId())).thenReturn(this.user);
     }
 
     @Test
     public void getTransactionsByUserId() {
-        List<TransactionDTO> result = this.transactionService.getTransactionsByUserId(this.user.getUsername());
-        List<Transaction> transactions = this.transactionRepository.findByUserEmailOrderByTransactionDateDesc(this.user.getUsername());
+        List<TransactionDTO> result = this.transactionService.getTransactionsByUserId(this.user.getId());
+        List<Transaction> transactions = this.transactionRepository.findByUserIdOrderByTransactionDateDesc(this.user.getId());
 
         Assertions.assertIterableEquals(transactions.stream()
                 .map(this::convertToTransactionDTO).collect(Collectors.toList()), result);
@@ -80,7 +80,7 @@ class TransactionServiceTest {
 
     @Test
     public void getAllPositions() {
-        List<TransactionDTO> result = this.transactionService.getAllPositions(this.user.getUsername());
+        List<TransactionDTO> result = this.transactionService.getAllPositions(this.user.getId());
         TransactionDTO testObject = result.stream().filter(tDTO -> "DOT".equals(tDTO.getSymbol())).findAny().get();
 
         Assertions.assertAll("Assert all merged values",
@@ -91,7 +91,7 @@ class TransactionServiceTest {
 
     @Test
     public void getAllPositions2() {
-        List<TransactionDTO> result = this.transactionService.getAllPositions(this.user.getUsername());
+        List<TransactionDTO> result = this.transactionService.getAllPositions(this.user.getId());
         TransactionDTO testObject = result.stream().filter(tDTO -> "BTC".equals(tDTO.getSymbol())).findAny().get();
 
         Assertions.assertAll("Assert all merged values",
@@ -102,7 +102,7 @@ class TransactionServiceTest {
 
     @Test
     public void getAllPositions3() {
-        List<TransactionDTO> result = this.transactionService.getAllPositions(this.user.getUsername());
+        List<TransactionDTO> result = this.transactionService.getAllPositions(this.user.getId());
         TransactionDTO testObject = result.stream().filter(tDTO -> "ADA".equals(tDTO.getSymbol())).findAny().get();
 
         Assertions.assertAll("Assert all merged values",
@@ -113,7 +113,7 @@ class TransactionServiceTest {
 
     @Test
     public void getCurrentHoldingsWithoutTransactions() {
-        List<TransactionDTO> result = this.transactionService.getCurrentHoldings("nobody@test.test",
+        List<TransactionDTO> result = this.transactionService.getCurrentHoldings(-1L,
                 TransactionQuery.builder().currency("EUR").build());
 
         assertTrue(result.isEmpty());
@@ -125,8 +125,8 @@ class TransactionServiceTest {
         when(this.cryptoAPIService.getLiveValueForCoins(anyString(), anyString())).thenReturn(this.getCryptoApiResponse());
         TransactionQuery query = TransactionQuery.builder().currency("EUR").build();
 
-        List<TransactionDTO> cached = this.transactionService.getCurrentHoldings(this.user.getUsername(), query);
-        List<TransactionDTO> refreshed = this.transactionService.refreshCurrentHoldings(this.user.getUsername(), query);
+        List<TransactionDTO> cached = this.transactionService.getCurrentHoldings(this.user.getId(), query);
+        List<TransactionDTO> refreshed = this.transactionService.refreshCurrentHoldings(this.user.getId(), query);
 
         Assertions.assertIterableEquals(cached, refreshed);
     }
@@ -134,7 +134,7 @@ class TransactionServiceTest {
     @Test
     public void getCurrentHoldings() throws JsonProcessingException {
         when(this.cryptoAPIService.getLiveValueForCoins(anyString(), anyString())).thenReturn(this.getCryptoApiResponse());
-        List<TransactionDTO> result = this.transactionService.getCurrentHoldings(this.user.getUsername(), TransactionQuery.builder().currency("EUR").build());
+        List<TransactionDTO> result = this.transactionService.getCurrentHoldings(this.user.getId(), TransactionQuery.builder().currency("EUR").build());
 
         TransactionDTO testObject = result.stream().filter(tDTO -> "BTC".equals(tDTO.getSymbol())).findAny().get();
 
@@ -150,7 +150,7 @@ class TransactionServiceTest {
     @Test
     public void getCurrentHoldings2() throws JsonProcessingException {
         when(this.cryptoAPIService.getLiveValueForCoins(anyString(), anyString())).thenReturn(this.getCryptoApiResponse());
-        List<TransactionDTO> result = this.transactionService.getCurrentHoldings(this.user.getUsername(), TransactionQuery.builder().currency("EUR").build());
+        List<TransactionDTO> result = this.transactionService.getCurrentHoldings(this.user.getId(), TransactionQuery.builder().currency("EUR").build());
 
         TransactionDTO testObject = result.stream().filter(tDTO -> "DOT".equals(tDTO.getSymbol())).findAny().get();
 
@@ -166,7 +166,7 @@ class TransactionServiceTest {
     @Test
     public void getCurrentHoldings3() throws JsonProcessingException {
         when(this.cryptoAPIService.getLiveValueForCoins(anyString(), anyString())).thenReturn(this.getCryptoApiResponse());
-        List<TransactionDTO> result = this.transactionService.getCurrentHoldings(this.user.getUsername(), TransactionQuery.builder().currency("EUR").build());
+        List<TransactionDTO> result = this.transactionService.getCurrentHoldings(this.user.getId(), TransactionQuery.builder().currency("EUR").build());
 
         Assertions.assertTrue(result.stream().filter(tDTO -> "ADA".equals(tDTO.getSymbol())).findAny().isEmpty());
     }
@@ -175,7 +175,7 @@ class TransactionServiceTest {
     public void createTransaction() {
         TransactionDTO transactionDTO = this.createNewTransaction();
 
-        TransactionDTO result = this.transactionService.createTransaction(transactionDTO, this.user.getUsername());
+        TransactionDTO result = this.transactionService.createTransaction(transactionDTO, this.user.getId());
 
         Assertions.assertAll("Assert new transaction values",
                 () -> assertEquals(transactionDTO.getBuySell(), result.getBuySell()),
@@ -194,7 +194,7 @@ class TransactionServiceTest {
         transactionDTO.setCurrencyId("NOT_EXISTS");
 
         Assertions.assertThrows(NoSuchElementException.class,
-                () -> this.transactionService.createTransaction(transactionDTO, this.user.getUsername()));
+                () -> this.transactionService.createTransaction(transactionDTO, this.user.getId()));
     }
 
     @Test
@@ -203,34 +203,34 @@ class TransactionServiceTest {
         transactionDTO.setSymbol("NOT_EXISTS");
 
         Assertions.assertThrows(NoSuchElementException.class,
-                () -> this.transactionService.createTransaction(transactionDTO, this.user.getUsername()));
+                () -> this.transactionService.createTransaction(transactionDTO, this.user.getId()));
     }
 
     @Test
     public void deleteTransactionById() {
         TransactionDTO transactionDTO = this.createNewTransaction();
-        TransactionDTO inserted = this.transactionService.createTransaction(transactionDTO, this.user.getUsername());
+        TransactionDTO inserted = this.transactionService.createTransaction(transactionDTO, this.user.getId());
 
-        this.transactionService.deleteTransactionById(this.user.getUsername(), List.of(inserted.getId()));
+        this.transactionService.deleteTransactionById(this.user.getId(), List.of(inserted.getId()));
 
-        Assertions.assertTrue(this.transactionRepository.findByIdAndUserEmail(inserted.getId(), this.user.getUsername()).isEmpty());
+        Assertions.assertTrue(this.transactionRepository.findByIdAndUserId(inserted.getId(), this.user.getId()).isEmpty());
     }
 
     @Test
     public void deleteTransactionByIdNotExists() {
-        Assertions.assertDoesNotThrow(() -> this.transactionService.deleteTransactionById(this.user.getUsername(), List.of(123456789L)));
+        Assertions.assertDoesNotThrow(() -> this.transactionService.deleteTransactionById(this.user.getId(), List.of(123456789L)));
     }
 
     @Test
     public void updateTransaction() {
         TransactionDTO transactionDTO = this.createNewTransaction();
-        TransactionDTO inserted = this.transactionService.createTransaction(transactionDTO, this.user.getUsername());
+        TransactionDTO inserted = this.transactionService.createTransaction(transactionDTO, this.user.getId());
         inserted.setBuySell("B");
         inserted.setQuantity(10.0);
         inserted.setAmount(100.0);
         inserted.setFee(5.0);
 
-        TransactionDTO result = this.transactionService.updateTransaction(inserted, this.user.getUsername());
+        TransactionDTO result = this.transactionService.updateTransaction(inserted, this.user.getId());
         Assertions.assertAll("Assert new transaction values",
                 () -> assertEquals("B", result.getBuySell()),
                 () -> assertEquals(10.0, result.getQuantity()),
@@ -242,37 +242,37 @@ class TransactionServiceTest {
     @Test
     public void updateTransactionNoCurrency() {
         TransactionDTO transactionDTO = this.createNewTransaction();
-        TransactionDTO inserted = this.transactionService.createTransaction(transactionDTO, this.user.getUsername());
+        TransactionDTO inserted = this.transactionService.createTransaction(transactionDTO, this.user.getId());
         inserted.setCurrencyId("NOT_EXISTS");
 
         Assertions.assertThrows(NoSuchElementException.class,
-                () -> this.transactionService.updateTransaction(inserted, this.user.getUsername()));
+                () -> this.transactionService.updateTransaction(inserted, this.user.getId()));
     }
 
     @Test
     public void updateTransactionNoCoin() {
         TransactionDTO transactionDTO = this.createNewTransaction();
-        TransactionDTO inserted = this.transactionService.createTransaction(transactionDTO, this.user.getUsername());
+        TransactionDTO inserted = this.transactionService.createTransaction(transactionDTO, this.user.getId());
         inserted.setSymbol("NOT_EXISTS");
 
         Assertions.assertThrows(NoSuchElementException.class,
-                () -> this.transactionService.updateTransaction(inserted, this.user.getUsername()));
+                () -> this.transactionService.updateTransaction(inserted, this.user.getId()));
     }
 
     @Test
     public void updateTransactionNoTransaction() {
         TransactionDTO transactionDTO = this.createNewTransaction();
-        TransactionDTO inserted = this.transactionService.createTransaction(transactionDTO, this.user.getUsername());
+        TransactionDTO inserted = this.transactionService.createTransaction(transactionDTO, this.user.getId());
         inserted.setId(123456789L);
 
         Assertions.assertThrows(NoSuchElementException.class,
-                () -> this.transactionService.updateTransaction(inserted, this.user.getUsername()));
+                () -> this.transactionService.updateTransaction(inserted, this.user.getId()));
     }
 
     @Test
     public void getCSV() {
         Writer writer = new StringWriter();
-        this.transactionService.getCSV(this.user.getUsername(), writer);
+        this.transactionService.getCSV(this.user.getId(), writer);
         Assertions.assertAll(
                 () -> assertTrue(writer.toString().contains("Transaction Id,Quantity,Type,Transaction Date,Symbol,Amount,Currency,Fee")),
                 () -> assertTrue(writer.toString().contains("2,98.5,B,2021-05-07,BTC,100.0,EUR,0.0")),
@@ -284,7 +284,7 @@ class TransactionServiceTest {
     @Test
     public void getCSV_Empty() {
         Writer writer = new StringWriter();
-        this.transactionService.getCSV("nouseremail", writer);
+        this.transactionService.getCSV(-1L, writer);
         Assertions.assertTrue(writer.toString().isEmpty());
     }
 
@@ -293,7 +293,7 @@ class TransactionServiceTest {
         String csvContent = "Transaction Id,Quantity,Type,Transaction Date,Symbol,Amount,Currency,Fee\n7,1000.0,S,2024-05-20,LUNA,2000.0,EUR,5.0";
         MultipartFile mpf = new MockMultipartFile("file", "file.csv", MediaType.TEXT_PLAIN_VALUE, csvContent.getBytes());
 
-        this.transactionService.processCSV(this.user.getUsername(), mpf);
+        this.transactionService.processCSV(this.user.getId(), mpf);
 
         Transaction result = this.transactionRepository.findById(7L).get();
 
@@ -311,9 +311,9 @@ class TransactionServiceTest {
         String csvContent = "Transaction Id,Quantity,Type,Transaction Date,Symbol,Amount,Currency,Fee\n,399.0,S,2024-05-29,LUNA,199.0,USD,6.0";
         MultipartFile mpf = new MockMultipartFile("file", "file.csv", MediaType.TEXT_PLAIN_VALUE, csvContent.getBytes());
 
-        this.transactionService.processCSV(this.user.getUsername(), mpf);
+        this.transactionService.processCSV(this.user.getId(), mpf);
 
-        List<Transaction> transactions = this.transactionRepository.findByUserEmailOrderByTransactionDateDesc(this.user.getUsername());
+        List<Transaction> transactions = this.transactionRepository.findByUserIdOrderByTransactionDateDesc(this.user.getId());
 
         Optional<Transaction> result = transactions.stream().filter(d -> d.getQuantity() == 399.0 && d.getCoin().getSymbol().equals("LUNA")).findAny();
 
@@ -325,7 +325,7 @@ class TransactionServiceTest {
         String csvContent = "EXCEPTION,1\n3,EXC,333\n64";
         MultipartFile mpf = new MockMultipartFile("file", "file.csv", MediaType.TEXT_PLAIN_VALUE, csvContent.getBytes());
         Assertions.assertThrows(CSVException.class,
-                () -> this.transactionService.processCSV(this.user.getUsername(), mpf));
+                () -> this.transactionService.processCSV(this.user.getId(), mpf));
     }
 
     @Test
@@ -333,7 +333,7 @@ class TransactionServiceTest {
         String csvContent = "Transaction Id,Quantity,Type,Transaction Date,Symbol,Amount,Currency,Fee\n,399.0,S,NOT_DATE,LUNA,199.0,USD,6.0";
         MultipartFile mpf = new MockMultipartFile("file", "file.csv", MediaType.TEXT_PLAIN_VALUE, csvContent.getBytes());
         Assertions.assertThrows(CSVException.class,
-                () -> this.transactionService.processCSV(this.user.getUsername(), mpf));
+                () -> this.transactionService.processCSV(this.user.getId(), mpf));
     }
 
 

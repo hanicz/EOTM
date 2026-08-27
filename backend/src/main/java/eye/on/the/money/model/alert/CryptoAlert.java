@@ -3,6 +3,7 @@ package eye.on.the.money.model.alert;
 import eye.on.the.money.model.crypto.Coin;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -16,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @SuperBuilder
 @ToString
-@Table(name = "EOTM_COIN_ALERT")
+@Table(name = "EOTM_COIN_ALERT", indexes = @Index(name = "IDX_COIN_ALERT_USER", columnList = "user_id"))
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated

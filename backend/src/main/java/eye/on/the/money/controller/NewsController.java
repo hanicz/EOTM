@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import eye.on.the.money.security.CurrentUserEmail;
+import eye.on.the.money.security.CurrentUserId;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,8 +24,8 @@ public class NewsController {
     private final RedditService redditService;
 
     @GetMapping("category/reddit")
-    public ResponseEntity<List<News>> getHotPosts(@CurrentUserEmail String userEmail) {
-        return ResponseEntity.ok(this.redditService.getHotNewsFromSubreddits(userEmail));
+    public ResponseEntity<List<News>> getHotPosts(@CurrentUserId Long userId) {
+        return ResponseEntity.ok(this.redditService.getHotNewsFromSubreddits(userId));
     }
 
     @GetMapping("category/{category}")
@@ -41,18 +41,18 @@ public class NewsController {
     }
 
     @GetMapping("reddit")
-    public ResponseEntity<List<Subreddit>> getSubreddits(@CurrentUserEmail String userEmail) {
-        return ResponseEntity.ok(this.redditService.getSubredditsByUser(userEmail));
+    public ResponseEntity<List<Subreddit>> getSubreddits(@CurrentUserId Long userId) {
+        return ResponseEntity.ok(this.redditService.getSubredditsByUser(userId));
     }
 
     @DeleteMapping("reddit/{id}")
-    public ResponseEntity<Void> deleteSubreddit(@PathVariable Long id, @CurrentUserEmail String userEmail) {
-        var isDeleted = this.redditService.deleteSubreddit(id, userEmail);
+    public ResponseEntity<Void> deleteSubreddit(@PathVariable Long id, @CurrentUserId Long userId) {
+        var isDeleted = this.redditService.deleteSubreddit(id, userId);
         return ResponseEntity.status(isDeleted ? HttpStatus.OK : HttpStatus.NOT_FOUND).build();
     }
 
     @PostMapping("reddit")
-    public ResponseEntity<Subreddit> addSubreddit(@RequestBody SubredditDTO subreddit, @CurrentUserEmail String userEmail) {
-        return ResponseEntity.ok(this.redditService.addSubreddit(subreddit, userEmail));
+    public ResponseEntity<Subreddit> addSubreddit(@RequestBody SubredditDTO subreddit, @CurrentUserId Long userId) {
+        return ResponseEntity.ok(this.redditService.addSubreddit(subreddit, userId));
     }
 }

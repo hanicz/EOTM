@@ -59,7 +59,7 @@ public class MonthlyReportScheduler {
         try {
             List<String> recipients = this.reportSubscriptionService.recipientsOf(subscription);
             this.emailService.sendMonthlyReportMail(recipients,
-                    this.monthlyReportService.build(userEmail, period, subscription.getCurrency()));
+                    this.monthlyReportService.build(subscription.getUser().getId(), period, subscription.getCurrency()));
             this.reportSubscriptionService.markSent(subscription, period);
         } catch (APIException | EmailException | DataAccessException e) {
             log.error("Unable to send the {} monthly report to {}", period, userEmail, e);

@@ -64,15 +64,15 @@ class InvestmentServiceTest {
 
     @Test
     public void getInvestments() {
-        List<InvestmentDTO> result = this.investmentService.getInvestments(this.user.getUsername());
-        List<Investment> investments = this.investmentRepository.findByUserEmailOrderByTransactionDateDesc(this.user.getUsername());
+        List<InvestmentDTO> result = this.investmentService.getInvestments(this.user.getId());
+        List<Investment> investments = this.investmentRepository.findByUserIdOrderByTransactionDateDesc(this.user.getId());
 
         Assertions.assertIterableEquals(investments.stream().map(this::convertToInvestmentDTO).collect(Collectors.toList()), result);
     }
 
     @Test
     public void getAllPositions() {
-        List<InvestmentDTO> result = this.investmentService.getAllPositions(this.user.getUsername());
+        List<InvestmentDTO> result = this.investmentService.getAllPositions(this.user.getId());
         InvestmentDTO testObject = result.stream().filter(iDTO -> "CRSR".equals(iDTO.getShortName())).findAny().get();
 
         Assertions.assertAll("Assert all merged values",
@@ -83,7 +83,7 @@ class InvestmentServiceTest {
 
     @Test
     public void getAllPositions2() {
-        List<InvestmentDTO> result = this.investmentService.getAllPositions(this.user.getUsername());
+        List<InvestmentDTO> result = this.investmentService.getAllPositions(this.user.getId());
         InvestmentDTO testObject = result.stream().filter(iDTO -> "AMD".equals(iDTO.getShortName())).findAny().get();
 
         Assertions.assertAll("Assert all merged values",
@@ -94,7 +94,7 @@ class InvestmentServiceTest {
 
     @Test
     public void getAllPositions3() {
-        List<InvestmentDTO> result = this.investmentService.getAllPositions(this.user.getUsername());
+        List<InvestmentDTO> result = this.investmentService.getAllPositions(this.user.getId());
         InvestmentDTO testObject = result.stream().filter(iDTO -> "INTC".equals(iDTO.getShortName())).findAny().get();
 
         Assertions.assertAll("Assert all merged values",
@@ -105,7 +105,7 @@ class InvestmentServiceTest {
 
     @Test
     public void getCurrentHoldings() {
-        List<InvestmentDTO> result = this.investmentService.getAllPositions(this.user.getUsername());
+        List<InvestmentDTO> result = this.investmentService.getAllPositions(this.user.getId());
         InvestmentDTO testObject = result.stream().filter(iDTO -> "CRSR".equals(iDTO.getShortName())).findAny().get();
 
         Assertions.assertAll("Assert all merged values",
@@ -116,7 +116,7 @@ class InvestmentServiceTest {
 
     @Test
     public void getCurrentHoldingsWithoutInvestments() {
-        List<InvestmentDTO> result = this.investmentService.getCurrentHoldings("nobody@test.test");
+        List<InvestmentDTO> result = this.investmentService.getCurrentHoldings(-1L);
 
         Assertions.assertTrue(result.isEmpty());
         verifyNoInteractions(this.eodAPIService);
@@ -126,15 +126,15 @@ class InvestmentServiceTest {
     public void refreshCurrentHoldingsMatchesGetCurrentHoldings() throws JsonProcessingException {
         when(this.eodAPIService.getLiveStockValue(anyString())).thenReturn(new ObjectMapper().readTree("[]"));
 
-        List<InvestmentDTO> cached = this.investmentService.getCurrentHoldings(this.user.getUsername());
-        List<InvestmentDTO> refreshed = this.investmentService.refreshCurrentHoldings(this.user.getUsername());
+        List<InvestmentDTO> cached = this.investmentService.getCurrentHoldings(this.user.getId());
+        List<InvestmentDTO> refreshed = this.investmentService.refreshCurrentHoldings(this.user.getId());
 
         Assertions.assertIterableEquals(cached, refreshed);
     }
 
     @Test
     public void getAllPositionsReopenedLotIsNotMergedWithClosedLot() {
-        List<InvestmentDTO> result = this.investmentService.getAllPositions(this.user.getUsername());
+        List<InvestmentDTO> result = this.investmentService.getAllPositions(this.user.getId());
         List<InvestmentDTO> googPositions = result.stream().filter(iDTO -> "GOOG".equals(iDTO.getShortName())).toList();
 
         InvestmentDTO closedLot = googPositions.stream().filter(iDTO -> iDTO.getQuantity() == 0).findAny().get();
@@ -149,7 +149,7 @@ class InvestmentServiceTest {
 
     @Test
     public void getPositionsByAccountIdOnlyOpenLotHasPositiveQuantity() {
-        List<InvestmentDTO> result = this.investmentService.getPositionsByAccountId(this.user.getUsername(), 1L);
+        List<InvestmentDTO> result = this.investmentService.getPositionsByAccountId(this.user.getId(), 1L);
         List<InvestmentDTO> googHoldings = result.stream()
                 .filter(iDTO -> "GOOG".equals(iDTO.getShortName()) && iDTO.getQuantity() > 0).toList();
 
@@ -168,11 +168,11 @@ class InvestmentServiceTest {
         when(this.stockService.getOrCreateStock(anyString(), anyString(), anyString()))
                 .thenReturn(investment.getStock());
 
-        this.investmentService.updateInvestment(investmentDTO, this.user.getUsername());
+        this.investmentService.updateInvestment(investmentDTO, this.user.getId());
 
         Assertions.assertFalse(investment.isRsu());
         Assertions.assertTrue(this.rsuTaxDetailsRepository
-                .findByUserEmailAndInvestmentIdIn(this.user.getUsername(), List.of(investment.getId())).isEmpty());
+                .findByUserIdAndInvestmentIdIn(this.user.getId(), List.of(investment.getId())).isEmpty());
     }
 
     @Test
@@ -184,16 +184,16 @@ class InvestmentServiceTest {
         when(this.stockService.getOrCreateStock(anyString(), anyString(), anyString()))
                 .thenReturn(investment.getStock());
 
-        this.investmentService.updateInvestment(investmentDTO, this.user.getUsername());
+        this.investmentService.updateInvestment(investmentDTO, this.user.getId());
 
         Assertions.assertTrue(investment.isRsu());
         Assertions.assertEquals(1, this.rsuTaxDetailsRepository
-                .findByUserEmailAndInvestmentIdIn(this.user.getUsername(), List.of(investment.getId())).size());
+                .findByUserIdAndInvestmentIdIn(this.user.getId(), List.of(investment.getId())).size());
     }
 
     private Investment flagAsRSU() {
         Investment investment = this.investmentRepository
-                .findByUserEmailOrderByTransactionDateDesc(this.user.getUsername()).stream()
+                .findByUserIdOrderByTransactionDateDesc(this.user.getId()).stream()
                 .filter(i -> "B".equals(i.getBuySell())).findFirst().orElseThrow();
         investment.setRsu(true);
         this.investmentRepository.save(investment);

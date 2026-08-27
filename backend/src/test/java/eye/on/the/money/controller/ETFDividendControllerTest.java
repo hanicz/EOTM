@@ -44,25 +44,25 @@ class ETFDividendControllerTest {
         edDTO.add(ETFDividendDTO.builder().dividendDate(LocalDate.now()).id(2L).amount(5.36).currencyId("huf").shortName("s2").exchange("e2").build());
         edDTO.add(ETFDividendDTO.builder().dividendDate(LocalDate.now()).id(3L).amount(51.6).currencyId("usd").shortName("s3").exchange("e3").build());
 
-        when(this.etfDividendService.getDividends("email")).thenReturn(edDTO);
+        when(this.etfDividendService.getDividends(1L)).thenReturn(edDTO);
 
-        Assertions.assertIterableEquals(edDTO, this.etfDividendController.getAllETFDividends("email").getBody());
+        Assertions.assertIterableEquals(edDTO, this.etfDividendController.getAllETFDividends(1L).getBody());
     }
 
     @Test
     public void createDividend() {
         ETFDividendDTO edDTO = ETFDividendDTO.builder().dividendDate(LocalDate.now()).id(1L).amount(5.6).currencyId("eur").shortName("s1").exchange("e1").build();
 
-        when(this.etfDividendService.createETFDividend(edDTO, "email")).thenReturn(edDTO);
+        when(this.etfDividendService.createETFDividend(edDTO, 1L)).thenReturn(edDTO);
 
-        Assertions.assertEquals(edDTO, this.etfDividendController.createDividend("email", edDTO).getBody());
+        Assertions.assertEquals(edDTO, this.etfDividendController.createDividend(1L, edDTO).getBody());
     }
 
     @Test
     public void deleteByIds() {
         doNothing().when(this.etfDividendService).deleteETFDividendById(any(), any());
 
-        Assertions.assertEquals(HttpStatus.OK, this.etfDividendController.deleteByIds("email", List.of(1L, 2L, 3L)).getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, this.etfDividendController.deleteByIds(1L, List.of(1L, 2L, 3L)).getStatusCode());
     }
 
     @Test
@@ -70,7 +70,7 @@ class ETFDividendControllerTest {
         HttpServletResponse httpSR = new MockHttpServletResponse();
 
         doNothing().when(this.etfDividendService).getCSV(any(), any());
-        this.etfDividendController.getCSV("email", httpSR);
+        this.etfDividendController.getCSV(1L, httpSR);
 
         verify(this.etfDividendService, times(1)).getCSV(any(), any());
     }
@@ -79,17 +79,17 @@ class ETFDividendControllerTest {
     public void updateETFDividend() {
         ETFDividendDTO edDTO = ETFDividendDTO.builder().dividendDate(LocalDate.now()).id(1L).amount(5.6).currencyId("eur").shortName("s1").exchange("e1").build();
 
-        when(this.etfDividendService.updateETFDividend(edDTO, "email")).thenReturn(edDTO);
+        when(this.etfDividendService.updateETFDividend(edDTO, 1L)).thenReturn(edDTO);
 
-        Assertions.assertEquals(edDTO, this.etfDividendController.updateETFDividend("email", edDTO).getBody());
+        Assertions.assertEquals(edDTO, this.etfDividendController.updateETFDividend(1L, edDTO).getBody());
     }
 
     @Test
     public void processCSV() throws IOException {
         MultipartFile mpf = new MockMultipartFile("mpf", "mpf.csv", MediaType.TEXT_PLAIN_VALUE, "content".getBytes());
 
-        doNothing().when(this.etfDividendService).processCSV("email", mpf);
+        doNothing().when(this.etfDividendService).processCSV(1L, mpf);
 
-        Assertions.assertEquals(HttpStatus.CREATED, this.etfDividendController.processCSV("email", mpf).getStatusCode());
+        Assertions.assertEquals(HttpStatus.CREATED, this.etfDividendController.processCSV(1L, mpf).getStatusCode());
     }
 }

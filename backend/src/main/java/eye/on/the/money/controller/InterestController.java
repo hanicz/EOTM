@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import eye.on.the.money.security.CurrentUserEmail;
+import eye.on.the.money.security.CurrentUserId;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,40 +24,40 @@ public class InterestController {
     private final InterestService interestService;
 
     @GetMapping()
-    public ResponseEntity<List<InterestDTO>> getAllInterest(@CurrentUserEmail String userEmail) {
+    public ResponseEntity<List<InterestDTO>> getAllInterest(@CurrentUserId Long userId) {
         log.trace("Enter");
-        return ResponseEntity.ok(this.interestService.getInterest(userEmail));
+        return ResponseEntity.ok(this.interestService.getInterest(userId));
     }
 
     @PostMapping
-    public ResponseEntity<InterestDTO> createInterest(@CurrentUserEmail String userEmail, @RequestBody InterestDTO interestDTO) {
+    public ResponseEntity<InterestDTO> createInterest(@CurrentUserId Long userId, @RequestBody InterestDTO interestDTO) {
         log.trace("Enter");
-        return ResponseEntity.status(HttpStatus.CREATED).body(this.interestService.createInterest(interestDTO, userEmail));
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.interestService.createInterest(interestDTO, userId));
     }
 
     @DeleteMapping()
-    public ResponseEntity<Void> deleteByIds(@CurrentUserEmail String userEmail, @RequestParam List<Long> ids) {
+    public ResponseEntity<Void> deleteByIds(@CurrentUserId Long userId, @RequestParam List<Long> ids) {
         log.trace("Enter");
-        this.interestService.deleteInterestById(ids, userEmail);
+        this.interestService.deleteInterestById(ids, userId);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/csv")
-    public void getCSV(@CurrentUserEmail String userEmail, HttpServletResponse servletResponse) throws IOException {
+    public void getCSV(@CurrentUserId Long userId, HttpServletResponse servletResponse) throws IOException {
         log.trace("Enter");
-        this.interestService.getCSV(userEmail, CsvResponseUtil.prepare(servletResponse, "interest.csv"));
+        this.interestService.getCSV(userId, CsvResponseUtil.prepare(servletResponse, "interest.csv"));
     }
 
     @PutMapping
-    public ResponseEntity<InterestDTO> updateInterest(@CurrentUserEmail String userEmail, @RequestBody InterestDTO interestDTO) {
+    public ResponseEntity<InterestDTO> updateInterest(@CurrentUserId Long userId, @RequestBody InterestDTO interestDTO) {
         log.trace("Enter");
-        return ResponseEntity.ok(this.interestService.updateInterest(interestDTO, userEmail));
+        return ResponseEntity.ok(this.interestService.updateInterest(interestDTO, userId));
     }
 
     @PostMapping("/process/csv")
-    public ResponseEntity<Void> processCSV(@CurrentUserEmail String userEmail, @RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<Void> processCSV(@CurrentUserId Long userId, @RequestParam("file") MultipartFile file) throws IOException {
         log.trace("Enter");
-        this.interestService.processCSV(userEmail, file);
+        this.interestService.processCSV(userId, file);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

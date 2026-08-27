@@ -63,11 +63,11 @@ public class FireService implements ICSVService {
 
     private final NetWorthService netWorthService;
 
-    public FireProjectionResultDTO project(String userEmail, FireProjectionDTO input) {
+    public FireProjectionResultDTO project(Long userId, FireProjectionDTO input) {
         log.trace("Enter");
         Assumptions assumptions = this.validate(input);
 
-        NetWorthDTO portfolio = this.netWorthService.getNetWorth(userEmail, input.getCurrency(), false);
+        NetWorthDTO portfolio = this.netWorthService.getNetWorth(userId, input.getCurrency(), false);
         double startingValue = portfolio.getTotalWorth().doubleValue() + assumptions.otherAssets();
 
         // The retirement year is only known once we know when the target is cleared, so accumulation is run
@@ -112,9 +112,9 @@ public class FireService implements ICSVService {
                 .build();
     }
 
-    public void getCSV(String userEmail, FireProjectionDTO input, Writer writer) {
+    public void getCSV(Long userId, FireProjectionDTO input, Writer writer) {
         log.trace("Enter");
-        this.printRecords(this.project(userEmail, input).getTimeline(), writer);
+        this.printRecords(this.project(userId, input).getTimeline(), writer);
     }
 
     /**

@@ -1,7 +1,7 @@
 package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.out.NetWorthDTO;
-import eye.on.the.money.security.CurrentUserEmail;
+import eye.on.the.money.security.CurrentUserId;
 import eye.on.the.money.service.shared.NetWorthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,10 +20,10 @@ public class NetWorthController {
     private final NetWorthService netWorthService;
 
     @GetMapping
-    public ResponseEntity<NetWorthDTO> getNetWorth(@CurrentUserEmail String userEmail,
+    public ResponseEntity<NetWorthDTO> getNetWorth(@CurrentUserId Long userId,
                                                    @RequestParam(required = false) String currency,
                                                    @RequestParam(defaultValue = "false") boolean refresh) {
         log.trace("Enter");
-        return ResponseEntity.ok(this.netWorthService.getNetWorth(userEmail, currency, refresh));
+        return ResponseEntity.ok(this.netWorthService.getNetWorth(userId, currency, refresh));
     }
 }

@@ -54,7 +54,7 @@ class ETFInvestmentServiceTest {
 
     @Test
     public void getETFInvestmentsByAccountId() {
-        List<ETFInvestmentDTO> result = this.etfInvestmentService.getETFInvestmentsByAccountId(this.user.getUsername(), 2L);
+        List<ETFInvestmentDTO> result = this.etfInvestmentService.getETFInvestmentsByAccountId(this.user.getId(), 2L);
 
         assertEquals(1, result.size());
         assertEquals("VWRL", result.getFirst().getShortName());
@@ -64,7 +64,7 @@ class ETFInvestmentServiceTest {
 
     @Test
     public void getAllPositions_keepsTheSameEtfInDifferentAccountsApart() {
-        List<ETFInvestmentDTO> result = this.etfInvestmentService.getAllPositions(this.user.getUsername());
+        List<ETFInvestmentDTO> result = this.etfInvestmentService.getAllPositions(this.user.getId());
 
         List<ETFInvestmentDTO> vwrl = result.stream().filter(i -> "VWRL".equals(i.getShortName())).toList();
         assertEquals(2, vwrl.size());
@@ -74,7 +74,7 @@ class ETFInvestmentServiceTest {
 
     @Test
     public void getPositionsByAccountId_onlyReturnsThatAccount() {
-        List<ETFInvestmentDTO> result = this.etfInvestmentService.getPositionsByAccountId(this.user.getUsername(), 2L);
+        List<ETFInvestmentDTO> result = this.etfInvestmentService.getPositionsByAccountId(this.user.getId(), 2L);
 
         assertEquals(1, result.size());
         assertEquals("VWRL", result.getFirst().getShortName());
@@ -83,7 +83,7 @@ class ETFInvestmentServiceTest {
 
     @Test
     public void getPositionsByAccountId_mergesTheBuyAndSellOfAClosedPosition() {
-        List<ETFInvestmentDTO> result = this.etfInvestmentService.getPositionsByAccountId(this.user.getUsername(), 1L);
+        List<ETFInvestmentDTO> result = this.etfInvestmentService.getPositionsByAccountId(this.user.getId(), 1L);
 
         ETFInvestmentDTO vwce = result.stream().filter(i -> "VWCE".equals(i.getShortName())).findFirst().orElseThrow();
         assertEquals(0, vwce.getQuantity());
@@ -96,14 +96,14 @@ class ETFInvestmentServiceTest {
         this.etfInvestmentService.createInvestment(ETFInvestmentDTO.builder()
                 .buySell("B").quantity(10).amount(1000.0).currencyId("EUR").fee(0.0)
                 .shortName("VWCE").exchange("MI").accountId(2L)
-                .transactionDate(LocalDate.of(2024, 1, 10)).build(), this.user.getUsername());
+                .transactionDate(LocalDate.of(2024, 1, 10)).build(), this.user.getId());
         this.etfInvestmentService.createInvestment(ETFInvestmentDTO.builder()
                 .buySell("B").quantity(4).amount(700.0).currencyId("EUR").fee(0.0)
                 .shortName("VWCE").exchange("XETRA").accountId(2L)
-                .transactionDate(LocalDate.of(2024, 1, 11)).build(), this.user.getUsername());
+                .transactionDate(LocalDate.of(2024, 1, 11)).build(), this.user.getId());
 
         List<ETFInvestmentDTO> vwce = this.etfInvestmentService
-                .getPositionsByAccountId(this.user.getUsername(), 2L).stream()
+                .getPositionsByAccountId(this.user.getId(), 2L).stream()
                 .filter(i -> "VWCE".equals(i.getShortName())).toList();
 
         Assertions.assertAll("Two exchanges stay two positions",
@@ -120,9 +120,9 @@ class ETFInvestmentServiceTest {
         ETFInvestmentDTO created = this.etfInvestmentService.createInvestment(ETFInvestmentDTO.builder()
                 .buySell("B").quantity(3).amount(123.45).currencyId("EUR").fee(1.0)
                 .shortName("VWCE").exchange("MI").accountId(2L)
-                .transactionDate(LocalDate.of(2023, 9, 1)).build(), this.user.getUsername());
+                .transactionDate(LocalDate.of(2023, 9, 1)).build(), this.user.getId());
 
-        ETFInvestment stored = this.etfInvestmentRepository.findByIdAndUserEmail(created.getId(), this.user.getUsername()).orElseThrow();
+        ETFInvestment stored = this.etfInvestmentRepository.findByIdAndUserId(created.getId(), this.user.getId()).orElseThrow();
 
         Assertions.assertAll("Assert stored ETF investment",
                 () -> assertEquals(123.45, stored.getAmount()),
@@ -142,21 +142,21 @@ class ETFInvestmentServiceTest {
                 .transactionDate(LocalDate.of(2023, 9, 1)).build();
 
         assertThrows(NoSuchElementException.class,
-                () -> this.etfInvestmentService.createInvestment(dto, this.user.getUsername()));
+                () -> this.etfInvestmentService.createInvestment(dto, this.user.getId()));
     }
 
     @Test
     @Transactional
     public void updateInvestment_movesTheInvestmentToAnotherAccount() {
-        ETFInvestment existing = this.etfInvestmentRepository.findByUserEmailAndAccountIdOrderByTransactionDateDesc(
-                this.user.getUsername(), 2L).getFirst();
+        ETFInvestment existing = this.etfInvestmentRepository.findByUserIdAndAccountIdOrderByTransactionDateDesc(
+                this.user.getId(), 2L).getFirst();
 
         this.etfInvestmentService.updateInvestment(ETFInvestmentDTO.builder()
                 .id(existing.getId()).buySell("B").quantity(5).amount(300.0).currencyId("EUR").fee(1.5)
                 .shortName("VWRL").exchange("AS").accountId(1L)
-                .transactionDate(existing.getTransactionDate()).build(), this.user.getUsername());
+                .transactionDate(existing.getTransactionDate()).build(), this.user.getId());
 
-        ETFInvestment moved = this.etfInvestmentRepository.findByIdAndUserEmail(existing.getId(), this.user.getUsername()).orElseThrow();
+        ETFInvestment moved = this.etfInvestmentRepository.findByIdAndUserId(existing.getId(), this.user.getId()).orElseThrow();
 
         assertEquals(1L, moved.getAccount().getId());
         assertEquals(300.0, moved.getAmount());
@@ -167,10 +167,10 @@ class ETFInvestmentServiceTest {
     public void processCSV_resolvesTheAccountByName() {
         String csv = CSV_HEADER + ",7,B,2023-10-01,VWCE,MI,700.0,EUR,2.0,ACCOUNT 2\n";
 
-        this.etfInvestmentService.processCSV(this.user.getUsername(), this.csvFile(csv));
+        this.etfInvestmentService.processCSV(this.user.getId(), this.csvFile(csv));
 
         List<ETFInvestment> inAccountTwo = this.etfInvestmentRepository
-                .findByUserEmailAndAccountIdOrderByTransactionDateDesc(this.user.getUsername(), 2L);
+                .findByUserIdAndAccountIdOrderByTransactionDateDesc(this.user.getId(), 2L);
         assertTrue(inAccountTwo.stream().anyMatch(i -> i.getAmount() == 700.0 && "VWCE".equals(i.getEtf().getShortName())));
     }
 
@@ -180,7 +180,7 @@ class ETFInvestmentServiceTest {
         String csv = CSV_HEADER + ",7,B,2023-10-01,VWCE,MI,700.0,EUR,2.0,NO SUCH ACCOUNT\n";
 
         assertThrows(CSVException.class,
-                () -> this.etfInvestmentService.processCSV(this.user.getUsername(), this.csvFile(csv)));
+                () -> this.etfInvestmentService.processCSV(this.user.getId(), this.csvFile(csv)));
     }
 
     @Test
@@ -189,7 +189,7 @@ class ETFInvestmentServiceTest {
         String csv = CSV_HEADER + ",7,B,2023-10-01,VWCE,MI,700.0,EUR,2.0,\n";
 
         assertThrows(CSVException.class,
-                () -> this.etfInvestmentService.processCSV(this.user.getUsername(), this.csvFile(csv)));
+                () -> this.etfInvestmentService.processCSV(this.user.getId(), this.csvFile(csv)));
     }
 
     private MockMultipartFile csvFile(String content) {

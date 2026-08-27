@@ -66,11 +66,11 @@ public class NetWorthService {
     private final SecurityTransactionService securityTransactionService;
     private final DashboardService dashboardService;
 
-    public NetWorthDTO getNetWorth(String userEmail, String currency, boolean refresh) {
+    public NetWorthDTO getNetWorth(Long userId, String currency, boolean refresh) {
         log.trace("Enter");
         String target = (currency == null || currency.isBlank()) ? BASE_CURRENCY : currency.toUpperCase();
 
-        Holdings holdings = this.loadHoldings(userEmail, refresh);
+        Holdings holdings = this.loadHoldings(userId, refresh);
         Set<String> currencies = this.currenciesIn(holdings, target);
         Map<String, Double> rates = holdings.isEmpty() ? Map.of()
                 : this.conversionRates(new ArrayList<>(currencies), refresh).getRates();
@@ -106,23 +106,23 @@ public class NetWorthService {
                 .build();
     }
 
-    private Holdings loadHoldings(String userEmail, boolean refresh) {
+    private Holdings loadHoldings(Long userId, boolean refresh) {
         TransactionQuery cryptoQuery = TransactionQuery.builder().currency(BASE_CURRENCY).build();
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
             CompletableFuture<List<InvestmentDTO>> stock = this.async(executor,
-                    () -> refresh ? this.investmentService.refreshCurrentHoldings(userEmail)
-                            : this.investmentService.getCurrentHoldings(userEmail));
+                    () -> refresh ? this.investmentService.refreshCurrentHoldings(userId)
+                            : this.investmentService.getCurrentHoldings(userId));
             CompletableFuture<List<TransactionDTO>> crypto = this.async(executor,
-                    () -> refresh ? this.transactionService.refreshCurrentHoldings(userEmail, cryptoQuery)
-                            : this.transactionService.getCurrentHoldings(userEmail, cryptoQuery));
+                    () -> refresh ? this.transactionService.refreshCurrentHoldings(userId, cryptoQuery)
+                            : this.transactionService.getCurrentHoldings(userId, cryptoQuery));
             CompletableFuture<List<ETFInvestmentDTO>> etf = this.async(executor,
-                    () -> refresh ? this.etfInvestmentService.refreshCurrentETFHoldings(userEmail)
-                            : this.etfInvestmentService.getCurrentETFHoldings(userEmail));
+                    () -> refresh ? this.etfInvestmentService.refreshCurrentETFHoldings(userId)
+                            : this.etfInvestmentService.getCurrentETFHoldings(userId));
             CompletableFuture<List<ForexTransactionDTO>> forex = this.async(executor,
-                    () -> refresh ? this.forexTransactionService.refreshAllForexHoldings(userEmail)
-                            : this.forexTransactionService.getAllForexHoldings(userEmail));
+                    () -> refresh ? this.forexTransactionService.refreshAllForexHoldings(userId)
+                            : this.forexTransactionService.getAllForexHoldings(userId));
             CompletableFuture<List<SecurityTransactionDTO>> securities = this.async(executor,
-                    () -> this.securityTransactionService.getCurrentHoldings(userEmail));
+                    () -> this.securityTransactionService.getCurrentHoldings(userId));
 
             return new Holdings(this.join(stock), this.join(crypto), this.join(etf), this.join(forex),
                     this.join(securities));

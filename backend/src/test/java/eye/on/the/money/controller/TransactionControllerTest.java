@@ -42,18 +42,18 @@ class TransactionControllerTest {
     public void getCoinTransactionsByUserId() {
         List<TransactionDTO> tDTO = this.createTransactionList();
 
-        when(this.transactionService.getTransactionsByUserId("email")).thenReturn(tDTO);
+        when(this.transactionService.getTransactionsByUserId(1L)).thenReturn(tDTO);
 
-        Assertions.assertIterableEquals(tDTO, this.transactionController.getCoinTransactionsByUserId("email").getBody());
+        Assertions.assertIterableEquals(tDTO, this.transactionController.getCoinTransactionsByUserId(1L).getBody());
     }
 
     @Test
     public void getAllPositions() {
         List<TransactionDTO> tDTO = this.createTransactionList();
 
-        when(this.transactionService.getAllPositions("email")).thenReturn(tDTO);
+        when(this.transactionService.getAllPositions(1L)).thenReturn(tDTO);
 
-        Assertions.assertIterableEquals(tDTO, this.transactionController.getAllPositions("email").getBody());
+        Assertions.assertIterableEquals(tDTO, this.transactionController.getAllPositions(1L).getBody());
     }
 
     @Test
@@ -61,9 +61,9 @@ class TransactionControllerTest {
         TransactionQuery query = TransactionQuery.builder().currency("eur").build();
         List<TransactionDTO> tDTO = this.createTransactionList();
 
-        when(this.transactionService.getCurrentHoldings("email", query)).thenReturn(tDTO);
+        when(this.transactionService.getCurrentHoldings(1L, query)).thenReturn(tDTO);
 
-        Assertions.assertIterableEquals(tDTO, this.transactionController.getAllHoldings("email", query, false).getBody());
+        Assertions.assertIterableEquals(tDTO, this.transactionController.getAllHoldings(1L, query, false).getBody());
     }
 
     @Test
@@ -71,17 +71,17 @@ class TransactionControllerTest {
         TransactionQuery query = TransactionQuery.builder().currency("eur").build();
         List<TransactionDTO> tDTO = this.createTransactionList();
 
-        when(this.transactionService.refreshCurrentHoldings("email", query)).thenReturn(tDTO);
+        when(this.transactionService.refreshCurrentHoldings(1L, query)).thenReturn(tDTO);
 
-        Assertions.assertIterableEquals(tDTO, this.transactionController.getAllHoldings("email", query, true).getBody());
-        verify(this.transactionService, never()).getCurrentHoldings("email", query);
+        Assertions.assertIterableEquals(tDTO, this.transactionController.getAllHoldings(1L, query, true).getBody());
+        verify(this.transactionService, never()).getCurrentHoldings(1L, query);
     }
 
     @Test
     public void deleteByIds() {
         doNothing().when(this.transactionService).deleteTransactionById(any(), any());
 
-        Assertions.assertEquals(HttpStatus.OK, this.transactionController.deleteByIds("email", List.of(1L, 2L, 3L)).getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, this.transactionController.deleteByIds(1L, List.of(1L, 2L, 3L)).getStatusCode());
     }
 
     @Test
@@ -89,7 +89,7 @@ class TransactionControllerTest {
         HttpServletResponse httpSR = new MockHttpServletResponse();
 
         doNothing().when(this.transactionService).getCSV(any(), any());
-        this.transactionController.getCSV("email", httpSR);
+        this.transactionController.getCSV(1L, httpSR);
 
         verify(this.transactionService, times(1)).getCSV(any(), any());
     }
@@ -99,9 +99,9 @@ class TransactionControllerTest {
         TransactionDTO tDTO = TransactionDTO.builder().transactionString("s1").transactionDate(LocalDate.now()).amount(555.1).quantity(431.0)
                 .buySell("b").symbol("s1").url("u1").fee(7.0).currencyId("c1").coinId("co1").liveValue(33.1).valueDiff(1.0).build();
 
-        when(this.transactionService.createTransaction(tDTO, "email")).thenReturn(tDTO);
+        when(this.transactionService.createTransaction(tDTO, 1L)).thenReturn(tDTO);
 
-        Assertions.assertEquals(tDTO, this.transactionController.createTransaction("email", tDTO).getBody());
+        Assertions.assertEquals(tDTO, this.transactionController.createTransaction(1L, tDTO).getBody());
     }
 
     @Test
@@ -109,18 +109,18 @@ class TransactionControllerTest {
         TransactionDTO tDTO = TransactionDTO.builder().id(1L).transactionString("s1").transactionDate(LocalDate.now()).amount(555.1).quantity(431.0)
                 .buySell("b").symbol("s1").url("u1").fee(7.0).currencyId("c1").coinId("co1").liveValue(33.1).valueDiff(1.0).build();
 
-        when(this.transactionService.updateTransaction(tDTO, "email")).thenReturn(tDTO);
+        when(this.transactionService.updateTransaction(tDTO, 1L)).thenReturn(tDTO);
 
-        Assertions.assertEquals(tDTO, this.transactionController.updateTransaction("email", tDTO).getBody());
+        Assertions.assertEquals(tDTO, this.transactionController.updateTransaction(1L, tDTO).getBody());
     }
 
     @Test
     public void processCSV() throws IOException {
         MultipartFile mpf = new MockMultipartFile("mpf", "mpf.csv", MediaType.TEXT_PLAIN_VALUE, "content".getBytes());
 
-        doNothing().when(this.transactionService).processCSV("email", mpf);
+        doNothing().when(this.transactionService).processCSV(1L, mpf);
 
-        Assertions.assertEquals(HttpStatus.CREATED, this.transactionController.processCSV("email", mpf).getStatusCode());
+        Assertions.assertEquals(HttpStatus.CREATED, this.transactionController.processCSV(1L, mpf).getStatusCode());
     }
 
     private List<TransactionDTO> createTransactionList() {

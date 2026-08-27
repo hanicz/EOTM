@@ -6,7 +6,7 @@ import eye.on.the.money.dto.out.RSUTaxEventReportDTO;
 import eye.on.the.money.dto.out.TaxBreakdownDTO;
 import eye.on.the.money.dto.out.TaxReportDTO;
 import eye.on.the.money.dto.out.TaxableEventReportDTO;
-import eye.on.the.money.security.CurrentUserEmail;
+import eye.on.the.money.security.CurrentUserId;
 import eye.on.the.money.service.financial.TaxableEventService;
 import eye.on.the.money.service.shared.TaxService;
 import eye.on.the.money.service.stock.RSUTaxService;
@@ -40,44 +40,44 @@ public class TaxController {
     private final RSUTaxService rsuTaxService;
 
     @GetMapping("/transaction")
-    public ResponseEntity<TaxableEventReportDTO> getTaxableEvents(@CurrentUserEmail String userEmail) {
+    public ResponseEntity<TaxableEventReportDTO> getTaxableEvents(@CurrentUserId Long userId) {
         log.trace("Enter");
-        return ResponseEntity.ok(this.taxableEventService.getTaxableEvents(userEmail));
+        return ResponseEntity.ok(this.taxableEventService.getTaxableEvents(userId));
     }
 
     @GetMapping("/transaction/csv")
-    public void getTaxableEventsCSV(@CurrentUserEmail String userEmail, HttpServletResponse servletResponse)
+    public void getTaxableEventsCSV(@CurrentUserId Long userId, HttpServletResponse servletResponse)
             throws IOException {
         log.trace("Enter");
-        this.taxableEventService.getCSV(userEmail, CsvResponseUtil.prepare(servletResponse, "taxable-events.csv"));
+        this.taxableEventService.getCSV(userId, CsvResponseUtil.prepare(servletResponse, "taxable-events.csv"));
     }
 
     @PutMapping("/transaction/paid")
-    public ResponseEntity<Void> setTaxPaid(@CurrentUserEmail String userEmail, @RequestParam List<Long> ids,
+    public ResponseEntity<Void> setTaxPaid(@CurrentUserId Long userId, @RequestParam List<Long> ids,
                                            @RequestParam boolean paid) {
         log.trace("Enter");
-        this.taxableEventService.setTaxPaid(userEmail, ids, paid);
+        this.taxableEventService.setTaxPaid(userId, ids, paid);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/stock")
-    public ResponseEntity<RSUTaxEventReportDTO> getRSUTaxEvents(@CurrentUserEmail String userEmail) {
+    public ResponseEntity<RSUTaxEventReportDTO> getRSUTaxEvents(@CurrentUserId Long userId) {
         log.trace("Enter");
-        return ResponseEntity.ok(this.rsuTaxService.getRSUTaxEvents(userEmail));
+        return ResponseEntity.ok(this.rsuTaxService.getRSUTaxEvents(userId));
     }
 
     @GetMapping("/stock/csv")
-    public void getRSUTaxEventsCSV(@CurrentUserEmail String userEmail, HttpServletResponse servletResponse)
+    public void getRSUTaxEventsCSV(@CurrentUserId Long userId, HttpServletResponse servletResponse)
             throws IOException {
         log.trace("Enter");
-        this.rsuTaxService.getCSV(userEmail, CsvResponseUtil.prepare(servletResponse, "rsu-transactions.csv"));
+        this.rsuTaxService.getCSV(userId, CsvResponseUtil.prepare(servletResponse, "rsu-transactions.csv"));
     }
 
     @PutMapping("/stock/paid")
-    public ResponseEntity<Void> setRSUTaxPaid(@CurrentUserEmail String userEmail, @RequestParam List<Long> ids,
+    public ResponseEntity<Void> setRSUTaxPaid(@CurrentUserId Long userId, @RequestParam List<Long> ids,
                                               @RequestParam boolean paid) {
         log.trace("Enter");
-        this.rsuTaxService.setTaxPaid(userEmail, ids, paid);
+        this.rsuTaxService.setTaxPaid(userId, ids, paid);
         return ResponseEntity.ok().build();
     }
 

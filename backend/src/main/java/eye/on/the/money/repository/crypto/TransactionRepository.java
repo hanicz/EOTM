@@ -8,13 +8,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-    List<Transaction> findByUserEmailOrderByTransactionDate(String userEmail);
+    List<Transaction> findByUserIdOrderByTransactionDate(Long userId);
 
-    List<Transaction> findByUserEmailAndTransactionDateBetweenOrderByTransactionDate(
-            String userEmail, LocalDate from, LocalDate to);
-    List<Transaction> findByUserEmailOrderByTransactionDateDesc(String userEmail);
+    List<Transaction> findByUserIdAndTransactionDateBetweenOrderByTransactionDate(
+            Long userId, LocalDate from, LocalDate to);
+    List<Transaction> findByUserIdOrderByTransactionDateDesc(Long userId);
 
-    int deleteByUserEmailAndIdIn(String userEmail, List<Long> ids);
+    int deleteByUserIdAndIdIn(Long userId, List<Long> ids);
 
-    Optional<Transaction> findByIdAndUserEmail(Long id, String userEmail);
+    Optional<Transaction> findByIdAndUserId(Long id, Long userId);
 }

@@ -18,7 +18,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
@@ -38,27 +37,27 @@ class AlertControllerTest {
         alerts.add(StockAlertDTO.builder().name("n2").shortName("sn2").valuePoint(0.2).type("t2").exchange("e2").id(1L).build());
         alerts.add(StockAlertDTO.builder().name("n3").shortName("sn3").valuePoint(0.3).type("t3").exchange("e3").id(1L).build());
 
-        when(this.alertService.getAllStockAlerts(anyString())).thenReturn(alerts);
+        when(this.alertService.getAllStockAlerts(anyLong())).thenReturn(alerts);
 
-        ResponseEntity<List<StockAlertDTO>> result = this.alertController.getStockAlerts("email");
+        ResponseEntity<List<StockAlertDTO>> result = this.alertController.getStockAlerts(1L);
 
         Assertions.assertIterableEquals(result.getBody(), alerts);
     }
 
     @Test
     public void deleteAlert() {
-        when(this.alertService.deleteStockAlert(anyString(), anyLong())).thenReturn(true);
+        when(this.alertService.deleteStockAlert(anyLong(), anyLong())).thenReturn(true);
 
-        ResponseEntity<Void> result = this.alertController.deleteStockAlert("email", 1L);
+        ResponseEntity<Void> result = this.alertController.deleteStockAlert(1L, 1L);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
     }
 
     @Test
     public void deleteAlert404() {
-        when(this.alertService.deleteStockAlert(anyString(), anyLong())).thenReturn(false);
+        when(this.alertService.deleteStockAlert(anyLong(), anyLong())).thenReturn(false);
 
-        ResponseEntity<Void> result = this.alertController.deleteStockAlert("user@email.com", 1L);
+        ResponseEntity<Void> result = this.alertController.deleteStockAlert(1L, 1L);
 
         assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
     }
@@ -66,9 +65,9 @@ class AlertControllerTest {
     @Test
     public void createStockAlert() {
         StockAlertDTO saDTO = StockAlertDTO.builder().name("n1").shortName("sn1").valuePoint(0.1).type("t1").exchange("e1").build();
-        when(this.alertService.createNewStockAlert("email", saDTO)).thenReturn(saDTO);
+        when(this.alertService.createNewStockAlert(1L, saDTO)).thenReturn(saDTO);
 
-        ResponseEntity<StockAlertDTO> result = this.alertController.createStockAlert("email", saDTO);
+        ResponseEntity<StockAlertDTO> result = this.alertController.createStockAlert(1L, saDTO);
 
         Assertions.assertAll("Assert response",
                 () -> assertEquals(saDTO, result.getBody()),
@@ -82,27 +81,27 @@ class AlertControllerTest {
         alerts.add(CryptoAlertDTO.builder().name("n2").symbol("s2").valuePoint(0.2).type("t2").id(1L).build());
         alerts.add(CryptoAlertDTO.builder().name("n3").symbol("s3").valuePoint(0.3).type("t3").id(1L).build());
 
-        when(this.alertService.getAllCryptoAlerts(anyString())).thenReturn(alerts);
+        when(this.alertService.getAllCryptoAlerts(anyLong())).thenReturn(alerts);
 
-        ResponseEntity<List<CryptoAlertDTO>> result = this.alertController.getCryptoAlerts("email");
+        ResponseEntity<List<CryptoAlertDTO>> result = this.alertController.getCryptoAlerts(1L);
 
         Assertions.assertIterableEquals(result.getBody(), alerts);
     }
 
     @Test
     public void deleteCryptoAlert() {
-        when(this.alertService.deleteCryptoAlert(anyString(), anyLong())).thenReturn(true);
+        when(this.alertService.deleteCryptoAlert(anyLong(), anyLong())).thenReturn(true);
 
-        ResponseEntity<Void> result = this.alertController.deleteCryptoAlert("email", 1L);
+        ResponseEntity<Void> result = this.alertController.deleteCryptoAlert(1L, 1L);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
     }
 
     @Test
     public void deleteCryptoAlert404() {
-        when(this.alertService.deleteCryptoAlert(anyString(), anyLong())).thenReturn(false);
+        when(this.alertService.deleteCryptoAlert(anyLong(), anyLong())).thenReturn(false);
 
-        ResponseEntity<Void> result = this.alertController.deleteCryptoAlert("user@email.com", 1L);
+        ResponseEntity<Void> result = this.alertController.deleteCryptoAlert(1L, 1L);
 
         assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
     }
@@ -110,9 +109,9 @@ class AlertControllerTest {
     @Test
     public void createCryptoAlert() {
         CryptoAlertDTO caDTO = CryptoAlertDTO.builder().name("n1").symbol("sn1").valuePoint(0.1).type("t1").build();
-        when(this.alertService.createNewCryptoAlert("email", caDTO)).thenReturn(caDTO);
+        when(this.alertService.createNewCryptoAlert(1L, caDTO)).thenReturn(caDTO);
 
-        ResponseEntity<CryptoAlertDTO> result = this.alertController.createCryptoAlert("email", caDTO);
+        ResponseEntity<CryptoAlertDTO> result = this.alertController.createCryptoAlert(1L, caDTO);
 
         Assertions.assertAll("Assert response",
                 () -> assertEquals(caDTO, result.getBody()),

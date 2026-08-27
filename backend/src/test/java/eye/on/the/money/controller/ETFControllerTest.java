@@ -38,64 +38,64 @@ class ETFControllerTest {
     public void getAllETFInvestments() {
         List<ETFInvestmentDTO> eiDTO = this.createETFList();
 
-        when(this.etfInvestmentService.getETFInvestments("email")).thenReturn(eiDTO);
+        when(this.etfInvestmentService.getETFInvestments(1L)).thenReturn(eiDTO);
 
-        Assertions.assertIterableEquals(eiDTO, this.etfController.getAllETFInvestments("email").getBody());
+        Assertions.assertIterableEquals(eiDTO, this.etfController.getAllETFInvestments(1L).getBody());
     }
 
     @Test
     public void getETFHoldings() {
         List<ETFInvestmentDTO> eiDTO = this.createETFList();
 
-        when(this.etfInvestmentService.getCurrentETFHoldings("email")).thenReturn(eiDTO);
+        when(this.etfInvestmentService.getCurrentETFHoldings(1L)).thenReturn(eiDTO);
 
-        Assertions.assertIterableEquals(eiDTO, this.etfController.getETFHoldings("email", false).getBody());
+        Assertions.assertIterableEquals(eiDTO, this.etfController.getETFHoldings(1L, false).getBody());
     }
 
     @Test
     public void getETFHoldings_refreshBypassesTheCache() {
         List<ETFInvestmentDTO> eiDTO = this.createETFList();
 
-        when(this.etfInvestmentService.refreshCurrentETFHoldings("email")).thenReturn(eiDTO);
+        when(this.etfInvestmentService.refreshCurrentETFHoldings(1L)).thenReturn(eiDTO);
 
-        Assertions.assertIterableEquals(eiDTO, this.etfController.getETFHoldings("email", true).getBody());
-        verify(this.etfInvestmentService, never()).getCurrentETFHoldings("email");
+        Assertions.assertIterableEquals(eiDTO, this.etfController.getETFHoldings(1L, true).getBody());
+        verify(this.etfInvestmentService, never()).getCurrentETFHoldings(1L);
     }
 
     @Test
     public void getPositions() {
         List<ETFInvestmentDTO> eiDTO = this.createETFList();
 
-        when(this.etfInvestmentService.getAllPositions("email")).thenReturn(eiDTO);
+        when(this.etfInvestmentService.getAllPositions(1L)).thenReturn(eiDTO);
 
-        Assertions.assertIterableEquals(eiDTO, this.etfController.getPositions("email").getBody());
+        Assertions.assertIterableEquals(eiDTO, this.etfController.getPositions(1L).getBody());
     }
 
     @Test
     public void getETFInvestmentsByAccount() {
         List<ETFInvestmentDTO> eiDTO = this.createETFList();
 
-        when(this.etfInvestmentService.getETFInvestmentsByAccountId("email", 2L)).thenReturn(eiDTO);
+        when(this.etfInvestmentService.getETFInvestmentsByAccountId(1L, 2L)).thenReturn(eiDTO);
 
-        Assertions.assertIterableEquals(eiDTO, this.etfController.getETFInvestmentsByAccount("email", 2L).getBody());
+        Assertions.assertIterableEquals(eiDTO, this.etfController.getETFInvestmentsByAccount(1L, 2L).getBody());
     }
 
     @Test
     public void getHoldingsByAccount() {
         List<ETFInvestmentDTO> eiDTO = this.createETFList();
 
-        when(this.etfInvestmentService.getHoldingsByAccountId("email", 2L)).thenReturn(eiDTO);
+        when(this.etfInvestmentService.getHoldingsByAccountId(1L, 2L)).thenReturn(eiDTO);
 
-        Assertions.assertIterableEquals(eiDTO, this.etfController.getHoldingsByAccount("email", 2L).getBody());
+        Assertions.assertIterableEquals(eiDTO, this.etfController.getHoldingsByAccount(1L, 2L).getBody());
     }
 
     @Test
     public void getPositionsByAccount() {
         List<ETFInvestmentDTO> eiDTO = this.createETFList();
 
-        when(this.etfInvestmentService.getPositionsByAccountId("email", 2L)).thenReturn(eiDTO);
+        when(this.etfInvestmentService.getPositionsByAccountId(1L, 2L)).thenReturn(eiDTO);
 
-        Assertions.assertIterableEquals(eiDTO, this.etfController.getPositionsByAccount("email", 2L).getBody());
+        Assertions.assertIterableEquals(eiDTO, this.etfController.getPositionsByAccount(1L, 2L).getBody());
     }
 
     @Test
@@ -103,9 +103,9 @@ class ETFControllerTest {
         ETFInvestmentDTO eiDTO = ETFInvestmentDTO.builder().valueDiff(0.1).transactionDate(LocalDate.now()).id(1L).fee(7.0).liveValue(55.6)
                 .shortName("s1").buySell("b").exchange("e1").currencyId("eur").quantity(645).build();
 
-        when(this.etfInvestmentService.createInvestment(eiDTO, "email")).thenReturn(eiDTO);
+        when(this.etfInvestmentService.createInvestment(eiDTO, 1L)).thenReturn(eiDTO);
 
-        Assertions.assertEquals(eiDTO, this.etfController.createInvestment("email", eiDTO).getBody());
+        Assertions.assertEquals(eiDTO, this.etfController.createInvestment(1L, eiDTO).getBody());
 
     }
 
@@ -113,7 +113,7 @@ class ETFControllerTest {
     public void deleteByIds() {
         doNothing().when(this.etfInvestmentService).deleteInvestmentById(any(), any());
 
-        Assertions.assertEquals(HttpStatus.OK, this.etfController.deleteByIds("email", List.of(1L, 2L, 3L)).getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, this.etfController.deleteByIds(1L, List.of(1L, 2L, 3L)).getStatusCode());
     }
 
     @Test
@@ -121,7 +121,7 @@ class ETFControllerTest {
         HttpServletResponse httpSR = new MockHttpServletResponse();
 
         doNothing().when(this.etfInvestmentService).getCSV(any(), any());
-        this.etfController.getCSV("email", httpSR);
+        this.etfController.getCSV(1L, httpSR);
 
         verify(this.etfInvestmentService, times(1)).getCSV(any(), any());
     }
@@ -131,9 +131,9 @@ class ETFControllerTest {
         ETFInvestmentDTO eiDTO = ETFInvestmentDTO.builder().valueDiff(0.1).transactionDate(LocalDate.now()).id(1L).fee(7.0).liveValue(55.6)
                 .shortName("s1").buySell("b").exchange("e1").currencyId("eur").quantity(645).build();
 
-        when(this.etfInvestmentService.updateInvestment(eiDTO, "email")).thenReturn(eiDTO);
+        when(this.etfInvestmentService.updateInvestment(eiDTO, 1L)).thenReturn(eiDTO);
 
-        Assertions.assertEquals(eiDTO, this.etfController.updateInvestment("email", eiDTO).getBody());
+        Assertions.assertEquals(eiDTO, this.etfController.updateInvestment(1L, eiDTO).getBody());
     }
 
     private List<ETFInvestmentDTO> createETFList() {

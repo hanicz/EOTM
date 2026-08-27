@@ -108,7 +108,7 @@ class BankTransactionRepositoryTest {
         this.persist(LocalDate.of(2025, 12, 20), this.huf, -1000.0, false);
         this.persist(LocalDate.of(2025, 11, 5), this.huf, -500.0, false);
 
-        List<MonthlyCashFlowDTO> result = this.bankTransactionRepository.findMonthlyCashFlow(USER_EMAIL);
+        List<MonthlyCashFlowDTO> result = this.bankTransactionRepository.findMonthlyCashFlow(this.user.getId());
 
         assertEquals(2, result.size());
         MonthlyCashFlowDTO december = result.getFirst();
@@ -130,7 +130,7 @@ class BankTransactionRepositoryTest {
         this.persist(LocalDate.of(2025, 12, 1), this.huf, 1000000.0, false);
         this.persist(LocalDate.of(2025, 12, 5), this.huf, -400000.0, false);
 
-        MonthlyCashFlowDTO december = this.bankTransactionRepository.findMonthlyCashFlow(USER_EMAIL).getFirst();
+        MonthlyCashFlowDTO december = this.bankTransactionRepository.findMonthlyCashFlow(this.user.getId()).getFirst();
 
         assertEquals(600000.0, december.getNet());
         assertEquals(60.0, december.getSavedPercent());
@@ -141,7 +141,7 @@ class BankTransactionRepositoryTest {
         this.persist(LocalDate.of(2025, 12, 1), this.huf, 100000.0, false);
         this.persist(LocalDate.of(2025, 12, 5), this.huf, -150000.0, false);
 
-        MonthlyCashFlowDTO december = this.bankTransactionRepository.findMonthlyCashFlow(USER_EMAIL).getFirst();
+        MonthlyCashFlowDTO december = this.bankTransactionRepository.findMonthlyCashFlow(this.user.getId()).getFirst();
 
         assertEquals(-50.0, december.getSavedPercent());
     }
@@ -150,7 +150,7 @@ class BankTransactionRepositoryTest {
     void findMonthlyCashFlow_leavesPercentBlankWhenNothingCameIn() {
         this.persist(LocalDate.of(2025, 12, 5), this.huf, -150000.0, false);
 
-        MonthlyCashFlowDTO december = this.bankTransactionRepository.findMonthlyCashFlow(USER_EMAIL).getFirst();
+        MonthlyCashFlowDTO december = this.bankTransactionRepository.findMonthlyCashFlow(this.user.getId()).getFirst();
 
         assertEquals(0.0, december.getMoneyIn());
         assertNull(december.getSavedPercent());
@@ -161,7 +161,7 @@ class BankTransactionRepositoryTest {
         this.persist(LocalDate.of(2025, 12, 1), this.huf, 850000.0, false);
         this.persist(LocalDate.of(2025, 12, 2), this.eur, 100.0, false);
 
-        List<MonthlyCashFlowDTO> result = this.bankTransactionRepository.findMonthlyCashFlow(USER_EMAIL);
+        List<MonthlyCashFlowDTO> result = this.bankTransactionRepository.findMonthlyCashFlow(this.user.getId());
 
         assertEquals(2, result.size());
         assertEquals("EUR", result.getFirst().getCurrencyId());
@@ -175,7 +175,7 @@ class BankTransactionRepositoryTest {
         this.persist(LocalDate.of(2025, 12, 1), this.huf, 850000.0, false);
         this.persist(LocalDate.of(2025, 12, 2), this.huf, -300000.0, true);
 
-        List<MonthlyCashFlowDTO> result = this.bankTransactionRepository.findMonthlyCashFlow(USER_EMAIL);
+        List<MonthlyCashFlowDTO> result = this.bankTransactionRepository.findMonthlyCashFlow(this.user.getId());
 
         assertEquals(1, result.size());
         assertEquals(850000.0, result.getFirst().getMoneyIn());
@@ -186,7 +186,7 @@ class BankTransactionRepositoryTest {
     void findMonthlyCashFlow_emptyWhenEverythingIsExcluded() {
         this.persist(LocalDate.of(2025, 12, 1), this.huf, 850000.0, true);
 
-        assertTrue(this.bankTransactionRepository.findMonthlyCashFlow(USER_EMAIL).isEmpty());
+        assertTrue(this.bankTransactionRepository.findMonthlyCashFlow(this.user.getId()).isEmpty());
     }
 
     private BankTransaction persistIncome(LocalDate bookingDate, double amount, String type, String partnerName) {
@@ -212,7 +212,7 @@ class BankTransactionRepositoryTest {
         this.persistIncome(LocalDate.of(2025, 12, 20), 150000.0, "Jovairas", "MUNKAADO ZRT");
         this.persistIncome(LocalDate.of(2025, 12, 9), 30000.0, "Jovairas", "MASIK KFT");
 
-        List<MonthlyIncomeDTO> result = this.bankTransactionRepository.findMonthlyIncome(USER_EMAIL);
+        List<MonthlyIncomeDTO> result = this.bankTransactionRepository.findMonthlyIncome(this.user.getId());
 
         assertEquals(2, result.size());
         assertEquals("MUNKAADO ZRT", result.getFirst().getSource());
@@ -228,7 +228,7 @@ class BankTransactionRepositoryTest {
         this.persistIncome(LocalDate.of(2025, 12, 5), 250.75, "Deviza jovairas", "");
         this.persistIncome(LocalDate.of(2025, 12, 6), 100.0, "Kamat", "   ");
 
-        List<MonthlyIncomeDTO> result = this.bankTransactionRepository.findMonthlyIncome(USER_EMAIL);
+        List<MonthlyIncomeDTO> result = this.bankTransactionRepository.findMonthlyIncome(this.user.getId());
 
         assertEquals(2, result.size());
         assertEquals("Deviza jovairas", result.getFirst().getSource());
@@ -241,7 +241,7 @@ class BankTransactionRepositoryTest {
         this.persist(LocalDate.of(2025, 12, 6), this.huf, -275.0, false);
         this.persist(LocalDate.of(2025, 12, 7), this.huf, 500000.0, true);
 
-        List<MonthlyIncomeDTO> result = this.bankTransactionRepository.findMonthlyIncome(USER_EMAIL);
+        List<MonthlyIncomeDTO> result = this.bankTransactionRepository.findMonthlyIncome(this.user.getId());
 
         assertEquals(1, result.size());
         assertEquals(850000.0, result.getFirst().getAmount());
@@ -253,7 +253,7 @@ class BankTransactionRepositoryTest {
         this.persistIncome(LocalDate.of(2025, 11, 5), 800000.0, "Jovairas", "MUNKAADO ZRT");
         this.persist(LocalDate.of(2025, 12, 8), this.eur, 250.75, false);
 
-        List<MonthlyIncomeDTO> result = this.bankTransactionRepository.findMonthlyIncome(USER_EMAIL);
+        List<MonthlyIncomeDTO> result = this.bankTransactionRepository.findMonthlyIncome(this.user.getId());
 
         assertEquals(3, result.size());
         assertEquals(12, result.getFirst().getMonth());
@@ -270,7 +270,7 @@ class BankTransactionRepositoryTest {
         BankTransaction second = this.persist(LocalDate.of(2025, 12, 2), this.huf, 200.0, false);
 
         int updated = this.bankTransactionRepository
-                .updateExcludedByUserEmailAndIdIn(USER_EMAIL, List.of(first.getId()), true);
+                .updateExcludedByUserIdAndIdIn(this.user.getId(), List.of(first.getId()), true);
 
         assertEquals(1, updated);
         assertTrue(this.bankTransactionRepository.findById(first.getId()).orElseThrow().isExcluded());
@@ -282,7 +282,7 @@ class BankTransactionRepositoryTest {
         BankTransaction transaction = this.persist(LocalDate.of(2025, 12, 1), this.huf, 100.0, false);
 
         int updated = this.bankTransactionRepository
-                .updateExcludedByUserEmailAndIdIn("someone@else.test", List.of(transaction.getId()), true);
+                .updateExcludedByUserIdAndIdIn(-1L, List.of(transaction.getId()), true);
 
         assertEquals(0, updated);
         assertFalse(this.bankTransactionRepository.findById(transaction.getId()).orElseThrow().isExcluded());
@@ -295,7 +295,7 @@ class BankTransactionRepositoryTest {
         this.persist(LocalDate.of(2025, 12, 5), this.huf, 300.0, false);
 
         List<BankTransaction> result =
-                this.bankTransactionRepository.findByUserEmailAndTaxableTrueOrderByBookingDateDesc(USER_EMAIL);
+                this.bankTransactionRepository.findByUserIdAndTaxableTrueOrderByBookingDateDesc(this.user.getId());
 
         assertEquals(2, result.size());
         assertEquals(newer.getId(), result.getFirst().getId());
@@ -306,7 +306,7 @@ class BankTransactionRepositoryTest {
     void findTaxable_readsBackTheStoredTax() {
         this.persistTaxable(LocalDate.of(2025, 12, 1), this.huf, 1000000.0);
 
-        TaxDetails stored = this.bankTransactionTaxRepository.findTaxableByUserEmail(USER_EMAIL)
+        TaxDetails stored = this.bankTransactionTaxRepository.findTaxableByUserId(this.user.getId())
                 .getFirst().getTaxDetails();
 
         assertEquals(0, new BigDecimal("1000000.00").compareTo(stored.getAmountInHuf()));
@@ -318,11 +318,11 @@ class BankTransactionRepositoryTest {
     void deletingATransactionRemovesItsTaxRow() {
         BankTransaction transaction = this.persistTaxable(LocalDate.of(2025, 12, 1), this.huf, 1000000.0);
 
-        this.bankTransactionRepository.deleteByUserEmailAndIdIn(USER_EMAIL, List.of(transaction.getId()));
+        this.bankTransactionRepository.deleteByUserIdAndIdIn(this.user.getId(), List.of(transaction.getId()));
         this.entityManager.flush();
         this.entityManager.clear();
 
-        assertTrue(this.bankTransactionTaxRepository.findTaxableByUserEmail(USER_EMAIL).isEmpty());
+        assertTrue(this.bankTransactionTaxRepository.findTaxableByUserId(this.user.getId()).isEmpty());
     }
 
     @Test
@@ -330,8 +330,8 @@ class BankTransactionRepositoryTest {
         BankTransaction transaction = this.persist(LocalDate.of(2025, 12, 1), this.huf, 100.0, false);
 
         assertEquals(1, this.bankTransactionRepository
-                .findByUserEmailAndIdIn(USER_EMAIL, List.of(transaction.getId())).size());
+                .findByUserIdAndIdIn(this.user.getId(), List.of(transaction.getId())).size());
         assertTrue(this.bankTransactionRepository
-                .findByUserEmailAndIdIn("someone@else.test", List.of(transaction.getId())).isEmpty());
+                .findByUserIdAndIdIn(-1L, List.of(transaction.getId())).isEmpty());
     }
 }

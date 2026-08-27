@@ -8,14 +8,14 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SecurityTransactionRepository extends JpaRepository<SecurityTransaction, Long> {
-    List<SecurityTransaction> findByUserEmailOrderByTransactionDateDesc(String userEmail);
+    List<SecurityTransaction> findByUserIdOrderByTransactionDateDesc(Long userId);
 
-    List<SecurityTransaction> findByUserEmailAndTransactionDateBetweenOrderByTransactionDate(
-            String userEmail, LocalDate from, LocalDate to);
+    List<SecurityTransaction> findByUserIdAndTransactionDateBetweenOrderByTransactionDate(
+            Long userId, LocalDate from, LocalDate to);
 
-    List<SecurityTransaction> findByUserEmailOrderByTransactionDate(String userEmail);
+    List<SecurityTransaction> findByUserIdOrderByTransactionDate(Long userId);
 
-    void deleteByUserEmailAndIdIn(String userEmail, List<Long> ids);
+    void deleteByUserIdAndIdIn(Long userId, List<Long> ids);
 
-    Optional<SecurityTransaction> findByIdAndUserEmail(Long id, String userEmail);
+    Optional<SecurityTransaction> findByIdAndUserId(Long id, Long userId);
 }

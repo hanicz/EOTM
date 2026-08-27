@@ -75,7 +75,7 @@ class WatchListServiceTest {
 
     @Test
     public void testGetCryptoWatchlistByUserId() throws JsonProcessingException {
-        when(cryptoWatchRepository.findByUserEmailOrderByCoin_Symbol("test@example.com")).thenReturn(List.of(
+        when(cryptoWatchRepository.findByUserIdOrderByCoin_Symbol(1L)).thenReturn(List.of(
                 CryptoWatch.builder().id(1L).coin(Coin.builder().id("bitcoin").build()).build(),
                 CryptoWatch.builder().id(2L).coin(Coin.builder().id("cardano").build()).build(),
                 CryptoWatch.builder().id(3L).coin(Coin.builder().id("ethereum").build()).build()
@@ -98,7 +98,7 @@ class WatchListServiceTest {
                              }
                         """));
 
-        List<CryptoWatchDTO> resultList = this.watchListService.getCryptoWatchlistByUserId("test@example.com", "EUR");
+        List<CryptoWatchDTO> resultList = this.watchListService.getCryptoWatchlistByUserId(1L, "EUR");
 
         assertEquals(3, resultList.size());
         assertEquals(44848.0, resultList.get(0).getLiveValue());
@@ -111,26 +111,26 @@ class WatchListServiceTest {
 
     @Test
     public void testGetCryptoWatchlistByUserIdEmpty() {
-        when(this.cryptoWatchRepository.findByUserEmailOrderByCoin_Symbol("test@example.com")).thenReturn(List.of());
+        when(this.cryptoWatchRepository.findByUserIdOrderByCoin_Symbol(1L)).thenReturn(List.of());
 
-        assertTrue(this.watchListService.getCryptoWatchlistByUserId("test@example.com", "EUR").isEmpty());
+        assertTrue(this.watchListService.getCryptoWatchlistByUserId(1L, "EUR").isEmpty());
         verifyNoInteractions(this.cryptoAPIService);
     }
 
     @Test
     public void testGetStockWatchlistByUserIdEmpty() {
-        when(this.stockWatchRepository.findByUserEmailOrderByStockShortName("test@example.com")).thenReturn(List.of());
+        when(this.stockWatchRepository.findByUserIdOrderByStockShortName(1L)).thenReturn(List.of());
 
-        assertTrue(this.watchListService.getStockWatchlistByUserId("test@example.com").isEmpty());
+        assertTrue(this.watchListService.getStockWatchlistByUserId(1L).isEmpty());
         verifyNoInteractions(this.eodAPIService);
         verifyNoInteractions(this.stockService);
     }
 
     @Test
     public void testGetForexWatchlistByUserIdEmpty() {
-        when(this.forexWatchRepository.findByUserEmailOrderByFromCurrencyAscToCurrencyAsc("test@example.com")).thenReturn(List.of());
+        when(this.forexWatchRepository.findByUserIdOrderByFromCurrencyAscToCurrencyAsc(1L)).thenReturn(List.of());
 
-        assertTrue(this.watchListService.getForexWatchlistByUserId("test@example.com").isEmpty());
+        assertTrue(this.watchListService.getForexWatchlistByUserId(1L).isEmpty());
         verifyNoInteractions(this.eodAPIService);
     }
 

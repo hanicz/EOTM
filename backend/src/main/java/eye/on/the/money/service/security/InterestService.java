@@ -39,12 +39,12 @@ public class InterestService implements ICSVService {
     private final UserService userService;
     private final ModelMapper modelMapper;
 
-    public List<InterestDTO> getInterest(String userEmail) {
-        return this.interestRepository.findByUserEmailOrderByInterestDateDesc(userEmail).stream().map(this::convertToDTO).collect(Collectors.toList());
+    public List<InterestDTO> getInterest(Long userId) {
+        return this.interestRepository.findByUserIdOrderByInterestDateDesc(userId).stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
-    public List<InterestDTO> getInterestBetween(String userEmail, LocalDate from, LocalDate to) {
-        return this.interestRepository.findByUserEmailAndInterestDateBetweenOrderByInterestDate(userEmail, from, to)
+    public List<InterestDTO> getInterestBetween(Long userId, LocalDate from, LocalDate to) {
+        return this.interestRepository.findByUserIdAndInterestDateBetweenOrderByInterestDate(userId, from, to)
                 .stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
@@ -53,10 +53,10 @@ public class InterestService implements ICSVService {
     }
 
     @Transactional
-    public InterestDTO createInterest(InterestDTO interestDTO, String userEmail) {
+    public InterestDTO createInterest(InterestDTO interestDTO, Long userId) {
         Currency currency = this.currencyRepository.findById(interestDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + interestDTO.getCurrencyId()));
         Security security = this.securityService.getOrCreateSecurity(interestDTO.getSecurityId(), interestDTO.getSecurityName());
-        User user = this.userService.loadUserByEmail(userEmail);
+        User user = this.userService.getReference(userId);
 
         Interest interest = Interest.builder()
                 .amount(interestDTO.getAmount())
@@ -71,10 +71,10 @@ public class InterestService implements ICSVService {
     }
 
     @Transactional
-    public InterestDTO updateInterest(InterestDTO interestDTO, String userEmail) {
+    public InterestDTO updateInterest(InterestDTO interestDTO, Long userId) {
         Currency currency = this.currencyRepository.findById(interestDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + interestDTO.getCurrencyId()));
         Security security = this.securityService.getOrCreateSecurity(interestDTO.getSecurityId(), interestDTO.getSecurityName());
-        Interest interest = this.interestRepository.findByIdAndUserEmail(interestDTO.getInterestId(), userEmail).orElseThrow(() -> new NoSuchElementException("Interest not found: " + interestDTO.getInterestId()));
+        Interest interest = this.interestRepository.findByIdAndUserId(interestDTO.getInterestId(), userId).orElseThrow(() -> new NoSuchElementException("Interest not found: " + interestDTO.getInterestId()));
 
         interest.setInterestDate(interestDTO.getInterestDate());
         interest.setCurrency(currency);
@@ -85,13 +85,13 @@ public class InterestService implements ICSVService {
     }
 
     @Transactional
-    public void deleteInterestById(List<Long> ids, String userEmail) {
-        this.interestRepository.deleteByUserEmailAndIdIn(userEmail, ids);
+    public void deleteInterestById(List<Long> ids, Long userId) {
+        this.interestRepository.deleteByUserIdAndIdIn(userId, ids);
     }
 
-    public void getCSV(String userEmail, Writer writer) {
+    public void getCSV(Long userId, Writer writer) {
         List<InterestDTO> interestList =
-                this.interestRepository.findByUserEmailOrderByInterestDateDesc(userEmail)
+                this.interestRepository.findByUserIdOrderByInterestDateDesc(userId)
                         .stream()
                         .map(this::convertToDTO)
                         .toList();
@@ -99,18 +99,18 @@ public class InterestService implements ICSVService {
     }
 
     @Transactional
-    public void processCSV(String userEmail, MultipartFile file) {
+    public void processCSV(Long userId, MultipartFile file) {
         try (CSVParser csvParser = this.getParser(file,
                 new String[]{"Interest Id", "Amount", "Interest Date", "Security Id", "Security Name", "Currency"})) {
             for (CSVRecord csvRecord : csvParser) {
                 InterestDTO interest = InterestDTO.createFromCSVRecord(csvRecord, DateFormats.YYYY_MM_DD);
 
                 if (interest.getInterestId() != null &&
-                        this.interestRepository.findByIdAndUserEmail(interest.getInterestId(), userEmail).isPresent()) {
-                    this.updateInterest(interest, userEmail);
+                        this.interestRepository.findByIdAndUserId(interest.getInterestId(), userId).isPresent()) {
+                    this.updateInterest(interest, userId);
                 } else {
                     interest.setInterestId(null);
-                    this.createInterest(interest, userEmail);
+                    this.createInterest(interest, userId);
                 }
             }
         } catch (IOException | DateTimeParseException | IllegalArgumentException e) {

@@ -39,9 +39,9 @@ public class RSUTaxService implements ICSVService {
     private final TaxService taxService;
 
     @Transactional
-    public void setRSU(String userEmail, List<Long> ids, boolean rsu) {
+    public void setRSU(Long userId, List<Long> ids, boolean rsu) {
         log.trace("Enter");
-        List<Investment> investments = this.investmentRepository.findByUserEmailAndIdIn(userEmail, ids).stream()
+        List<Investment> investments = this.investmentRepository.findByUserIdAndIdIn(userId, ids).stream()
                 .filter(investment -> BUY.equals(investment.getBuySell())).toList();
         if (investments.isEmpty()) return;
 
@@ -55,7 +55,7 @@ public class RSUTaxService implements ICSVService {
         }
 
         Map<Long, RSUTaxDetails> existing = this.rsuTaxDetailsRepository
-                .findByUserEmailAndInvestmentIdIn(userEmail, investmentIds).stream()
+                .findByUserIdAndInvestmentIdIn(userId, investmentIds).stream()
                 .collect(Collectors.toMap(details -> details.getInvestment().getId(), Function.identity()));
 
         List<RSUTaxDTO> valued = this.taxService.calculateTaxForRSUs(investments.stream()
@@ -70,19 +70,19 @@ public class RSUTaxService implements ICSVService {
     }
 
     @Transactional
-    public void setTaxPaid(String userEmail, List<Long> ids, boolean paid) {
+    public void setTaxPaid(Long userId, List<Long> ids, boolean paid) {
         log.trace("Enter");
         List<RSUTaxDetails> details = this.rsuTaxDetailsRepository
-                .findByUserEmailAndInvestmentIdIn(userEmail, ids);
+                .findByUserIdAndInvestmentIdIn(userId, ids);
         if (details.isEmpty()) return;
 
         details.forEach(detail -> detail.getTaxDetails().setPaid(paid));
         this.rsuTaxDetailsRepository.saveAll(details);
     }
 
-    public RSUTaxEventReportDTO getRSUTaxEvents(String userEmail) {
+    public RSUTaxEventReportDTO getRSUTaxEvents(Long userId) {
         log.trace("Enter");
-        List<RSUTaxDetails> details = this.rsuTaxDetailsRepository.findFlaggedByUserEmail(userEmail);
+        List<RSUTaxDetails> details = this.rsuTaxDetailsRepository.findFlaggedByUserId(userId);
         if (details.isEmpty()) return RSUTaxEventReportDTO.empty();
 
         List<RSUTaxEventDTO> items = details.stream().map(this::convertToDTO).toList();
@@ -96,9 +96,9 @@ public class RSUTaxService implements ICSVService {
                 .totalAmountInHuf(totalAmount).totalTax(totalTax).build();
     }
 
-    public void getCSV(String userEmail, Writer writer) {
+    public void getCSV(Long userId, Writer writer) {
         log.trace("Enter");
-        this.printRecords(this.getRSUTaxEvents(userEmail).getItems(), writer);
+        this.printRecords(this.getRSUTaxEvents(userId).getItems(), writer);
     }
 
     private RSUDTO toRSUDTO(Investment investment) {

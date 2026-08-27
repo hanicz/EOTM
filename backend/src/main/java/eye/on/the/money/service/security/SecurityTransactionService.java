@@ -45,18 +45,18 @@ public class SecurityTransactionService implements ICSVService {
     private final SecurityService securityService;
     private final SecurityRateService securityRateService;
 
-    public List<SecurityTransactionDTO> getTransactions(String userEmail) {
-        return this.securityTransactionRepository.findByUserEmailOrderByTransactionDateDesc(userEmail)
+    public List<SecurityTransactionDTO> getTransactions(Long userId) {
+        return this.securityTransactionRepository.findByUserIdOrderByTransactionDateDesc(userId)
                 .stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
-    public List<SecurityTransactionDTO> getTransactionsBetween(String userEmail, LocalDate from, LocalDate to) {
-        return this.securityTransactionRepository.findByUserEmailAndTransactionDateBetweenOrderByTransactionDate(userEmail, from, to)
+    public List<SecurityTransactionDTO> getTransactionsBetween(Long userId, LocalDate from, LocalDate to) {
+        return this.securityTransactionRepository.findByUserIdAndTransactionDateBetweenOrderByTransactionDate(userId, from, to)
                 .stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
-    public List<SecurityTransactionDTO> getCurrentHoldings(String userEmail) {
-        List<SecurityTransactionDTO> transactions = this.securityTransactionRepository.findByUserEmailOrderByTransactionDate(userEmail)
+    public List<SecurityTransactionDTO> getCurrentHoldings(Long userId) {
+        List<SecurityTransactionDTO> transactions = this.securityTransactionRepository.findByUserIdOrderByTransactionDate(userId)
                 .stream().map(this::convertToDTO).toList();
         Map<String, SecurityTransactionDTO> holdingsMap = this.getCalculated(transactions);
         List<SecurityTransactionDTO> holdings = new ArrayList<>(holdingsMap.values()).stream()
@@ -107,10 +107,10 @@ public class SecurityTransactionService implements ICSVService {
     }
 
     @Transactional
-    public SecurityTransactionDTO createTransaction(SecurityTransactionDTO transactionDTO, String userEmail) {
+    public SecurityTransactionDTO createTransaction(SecurityTransactionDTO transactionDTO, Long userId) {
         Currency currency = this.currencyRepository.findById(transactionDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + transactionDTO.getCurrencyId()));
         Security security = this.securityService.getOrCreateSecurity(transactionDTO.getSecurityId(), transactionDTO.getSecurityName());
-        User user = this.userService.loadUserByEmail(userEmail);
+        User user = this.userService.getReference(userId);
 
         SecurityTransaction transaction = SecurityTransaction.builder()
                 .buySell(transactionDTO.getBuySell())
@@ -127,10 +127,10 @@ public class SecurityTransactionService implements ICSVService {
     }
 
     @Transactional
-    public SecurityTransactionDTO updateTransaction(SecurityTransactionDTO transactionDTO, String userEmail) {
+    public SecurityTransactionDTO updateTransaction(SecurityTransactionDTO transactionDTO, Long userId) {
         Currency currency = this.currencyRepository.findById(transactionDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + transactionDTO.getCurrencyId()));
         Security security = this.securityService.getOrCreateSecurity(transactionDTO.getSecurityId(), transactionDTO.getSecurityName());
-        SecurityTransaction transaction = this.securityTransactionRepository.findByIdAndUserEmail(transactionDTO.getTransactionId(), userEmail).orElseThrow(() -> new NoSuchElementException("Security transaction not found: " + transactionDTO.getTransactionId()));
+        SecurityTransaction transaction = this.securityTransactionRepository.findByIdAndUserId(transactionDTO.getTransactionId(), userId).orElseThrow(() -> new NoSuchElementException("Security transaction not found: " + transactionDTO.getTransactionId()));
 
         transaction.setBuySell(transactionDTO.getBuySell());
         transaction.setTransactionDate(transactionDTO.getTransactionDate());
@@ -143,13 +143,13 @@ public class SecurityTransactionService implements ICSVService {
     }
 
     @Transactional
-    public void deleteTransactionById(String userEmail, List<Long> ids) {
-        this.securityTransactionRepository.deleteByUserEmailAndIdIn(userEmail, ids);
+    public void deleteTransactionById(Long userId, List<Long> ids) {
+        this.securityTransactionRepository.deleteByUserIdAndIdIn(userId, ids);
     }
 
-    public void getCSV(String userEmail, Writer writer) {
+    public void getCSV(Long userId, Writer writer) {
         List<SecurityTransactionDTO> transactionList =
-                this.securityTransactionRepository.findByUserEmailOrderByTransactionDate(userEmail)
+                this.securityTransactionRepository.findByUserIdOrderByTransactionDate(userId)
                         .stream()
                         .map(this::convertToDTO)
                         .toList();
@@ -157,20 +157,20 @@ public class SecurityTransactionService implements ICSVService {
     }
 
     @Transactional
-    public void processCSV(String userEmail, MultipartFile file) {
+    public void processCSV(Long userId, MultipartFile file) {
         try (CSVParser csvParser = this.getParser(file,
                 new String[]{"Transaction Id", "Quantity", "Type", "Transaction Date", "Security Id", "Security Name", "Amount", "Currency"})) {
             for (CSVRecord csvRecord : csvParser) {
                 SecurityTransactionDTO transaction = SecurityTransactionDTO.createFromCSVRecord(csvRecord, DateFormats.YYYY_MM_DD);
 
                 if (transaction.getTransactionId() != null &&
-                        this.securityTransactionRepository.findByIdAndUserEmail(transaction.getTransactionId(), userEmail).isPresent()) {
+                        this.securityTransactionRepository.findByIdAndUserId(transaction.getTransactionId(), userId).isPresent()) {
                     log.trace("Update transaction {}", transaction);
-                    this.updateTransaction(transaction, userEmail);
+                    this.updateTransaction(transaction, userId);
                 } else {
                     transaction.setTransactionId(null);
                     log.trace("Create transaction {}", transaction);
-                    this.createTransaction(transaction, userEmail);
+                    this.createTransaction(transaction, userId);
                 }
             }
         } catch (IOException | DateTimeParseException | IllegalArgumentException e) {

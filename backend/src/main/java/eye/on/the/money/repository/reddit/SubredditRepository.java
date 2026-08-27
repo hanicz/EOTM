@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SubredditRepository extends JpaRepository<Subreddit, Long> {
-    List<Subreddit> findByUserEmailOrderBySubredditAsc(String userEmail);
+    List<Subreddit> findByUserIdOrderBySubredditAsc(Long userId);
 
-    Optional<Subreddit> findBySubredditAndUserEmail(String subreddit, String userEmail);
+    Optional<Subreddit> findBySubredditAndUserId(String subreddit, Long userId);
 
-    int deleteByIdAndUserEmail(Long id, String userEmail);
+    int deleteByIdAndUserId(Long id, Long userId);
 }

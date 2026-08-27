@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import eye.on.the.money.security.CurrentUserEmail;
+import eye.on.the.money.security.CurrentUserId;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,41 +24,41 @@ public class ForexController {
     private final ForexTransactionService forexTransactionService;
 
     @GetMapping()
-    public ResponseEntity<List<ForexTransactionDTO>> getForexTransactionsByUserId(@CurrentUserEmail String userEmail) {
-        return ResponseEntity.ok(this.forexTransactionService.getForexTransactionsByUserId(userEmail));
+    public ResponseEntity<List<ForexTransactionDTO>> getForexTransactionsByUserId(@CurrentUserId Long userId) {
+        return ResponseEntity.ok(this.forexTransactionService.getForexTransactionsByUserId(userId));
     }
 
     @GetMapping("/holding")
-    public ResponseEntity<List<ForexTransactionDTO>> getForexHoldings(@CurrentUserEmail String userEmail,
+    public ResponseEntity<List<ForexTransactionDTO>> getForexHoldings(@CurrentUserId Long userId,
                                                                       @RequestParam(defaultValue = "false") boolean refresh) {
-        return ResponseEntity.ok(refresh ? this.forexTransactionService.refreshAllForexHoldings(userEmail)
-                : this.forexTransactionService.getAllForexHoldings(userEmail));
+        return ResponseEntity.ok(refresh ? this.forexTransactionService.refreshAllForexHoldings(userId)
+                : this.forexTransactionService.getAllForexHoldings(userId));
     }
 
     @DeleteMapping()
-    public ResponseEntity<Void> deleteByIds(@CurrentUserEmail String userEmail, @RequestParam List<Long> ids) {
-        this.forexTransactionService.deleteForexTransactionById(userEmail, ids);
+    public ResponseEntity<Void> deleteByIds(@CurrentUserId Long userId, @RequestParam List<Long> ids) {
+        this.forexTransactionService.deleteForexTransactionById(userId, ids);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping
-    public ResponseEntity<ForexTransactionDTO> createTransaction(@CurrentUserEmail String userEmail, @RequestBody ForexTransactionDTO forexTransactionDTO) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(this.forexTransactionService.createForexTransaction(forexTransactionDTO, userEmail));
+    public ResponseEntity<ForexTransactionDTO> createTransaction(@CurrentUserId Long userId, @RequestBody ForexTransactionDTO forexTransactionDTO) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.forexTransactionService.createForexTransaction(forexTransactionDTO, userId));
     }
 
     @PutMapping
-    public ResponseEntity<ForexTransactionDTO> updateTransaction(@CurrentUserEmail String userEmail, @RequestBody ForexTransactionDTO forexTransactionDTO) {
-        return ResponseEntity.ok(this.forexTransactionService.updateForexTransaction(forexTransactionDTO, userEmail));
+    public ResponseEntity<ForexTransactionDTO> updateTransaction(@CurrentUserId Long userId, @RequestBody ForexTransactionDTO forexTransactionDTO) {
+        return ResponseEntity.ok(this.forexTransactionService.updateForexTransaction(forexTransactionDTO, userId));
     }
 
     @GetMapping("/csv")
-    public void getCSV(@CurrentUserEmail String userEmail, HttpServletResponse servletResponse) throws IOException {
-        this.forexTransactionService.getCSV(userEmail, CsvResponseUtil.prepare(servletResponse, "forex_transactions.csv"));
+    public void getCSV(@CurrentUserId Long userId, HttpServletResponse servletResponse) throws IOException {
+        this.forexTransactionService.getCSV(userId, CsvResponseUtil.prepare(servletResponse, "forex_transactions.csv"));
     }
 
     @PostMapping("/process/csv")
-    public ResponseEntity<Void> processCSV(@CurrentUserEmail String userEmail, @RequestParam("file") MultipartFile file) throws IOException {
-        this.forexTransactionService.processCSV(userEmail, file);
+    public ResponseEntity<Void> processCSV(@CurrentUserId Long userId, @RequestParam("file") MultipartFile file) throws IOException {
+        this.forexTransactionService.processCSV(userId, file);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

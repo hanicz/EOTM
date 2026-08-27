@@ -37,7 +37,7 @@ public class UserControllerIntegrationTest {
 
     @Test
     @WithMockUser("test@test.test")
-    public void getUserEmailResolvesCurrentUserEmail() throws Exception {
+    public void getUserIdResolvesCurrentUserId() throws Exception {
         this.mockMvc.perform(get("/api/v1/user/me"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("test@test.test"));

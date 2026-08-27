@@ -26,8 +26,8 @@ public class ReportSubscriptionService {
     private final ReportSubscriptionRepository reportSubscriptionRepository;
     private final UserService userService;
 
-    public ReportSubscriptionDTO get(String userEmail) {
-        return this.reportSubscriptionRepository.findByUserEmail(userEmail)
+    public ReportSubscriptionDTO get(Long userId) {
+        return this.reportSubscriptionRepository.findByUserId(userId)
                 .map(this::toDTO)
                 .orElseGet(() -> ReportSubscriptionDTO.builder()
                         .enabled(false)
@@ -37,12 +37,12 @@ public class ReportSubscriptionService {
     }
 
     @Transactional
-    public ReportSubscriptionDTO update(String userEmail, ReportSubscriptionUpdateDTO update) {
+    public ReportSubscriptionDTO update(Long userId, ReportSubscriptionUpdateDTO update) {
         log.trace("Enter");
-        List<String> recipients = this.normalise(userEmail, update.recipients());
+        ReportSubscription subscription = this.reportSubscriptionRepository.findByUserId(userId)
+                .orElseGet(() -> this.create(userId));
 
-        ReportSubscription subscription = this.reportSubscriptionRepository.findByUserEmail(userEmail)
-                .orElseGet(() -> this.create(userEmail));
+        List<String> recipients = this.normalise(subscription.getUser().getEmail(), update.recipients());
 
         subscription.setEnabled(Boolean.TRUE.equals(update.enabled()));
         subscription.setCurrency(update.currency().toUpperCase());
@@ -69,8 +69,8 @@ public class ReportSubscriptionService {
         this.reportSubscriptionRepository.save(subscription);
     }
 
-    private ReportSubscription create(String userEmail) {
-        User user = this.userService.loadUserByEmail(userEmail);
+    private ReportSubscription create(Long userId) {
+        User user = this.userService.loadUserById(userId);
         return ReportSubscription.builder()
                 .user(user)
                 .enabled(false)

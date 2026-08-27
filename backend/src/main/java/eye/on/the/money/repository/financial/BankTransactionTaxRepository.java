@@ -10,12 +10,12 @@ import java.util.List;
 public interface BankTransactionTaxRepository extends JpaRepository<BankTransactionTax, Long> {
 
     @Query("select t from BankTransactionTax t join fetch t.bankTransaction b join fetch b.currency "
-            + "where b.user.email = :userEmail and b.taxable = true order by b.bookingDate desc")
-    List<BankTransactionTax> findTaxableByUserEmail(@Param("userEmail") String userEmail);
+            + "where b.user.id = :userId and b.taxable = true order by b.bookingDate desc")
+    List<BankTransactionTax> findTaxableByUserId(@Param("userId") Long userId);
 
     @Query("select t from BankTransactionTax t join fetch t.bankTransaction b join fetch b.currency "
-            + "where b.user.email = :userEmail and b.id in :ids")
-    List<BankTransactionTax> findByUserEmailAndBankTransactionIdIn(@Param("userEmail") String userEmail,
+            + "where b.user.id = :userId and b.id in :ids")
+    List<BankTransactionTax> findByUserIdAndBankTransactionIdIn(@Param("userId") Long userId,
                                                                    @Param("ids") List<Long> ids);
 
     void deleteByBankTransactionIdIn(List<Long> ids);

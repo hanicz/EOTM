@@ -52,15 +52,15 @@ class ETFDividendServiceTest {
 
     @Test
     public void getDividends() {
-        List<ETFDividendDTO> dividends = this.etfDividendService.getDividends(this.user.getUsername());
-        List<ETFDividend> dividendsActual = this.etfDividendRepository.findByUserEmailOrderByDividendDateDesc("test@test.test");
+        List<ETFDividendDTO> dividends = this.etfDividendService.getDividends(this.user.getId());
+        List<ETFDividend> dividendsActual = this.etfDividendRepository.findByUserIdOrderByDividendDateDesc(this.user.getId());
         Assertions.assertIterableEquals(dividendsActual.stream()
                 .map(this::convertToETFDividendDTO).collect(Collectors.toList()), dividends);
     }
 
     @Test
     public void getDividends_NoResult() {
-        List<ETFDividendDTO> dividends = this.etfDividendService.getDividends("nouseremail");
+        List<ETFDividendDTO> dividends = this.etfDividendService.getDividends(-1L);
         assertEquals(0, dividends.size());
     }
 
@@ -68,7 +68,7 @@ class ETFDividendServiceTest {
     @Test
     public void createETFDividend() throws ParseException {
         ETFDividendDTO etfDividendDTO = this.getETFDividendDTO();
-        ETFDividendDTO created = this.etfDividendService.createETFDividend(etfDividendDTO, this.user.getUsername());
+        ETFDividendDTO created = this.etfDividendService.createETFDividend(etfDividendDTO, this.user.getId());
         etfDividendDTO.setId(created.getId());
         assertEquals(etfDividendDTO, created);
     }
@@ -78,22 +78,22 @@ class ETFDividendServiceTest {
         ETFDividendDTO etfDividendDTO = this.getETFDividendDTO();
         etfDividendDTO.setShortName("NEWETF");
         etfDividendDTO.setName("New ETF Fund");
-        ETFDividendDTO created = this.etfDividendService.createETFDividend(etfDividendDTO, this.user.getUsername());
+        ETFDividendDTO created = this.etfDividendService.createETFDividend(etfDividendDTO, this.user.getId());
         assertEquals("NEWETF", created.getShortName());
         assertEquals("New ETF Fund", created.getName());
     }
 
     @Test
     public void deleteETFDividendById() throws ParseException {
-        ETFDividendDTO created = this.etfDividendService.createETFDividend(this.getETFDividendDTO(), this.user.getUsername());
-        this.etfDividendService.deleteETFDividendById(List.of(created.getId()), this.user.getUsername());
+        ETFDividendDTO created = this.etfDividendService.createETFDividend(this.getETFDividendDTO(), this.user.getId());
+        this.etfDividendService.deleteETFDividendById(List.of(created.getId()), this.user.getId());
         assertTrue(this.etfDividendRepository.findById(created.getId()).isEmpty());
     }
 
     @Test
     public void getDividends_IdIsPopulated() throws ParseException {
-        this.etfDividendService.createETFDividend(this.getETFDividendDTO(), this.user.getUsername());
-        List<ETFDividendDTO> dividends = this.etfDividendService.getDividends(this.user.getUsername());
+        this.etfDividendService.createETFDividend(this.getETFDividendDTO(), this.user.getId());
+        List<ETFDividendDTO> dividends = this.etfDividendService.getDividends(this.user.getId());
         assertTrue(dividends.size() > 0, "expected at least one dividend");
         assertTrue(dividends.get(0).getId() != null, "id was null: " + dividends.get(0));
     }

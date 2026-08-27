@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.Optional;
 
 public interface InterestRepository extends JpaRepository<Interest, Long> {
-    List<Interest> findByUserEmailOrderByInterestDateDesc(String userEmail);
+    List<Interest> findByUserIdOrderByInterestDateDesc(Long userId);
 
-    List<Interest> findByUserEmailAndInterestDateBetweenOrderByInterestDate(
-            String userEmail, LocalDate from, LocalDate to);
+    List<Interest> findByUserIdAndInterestDateBetweenOrderByInterestDate(
+            Long userId, LocalDate from, LocalDate to);
 
-    void deleteByUserEmailAndIdIn(String userEmail, List<Long> ids);
+    void deleteByUserIdAndIdIn(Long userId, List<Long> ids);
 
-    Optional<Interest> findByIdAndUserEmail(Long id, String userEmail);
+    Optional<Interest> findByIdAndUserId(Long id, Long userId);
 }

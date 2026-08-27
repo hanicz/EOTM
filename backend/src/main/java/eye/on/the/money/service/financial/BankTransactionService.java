@@ -51,31 +51,31 @@ public class BankTransactionService implements ICSVService {
     private final UserService userService;
     private final ModelMapper modelMapper;
 
-    public List<BankTransactionDTO> getTransactions(String userEmail) {
-        return this.bankTransactionRepository.findByUserEmailOrderByBookingDateDesc(userEmail)
+    public List<BankTransactionDTO> getTransactions(Long userId) {
+        return this.bankTransactionRepository.findByUserIdOrderByBookingDateDesc(userId)
                 .stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
-    public List<MonthlyCashFlowDTO> getMonthlyCashFlow(String userEmail) {
-        return this.bankTransactionRepository.findMonthlyCashFlow(userEmail);
+    public List<MonthlyCashFlowDTO> getMonthlyCashFlow(Long userId) {
+        return this.bankTransactionRepository.findMonthlyCashFlow(userId);
     }
 
-    public List<MonthlyCashFlowDTO> getCashFlowBetween(String userEmail, LocalDate from, LocalDate to) {
-        return this.bankTransactionRepository.findCashFlowBetween(userEmail, from, to);
+    public List<MonthlyCashFlowDTO> getCashFlowBetween(Long userId, LocalDate from, LocalDate to) {
+        return this.bankTransactionRepository.findCashFlowBetween(userId, from, to);
     }
 
-    public List<MonthlyIncomeDTO> getMonthlyIncome(String userEmail) {
-        return this.bankTransactionRepository.findMonthlyIncome(userEmail);
-    }
-
-    @Transactional
-    public void setExcluded(String userEmail, List<Long> ids, boolean excluded) {
-        this.bankTransactionRepository.updateExcludedByUserEmailAndIdIn(userEmail, ids, excluded);
+    public List<MonthlyIncomeDTO> getMonthlyIncome(Long userId) {
+        return this.bankTransactionRepository.findMonthlyIncome(userId);
     }
 
     @Transactional
-    public void updateTransaction(String userEmail, Long id, BankTransactionEditDTO editDTO) {
-        BankTransaction transaction = this.bankTransactionRepository.findByIdAndUserEmail(id, userEmail)
+    public void setExcluded(Long userId, List<Long> ids, boolean excluded) {
+        this.bankTransactionRepository.updateExcludedByUserIdAndIdIn(userId, ids, excluded);
+    }
+
+    @Transactional
+    public void updateTransaction(Long userId, Long id, BankTransactionEditDTO editDTO) {
+        BankTransaction transaction = this.bankTransactionRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new NoSuchElementException("Bank transaction not found: " + id));
         transaction.setBookingDate(editDTO.bookingDate());
         transaction.setMemo(editDTO.memo().trim());
@@ -83,20 +83,20 @@ public class BankTransactionService implements ICSVService {
     }
 
     @Transactional
-    public void deleteTransactionById(String userEmail, List<Long> ids) {
-        this.bankTransactionRepository.deleteByUserEmailAndIdIn(userEmail, ids);
+    public void deleteTransactionById(Long userId, List<Long> ids) {
+        this.bankTransactionRepository.deleteByUserIdAndIdIn(userId, ids);
     }
 
-    public void getMonthlyCashFlowCSV(String userEmail, Writer writer) {
-        this.printRecords(this.getMonthlyCashFlow(userEmail), writer);
+    public void getMonthlyCashFlowCSV(Long userId, Writer writer) {
+        this.printRecords(this.getMonthlyCashFlow(userId), writer);
     }
 
-    public void getMonthlyIncomeCSV(String userEmail, Writer writer) {
-        this.printRecords(this.getMonthlyIncome(userEmail), writer);
+    public void getMonthlyIncomeCSV(Long userId, Writer writer) {
+        this.printRecords(this.getMonthlyIncome(userId), writer);
     }
 
-    public void getCSV(String userEmail, Writer writer) {
-        List<BankTransactionDTO> transactionList = this.bankTransactionRepository.findByUserEmailOrderByBookingDate(userEmail)
+    public void getCSV(Long userId, Writer writer) {
+        List<BankTransactionDTO> transactionList = this.bankTransactionRepository.findByUserIdOrderByBookingDate(userId)
                 .stream()
                 .map(this::convertToDTO)
                 .toList();
@@ -104,8 +104,8 @@ public class BankTransactionService implements ICSVService {
     }
 
     @Transactional
-    public ImportResultDTO processCSV(String userEmail, MultipartFile file) {
-        User user = this.userService.loadUserByEmail(userEmail);
+    public ImportResultDTO processCSV(Long userId, MultipartFile file) {
+        User user = this.userService.getReference(userId);
         int created = 0;
         int updated = 0;
         try (CSVParser csvParser = this.getParser(file, BankTransactionDTO.KH_HEADERS, KH_DELIMITER, this.detectCharset(file))) {
@@ -133,8 +133,8 @@ public class BankTransactionService implements ICSVService {
                 .orElseThrow(() -> new CSVException("Unknown currency: " + transactionDTO.getCurrencyId()));
 
         Optional<BankTransaction> existing = this.bankTransactionRepository
-                .findByUserEmailAndBankTransactionIdAndBookingDateAndTypeAndAmountAndMemo(
-                        user.getEmail(), transactionDTO.getBankTransactionId(), transactionDTO.getBookingDate(),
+                .findByUserIdAndBankTransactionIdAndBookingDateAndTypeAndAmountAndMemo(
+                        user.getId(), transactionDTO.getBankTransactionId(), transactionDTO.getBookingDate(),
                         transactionDTO.getType(), transactionDTO.getAmount(), transactionDTO.getMemo());
 
         if (existing.isPresent()) {

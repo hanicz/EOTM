@@ -26,28 +26,28 @@ public class AccountService {
         return this.accountRepository.save(account);
     }
 
-    public List<Account> getAccountsByUserEmail(String userEmail) {
-        return this.accountRepository.findByUserEmailOrderByAccountName(userEmail);
+    public List<Account> getAccountsByUserId(Long userId) {
+        return this.accountRepository.findByUserIdOrderByAccountName(userId);
     }
 
-    public Account getAccount(String userEmail, Long accountId) {
-        return this.accountRepository.findByUserEmailAndId(userEmail, accountId)
+    public Account getAccount(Long userId, Long accountId) {
+        return this.accountRepository.findByUserIdAndId(userId, accountId)
                 .orElseThrow(() -> new NoSuchElementException("Account not found: " + accountId));
     }
 
-    public Map<String, Long> getAccountIdsByName(String userEmail) {
-        return this.accountRepository.findByUserEmailOrderByAccountName(userEmail).stream()
+    public Map<String, Long> getAccountIdsByName(Long userId) {
+        return this.accountRepository.findByUserIdOrderByAccountName(userId).stream()
                 .collect(Collectors.toMap(Account::getAccountName, Account::getId, (first, ignored) -> first));
     }
 
     @Transactional
-    public boolean deleteById(String userEmail, Long id) {
-        return this.accountRepository.deleteByUserEmailAndId(userEmail, id) > 0;
+    public boolean deleteById(Long userId, Long id) {
+        return this.accountRepository.deleteByUserIdAndId(userId, id) > 0;
     }
 
     @Transactional
-    public Account createAccount(Account account, String userEmail) {
-        User user = this.userService.loadUserByEmail(userEmail);
+    public Account createAccount(Account account, Long userId) {
+        User user = this.userService.getReference(userId);
         account.setId(null);
         account.setUser(user);
         return this.accountRepository.save(account);

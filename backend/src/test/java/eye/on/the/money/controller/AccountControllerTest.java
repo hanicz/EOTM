@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
@@ -36,27 +35,27 @@ class AccountControllerTest {
         accountList.add(Account.builder().id(2L).build());
         accountList.add(Account.builder().id(3L).build());
 
-        when(this.accountService.getAccountsByUserEmail(anyString())).thenReturn(accountList);
+        when(this.accountService.getAccountsByUserId(anyLong())).thenReturn(accountList);
 
-        ResponseEntity<List<Account>> result = this.accountController.getAccounts("email");
+        ResponseEntity<List<Account>> result = this.accountController.getAccounts(1L);
 
         Assertions.assertIterableEquals(result.getBody(), accountList);
     }
 
     @Test
     public void deleteAccount() {
-        when(this.accountService.deleteById(anyString(), anyLong())).thenReturn(true);
+        when(this.accountService.deleteById(anyLong(), anyLong())).thenReturn(true);
 
-        ResponseEntity<Void> result = this.accountController.deleteAccount("email", 1L);
+        ResponseEntity<Void> result = this.accountController.deleteAccount(1L, 1L);
 
         Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
     }
 
     @Test
     public void deleteAccount404() {
-        when(this.accountService.deleteById(anyString(), anyLong())).thenReturn(false);
+        when(this.accountService.deleteById(anyLong(), anyLong())).thenReturn(false);
 
-        ResponseEntity<Void> result = this.accountController.deleteAccount("email", 1L);
+        ResponseEntity<Void> result = this.accountController.deleteAccount(1L, 1L);
 
         Assertions.assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
     }
@@ -64,9 +63,9 @@ class AccountControllerTest {
     @Test
     public void createAccount() {
         Account account = Account.builder().id(1L).build();
-        when(this.accountService.createAccount(account, "email")).thenReturn(account);
+        when(this.accountService.createAccount(account, 1L)).thenReturn(account);
 
-        ResponseEntity<Account> result = this.accountController.createAccount(account, "email");
+        ResponseEntity<Account> result = this.accountController.createAccount(account, 1L);
 
         Assertions.assertEquals(account, result.getBody());
     }

@@ -2,7 +2,7 @@ package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.in.FireProjectionDTO;
 import eye.on.the.money.dto.out.FireProjectionResultDTO;
-import eye.on.the.money.security.CurrentUserEmail;
+import eye.on.the.money.security.CurrentUserId;
 import eye.on.the.money.service.shared.FireService;
 import eye.on.the.money.util.CsvResponseUtil;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,16 +32,16 @@ public class FireController {
      * portfolio it starts from comes from the database.
      */
     @PostMapping("/projection")
-    public ResponseEntity<FireProjectionResultDTO> project(@CurrentUserEmail String userEmail,
+    public ResponseEntity<FireProjectionResultDTO> project(@CurrentUserId Long userId,
                                                            @RequestBody @Valid FireProjectionDTO projectionDTO) {
         log.trace("Enter");
-        return ResponseEntity.ok(this.fireService.project(userEmail, projectionDTO));
+        return ResponseEntity.ok(this.fireService.project(userId, projectionDTO));
     }
 
     @PostMapping("/projection/csv")
-    public void getCSV(@CurrentUserEmail String userEmail, @RequestBody @Valid FireProjectionDTO projectionDTO,
+    public void getCSV(@CurrentUserId Long userId, @RequestBody @Valid FireProjectionDTO projectionDTO,
                        HttpServletResponse servletResponse) throws IOException {
         log.trace("Enter");
-        this.fireService.getCSV(userEmail, projectionDTO, CsvResponseUtil.prepare(servletResponse, "fire-projection.csv"));
+        this.fireService.getCSV(userId, projectionDTO, CsvResponseUtil.prepare(servletResponse, "fire-projection.csv"));
     }
 }

@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface AccountRepository extends JpaRepository<Account, Long> {
-    Optional<Account> findByUserEmailAndId(String email, Long id);
+    Optional<Account> findByUserIdAndId(Long userId, Long id);
 
-    List<Account> findByUserEmailOrderByAccountName(String email);
+    List<Account> findByUserIdOrderByAccountName(Long userId);
 
-    int deleteByUserEmailAndId(String email, Long id);
+    int deleteByUserIdAndId(Long userId, Long id);
 }

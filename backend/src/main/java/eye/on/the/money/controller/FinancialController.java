@@ -5,7 +5,7 @@ import eye.on.the.money.dto.out.BankTransactionDTO;
 import eye.on.the.money.dto.out.ImportResultDTO;
 import eye.on.the.money.dto.out.MonthlyCashFlowDTO;
 import eye.on.the.money.dto.out.MonthlyIncomeDTO;
-import eye.on.the.money.security.CurrentUserEmail;
+import eye.on.the.money.security.CurrentUserId;
 import eye.on.the.money.service.financial.BankTransactionService;
 import eye.on.the.money.service.financial.TaxableEventService;
 import eye.on.the.money.util.CsvResponseUtil;
@@ -32,66 +32,66 @@ public class FinancialController {
     private final TaxableEventService taxableEventService;
 
     @GetMapping()
-    public ResponseEntity<List<BankTransactionDTO>> getAllTransactions(@CurrentUserEmail String userEmail) {
-        return ResponseEntity.ok(this.bankTransactionService.getTransactions(userEmail));
+    public ResponseEntity<List<BankTransactionDTO>> getAllTransactions(@CurrentUserId Long userId) {
+        return ResponseEntity.ok(this.bankTransactionService.getTransactions(userId));
     }
 
     @GetMapping("/report/monthly")
-    public ResponseEntity<List<MonthlyCashFlowDTO>> getMonthlyCashFlow(@CurrentUserEmail String userEmail) {
-        return ResponseEntity.ok(this.bankTransactionService.getMonthlyCashFlow(userEmail));
+    public ResponseEntity<List<MonthlyCashFlowDTO>> getMonthlyCashFlow(@CurrentUserId Long userId) {
+        return ResponseEntity.ok(this.bankTransactionService.getMonthlyCashFlow(userId));
     }
 
     @GetMapping("/report/monthly/csv")
-    public void getMonthlyCashFlowCSV(@CurrentUserEmail String userEmail, HttpServletResponse servletResponse) throws IOException {
-        this.bankTransactionService.getMonthlyCashFlowCSV(userEmail,
+    public void getMonthlyCashFlowCSV(@CurrentUserId Long userId, HttpServletResponse servletResponse) throws IOException {
+        this.bankTransactionService.getMonthlyCashFlowCSV(userId,
                 CsvResponseUtil.prepare(servletResponse, "monthly_cash_flow.csv"));
     }
 
     @GetMapping("/report/income")
-    public ResponseEntity<List<MonthlyIncomeDTO>> getMonthlyIncome(@CurrentUserEmail String userEmail) {
-        return ResponseEntity.ok(this.bankTransactionService.getMonthlyIncome(userEmail));
+    public ResponseEntity<List<MonthlyIncomeDTO>> getMonthlyIncome(@CurrentUserId Long userId) {
+        return ResponseEntity.ok(this.bankTransactionService.getMonthlyIncome(userId));
     }
 
     @GetMapping("/report/income/csv")
-    public void getMonthlyIncomeCSV(@CurrentUserEmail String userEmail, HttpServletResponse servletResponse) throws IOException {
-        this.bankTransactionService.getMonthlyIncomeCSV(userEmail,
+    public void getMonthlyIncomeCSV(@CurrentUserId Long userId, HttpServletResponse servletResponse) throws IOException {
+        this.bankTransactionService.getMonthlyIncomeCSV(userId,
                 CsvResponseUtil.prepare(servletResponse, "monthly_income.csv"));
     }
 
     @PutMapping("/exclusion")
-    public ResponseEntity<Void> setExcluded(@CurrentUserEmail String userEmail, @RequestParam List<Long> ids,
+    public ResponseEntity<Void> setExcluded(@CurrentUserId Long userId, @RequestParam List<Long> ids,
                                             @RequestParam boolean excluded) {
-        this.bankTransactionService.setExcluded(userEmail, ids, excluded);
+        this.bankTransactionService.setExcluded(userId, ids, excluded);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/taxable")
-    public ResponseEntity<Void> setTaxable(@CurrentUserEmail String userEmail, @RequestParam List<Long> ids,
+    public ResponseEntity<Void> setTaxable(@CurrentUserId Long userId, @RequestParam List<Long> ids,
                                            @RequestParam boolean taxable) {
-        this.taxableEventService.setTaxable(userEmail, ids, taxable);
+        this.taxableEventService.setTaxable(userId, ids, taxable);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateTransaction(@CurrentUserEmail String userEmail, @PathVariable Long id,
+    public ResponseEntity<Void> updateTransaction(@CurrentUserId Long userId, @PathVariable Long id,
                                                   @RequestBody @Valid BankTransactionEditDTO editDTO) {
-        this.bankTransactionService.updateTransaction(userEmail, id, editDTO);
+        this.bankTransactionService.updateTransaction(userId, id, editDTO);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping()
-    public ResponseEntity<Void> deleteByIds(@CurrentUserEmail String userEmail, @RequestParam List<Long> ids) {
-        this.bankTransactionService.deleteTransactionById(userEmail, ids);
+    public ResponseEntity<Void> deleteByIds(@CurrentUserId Long userId, @RequestParam List<Long> ids) {
+        this.bankTransactionService.deleteTransactionById(userId, ids);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/csv")
-    public void getCSV(@CurrentUserEmail String userEmail, HttpServletResponse servletResponse) throws IOException {
-        this.bankTransactionService.getCSV(userEmail, CsvResponseUtil.prepare(servletResponse, "bank_transactions.csv"));
+    public void getCSV(@CurrentUserId Long userId, HttpServletResponse servletResponse) throws IOException {
+        this.bankTransactionService.getCSV(userId, CsvResponseUtil.prepare(servletResponse, "bank_transactions.csv"));
     }
 
     @PostMapping("/process/csv")
-    public ResponseEntity<ImportResultDTO> processCSV(@CurrentUserEmail String userEmail, @RequestParam("file") MultipartFile file) {
-        return ResponseEntity.ok(this.bankTransactionService.processCSV(userEmail, file));
+    public ResponseEntity<ImportResultDTO> processCSV(@CurrentUserId Long userId, @RequestParam("file") MultipartFile file) {
+        return ResponseEntity.ok(this.bankTransactionService.processCSV(userId, file));
     }
 }

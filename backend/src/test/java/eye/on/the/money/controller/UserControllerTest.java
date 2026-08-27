@@ -53,14 +53,14 @@ class UserControllerTest {
 
     @Test
     void changePassword() {
-        doNothing().when(this.userService).changePassword(anyString(), any(ChangePasswordDTO.class));
+        doNothing().when(this.userService).changePassword(anyLong(), any(ChangePasswordDTO.class));
 
-        Assertions.assertEquals(HttpStatus.OK, this.userController.changePassword(new ChangePasswordDTO("old", "new"), "email").getStatusCode());
-        verify(this.userService, times(1)).changePassword(anyString(), any(ChangePasswordDTO.class));
+        Assertions.assertEquals(HttpStatus.OK, this.userController.changePassword(new ChangePasswordDTO("old", "new"), 1L).getStatusCode());
+        verify(this.userService, times(1)).changePassword(anyLong(), any(ChangePasswordDTO.class));
     }
 
     @Test
     void getUserEmail() {
-        Assertions.assertEquals(Map.of("email", this.user.getUsername()), this.userController.getUserEmail("email").getBody());
+        Assertions.assertEquals(Map.of("email", this.user.getUsername()), this.userController.getUserEmail(this.user.getUsername()).getBody());
     }
 }

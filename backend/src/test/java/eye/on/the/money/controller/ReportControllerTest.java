@@ -36,7 +36,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ReportControllerTest {
 
-    private static final String USER = "test@test.test";
+    private static final Long USER_ID = 1L;
+    private static final String USER_EMAIL = "test@test.test";
 
     @Mock
     private ReportSubscriptionService reportSubscriptionService;
@@ -57,9 +58,9 @@ class ReportControllerTest {
     void getSubscriptionReturnsTheStoredSettings() {
         ReportSubscriptionDTO dto = ReportSubscriptionDTO.builder()
                 .enabled(true).currency("EUR").recipients(List.of("partner@test.test")).build();
-        when(this.reportSubscriptionService.get(USER)).thenReturn(dto);
+        when(this.reportSubscriptionService.get(USER_ID)).thenReturn(dto);
 
-        assertEquals(dto, this.reportController.getSubscription(USER).getBody());
+        assertEquals(dto, this.reportController.getSubscription(USER_ID).getBody());
     }
 
     @Test
@@ -68,16 +69,16 @@ class ReportControllerTest {
                 new ReportSubscriptionUpdateDTO(true, "HUF", List.of("partner@test.test"));
         ReportSubscriptionDTO saved = ReportSubscriptionDTO.builder()
                 .enabled(true).currency("HUF").recipients(List.of("partner@test.test")).build();
-        when(this.reportSubscriptionService.update(USER, update)).thenReturn(saved);
+        when(this.reportSubscriptionService.update(USER_ID, update)).thenReturn(saved);
 
-        assertEquals(saved, this.reportController.updateSubscription(USER, update).getBody());
+        assertEquals(saved, this.reportController.updateSubscription(USER_ID, update).getBody());
     }
 
     @Test
     void sendNowConflictsWhenEmailIsNotConfigured() {
         when(this.emailService.isEnabled()).thenReturn(false);
 
-        ResponseEntity<Object> response = this.reportController.sendNow(USER, null, null);
+        ResponseEntity<Object> response = this.reportController.sendNow(USER_ID, USER_EMAIL, null, null);
 
         Assertions.assertAll("Mail not configured",
                 () -> assertEquals(HttpStatus.CONFLICT, response.getStatusCode()),
@@ -87,33 +88,33 @@ class ReportControllerTest {
     @Test
     void sendNowUsesTheRequestedPeriodAndTheStoredCurrency() {
         ReportSubscription subscription = ReportSubscription.builder()
-                .user(User.builder().email(USER).build())
+                .user(User.builder().email(USER_EMAIL).build())
                 .enabled(true).currency("HUF").recipients(new ArrayList<>()).build();
         MonthlyReportDTO report = MonthlyReportDTO.builder().year(2023).month(9).currency("HUF").build();
 
         when(this.emailService.isEnabled()).thenReturn(true);
-        when(this.reportSubscriptionRepository.findByUserEmail(USER)).thenReturn(Optional.of(subscription));
-        when(this.reportSubscriptionService.recipientsOf(subscription)).thenReturn(List.of(USER));
-        when(this.monthlyReportService.build(USER, YearMonth.of(2023, 9), "HUF")).thenReturn(report);
+        when(this.reportSubscriptionRepository.findByUserId(USER_ID)).thenReturn(Optional.of(subscription));
+        when(this.reportSubscriptionService.recipientsOf(subscription)).thenReturn(List.of(USER_EMAIL));
+        when(this.monthlyReportService.build(USER_ID, YearMonth.of(2023, 9), "HUF")).thenReturn(report);
 
-        ResponseEntity<Object> response = this.reportController.sendNow(USER, 2023, 9);
+        ResponseEntity<Object> response = this.reportController.sendNow(USER_ID, USER_EMAIL, 2023, 9);
 
         Assertions.assertAll("Manual send",
                 () -> assertEquals(HttpStatus.OK, response.getStatusCode()),
-                () -> verify(this.emailService).sendMonthlyReportMail(List.of(USER), report));
+                () -> verify(this.emailService).sendMonthlyReportMail(List.of(USER_EMAIL), report));
     }
 
     @Test
     void sendNowFallsBackToTheOwnerWithoutASubscription() {
         when(this.emailService.isEnabled()).thenReturn(true);
-        when(this.reportSubscriptionRepository.findByUserEmail(USER)).thenReturn(Optional.empty());
-        when(this.monthlyReportService.build(eq(USER), any(), eq(ReportSubscription.DEFAULT_CURRENCY)))
+        when(this.reportSubscriptionRepository.findByUserId(USER_ID)).thenReturn(Optional.empty());
+        when(this.monthlyReportService.build(eq(USER_ID), any(), eq(ReportSubscription.DEFAULT_CURRENCY)))
                 .thenReturn(MonthlyReportDTO.builder().build());
 
-        this.reportController.sendNow(USER, null, null);
+        this.reportController.sendNow(USER_ID, USER_EMAIL, null, null);
 
         ArgumentCaptor<List<String>> recipients = ArgumentCaptor.captor();
         verify(this.emailService).sendMonthlyReportMail(recipients.capture(), any(MonthlyReportDTO.class));
-        assertEquals(List.of(USER), recipients.getValue());
+        assertEquals(List.of(USER_EMAIL), recipients.getValue());
     }
 }

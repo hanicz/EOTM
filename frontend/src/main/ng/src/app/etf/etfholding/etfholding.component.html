@@ -1,94 +1,71 @@
-@if (investmentsLoading) {
-  <p-table [value]="[{}]" styleClass="p-datatable-striped table-stack">
-    <ng-template pTemplate="header">
-      <tr>
-        <th>ETF Name</th>
-        <th>Quantity</th>
-        <th>Spent</th>
-        <th>Worth</th>
-        <th>Average</th>
-        <th>Price</th>
-        <th>Profit</th>
-        <th>%</th>
-      </tr>
-    </ng-template>
-    <ng-template pTemplate="body">
-      @for (item of [].constructor(4); track $index) {
-        <tr>
-          <td data-label="ETF Name"><p-skeleton></p-skeleton></td>
-          <td data-label="Quantity"><p-skeleton></p-skeleton></td>
-          <td data-label="Spent"><p-skeleton></p-skeleton></td>
-          <td data-label="Worth"><p-skeleton></p-skeleton></td>
-          <td data-label="Average"><p-skeleton></p-skeleton></td>
-          <td data-label="Price"><p-skeleton></p-skeleton></td>
-          <td data-label="Profit"><p-skeleton></p-skeleton></td>
-          <td data-label="%"><p-skeleton></p-skeleton></td>
-        </tr>
-      }
-    </ng-template>
-  </p-table>
-}
+<p-table [value]="investmentsLoading ? skeletonRows : investments"
+  styleClass="p-datatable-striped table-stack eotm-table">
+  <ng-template pTemplate="header">
+    <tr>
+      <th pSortableColumn="shortName">ETF Name <p-sortIcon field="shortName"></p-sortIcon></th>
+      <th pSortableColumn="accountName">Account <p-sortIcon field="accountName"></p-sortIcon></th>
+      <th class="cell-num" pSortableColumn="quantity">Quantity <p-sortIcon field="quantity"></p-sortIcon></th>
+      <th class="cell-num" pSortableColumn="amount">Spent <p-sortIcon field="amount"></p-sortIcon></th>
+      <th class="cell-num" pSortableColumn="liveValue">Worth <p-sortIcon field="liveValue"></p-sortIcon></th>
+      <th class="cell-num">Price</th>
+      <th class="cell-num" pSortableColumn="valueDiff">Profit <p-sortIcon field="valueDiff"></p-sortIcon></th>
+    </tr>
+  </ng-template>
 
-@if (!investmentsLoading) {
-  <p-table [value]="investments" styleClass="p-datatable-striped table-stack">
-    <ng-template pTemplate="header">
-      <tr>
-        <th>ETF Name</th>
-        <th>Quantity</th>
-        <th>Spent</th>
-        <th>Worth</th>
-        <th>Average</th>
-        <th>Price</th>
-        <th>Profit</th>
-        <th>%</th>
-      </tr>
-    </ng-template>
-    <ng-template pTemplate="body" let-investment>
-      <tr>
+  <ng-template pTemplate="body" let-investment>
+    <tr>
+      @if (investmentsLoading) {
+        <td data-label="ETF Name"><p-skeleton></p-skeleton></td>
+        <td data-label="Account"><p-skeleton></p-skeleton></td>
+        <td data-label="Quantity"><p-skeleton></p-skeleton></td>
+        <td data-label="Spent"><p-skeleton></p-skeleton></td>
+        <td data-label="Worth"><p-skeleton></p-skeleton></td>
+        <td data-label="Price"><p-skeleton></p-skeleton></td>
+        <td data-label="Profit"><p-skeleton></p-skeleton></td>
+      } @else {
         <td data-label="ETF Name">
-          <div class="flex align-items-center">
-            <app-ticker-logo class="mr-1" [exchange]="investment.exchange"
-              [symbol]="investment.shortName"></app-ticker-logo>
-            {{investment.shortName}}.{{investment.exchange}}
-          </div>
+          <app-ticker-identity [exchange]="investment.exchange" [symbol]="investment.shortName"
+            [name]="investment.name"></app-ticker-identity>
         </td>
-        <td data-label="Quantity">{{investment.quantity}}</td>
-        <td data-label="Spent">{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}</td>
-        <td data-label="Worth">
+        <td data-label="Account" class="cell-quiet">{{investment.accountName}}</td>
+        <td data-label="Quantity" class="cell-num">{{investment.quantity}}</td>
+        <td data-label="Spent" class="cell-num">{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}</td>
+        <td data-label="Worth" class="cell-num">
           @if (investment.liveValue != null) {
-            {{investment.liveValue | currency : investment.currencyId : 'symbol' : '0.0-2'}}
             @if (investment.stalePrice) {
-              <i class="pi pi-clock stale-price" pTooltip="No live quote right now, valued at the previous close."></i>
+              <i class="pi pi-clock stale-price stale-price-before" pTooltip="No live quote right now, valued at the previous close."></i>
             }
+            {{investment.liveValue | currency : investment.currencyId : 'symbol' : '0.0-2'}}
           } @else {
-            <span>N/A</span>
+            <span class="cell-none">N/A</span>
           }
         </td>
-        <td data-label="Average">{{investment.amount / investment.quantity | currency : investment.currencyId : 'symbol' : '0.0-3'}}</td>
-        <td data-label="Price">
+        <td data-label="Price" class="cell-num">
           @if (investment.liveValue != null) {
             {{investment.liveValue / investment.quantity | currency : investment.currencyId : 'symbol' : '0.0-3'}}
           } @else {
-            <span>N/A</span>
+            <span class="cell-none">N/A</span>
           }
+          <span class="cell-sub">{{investment.amount / investment.quantity | currency : investment.currencyId : 'symbol' : '0.0-3'}} avg</span>
         </td>
-        <td data-label="Profit">
-          @if (investment.valueDiff > 0) {
-            <p-tag styleClass="p-mr-2" severity="success" value="{{investment.valueDiff | currency : investment.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
-          }
-          @if (investment.valueDiff < 0) {
-            <p-tag styleClass="p-mr-2" severity="danger" value="{{investment.valueDiff | currency : investment.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
-          }
+        <td data-label="Profit" class="cell-num">
+          <app-delta [value]="investment.liveValue != null ? investment.valueDiff : null"
+            [percent]="investment.liveValue != null ? (investment.valueDiff / investment.amount * 100) : null"
+            [currency]="investment.currencyId"></app-delta>
         </td>
-        <td data-label="%">
-          @if (investment.valueDiff > 0) {
-            <p-tag styleClass="p-mr-2" severity="success" value="{{(investment.valueDiff / investment.amount * 100 | number : '0.0-1') + '%'}}"></p-tag>
-          }
-          @if (investment.valueDiff < 0) {
-            <p-tag styleClass="p-mr-2" severity="danger" value="{{(investment.valueDiff / investment.amount * 100 | number : '0.0-1') + '%'}}"></p-tag>
-          }
-        </td>
-      </tr>
-    </ng-template>
-  </p-table>
-}
+      }
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="7">
+        <div class="table-empty">
+          <i class="pi pi-chart-line"></i>
+          <span class="table-empty-title">No holdings yet</span>
+          <span>Add a transaction and your open positions will show up here.</span>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>

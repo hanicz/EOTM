@@ -124,3 +124,19 @@
         grid-template-columns: 1fr;
     }
 }
+
+.news-empty {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 2rem 1rem;
+    font-size: 13px;
+    color: #888780;
+}
+
+.news-empty .pi {
+    font-size: 1.1rem;
+    color: #d8d3c4;
+}

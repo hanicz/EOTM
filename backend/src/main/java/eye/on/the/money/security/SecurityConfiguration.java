@@ -48,7 +48,8 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, SIGN_UP_URL).permitAll()
-                        .requestMatchers("/", "/resources/**", "/index.html").permitAll()
+                        .requestMatchers("/", "/resources/**", "/index.html", "/favicon.ico").permitAll()
+                        .requestMatchers(SecurityConstants.SPA_ROUTES).permitAll()
                         .anyRequest().authenticated())
                 .authenticationManager(authenticationManager)
                 .addFilterBefore(new AuthenticationFilter(authenticationManager, this.jwtService), UsernamePasswordAuthenticationFilter.class)

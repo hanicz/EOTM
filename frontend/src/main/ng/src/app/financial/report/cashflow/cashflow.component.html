@@ -28,13 +28,6 @@
       <div>Net: <b>{{(block.totalIn + block.totalOut) | currency : block.currencyId : 'symbol' : '0.0-2'}}</b></div>
     </div>
 
-    <apx-chart [series]="block.chartOptions.series!" [chart]="block.chartOptions.chart!"
-      [xaxis]="block.chartOptions.xaxis!" [yaxis]="block.chartOptions.yaxis!"
-      [legend]="block.chartOptions.legend!" [dataLabels]="block.chartOptions.dataLabels!"
-      [tooltip]="block.chartOptions.tooltip!" [stroke]="block.chartOptions.stroke!"
-      [colors]="block.chartOptions.colors!">
-    </apx-chart>
-
     <p-table [value]="block.rows" styleClass="p-datatable-striped p-datatable-sm table-stack">
       <ng-template pTemplate="header">
         <tr>
@@ -128,6 +121,13 @@
         </tr>
       </ng-template>
     </p-table>
+
+    <apx-chart [series]="block.chartOptions.series!" [chart]="block.chartOptions.chart!"
+      [xaxis]="block.chartOptions.xaxis!" [yaxis]="block.chartOptions.yaxis!"
+      [legend]="block.chartOptions.legend!" [dataLabels]="block.chartOptions.dataLabels!"
+      [tooltip]="block.chartOptions.tooltip!" [stroke]="block.chartOptions.stroke!"
+      [colors]="block.chartOptions.colors!">
+    </apx-chart>
   </div>
 
   @if (!last) {

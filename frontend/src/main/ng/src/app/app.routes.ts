@@ -20,7 +20,7 @@ export const routes: Routes = [
   { path: '', component: LandingComponent },
   { path: 'login', component: LoginComponent },
   { path: 'dashboard', component: DashboardComponent },
-  { path: 'home', component: HomeComponent },
+  { path: 'news', component: HomeComponent },
   { path: 'stock', component: StockComponent },
   { path: 'crypto', component: CryptoComponent },
   { path: 'watchlist', component: WatchlistComponent },

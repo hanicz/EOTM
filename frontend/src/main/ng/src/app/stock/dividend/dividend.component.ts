@@ -1,6 +1,9 @@
 import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { Dividend } from 'src/app/model/dividend';
 import { DividendService } from 'src/app/service/dividend.service';
+import { StockService } from 'src/app/service/stock.service';
+import { Exchange } from 'src/app/model/exchange';
+import { Symbol } from 'src/app/model/symbol';
 import { Globals } from '../../util/global';
 import { Bind } from 'primeng/bind';
 import { Toolbar } from 'primeng/toolbar';
@@ -14,14 +17,16 @@ import { InputText } from 'primeng/inputtext';
 import { Dialog } from 'primeng/dialog';
 import { FormsModule } from '@angular/forms';
 import { Select } from 'primeng/select';
-import { TickerLogoComponent } from '../../util/ticker-logo.component';
+import { TickerIdentityComponent } from '../../util/ticker-identity.component';
+import { ExchangeOptionComponent } from '../../util/exchange-option.component';
+import { SymbolOptionComponent } from '../../util/symbol-option.component';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-dividend',
     templateUrl: './dividend.component.html',
     styleUrls: ['./dividend.component.css'],
-    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Dialog, FormsModule, Select, CurrencyPipe, DatePipe, Toast, TickerLogoComponent]
+    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Dialog, FormsModule, Select, CurrencyPipe, DatePipe, Toast, TickerIdentityComponent, ExchangeOptionComponent, SymbolOptionComponent]
 })
 export class DividendComponent implements OnInit {
 
@@ -31,11 +36,29 @@ export class DividendComponent implements OnInit {
   dividendDialog: boolean = false;
   dividend: Dividend = {} as Dividend;
   @ViewChild('fileUpload') fileUpload: any;
+  symbols: Symbol[] = [];
+  exchanges: Exchange[] = [];
+  exchangesLoading: boolean = true;
+  stocksLoading: boolean = false;
+  selectedStock: Symbol = {} as Symbol;
+  selectedExchange: Exchange = {} as Exchange;
   globals: Globals;
 
-  constructor(private dividendService: DividendService, globals: Globals, private cdr: ChangeDetectorRef, private messageService: MessageService) {
+  constructor(private dividendService: DividendService, globals: Globals, private stockService: StockService, private cdr: ChangeDetectorRef, private messageService: MessageService) {
     this.globals = globals;
     this.currencies = globals.currencies;
+
+    this.stockService.getAllExchanges().subscribe({
+      next: (data) => {
+        this.exchangesLoading = false;
+        this.exchanges = data;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.exchangesLoading = false;
+        this.cdr.markForCheck();
+      }
+    });
 
     this.fetchData();
   }
@@ -61,6 +84,9 @@ export class DividendComponent implements OnInit {
 
   openNew() {
     this.dividend = {} as Dividend;
+    this.symbols = [];
+    this.selectedStock = {} as Symbol;
+    this.selectedExchange = {} as Exchange;
     this.dividendDialog = true;
   }
 
@@ -70,7 +96,39 @@ export class DividendComponent implements OnInit {
 
   editDividend(dividend: Dividend) {
     this.dividend = { ...dividend };
+    this.selectedExchange = this.exchanges.find(e => e.Code === dividend.exchange)
+      ?? { Code: dividend.exchange, Name: dividend.exchange } as Exchange;
+    this.selectedStock = { Code: dividend.shortName, Name: dividend.name } as Symbol;
+    this.loadSymbols(dividend.shortName);
     this.dividendDialog = true;
+  }
+
+  exchangeChanged(event: any) {
+    this.selectedStock = {} as Symbol;
+    this.loadSymbols();
+  }
+
+  private loadSymbols(preselectCode?: string) {
+    if (!this.selectedExchange?.Code) {
+      this.symbols = [];
+      return;
+    }
+    this.stocksLoading = true;
+    this.stockService.getAllSymbols(this.selectedExchange.Code).subscribe({
+      next: (data) => {
+        this.stocksLoading = false;
+        this.symbols = data;
+        if (preselectCode) {
+          this.selectedStock = data.find(s => s.Code === preselectCode) ?? this.selectedStock;
+        }
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.stocksLoading = false;
+        this.symbols = [];
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   deleteClicked() {
@@ -103,6 +161,9 @@ export class DividendComponent implements OnInit {
   }
 
   saveDividend() {
+    this.dividend.name = this.selectedStock.Name;
+    this.dividend.shortName = this.selectedStock.Code;
+    this.dividend.exchange = this.selectedExchange.Code;
     if (this.dividend.dividendId === undefined) {
       this.dividendService.create(this.dividend).subscribe({
         next: () => {

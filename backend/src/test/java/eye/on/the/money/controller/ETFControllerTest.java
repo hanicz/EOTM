@@ -72,6 +72,33 @@ class ETFControllerTest {
     }
 
     @Test
+    public void getETFInvestmentsByAccount() {
+        List<ETFInvestmentDTO> eiDTO = this.createETFList();
+
+        when(this.etfInvestmentService.getETFInvestmentsByAccountId("email", 2L)).thenReturn(eiDTO);
+
+        Assertions.assertIterableEquals(eiDTO, this.etfController.getETFInvestmentsByAccount("email", 2L).getBody());
+    }
+
+    @Test
+    public void getHoldingsByAccount() {
+        List<ETFInvestmentDTO> eiDTO = this.createETFList();
+
+        when(this.etfInvestmentService.getHoldingsByAccountId("email", 2L)).thenReturn(eiDTO);
+
+        Assertions.assertIterableEquals(eiDTO, this.etfController.getHoldingsByAccount("email", 2L).getBody());
+    }
+
+    @Test
+    public void getPositionsByAccount() {
+        List<ETFInvestmentDTO> eiDTO = this.createETFList();
+
+        when(this.etfInvestmentService.getPositionsByAccountId("email", 2L)).thenReturn(eiDTO);
+
+        Assertions.assertIterableEquals(eiDTO, this.etfController.getPositionsByAccount("email", 2L).getBody());
+    }
+
+    @Test
     public void createInvestment() {
         ETFInvestmentDTO eiDTO = ETFInvestmentDTO.builder().valueDiff(0.1).transactionDate(LocalDate.now()).id(1L).fee(7.0).liveValue(55.6)
                 .shortName("s1").buySell("b").exchange("e1").currencyId("eur").quantity(645).build();

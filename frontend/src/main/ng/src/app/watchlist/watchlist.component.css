@@ -155,40 +155,8 @@
   white-space: nowrap;
 }
 
-.delta-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.2rem;
-  padding: 0.05rem 0.35rem;
-  border-radius: 0.65rem;
-}
-
 .quote-caret {
   font-size: 0.6rem;
-}
-
-.delta-up {
-  color: #14713f;
-}
-
-.delta-down {
-  color: #a32a30;
-}
-
-.delta-flat {
-  color: #5f5e5a;
-}
-
-.delta-pill.delta-up {
-  background-color: rgba(20, 113, 63, 0.14);
-}
-
-.delta-pill.delta-down {
-  background-color: rgba(163, 42, 48, 0.14);
-}
-
-.delta-pill.delta-flat {
-  background-color: rgba(95, 94, 90, 0.12);
 }
 
 .quote-remove {

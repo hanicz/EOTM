@@ -30,6 +30,7 @@ class InvestmentDTOTest {
                 .buySell("B")
                 .shortName("AMD")
                 .accountId(1L)
+                .exchange("NYSE")
                 .build();
         InvestmentDTO baseDTO = this.getBaseDTO();
 
@@ -51,6 +52,7 @@ class InvestmentDTOTest {
                 .buySell("B")
                 .shortName("AMD")
                 .accountId(1L)
+                .exchange("NYSE")
                 .build();
         InvestmentDTO baseDTO = this.getBaseDTO();
 
@@ -60,6 +62,26 @@ class InvestmentDTOTest {
                 () -> assertEquals(iDTO2.getAmount() + baseDTO.getAmount(), iDTO1.getAmount()),
                 () -> assertEquals(iDTO2.getQuantity() + baseDTO.getQuantity(), iDTO1.getQuantity()),
                 () -> assertEquals("B", iDTO1.getBuySell()));
+    }
+
+    @Test
+    public void mergeInvestmentsDifferentExchange() {
+        InvestmentDTO iDTO1 = this.getBaseDTO();
+        InvestmentDTO iDTO2 = InvestmentDTO.builder()
+                .amount(15.0)
+                .quantity(667)
+                .buySell("B")
+                .shortName("AMD")
+                .accountId(1L)
+                .exchange("XETRA")
+                .build();
+
+        iDTO1.mergeInvestments(iDTO2);
+
+        Assertions.assertAll("Assert nothing merged",
+                () -> assertEquals(15.0, iDTO1.getAmount()),
+                () -> assertEquals(667, iDTO1.getQuantity()),
+                () -> assertEquals("NYSE", iDTO1.getExchange()));
     }
 
     @Test

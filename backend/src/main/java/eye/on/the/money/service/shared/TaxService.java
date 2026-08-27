@@ -9,6 +9,7 @@ import eye.on.the.money.model.stock.Exchange;
 import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.api.MNBAPIService;
 import eye.on.the.money.service.stock.StockService;
+import eye.on.the.money.util.Ticker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -187,7 +188,7 @@ public class TaxService implements ICSVService {
     }
 
     private String ticker(RSUDTO rsu) {
-        return rsu.getShortName().toUpperCase() + "." + this.exchange(rsu);
+        return Ticker.symbol(rsu.getShortName(), this.exchange(rsu));
     }
 
     private record PriceSeries(NavigableMap<LocalDate, BigDecimal> closes) {

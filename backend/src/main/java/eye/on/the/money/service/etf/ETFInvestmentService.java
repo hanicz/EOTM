@@ -8,15 +8,16 @@ import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.etf.ETF;
 import eye.on.the.money.model.etf.ETFInvestment;
-import eye.on.the.money.model.etf.ETFPayment;
+import eye.on.the.money.model.stock.Account;
 import eye.on.the.money.repository.etf.ETFInvestmentRepository;
-import eye.on.the.money.repository.etf.ETFRepository;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.shared.ICSVService;
+import eye.on.the.money.service.stock.AccountService;
 import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
 import eye.on.the.money.util.LiveQuote;
+import eye.on.the.money.util.Ticker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVParser;
@@ -41,14 +42,19 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ETFInvestmentService implements ICSVService {
     private final ETFInvestmentRepository etfInvestmentRepository;
-    private final ETFRepository etfRepository;
+    private final ETFService etfService;
     private final CurrencyRepository currencyRepository;
     private final EODAPIService eodAPIService;
     private final UserService userService;
     private final ModelMapper modelMapper;
-    private final ETFPaymentService etfPaymentService;
+    private final AccountService accountService;
     public List<ETFInvestmentDTO> getETFInvestments(String userEmail) {
         return this.etfInvestmentRepository.findByUserEmailOrderByTransactionDateDesc(userEmail).stream().map(this::convertToETFInvestmentDTO).collect(Collectors.toList());
+    }
+
+    public List<ETFInvestmentDTO> getETFInvestmentsByAccountId(String userEmail, Long accountId) {
+        return this.etfInvestmentRepository.findByUserEmailAndAccountIdOrderByTransactionDateDesc(userEmail, accountId)
+                .stream().map(this::convertToETFInvestmentDTO).collect(Collectors.toList());
     }
 
     public List<ETFInvestmentDTO> getETFInvestmentsBetween(String userEmail, LocalDate from, LocalDate to) {
@@ -71,28 +77,41 @@ public class ETFInvestmentService implements ICSVService {
     }
 
     private List<ETFInvestmentDTO> currentETFHoldings(String userEmail) {
-        Map<String, ETFInvestmentDTO> investmentMap = this.getCalculated(userEmail);
+        List<ETFInvestmentDTO> investments = this.etfInvestmentRepository.findByUserEmailOrderByTransactionDate(userEmail)
+                .stream().map(this::convertToETFInvestmentDTO).toList();
+        return this.getLiveDataForInvestments(investments);
+    }
+
+    public List<ETFInvestmentDTO> getHoldingsByAccountId(String userEmail, Long accountId) {
+        List<ETFInvestmentDTO> investments = this.etfInvestmentRepository.findByUserEmailAndAccountIdOrderByTransactionDateDesc(userEmail, accountId)
+                .stream().map(this::convertToETFInvestmentDTO).toList();
+        return this.getLiveDataForInvestments(investments);
+    }
+
+    private List<ETFInvestmentDTO> getLiveDataForInvestments(List<ETFInvestmentDTO> investments) {
+        Map<String, ETFInvestmentDTO> investmentMap = this.getCalculated(investments);
         List<ETFInvestmentDTO> etfInvestmentDTOList = (new ArrayList<>(investmentMap.values()))
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
         if (etfInvestmentDTOList.isEmpty()) return etfInvestmentDTOList;
 
-        String joinedList = etfInvestmentDTOList.stream().map(i -> (i.getShortName() + "." + i.getExchange())).collect(Collectors.joining(","));
+        String joinedList = etfInvestmentDTOList.stream().map(i -> Ticker.symbol(i.getShortName(), i.getExchange())).distinct().collect(Collectors.joining(","));
 
         try {
             JsonNode responseBody = this.eodAPIService.getLiveEtfValue(joinedList);
             for (JsonNode etf : responseBody) {
-                Optional<ETFInvestmentDTO> etfInvestmentDTO = etfInvestmentDTOList.stream().filter
-                        (i -> (i.getShortName() + "." + i.getExchange()).equals(etf.findValue("code").textValue())).findFirst();
-                if (etfInvestmentDTO.isEmpty()) continue;
+                String code = etf.findValue("code").textValue();
                 Optional<LiveQuote.Price> price = LiveQuote.price(etf);
                 if (price.isEmpty()) {
-                    log.warn("No live or previous close for {}, leaving holding without live data",
-                            etf.findValue("code").textValue());
+                    log.warn("No live or previous close for {}, leaving holding without live data", code);
                     continue;
                 }
-                etfInvestmentDTO.get().setLiveValue(price.get().value() * etfInvestmentDTO.get().getQuantity());
-                etfInvestmentDTO.get().setValueDiff(etfInvestmentDTO.get().getLiveValue() - etfInvestmentDTO.get().getAmount());
-                etfInvestmentDTO.get().setStalePrice(price.get().stale());
+                etfInvestmentDTOList.stream()
+                        .filter(i -> Ticker.symbol(i.getShortName(), i.getExchange()).equals(code))
+                        .forEach(i -> {
+                            i.setLiveValue(price.get().value() * i.getQuantity());
+                            i.setValueDiff(i.getLiveValue() - i.getAmount());
+                            i.setStalePrice(price.get().stale());
+                        });
             }
         } catch (APIException e) {
             log.error("Unable to fetch live ETF values, returning holdings without live data", e);
@@ -101,19 +120,27 @@ public class ETFInvestmentService implements ICSVService {
     }
 
     public List<ETFInvestmentDTO> getAllPositions(String userEmail) {
-        Map<String, ETFInvestmentDTO> investmentMap = this.getCalculated(userEmail);
+        List<ETFInvestmentDTO> investments = this.etfInvestmentRepository.findByUserEmailOrderByTransactionDate(userEmail)
+                .stream().map(this::convertToETFInvestmentDTO).toList();
+        Map<String, ETFInvestmentDTO> investmentMap = this.getCalculated(investments);
         return new ArrayList<>(investmentMap.values());
     }
 
-    private Map<String, ETFInvestmentDTO> getCalculated(String userEmail) {
-        List<ETFInvestmentDTO> investments = this.etfInvestmentRepository.findByUserEmailOrderByTransactionDate(userEmail).stream().map(this::convertToETFInvestmentDTO).toList();
+    public List<ETFInvestmentDTO> getPositionsByAccountId(String userEmail, Long accountId) {
+        List<ETFInvestmentDTO> investments = this.etfInvestmentRepository.findByUserEmailAndAccountIdOrderByTransactionDateDesc(userEmail, accountId)
+                .stream().map(this::convertToETFInvestmentDTO).toList();
+        Map<String, ETFInvestmentDTO> investmentMap = this.getCalculated(investments);
+        return new ArrayList<>(investmentMap.values());
+    }
 
+    private Map<String, ETFInvestmentDTO> getCalculated(List<ETFInvestmentDTO> investments) {
         Map<String, ETFInvestmentDTO> investmentMap = new HashMap<>();
         for (ETFInvestmentDTO i : investments) {
             if (i.getBuySell().equals("S")) {
                 i.negateAmountAndQuantity();
             }
-            investmentMap.compute(i.getShortName(), (key, value) -> (value == null) ? i : value.mergeInvestments(i));
+            investmentMap.compute(Ticker.symbol(i.getShortName(), i.getExchange()) + "_" + i.getAccountId(),
+                    (key, value) -> (value == null) ? i : value.mergeInvestments(i));
         }
         return investmentMap;
     }
@@ -129,9 +156,9 @@ public class ETFInvestmentService implements ICSVService {
     @Transactional
     public ETFInvestmentDTO createInvestment(ETFInvestmentDTO investmentDTO, String userEmail) {
         Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + investmentDTO.getCurrencyId()));
-        ETF etf = this.etfRepository.findByShortNameAndExchange(investmentDTO.getShortName(), investmentDTO.getExchange()).orElseThrow(() -> new NoSuchElementException("ETF not found: " + investmentDTO.getShortName() + "." + investmentDTO.getExchange()));
-        ETFPayment etfPayment = this.etfPaymentService.createPayment(currency, investmentDTO.getAmount());
+        ETF etf = this.etfService.getOrCreateETF(investmentDTO.getShortName(), investmentDTO.getExchange(), investmentDTO.getName());
         User user = this.userService.loadUserByEmail(userEmail);
+        Account account = this.accountService.getAccount(userEmail, investmentDTO.getAccountId());
 
         ETFInvestment investment = ETFInvestment.builder()
                 .buySell(investmentDTO.getBuySell())
@@ -140,7 +167,9 @@ public class ETFInvestmentService implements ICSVService {
                 .user(user)
                 .quantity(investmentDTO.getQuantity())
                 .etf(etf)
-                .etfPayment(etfPayment)
+                .amount(investmentDTO.getAmount())
+                .currency(currency)
+                .account(account)
                 .fee(investmentDTO.getFee())
                 .build();
         investment = this.etfInvestmentRepository.save(investment);
@@ -151,17 +180,18 @@ public class ETFInvestmentService implements ICSVService {
     @Transactional
     public ETFInvestmentDTO updateInvestment(ETFInvestmentDTO investmentDTO, String userEmail) {
         Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + investmentDTO.getCurrencyId()));
-        ETF etf = this.etfRepository.findByShortNameAndExchange(investmentDTO.getShortName(), investmentDTO.getExchange()).orElseThrow(() -> new NoSuchElementException("ETF not found: " + investmentDTO.getShortName() + "." + investmentDTO.getExchange()));
+        ETF etf = this.etfService.getOrCreateETF(investmentDTO.getShortName(), investmentDTO.getExchange(), investmentDTO.getName());
         ETFInvestment investment = this.etfInvestmentRepository.findByIdAndUserEmail(investmentDTO.getId(), userEmail).orElseThrow(() -> new NoSuchElementException("ETF investment not found: " + investmentDTO.getId()));
-        ETFPayment etfPayment = investment.getEtfPayment();
+        Account account = this.accountService.getAccount(userEmail, investmentDTO.getAccountId());
 
         investment.setBuySell(investmentDTO.getBuySell());
         investment.setTransactionDate(investmentDTO.getTransactionDate());
         investment.setQuantity(investmentDTO.getQuantity());
         investment.setEtf(etf);
         investment.setFee(investmentDTO.getFee());
-        etfPayment.setAmount(investmentDTO.getAmount());
-        etfPayment.setCurrency(currency);
+        investment.setAmount(investmentDTO.getAmount());
+        investment.setCurrency(currency);
+        investment.setAccount(account);
 
         return this.convertToETFInvestmentDTO(investment);
     }
@@ -179,9 +209,12 @@ public class ETFInvestmentService implements ICSVService {
     @Transactional
     public void processCSV(String userEmail, MultipartFile file) {
         try (CSVParser csvParser = this.getParser(file,
-                new String[]{"Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Exchange", "Amount", "Currency", "Fee"})) {
+                new String[]{"Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Exchange", "Amount", "Currency", "Fee", "Account"})) {
+            Map<String, Long> accountIdsByName = this.accountService.getAccountIdsByName(userEmail);
+
             for (CSVRecord csvRecord : csvParser) {
                 ETFInvestmentDTO investment = ETFInvestmentDTO.createFromCSVRecord(csvRecord, DateFormats.YYYY_MM_DD);
+                investment.setAccountId(this.resolveAccountId(accountIdsByName, investment.getAccountName()));
 
                 if (investment.getId() != null &&
                         this.etfInvestmentRepository.findByIdAndUserEmail(investment.getId(), userEmail).isPresent()) {

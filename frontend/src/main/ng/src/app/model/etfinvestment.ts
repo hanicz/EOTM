@@ -4,6 +4,7 @@ export interface ETFInvestment {
     buySell: string;
     transactionDate: Date;
     shortName: string;
+    name: string;
     exchange: string;
     amount: number;
     currencyId: string;
@@ -12,4 +13,6 @@ export interface ETFInvestment {
     valueDiff?: number;
     fee: number;
     eodDate: Date;
+    accountId: number;
+    accountName: string;
 }

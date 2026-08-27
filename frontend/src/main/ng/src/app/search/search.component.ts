@@ -77,6 +77,23 @@ export class SearchComponent implements OnInit, AfterViewInit {
   difference = 0;
   volume = 0;
 
+  displayName = '';
+  displayTicker = '';
+  displayExchange = '';
+  displayCurrency = 'USD';
+  displayIsin = '';
+  displayType = '';
+  hasProfile = false;
+  hasMetric = false;
+  private metricHasValues = false;
+  private usExchange = false;
+  private pendingStockRestore = false;
+  volumeAxisMax = 0;
+  periodHigh = 0;
+  periodLow = 0;
+  periodHighDate: Date | undefined;
+  periodLowDate: Date | undefined;
+
   newsType = '';
 
   exchangesLoading: boolean = true;
@@ -113,9 +130,18 @@ export class SearchComponent implements OnInit, AfterViewInit {
       next: (data) => {
         this.exchangesLoading = false;
         this.exchanges = data;
+        this.updateDisplayInfo();
+        if (this.pendingStockRestore) {
+          this.pendingStockRestore = false;
+          this.stockChanged(undefined);
+        }
         this.cdr.markForCheck();
       }
     });
+
+    if (this.globals.selectedExchange != '') {
+      this.loadSymbols();
+    }
 
     this.chartOptions = {
       chart: {
@@ -183,6 +209,9 @@ export class SearchComponent implements OnInit, AfterViewInit {
 
     this.recChartOptions = {
       series: [],
+      noData: {
+        text: 'No analyst recommendations for this ticker'
+      },
       chart: {
         type: 'bar',
         height: 220,
@@ -222,8 +251,13 @@ export class SearchComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    if (this.globals.selectedStock != '') {
+    if (this.globals.selectedStock == '') {
+      return;
+    }
+    if (this.exchanges.length > 0) {
       this.stockChanged(undefined);
+    } else {
+      this.pendingStockRestore = true;
     }
   }
 
@@ -258,14 +292,34 @@ export class SearchComponent implements OnInit, AfterViewInit {
   }
 
   stockChanged(event: any) {
-    this.profileLoading = true;
     this.profile = {} as Profile;
     this.metric = {} as Metric;
     this.signalResult = undefined;
+    this.recommendations = [];
+    this.metricHasValues = false;
+    this.updateDisplayInfo();
+    this.profileLoading = this.usExchange;
+
+    this.newsType = `company/${this.globals.selectedStock}`;
+    this.getCandleData();
+    this.getSignal();
+
+    if (!this.usExchange) {
+      return;
+    }
 
     this.metricService.getMetrics(this.globals.selectedStock).subscribe({
       next: (data) => {
-        this.metric = data;
+        this.metric = data ?? {} as Metric;
+        this.metricHasValues = this.metric.peInclExtraTTM != null || this.metric.yearHigh != null
+          || this.metric.tenDayAverageTradingVolume != null;
+        this.updateDisplayInfo();
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.metric = {} as Metric;
+        this.metricHasValues = false;
+        this.updateDisplayInfo();
         this.cdr.markForCheck();
       }
     });
@@ -273,27 +327,80 @@ export class SearchComponent implements OnInit, AfterViewInit {
     this.metricService.getProfile(this.globals.selectedStock).subscribe({
       next: (data) => {
         this.profileLoading = false;
-        this.profile = data;
+        this.profile = data ?? {} as Profile;
+        this.updateDisplayInfo();
         this.cdr.markForCheck();
       },
       error: () => {
         this.profileLoading = false;
+        this.profile = {} as Profile;
+        this.updateDisplayInfo();
         this.cdr.markForCheck();
       }
     });
 
     this.metricService.getRecommendations(this.globals.selectedStock).subscribe({
       next: (data) => {
-        this.recommendations = data;
+        this.recommendations = data ?? [];
+        this.createRecChart();
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.recommendations = [];
         this.createRecChart();
         this.cdr.markForCheck();
       }
     });
+  }
 
-    this.newsType = `company/${this.globals.selectedStock}`;
+  updateDisplayInfo() {
+    const symbol = this.symbols.find(s => s.Code === this.globals.selectedStock);
+    const exchange = this.exchanges.find(e => e.Code === this.globals.selectedExchange);
 
-    this.getCandleData();
-    this.getSignal();
+    this.usExchange = exchange?.CountryISO2 === 'US' || this.globals.selectedExchange === 'US';
+    this.hasProfile = this.usExchange && !!this.profile.name;
+    this.hasMetric = this.usExchange && this.metricHasValues;
+
+    this.displayName = (this.hasProfile ? this.profile.name : '')
+      || symbol?.Name
+      || this.stocks.find(s => s.shortName === this.globals.selectedStock)?.name
+      || this.globals.selectedStock;
+    this.displayTicker = (this.hasProfile ? this.profile.ticker : '') || this.globals.selectedStock;
+    this.displayExchange = (this.hasProfile ? this.profile.exchange : '')
+      || exchange?.Name || this.globals.selectedExchange;
+    this.displayCurrency = exchange?.Currency
+      || (this.hasProfile ? this.profile.currency : '') || 'USD';
+    this.displayIsin = symbol?.Isin ?? '';
+    this.displayType = symbol?.Type ?? '';
+
+    this.applyChartCurrency();
+    this.createRecChart();
+  }
+
+  applyChartCurrency() {
+    if (!this.chart || !this.candle.c?.length) {
+      return;
+    }
+    this.chart.updateOptions({ yaxis: this.buildYAxis() });
+  }
+
+  buildYAxis() {
+    const currency = this.displayCurrency;
+    return [{
+      labels: {
+        show: true,
+        formatter: (value: any) => value + ' ' + currency
+      }
+    },
+    {
+      seriesName: 'Volume',
+      opposite: true,
+      min: 0,
+      max: this.volumeAxisMax,
+      labels: {
+        show: false,
+      }
+    }];
   }
 
   getSignal() {
@@ -305,16 +412,27 @@ export class SearchComponent implements OnInit, AfterViewInit {
       error: (error) => {
         console.log(error);
         this.signalResult = undefined;
+        this.cdr.markForCheck();
       }
     });
   }
 
   exchangeChanged(event: any) {
+    this.loadSymbols();
+  }
+
+  loadSymbols() {
     this.stocksLoading = true;
     this.stockService.getAllSymbols(this.globals.selectedExchange).subscribe({
       next: (data) => {
         this.stocksLoading = false;
         this.symbols = data;
+        this.updateDisplayInfo();
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.stocksLoading = false;
+        this.symbols = [];
         this.cdr.markForCheck();
       }
     });
@@ -338,6 +456,7 @@ export class SearchComponent implements OnInit, AfterViewInit {
       chartData.push(xy);
       volumeChartData.push({ x: new Date(this.candle.t[i]).toLocaleDateString("en-US"), y: this.candle.v[i] / 1000000 })
     }
+    this.volumeAxisMax = Math.max(...volumeChartData.map(v => v.y)) * 4;
     this.chart.updateOptions({
       legend: {
         show: false
@@ -349,24 +468,7 @@ export class SearchComponent implements OnInit, AfterViewInit {
       stroke: {
         width: [2, 0]
       },
-      yaxis: [{
-        labels: {
-          show: true,
-          formatter: function (value: any) {
-            return value + ' $';
-          }
-        }
-      },
-      {
-        seriesName: 'Volume',
-        opposite: true,
-        min: 0,
-        max: Math.max(...volumeChartData.map(v => v.y)) * 4,
-        labels: {
-          show: false,
-        }
-      }
-      ]
+      yaxis: this.buildYAxis()
     });
     this.chart.updateSeries([{ name: 'Price', data: chartData, type: 'candlestick' }, { name: 'Volume', data: volumeChartData, type: 'column' }], false);
 
@@ -375,6 +477,35 @@ export class SearchComponent implements OnInit, AfterViewInit {
     this.difference = this.endPrice - this.startPrice;
     this.percentage = this.difference / this.startPrice * 100;
     this.volume = this.candle.v[this.candle.c.length - 1] / 1000000;
+    this.calculatePeriodExtremes();
+  }
+
+  calculatePeriodExtremes() {
+    if (!this.candle.h?.length || !this.candle.l?.length) {
+      this.periodHigh = 0;
+      this.periodLow = 0;
+      this.periodHighDate = undefined;
+      this.periodLowDate = undefined;
+      return;
+    }
+    let highIndex = 0;
+    let lowIndex = 0;
+    for (let i = 1; i < this.candle.h.length; i++) {
+      if (this.candle.h[i] > this.candle.h[highIndex]) {
+        highIndex = i;
+      }
+      if (this.candle.l[i] < this.candle.l[lowIndex]) {
+        lowIndex = i;
+      }
+    }
+    this.periodHigh = this.candle.h[highIndex];
+    this.periodLow = this.candle.l[lowIndex];
+    this.periodHighDate = new Date(this.candle.t[highIndex]);
+    this.periodLowDate = new Date(this.candle.t[lowIndex]);
+  }
+
+  get periodLabel(): string {
+    return this.options.find(o => o.value === this.selectedOption)?.label ?? '';
   }
 
   checkStockContain() {
@@ -390,10 +521,7 @@ export class SearchComponent implements OnInit, AfterViewInit {
   }
 
   addToWatchList() {
-    let name = this.stocks.find(s => s.shortName === this.globals.selectedStock)?.name
-      ?? this.symbols.find(s => s.Code === this.globals.selectedStock)?.Name
-      ?? this.profile.name;
-    this.watchlistService.createNewStockWatch(this.globals.selectedStock, name, this.globals.selectedExchange).subscribe({
+    this.watchlistService.createNewStockWatch(this.globals.selectedStock, this.displayName, this.globals.selectedExchange).subscribe({
       next: () => {
         this.globals.stockWatchEvent.emit();
       }
@@ -410,6 +538,13 @@ export class SearchComponent implements OnInit, AfterViewInit {
   }
 
   createRecChart() {
+    if (!this.recChart) {
+      return;
+    }
+    if (!this.usExchange || this.recommendations.length === 0) {
+      this.recChart.updateSeries([], false);
+      return;
+    }
     let sellArray: number[] = [];
     let strongSellArray: number[] = [];
     let holdArray: number[] = [];

@@ -24,4 +24,5 @@ public class AssetClassValueDTO {
     private BigDecimal spent;
     private BigDecimal worth;
     private BigDecimal changePct;
+    private BigDecimal expectedRatePct;
 }

@@ -8,7 +8,6 @@ import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.crypto.Coin;
-import eye.on.the.money.model.crypto.Payment;
 import eye.on.the.money.model.crypto.Transaction;
 import eye.on.the.money.repository.crypto.CoinRepository;
 import eye.on.the.money.repository.crypto.TransactionRepository;
@@ -42,7 +41,6 @@ import java.util.stream.Collectors;
 public class TransactionService implements ICSVService {
 
     private final TransactionRepository transactionRepository;
-    private final PaymentService paymentService;
     private final UserService userService;
     private final CurrencyRepository currencyRepository;
     private final CoinRepository coinRepository;
@@ -111,7 +109,6 @@ public class TransactionService implements ICSVService {
     public TransactionDTO createTransaction(TransactionDTO transactionDTO, String userEmail) {
         Currency currency = this.currencyRepository.findById(transactionDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + transactionDTO.getCurrencyId()));
         Coin coin = this.coinRepository.findBySymbol(transactionDTO.getSymbol()).orElseThrow(() -> new NoSuchElementException("Coin not found: " + transactionDTO.getSymbol()));
-        Payment payment = this.paymentService.createPayment(currency, transactionDTO.getAmount());
         User user = this.userService.loadUserByEmail(userEmail);
 
         Transaction transaction = Transaction.builder()
@@ -121,7 +118,8 @@ public class TransactionService implements ICSVService {
                 .quantity(transactionDTO.getQuantity())
                 .creationDate(LocalDate.now())
                 .coin(coin)
-                .payment(payment)
+                .amount(transactionDTO.getAmount())
+                .currency(currency)
                 .user(user)
                 .fee(transactionDTO.getFee())
                 .build();
@@ -136,7 +134,6 @@ public class TransactionService implements ICSVService {
         Currency currency = this.currencyRepository.findById(transactionDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + transactionDTO.getCurrencyId()));
         Coin coin = this.coinRepository.findBySymbol(transactionDTO.getSymbol()).orElseThrow(() -> new NoSuchElementException("Coin not found: " + transactionDTO.getSymbol()));
         Transaction transaction = this.transactionRepository.findByIdAndUserEmail(transactionDTO.getId(), userEmail).orElseThrow(() -> new NoSuchElementException("Transaction not found: " + transactionDTO.getId()));
-        Payment payment = transaction.getPayment();
 
         transaction.setBuySell(transactionDTO.getBuySell());
         transaction.setTransactionString(transactionDTO.getTransactionString());
@@ -144,8 +141,8 @@ public class TransactionService implements ICSVService {
         transaction.setQuantity(transactionDTO.getQuantity());
         transaction.setCoin(coin);
         transaction.setFee(transactionDTO.getFee());
-        payment.setAmount(transactionDTO.getAmount());
-        payment.setCurrency(currency);
+        transaction.setAmount(transactionDTO.getAmount());
+        transaction.setCurrency(currency);
 
         return this.convertToTransactionDTO(transaction);
     }

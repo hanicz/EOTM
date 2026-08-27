@@ -14,7 +14,7 @@ import { FormsModule } from '@angular/forms';
 import { HoldingComponent } from './holding/holding.component';
 import { TransactionComponent } from './transaction/transaction.component';
 import { InterestComponent } from './interest/interest.component';
-import { CurrencyPipe } from '@angular/common';
+import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { DashboardService } from '../service/dashboard.service';
 import { SecurityService } from '../service/security.service';
 import { Tag } from 'primeng/tag';
@@ -31,7 +31,7 @@ export type AllocationChartOptions = {
     selector: 'app-security',
     templateUrl: './security.component.html',
     styleUrls: ['./security.component.css'],
-    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, Select, FormsModule, HoldingComponent, TransactionComponent, InterestComponent, CurrencyPipe, Tag, ChartComponent]
+    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, Select, FormsModule, HoldingComponent, TransactionComponent, InterestComponent, CurrencyPipe, DecimalPipe, Tag, ChartComponent]
 })
 export class SecurityComponent implements OnInit {
 
@@ -44,6 +44,7 @@ export class SecurityComponent implements OnInit {
   totalSpent: number = 0;
   totalWorth: number = 0;
   totalInterest: number = 0;
+  expectedRate: number = 0;
 
   allocationChartOptions: Partial<AllocationChartOptions> = {
     series: [],
@@ -173,7 +174,9 @@ export class SecurityComponent implements OnInit {
 
   private calculateTotals(): void {
     this.totalSpent = 0;
+    this.totalWorth = 0;
     this.transactions.forEach(t => {
+      this.totalWorth += this.convert(t.zeroCoupon ? t.amount : t.quantity , t.currencyId);
       this.totalSpent += this.convert(t.amount, t.currencyId);
     });
 
@@ -182,9 +185,14 @@ export class SecurityComponent implements OnInit {
       this.totalInterest += this.convert(i.amount, i.currencyId);
     });
 
-    // Securities have no live price, and the interest is reinvested by buying more, which already shows up
-    // as a transaction. Adding it here as well would count the same money twice.
-    this.totalWorth = this.totalSpent;
+    let quantity = 0;
+    let weighted = 0;
+    this.transactions.forEach(t => {
+      const converted = this.convert(t.zeroCoupon ? t.amount : t.quantity, t.currencyId);
+      quantity += converted;
+      weighted += (t.rate ?? 0) * converted;
+    });
+    this.expectedRate = quantity === 0 ? 0 : weighted / quantity;
 
     this.allocationChartOptions.series = this.transactions.map(t => this.convert(t.amount, t.currencyId));
     this.allocationChartOptions.labels = this.transactions.map(t => t.securityName);

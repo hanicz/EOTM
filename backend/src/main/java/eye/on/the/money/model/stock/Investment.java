@@ -1,6 +1,7 @@
 package eye.on.the.money.model.stock;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
@@ -20,7 +21,8 @@ import java.time.LocalDate;
         @Index(name = "IDX_STOCK_INVESTMENT_USER_DATE", columnList = "user_id, transaction_date"),
         @Index(name = "IDX_STOCK_INVESTMENT_USER_RSU", columnList = "user_id, rsu"),
         @Index(name = "IDX_STOCK_INVESTMENT_STOCK", columnList = "stock_id"),
-        @Index(name = "IDX_STOCK_INVESTMENT_ACCOUNT", columnList = "account_id")})
+        @Index(name = "IDX_STOCK_INVESTMENT_ACCOUNT", columnList = "account_id"),
+        @Index(name = "IDX_STOCK_INVESTMENT_CURRENCY", columnList = "currency_id")})
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
@@ -44,6 +46,9 @@ public class Investment {
 
     private Double fee;
 
+    @Column(nullable = false)
+    private Double amount;
+
     @Column(name = "rsu", nullable = false)
     @ColumnDefault("false")
     private boolean rsu;
@@ -57,9 +62,10 @@ public class Investment {
     @JoinColumn(name = "stock_id", nullable = false)
     private Stock stock;
 
-    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true)
-    @JoinColumn(name = "stockPayment_id", nullable = false)
-    private StockPayment stockPayment;
+    @ManyToOne
+    @JoinColumn(name = "currency_id", nullable = false)
+    @JsonIgnore
+    private Currency currency;
 
     @ManyToOne
     @JoinColumn(name = "account_id", nullable = false)

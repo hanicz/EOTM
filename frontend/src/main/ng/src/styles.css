@@ -1,5 +1,20 @@
 /* You can add global styles to this file, and also import other style files */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+/* Warm surface tokens.
+   Aura's stock ramp is Tailwind slate, which fights the cream page background
+   and the orange accent. The hand-written CSS across the app already assumes
+   these warm values -- it writes fallbacks like
+   `var(--p-content-border-color, #e3e0d5)` -- but the fallbacks never fire
+   because Aura defines the variables. Overriding them here is what makes those
+   fallbacks finally agree with what renders, and warms every p-datatable,
+   p-panel and p-select in one place. */
+:root {
+    --p-content-border-color: #e3e0d5;
+    --p-text-muted-color: #5f5e5a;
+    --p-surface-50: #faf9f6;
+    --p-content-hover-background: #f6f4ee;
+}
 
 /* Responsive breakpoints.
    These match PrimeFlex's scale, so a `@media (max-width: 991px)` block and a
@@ -49,19 +64,30 @@ html {
     min-width: 0;
 }
 
+/* Money and quantities. Tabular figures so decimal points line up down a
+   column -- proportional digits leave a table of prices looking ragged. */
+.amount {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
 /* Marks a price the provider had no live quote for, so it fell back to the
    previous close. Deliberately quiet -- the number is still usable, it is just
    not current. */
-.amount {
-    white-space: nowrap;
-}
-
 .stale-price {
     margin-left: 0.35rem;
     font-size: 0.75rem;
     color: var(--p-text-muted-color);
     vertical-align: middle;
     cursor: help;
+}
+
+/* Leading variant, for the right-aligned Worth column on the holdings tables:
+   a trailing icon there would sit between the figure and the column edge and
+   break the decimal alignment the rest of the column relies on. */
+.stale-price-before {
+    margin-left: 0;
+    margin-right: 0.35rem;
 }
 
 /* Stacked tables.
@@ -125,6 +151,146 @@ html {
     }
 }
 
+
+/* Delta pill.
+   A signed change, shown as tinted text with an optional caret. Lives here
+   rather than in a component because the watchlist and the alert list had
+   grown byte-identical copies of it, and the Stock/ETF tables are the third
+   user. The 14%-alpha wash keeps it readable on both the cream page and the
+   white table row without a border. */
+.delta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.05rem 0.35rem;
+    border-radius: 0.65rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.delta-up { color: #14713f; }
+.delta-down { color: #a32a30; }
+.delta-flat { color: #5f5e5a; }
+
+.delta-pill.delta-up { background-color: rgba(20, 113, 63, 0.14); }
+.delta-pill.delta-down { background-color: rgba(163, 42, 48, 0.14); }
+.delta-pill.delta-flat { background-color: rgba(95, 94, 90, 0.12); }
+
+.delta-caret { font-size: 0.6rem; }
+
+/* Table cell roles.
+   `cell-num` is the important one: money and quantities right-aligned with
+   tabular figures, so a column of prices lines up on the decimal point.
+   `cell-sub` is the muted second line of a two-line cell (the average under a
+   price), and `cell-quiet` de-emphasises a whole column that is context rather
+   than data -- account names, currency codes. */
+.cell-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.cell-sub {
+    display: block;
+    color: var(--p-text-muted-color);
+    font-size: 0.7rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.cell-quiet {
+    color: var(--p-text-muted-color);
+}
+
+/* A value that does not apply to this row (the cost basis of a closed
+   position). An em dash reads as "deliberately nothing" where a blank cell
+   just looks like missing data. */
+.cell-none {
+    color: #b4b2a9;
+}
+
+/* Chip for a non-numeric state -- BUY/SELL, RSU, Closed. Same geometry as the
+   delta pill so a row never mixes two pill shapes. */
+.state-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.05rem 0.4rem;
+    border-radius: 0.65rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.state-buy { color: #14713f; background-color: rgba(20, 113, 63, 0.14); }
+.state-sell { color: #a32a30; background-color: rgba(163, 42, 48, 0.14); }
+.state-neutral { color: #5f5e5a; background-color: rgba(95, 94, 90, 0.12); }
+.state-accent { color: #854f0b; background-color: rgba(239, 159, 39, 0.18); }
+
+/* Shared table chrome.
+   Add `eotm-table` alongside `table-stack`. Quiet uppercase headers so the
+   column labels recede and the figures carry the row, plus a warm hover that
+   matches the watchlist instead of Aura's slate. */
+.eotm-table .p-datatable-thead > tr > th {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--p-text-muted-color);
+}
+
+/* PrimeNG injects the Aura datatable CSS at runtime rather than into the built
+   stylesheet, and its `.p-datatable-tbody > tr > td` rule outranks a bare
+   `.cell-num`. These repeat the alignment at a specificity that wins. The
+   Profit column never needed it -- app-delta lays itself out with flex. */
+.eotm-table .p-datatable-thead > tr > th.cell-num,
+.eotm-table .p-datatable-tbody > tr > td.cell-num {
+    text-align: right;
+}
+
+.eotm-table .p-datatable-tbody > tr > td.cell-quiet {
+    color: var(--p-text-muted-color);
+}
+
+.eotm-table .p-datatable-tbody > tr:hover > td {
+    background-color: rgba(239, 159, 39, 0.12);
+}
+
+.table-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 2.5rem 1rem;
+    text-align: center;
+    color: #888780;
+}
+
+.table-empty .pi {
+    font-size: 1.75rem;
+    color: #d8d3c4;
+    margin-bottom: 0.25rem;
+}
+
+.table-empty-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1b1b1b;
+}
+
+/* Stacked rows already right-align every cell and prepend the column label, so
+   the desktop alignment classes would fight the layout rather than help it. */
+@media screen and (max-width: 767px) {
+    .cell-num,
+    .cell-sub {
+        text-align: right;
+    }
+
+    .table-stack .p-datatable-tbody > tr > td > .cell-sub {
+        display: inline;
+    }
+}
 /* The table search boxes carry an inline `width: 16rem`, which overflows a
    phone-width column. */
 .p-column-filter {

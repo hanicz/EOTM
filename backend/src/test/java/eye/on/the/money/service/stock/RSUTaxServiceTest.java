@@ -63,7 +63,7 @@ class RSUTaxServiceTest {
                 .buySell(buySell)
                 .transactionDate(transactionDate)
                 .quantity(quantity)
-                .stock(Stock.builder().id("aapl").shortName("AAPL").exchange("US").name("Apple").build())
+                .stock(Stock.builder().id("aapl.us").shortName("AAPL").exchange("US").name("Apple").build())
                 .user(User.builder().id(1L).email(USER_EMAIL).build())
                 .build();
     }

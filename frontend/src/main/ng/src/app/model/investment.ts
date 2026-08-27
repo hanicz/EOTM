@@ -13,6 +13,6 @@ export interface Investment {
     exchange: string;
     name: string;
     accountId: number;
-    accoutName: string;
+    accountName: string;
     rsu: boolean;
 }

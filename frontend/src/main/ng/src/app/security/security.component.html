@@ -13,6 +13,11 @@
           value="{{totalInterest | currency : selectedCurrency : 'symbol' : '0.0-2'}}"
           pTooltip="Already reinvested into the holdings above, so it is not added to the total worth."></p-tag>
       </div>
+      <div class="summary-stat">Expected return:
+        <p-tag severity="info"
+          value="{{(expectedRate | number : '0.2-2') + '%'}}"
+          pTooltip="Average of the rate on every holding, weighted by quantity, so larger positions count for more."></p-tag>
+      </div>
       <div class="summary-actions">
         <p-select [options]="currencyOptions" [(ngModel)]="selectedCurrency" optionLabel="label" optionValue="value"
           (onChange)="onCurrencyChange()"></p-select>

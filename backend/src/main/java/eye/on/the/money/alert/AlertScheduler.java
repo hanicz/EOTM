@@ -16,6 +16,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import eye.on.the.money.util.LiveQuote;
+import eye.on.the.money.util.Ticker;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -83,7 +84,7 @@ public class AlertScheduler {
         List<StockAlert> stockAlertList = this.stockAlertRepository.findAll();
         if (stockAlertList.isEmpty()) return;
         String joinedList = String.join(",", stockAlertList.stream()
-                .map(alert -> alert.getStock().getShortName() + "." + alert.getStock().getExchange())
+                .map(alert -> Ticker.symbol(alert.getStock().getShortName(), alert.getStock().getExchange()))
                 .collect(Collectors.toSet()));
 
         JsonNode responseBody = this.eodAPIService.getLiveStockValue(joinedList);
@@ -93,7 +94,7 @@ public class AlertScheduler {
         }
 
         stockAlertList.parallelStream().forEach(alert -> {
-            String ticker = alert.getStock().getShortName() + "." + alert.getStock().getExchange();
+            String ticker = Ticker.symbol(alert.getStock().getShortName(), alert.getStock().getExchange());
             alert.setSymbolOrTicker(ticker);
             JsonNode stock = stockMap.get(ticker);
             if (stock == null) {

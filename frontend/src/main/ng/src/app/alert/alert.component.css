@@ -22,29 +22,16 @@
     font-size: 0.75rem;
 }
 
+/* Size modifier on the shared .delta-pill -- the alert list runs a touch larger
+   than the table pills. Colours come from .delta-up / .delta-down. */
 .alert-type {
-    display: inline-flex;
-    align-items: center;
     gap: 0.3rem;
     padding: 0.1rem 0.45rem;
-    border-radius: 0.65rem;
     font-size: 0.8rem;
-    font-weight: 600;
-    white-space: nowrap;
 }
 
 .alert-type i {
     font-size: 0.65rem;
-}
-
-.alert-over {
-    color: #14713f;
-    background-color: rgba(20, 113, 63, 0.14);
-}
-
-.alert-under {
-    color: #a32a30;
-    background-color: rgba(163, 42, 48, 0.14);
 }
 
 .alert-value {

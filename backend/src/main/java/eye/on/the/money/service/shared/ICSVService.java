@@ -15,6 +15,7 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 public interface ICSVService {
 
@@ -63,6 +64,17 @@ public interface ICSVService {
         } catch (NumberFormatException e) {
             return false;
         }
+    }
+
+    default Long resolveAccountId(Map<String, Long> accountIdsByName, String accountName) {
+        if (accountName == null || accountName.isBlank()) {
+            throw new CSVException("Account is missing from the CSV file");
+        }
+        Long accountId = accountIdsByName.get(accountName);
+        if (accountId == null) {
+            throw new CSVException("Unknown account: " + accountName);
+        }
+        return accountId;
     }
 
     default CSVParser getParser(MultipartFile file, String[] headers) throws IOException {

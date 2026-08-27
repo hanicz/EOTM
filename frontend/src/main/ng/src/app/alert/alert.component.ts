@@ -170,7 +170,7 @@ export class AlertComponent implements OnInit {
   }
 
   directionClass(type: string): string {
-    return this.isOver(type) ? 'alert-over' : 'alert-under';
+    return this.isOver(type) ? 'delta-up' : 'delta-down';
   }
 
   directionIcon(type: string): string {

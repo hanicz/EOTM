@@ -9,9 +9,7 @@ import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Investment;
 import eye.on.the.money.model.stock.Stock;
-import eye.on.the.money.model.stock.StockPayment;
 import eye.on.the.money.repository.forex.CurrencyRepository;
-import eye.on.the.money.repository.stock.AccountRepository;
 import eye.on.the.money.repository.stock.InvestmentRepository;
 import eye.on.the.money.repository.stock.RSUTaxDetailsRepository;
 import eye.on.the.money.service.api.EODAPIService;
@@ -19,6 +17,7 @@ import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
 import eye.on.the.money.util.LiveQuote;
+import eye.on.the.money.util.Ticker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVParser;
@@ -46,8 +45,7 @@ public class InvestmentService implements ICSVService {
     private final InvestmentRepository investmentRepository;
     private final RSUTaxDetailsRepository rsuTaxDetailsRepository;
     private final CurrencyRepository currencyRepository;
-    private final StockPaymentService stockPaymentService;
-    private final AccountRepository accountRepository;
+    private final AccountService accountService;
     private final UserService userService;
     private final ModelMapper modelMapper;
     private final EODAPIService eodAPIService;
@@ -93,7 +91,7 @@ public class InvestmentService implements ICSVService {
                 .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
         if (investmentDTOList.isEmpty()) return investmentDTOList;
 
-        String joinedList = investmentDTOList.stream().map(i -> (i.getShortName() + "." + i.getExchange())).distinct().collect(Collectors.joining(","));
+        String joinedList = investmentDTOList.stream().map(i -> Ticker.symbol(i.getShortName(), i.getExchange())).distinct().collect(Collectors.joining(","));
 
         JsonNode responseBody;
         try {
@@ -111,7 +109,7 @@ public class InvestmentService implements ICSVService {
                 continue;
             }
             investmentDTOList.stream()
-                    .filter(i -> (i.getShortName() + "." + i.getExchange()).equals(code))
+                    .filter(i -> Ticker.symbol(i.getShortName(), i.getExchange()).equals(code))
                     .forEach(i -> {
                         i.setLiveValue(price.get().value() * i.getQuantity());
                         i.setValueDiff(i.getLiveValue() - i.getAmount());
@@ -146,7 +144,7 @@ public class InvestmentService implements ICSVService {
                     if (i.getBuySell().equals("S")) {
                         i.negateAmountAndQuantity();
                     }
-                    String baseKey = i.getShortName() + "_" + i.getAccountId();
+                    String baseKey = Ticker.symbol(i.getShortName(), i.getExchange()) + "_" + i.getAccountId();
                     int lotIndex = lotIndexByKey.getOrDefault(baseKey, 0);
                     String key = baseKey + "_" + lotIndex;
 
@@ -169,9 +167,8 @@ public class InvestmentService implements ICSVService {
     public InvestmentDTO createInvestment(InvestmentDTO investmentDTO, String userEmail) {
         Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + investmentDTO.getCurrencyId()));
         Stock stock = this.stockService.getOrCreateStock(investmentDTO.getShortName(), investmentDTO.getExchange(), investmentDTO.getName());
-        StockPayment stockPayment = this.stockPaymentService.createNewPayment(currency, investmentDTO.getAmount());
         User user = this.userService.loadUserByEmail(userEmail);
-        Account account = this.accountRepository.findByUserEmailAndId(userEmail, investmentDTO.getAccountId()).orElseThrow(() -> new NoSuchElementException("Account not found: " + investmentDTO.getAccountId()));
+        Account account = this.accountService.getAccount(userEmail, investmentDTO.getAccountId());
 
         Investment investment = Investment.builder()
                 .buySell(investmentDTO.getBuySell())
@@ -180,7 +177,8 @@ public class InvestmentService implements ICSVService {
                 .user(user)
                 .quantity(investmentDTO.getQuantity())
                 .stock(stock)
-                .stockPayment(stockPayment)
+                .amount(investmentDTO.getAmount())
+                .currency(currency)
                 .fee(investmentDTO.getFee())
                 .account(account)
                 .build();
@@ -194,8 +192,7 @@ public class InvestmentService implements ICSVService {
         Currency currency = this.currencyRepository.findById(investmentDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + investmentDTO.getCurrencyId()));
         Stock stock = this.stockService.getOrCreateStock(investmentDTO.getShortName(), investmentDTO.getExchange(), investmentDTO.getName());
         Investment investment = this.investmentRepository.findByIdAndUserEmail(investmentDTO.getInvestmentId(), userEmail).orElseThrow(() -> new NoSuchElementException("Investment not found: " + investmentDTO.getInvestmentId()));
-        StockPayment stockPayment = investment.getStockPayment();
-        Account account = this.accountRepository.findByUserEmailAndId(userEmail, investmentDTO.getAccountId()).orElseThrow(() -> new NoSuchElementException("Account not found: " + investmentDTO.getAccountId()));
+        Account account = this.accountService.getAccount(userEmail, investmentDTO.getAccountId());
 
         if (investment.isRsu() && this.rsuValuationChanged(investment, investmentDTO, stock)) {
             investment.setRsu(false);
@@ -208,8 +205,8 @@ public class InvestmentService implements ICSVService {
         investment.setStock(stock);
         investment.setAccount(account);
         investment.setFee(investmentDTO.getFee());
-        stockPayment.setAmount(investmentDTO.getAmount());
-        stockPayment.setCurrency(currency);
+        investment.setAmount(investmentDTO.getAmount());
+        investment.setCurrency(currency);
 
         return this.convertToInvestmentDTO(investment);
     }
@@ -241,8 +238,7 @@ public class InvestmentService implements ICSVService {
     public void processCSV(String userEmail, MultipartFile file) {
         try (CSVParser csvParser = this.getParser(file,
                 new String[]{"Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Exchange", "Amount", "Currency", "Fee", "Account"})) {
-            Map<String, Long> accountIdsByName = this.accountRepository.findByUserEmailOrderByAccountName(userEmail).stream()
-                    .collect(Collectors.toMap(Account::getAccountName, Account::getId, (first, ignored) -> first));
+            Map<String, Long> accountIdsByName = this.accountService.getAccountIdsByName(userEmail);
 
             for (CSVRecord csvRecord : csvParser) {
                 InvestmentDTO investment = InvestmentDTO.createFromCSVRecord(csvRecord, DateFormats.YYYY_MM_DD);
@@ -262,16 +258,5 @@ public class InvestmentService implements ICSVService {
             log.error("Error while processing CSV", e);
             throw new CSVException("Failed to parse CSV file: " + e.getMessage(), e);
         }
-    }
-
-    private Long resolveAccountId(Map<String, Long> accountIdsByName, String accountName) {
-        if (accountName == null || accountName.isBlank()) {
-            throw new CSVException("Account is missing from the CSV file");
-        }
-        Long accountId = accountIdsByName.get(accountName);
-        if (accountId == null) {
-            throw new CSVException("Unknown account: " + accountName);
-        }
-        return accountId;
     }
 }

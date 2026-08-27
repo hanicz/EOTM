@@ -46,7 +46,9 @@ class DividendServiceTest {
 
     private User user;
 
-    private final ModelMapper modelMapper = new ModelMapper();
+    @Autowired
+    private ModelMapper modelMapper;
+
     private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @BeforeEach
@@ -78,11 +80,13 @@ class DividendServiceTest {
     }
 
     @Test
-    public void createDividend_NoStockFound() throws ParseException {
+    public void createDividend_CreatesMissingStock() throws ParseException {
         DividendDTO dividendDTO = this.getDividendDTO();
-        dividendDTO.setShortName("NONEXISTING");
-        assertThrows(NoSuchElementException.class,
-                () -> this.dividendService.createDividend(dividendDTO, this.user.getUsername()));
+        dividendDTO.setShortName("NEWTICKER");
+        dividendDTO.setName("New Ticker Inc");
+        DividendDTO created = this.dividendService.createDividend(dividendDTO, this.user.getUsername());
+        assertEquals("NEWTICKER", created.getShortName());
+        assertEquals("New Ticker Inc", created.getName());
     }
 
     @Test
@@ -103,11 +107,13 @@ class DividendServiceTest {
     }
 
     @Test
-    public void updateDividend_NoStockFound() throws ParseException {
-        DividendDTO dividendDTO = this.getDividendDTO();
-        dividendDTO.setShortName("NONEXISTING");
-        assertThrows(NoSuchElementException.class,
-                () -> this.dividendService.updateDividend(dividendDTO, this.user.getUsername()));
+    public void updateDividend_CreatesMissingStock() throws ParseException {
+        DividendDTO created = this.dividendService.createDividend(this.getDividendDTO(), this.user.getUsername());
+        created.setShortName("OTHERTICKER");
+        created.setName("Other Ticker Inc");
+        DividendDTO updated = this.dividendService.updateDividend(created, this.user.getUsername());
+        assertEquals("OTHERTICKER", updated.getShortName());
+        assertEquals("Other Ticker Inc", updated.getName());
     }
 
     @Test
@@ -171,7 +177,7 @@ class DividendServiceTest {
 
         List<Dividend> dividends = this.dividendRepository.findByUserEmailOrderByDividendDate(this.user.getUsername());
 
-        Optional<Dividend> createdDividend = dividends.stream().filter(d -> d.getAmount() == 299.0 && d.getStock().getId().equals("intc")).findAny();
+        Optional<Dividend> createdDividend = dividends.stream().filter(d -> d.getAmount() == 299.0 && d.getStock().getId().equals("intc.us")).findAny();
 
         Assertions.assertTrue(createdDividend.isPresent());
     }
@@ -200,6 +206,7 @@ class DividendServiceTest {
                 .amount(10000000.0)
                 .dividendDate(LocalDate.parse("2021-07-03", FORMATTER))
                 .shortName("CRSR")
+                .name("Corsair Gaming Inc")
                 .currencyId("EUR")
                 .exchange("US")
                 .build();

@@ -28,12 +28,6 @@
       <div>Months: <b>{{block.months}}</b></div>
     </div>
 
-    <apx-chart [series]="block.chartOptions.series!" [chart]="block.chartOptions.chart!"
-      [xaxis]="block.chartOptions.xaxis!" [yaxis]="block.chartOptions.yaxis!"
-      [legend]="block.chartOptions.legend!" [dataLabels]="block.chartOptions.dataLabels!"
-      [tooltip]="block.chartOptions.tooltip!">
-    </apx-chart>
-
     <p-table [value]="block.rows" styleClass="p-datatable-striped p-datatable-sm table-stack"
       rowGroupMode="subheader" groupRowsBy="monthKey" [groupRowsByOrder]="-1">
       <ng-template pTemplate="header">
@@ -72,6 +66,12 @@
         </tr>
       </ng-template>
     </p-table>
+
+    <apx-chart [series]="block.chartOptions.series!" [chart]="block.chartOptions.chart!"
+      [xaxis]="block.chartOptions.xaxis!" [yaxis]="block.chartOptions.yaxis!"
+      [legend]="block.chartOptions.legend!" [dataLabels]="block.chartOptions.dataLabels!"
+      [tooltip]="block.chartOptions.tooltip!">
+    </apx-chart>
   </div>
 
   @if (!last) {

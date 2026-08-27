@@ -34,6 +34,12 @@ public class ETFController {
         return ResponseEntity.ok(this.etfInvestmentService.getETFInvestments(userEmail));
     }
 
+    @GetMapping("/account/{accountId}")
+    public ResponseEntity<List<ETFInvestmentDTO>> getETFInvestmentsByAccount(@CurrentUserEmail String userEmail, @PathVariable Long accountId) {
+        log.trace("Enter getETFInvestmentsByAccount");
+        return ResponseEntity.ok(this.etfInvestmentService.getETFInvestmentsByAccountId(userEmail, accountId));
+    }
+
     @GetMapping("/holding")
     public ResponseEntity<List<ETFInvestmentDTO>> getETFHoldings(@CurrentUserEmail String userEmail,
                                                                  @RequestParam(defaultValue = "false") boolean refresh) {
@@ -42,10 +48,22 @@ public class ETFController {
                 : this.etfInvestmentService.getCurrentETFHoldings(userEmail));
     }
 
+    @GetMapping("/holding/account/{accountId}")
+    public ResponseEntity<List<ETFInvestmentDTO>> getHoldingsByAccount(@CurrentUserEmail String userEmail, @PathVariable Long accountId) {
+        log.trace("Enter getHoldingsByAccount");
+        return ResponseEntity.ok(this.etfInvestmentService.getHoldingsByAccountId(userEmail, accountId));
+    }
+
     @GetMapping("/position")
     public ResponseEntity<List<ETFInvestmentDTO>> getPositions(@CurrentUserEmail String userEmail) {
         log.trace("Enter");
         return ResponseEntity.ok(this.etfInvestmentService.getAllPositions(userEmail));
+    }
+
+    @GetMapping("/position/account/{accountId}")
+    public ResponseEntity<List<ETFInvestmentDTO>> getPositionsByAccount(@CurrentUserEmail String userEmail, @PathVariable Long accountId) {
+        log.trace("Enter getPositionsByAccount");
+        return ResponseEntity.ok(this.etfInvestmentService.getPositionsByAccountId(userEmail, accountId));
     }
 
     @PostMapping

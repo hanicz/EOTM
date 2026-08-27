@@ -15,7 +15,10 @@ import java.util.Set;
 @Builder
 @EqualsAndHashCode
 @ToString
-@Table(name = "EOTM_STOCK")
+@Table(name = "EOTM_STOCK",
+        uniqueConstraints = @UniqueConstraint(name = "UK_STOCK_SHORT_NAME_EXCHANGE",
+                columnNames = {"short_name", "exchange"}),
+        indexes = @Index(name = "IDX_STOCK_SHORT_NAME", columnList = "short_name"))
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
@@ -23,7 +26,11 @@ public class Stock {
     @Id
     private String id;
     private String name;
+
+    @Column(nullable = false)
     private String shortName;
+
+    @Column(nullable = false)
     private String exchange;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "stock")

@@ -13,8 +13,8 @@
     <button pButton pRipple label="Export" icon="pi pi-upload" severity="secondary" class="p-button-outlined" (click)="download()"></button>
   </ng-template>
 </p-toolbar>
-<p-table #dt1 [value]="investments" styleClass="p-datatable-striped table-stack"
-  [(selection)]="selectedInvestments">
+<p-table #dt1 [value]="investments" styleClass="p-datatable-striped table-stack eotm-table"
+  [(selection)]="selectedInvestments" [paginator]="true" [rows]="25">
 
   <ng-template pTemplate="caption">
     <div class="filter-bar">
@@ -28,10 +28,10 @@
             [showClear]="true" placeholder="Any">
             <ng-template let-option pTemplate="item">
               @if (option.label === 'BUY') {
-                <p-tag styleClass="p-mr-2" severity="info" value="BUY"></p-tag>
+                <span class="state-chip state-buy">BUY</span>
               }
               @if (option.label === 'SELL') {
-                <p-tag styleClass="p-mr-2" severity="warn" value="SELL"></p-tag>
+                <span class="state-chip state-sell">SELL</span>
               }
             </ng-template>
           </p-select>
@@ -44,14 +44,15 @@
       <th style="width: 3rem">
         <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
       </th>
-      <th>ETF Name</th>
-      <th>Type</th>
-      <th>Quantity</th>
-      <th>Spent</th>
-      <th>Average</th>
-      <th>Date</th>
-      <th>Currency</th>
-      <th>Fee</th>
+      <th pSortableColumn="shortName">ETF Name <p-sortIcon field="shortName"></p-sortIcon></th>
+      <th pSortableColumn="buySell">Type <p-sortIcon field="buySell"></p-sortIcon></th>
+      <th class="cell-num" pSortableColumn="quantity">Quantity <p-sortIcon field="quantity"></p-sortIcon></th>
+      <th class="cell-num" pSortableColumn="amount">Spent <p-sortIcon field="amount"></p-sortIcon></th>
+      <th class="cell-num">Average</th>
+      <th pSortableColumn="transactionDate">Date <p-sortIcon field="transactionDate"></p-sortIcon></th>
+      <th pSortableColumn="accountName">Account <p-sortIcon field="accountName"></p-sortIcon></th>
+      <th pSortableColumn="currencyId">Currency <p-sortIcon field="currencyId"></p-sortIcon></th>
+      <th class="cell-num">Fee</th>
       <th></th>
     </tr>
   </ng-template>
@@ -61,32 +62,39 @@
         <p-tableCheckbox [value]="investment"></p-tableCheckbox>
       </td>
       <td data-label="ETF Name">
-        <div class="flex align-items-center">
-          <app-ticker-logo class="mr-1" [exchange]="investment.exchange"
-            [symbol]="investment.shortName"></app-ticker-logo>
-          {{investment.shortName}}.{{investment.exchange}}
-        </div>
+        <app-ticker-identity [exchange]="investment.exchange" [symbol]="investment.shortName"
+            [name]="investment.name"></app-ticker-identity>
       </td>
       <td data-label="Type">
-        @if (investment.buySell === 'B') {
-          <p-tag styleClass="p-mr-2" severity="info" value="BUY"></p-tag>
-        }
-        @if (investment.buySell === 'S') {
-          <p-tag styleClass="p-mr-2" severity="warn" value="SELL"></p-tag>
-        }
+        <span class="state-chip" [ngClass]="investment.buySell === 'B' ? 'state-buy' : 'state-sell'">
+          {{investment.buySell === 'B' ? 'BUY' : 'SELL'}}
+        </span>
       </td>
-      <td data-label="Quantity">{{investment.quantity}}</td>
-      <td data-label="Spent">{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}</td>
-      <td data-label="Average">{{(investment.amount / investment.quantity) | currency : investment.currencyId : 'symbol' : '0.0-3'}}
+      <td data-label="Quantity" class="cell-num">{{investment.quantity}}</td>
+      <td data-label="Spent" class="cell-num">{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}</td>
+      <td data-label="Average" class="cell-num cell-quiet">{{(investment.amount / investment.quantity) | currency : investment.currencyId : 'symbol' : '0.0-3'}}
       </td>
       <td data-label="Date">{{investment.transactionDate | date:'mediumDate'}}</td>
-      <td data-label="Currency">{{investment.currencyId}}</td>
-      <td data-label="Fee">{{investment.fee}}</td>
+      <td data-label="Account" class="cell-quiet">{{investment.accountName}}</td>
+      <td data-label="Currency" class="cell-quiet">{{investment.currencyId}}</td>
+      <td data-label="Fee" class="cell-num cell-quiet">{{investment.fee | currency : investment.currencyId : 'symbol' : '0.0-2'}}</td>
       <td>
         <button pButton pRipple type="button" icon="pi pi-pencil" (click)="editInvestment(investment)"
         class="p-button-rounded p-button-text mr-1" severity="info"></button>
         <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(investment.id)"
         class="p-button-rounded p-button-text ml-2" severity="danger"></button>
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="10">
+        <div class="table-empty">
+          <i class="pi pi-receipt"></i>
+          <span class="table-empty-title">No transactions yet</span>
+          <span>Use New to record your first buy or sell.</span>
+        </div>
       </td>
     </tr>
   </ng-template>
@@ -96,13 +104,42 @@
   styleClass="p-fluid">
   <ng-template pTemplate="content">
     <div class="grid">
-      <div class="col-12 sm:col-6 mb-2">
-        <label for="name" class="block mb-2 font-medium text-color-secondary">Name</label>
-        <input type="text" pInputText id="name" [(ngModel)]="investment.shortName" class="w-full" />
+      <div class="col-12 mb-2">
+        <label for="exchange" class="block mb-2 font-medium text-color-secondary">Exchange</label>
+        <p-select class="searchDropdown" [options]="exchanges" optionLabel="Name" [virtualScroll]="true"
+          [virtualScrollItemSize]="31" [filter]="true" filterBy="Name,Code"
+          filterPlaceholder="Search by name or code"
+          (onChange)="exchangeChanged($event)" [(ngModel)]="selectedExchange"
+          placeholder="Select an Exchange" [style]="{'width':'100%'}"
+          [dropdownIcon]="exchangesLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+          <ng-template let-option pTemplate="item">
+            <app-exchange-option [exchange]="option"></app-exchange-option>
+          </ng-template>
+          <ng-template let-option pTemplate="selectedItem">
+            <app-exchange-option [exchange]="option" [dense]="true"></app-exchange-option>
+          </ng-template>
+        </p-select>
+      </div>
+      <div class="col-12 mb-2">
+        <label for="ticker" class="block mb-2 font-medium text-color-secondary">Ticker</label>
+        <p-select class="searchDropdown" [options]="symbols" optionLabel="Name" [virtualScroll]="true"
+          [virtualScrollItemSize]="46" [filter]="true" filterBy="Name,Code,Isin"
+          filterPlaceholder="Search by name, code or ISIN"
+          [(ngModel)]="selectedETF" placeholder="Select a Ticker"
+          [style]="{'width':'100%'}"
+          [dropdownIcon]="etfsLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+          <ng-template let-option pTemplate="item">
+            <app-symbol-option [symbol]="option"></app-symbol-option>
+          </ng-template>
+          <ng-template let-option pTemplate="selectedItem">
+            <app-symbol-option [symbol]="option" [dense]="true"></app-symbol-option>
+          </ng-template>
+        </p-select>
       </div>
       <div class="col-12 sm:col-6 mb-2">
-        <label for="exchange" class="block mb-2 font-medium text-color-secondary">Exchange</label>
-        <input type="text" pInputText id="exchange" [(ngModel)]="investment.exchange" class="w-full" />
+        <label for="account" class="block mb-2 font-medium text-color-secondary">Account</label>
+        <p-select [options]="accounts" [(ngModel)]="investment.accountId" id="account" optionLabel="accountName"
+          optionValue="id" [style]="{'width':'100%'}"></p-select>
       </div>
       <div class="col-12 sm:col-6 mb-2">
         <label for="currency" class="block mb-2 font-medium text-color-secondary">Currency</label>
@@ -115,11 +152,10 @@
           [style]="{'width':'100%'}">
           <ng-template let-option pTemplate="item">
             @if (option.label === 'BUY') {
-              <p-tag styleClass="p-mr-2" severity="info" value="BUY">
-              </p-tag>
+              <span class="state-chip state-buy">BUY</span>
             }
             @if (option.label === 'SELL') {
-              <p-tag styleClass="p-mr-2" severity="warn" value="SELL"></p-tag>
+              <span class="state-chip state-sell">SELL</span>
             }
           </ng-template>
         </p-select>

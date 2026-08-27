@@ -5,8 +5,8 @@ import { Globals } from '../../util/global';
 import { Bind } from 'primeng/bind';
 import { TableModule } from 'primeng/table';
 import { PrimeTemplate } from 'primeng/api';
-import { TickerLogoComponent } from '../../util/ticker-logo.component';
-import { Tag } from 'primeng/tag';
+import { TickerIdentityComponent } from '../../util/ticker-identity.component';
+import { DeltaComponent } from '../../util/delta.component';
 import { InputText } from 'primeng/inputtext';
 import { DecimalPipe, CurrencyPipe } from '@angular/common';
 
@@ -14,12 +14,11 @@ import { DecimalPipe, CurrencyPipe } from '@angular/common';
     selector: 'app-position',
     templateUrl: './position.component.html',
     styleUrls: ['./position.component.css'],
-    imports: [Bind, TableModule, PrimeTemplate, Tag, InputText, DecimalPipe, CurrencyPipe, TickerLogoComponent]
+    imports: [Bind, TableModule, PrimeTemplate, InputText, DecimalPipe, CurrencyPipe, TickerIdentityComponent, DeltaComponent]
 })
 export class PositionComponent implements OnInit {
 
   investments: Investment[] = [];
-  myMath = Math;
   globals: Globals;
 
   constructor(private stockService: StockService, globals: Globals, private cdr: ChangeDetectorRef) {

@@ -149,20 +149,118 @@ class NetWorthServiceTest {
     }
 
     /**
-     * Interest is paid out and then reinvested by buying more, and those purchases already show up as
-     * transactions. Counting the interest as well would count the same money twice.
+     * A coupon bond redeems at par, so par is what it is worth. It is still not a gain or a loss: the same
+     * arithmetic that turns a discount into a gain turns the accrued interest paid on a mid-period purchase
+     * into a loss on a holding whose value never moved. Interest stays out of it either way - it is paid out
+     * and reinvested by buying more, and those purchases already show up as transactions, so counting it
+     * here would count the same money twice.
      */
     @Test
-    void getNetWorth_leavesInterestOutOfWhatSecuritiesAreWorth() {
+    void getNetWorth_reportsNoChangeOnSecuritiesEvenWhenParDiffersFromCost() {
         when(this.securityTransactionService.getCurrentHoldings(USER)).thenReturn(List.of(
-                SecurityTransactionDTO.builder().amount(1000.0).currencyId("EUR").build()));
+                SecurityTransactionDTO.builder().amount(950.0).quantity(1000).currencyId("EUR").build()));
 
         NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
 
         AssetClassValueDTO securities = this.assetOf(result, NetWorthService.SECURITIES);
-        assertEquals(0, securities.getSpent().compareTo(new BigDecimal("1000.00")));
+        assertEquals(0, securities.getSpent().compareTo(new BigDecimal("950.00")));
         assertEquals(0, securities.getWorth().compareTo(new BigDecimal("1000.00")));
         assertEquals(0, securities.getChangePct().signum());
+    }
+
+    /**
+     * Securities weigh on the total as money invested that did not move, so they pull the percentage towards
+     * zero rather than contributing a gain or a loss of their own.
+     */
+    @Test
+    void getNetWorth_leavesSecuritiesOutOfTheTotalChangeButNotOutOfWhatWasSpent() {
+        when(this.investmentService.getCurrentHoldings(USER)).thenReturn(List.of(
+                InvestmentDTO.builder().amount(1_000_000.0).liveValue(1_200_000.0).currencyId("EUR").build()));
+        when(this.securityTransactionService.getCurrentHoldings(USER)).thenReturn(List.of(
+                SecurityTransactionDTO.builder().amount(10_200_000.0).quantity(10_000_000).currencyId("EUR").build()));
+
+        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
+
+        // Only the stock moved: 200K gain on the 11.2M spent across both. Counting the 200K the bond is
+        // under par would have shown 0.00, and dropping the bond from the denominator would have shown 20.00.
+        assertEquals(0, result.getTotalChangePct().compareTo(new BigDecimal("1.79")));
+        assertEquals(0, result.getTotalSpent().compareTo(new BigDecimal("11200000.00")));
+        assertEquals(0, result.getTotalWorth().compareTo(new BigDecimal("11200000.00")));
+    }
+
+    /**
+     * A zero coupon bond's par already contains all the interest it has yet to earn, so valuing it at par
+     * would book an unearned gain. It is worth what it cost, and that cost is also what weights its rate.
+     */
+    @Test
+    void getNetWorth_valuesZeroCouponSecuritiesAtCostNotAtPar() {
+        when(this.securityTransactionService.getCurrentHoldings(USER)).thenReturn(List.of(
+                SecurityTransactionDTO.builder().amount(950_000.0).quantity(1_000_000).rate(5.0)
+                        .currencyId("EUR").build(),
+                SecurityTransactionDTO.builder().amount(800_000.0).quantity(1_000_000).rate(25.0)
+                        .zeroCoupon(true).currencyId("EUR").build()));
+
+        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
+
+        AssetClassValueDTO securities = this.assetOf(result, NetWorthService.SECURITIES);
+        assertEquals(0, securities.getSpent().compareTo(new BigDecimal("1750000.00")));
+        // 1M par for the coupon bond, 800K cost for the zero coupon one
+        assertEquals(0, securities.getWorth().compareTo(new BigDecimal("1800000.00")));
+        // (1M x 5.0 + 800K x 25.0) / 1.8M; weighting the zero coupon bond by its par would have given 15.0
+        assertEquals(0, securities.getExpectedRatePct().compareTo(new BigDecimal("13.89")));
+        assertEquals(0, result.getTotalWorth().compareTo(new BigDecimal("1800000.00")));
+    }
+
+    /**
+     * A big position has to pull the average towards its own rate; the plain average of 5.5 and 5.0 would be
+     * 5.25, which would let the 1M holding count as much as the 17M one.
+     */
+    @Test
+    void getNetWorth_weightsTheSecuritiesRateByQuantityNotByHoldingCount() {
+        when(this.securityTransactionService.getCurrentHoldings(USER)).thenReturn(List.of(
+                SecurityTransactionDTO.builder().amount(16_000_000.0).quantity(17_000_000).rate(5.5).currencyId("EUR").build(),
+                SecurityTransactionDTO.builder().amount(950_000.0).quantity(1_000_000).rate(5.0).currencyId("EUR").build()));
+
+        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
+
+        // (17M x 5.5 + 1M x 5.0) / 18M
+        assertEquals(0, this.assetOf(result, NetWorthService.SECURITIES).getExpectedRatePct()
+                .compareTo(new BigDecimal("5.47")));
+    }
+
+    @Test
+    void getNetWorth_countsSecuritiesWithNoRateAsZeroPercent() {
+        when(this.securityTransactionService.getCurrentHoldings(USER)).thenReturn(List.of(
+                SecurityTransactionDTO.builder().amount(16_000_000.0).quantity(17_000_000).rate(5.5).currencyId("EUR").build(),
+                SecurityTransactionDTO.builder().amount(950_000.0).quantity(1_000_000).rate(5.0).currencyId("EUR").build(),
+                SecurityTransactionDTO.builder().amount(4_800_000.0).quantity(5_000_000).rate(null).currencyId("EUR").build()));
+
+        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
+
+        // The rateless 5M stays in the denominator: (17M x 5.5 + 1M x 5.0 + 0) / 23M
+        assertEquals(0, this.assetOf(result, NetWorthService.SECURITIES).getExpectedRatePct()
+                .compareTo(new BigDecimal("4.28")));
+    }
+
+    @Test
+    void getNetWorth_convertsQuantitiesBeforeWeightingTheSecuritiesRate() {
+        when(this.securityTransactionService.getCurrentHoldings(USER)).thenReturn(List.of(
+                SecurityTransactionDTO.builder().amount(1_000_000.0).quantity(1_000_000).rate(10.0).currencyId("EUR").build(),
+                SecurityTransactionDTO.builder().amount(400_000_000.0).quantity(400_000_000).rate(5.0).currencyId("HUF").build()));
+
+        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
+
+        // 400M HUF / 400 = 1M EUR, so the two weigh the same: (10.0 + 5.0) / 2. Weighting the raw HUF figure
+        // would have given 5.01.
+        assertEquals(0, this.assetOf(result, NetWorthService.SECURITIES).getExpectedRatePct()
+                .compareTo(new BigDecimal("7.50")));
+    }
+
+    @Test
+    void getNetWorth_reportsZeroExpectedRateWhenNoSecuritiesAreHeld() {
+        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
+
+        assertEquals(0, this.assetOf(result, NetWorthService.SECURITIES).getExpectedRatePct().signum());
     }
 
     @Test

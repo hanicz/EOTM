@@ -1,7 +1,9 @@
 package eye.on.the.money.model.etf;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
+import eye.on.the.money.model.stock.Account;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,7 +19,9 @@ import java.time.LocalDate;
 @ToString
 @Table(name = "EOTM_ETF_INVESTMENT", indexes = {
         @Index(name = "IDX_ETF_INVESTMENT_USER_DATE", columnList = "user_id, transaction_date"),
-        @Index(name = "IDX_ETF_INVESTMENT_ETF", columnList = "etf_id")})
+        @Index(name = "IDX_ETF_INVESTMENT_ETF", columnList = "etf_id"),
+        @Index(name = "IDX_ETF_INVESTMENT_ACCOUNT", columnList = "account_id"),
+        @Index(name = "IDX_ETF_INVESTMENT_CURRENCY", columnList = "currency_id")})
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
@@ -41,6 +45,9 @@ public class ETFInvestment {
 
     private Double fee;
 
+    @Column(nullable = false)
+    private Double amount;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnore
@@ -50,7 +57,12 @@ public class ETFInvestment {
     @JoinColumn(name = "etf_id", nullable = false)
     private ETF etf;
 
-    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true)
-    @JoinColumn(name = "etfPayment_id", nullable = false)
-    private ETFPayment etfPayment;
+    @ManyToOne
+    @JoinColumn(name = "currency_id", nullable = false)
+    @JsonIgnore
+    private Currency currency;
+
+    @ManyToOne
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
 }

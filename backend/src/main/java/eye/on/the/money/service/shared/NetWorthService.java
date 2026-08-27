@@ -44,11 +44,6 @@ import java.util.function.Supplier;
  * (this service always asks for EUR), not in the {@code currencyId} the coins were bought with. Those two
  * differ for anyone who paid in something other than EUR, so the live figure is converted from EUR while the
  * cost basis is converted from {@code currencyId}.
- * <p>
- * A note on securities: interest is deliberately left out of what they are worth. Interest is paid out and
- * then reinvested by buying more, and those purchases are already recorded as transactions, so counting the
- * interest as well would count the same money twice. What a security is worth is therefore what was paid for
- * it; the return shows up as the holdings growing, not as a gain on an existing one.
  */
 @Service
 @Slf4j
@@ -84,9 +79,8 @@ public class NetWorthService {
         List<AssetClassValueDTO> assets = List.of(
                 this.value(STOCK, holdings.stock(), InvestmentDTO::getAmount, InvestmentDTO::getCurrencyId,
                         InvestmentDTO::getLiveValue, InvestmentDTO::getCurrencyId, converter),
-                // The one asymmetric row: cost is in currencyId, live value is in EUR. See the class javadoc.
                 this.value(CRYPTO, holdings.crypto(), TransactionDTO::getAmount, TransactionDTO::getCurrencyId,
-                        TransactionDTO::getLiveValue, transaction -> BASE_CURRENCY, converter),
+                        TransactionDTO::getLiveValue, _ -> BASE_CURRENCY, converter),
                 this.value(ETF, holdings.etf(), ETFInvestmentDTO::getAmount, ETFInvestmentDTO::getCurrencyId,
                         ETFInvestmentDTO::getLiveValue, ETFInvestmentDTO::getCurrencyId, converter),
                 this.value(FOREX, holdings.forex(), ForexTransactionDTO::getFromAmount,
@@ -96,12 +90,16 @@ public class NetWorthService {
 
         double spent = assets.stream().mapToDouble(asset -> asset.getSpent().doubleValue()).sum();
         double worth = assets.stream().mapToDouble(asset -> asset.getWorth().doubleValue()).sum();
+        double gain = assets.stream()
+                .filter(asset -> !SECURITIES.equals(asset.getAssetClass()))
+                .mapToDouble(asset -> asset.getWorth().doubleValue() - asset.getSpent().doubleValue())
+                .sum();
 
         return NetWorthDTO.builder()
                 .currency(target)
                 .totalSpent(this.scaled(spent))
                 .totalWorth(this.scaled(worth))
-                .totalChangePct(this.changePct(spent, worth))
+                .totalChangePct(this.gainPct(gain, spent))
                 .assets(assets)
                 .availableCurrencies(new ArrayList<>(currencies))
                 .unconvertedCurrencies(new ArrayList<>(converter.unconverted()))
@@ -172,15 +170,34 @@ public class NetWorthService {
     }
 
     /**
-     * Securities have no live price, and interest is left out on purpose - see the class javadoc - so what
-     * they are worth is simply what was paid for the ones still held.
+     * Securities have no live price. A coupon bond is valued at par ({@code quantity}), which is what it
+     * redeems for; a zero-coupon bond is valued at cost ({@code amount}), because its par already contains
+     * all the interest it has yet to earn and booking that now would be an unearned gain. Interest itself
+     * stays out of what they are worth either way: it is paid out and then reinvested by buying more, and
+     * those purchases are already recorded as transactions, so counting it here would count the same money
+     * twice.
      */
     private AssetClassValueDTO securities(List<SecurityTransactionDTO> transactions, Converter converter) {
         double spent = 0;
+        double worth = 0;
+        double weighted = 0;
         for (SecurityTransactionDTO transaction : transactions) {
             spent += converter.convert(transaction.getAmount(), transaction.getCurrencyId());
+            double converted = converter.convert(this.faceValue(transaction), transaction.getCurrencyId());
+            worth += converted;
+            if (transaction.getRate() != null) weighted += transaction.getRate() * converted;
         }
-        return this.asset(SECURITIES, spent, spent);
+        AssetClassValueDTO asset = this.asset(SECURITIES, spent, worth);
+        asset.setChangePct(this.scaled(0));
+        asset.setExpectedRatePct(this.scaled(worth == 0 ? 0 : weighted / worth));
+        return asset;
+    }
+
+    private Double faceValue(SecurityTransactionDTO transaction) {
+        if (Boolean.TRUE.equals(transaction.getZeroCoupon()) || transaction.getQuantity() == null) {
+            return transaction.getAmount();
+        }
+        return transaction.getQuantity().doubleValue();
     }
 
     private AssetClassValueDTO asset(String assetClass, double spent, double worth) {
@@ -216,8 +233,12 @@ public class NetWorthService {
     }
 
     private BigDecimal changePct(double spent, double worth) {
+        return this.gainPct(worth - spent, spent);
+    }
+
+    private BigDecimal gainPct(double gain, double spent) {
         if (spent == 0) return BigDecimal.ZERO.setScale(SCALE, RoundingMode.HALF_UP);
-        return BigDecimal.valueOf((worth - spent) / spent * 100).setScale(SCALE, RoundingMode.HALF_UP);
+        return BigDecimal.valueOf(gain / spent * 100).setScale(SCALE, RoundingMode.HALF_UP);
     }
 
     private record Holdings(List<InvestmentDTO> stock, List<TransactionDTO> crypto, List<ETFInvestmentDTO> etf,

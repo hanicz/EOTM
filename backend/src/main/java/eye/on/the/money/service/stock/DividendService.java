@@ -8,7 +8,6 @@ import eye.on.the.money.model.stock.Dividend;
 import eye.on.the.money.model.stock.Stock;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.stock.DividendRepository;
-import eye.on.the.money.repository.stock.StockRepository;
 import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
@@ -36,7 +35,7 @@ public class DividendService implements ICSVService {
 
     private final DividendRepository dividendRepository;
     private final CurrencyRepository currencyRepository;
-    private final StockRepository stockRepository;
+    private final StockService stockService;
     private final UserService userService;
     private final ModelMapper modelMapper;
     public List<DividendDTO> getDividends(String userEmail) {
@@ -55,7 +54,7 @@ public class DividendService implements ICSVService {
     @Transactional
     public DividendDTO createDividend(DividendDTO dividendDTO, String userEmail) {
         Currency currency = this.currencyRepository.findById(dividendDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + dividendDTO.getCurrencyId()));
-        Stock stock = this.stockRepository.findByShortName(dividendDTO.getShortName()).orElseThrow(() -> new NoSuchElementException("Stock not found: " + dividendDTO.getShortName()));
+        Stock stock = this.stockService.getOrCreateStock(dividendDTO.getShortName(), dividendDTO.getExchange(), dividendDTO.getName());
         User user = this.userService.loadUserByEmail(userEmail);
 
         Dividend dividend = Dividend.builder()
@@ -73,7 +72,7 @@ public class DividendService implements ICSVService {
     @Transactional
     public DividendDTO updateDividend(DividendDTO dividendDTO, String userEmail) {
         Currency currency = this.currencyRepository.findById(dividendDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + dividendDTO.getCurrencyId()));
-        Stock stock = this.stockRepository.findByShortName(dividendDTO.getShortName()).orElseThrow(() -> new NoSuchElementException("Stock not found: " + dividendDTO.getShortName()));
+        Stock stock = this.stockService.getOrCreateStock(dividendDTO.getShortName(), dividendDTO.getExchange(), dividendDTO.getName());
         Dividend dividend = this.dividendRepository.findByIdAndUserEmail(dividendDTO.getDividendId(), userEmail).orElseThrow(() -> new NoSuchElementException("Dividend not found: " + dividendDTO.getDividendId()));
 
         dividend.setDividendDate(dividendDTO.getDividendDate());

@@ -25,4 +25,6 @@ public class Exchange implements Serializable {
     private String code;
     @JsonProperty("Currency")
     private String currency;
+    @JsonProperty("CountryISO2")
+    private String countryISO2;
 }

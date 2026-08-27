@@ -14,6 +14,7 @@ import org.apache.commons.csv.CSVRecord;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -44,7 +45,9 @@ public class InvestmentDTO implements CSVHelper, Serializable {
     private boolean rsu;
 
     public InvestmentDTO mergeInvestments(InvestmentDTO other) {
-        if (!this.getShortName().equals(other.getShortName()) || !this.getAccountId().equals(other.getAccountId()))
+        if (!this.getShortName().equals(other.getShortName())
+                || !Objects.equals(this.getExchange(), other.getExchange())
+                || !this.getAccountId().equals(other.getAccountId()))
             return this;
 
         this.setAmount(this.getAmount() + other.getAmount());

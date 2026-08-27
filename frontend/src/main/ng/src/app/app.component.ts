@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { NavigationStart } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { WatchlistComponent } from './watchlist/watchlist.component';
 import { Globals } from './util/global';
 
@@ -13,20 +14,13 @@ import { Globals } from './util/global';
 export class AppComponent {
   router: Router;
   title = 'Eye OTM';
-  routeUrl = "";
   watchlistOpen = false;
 
   constructor(router: Router, private globals: Globals) {
     this.router = router;
-    this.router.events.subscribe(routerEvent => {
-      if (routerEvent instanceof NavigationStart) {
-        this.setWatchlistOpen(false);
-        if (this.routeUrl != routerEvent.url) {
-          this.routeUrl = routerEvent.url;
-          this.router.navigateByUrl(routerEvent.url, { skipLocationChange: true });
-        }
-      }
-    });
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationStart))
+      .subscribe(() => this.setWatchlistOpen(false));
 
     this.globals.watchlistToggleEvent.subscribe(() => this.setWatchlistOpen(!this.watchlistOpen));
   }

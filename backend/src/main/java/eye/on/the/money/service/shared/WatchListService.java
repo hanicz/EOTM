@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import eye.on.the.money.util.LiveQuote;
+import eye.on.the.money.util.Ticker;
 
 import java.util.List;
 import java.util.Map;
@@ -70,7 +71,7 @@ public class WatchListService {
                 .map(this::convertToStockWatchDTO).collect(Collectors.toList());
         if (stockList.isEmpty()) return stockList;
 
-        String joinedList = stockList.stream().map(s -> (s.getStockShortName() + "." + s.getStockExchange())).collect(Collectors.joining(","));
+        String joinedList = stockList.stream().map(s -> Ticker.symbol(s.getStockShortName(), s.getStockExchange())).collect(Collectors.joining(","));
         JsonNode responseBody = this.eodAPIService.getLiveStockValue(joinedList);
 
         Map<String, String> exchangeCurrencies = this.stockService.getAllExchanges().stream()
@@ -80,7 +81,7 @@ public class WatchListService {
 
         for (JsonNode stock : responseBody) {
             Optional<StockWatchDTO> stockWatchDTO = stockList.stream().filter
-                    (s -> (s.getStockShortName() + "." + s.getStockExchange()).equals(stock.findValue("code").textValue())).findFirst();
+                    (s -> Ticker.symbol(s.getStockShortName(), s.getStockExchange()).equals(stock.findValue("code").textValue())).findFirst();
             if (stockWatchDTO.isEmpty()) continue;
 
             LiveQuote.price(stock).ifPresent(price -> {

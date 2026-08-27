@@ -4,20 +4,20 @@ import { ETFInvestment } from 'src/app/model/etfinvestment';
 import { Bind } from 'primeng/bind';
 import { TableModule } from 'primeng/table';
 import { PrimeTemplate } from 'primeng/api';
-import { Tag } from 'primeng/tag';
+import { InputText } from 'primeng/inputtext';
 import { DecimalPipe, CurrencyPipe } from '@angular/common';
-import { TickerLogoComponent } from '../../util/ticker-logo.component';
+import { TickerIdentityComponent } from '../../util/ticker-identity.component';
+import { DeltaComponent } from '../../util/delta.component';
 
 @Component({
     selector: 'app-etfposition',
     templateUrl: './etfposition.component.html',
     styleUrls: ['./etfposition.component.css'],
-    imports: [Bind, TableModule, PrimeTemplate, Tag, DecimalPipe, CurrencyPipe, TickerLogoComponent]
+    imports: [Bind, TableModule, PrimeTemplate, InputText, DecimalPipe, CurrencyPipe, TickerIdentityComponent, DeltaComponent]
 })
 export class EtfpositionComponent implements OnInit {
 
   investments: ETFInvestment[] = [];
-  myMath = Math;
 
   constructor(private etfService: EtfService, private cdr: ChangeDetectorRef) {
     this.fetchData();

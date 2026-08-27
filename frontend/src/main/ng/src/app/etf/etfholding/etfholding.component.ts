@@ -5,16 +5,17 @@ import { Bind } from 'primeng/bind';
 import { TableModule } from 'primeng/table';
 import { PrimeTemplate } from 'primeng/api';
 import { Skeleton } from 'primeng/skeleton';
-import { Tag } from 'primeng/tag';
 import { Tooltip } from 'primeng/tooltip';
-import { DecimalPipe, CurrencyPipe } from '@angular/common';
-import { TickerLogoComponent } from '../../util/ticker-logo.component';
+import { CurrencyPipe } from '@angular/common';
+import { TickerIdentityComponent } from '../../util/ticker-identity.component';
+import { DeltaComponent } from '../../util/delta.component';
 
 @Component({
     selector: 'app-etfholding',
     templateUrl: './etfholding.component.html',
     styleUrls: ['./etfholding.component.css'],
-    imports: [Bind, TableModule, PrimeTemplate, Skeleton, Tag, Tooltip, DecimalPipe, CurrencyPipe, TickerLogoComponent]
+    imports: [Bind, TableModule, PrimeTemplate, Skeleton, Tooltip, CurrencyPipe, TickerIdentityComponent,
+        DeltaComponent]
 })
 export class EtfholdingComponent implements OnInit {
 
@@ -22,6 +23,8 @@ export class EtfholdingComponent implements OnInit {
   @Output() dataLoaded = new EventEmitter<ETFInvestment[]>();
 
   investmentsLoading: boolean = true;
+
+  readonly skeletonRows = new Array(4).fill({});
 
   constructor(private etfService: EtfService, private cdr: ChangeDetectorRef) {
     this.fetchData();

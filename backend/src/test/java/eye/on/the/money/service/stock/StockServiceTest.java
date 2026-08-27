@@ -124,7 +124,7 @@ class StockServiceTest {
 
     @Test
     public void getOrCreateStockExist() {
-        Stock expected = this.stockRepository.findById("crsr").get();
+        Stock expected = this.stockRepository.findById("crsr.us").get();
         Stock result = this.stockService.getOrCreateStock("crsr", "US", "Corsair Gaming Inc");
 
         Assertions.assertEquals(expected, result);
@@ -132,13 +132,54 @@ class StockServiceTest {
 
     @Test
     public void getOrCreateStockNew() {
-        Optional<Stock> empty = this.stockRepository.findById("new");
+        Optional<Stock> empty = this.stockRepository.findById("new.us");
         Stock result = this.stockService.getOrCreateStock("new", "US", "New Stock Test");
 
-        Stock expected = this.stockRepository.findById("new").get();
+        Stock expected = this.stockRepository.findById("new.us").get();
 
         Assertions.assertTrue(empty.isEmpty());
         Assertions.assertEquals(expected, result);
+    }
+
+    @Test
+    public void getOrCreateStockSeparatesSameTickerOnDifferentExchanges() {
+        Stock xetra = this.stockService.getOrCreateStock("VWCE", "XETRA", "Vanguard FTSE All-World");
+        Stock milan = this.stockService.getOrCreateStock("vwce", "mi", "Vanguard FTSE All-World");
+
+        Assertions.assertAll(
+                () -> Assertions.assertEquals("vwce.xetra", xetra.getId()),
+                () -> Assertions.assertEquals("vwce.mi", milan.getId()),
+                () -> Assertions.assertEquals("XETRA", xetra.getExchange()),
+                () -> Assertions.assertEquals("MI", milan.getExchange()),
+                () -> Assertions.assertEquals("VWCE", milan.getShortName()),
+                () -> Assertions.assertEquals(2, this.stockRepository.findAll().stream()
+                        .filter(s -> "VWCE".equals(s.getShortName())).count()));
+    }
+
+    @Test
+    public void getOrCreateStockNormalisesCasing() {
+        Stock result = this.stockService.getOrCreateStock(" crsr ", " us ", "Corsair Gaming Inc");
+
+        Assertions.assertEquals("crsr.us", result.getId());
+    }
+
+    @Test
+    public void getOrCreateStockRejectsBlankExchange() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> this.stockService.getOrCreateStock("CRSR", "  ", "Corsair Gaming Inc"));
+    }
+
+    @Test
+    public void getOrCreateStockRejectsBlankShortName() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> this.stockService.getOrCreateStock(null, "US", "Corsair Gaming Inc"));
+    }
+
+    @Test
+    public void getOrCreateStockKeepsStoredName() {
+        Stock result = this.stockService.getOrCreateStock("crsr", "US", "Hijacked Name");
+
+        Assertions.assertEquals("Corsair Gaming Inc", result.getName());
     }
 
     private List<EODCandleQuoteDTO> geteodList(){

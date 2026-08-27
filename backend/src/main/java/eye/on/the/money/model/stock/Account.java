@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import eye.on.the.money.model.User;
-import eye.on.the.money.model.stock.Investment;
+import eye.on.the.money.model.etf.ETFInvestment;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
 import lombok.*;
@@ -50,4 +50,10 @@ public class Account {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<Investment> investment;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "account", cascade = CascadeType.REMOVE)
+    @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<ETFInvestment> etfInvestment;
 }

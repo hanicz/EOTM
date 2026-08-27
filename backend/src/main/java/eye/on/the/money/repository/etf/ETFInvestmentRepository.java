@@ -17,5 +17,7 @@ public interface ETFInvestmentRepository extends JpaRepository<ETFInvestment, Lo
 
     List<ETFInvestment> findByUserEmailOrderByTransactionDateDesc(String userEmail);
 
+    List<ETFInvestment> findByUserEmailAndAccountIdOrderByTransactionDateDesc(String userEmail, Long accountId);
+
     void deleteByUserEmailAndIdIn(String userEmail, List<Long> ids);
 }

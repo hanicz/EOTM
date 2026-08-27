@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(classes = EotmApplication.class)
 @ActiveProfiles("test")
@@ -37,7 +38,9 @@ class ETFDividendServiceTest {
 
     private User user;
 
-    private final ModelMapper modelMapper = new ModelMapper();
+    @Autowired
+    private ModelMapper modelMapper;
+
 
     private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -70,12 +73,38 @@ class ETFDividendServiceTest {
         assertEquals(etfDividendDTO, created);
     }
 
+    @Test
+    public void createETFDividend_CreatesMissingETF() throws ParseException {
+        ETFDividendDTO etfDividendDTO = this.getETFDividendDTO();
+        etfDividendDTO.setShortName("NEWETF");
+        etfDividendDTO.setName("New ETF Fund");
+        ETFDividendDTO created = this.etfDividendService.createETFDividend(etfDividendDTO, this.user.getUsername());
+        assertEquals("NEWETF", created.getShortName());
+        assertEquals("New ETF Fund", created.getName());
+    }
+
+    @Test
+    public void deleteETFDividendById() throws ParseException {
+        ETFDividendDTO created = this.etfDividendService.createETFDividend(this.getETFDividendDTO(), this.user.getUsername());
+        this.etfDividendService.deleteETFDividendById(List.of(created.getId()), this.user.getUsername());
+        assertTrue(this.etfDividendRepository.findById(created.getId()).isEmpty());
+    }
+
+    @Test
+    public void getDividends_IdIsPopulated() throws ParseException {
+        this.etfDividendService.createETFDividend(this.getETFDividendDTO(), this.user.getUsername());
+        List<ETFDividendDTO> dividends = this.etfDividendService.getDividends(this.user.getUsername());
+        assertTrue(dividends.size() > 0, "expected at least one dividend");
+        assertTrue(dividends.get(0).getId() != null, "id was null: " + dividends.get(0));
+    }
+
     private ETFDividendDTO getETFDividendDTO() throws ParseException {
         return ETFDividendDTO.builder()
                 .id(1L)
                 .amount(105.7)
                 .dividendDate(LocalDate.parse("2021-07-03", FORMATTER))
                 .shortName("VWRL")
+                .name("Vang FTSE AllW-D")
                 .currencyId("EUR")
                 .exchange("AS")
                 .build();

@@ -17,19 +17,18 @@ import { TableModule } from 'primeng/table';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
-import { Tag } from 'primeng/tag';
-import { TickerLogoComponent } from '../../util/ticker-logo.component';
+import { TickerIdentityComponent } from '../../util/ticker-identity.component';
 import { ExchangeOptionComponent } from '../../util/exchange-option.component';
 import { SymbolOptionComponent } from '../../util/symbol-option.component';
 import { Dialog } from 'primeng/dialog';
 import { Tooltip } from 'primeng/tooltip';
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe, NgClass } from '@angular/common';
 
 @Component({
     selector: 'app-investment',
     templateUrl: './investment.component.html',
     styleUrls: ['./investment.component.css'],
-    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Tag, Dialog, Tooltip, CurrencyPipe, DatePipe, Toast, TickerLogoComponent, ExchangeOptionComponent, SymbolOptionComponent]
+    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Dialog, Tooltip, CurrencyPipe, DatePipe, NgClass, Toast, TickerIdentityComponent, ExchangeOptionComponent, SymbolOptionComponent]
 })
 export class InvestmentComponent implements OnInit {
 
@@ -62,6 +61,10 @@ export class InvestmentComponent implements OnInit {
       next: (data) => {
         this.exchangesLoading = false;
         this.exchanges = data;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.exchangesLoading = false;
         this.cdr.markForCheck();
       }
     });
@@ -97,6 +100,9 @@ export class InvestmentComponent implements OnInit {
 
   openNew() {
     this.investment = {} as Investment;
+    this.symbols = [];
+    this.selectedStock = {} as Symbol;
+    this.selectedExchange = {} as Exchange;
     this.investmentDialog = true;
   }
 
@@ -106,6 +112,10 @@ export class InvestmentComponent implements OnInit {
 
   editInvestment(investment: Investment) {
     this.investment = { ...investment };
+    this.selectedExchange = this.exchanges.find(e => e.Code === investment.exchange)
+      ?? { Code: investment.exchange, Name: investment.exchange } as Exchange;
+    this.selectedStock = { Code: investment.shortName, Name: investment.name } as Symbol;
+    this.loadSymbols(investment.shortName);
     this.investmentDialog = true;
   }
 
@@ -199,11 +209,28 @@ export class InvestmentComponent implements OnInit {
   }
 
   exchangeChanged(event: any) {
+    this.selectedStock = {} as Symbol;
+    this.loadSymbols();
+  }
+
+  private loadSymbols(preselectCode?: string) {
+    if (!this.selectedExchange?.Code) {
+      this.symbols = [];
+      return;
+    }
     this.stocksLoading = true;
     this.stockService.getAllSymbols(this.selectedExchange.Code).subscribe({
       next: (data) => {
         this.stocksLoading = false;
         this.symbols = data;
+        if (preselectCode) {
+          this.selectedStock = data.find(s => s.Code === preselectCode) ?? this.selectedStock;
+        }
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.stocksLoading = false;
+        this.symbols = [];
         this.cdr.markForCheck();
       }
     });

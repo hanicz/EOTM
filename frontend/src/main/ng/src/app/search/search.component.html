@@ -51,13 +51,13 @@
                 } @else {
                   <div>
                     <div class="flex flex-wrap align-items-center">
-                      <div class="ticker-name">{{profile.name}}</div>
-                      <p-tag styleClass="ml-2" [rounded]="true" severity="contrast" value="{{profile.ticker}}"></p-tag>
+                      <div class="ticker-name">{{displayName}}</div>
+                      <p-tag styleClass="ml-2" [rounded]="true" severity="contrast" value="{{displayTicker}}"></p-tag>
                     </div>
-                    <div class="ticker-subline mt-1">{{profile.exchange}}</div>
+                    <div class="ticker-subline mt-1">{{displayExchange}}</div>
                   </div>
                   <div class="ticker-price ml-4">
-                    {{endPrice | currency : profile.currency : 'symbol' : '0.0-2'}}
+                    {{endPrice | currency : displayCurrency : 'symbol' : '0.0-2'}}
                   </div>
                 }
               </div>
@@ -89,10 +89,10 @@
               </p-selectButton>
               <div class="flex align-items-center">
                 <p-tag styleClass="mr-2" severity="secondary"
-                  value="{{(startPrice | currency : profile.currency : 'symbol' : '0.0-1') + ' - ' + (endPrice | currency : profile.currency : 'symbol' : '0.0-1')}}">
+                  value="{{(startPrice | currency : displayCurrency : 'symbol' : '0.0-1') + ' - ' + (endPrice | currency : displayCurrency : 'symbol' : '0.0-1')}}">
                 </p-tag>
                 <p-tag styleClass="mr-2" [severity]="(difference > 0) ? 'success':'danger'"
-                value="{{difference | currency : profile.currency : 'symbol' : '0.0-1'}}"></p-tag>
+                value="{{difference | currency : displayCurrency : 'symbol' : '0.0-1'}}"></p-tag>
                 <p-tag [severity]="(percentage > 0) ? 'success':'danger'"
                 value="{{(percentage | number : '0.0-1') + '%'}}"></p-tag>
               </div>
@@ -121,75 +121,121 @@
             } @else {
             <div class="info-card">
               <div class="info-card-title">Company Info</div>
-              <div class="info-row">
-                <div class="info-label"><i class="pi pi-building"></i>Industry<i class="pi pi-question-circle info-tooltip-icon" pTooltip="The sector the company primarily operates in." tooltipPosition="top"></i></div>
-                <div class="info-value">{{profile.finnhubIndustry}}</div>
-              </div>
-              <div class="info-row">
-                <div class="info-label"><i class="pi pi-calendar"></i>IPO<i class="pi pi-question-circle info-tooltip-icon" pTooltip="Date the company went public via its Initial Public Offering." tooltipPosition="top"></i></div>
-                <div class="info-value">{{profile.ipo | date:'mediumDate' }}</div>
-              </div>
-              <div class="info-row">
-                <div class="info-label"><i class="pi pi-wallet"></i>Market Cap.<i class="pi pi-question-circle info-tooltip-icon" pTooltip="Total market value of the company's outstanding shares (share price x shares outstanding)." tooltipPosition="top"></i></div>
-                <div class="info-value">{{profile.marketCapitalization / 1000 | currency :
-                profile.currency : 'symbol' : '0.0-2'}}B</div>
-              </div>
-              <div class="info-row">
-                <div class="info-label"><i class="pi pi-th-large"></i>Outstanding Shares<i class="pi pi-question-circle info-tooltip-icon" pTooltip="Total number of shares currently held by all shareholders." tooltipPosition="top"></i></div>
-                <div class="info-value">{{profile.shareOutstanding / 1000 | number : '0.0-1'}}B</div>
-              </div>
-              <div class="info-row">
-                <div class="info-label"><i class="pi pi-link"></i>WebUrl<i class="pi pi-question-circle info-tooltip-icon" pTooltip="The company's official website." tooltipPosition="top"></i></div>
-                <div class="info-value info-value-truncate">
-                  <a href="{{profile.weburl}}" target="_blank" class="info-link"
-                    [pTooltip]="profile.weburl">{{hostName(profile.weburl)}}</a>
+              @if (hasProfile) {
+                <div class="info-row">
+                  <div class="info-label"><i class="pi pi-building"></i>Industry<i class="pi pi-question-circle info-tooltip-icon" pTooltip="The sector the company primarily operates in." tooltipPosition="top"></i></div>
+                  <div class="info-value">{{profile.finnhubIndustry}}</div>
                 </div>
-              </div>
-              <div class="info-row">
-                <div class="info-label"><i class="pi pi-users"></i>Peers<i class="pi pi-question-circle info-tooltip-icon" pTooltip="Other companies commonly compared to this one, e.g. competitors in the same industry." tooltipPosition="top"></i></div>
-                <div class="info-value info-value-wrap">
-                  @for (peer of profile.peers; track peer) {
-                    <span class="peer-chip">{{peer}}</span>
-                  }
+                <div class="info-row">
+                  <div class="info-label"><i class="pi pi-calendar"></i>IPO<i class="pi pi-question-circle info-tooltip-icon" pTooltip="Date the company went public via its Initial Public Offering." tooltipPosition="top"></i></div>
+                  <div class="info-value">{{profile.ipo | date:'mediumDate' }}</div>
                 </div>
-              </div>
+                <div class="info-row">
+                  <div class="info-label"><i class="pi pi-wallet"></i>Market Cap.<i class="pi pi-question-circle info-tooltip-icon" pTooltip="Total market value of the company's outstanding shares (share price x shares outstanding)." tooltipPosition="top"></i></div>
+                  <div class="info-value">{{profile.marketCapitalization / 1000 | currency :
+                  profile.currency : 'symbol' : '0.0-2'}}B</div>
+                </div>
+                <div class="info-row">
+                  <div class="info-label"><i class="pi pi-th-large"></i>Outstanding Shares<i class="pi pi-question-circle info-tooltip-icon" pTooltip="Total number of shares currently held by all shareholders." tooltipPosition="top"></i></div>
+                  <div class="info-value">{{profile.shareOutstanding / 1000 | number : '0.0-1'}}B</div>
+                </div>
+                <div class="info-row">
+                  <div class="info-label"><i class="pi pi-link"></i>WebUrl<i class="pi pi-question-circle info-tooltip-icon" pTooltip="The company's official website." tooltipPosition="top"></i></div>
+                  <div class="info-value info-value-truncate">
+                    <a href="{{profile.weburl}}" target="_blank" class="info-link"
+                      [pTooltip]="profile.weburl">{{hostName(profile.weburl)}}</a>
+                  </div>
+                </div>
+                <div class="info-row">
+                  <div class="info-label"><i class="pi pi-users"></i>Peers<i class="pi pi-question-circle info-tooltip-icon" pTooltip="Other companies commonly compared to this one, e.g. competitors in the same industry." tooltipPosition="top"></i></div>
+                  <div class="info-value info-value-wrap">
+                    @for (peer of profile.peers; track peer) {
+                      <span class="peer-chip">{{peer}}</span>
+                    }
+                  </div>
+                </div>
+              } @else {
+                <div class="info-row">
+                  <div class="info-label"><i class="pi pi-building-columns"></i>Exchange<i class="pi pi-question-circle info-tooltip-icon" pTooltip="The exchange this ticker is listed on." tooltipPosition="top"></i></div>
+                  <div class="info-value">{{displayExchange}}</div>
+                </div>
+                @if (displayIsin) {
+                  <div class="info-row">
+                    <div class="info-label"><i class="pi pi-id-card"></i>ISIN<i class="pi pi-question-circle info-tooltip-icon" pTooltip="International Securities Identification Number, the globally unique id of this security." tooltipPosition="top"></i></div>
+                    <div class="info-value">{{displayIsin}}</div>
+                  </div>
+                }
+                @if (displayType) {
+                  <div class="info-row">
+                    <div class="info-label"><i class="pi pi-tag"></i>Type<i class="pi pi-question-circle info-tooltip-icon" pTooltip="The instrument type, e.g. common stock, ETF or fund." tooltipPosition="top"></i></div>
+                    <div class="info-value">{{displayType}}</div>
+                  </div>
+                }
+                <div class="info-row info-row-last">
+                  <div class="info-label"><i class="pi pi-dollar"></i>Currency<i class="pi pi-question-circle info-tooltip-icon" pTooltip="The currency this ticker is quoted in." tooltipPosition="top"></i></div>
+                  <div class="info-value">{{displayCurrency}}</div>
+                </div>
+                <div class="info-note"><i class="pi pi-info-circle"></i>Industry, IPO and market cap
+                  data is only published for US-listed tickers.</div>
+              }
 
               <div class="info-card-title info-card-title-spaced">Trading Stats</div>
-              <div class="info-row">
-                <div class="info-label"><i class="pi pi-percentage"></i>P/E (TTM)<i class="pi pi-question-circle info-tooltip-icon" pTooltip="Price-to-Earnings ratio over the trailing twelve months, a measure of valuation relative to earnings." tooltipPosition="top"></i></div>
-                <div class="info-value">{{metric.peInclExtraTTM | number : '0.0-2'}}</div>
-              </div>
               <div class="info-row">
                 <div class="info-label"><i class="pi pi-chart-bar"></i>Volume<i class="pi pi-question-circle info-tooltip-icon" pTooltip="Number of shares traded in the most recent trading session, in millions." tooltipPosition="top"></i></div>
                 <div class="info-value">{{volume | number : '0.0-1'}}M</div>
               </div>
-              <div class="info-row">
-                <div class="info-label"><i class="pi pi-chart-bar"></i>Avg Vol (10D)<i class="pi pi-question-circle info-tooltip-icon" pTooltip="Average daily trading volume over the past 10 days, in millions." tooltipPosition="top"></i></div>
-                <div class="info-value">{{metric.tenDayAverageTradingVolume | number : '0.0-1'}}M
+              @if (hasMetric) {
+                <div class="info-row">
+                  <div class="info-label"><i class="pi pi-percentage"></i>P/E (TTM)<i class="pi pi-question-circle info-tooltip-icon" pTooltip="Price-to-Earnings ratio over the trailing twelve months, a measure of valuation relative to earnings." tooltipPosition="top"></i></div>
+                  <div class="info-value">{{metric.peInclExtraTTM | number : '0.0-2'}}</div>
                 </div>
-              </div>
-              <div class="info-row">
-                <div class="info-label"><i class="pi pi-chart-bar"></i>Avg Vol (3M)<i class="pi pi-question-circle info-tooltip-icon" pTooltip="Average daily trading volume over the past 3 months, in millions." tooltipPosition="top"></i></div>
-                <div class="info-value">{{metric.threeMonthAverageTradingVolume | number :
-                  '0.0-1'}}M
+                <div class="info-row">
+                  <div class="info-label"><i class="pi pi-chart-bar"></i>Avg Vol (10D)<i class="pi pi-question-circle info-tooltip-icon" pTooltip="Average daily trading volume over the past 10 days, in millions." tooltipPosition="top"></i></div>
+                  <div class="info-value">{{metric.tenDayAverageTradingVolume | number : '0.0-1'}}M
+                  </div>
                 </div>
-              </div>
-              <div class="info-row">
-                <div class="info-label"><i class="pi pi-arrows-v"></i>52 Week H/L<i class="pi pi-question-circle info-tooltip-icon" pTooltip="The highest and lowest price the stock has traded at over the past 52 weeks." tooltipPosition="top"></i></div>
-                <div class="info-value">
-                  <p-tag styleClass="mr-1 mt-1 mb-1" severity="success"
-                    value="{{metric.yearHigh | number : '0.0-1'}}">
-                  </p-tag>
-                  <p-tag styleClass="ml-2 mt-1 mb-1" severity="danger"
-                    value="{{metric.yearLow | number : '0.0-1'}}">
-                  </p-tag>
+                <div class="info-row">
+                  <div class="info-label"><i class="pi pi-chart-bar"></i>Avg Vol (3M)<i class="pi pi-question-circle info-tooltip-icon" pTooltip="Average daily trading volume over the past 3 months, in millions." tooltipPosition="top"></i></div>
+                  <div class="info-value">{{metric.threeMonthAverageTradingVolume | number :
+                    '0.0-1'}}M
+                  </div>
                 </div>
-              </div>
-              <div class="info-row info-row-last">
-                <div class="info-label"><i class="pi pi-calendar-times"></i>H/L Date<i class="pi pi-question-circle info-tooltip-icon" pTooltip="The dates on which the 52-week high and low prices occurred." tooltipPosition="top"></i></div>
-                <div class="info-value">{{(metric.yearHighDate | date:'mediumDate') + ' - ' +
-                (metric.yearLowDate | date:'mediumDate')}}</div>
-              </div>
+                <div class="info-row">
+                  <div class="info-label"><i class="pi pi-arrows-v"></i>52 Week H/L<i class="pi pi-question-circle info-tooltip-icon" pTooltip="The highest and lowest price the stock has traded at over the past 52 weeks." tooltipPosition="top"></i></div>
+                  <div class="info-value">
+                    <p-tag styleClass="mr-1 mt-1 mb-1" severity="success"
+                      value="{{metric.yearHigh | number : '0.0-1'}}">
+                    </p-tag>
+                    <p-tag styleClass="ml-2 mt-1 mb-1" severity="danger"
+                      value="{{metric.yearLow | number : '0.0-1'}}">
+                    </p-tag>
+                  </div>
+                </div>
+                <div class="info-row info-row-last">
+                  <div class="info-label"><i class="pi pi-calendar-times"></i>H/L Date<i class="pi pi-question-circle info-tooltip-icon" pTooltip="The dates on which the 52-week high and low prices occurred." tooltipPosition="top"></i></div>
+                  <div class="info-value">{{(metric.yearHighDate | date:'mediumDate') + ' - ' +
+                  (metric.yearLowDate | date:'mediumDate')}}</div>
+                </div>
+              } @else {
+                <div class="info-row">
+                  <div class="info-label"><i class="pi pi-arrows-v"></i>Period H/L<i class="pi pi-question-circle info-tooltip-icon" [pTooltip]="'The highest and lowest price over the ' + periodLabel + ' range shown in the chart.'" tooltipPosition="top"></i></div>
+                  <div class="info-value">
+                    <p-tag styleClass="mr-1 mt-1 mb-1" severity="success"
+                      value="{{periodHigh | number : '0.0-1'}}">
+                    </p-tag>
+                    <p-tag styleClass="ml-2 mt-1 mb-1" severity="danger"
+                      value="{{periodLow | number : '0.0-1'}}">
+                    </p-tag>
+                  </div>
+                </div>
+                <div class="info-row info-row-last">
+                  <div class="info-label"><i class="pi pi-calendar-times"></i>H/L Date<i class="pi pi-question-circle info-tooltip-icon" pTooltip="The dates on which the period high and low prices occurred." tooltipPosition="top"></i></div>
+                  <div class="info-value">{{(periodHighDate | date:'mediumDate') + ' - ' +
+                  (periodLowDate | date:'mediumDate')}}</div>
+                </div>
+                <div class="info-note"><i class="pi pi-info-circle"></i>P/E and average volume are
+                  only published for US-listed tickers; high/low is taken from the chart range.</div>
+              }
             </div>
             }
           </div>

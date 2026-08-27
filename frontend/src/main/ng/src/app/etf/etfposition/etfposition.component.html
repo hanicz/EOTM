@@ -1,43 +1,61 @@
-<p-table [value]="investments" styleClass="p-datatable-striped table-stack" sortField="quantity" [sortOrder]=-1 >
+<p-table #dt1 [value]="investments" styleClass="p-datatable-striped table-stack eotm-table"
+  sortField="quantity" [sortOrder]="-1" [globalFilterFields]="['shortName', 'accountName']">
+  <ng-template pTemplate="caption">
+    <div class="filter-bar">
+      <input pInputText type="text"
+        (input)="dt1.filterGlobal($any($event.target)?.value, 'contains')"
+        [value]="$any(dt1.filters['global'])?.value ?? ''" placeholder="Search by Name or Account"
+        class="p-column-filter filter-input">
+    </div>
+  </ng-template>
+
   <ng-template pTemplate="header">
     <tr>
-      <th>Stock Name</th>
-      <th>Total Spent</th>
-      <th>Average</th>
-      <th pSortableColumn="quantity">Position <p-sortIcon field="quantity"></p-sortIcon></th>
-      <th>Profit</th>
+      <th pSortableColumn="shortName">ETF Name <p-sortIcon field="shortName"></p-sortIcon></th>
+      <th pSortableColumn="accountName">Account <p-sortIcon field="accountName"></p-sortIcon></th>
+      <th class="cell-num" pSortableColumn="amount">Total Spent <p-sortIcon field="amount"></p-sortIcon></th>
+      <th class="cell-num" pSortableColumn="quantity">Position <p-sortIcon field="quantity"></p-sortIcon></th>
+      <th class="cell-num" pSortableColumn="amount">Profit <p-sortIcon field="amount"></p-sortIcon></th>
     </tr>
   </ng-template>
+
   <ng-template pTemplate="body" let-investment>
     <tr>
       <td data-label="ETF Name">
-        <div class="flex align-items-center">
-          <app-ticker-logo class="mr-1" [exchange]="investment.exchange"
-            [symbol]="investment.shortName"></app-ticker-logo>
-          {{investment.shortName}}.{{investment.exchange}}
+        <app-ticker-identity [exchange]="investment.exchange" [symbol]="investment.shortName"
+          [name]="investment.name"></app-ticker-identity>
+      </td>
+      <td data-label="Account" class="cell-quiet">{{investment.accountName}}</td>
+      <td data-label="Total Spent" class="cell-num">
+        @if (investment.quantity > 0) {
+          {{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}
+          <span class="cell-sub">{{(investment.amount / investment.quantity) | currency : investment.currencyId : 'symbol' : '0.0-3'}} avg</span>
+        } @else {
+          <span class="cell-none">&mdash;</span>
+        }
+      </td>
+      <td data-label="Position" class="cell-num">
+        @if (investment.quantity > 0) {
+          {{investment.quantity | number: '0.0-4'}}
+        } @else {
+          <span class="state-chip state-neutral">Closed</span>
+        }
+      </td>
+      <td data-label="Profit" class="cell-num">
+        <app-delta [value]="investment.quantity == 0 ? -investment.amount : null"
+          [currency]="investment.currencyId"></app-delta>
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="5">
+        <div class="table-empty">
+          <i class="pi pi-inbox"></i>
+          <span class="table-empty-title">No positions yet</span>
+          <span>Positions appear once you record a transaction.</span>
         </div>
-      </td>
-      <td data-label="Total Spent">
-        @if (investment.quantity > 0) {
-          <span>{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}</span>
-        }
-      </td>
-      <td data-label="Average">
-        @if (investment.quantity > 0) {
-          <span>{{(investment.amount / investment.quantity) | currency : investment.currencyId : 'symbol' : '0.0-3'}}</span>
-        }
-      </td>
-      <td data-label="Position">
-        <p-tag styleClass="p-mr-2" [severity]="(investment.quantity > 0) ? 'info':'warn'"
-        value="{{(investment.quantity > 0) ? (investment.quantity | number: '0.0-4') : 'Closed'}}"></p-tag>
-      </td>
-      <td data-label="Profit">
-        @if (investment.quantity == 0 && investment.amount < 0) {
-          <p-tag styleClass="p-mr-2" severity="success" value="{{myMath.abs(investment.amount) | currency : investment.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
-        }
-        @if (investment.quantity == 0 && investment.amount > 0) {
-          <p-tag styleClass="p-mr-2" severity="danger" value="{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
-        }
       </td>
     </tr>
   </ng-template>

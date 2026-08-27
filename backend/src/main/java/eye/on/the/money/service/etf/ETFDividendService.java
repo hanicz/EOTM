@@ -7,7 +7,6 @@ import eye.on.the.money.model.User;
 import eye.on.the.money.model.etf.ETF;
 import eye.on.the.money.model.etf.ETFDividend;
 import eye.on.the.money.repository.etf.ETFDividendRepository;
-import eye.on.the.money.repository.etf.ETFRepository;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.user.UserService;
@@ -36,7 +35,7 @@ public class ETFDividendService implements ICSVService {
 
     private final ETFDividendRepository etfDividendRepository;
     private final CurrencyRepository currencyRepository;
-    private final ETFRepository etfRepository;
+    private final ETFService etfService;
     private final UserService userService;
     private final ModelMapper modelMapper;
     public List<ETFDividendDTO> getDividends(String userEmail) {
@@ -55,7 +54,7 @@ public class ETFDividendService implements ICSVService {
     @Transactional
     public ETFDividendDTO createETFDividend(ETFDividendDTO dividendDTO, String userEmail) {
         Currency currency = this.currencyRepository.findById(dividendDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + dividendDTO.getCurrencyId()));
-        ETF etf = this.etfRepository.findByShortName(dividendDTO.getShortName()).orElseThrow(() -> new NoSuchElementException("ETF not found: " + dividendDTO.getShortName()));
+        ETF etf = this.etfService.getOrCreateETF(dividendDTO.getShortName(), dividendDTO.getExchange(), dividendDTO.getName());
         User user = this.userService.loadUserByEmail(userEmail);
 
         ETFDividend dividend = ETFDividend.builder()
@@ -73,7 +72,7 @@ public class ETFDividendService implements ICSVService {
     @Transactional
     public ETFDividendDTO updateETFDividend(ETFDividendDTO dividendDTO, String userEmail) {
         Currency currency = this.currencyRepository.findById(dividendDTO.getCurrencyId()).orElseThrow(() -> new NoSuchElementException("Currency not found: " + dividendDTO.getCurrencyId()));
-        ETF etf = this.etfRepository.findByShortName(dividendDTO.getShortName()).orElseThrow(() -> new NoSuchElementException("ETF not found: " + dividendDTO.getShortName()));
+        ETF etf = this.etfService.getOrCreateETF(dividendDTO.getShortName(), dividendDTO.getExchange(), dividendDTO.getName());
         ETFDividend dividend = this.etfDividendRepository.findByIdAndUserEmail(dividendDTO.getId(), userEmail).orElseThrow(() -> new NoSuchElementException("ETF dividend not found: " + dividendDTO.getId()));
 
         dividend.setDividendDate(dividendDTO.getDividendDate());

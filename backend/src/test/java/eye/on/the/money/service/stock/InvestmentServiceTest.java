@@ -45,8 +45,6 @@ class InvestmentServiceTest {
     @Autowired
     private RSUTaxDetailsRepository rsuTaxDetailsRepository;
     @MockitoBean
-    private StockPaymentService stockPaymentService;
-    @MockitoBean
     private EODAPIService eodAPIService;
     @MockitoBean
     private StockService stockService;

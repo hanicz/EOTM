@@ -13,6 +13,7 @@ import org.apache.commons.csv.CSVRecord;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -31,6 +32,7 @@ public class ETFInvestmentDTO implements CSVHelper, Serializable {
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate transactionDate;
     private String shortName;
+    private String name;
     private Double amount;
     private String currencyId;
     private Double liveValue;
@@ -38,9 +40,13 @@ public class ETFInvestmentDTO implements CSVHelper, Serializable {
     private Double valueDiff;
     private Double fee;
     private String exchange;
+    private String accountName;
+    private Long accountId;
 
     public ETFInvestmentDTO mergeInvestments(ETFInvestmentDTO other) {
-        if (!this.getShortName().equals(other.getShortName()))
+        if (!this.getShortName().equals(other.getShortName())
+                || !Objects.equals(this.getExchange(), other.getExchange())
+                || !Objects.equals(this.getAccountId(), other.getAccountId()))
             return this;
 
         this.setAmount(this.getAmount() + other.getAmount());
@@ -60,14 +66,14 @@ public class ETFInvestmentDTO implements CSVHelper, Serializable {
     @Override
     @JsonIgnore
     public Object[] getHeaders() {
-        return new String[]{"Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Exchange", "Amount", "Currency", "Fee"};
+        return new String[]{"Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Exchange", "Amount", "Currency", "Fee", "Account"};
     }
 
     @Override
     @JsonIgnore
     public Object[] getCSVRecord() {
         return new Object[]{this.getId(), this.getQuantity(), this.getBuySell(), this.getTransactionDate(),
-                this.getShortName(), this.getExchange(), this.getAmount(), this.getCurrencyId(), this.getFee()};
+                this.getShortName(), this.getExchange(), this.getAmount(), this.getCurrencyId(), this.getFee(), this.getAccountName()};
     }
 
     public static ETFInvestmentDTO createFromCSVRecord(CSVRecord csvRecord, DateTimeFormatter formatter) {
@@ -81,6 +87,7 @@ public class ETFInvestmentDTO implements CSVHelper, Serializable {
                 .shortName(csvRecord.get("Short Name"))
                 .exchange(csvRecord.get("Exchange"))
                 .fee(Double.parseDouble(csvRecord.get("Fee")))
+                .accountName(csvRecord.get("Account"))
                 .build();
     }
 }

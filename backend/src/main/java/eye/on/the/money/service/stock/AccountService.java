@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -25,6 +28,16 @@ public class AccountService {
 
     public List<Account> getAccountsByUserEmail(String userEmail) {
         return this.accountRepository.findByUserEmailOrderByAccountName(userEmail);
+    }
+
+    public Account getAccount(String userEmail, Long accountId) {
+        return this.accountRepository.findByUserEmailAndId(userEmail, accountId)
+                .orElseThrow(() -> new NoSuchElementException("Account not found: " + accountId));
+    }
+
+    public Map<String, Long> getAccountIdsByName(String userEmail) {
+        return this.accountRepository.findByUserEmailOrderByAccountName(userEmail).stream()
+                .collect(Collectors.toMap(Account::getAccountName, Account::getId, (first, ignored) -> first));
     }
 
     @Transactional

@@ -9,6 +9,7 @@ import eye.on.the.money.model.stock.Symbol;
 import eye.on.the.money.repository.stock.StockRepository;
 import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.util.LiveQuote;
+import eye.on.the.money.util.Ticker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
@@ -69,11 +70,11 @@ public class StockService {
     }
 
     public Stock getOrCreateStock(String shortName, String exchange, String name) {
-        return this.stockRepository.findById(shortName.toLowerCase()).orElseGet(() -> {
+        return this.stockRepository.findById(Ticker.id(shortName, exchange)).orElseGet(() -> {
                     Stock newStock = Stock.builder()
-                            .id(shortName.toLowerCase())
-                            .exchange(exchange)
-                            .shortName(shortName.toUpperCase())
+                            .id(Ticker.id(shortName, exchange))
+                            .exchange(Ticker.normalizeExchange(exchange))
+                            .shortName(Ticker.normalizeShortName(shortName))
                             .name(name)
                             .build();
                     return this.stockRepository.save(newStock);

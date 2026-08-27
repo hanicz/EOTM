@@ -3,6 +3,7 @@ export interface AssetClassValue {
     spent: number;
     worth: number;
     changePct: number;
+    expectedRatePct?: number;
 }
 
 export interface NetWorth {

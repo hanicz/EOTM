@@ -30,6 +30,7 @@ public class ETFDividendDTO implements CSVHelper {
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate dividendDate;
     private String shortName;
+    private String name;
     private String currencyId;
     private String exchange;
 

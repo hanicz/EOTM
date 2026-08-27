@@ -7,19 +7,19 @@ import { Bind } from 'primeng/bind';
 import { TableModule } from 'primeng/table';
 import { PrimeTemplate } from 'primeng/api';
 import { Skeleton } from 'primeng/skeleton';
-import { TickerLogoComponent } from '../../util/ticker-logo.component';
-import { Tag } from 'primeng/tag';
+import { TickerIdentityComponent } from '../../util/ticker-identity.component';
+import { DeltaComponent } from '../../util/delta.component';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { Tooltip } from 'primeng/tooltip';
-import { DecimalPipe, CurrencyPipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 
 @Component({
     selector: 'app-holding',
     templateUrl: './holding.component.html',
     styleUrls: ['./holding.component.css'],
-    imports: [Bind, TableModule, PrimeTemplate, Skeleton, Tag, ButtonDirective, Ripple, Tooltip, DecimalPipe,
-        CurrencyPipe, TickerLogoComponent]
+    imports: [Bind, TableModule, PrimeTemplate, Skeleton, ButtonDirective, Ripple, Tooltip,
+        CurrencyPipe, TickerIdentityComponent, DeltaComponent]
 })
 export class HoldingComponent implements OnInit {
 
@@ -30,6 +30,8 @@ export class HoldingComponent implements OnInit {
   investmentsLoading: boolean = true;
 
   readonly alertSteps = [0.05, 0.1];
+
+  readonly skeletonRows = new Array(4).fill({});
 
   private readonly pendingAlerts = new Set<string>();
   private readonly createdAlerts = new Set<string>();

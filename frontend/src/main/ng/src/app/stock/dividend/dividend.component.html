@@ -13,8 +13,8 @@
         <button pButton pRipple label="Export" icon="pi pi-upload" severity="secondary" class="p-button-outlined" (click)="download()"></button>
     </ng-template>
 </p-toolbar>
-<p-table #dt1 [value]="dividends" styleClass="p-datatable-striped table-stack"
-    [(selection)]="selectedDividends">
+<p-table #dt1 [value]="dividends" styleClass="p-datatable-striped table-stack eotm-table"
+    [(selection)]="selectedDividends" [paginator]="true" [rows]="25">
 
     <ng-template pTemplate="caption">
         <div class="filter-bar">
@@ -29,9 +29,9 @@
             <th style="width: 3rem">
                 <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
             </th>
-            <th>Stock Name</th>
-            <th>Amount</th>
-            <th>Date</th>
+            <th pSortableColumn="shortName">Stock Name <p-sortIcon field="shortName"></p-sortIcon></th>
+            <th class="cell-num" pSortableColumn="amount">Amount <p-sortIcon field="amount"></p-sortIcon></th>
+            <th pSortableColumn="dividendDate">Date <p-sortIcon field="dividendDate"></p-sortIcon></th>
             <th></th>
         </tr>
     </ng-template>
@@ -41,19 +41,28 @@
                 <p-tableCheckbox [value]="dividend"></p-tableCheckbox>
             </td>
             <td data-label="Stock Name">
-                <div class="flex align-items-center">
-                    <app-ticker-logo class="mr-1" [exchange]="dividend.exchange"
-                        [symbol]="dividend.shortName"></app-ticker-logo>
-                    {{dividend.shortName}}.{{dividend.exchange}}
-                </div>
+                <app-ticker-identity [exchange]="dividend.exchange" [symbol]="dividend.shortName"
+                        [name]="dividend.name"></app-ticker-identity>
             </td>
-            <td data-label="Amount">{{dividend.amount | currency : dividend.currencyId : 'symbol' : '0.0-2'}}</td>
+            <td data-label="Amount" class="cell-num">{{dividend.amount | currency : dividend.currencyId : 'symbol' : '0.0-2'}}</td>
             <td data-label="Date">{{dividend.dividendDate | date:'mediumDate'}}</td>
             <td>
                 <button pButton pRipple type="button" icon="pi pi-pencil" (click)="editDividend(dividend)"
                     class="p-button-rounded p-button-text mr-1" severity="info"></button>
                 <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(dividend.dividendId)"
                     class="p-button-rounded p-button-text ml-2" severity="danger"></button>
+            </td>
+        </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+        <tr>
+            <td colspan="5">
+                <div class="table-empty">
+                    <i class="pi pi-wallet"></i>
+                    <span class="table-empty-title">No dividends yet</span>
+                    <span>Use New to record a dividend payment.</span>
+                </div>
             </td>
         </tr>
     </ng-template>
@@ -64,8 +73,36 @@
     <ng-template pTemplate="content">
         <div class="grid">
             <div class="col-12 mb-2">
-                <label for="name" class="block mb-2 font-medium text-color-secondary">Name</label>
-                <input type="text" pInputText id="name" [(ngModel)]="dividend.shortName" class="w-full" />
+                <label for="exchange" class="block mb-2 font-medium text-color-secondary">Exchange</label>
+                <p-select class="searchDropdown" [options]="exchanges" optionLabel="Name" [virtualScroll]="true"
+                    [virtualScrollItemSize]="31" [filter]="true" filterBy="Name,Code"
+                    filterPlaceholder="Search by name or code"
+                    (onChange)="exchangeChanged($event)" [(ngModel)]="selectedExchange"
+                    placeholder="Select an Exchange" [style]="{'width':'100%'}"
+                    [dropdownIcon]="exchangesLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+                    <ng-template let-option pTemplate="item">
+                        <app-exchange-option [exchange]="option"></app-exchange-option>
+                    </ng-template>
+                    <ng-template let-option pTemplate="selectedItem">
+                        <app-exchange-option [exchange]="option" [dense]="true"></app-exchange-option>
+                    </ng-template>
+                </p-select>
+            </div>
+            <div class="col-12 mb-2">
+                <label for="ticker" class="block mb-2 font-medium text-color-secondary">Ticker</label>
+                <p-select class="searchDropdown" [options]="symbols" optionLabel="Name" [virtualScroll]="true"
+                    [virtualScrollItemSize]="46" [filter]="true" filterBy="Name,Code,Isin"
+                    filterPlaceholder="Search by name, code or ISIN"
+                    [(ngModel)]="selectedStock" placeholder="Select a Ticker"
+                    [style]="{'width':'100%'}"
+                    [dropdownIcon]="stocksLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+                    <ng-template let-option pTemplate="item">
+                        <app-symbol-option [symbol]="option"></app-symbol-option>
+                    </ng-template>
+                    <ng-template let-option pTemplate="selectedItem">
+                        <app-symbol-option [symbol]="option" [dense]="true"></app-symbol-option>
+                    </ng-template>
+                </p-select>
             </div>
             <div class="col-12 sm:col-6 mb-2">
                 <label for="currency" class="block mb-2 font-medium text-color-secondary">Currency</label>

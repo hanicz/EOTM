@@ -75,6 +75,7 @@
 									<directory>${project.parent.basedir}/backend/src/main/resources/public/resources</directory>
                                     <includes>
                                         <include>index.html</include>
+                                        <include>favicon.ico</include>
                                     </includes>
 								</resource>
 							</resources>

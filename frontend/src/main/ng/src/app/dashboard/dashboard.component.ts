@@ -68,6 +68,7 @@ export class DashboardComponent implements OnInit {
   forexTotal: number = 0;
   forexChangePct: number = 0;
   securityTotal: number = 0;
+  securityRatePct: number = 0;
 
   netWorth: number = 0;
   netWorthChangePct: number = 0;
@@ -154,6 +155,7 @@ export class DashboardComponent implements OnInit {
     this.forexTotal = this.worthOf(netWorth, 'Forex');
     this.forexChangePct = this.changeOf(netWorth, 'Forex');
     this.securityTotal = this.worthOf(netWorth, 'Securities');
+    this.securityRatePct = this.expectedRateOf(netWorth, 'Securities');
 
     this.netWorth = netWorth.totalWorth;
     this.netWorthChangePct = netWorth.totalChangePct;
@@ -167,6 +169,10 @@ export class DashboardComponent implements OnInit {
 
   private changeOf(netWorth: NetWorth, assetClass: string): number {
     return netWorth.assets?.find(a => a.assetClass === assetClass)?.changePct ?? 0;
+  }
+
+  private expectedRateOf(netWorth: NetWorth, assetClass: string): number {
+    return netWorth.assets?.find(a => a.assetClass === assetClass)?.expectedRatePct ?? 0;
   }
 
   private buildAllocation(netWorth: NetWorth): void {

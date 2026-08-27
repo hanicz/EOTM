@@ -32,6 +32,7 @@ class ETFInvestmentDTOTest {
                 .liveValue(55.4)
                 .shortName("AMD")
                 .valueDiff(77.8)
+                .exchange("NASDAQ")
                 .build();
         ETFInvestmentDTO baseDTO = this.getBaseDTO();
 
@@ -55,6 +56,7 @@ class ETFInvestmentDTOTest {
                 .liveValue(22.7)
                 .shortName("AMD")
                 .valueDiff(55.3)
+                .exchange("NASDAQ")
                 .build();
         ETFInvestmentDTO baseDTO = this.getBaseDTO();
 
@@ -64,6 +66,28 @@ class ETFInvestmentDTOTest {
                 () -> assertEquals(eiDTO2.getAmount() + baseDTO.getAmount(), eiDTO1.getAmount()),
                 () -> assertEquals(eiDTO2.getQuantity() + baseDTO.getQuantity(), eiDTO1.getQuantity()),
                 () -> assertEquals("B", eiDTO1.getBuySell()));
+    }
+
+    @Test
+    public void mergeInvestmentsDifferentExchange() {
+        ETFInvestmentDTO eiDTO1 = this.getBaseDTO();
+        ETFInvestmentDTO eiDTO2 = ETFInvestmentDTO.builder()
+                .amount(15.0)
+                .quantity(667)
+                .id(2L)
+                .buySell("B")
+                .liveValue(55.4)
+                .shortName("AMD")
+                .valueDiff(77.8)
+                .exchange("XETRA")
+                .build();
+
+        eiDTO1.mergeInvestments(eiDTO2);
+
+        Assertions.assertAll("Assert nothing merged",
+                () -> assertEquals(15.0, eiDTO1.getAmount()),
+                () -> assertEquals(667, eiDTO1.getQuantity()),
+                () -> assertEquals("NASDAQ", eiDTO1.getExchange()));
     }
 
     @Test
@@ -77,6 +101,7 @@ class ETFInvestmentDTOTest {
                 .liveValue(55.4)
                 .shortName("CRSR")
                 .valueDiff(77.8)
+                .exchange("NASDAQ")
                 .build();
 
         eiDTO1.mergeInvestments(eiDTO2);

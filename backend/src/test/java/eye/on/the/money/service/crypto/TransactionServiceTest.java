@@ -300,7 +300,7 @@ class TransactionServiceTest {
         Assertions.assertAll("Assert new transaction values",
                 () -> assertEquals("S", result.getBuySell()),
                 () -> assertEquals(1000.0, result.getQuantity()),
-                () -> assertEquals(2000.0, result.getPayment().getAmount()),
+                () -> assertEquals(2000.0, result.getAmount()),
                 () -> assertEquals(5.0, result.getFee()),
                 () -> assertEquals("LUNA", result.getCoin().getSymbol())
         );

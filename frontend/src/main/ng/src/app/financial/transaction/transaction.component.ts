@@ -40,9 +40,15 @@ export class FinancialTransactionComponent {
   transactions: BankTransaction[] = [];
   filteredTransactions: BankTransaction[] = [];
   selectedTransactions: BankTransaction[] = [];
-  types: { label: string, value: string }[] = [];
+  readonly flags: { label: string, value: string }[] = [
+    { label: 'Taxable', value: 'taxable' },
+    { label: 'Not taxable', value: 'notTaxable' },
+    { label: 'Excluded', value: 'excluded' },
+    { label: 'Counted', value: 'counted' }
+  ];
   fromDate: string = '';
   toDate: string = '';
+  flagFilter: string | null = null;
   readonly memoMaxLength = 500;
   private readonly editableFields = ['bookingDate', 'memo'];
   private beforeEdit: TransactionEditValues | null = null;
@@ -62,8 +68,7 @@ export class FinancialTransactionComponent {
     this.financialService.getTransactions().subscribe({
       next: (data) => {
         this.transactions = data;
-        this.types = [...new Set(data.map(t => t.type))].sort().map(type => ({ label: type, value: type }));
-        this.applyDateFilter();
+        this.applyFilters();
         this.cdr.markForCheck();
       },
       error: (error) => {
@@ -72,26 +77,39 @@ export class FinancialTransactionComponent {
     });
   }
 
-  get hasDateFilter(): boolean {
-    return !!this.fromDate || !!this.toDate;
+  get hasFilters(): boolean {
+    return !!this.fromDate || !!this.toDate || !!this.flagFilter;
   }
 
-  dateFilterChanged(): void {
+  filterChanged(): void {
     this.selectedTransactions = [];
-    this.applyDateFilter();
+    this.applyFilters();
   }
 
-  clearDateFilter(): void {
+  clearFilters(): void {
     this.fromDate = '';
     this.toDate = '';
-    this.dateFilterChanged();
+    this.flagFilter = null;
+    this.filterChanged();
   }
 
-  private applyDateFilter(): void {
+  private applyFilters(): void {
     this.filteredTransactions = this.transactions.filter(transaction => {
       const booked = this.bookedOn(transaction);
-      return (!this.fromDate || booked >= this.fromDate) && (!this.toDate || booked <= this.toDate);
+      return (!this.fromDate || booked >= this.fromDate)
+        && (!this.toDate || booked <= this.toDate)
+        && this.matchesFlag(transaction);
     });
+  }
+
+  private matchesFlag(transaction: BankTransaction): boolean {
+    switch (this.flagFilter) {
+      case 'taxable': return !!transaction.taxable;
+      case 'notTaxable': return !transaction.taxable;
+      case 'excluded': return !!transaction.excluded;
+      case 'counted': return !transaction.excluded;
+      default: return true;
+    }
   }
 
   private bookedOn(transaction: BankTransaction): string {
@@ -167,7 +185,7 @@ export class FinancialTransactionComponent {
     this.financialService.updateTransaction(transaction.id, bookingDate, memo).subscribe({
       next: () => {
         if (bookingDate !== previous.bookingDate) {
-          this.applyDateFilter();
+          this.applyFilters();
           this.dataChanged.emit();
         }
       },

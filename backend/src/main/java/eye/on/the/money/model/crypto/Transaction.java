@@ -1,6 +1,7 @@
 package eye.on.the.money.model.crypto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
@@ -17,7 +18,8 @@ import java.time.LocalDate;
 @ToString
 @Table(name = "EOTM_COIN_TRANSACTION", indexes = {
         @Index(name = "IDX_COIN_TRANSACTION_USER_DATE", columnList = "user_id, transaction_date"),
-        @Index(name = "IDX_COIN_TRANSACTION_COIN", columnList = "coin_id")})
+        @Index(name = "IDX_COIN_TRANSACTION_COIN", columnList = "coin_id"),
+        @Index(name = "IDX_COIN_TRANSACTION_CURRENCY", columnList = "currency_id")})
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
@@ -43,6 +45,9 @@ public class Transaction {
 
     private Double fee;
 
+    @Column(nullable = false)
+    private Double amount;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnore
@@ -52,7 +57,8 @@ public class Transaction {
     @JoinColumn(name = "coin_id", nullable = false)
     private Coin coin;
 
-    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true)
-    @JoinColumn(name = "payment_id", nullable = false)
-    private Payment payment;
+    @ManyToOne
+    @JoinColumn(name = "currency_id", nullable = false)
+    @JsonIgnore
+    private Currency currency;
 }

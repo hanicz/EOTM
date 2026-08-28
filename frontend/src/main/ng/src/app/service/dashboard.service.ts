@@ -18,9 +18,10 @@ export class DashboardService {
 
   constructor(private http: HttpClient) { }
 
-  getRates(currencies: string[]) {
+  getRates(currencies: string[], refresh = false) {
     const params = currencies.map(c => `currencies=${encodeURIComponent(c)}`).join('&');
-    const url = `${this.dashboardUrl}/rates${params ? '?' + params : ''}`;
+    const query = [params, refresh ? 'refresh=true' : ''].filter(p => p).join('&');
+    const url = `${this.dashboardUrl}/rates${query ? '?' + query : ''}`;
     return this.http.get<DashboardRates>(url, {
       headers: this.helper.getHeadersWithToken()
     });

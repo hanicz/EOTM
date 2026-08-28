@@ -70,6 +70,7 @@ export class SecurityComponent implements OnInit {
   private readonly BASE_CURRENCY = 'EUR';
   private rates: { [currency: string]: number } = { EUR: 1 };
 
+  private forceRateRefresh: boolean = false;
   private ratesRequestInFlight: boolean = false;
   private pendingRecalculation: boolean = false;
 
@@ -81,6 +82,7 @@ export class SecurityComponent implements OnInit {
   }
 
   refreshAll(): void {
+    this.forceRateRefresh = true;
     this.holding?.refresh();
     this.transaction?.refresh();
     this.interest?.refresh();
@@ -116,6 +118,7 @@ export class SecurityComponent implements OnInit {
 
   private loadRatesAndCalculate(): void {
     if (this.transactions.length === 0 && this.interests.length === 0) {
+      this.forceRateRefresh = false;
       this.calculateTotals();
       return;
     }
@@ -125,9 +128,13 @@ export class SecurityComponent implements OnInit {
       ...this.transactions.map(t => t.currencyId),
       ...this.interests.map(i => i.currencyId)
     ]);
-    const missing = [...neededCurrencies].filter(currency => !(currency in this.rates));
+    const forced = this.forceRateRefresh;
+    const requested = forced
+      ? [...neededCurrencies].filter(currency => currency !== this.BASE_CURRENCY)
+      : [...neededCurrencies].filter(currency => !(currency in this.rates));
 
-    if (missing.length === 0) {
+    if (requested.length === 0) {
+      this.forceRateRefresh = false;
       this.calculateTotals();
       return;
     }
@@ -138,20 +145,28 @@ export class SecurityComponent implements OnInit {
     }
 
     this.ratesRequestInFlight = true;
-    this.dashboardService.getRates(missing).subscribe({
+    this.dashboardService.getRates(requested, forced).subscribe({
       next: (response) => {
         this.rates = { ...this.rates, ...response.rates };
         this.ratesRequestInFlight = false;
+        this.clearForcedRefresh(forced);
         this.calculateTotals();
         this.recalculateIfPending();
       },
       error: (error) => {
         console.error('Error loading exchange rates:', error);
         this.ratesRequestInFlight = false;
+        this.clearForcedRefresh(forced);
         this.calculateTotals();
         this.recalculateIfPending();
       }
     });
+  }
+
+  private clearForcedRefresh(forced: boolean): void {
+    if (forced && !this.pendingRecalculation) {
+      this.forceRateRefresh = false;
+    }
   }
 
   private recalculateIfPending(): void {

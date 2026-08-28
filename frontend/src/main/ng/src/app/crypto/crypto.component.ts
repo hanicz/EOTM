@@ -54,6 +54,7 @@ export class CryptoComponent implements OnInit {
   // Rates are EUR -> currency (e.g. rates['USD'] = how many USD per 1 EUR). EUR itself is always 1.
   private readonly BASE_CURRENCY = 'EUR';
   private rates: { [currency: string]: number } = { EUR: 1 };
+  private forceRateRefresh: boolean = false;
 
   constructor(private dashboardService: DashboardService) { }
 
@@ -73,6 +74,7 @@ export class CryptoComponent implements OnInit {
   }
 
   refreshAll(): void {
+    this.forceRateRefresh = true;
     this.cryptoholding?.refresh();
     this.cryptoposition?.refresh();
     this.transaction?.refresh();
@@ -89,19 +91,24 @@ export class CryptoComponent implements OnInit {
 
   private loadRatesAndCalculate(): void {
     if (this.transactions.length === 0) {
+      this.forceRateRefresh = false;
       this.calculateTotals();
       return;
     }
 
     const neededCurrencies = new Set<string>([this.selectedCurrency, ...this.transactions.map(t => t.currencyId)]);
-    const missing = [...neededCurrencies].filter(currency => !(currency in this.rates));
+    const forced = this.forceRateRefresh;
+    this.forceRateRefresh = false;
+    const requested = forced
+      ? [...neededCurrencies].filter(currency => currency !== this.BASE_CURRENCY)
+      : [...neededCurrencies].filter(currency => !(currency in this.rates));
 
-    if (missing.length === 0) {
+    if (requested.length === 0) {
       this.calculateTotals();
       return;
     }
 
-    this.dashboardService.getRates(missing).subscribe({
+    this.dashboardService.getRates(requested, forced).subscribe({
       next: (response) => {
         this.rates = { ...this.rates, ...response.rates };
         this.calculateTotals();

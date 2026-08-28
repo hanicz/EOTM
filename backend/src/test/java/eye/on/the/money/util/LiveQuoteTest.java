@@ -43,6 +43,22 @@ class LiveQuoteTest {
     }
 
     @Test
+    void price_carriesTheDailyChangeWhenQuoted() {
+        LiveQuote.Price price = LiveQuote.price(this.quote("AMD.US")).orElseThrow();
+
+        assertEquals(-16.505, price.change());
+        assertEquals(-3.4876, price.changePercent());
+    }
+
+    @Test
+    void price_leavesTheDailyChangeNullWhenNotAvailable() {
+        LiveQuote.Price stale = LiveQuote.price(this.quote("RICHTER.BUD")).orElseThrow();
+
+        assertNull(stale.change());
+        assertNull(stale.changePercent());
+    }
+
+    @Test
     void numeric_isEmptyForMissingField() {
         assertTrue(LiveQuote.numeric(this.quote("AMD.US"), "nope").isEmpty());
     }

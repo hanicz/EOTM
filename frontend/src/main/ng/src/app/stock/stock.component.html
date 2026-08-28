@@ -8,6 +8,16 @@
       <div class="summary-stat">Total Worth:
         <b class="amount">{{totalWorth | currency : selectedCurrency : 'symbol' : '0.0-2'}}</b>
       </div>
+      <div class="summary-stat">Today:
+        @if (todayDiff > 0) {
+          <p-tag severity="success"
+            value="{{(todayDiff | currency : selectedCurrency : 'symbol' : '0.0-2') + ' (' + (todayPercentage | number : '0.0-1') + '%)'}}"></p-tag>
+        }
+        @if (todayDiff < 0) {
+          <p-tag severity="danger"
+            value="{{(todayDiff | currency : selectedCurrency : 'symbol' : '0.0-2') + ' (' + (todayPercentage | number : '0.0-1') + '%)'}}"></p-tag>
+        }
+      </div>
       <div class="summary-stat">Profit:
         @if (diffy > 0) {
           <p-tag severity="success"

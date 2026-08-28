@@ -15,48 +15,66 @@ import static org.springframework.http.HttpStatus.*;
 @ControllerAdvice
 @Slf4j
 public class ExceptionAdvice extends ResponseEntityExceptionHandler {
+
+    private static final String INVALID_REQUEST_MESSAGE = "Invalid request";
+
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<ErrorResponse> handleNoSuchElementException(NoSuchElementException e) {
+        log.warn("Not found: {}", e.getMessage());
         return ResponseEntity.status(NOT_FOUND).body(new ErrorResponse(NOT_FOUND.value(), e.getMessage()));
     }
 
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUsernameNotFoundException(UsernameNotFoundException e) {
+        log.warn("User not found: {}", e.getMessage());
         return ResponseEntity.status(NOT_FOUND).body(new ErrorResponse(NOT_FOUND.value(), "User not found: " + e.getMessage()));
     }
 
     @ExceptionHandler(APIException.class)
     public ResponseEntity<ErrorResponse> handleAPIException(APIException e) {
+        log.warn("API error: {}", e.getMessage());
         return ResponseEntity.status(BAD_REQUEST).body(new ErrorResponse(BAD_REQUEST.value(), e.getMessage()));
     }
 
     @ExceptionHandler(CSVException.class)
     public ResponseEntity<ErrorResponse> handleCSVException(CSVException e) {
+        log.warn("CSV error: {}", e.getMessage());
+        return ResponseEntity.status(BAD_REQUEST).body(new ErrorResponse(BAD_REQUEST.value(), e.getMessage()));
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(ValidationException e) {
+        log.warn("Validation failed: {}", e.getMessage());
         return ResponseEntity.status(BAD_REQUEST).body(new ErrorResponse(BAD_REQUEST.value(), e.getMessage()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e) {
-        return ResponseEntity.status(BAD_REQUEST).body(new ErrorResponse(BAD_REQUEST.value(), e.getMessage()));
+        log.warn("Rejected request: {}", e.getMessage(), e);
+        return ResponseEntity.status(BAD_REQUEST).body(new ErrorResponse(BAD_REQUEST.value(), INVALID_REQUEST_MESSAGE));
     }
 
     @ExceptionHandler(TaxException.class)
     public ResponseEntity<ErrorResponse> handleTaxException(TaxException e) {
+        log.warn("Tax error: {}", e.getMessage());
         return ResponseEntity.status(BAD_REQUEST).body(new ErrorResponse(BAD_REQUEST.value(), e.getMessage()));
     }
 
     @ExceptionHandler(FireException.class)
     public ResponseEntity<ErrorResponse> handleFireException(FireException e) {
+        log.warn("FIRE error: {}", e.getMessage());
         return ResponseEntity.status(BAD_REQUEST).body(new ErrorResponse(BAD_REQUEST.value(), e.getMessage()));
     }
 
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleUserAlreadyExistsException(UserAlreadyExistsException e) {
+        log.warn("Sign up conflict: {}", e.getMessage());
         return ResponseEntity.status(CONFLICT).body(new ErrorResponse(CONFLICT.value(), e.getMessage()));
     }
 
     @ExceptionHandler(PasswordException.class)
     public ResponseEntity<ErrorResponse> handlePasswordException(PasswordException e) {
+        log.warn("Password error: {}", e.getMessage());
         return ResponseEntity.status(FORBIDDEN).body(new ErrorResponse(FORBIDDEN.value(), e.getMessage()));
     }
 

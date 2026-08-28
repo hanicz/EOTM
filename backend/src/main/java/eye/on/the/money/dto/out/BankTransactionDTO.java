@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import eye.on.the.money.dto.CSVHelper;
+import eye.on.the.money.exception.ValidationException;
 import eye.on.the.money.model.financial.BankTransaction;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -113,7 +114,7 @@ public class BankTransactionDTO implements CSVHelper {
             normalised.append(character == DECIMAL_SEPARATOR ? '.' : character);
         }
         if (normalised.isEmpty()) {
-            throw new IllegalArgumentException("Missing amount");
+            throw new ValidationException("Missing amount");
         }
         return Double.parseDouble(normalised.toString());
     }

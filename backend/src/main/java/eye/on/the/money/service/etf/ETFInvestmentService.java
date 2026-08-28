@@ -3,7 +3,6 @@ package eye.on.the.money.service.etf;
 import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.out.ETFInvestmentDTO;
 import eye.on.the.money.exception.APIException;
-import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.etf.ETF;
@@ -111,6 +110,8 @@ public class ETFInvestmentService implements ICSVService {
                             i.setLiveValue(price.get().value() * i.getQuantity());
                             i.setValueDiff(i.getLiveValue() - i.getAmount());
                             i.setStalePrice(price.get().stale());
+                            i.setDayChange(price.get().change() == null ? null : price.get().change() * i.getQuantity());
+                            i.setDayChangePercent(price.get().changePercent());
                         });
             }
         } catch (APIException e) {
@@ -208,11 +209,13 @@ public class ETFInvestmentService implements ICSVService {
     @CacheEvict(cacheNames = "holdings-etf", key = "#userId")
     @Transactional
     public void processCSV(Long userId, MultipartFile file) {
+        long lineNumber = 0;
         try (CSVParser csvParser = this.getParser(file,
                 new String[]{"Investment Id", "Quantity", "Type", "Transaction Date", "Short Name", "Exchange", "Amount", "Currency", "Fee", "Account"})) {
             Map<String, Long> accountIdsByName = this.accountService.getAccountIdsByName(userId);
 
             for (CSVRecord csvRecord : csvParser) {
+                lineNumber = csvParser.getCurrentLineNumber();
                 ETFInvestmentDTO investment = ETFInvestmentDTO.createFromCSVRecord(csvRecord, DateFormats.YYYY_MM_DD);
                 investment.setAccountId(this.resolveAccountId(accountIdsByName, investment.getAccountName()));
 
@@ -228,7 +231,7 @@ public class ETFInvestmentService implements ICSVService {
             }
         } catch (IOException | DateTimeParseException | IllegalArgumentException e) {
             log.error("Error while processing CSV", e);
-            throw new CSVException("Failed to parse CSV file: " + e.getMessage(), e);
+            throw this.csvParseFailure(lineNumber, e);
         }
     }
 }

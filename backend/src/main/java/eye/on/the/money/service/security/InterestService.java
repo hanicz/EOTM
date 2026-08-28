@@ -1,7 +1,6 @@
 package eye.on.the.money.service.security;
 
 import eye.on.the.money.dto.out.InterestDTO;
-import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.security.Interest;
@@ -100,9 +99,11 @@ public class InterestService implements ICSVService {
 
     @Transactional
     public void processCSV(Long userId, MultipartFile file) {
+        long lineNumber = 0;
         try (CSVParser csvParser = this.getParser(file,
                 new String[]{"Interest Id", "Amount", "Interest Date", "Security Id", "Security Name", "Currency"})) {
             for (CSVRecord csvRecord : csvParser) {
+                lineNumber = csvParser.getCurrentLineNumber();
                 InterestDTO interest = InterestDTO.createFromCSVRecord(csvRecord, DateFormats.YYYY_MM_DD);
 
                 if (interest.getInterestId() != null &&
@@ -115,7 +116,7 @@ public class InterestService implements ICSVService {
             }
         } catch (IOException | DateTimeParseException | IllegalArgumentException e) {
             log.error("Error while processing CSV", e);
-            throw new CSVException("Failed to parse CSV file: " + e.getMessage(), e);
+            throw this.csvParseFailure(lineNumber, e);
         }
     }
 }

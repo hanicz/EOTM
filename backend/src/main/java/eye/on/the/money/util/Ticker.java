@@ -1,5 +1,7 @@
 package eye.on.the.money.util;
 
+import eye.on.the.money.exception.ValidationException;
+
 import java.util.Locale;
 
 public final class Ticker {
@@ -27,7 +29,7 @@ public final class Ticker {
 
     private static String normalize(String value, String field) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("Security " + field + " must not be blank");
+            throw new ValidationException("Security " + field + " must not be blank");
         }
         return value.trim().toUpperCase(Locale.ROOT);
     }

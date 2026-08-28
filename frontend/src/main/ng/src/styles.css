@@ -287,8 +287,13 @@ html {
         text-align: right;
     }
 
+    .table-stack .p-datatable-tbody > tr > td {
+        flex-wrap: wrap;
+        row-gap: 0;
+    }
+
     .table-stack .p-datatable-tbody > tr > td > .cell-sub {
-        display: inline;
+        flex: 0 0 100%;
     }
 }
 /* The table search boxes carry an inline `width: 16rem`, which overflows a

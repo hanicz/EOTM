@@ -31,7 +31,6 @@ export class UserService {
       withCredentials: true,
       observe: 'response'
     }).pipe(tap(response => {
-      console.log(<string>response.headers.get('token'));
       localStorage.setItem('token', <string>response.headers.get('token'));
       this.cachedUser$ = undefined;
     }));
@@ -69,7 +68,6 @@ export class UserService {
 
   changePassword(oldPassword: string, newPassword: string) {
     const url = `${this.userUrl}/password`;
-    console.log(JSON.stringify({ oldPassword, newPassword }));
     return this.http.put(url, JSON.stringify({ oldPassword, newPassword }), {
       headers: this.helper.getHeadersWithToken()
     });

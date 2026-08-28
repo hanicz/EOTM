@@ -1,4 +1,5 @@
 import { Component, OnInit, HostListener } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { User } from '../model/user';
 import { UserService } from '../service/user.service';
 import { Router } from '@angular/router';
@@ -43,14 +44,18 @@ export class LoginComponent {
         next: (data) => {
           this.router.navigate(['./dashboard'])
         },
-        error: () => {
-          this.showError();
+        error: (err: HttpErrorResponse) => {
+          this.showError(err);
         }
       });
     }
   }
 
-  private showError() {
+  private showError(err: HttpErrorResponse) {
+    if (err.status === 429) {
+      this.messageService.add({ severity: 'warn', detail: 'Too many login attempts. Please wait a minute and try again.' });
+      return;
+    }
     this.messageService.add({ severity: 'error', detail: 'Login failed!' });
   }
 }

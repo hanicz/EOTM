@@ -32,17 +32,24 @@ public abstract class APIService {
     protected final WebClient webClient;
     protected final ObjectMapper objectMapper;
 
+    private static final String SERVICE_UNAVAILABLE_MESSAGE = "Service temporarily unavailable";
+
     private final Map<String, String> apiUrlCache = new ConcurrentHashMap<>();
     private final Map<String, String> secretCache = new ConcurrentHashMap<>();
 
     protected String getApiUrl(String api) {
         return this.apiUrlCache.computeIfAbsent(api, key -> this.configRepository.findById(key)
-                .orElseThrow(() -> new NoSuchElementException("API config not found: " + key)).getConfigValue());
+                .orElseThrow(() -> this.missingApiSetting("config", key)).getConfigValue());
     }
 
     protected String getSecret(String api) {
         return this.secretCache.computeIfAbsent(api, key -> this.credentialRepository.findById(key)
-                .orElseThrow(() -> new NoSuchElementException("API credential not found: " + key)).getSecret());
+                .orElseThrow(() -> this.missingApiSetting("credential", key)).getSecret());
+    }
+
+    private NoSuchElementException missingApiSetting(String kind, String key) {
+        log.error("Missing API {} for key {}", kind, key);
+        return new NoSuchElementException(SERVICE_UNAVAILABLE_MESSAGE);
     }
 
     protected String createURL(String api, String path, String... params) {

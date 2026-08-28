@@ -53,6 +53,23 @@ import { TickerLogoComponent } from './ticker-logo.component';
       color: var(--p-text-muted-color, #5f5e5a);
       font-size: 0.7rem;
     }
+
+    @media screen and (max-width: 767px) {
+      /* A name too long for the label's line wraps the whole cell onto a
+         second flex line, which starts at the left edge. */
+      :host {
+        margin-left: auto;
+      }
+
+      .ticker-identity {
+        align-items: flex-end;
+      }
+
+      .ticker-identity-head,
+      .ticker-identity-name {
+        max-width: 100%;
+      }
+    }
   `]
 })
 export class TickerIdentityComponent {

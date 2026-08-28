@@ -1,7 +1,6 @@
 package eye.on.the.money.service.etf;
 
 import eye.on.the.money.dto.out.ETFDividendDTO;
-import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.etf.ETF;
@@ -99,9 +98,11 @@ public class ETFDividendService implements ICSVService {
 
     @Transactional
     public void processCSV(Long userId, MultipartFile file) {
+        long lineNumber = 0;
         try (CSVParser csvParser = this.getParser(file,
                 new String[]{"Dividend Id", "Amount", "Dividend Date", "Short Name","Exchange", "Currency"})) {
             for (CSVRecord csvRecord : csvParser) {
+                lineNumber = csvParser.getCurrentLineNumber();
                 ETFDividendDTO dividend = ETFDividendDTO.createFromCSVRecord(csvRecord, DateFormats.YYYY_MM_DD);
 
                 if (dividend.getId() != null &&
@@ -114,7 +115,7 @@ public class ETFDividendService implements ICSVService {
             }
         } catch (IOException | DateTimeParseException | IllegalArgumentException e) {
             log.error("Error while processing CSV", e);
-            throw new CSVException("Failed to parse CSV file: " + e.getMessage(), e);
+            throw this.csvParseFailure(lineNumber, e);
         }
     }
 }

@@ -108,8 +108,10 @@ public class BankTransactionService implements ICSVService {
         User user = this.userService.getReference(userId);
         int created = 0;
         int updated = 0;
+        long lineNumber = 0;
         try (CSVParser csvParser = this.getParser(file, BankTransactionDTO.KH_HEADERS, KH_DELIMITER, this.detectCharset(file))) {
             for (CSVRecord csvRecord : csvParser) {
+                lineNumber = csvParser.getCurrentLineNumber();
                 if (this.isBlankRecord(csvRecord)) {
                     continue;
                 }
@@ -122,7 +124,7 @@ public class BankTransactionService implements ICSVService {
             }
         } catch (IOException | DateTimeParseException | IllegalArgumentException e) {
             log.error("Error while processing CSV", e);
-            throw new CSVException("Failed to parse CSV file: " + e.getMessage(), e);
+            throw this.csvParseFailure(lineNumber, e);
         }
         log.debug("Imported bank transactions, created {}, updated {}", created, updated);
         return ImportResultDTO.builder().created(created).updated(updated).build();

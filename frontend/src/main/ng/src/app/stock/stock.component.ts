@@ -44,6 +44,8 @@ export class StockComponent implements OnInit {
   totalWorth: number = 0;
   diffy: number = 0;
   percentage: number = 0;
+  todayDiff: number = 0;
+  todayPercentage: number = 0;
 
   currencyOptions = [
     { label: 'HUF', value: 'HUF' },
@@ -132,14 +134,20 @@ export class StockComponent implements OnInit {
     this.totalWorth = 0;
     this.diffy = 0;
     this.percentage = 0;
+    this.todayDiff = 0;
+    this.todayPercentage = 0;
 
     this.investments.forEach(i => {
       this.totalSpent += this.convert(i.amount, i.currencyId);
       const worth = i.liveValue != undefined ? i.liveValue : i.amount;
       this.totalWorth += this.convert(worth, i.currencyId);
+      this.todayDiff += this.convert(i.dayChange ?? 0, i.currencyId);
     });
     this.diffy = this.totalWorth - this.totalSpent;
     this.percentage = this.diffy / this.totalSpent * 100;
+
+    const previousWorth = this.totalWorth - this.todayDiff;
+    this.todayPercentage = previousWorth !== 0 ? this.todayDiff / previousWorth * 100 : 0;
 
     this.allocationChartOptions.series = this.investments.map(i => this.convert(i.liveValue ?? i.amount, i.currencyId));
     this.allocationChartOptions.labels = this.investments.map(i => `${i.shortName}.${i.exchange}`);

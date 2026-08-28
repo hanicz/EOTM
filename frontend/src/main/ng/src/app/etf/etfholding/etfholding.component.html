@@ -8,6 +8,7 @@
       <th class="cell-num" pSortableColumn="amount">Spent <p-sortIcon field="amount"></p-sortIcon></th>
       <th class="cell-num" pSortableColumn="liveValue">Worth <p-sortIcon field="liveValue"></p-sortIcon></th>
       <th class="cell-num">Price</th>
+      <th class="cell-num" pSortableColumn="dayChange">Today <p-sortIcon field="dayChange"></p-sortIcon></th>
       <th class="cell-num" pSortableColumn="valueDiff">Profit <p-sortIcon field="valueDiff"></p-sortIcon></th>
     </tr>
   </ng-template>
@@ -21,6 +22,7 @@
         <td data-label="Spent"><p-skeleton></p-skeleton></td>
         <td data-label="Worth"><p-skeleton></p-skeleton></td>
         <td data-label="Price"><p-skeleton></p-skeleton></td>
+        <td data-label="Today"><p-skeleton></p-skeleton></td>
         <td data-label="Profit"><p-skeleton></p-skeleton></td>
       } @else {
         <td data-label="ETF Name">
@@ -48,6 +50,10 @@
           }
           <span class="cell-sub">{{investment.amount / investment.quantity | currency : investment.currencyId : 'symbol' : '0.0-3'}} avg</span>
         </td>
+        <td data-label="Today" class="cell-num">
+          <app-delta [value]="investment.dayChange ?? null" [percent]="investment.dayChangePercent ?? null"
+            [currency]="investment.currencyId"></app-delta>
+        </td>
         <td data-label="Profit" class="cell-num">
           <app-delta [value]="investment.liveValue != null ? investment.valueDiff : null"
             [percent]="investment.liveValue != null ? (investment.valueDiff / investment.amount * 100) : null"
@@ -59,7 +65,7 @@
 
   <ng-template pTemplate="emptymessage">
     <tr>
-      <td colspan="7">
+      <td colspan="8">
         <div class="table-empty">
           <i class="pi pi-chart-line"></i>
           <span class="table-empty-title">No holdings yet</span>

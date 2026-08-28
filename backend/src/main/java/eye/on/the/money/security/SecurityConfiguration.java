@@ -1,5 +1,6 @@
 package eye.on.the.money.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eye.on.the.money.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,15 +29,17 @@ public class SecurityConfiguration {
     private final PasswordEncoder passwordEncoder;
     private final CorsConfigurationSource corsConfigurationSource;
     private final JwtService jwtService;
+    private final ObjectMapper objectMapper;
 
     @Autowired
     public SecurityConfiguration(UserService userService, PasswordEncoder passwordEncoder,
                                  @Qualifier("cors") CorsConfigurationSource corsConfigurationSource,
-                                 JwtService jwtService) {
+                                 JwtService jwtService, ObjectMapper objectMapper) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.corsConfigurationSource = corsConfigurationSource;
         this.jwtService = jwtService;
+        this.objectMapper = objectMapper;
     }
 
     @Bean
@@ -47,12 +50,12 @@ public class SecurityConfiguration {
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::deny))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, SIGN_UP_URL).permitAll()
+                        .requestMatchers(HttpMethod.POST, SIGN_UP_URL).denyAll()
                         .requestMatchers("/", "/resources/**", "/index.html", "/favicon.ico").permitAll()
                         .requestMatchers(SecurityConstants.SPA_ROUTES).permitAll()
                         .anyRequest().authenticated())
                 .authenticationManager(authenticationManager)
-                .addFilterBefore(new AuthenticationFilter(authenticationManager, this.jwtService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new AuthenticationFilter(authenticationManager, this.jwtService, this.objectMapper), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new AuthorizationFilter(this.userService, this.jwtService), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

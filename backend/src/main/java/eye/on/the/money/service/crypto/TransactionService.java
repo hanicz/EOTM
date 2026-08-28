@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.in.TransactionQuery;
 import eye.on.the.money.dto.out.TransactionDTO;
 import eye.on.the.money.exception.APIException;
-import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.crypto.Coin;
@@ -174,9 +173,11 @@ public class TransactionService implements ICSVService {
     @CacheEvict(cacheNames = "holdings-crypto", key = "#userId")
     @Transactional
     public void processCSV(Long userId, MultipartFile file) {
+        long lineNumber = 0;
         try (CSVParser csvParser = this.getParser(file,
                 new String[]{"Transaction Id", "Quantity", "Type", "Transaction Date", "Symbol", "Amount", "Currency", "Fee"})) {
             for (CSVRecord csvRecord : csvParser) {
+                lineNumber = csvParser.getCurrentLineNumber();
                 TransactionDTO transaction = TransactionDTO.createFromCSVRecord(csvRecord, DateFormats.YYYY_MM_DD);
 
                 if (transaction.getId() != null &&
@@ -189,7 +190,7 @@ public class TransactionService implements ICSVService {
             }
         } catch (IOException | DateTimeParseException | IllegalArgumentException e) {
             log.error("Error while processing CSV", e);
-            throw new CSVException("Failed to parse CSV file: " + e.getMessage(), e);
+            throw this.csvParseFailure(lineNumber, e);
         }
     }
 }

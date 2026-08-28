@@ -31,7 +31,7 @@ public interface ICSVService {
                 csvPrinter.printRecord(this.neutralize(record.getCSVRecord()));
             }
         } catch (IOException e) {
-            throw new CSVException("Failed to create CSV file: " + e.getMessage(), e);
+            throw new CSVException("Failed to create CSV file", e);
         }
     }
 
@@ -64,6 +64,12 @@ public interface ICSVService {
         } catch (NumberFormatException e) {
             return false;
         }
+    }
+
+    default CSVException csvParseFailure(long lineNumber, Exception cause) {
+        return new CSVException(lineNumber > 0
+                ? "Failed to parse CSV file at row " + lineNumber
+                : "Failed to parse CSV file", cause);
     }
 
     default Long resolveAccountId(Map<String, Long> accountIdsByName, String accountName) {

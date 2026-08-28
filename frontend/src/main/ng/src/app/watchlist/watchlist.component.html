@@ -182,8 +182,8 @@
 
 <p-dialog [(visible)]="display" header="Add to watchlist" [modal]="true"
   [breakpoints]="{'1400px': '40vw', '992px': '75vw', '576px': '100vw'}"
-  [style]="{width: '32vw', minWidth: '26rem'}"
-  [draggable]="false" [resizable]="false">
+  [style]="{width: '32vw', minWidth: 'min(26rem, 100vw)'}"
+  [draggable]="false" [resizable]="false" [appendTo]="'body'">
   <p-tabs value="0">
     <p-tablist>
       <p-tab value="0">Stock</p-tab>

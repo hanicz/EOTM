@@ -11,6 +11,8 @@ export interface ETFInvestment {
     liveValue?: number;
     stalePrice?: boolean;
     valueDiff?: number;
+    dayChange?: number;
+    dayChangePercent?: number;
     fee: number;
     eodDate: Date;
     accountId: number;

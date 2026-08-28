@@ -23,7 +23,8 @@ import java.util.TreeSet;
  * <p>
  * The plan runs as one continuous timeline from today to the end of life. Up to the retirement year the pot
  * grows and takes contributions; after it, contributions stop and an inflation-linked income is drawn from
- * it. Growth is compounded monthly and contributions land at the end of each month.
+ * it. Growth is applied once a year, and the year's contributions, pension and withdrawals land at the end
+ * of it.
  * <p>
  * Two figures are reported for every year. The nominal balance is the number that would be on the statement;
  * the real balance discounts that back to today's money. Which one the target is measured against depends on
@@ -123,7 +124,7 @@ public class FireService implements ICSVService {
      */
     private List<FireYearDTO> simulate(double startingValue, Assumptions assumptions, int retirementYear,
                                        double annualSpending) {
-        double monthlyGrowth = Math.pow(1 + assumptions.annualReturn() / 100.0, 1.0 / MONTHS_IN_YEAR);
+        double growthRate = assumptions.annualReturn() / 100.0;
         double inflationRate = 1 + assumptions.inflation() / 100.0;
         double contributionRise = 1 + assumptions.contributionIncrease() / 100.0;
 
@@ -137,33 +138,29 @@ public class FireService implements ICSVService {
             boolean accumulating = year <= retirementYear;
             double inflationToYear = Math.pow(inflationRate, year);
 
-            // Contributions rise once a year; spending and pension are given in today's money and inflated
-            // to the year they land in. Everything is then applied in twelve equal monthly steps.
-            double monthlyContribution = accumulating
-                    ? assumptions.monthlyContribution() * Math.pow(contributionRise, year - 1) : 0;
-            double monthlySpending = accumulating
-                    ? 0 : annualSpending * inflationToYear / MONTHS_IN_YEAR;
-            double monthlyPension = this.pensionPaid(assumptions, year)
-                    ? assumptions.monthlyPension() * inflationToYear : 0;
-
-            // The pension meets the spending first, so only the shortfall comes out of the pot. Anything
-            // left over is income with nowhere else to go, so it joins the pot.
-            double monthlyIn = monthlyContribution + Math.max(0, monthlyPension - monthlySpending);
-            double monthlyOut = Math.max(0, monthlySpending - monthlyPension);
-
             double contributed = 0;
             double pension = 0;
             double withdrawn = 0;
             double earned = 0;
-            for (int month = 0; month < MONTHS_IN_YEAR && !depleted; month++) {
-                double growth = balance * (monthlyGrowth - 1);
-                balance = balance + growth + monthlyIn - monthlyOut;
-                earned += growth;
-                contributed += monthlyContribution;
-                pension += monthlyPension;
-                withdrawn += monthlyOut;
+
+            if (!depleted) {
+                // Contributions rise once a year; spending and pension are given in today's money and
+                // inflated to the year they land in. The monthly figures are taken as a year's worth.
+                contributed = accumulating ? assumptions.monthlyContribution() * MONTHS_IN_YEAR
+                        * Math.pow(contributionRise, year - 1) : 0;
+                double spending = accumulating ? 0 : annualSpending * inflationToYear;
+                pension = this.pensionPaid(assumptions, year)
+                        ? assumptions.monthlyPension() * MONTHS_IN_YEAR * inflationToYear : 0;
+
+                // The pension meets the spending first, so only the shortfall comes out of the pot. Anything
+                // left over is income with nowhere else to go, so it joins the pot.
+                double paidIn = contributed + Math.max(0, pension - spending);
+                withdrawn = Math.max(0, spending - pension);
+
+                earned = balance * growthRate;
+                balance = balance + earned + paidIn - withdrawn;
                 if (balance <= 0) {
-                    // The last withdrawal only partly landed; report what was actually taken.
+                    // The withdrawal only partly landed; report what was actually taken.
                     withdrawn += balance;
                     balance = 0;
                     depleted = true;
@@ -175,6 +172,7 @@ public class FireService implements ICSVService {
         }
         return timeline;
     }
+
 
     private FireYearDTO year(int year, Assumptions assumptions, String phase, double contributed,
                              double earned, double pension, double withdrawn, double balance) {

@@ -133,6 +133,25 @@ class InvestmentServiceTest {
     }
 
     @Test
+    public void currentHoldingsCarryTheDailyChange() throws JsonProcessingException {
+        when(this.eodAPIService.getLiveStockValue(anyString())).thenReturn(new ObjectMapper().readTree("""
+                [{"code":"GOOG.US","close":30.0,"previousClose":27.5,"change":2.5,"change_p":9.0909},
+                 {"code":"INTC.US","close":"NA","previousClose":21.0,"change":"NA","change_p":"NA"}]"""));
+
+        List<InvestmentDTO> result = this.investmentService.getCurrentHoldings(this.user.getId());
+        InvestmentDTO goog = result.stream().filter(iDTO -> "GOOG".equals(iDTO.getShortName())).findAny().orElseThrow();
+        InvestmentDTO intc = result.stream().filter(iDTO -> "INTC".equals(iDTO.getShortName())).findAny().orElseThrow();
+
+        Assertions.assertAll("The daily change scales with quantity and stays absent for an unquoted holding",
+                () -> assertEquals(12.5, goog.getDayChange(), this.epsilon),
+                () -> assertEquals(9.0909, goog.getDayChangePercent(), this.epsilon),
+                () -> assertEquals(42.0, intc.getLiveValue(), this.epsilon),
+                () -> Assertions.assertTrue(intc.getStalePrice()),
+                () -> Assertions.assertNull(intc.getDayChange()),
+                () -> Assertions.assertNull(intc.getDayChangePercent()));
+    }
+
+    @Test
     public void getAllPositionsReopenedLotIsNotMergedWithClosedLot() {
         List<InvestmentDTO> result = this.investmentService.getAllPositions(this.user.getId());
         List<InvestmentDTO> googPositions = result.stream().filter(iDTO -> "GOOG".equals(iDTO.getShortName())).toList();

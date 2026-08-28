@@ -124,13 +124,13 @@ class FireServiceTest {
     }
 
     @Test
-    void project_compoundsMonthlyToTheStatedAnnualReturn() {
+    void project_appliesTheAnnualReturnOncePerYear() {
         this.stubPortfolio(1_000_000);
 
         FireProjectionResultDTO result = this.fireService.project(USER,
                 this.plan().annualReturn(BigDecimal.valueOf(10)).build());
 
-        // Twelve monthly steps of (1.10)^(1/12) come back to exactly 10% over the year.
+        // One step of 10% a year, applied to whatever the pot opened the year with.
         assertEquals(1_100_000, this.yearOf(result, 1).getBalance().doubleValue(), 1.0);
         assertEquals(1_210_000, this.yearOf(result, 2).getBalance().doubleValue(), 1.0);
     }
@@ -181,6 +181,24 @@ class FireServiceTest {
                         + first.getGrowth().doubleValue(), TOLERANCE);
     }
 
+    /**
+     * Contributions land at the end of the year, so the return is earned on the opening balance alone. The
+     * whole point of the annual step is that this row reads 100,000 and not the 155,000 a monthly one gave.
+     */
+    @Test
+    void project_earnsNothingOnTheContributionsPaidInThatYear() {
+        this.stubPortfolio(1_000_000);
+
+        FireProjectionResultDTO result = this.fireService.project(USER,
+                this.plan().annualReturn(BigDecimal.valueOf(10))
+                        .monthlyContribution(BigDecimal.valueOf(100_000)).build());
+
+        FireYearDTO first = this.yearOf(result, 1);
+        assertEquals(100_000, first.getGrowth().doubleValue(), TOLERANCE);
+        assertEquals(1_200_000, first.getContributions().doubleValue(), TOLERANCE);
+        assertEquals(2_300_000, first.getBalance().doubleValue(), TOLERANCE);
+    }
+
     @Test
     void project_keepsReportingGrowthOnWhatIsLeftInDrawdown() {
         this.stubPortfolio(100_000_000);
@@ -197,7 +215,7 @@ class FireServiceTest {
     }
 
     @Test
-    void project_addsContributionsEveryMonth() {
+    void project_addsAWholeYearOfContributions() {
         FireProjectionResultDTO result = this.fireService.project(USER,
                 this.plan().monthlyContribution(BigDecimal.valueOf(100_000)).build());
 

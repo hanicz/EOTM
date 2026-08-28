@@ -1,5 +1,7 @@
 package eye.on.the.money.service.etf;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eye.on.the.money.EotmApplication;
 import eye.on.the.money.dto.out.ETFInvestmentDTO;
 import eye.on.the.money.exception.CSVException;
@@ -28,6 +30,8 @@ import java.util.NoSuchElementException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = EotmApplication.class)
 @ActiveProfiles("test")
@@ -70,6 +74,41 @@ class ETFInvestmentServiceTest {
         assertEquals(2, vwrl.size());
         assertEquals(500.0, vwrl.stream().filter(i -> i.getAccountId() == 1L).findFirst().orElseThrow().getAmount());
         assertEquals(260.0, vwrl.stream().filter(i -> i.getAccountId() == 2L).findFirst().orElseThrow().getAmount());
+    }
+
+    @Test
+    public void currentHoldingsCarryTheDailyChange() throws JsonProcessingException {
+        when(this.eodAPIService.getLiveEtfValue(anyString())).thenReturn(new ObjectMapper().readTree("""
+                [{"code":"VWRL.AS","close":110.0,"previousClose":100.0,"change":10.0,"change_p":10.0}]"""));
+
+        List<ETFInvestmentDTO> result = this.etfInvestmentService.getCurrentETFHoldings(this.user.getId());
+
+        ETFInvestmentDTO firstAccount = result.stream()
+                .filter(i -> "VWRL".equals(i.getShortName()) && i.getAccountId() == 1L).findFirst().orElseThrow();
+        ETFInvestmentDTO secondAccount = result.stream()
+                .filter(i -> "VWRL".equals(i.getShortName()) && i.getAccountId() == 2L).findFirst().orElseThrow();
+
+        Assertions.assertAll("The daily change scales with each lot's quantity",
+                () -> assertEquals(100.0, firstAccount.getDayChange()),
+                () -> assertEquals(10.0, firstAccount.getDayChangePercent()),
+                () -> assertEquals(50.0, secondAccount.getDayChange()),
+                () -> assertEquals(10.0, secondAccount.getDayChangePercent()));
+    }
+
+    @Test
+    public void currentHoldingsLeaveTheDailyChangeAbsentForAnUnquotedEtf() throws JsonProcessingException {
+        when(this.eodAPIService.getLiveEtfValue(anyString())).thenReturn(new ObjectMapper().readTree("""
+                [{"code":"VWRL.AS","close":"NA","previousClose":100.0,"change":"NA","change_p":"NA"}]"""));
+
+        List<ETFInvestmentDTO> result = this.etfInvestmentService.getCurrentETFHoldings(this.user.getId());
+        ETFInvestmentDTO vwrl = result.stream()
+                .filter(i -> "VWRL".equals(i.getShortName()) && i.getAccountId() == 1L).findFirst().orElseThrow();
+
+        Assertions.assertAll("A previous-close valuation carries no daily move",
+                () -> assertEquals(1000.0, vwrl.getLiveValue()),
+                () -> Assertions.assertTrue(vwrl.getStalePrice()),
+                () -> Assertions.assertNull(vwrl.getDayChange()),
+                () -> Assertions.assertNull(vwrl.getDayChangePercent()));
     }
 
     @Test

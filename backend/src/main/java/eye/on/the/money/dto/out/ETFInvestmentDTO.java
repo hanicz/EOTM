@@ -38,6 +38,8 @@ public class ETFInvestmentDTO implements CSVHelper, Serializable {
     private Double liveValue;
     private Boolean stalePrice;
     private Double valueDiff;
+    private Double dayChange;
+    private Double dayChangePercent;
     private Double fee;
     private String exchange;
     private String accountName;

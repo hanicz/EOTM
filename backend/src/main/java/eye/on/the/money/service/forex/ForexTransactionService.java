@@ -3,7 +3,6 @@ package eye.on.the.money.service.forex;
 import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.out.ForexTransactionDTO;
 import eye.on.the.money.exception.APIException;
-import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.forex.ForexTransaction;
@@ -165,9 +164,11 @@ public class ForexTransactionService implements ICSVService {
     @CacheEvict(cacheNames = "holdings-forex", key = "#userId")
     @Transactional
     public void processCSV(Long userId, MultipartFile file) {
+        long lineNumber = 0;
         try (CSVParser csvParser = this.getParser(file,
                 new String[]{"Transaction Id", "From Amount", "To Amount", "Type", "Transaction Date", "Change Rate", "From Currency", "To Currency"})) {
             for (CSVRecord csvRecord : csvParser) {
+                lineNumber = csvParser.getCurrentLineNumber();
                 ForexTransactionDTO transaction = ForexTransactionDTO.createFromCSVRecord(csvRecord, DateFormats.YYYY_MM_DD);
 
                 if (transaction.getForexTransactionId() != null &&
@@ -182,7 +183,7 @@ public class ForexTransactionService implements ICSVService {
             }
         } catch (IOException | DateTimeParseException | IllegalArgumentException e) {
             log.error("Error while processing CSV", e);
-            throw new CSVException("Failed to parse CSV file: " + e.getMessage(), e);
+            throw this.csvParseFailure(lineNumber, e);
         }
     }
 }

@@ -43,16 +43,6 @@ import { CurrencyPipe, DecimalPipe, NgClass } from '@angular/common';
     .delta-pill {
       font-size: 0.7rem;
     }
-
-    /* Stacked rows lay a cell out as one horizontal label/value line, so the
-       two halves sit side by side there rather than stacked. */
-    @media screen and (max-width: 767px) {
-      .delta-cell {
-        flex-direction: row;
-        align-items: center;
-        gap: 0.35rem;
-      }
-    }
   `]
 })
 export class DeltaComponent {

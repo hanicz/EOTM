@@ -1,5 +1,6 @@
 package eye.on.the.money.service.shared;
 
+import eye.on.the.money.dto.out.CashDTO;
 import eye.on.the.money.dto.out.DividendDTO;
 import eye.on.the.money.dto.out.ExportDTO;
 import eye.on.the.money.dto.out.InvestmentDTO;
@@ -16,6 +17,7 @@ import eye.on.the.money.model.watchlist.TickerWatch;
 import eye.on.the.money.repository.watchlist.CryptoWatchRepository;
 import eye.on.the.money.repository.watchlist.ForexWatchRepository;
 import eye.on.the.money.repository.watchlist.StockWatchRepository;
+import eye.on.the.money.service.cash.CashService;
 import eye.on.the.money.service.crypto.TransactionService;
 import eye.on.the.money.service.etf.ETFDividendService;
 import eye.on.the.money.service.etf.ETFInvestmentService;
@@ -61,6 +63,7 @@ class ExportServiceTest {
     @Mock private ForexTransactionService forexTransactionService;
     @Mock private SecurityTransactionService securityTransactionService;
     @Mock private InterestService interestService;
+    @Mock private CashService cashService;
     @Mock private StockWatchRepository stockWatchRepository;
     @Mock private CryptoWatchRepository cryptoWatchRepository;
     @Mock private ForexWatchRepository forexWatchRepository;
@@ -74,6 +77,8 @@ class ExportServiceTest {
     void stubTheOwner() {
         when(this.userService.loadUserById(USER_ID))
                 .thenReturn(User.builder().id(USER_ID).email(USER_EMAIL).build());
+        when(this.cashService.getCash(USER_ID))
+                .thenReturn(CashDTO.builder().amount(0.0).currency("HUF").build());
     }
 
     @Test
@@ -91,7 +96,7 @@ class ExportServiceTest {
 
         ExportDTO export = this.exportService.export(USER_ID);
 
-        assertEquals(1, export.getSchemaVersion());
+        assertEquals(2, export.getSchemaVersion());
         assertEquals(USER_EMAIL, export.getEmail());
         assertNotNull(export.getExportedAt());
         assertEquals("Main", export.getAccounts().getFirst().accountName());
@@ -119,6 +124,16 @@ class ExportServiceTest {
         assertEquals(new ExportDTO.StockWatchRow(1L, "AAPL", "US", "Apple Inc."), watchlists.stock().getFirst());
         assertEquals(new ExportDTO.CryptoWatchRow(2L, "bitcoin", "btc", "Bitcoin"), watchlists.crypto().getFirst());
         assertEquals(new ExportDTO.ForexWatchRow(3L, "EUR", "HUF"), watchlists.forex().getFirst());
+    }
+
+    @Test
+    void export_includesTheCashBalance() {
+        when(this.cashService.getCash(USER_ID))
+                .thenReturn(CashDTO.builder().amount(1250000.0).currency("HUF").build());
+
+        ExportDTO export = this.exportService.export(USER_ID);
+
+        assertEquals(new ExportDTO.CashSection(1250000.0, "HUF"), export.getCash());
     }
 
     @Test

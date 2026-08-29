@@ -2,6 +2,7 @@ package eye.on.the.money.service.shared;
 
 import eye.on.the.money.dto.in.TransactionQuery;
 import eye.on.the.money.dto.out.AssetClassValueDTO;
+import eye.on.the.money.dto.out.CashDTO;
 import eye.on.the.money.dto.out.DashboardRatesDTO;
 import eye.on.the.money.dto.out.ETFInvestmentDTO;
 import eye.on.the.money.dto.out.ForexTransactionDTO;
@@ -10,6 +11,7 @@ import eye.on.the.money.dto.out.NetWorthDTO;
 import eye.on.the.money.dto.out.SecurityTransactionDTO;
 import eye.on.the.money.dto.out.TransactionDTO;
 import eye.on.the.money.exception.APIException;
+import eye.on.the.money.service.cash.CashService;
 import eye.on.the.money.service.crypto.TransactionService;
 import eye.on.the.money.service.etf.ETFInvestmentService;
 import eye.on.the.money.service.forex.ForexTransactionService;
@@ -55,6 +57,8 @@ class NetWorthServiceTest {
     @Mock
     private SecurityTransactionService securityTransactionService;
     @Mock
+    private CashService cashService;
+    @Mock
     private DashboardService dashboardService;
 
     private NetWorthService netWorthService;
@@ -63,7 +67,7 @@ class NetWorthServiceTest {
     void setUp() {
         this.netWorthService = new NetWorthService(this.investmentService, this.transactionService,
                 this.etfInvestmentService, this.forexTransactionService, this.securityTransactionService,
-                this.dashboardService);
+                this.cashService, this.dashboardService);
 
         this.stubRates(Map.of("USD", 1.10, "HUF", 400.0));
         when(this.investmentService.getCurrentHoldings(anyLong())).thenReturn(List.of());
@@ -71,6 +75,12 @@ class NetWorthServiceTest {
         when(this.etfInvestmentService.getCurrentETFHoldings(anyLong())).thenReturn(List.of());
         when(this.forexTransactionService.getAllForexHoldings(anyLong())).thenReturn(List.of());
         when(this.securityTransactionService.getCurrentHoldings(anyLong())).thenReturn(List.of());
+        this.stubCash(0.0);
+    }
+
+    private void stubCash(Double amount) {
+        when(this.cashService.getCash(anyLong()))
+                .thenReturn(CashDTO.builder().amount(amount).currency("HUF").build());
     }
 
     private void stubRates(Map<String, Double> rates) {
@@ -261,6 +271,42 @@ class NetWorthServiceTest {
         NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
 
         assertEquals(0, this.assetOf(result, NetWorthService.SECURITIES).getExpectedRatePct().signum());
+    }
+
+    @Test
+    void getNetWorth_convertsCashIntoTheTargetCurrency() {
+        this.stubCash(400_000.0);
+
+        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
+
+        AssetClassValueDTO cash = this.assetOf(result, NetWorthService.CASH);
+        assertEquals(0, cash.getWorth().compareTo(new BigDecimal("1000.00")));
+        assertEquals(0, cash.getSpent().compareTo(new BigDecimal("1000.00")));
+        assertEquals(0, cash.getChangePct().signum());
+        assertEquals(0, result.getTotalWorth().compareTo(new BigDecimal("1000.00")));
+    }
+
+    @Test
+    void getNetWorth_looksUpRatesWhenCashIsTheOnlyHolding() {
+        this.stubCash(400_000.0);
+
+        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
+
+        assertTrue(result.getUnconvertedCurrencies().isEmpty());
+        assertEquals(0, result.getTotalWorth().compareTo(new BigDecimal("1000.00")));
+    }
+
+    @Test
+    void getNetWorth_leavesCashOutOfTheTotalChangeOnBothSides() {
+        this.stubCash(400_000.0);
+        when(this.investmentService.getCurrentHoldings(USER)).thenReturn(List.of(
+                InvestmentDTO.builder().amount(1000.0).liveValue(1200.0).currencyId("EUR").build()));
+
+        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
+
+        assertEquals(0, result.getTotalChangePct().compareTo(new BigDecimal("20.00")));
+        assertEquals(0, result.getTotalSpent().compareTo(new BigDecimal("2000.00")));
+        assertEquals(0, result.getTotalWorth().compareTo(new BigDecimal("2200.00")));
     }
 
     @Test

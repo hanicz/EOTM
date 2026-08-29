@@ -15,6 +15,10 @@ plan what they add up to.
   no live market price, so they are valued at what was paid for them. Interest is recorded but deliberately
   left out of that valuation: it gets reinvested by buying more, and those purchases are already counted, so
   adding the interest as well would count the same money twice.
+- **Cash** — a plain forint balance for money sitting in an account rather than invested. It counts towards
+  net worth at face value, so it never shows a gain or a loss, and it is left out of the overall change on
+  both sides: cash was never spent on anything, and counting it as cost would water down the percentage the
+  rest of the portfolio moved.
 - **Multi-currency** — every amount is held in the currency it was traded in and converted on the fly, so a
   portfolio spread across HUF, EUR and USD still totals up.
 
@@ -48,8 +52,8 @@ plan what they add up to.
 
 ### FIRE (financial independence / early retirement)
 
-- Projects your portfolio forward from what you actually hold, plus any cash or other assets not tracked
-  here, at **1, 3, 5, 10, 15 and 20 years** — and at the year you reach your target.
+- Projects your portfolio forward from what you actually hold — cash included — plus any other assets not
+  tracked here, at **1, 3, 5, 10, 15 and 20 years** — and at the year you reach your target.
 - Every assumption is editable: monthly contribution and how fast it rises, expected return, inflation,
   withdrawal rate, current age, retirement age and how long the money has to last.
 - **FIRE number** either derived from the annual spending you want (`spending ÷ withdrawal rate`) or typed in

@@ -1,0 +1,56 @@
+.cash-hint {
+    margin: 0 0 1.25rem 0;
+    font-size: 0.85rem;
+    color: #5f5e5a;
+}
+
+.cash-section {
+    padding: 1rem 1.1rem 1.1rem 1.1rem;
+    border: 1px solid #ece9e0;
+    border-radius: 0.6rem;
+    background: #faf9f6;
+}
+
+.cash-section-title {
+    margin: 0 0 0.9rem 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #5f5e5a;
+}
+
+.cash-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem;
+}
+
+.cash-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-width: 14rem;
+}
+
+.cash-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #5f5e5a;
+}
+
+:host ::ng-deep .cash-field .p-inputnumber {
+    width: 100%;
+}
+
+:host ::ng-deep .cash-field .p-inputnumber input {
+    width: 100%;
+    min-width: 0;
+}
+
+.cash-actions {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 1.25rem;
+}

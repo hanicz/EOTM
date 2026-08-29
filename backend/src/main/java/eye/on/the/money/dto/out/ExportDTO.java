@@ -37,6 +37,7 @@ public class ExportDTO {
     private CryptoSection crypto;
     private ForexSection forex;
     private SecuritiesSection securities;
+    private CashSection cash;
     private WatchlistSection watchlists;
     private AlertSection alerts;
     private PreferencesSection preferences;
@@ -57,6 +58,9 @@ public class ExportDTO {
     }
 
     public record SecuritiesSection(List<SecurityTransactionDTO> transactions, List<InterestDTO> interest) {
+    }
+
+    public record CashSection(Double amount, String currency) {
     }
 
     public record WatchlistSection(List<StockWatchRow> stock, List<CryptoWatchRow> crypto,

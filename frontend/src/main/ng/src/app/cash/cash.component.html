@@ -1,0 +1,31 @@
+<p-toast position="bottom-center"></p-toast>
+<div class="shadow-5">
+  <menu class="pl-0 mb-0"></menu>
+  <p-panel>
+
+    <p class="cash-hint">
+      Money sitting in an account rather than invested. It counts towards your net worth at face value, so
+      it never shows a gain or a loss.
+    </p>
+
+    <section class="cash-section">
+      <h3 class="cash-section-title">Balance</h3>
+      <div class="cash-form">
+        <div class="cash-field">
+          <label for="cashAmount" class="cash-label">Cash</label>
+          @if (loading) {
+            <p-skeleton height="2.5rem"></p-skeleton>
+          } @else {
+            <p-inputnumber inputId="cashAmount" [(ngModel)]="amount" [min]="0" placeholder="0"
+              [suffix]="' ' + currency" (keyup.enter)="save()"></p-inputnumber>
+          }
+        </div>
+      </div>
+      <div class="cash-actions">
+        <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-rounded"
+          [loading]="saving" [disabled]="loading" (click)="save()"></button>
+      </div>
+    </section>
+
+  </p-panel>
+</div>

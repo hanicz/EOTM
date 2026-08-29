@@ -11,7 +11,7 @@
 
       @if (loading) {
         <div class="metric-grid">
-          @for (item of [].constructor(6); track $index) {
+          @for (item of [].constructor(7); track $index) {
             <div class="metric-tile">
               <p-skeleton width="60%" styleClass="mb-2"></p-skeleton>
               <p-skeleton width="80%" height="24px"></p-skeleton>
@@ -26,7 +26,7 @@
             <div class="metric-label">Net worth</div>
             <div class="metric-value">{{netWorth | currency : selectedCurrency : 'symbol' : '0.0-0'}}</div>
             <div class="metric-change" [class.positive]="netWorthChangePct >= 0" [class.negative]="netWorthChangePct < 0"
-              pTooltip="Change against what you paid. Securities count as no change - they have no market price.">
+              pTooltip="Change against what you paid. Securities count as no change - they have no market price. Cash is left out of it entirely.">
               {{netWorthChangePct >= 0 ? '+' : ''}}{{netWorthChangePct | number : '0.0-1'}}%
             </div>
           </div>
@@ -65,6 +65,11 @@
             <div class="metric-change" [class.positive]="cryptoChangePct >= 0" [class.negative]="cryptoChangePct < 0">
               {{cryptoChangePct >= 0 ? '+' : ''}}{{cryptoChangePct | number : '0.0-1'}}%
             </div>
+          </div>
+          <div class="metric-tile metric-tile-clickable" (click)="navigateTo('/cash')">
+            <div class="metric-label">Cash</div>
+            <div class="metric-value">{{cashTotal | currency : selectedCurrency : 'symbol' : '0.0-0'}}</div>
+            <div class="metric-change" pTooltip="Held at face value, so it never gains or loses.">&mdash;</div>
           </div>
         </div>
 

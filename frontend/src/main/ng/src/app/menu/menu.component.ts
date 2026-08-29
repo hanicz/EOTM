@@ -29,7 +29,8 @@ export class MenuComponent implements OnInit {
         { label: 'ETF', icon: 'fas fa-chart-line', routerLink: ['/etf'] },
         { label: 'Stock', icon: 'fa-solid fa-arrow-trend-up', routerLink: ['/stock'] },
         { label: 'Forex', icon: 'fa-solid fa-coins', routerLink: ['/forex'] },
-        { label: 'Crypto', icon: 'fab fa-bitcoin', routerLink: ['/crypto'] }
+        { label: 'Crypto', icon: 'fab fa-bitcoin', routerLink: ['/crypto'] },
+        { label: 'Cash', icon: 'fa-solid fa-wallet', routerLink: ['/cash'] }
       ]
     },
     { label: 'Financials', icon: 'fa-solid fa-receipt', routerLink: ['/financial'] },

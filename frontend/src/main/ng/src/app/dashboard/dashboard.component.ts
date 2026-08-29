@@ -45,6 +45,7 @@ const ASSET_COLOURS: { [assetClass: string]: string } = {
   'ETF': '#1b1b1b',
   'Forex': '#b4b2a9',
   'Securities': '#7a8c5c',
+  'Cash': '#c9a227',
 };
 
 @Component({
@@ -70,6 +71,7 @@ export class DashboardComponent implements OnInit {
   forexChangePct: number = 0;
   securityTotal: number = 0;
   securityRatePct: number = 0;
+  cashTotal: number = 0;
 
   netWorth: number = 0;
   netWorthChangePct: number = 0;
@@ -157,6 +159,7 @@ export class DashboardComponent implements OnInit {
     this.forexChangePct = this.changeOf(netWorth, 'Forex');
     this.securityTotal = this.worthOf(netWorth, 'Securities');
     this.securityRatePct = this.expectedRateOf(netWorth, 'Securities');
+    this.cashTotal = this.worthOf(netWorth, 'Cash');
 
     this.netWorth = netWorth.totalWorth;
     this.netWorthChangePct = netWorth.totalChangePct;

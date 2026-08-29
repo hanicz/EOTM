@@ -15,6 +15,7 @@ import { SecurityComponent } from './security/security.component';
 import { TaxComponent } from './tax/tax.component';
 import { FireComponent } from './fire/fire.component';
 import { FinancialComponent } from './financial/financial.component';
+import { CashComponent } from './cash/cash.component';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent },
@@ -28,6 +29,7 @@ export const routes: Routes = [
   { path: 'forex', component: ForexComponent },
   { path: 'security', component: SecurityComponent },
   { path: 'etf', component: EtfComponent },
+  { path: 'cash', component: CashComponent },
   { path: 'alert', component: AlertComponent },
   { path: 'tax', component: TaxComponent },
   { path: 'fire', component: FireComponent },

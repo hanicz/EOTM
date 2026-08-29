@@ -7,6 +7,6 @@ public class SecurityConstants {
     public static final Integer EXPIRATION = 3;
     public static final String[] SPA_ROUTES = {
             "/login", "/dashboard", "/news", "/stock", "/crypto", "/watchlist", "/search",
-            "/forex", "/security", "/etf", "/alert", "/tax", "/fire", "/financial", "/settings"
+            "/forex", "/security", "/etf", "/cash", "/alert", "/tax", "/fire", "/financial", "/settings"
     };
 }

@@ -1,17 +1,22 @@
 <div class="shadow-5">
   <menu class="pl-0 mb-0"></menu>
   <p-panel>
-    <p-tabs value="0">
+    <p-tabs [(value)]="activeTab">
       <p-tablist>
         <p-tab value="0">Transactions</p-tab>
         <p-tab value="1">Reports</p-tab>
+        <p-tab value="2">Rules</p-tab>
       </p-tablist>
       <p-tabpanels>
         <p-tabpanel value="0">
-          <app-financial-transaction (dataChanged)="onDataChanged()"></app-financial-transaction>
+          <app-financial-transaction (dataChanged)="onDataChanged()"
+            (createRule)="onCreateRule($event)"></app-financial-transaction>
         </p-tabpanel>
         <p-tabpanel value="1" lazy>
           <app-financial-report></app-financial-report>
+        </p-tabpanel>
+        <p-tabpanel value="2" lazy>
+          <app-financial-rule [ruleRequest]="ruleRequest"></app-financial-rule>
         </p-tabpanel>
       </p-tabpanels>
     </p-tabs>

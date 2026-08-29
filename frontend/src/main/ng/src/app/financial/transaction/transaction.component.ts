@@ -36,6 +36,7 @@ interface TransactionEditValues {
 export class FinancialTransactionComponent {
 
   @Output() dataChanged = new EventEmitter<void>();
+  @Output() createRule = new EventEmitter<string>();
 
   transactions: BankTransaction[] = [];
   filteredTransactions: BankTransaction[] = [];
@@ -132,6 +133,15 @@ export class FinancialTransactionComponent {
         this.messageService.add({ severity: 'error', detail: 'Could not update the exclusion.' });
       }
     });
+  }
+
+  ruleClicked(transaction: BankTransaction): void {
+    const account = transaction.partnerAccount?.trim();
+    if (!account) {
+      this.messageService.add({ severity: 'warn', detail: 'This record has no partner account to build a rule on.' });
+      return;
+    }
+    this.createRule.emit(account);
   }
 
   taxableClicked(taxable: boolean): void {

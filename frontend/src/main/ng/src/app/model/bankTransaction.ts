@@ -37,3 +37,17 @@ export interface MonthlyIncome {
     amount: number;
     transactionCount: number;
 }
+
+export type AccountSide = 'OWN_ACCOUNT' | 'PARTNER_ACCOUNT' | 'ANY';
+
+export interface ExclusionRule {
+    id: number;
+    accountNumber: string;
+    side: AccountSide;
+    active: boolean;
+}
+
+export interface ExclusionRuleRequest {
+    accountNumber: string;
+    seq: number;
+}

@@ -1,0 +1,92 @@
+<p-toast position="bottom-center"></p-toast>
+<p class="mt-0 mb-3 text-color-secondary text-sm">
+  A rule leaves transactions to or from an account out of the reports automatically. It is applied as records
+  are imported, so it never changes ones already in the list &mdash; and if you include a record by hand
+  afterwards, it stays included on the next import.
+</p>
+<p-toolbar styleClass="table-toolbar">
+  <ng-template pTemplate="left">
+    <button pButton pRipple label="New rule" icon="pi pi-plus" (click)="openNew()"></button>
+    <button pButton pRipple icon="pi pi-trash" severity="danger" class="p-button-outlined"
+      [disabled]="!selectedRules || !selectedRules.length" (click)="deleteClicked()"></button>
+  </ng-template>
+</p-toolbar>
+
+<p-table #dt1 [value]="rules" styleClass="p-datatable-striped table-stack eotm-table"
+  [(selection)]="selectedRules" [paginator]="true" [rows]="25" [rowsPerPageOptions]="[25, 50, 100]">
+
+  <ng-template pTemplate="header">
+    <tr>
+      <th style="width: 3rem">
+        <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+      </th>
+      <th pSortableColumn="accountNumber">Account <p-sortIcon field="accountNumber"></p-sortIcon></th>
+      <th>Matches on</th>
+      <th>Status</th>
+      <th></th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-rule>
+    <tr [class.rule-paused]="!rule.active">
+      <td>
+        <p-tableCheckbox [value]="rule"></p-tableCheckbox>
+      </td>
+      <td data-label="Account">{{rule.accountNumber}}</td>
+      <td data-label="Matches on">
+        <p-tag severity="info" [value]="sideLabel(rule.side)"></p-tag>
+      </td>
+      <td data-label="Status">
+        @if (rule.active) {
+          <p-tag severity="success" value="Active"></p-tag>
+        } @else {
+          <p-tag severity="secondary" value="Paused"></p-tag>
+        }
+      </td>
+      <td>
+        <button pButton pRipple type="button" icon="pi pi-pencil" pTooltip="Edit this rule"
+          (click)="editRule(rule)" class="p-button-rounded p-button-text mr-1" severity="secondary"></button>
+        <button pButton pRipple type="button" [icon]="rule.active ? 'pi pi-pause' : 'pi pi-play'"
+          [pTooltip]="rule.active ? 'Stop applying this rule to new imports' : 'Apply this rule to new imports again'"
+          (click)="toggleActive(rule)" class="p-button-rounded p-button-text mr-1" severity="secondary"></button>
+        <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(rule.id)"
+          class="p-button-rounded p-button-text" severity="danger"></button>
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="5">No exclusion rules yet.</td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog [(visible)]="ruleDialog" [style]="{width: '50vw'}" [breakpoints]="{'992px': '75vw', '576px': '100vw'}"
+  header="Exclusion Rule" [modal]="true" styleClass="p-fluid">
+  <ng-template pTemplate="content">
+    <div class="grid">
+      <div class="col-12 mb-2">
+        <label for="accountNumber" class="block mb-2 font-medium text-color-secondary">Account number</label>
+        <input pInputText id="accountNumber" type="text" [(ngModel)]="rule.accountNumber"
+          [maxlength]="accountMaxLength" placeholder="e.g. 11111111-22222222-33333333" [style]="{'width':'100%'}">
+        <small class="block mt-2 text-color-secondary">Dashes and spaces are ignored, an IBAN matches the same
+          account in its domestic form, and a trailing <code>-00000000</code> block is optional.</small>
+      </div>
+      <div class="col-12 mb-2">
+        <label for="side" class="block mb-2 font-medium text-color-secondary">Matches on</label>
+        <p-select id="side" [options]="sides" optionLabel="label" optionValue="value" [(ngModel)]="rule.side"
+          [style]="{'width':'100%'}" [appendTo]="'body'"></p-select>
+      </div>
+      <div class="col-12 mb-2 flex align-items-center gap-2">
+        <p-checkbox inputId="active" [(ngModel)]="rule.active" [binary]="true"></p-checkbox>
+        <label for="active" class="font-medium text-color-secondary">Apply this rule to new imports</label>
+      </div>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+    <button pButton pRipple label="Save" icon="pi pi-check" [disabled]="!rule.accountNumber.trim()"
+      (click)="saveRule()"></button>
+  </ng-template>
+</p-dialog>

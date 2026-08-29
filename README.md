@@ -80,6 +80,13 @@ plan what they add up to.
 - Individual records can be **left out of the reports** — a transfer between your own accounts is real money
   leaving one account, but counting it distorts what you actually spent. The flag is per record and survives
   re-importing the export.
+- **Exclusion rules** save flagging the same transfers by hand every month. A rule names a bank account and
+  which side it matches — your own account, the partner's, or either — and flags matching records as they are
+  imported. The number matches however the bank prints it: dashes and spaces are ignored, an IBAN matches the
+  same account in its domestic form, and the empty `-00000000` third block of a 16-digit account is optional.
+  Rules apply only
+  when a record is first created: include one again by hand and it stays included, however often you re-import
+  the export. Rules can be paused instead of deleted, and one can be created straight from a transaction row.
 - The history exports back out to CSV.
 
 ### Data in and out

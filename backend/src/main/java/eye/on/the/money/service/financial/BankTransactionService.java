@@ -48,6 +48,7 @@ public class BankTransactionService implements ICSVService {
 
     private final BankTransactionRepository bankTransactionRepository;
     private final CurrencyRepository currencyRepository;
+    private final BankExclusionRuleService bankExclusionRuleService;
     private final UserService userService;
     private final ModelMapper modelMapper;
 
@@ -106,6 +107,7 @@ public class BankTransactionService implements ICSVService {
     @Transactional
     public ImportResultDTO processCSV(Long userId, MultipartFile file) {
         User user = this.userService.getReference(userId);
+        ExclusionRuleMatcher matcher = this.bankExclusionRuleService.matcherFor(userId);
         int created = 0;
         int updated = 0;
         long lineNumber = 0;
@@ -116,7 +118,7 @@ public class BankTransactionService implements ICSVService {
                     continue;
                 }
                 BankTransactionDTO transaction = BankTransactionDTO.createFromKHRecord(csvRecord, DateFormats.YYYY_MM_DD_DOTTED);
-                if (this.upsert(transaction, user)) {
+                if (this.upsert(transaction, user, matcher)) {
                     created++;
                 } else {
                     updated++;
@@ -130,7 +132,7 @@ public class BankTransactionService implements ICSVService {
         return ImportResultDTO.builder().created(created).updated(updated).build();
     }
 
-    private boolean upsert(BankTransactionDTO transactionDTO, User user) {
+    private boolean upsert(BankTransactionDTO transactionDTO, User user, ExclusionRuleMatcher matcher) {
         Currency currency = this.currencyRepository.findById(transactionDTO.getCurrencyId())
                 .orElseThrow(() -> new CSVException("Unknown currency: " + transactionDTO.getCurrencyId()));
 
@@ -159,6 +161,7 @@ public class BankTransactionService implements ICSVService {
                 .partnerName(transactionDTO.getPartnerName())
                 .amount(transactionDTO.getAmount())
                 .memo(transactionDTO.getMemo())
+                .excluded(matcher.matches(transactionDTO.getAccountNumber(), transactionDTO.getPartnerAccount()))
                 .creationDate(LocalDate.now())
                 .currency(currency)
                 .user(user)

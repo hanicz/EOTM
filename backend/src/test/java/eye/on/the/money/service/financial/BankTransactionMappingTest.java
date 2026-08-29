@@ -22,15 +22,15 @@ class BankTransactionMappingTest {
     void mapsEveryFieldToTheRightDestination() {
         BankTransaction transaction = BankTransaction.builder()
                 .id(42L)
-                .bankTransactionId("AAACT253654SV4TMYZ")
+                .bankTransactionId("ABCDE123456AB1CDEF")
                 .bookingDate(LocalDate.of(2025, 12, 31))
                 .type("Kamatado")
-                .accountNumber("104040278676776881541004")
-                .accountName("HANICZ TAMAS")
+                .accountNumber("111111112222222233333333")
+                .accountName("ACCOUNT HOLDER")
                 .partnerAccount("120010000000000000000000")
                 .partnerName("PARTNER KFT")
                 .amount(-275.0)
-                .memo("Ref.: AAACT253654SV4TMYZ")
+                .memo("Ref.: ABCDE123456AB1CDEF")
                 .creationDate(LocalDate.of(2026, 1, 1))
                 .currency(new Currency("HUF", "forint"))
                 .user(User.builder().id(1L).email("test@email.com").build())
@@ -39,15 +39,15 @@ class BankTransactionMappingTest {
         BankTransactionDTO dto = this.modelMapper.map(transaction, BankTransactionDTO.class);
 
         assertEquals(42L, dto.getId());
-        assertEquals("AAACT253654SV4TMYZ", dto.getBankTransactionId());
+        assertEquals("ABCDE123456AB1CDEF", dto.getBankTransactionId());
         assertEquals(LocalDate.of(2025, 12, 31), dto.getBookingDate());
         assertEquals("Kamatado", dto.getType());
-        assertEquals("104040278676776881541004", dto.getAccountNumber());
-        assertEquals("HANICZ TAMAS", dto.getAccountName());
+        assertEquals("111111112222222233333333", dto.getAccountNumber());
+        assertEquals("ACCOUNT HOLDER", dto.getAccountName());
         assertEquals("120010000000000000000000", dto.getPartnerAccount());
         assertEquals("PARTNER KFT", dto.getPartnerName());
         assertEquals(-275.0, dto.getAmount());
-        assertEquals("Ref.: AAACT253654SV4TMYZ", dto.getMemo());
+        assertEquals("Ref.: ABCDE123456AB1CDEF", dto.getMemo());
         assertEquals("HUF", dto.getCurrencyId());
     }
 }

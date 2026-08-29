@@ -6,6 +6,8 @@ import eye.on.the.money.dto.out.ImportResultDTO;
 import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
+import eye.on.the.money.model.financial.AccountSide;
+import eye.on.the.money.model.financial.BankExclusionRule;
 import eye.on.the.money.model.financial.BankTransaction;
 import eye.on.the.money.repository.financial.BankTransactionRepository;
 import eye.on.the.money.repository.forex.CurrencyRepository;
@@ -50,14 +52,17 @@ class BankTransactionServiceTest {
 
     private static final Long USER_ID = 1L;
     private static final String USER_EMAIL = "test@email.com";
-    private static final String BANK_ID = "AAACT253654SV4TMYZ";
-    private static final String ACCOUNT = "104040278676776881541004";
+    private static final String BANK_ID = "ABCDE123456AB1CDEF";
+    private static final String ACCOUNT = "111111112222222233333333";
+    private static final String PARTNER = "120010080000000000000001";
     private static final LocalDate BOOKING_DATE = LocalDate.of(2025, 12, 31);
 
     @Mock
     private BankTransactionRepository bankTransactionRepository;
     @Mock
     private CurrencyRepository currencyRepository;
+    @Mock
+    private BankExclusionRuleService bankExclusionRuleService;
     @Mock
     private UserService userService;
     @Mock
@@ -72,6 +77,7 @@ class BankTransactionServiceTest {
     @BeforeEach
     void setUp() {
         when(this.userService.getReference(USER_ID)).thenReturn(this.user);
+        when(this.bankExclusionRuleService.matcherFor(USER_ID)).thenReturn(ExclusionRuleMatcher.empty());
         when(this.currencyRepository.findById("HUF")).thenReturn(Optional.of(this.huf));
         when(this.bankTransactionRepository
                 .findByUserIdAndBankTransactionIdAndBookingDateAndTypeAndAmountAndMemo(
@@ -86,11 +92,36 @@ class BankTransactionServiceTest {
         fields[1] = bankId;
         fields[2] = type;
         fields[3] = ACCOUNT;
-        fields[4] = "HANICZ TAMAS";
+        fields[4] = "ACCOUNT HOLDER";
         fields[7] = amount;
         fields[8] = "HUF";
         fields[9] = memo;
         return String.join("\t", fields);
+    }
+
+    private String rowWithPartner(String partnerAccount) {
+        String[] fields = new String[BankTransactionDTO.KH_HEADERS.length];
+        Arrays.fill(fields, "");
+        fields[0] = "2025.12.31";
+        fields[1] = BANK_ID;
+        fields[2] = "Atutalas";
+        fields[3] = ACCOUNT;
+        fields[4] = "ACCOUNT HOLDER";
+        fields[5] = partnerAccount;
+        fields[6] = "PARTNER KFT";
+        fields[7] = "-5";
+        fields[8] = "HUF";
+        fields[9] = "Ref.";
+        return String.join("\t", fields);
+    }
+
+    private BankExclusionRule rule(String accountNumber, AccountSide side) {
+        return BankExclusionRule.builder()
+                .accountNumber(accountNumber)
+                .normalizedAccount(ExclusionRuleMatcher.normalize(accountNumber))
+                .side(side)
+                .active(true)
+                .build();
     }
 
     private String blankRow() {
@@ -130,7 +161,7 @@ class BankTransactionServiceTest {
         assertEquals("Mobilinfo uzenetdij", saved.get(0).getType());
         assertEquals(-275.0, saved.get(0).getAmount());
         assertEquals(ACCOUNT, saved.get(0).getAccountNumber());
-        assertEquals("HANICZ TAMAS", saved.get(0).getAccountName());
+        assertEquals("ACCOUNT HOLDER", saved.get(0).getAccountName());
         assertEquals("", saved.get(0).getPartnerName());
         assertEquals("HUF", saved.get(0).getCurrency().getId());
         assertEquals("Kamatado", saved.get(1).getType());
@@ -299,5 +330,136 @@ class BankTransactionServiceTest {
 
         assertEquals(1, result.size());
         assertEquals(-275.0, result.getFirst().getAmount());
+    }
+
+    @Test
+    void processCSV_excludesWhenAPartnerRuleMatches() {
+        when(this.bankExclusionRuleService.matcherFor(USER_ID))
+                .thenReturn(ExclusionRuleMatcher.of(List.of(this.rule(PARTNER, AccountSide.PARTNER_ACCOUNT))));
+
+        this.bankTransactionService.processCSV(USER_ID,
+                this.file(StandardCharsets.UTF_8, this.rowWithPartner(PARTNER)));
+
+        assertTrue(this.captureSingleSave().isExcluded());
+    }
+
+    @Test
+    void processCSV_excludesWhenAnOwnAccountRuleMatches() {
+        when(this.bankExclusionRuleService.matcherFor(USER_ID))
+                .thenReturn(ExclusionRuleMatcher.of(List.of(this.rule(ACCOUNT, AccountSide.OWN_ACCOUNT))));
+
+        this.bankTransactionService.processCSV(USER_ID,
+                this.file(StandardCharsets.UTF_8, this.rowWithPartner(PARTNER)));
+
+        assertTrue(this.captureSingleSave().isExcluded());
+    }
+
+    @Test
+    void processCSV_excludesOnEitherSideForAnAnyRule() {
+        when(this.bankExclusionRuleService.matcherFor(USER_ID))
+                .thenReturn(ExclusionRuleMatcher.of(List.of(this.rule(PARTNER, AccountSide.ANY))));
+
+        this.bankTransactionService.processCSV(USER_ID,
+                this.file(StandardCharsets.UTF_8, this.rowWithPartner(PARTNER)));
+
+        assertTrue(this.captureSingleSave().isExcluded());
+    }
+
+    @Test
+    void processCSV_doesNotExcludeWhenTheSideDoesNotMatch() {
+        when(this.bankExclusionRuleService.matcherFor(USER_ID))
+                .thenReturn(ExclusionRuleMatcher.of(List.of(this.rule(PARTNER, AccountSide.OWN_ACCOUNT))));
+
+        this.bankTransactionService.processCSV(USER_ID,
+                this.file(StandardCharsets.UTF_8, this.rowWithPartner(PARTNER)));
+
+        assertFalse(this.captureSingleSave().isExcluded());
+    }
+
+    @Test
+    void processCSV_matchesIgnoringSeparatorsAndCase() {
+        when(this.bankExclusionRuleService.matcherFor(USER_ID))
+                .thenReturn(ExclusionRuleMatcher.of(
+                        List.of(this.rule("12001008-00000000-00000001", AccountSide.PARTNER_ACCOUNT))));
+
+        this.bankTransactionService.processCSV(USER_ID,
+                this.file(StandardCharsets.UTF_8, this.rowWithPartner("120010080000000000000001")));
+
+        assertTrue(this.captureSingleSave().isExcluded());
+    }
+
+    @Test
+    void processCSV_neverExcludesOnABlankPartnerAccount() {
+        when(this.bankExclusionRuleService.matcherFor(USER_ID))
+                .thenReturn(ExclusionRuleMatcher.of(List.of(this.rule(PARTNER, AccountSide.PARTNER_ACCOUNT))));
+
+        this.bankTransactionService.processCSV(USER_ID,
+                this.file(StandardCharsets.UTF_8, this.rowWithPartner("")));
+
+        assertFalse(this.captureSingleSave().isExcluded());
+    }
+
+    @Test
+    void processCSV_doesNotReExcludeOnTheUpdateBranch() {
+        BankTransaction included = BankTransaction.builder().id(7L).bankTransactionId(BANK_ID)
+                .bookingDate(BOOKING_DATE).type("Atutalas").amount(-5.0).memo("Ref.")
+                .excluded(false).user(this.user).currency(this.huf).build();
+
+        when(this.bankExclusionRuleService.matcherFor(USER_ID))
+                .thenReturn(ExclusionRuleMatcher.of(List.of(this.rule(PARTNER, AccountSide.PARTNER_ACCOUNT))));
+        when(this.bankTransactionRepository
+                .findByUserIdAndBankTransactionIdAndBookingDateAndTypeAndAmountAndMemo(
+                        USER_ID, BANK_ID, BOOKING_DATE, "Atutalas", -5.0, "Ref."))
+                .thenReturn(Optional.of(included));
+
+        this.bankTransactionService.processCSV(USER_ID,
+                this.file(StandardCharsets.UTF_8, this.rowWithPartner(PARTNER)));
+
+        assertFalse(included.isExcluded());
+        verify(this.bankTransactionRepository, never()).save(any());
+    }
+
+    @Test
+    void processCSV_loadsTheRulesOnceForTheWholeFile() {
+        this.bankTransactionService.processCSV(USER_ID, this.file(StandardCharsets.UTF_8,
+                this.row("2025.12.31", BANK_ID, "Mobilinfo uzenetdij", "-275", "One"),
+                this.row("2025.12.31", BANK_ID, "Kamatado", "-5", "Two"),
+                this.row("2025.12.31", BANK_ID, "Atutalas", "-9", "Three")));
+
+        verify(this.bankExclusionRuleService, times(1)).matcherFor(USER_ID);
+    }
+
+    @Test
+    void processCSV_matchesAnIbanRuleAgainstADomesticPartnerAccount() {
+        when(this.bankExclusionRuleService.matcherFor(USER_ID))
+                .thenReturn(ExclusionRuleMatcher.of(List.of(this.rule("HU90" + PARTNER, AccountSide.PARTNER_ACCOUNT))));
+
+        this.bankTransactionService.processCSV(USER_ID,
+                this.file(StandardCharsets.UTF_8, this.rowWithPartner(PARTNER)));
+
+        assertTrue(this.captureSingleSave().isExcluded());
+    }
+
+    @Test
+    void processCSV_matchesADomesticRuleAgainstAnIbanPartnerAccount() {
+        when(this.bankExclusionRuleService.matcherFor(USER_ID))
+                .thenReturn(ExclusionRuleMatcher.of(List.of(this.rule(PARTNER, AccountSide.PARTNER_ACCOUNT))));
+
+        this.bankTransactionService.processCSV(USER_ID,
+                this.file(StandardCharsets.UTF_8, this.rowWithPartner("HU42 " + PARTNER)));
+
+        assertTrue(this.captureSingleSave().isExcluded());
+    }
+
+    @Test
+    void processCSV_matchesAShortRuleAgainstAPaddedPartnerAccount() {
+        when(this.bankExclusionRuleService.matcherFor(USER_ID))
+                .thenReturn(ExclusionRuleMatcher.of(
+                        List.of(this.rule("11111111-22222222", AccountSide.PARTNER_ACCOUNT))));
+
+        this.bankTransactionService.processCSV(USER_ID,
+                this.file(StandardCharsets.UTF_8, this.rowWithPartner("111111112222222200000000")));
+
+        assertTrue(this.captureSingleSave().isExcluded());
     }
 }

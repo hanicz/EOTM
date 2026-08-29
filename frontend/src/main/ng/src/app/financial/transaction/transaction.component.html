@@ -133,6 +133,10 @@
           [pTooltip]="transaction.excluded ? 'Count in reports' : 'Leave out of reports'"
           (click)="setExcluded(transaction.id, !transaction.excluded)"
           class="p-button-rounded p-button-text mr-1" severity="secondary"></button>
+        <button pButton pRipple type="button" icon="pi pi-bolt"
+          pTooltip="Always leave future imports from this partner account out of the reports"
+          [disabled]="!transaction.partnerAccount" (click)="ruleClicked(transaction)"
+          class="p-button-rounded p-button-text mr-1" severity="secondary"></button>
         <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(transaction.id)"
           class="p-button-rounded p-button-text" severity="danger"></button>
       </td>

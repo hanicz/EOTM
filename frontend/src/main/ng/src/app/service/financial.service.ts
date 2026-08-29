@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BankTransaction, ImportResult, MonthlyCashFlow, MonthlyIncome } from '../model/bankTransaction';
+import { BankTransaction, ExclusionRule, ImportResult, MonthlyCashFlow, MonthlyIncome } from '../model/bankTransaction';
 import { ResourceHelper } from '../util/servicehelper';
 import { environment } from '../../environments/environment';
 
@@ -12,6 +12,7 @@ export class FinancialService {
   private helper = new ResourceHelper();
 
   private transactionUrl = `${environment.API_URL}/api/v1/financial/transaction`;
+  private ruleUrl = `${environment.API_URL}/api/v1/financial/rule`;
 
   constructor(private http: HttpClient) { }
 
@@ -93,6 +94,32 @@ export class FinancialService {
     const url = `${this.transactionUrl}/process/csv`;
     return this.http.post<ImportResult>(url, formData, {
       headers: this.helper.getAuthHeaders(),
+    });
+  }
+
+  getRules() {
+    return this.http.get<ExclusionRule[]>(this.ruleUrl, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  }
+
+  createRule(rule: ExclusionRule) {
+    return this.http.post<ExclusionRule>(this.ruleUrl, JSON.stringify(rule), {
+      headers: this.helper.getHeadersWithToken()
+    });
+  }
+
+  updateRule(rule: ExclusionRule) {
+    const url = `${this.ruleUrl}/${rule.id}`;
+    return this.http.put<ExclusionRule>(url, JSON.stringify(rule), {
+      headers: this.helper.getHeadersWithToken()
+    });
+  }
+
+  deleteRulesByIds(ids: string) {
+    const url = `${this.ruleUrl}?ids=${ids}`;
+    return this.http.delete(url, {
+      headers: this.helper.getHeadersWithToken()
     });
   }
 }

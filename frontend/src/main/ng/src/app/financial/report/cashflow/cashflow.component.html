@@ -21,11 +21,17 @@
 
 @for (block of blocks; track block.currencyId; let last = $last) {
   <div class="cash-flow-block">
-    <div class="flex flex-row flex-wrap align-items-center mb-3">
-      <h3 class="mt-0 mb-0 mr-4">{{block.currencyId}}</h3>
-      <div class="mr-4">In: <b class="amount-in">{{block.totalIn | currency : block.currencyId : 'symbol' : '0.0-2'}}</b></div>
-      <div class="mr-4">Out: <b class="amount-out">{{block.totalOut | currency : block.currencyId : 'symbol' : '0.0-2'}}</b></div>
-      <div>Net: <b>{{(block.totalIn + block.totalOut) | currency : block.currencyId : 'symbol' : '0.0-2'}}</b></div>
+    <div class="page-summary mb-3">
+      <h3 class="mt-0 mb-0">{{block.currencyId}}</h3>
+      <div class="summary-stat">In:
+        <b class="amount-in">{{block.totalIn | currency : block.currencyId : 'symbol' : '0.0-2'}}</b>
+      </div>
+      <div class="summary-stat">Out:
+        <b class="amount-out">{{block.totalOut | currency : block.currencyId : 'symbol' : '0.0-2'}}</b>
+      </div>
+      <div class="summary-stat">Net:
+        <b>{{(block.totalIn + block.totalOut) | currency : block.currencyId : 'symbol' : '0.0-2'}}</b>
+      </div>
     </div>
 
     <p-table [value]="block.rows" styleClass="p-datatable-striped p-datatable-sm table-stack">

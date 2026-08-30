@@ -54,7 +54,7 @@
               </ng-template>
               <ng-template pTemplate="body" let-rsu let-i="rowIndex">
                 <tr>
-                  <td data-label="Ticker"><p-tag severity="info" value="{{rsu.shortName}}.{{rsu.exchange}}"></p-tag></td>
+                  <td data-label="Ticker"><span class="state-chip state-info">{{rsu.shortName}}.{{rsu.exchange}}</span></td>
                   <td data-label="Date">{{rsu.date}}</td>
                   <td data-label="Quantity" class="text-right">{{rsu.quantity | number}}</td>
                   <td class="text-right">
@@ -95,7 +95,7 @@
               </ng-template>
               <ng-template pTemplate="body" let-item>
                 <tr>
-                  <td data-label="Ticker"><p-tag severity="info" value="{{item.shortName}}.{{item.exchange}}"></p-tag></td>
+                  <td data-label="Ticker"><span class="state-chip state-info">{{item.shortName}}.{{item.exchange}}</span></td>
                   <td data-label="Date">{{item.date}}</td>
                   <td data-label="Quantity" class="text-right">{{item.quantity | number}}</td>
                   <td data-label="Price" class="text-right">
@@ -243,9 +243,9 @@
                   <td data-label="Tax" class="text-right tax-total-cell">{{item.tax.total | number:'1.0-0'}} Ft</td>
                   <td data-label="Paid">
                     @if (item.paid) {
-                      <p-tag severity="success" value="Paid"></p-tag>
+                      <span class="state-chip state-buy">Paid</span>
                     } @else {
-                      <p-tag severity="warn" value="Unpaid"></p-tag>
+                      <span class="state-chip state-accent">Unpaid</span>
                     }
                   </td>
                   <td data-label="Calculated" class="text-color-secondary text-sm">
@@ -333,7 +333,7 @@
                 <tr>
                   <td data-label="Date">{{item.transactionDate | date:'mediumDate'}}</td>
                   <td data-label="Ticker">
-                    <p-tag severity="info" value="{{item.shortName}}.{{item.exchange}}"></p-tag>
+                    <span class="state-chip state-info">{{item.shortName}}.{{item.exchange}}</span>
                   </td>
                   <td data-label="Quantity" class="text-right">{{item.quantity}}</td>
                   <td data-label="Price" class="text-right">
@@ -360,9 +360,9 @@
                   <td data-label="Tax" class="text-right tax-total-cell">{{item.tax.total | number:'1.0-0'}} Ft</td>
                   <td data-label="Paid">
                     @if (item.paid) {
-                      <p-tag severity="success" value="Paid"></p-tag>
+                      <span class="state-chip state-buy">Paid</span>
                     } @else {
-                      <p-tag severity="warn" value="Unpaid"></p-tag>
+                      <span class="state-chip state-accent">Unpaid</span>
                     }
                   </td>
                   <td data-label="Calculated" class="text-color-secondary text-sm">

@@ -11,7 +11,6 @@ import { Tooltip } from 'primeng/tooltip';
 import { TableModule } from 'primeng/table';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
-import { Tag } from 'primeng/tag';
 import { Dialog } from 'primeng/dialog';
 import { Checkbox } from 'primeng/checkbox';
 import { FormsModule } from '@angular/forms';
@@ -21,7 +20,7 @@ import { FormsModule } from '@angular/forms';
     templateUrl: './rule.component.html',
     styleUrls: ['./rule.component.css'],
     imports: [Bind, Toolbar, PrimeTemplate, Toast, ButtonDirective, Ripple, Tooltip, TableModule,
-        InputText, Select, Tag, Dialog, Checkbox, FormsModule]
+        InputText, Select, Dialog, Checkbox, FormsModule]
 })
 export class FinancialRuleComponent implements OnChanges {
 
@@ -30,13 +29,14 @@ export class FinancialRuleComponent implements OnChanges {
   rules: ExclusionRule[] = [];
   selectedRules: ExclusionRule[] = [];
   ruleDialog: boolean = false;
-  rule: ExclusionRule = { accountNumber: '', side: 'PARTNER_ACCOUNT', active: true } as ExclusionRule;
+  rule: ExclusionRule = { name: '', accountNumber: '', side: 'PARTNER_ACCOUNT', active: true } as ExclusionRule;
   readonly sides: { label: string, value: AccountSide }[] = [
     { label: 'Partner account', value: 'PARTNER_ACCOUNT' },
     { label: 'My account', value: 'OWN_ACCOUNT' },
     { label: 'Either side', value: 'ANY' }
   ];
   readonly accountMaxLength = 64;
+  readonly nameMaxLength = 64;
 
   constructor(private financialService: FinancialService, private cdr: ChangeDetectorRef,
     private messageService: MessageService) {
@@ -68,6 +68,7 @@ export class FinancialRuleComponent implements OnChanges {
 
   openNew(accountNumber?: string): void {
     this.rule = {
+      name: '',
       accountNumber: accountNumber ?? '',
       side: 'PARTNER_ACCOUNT',
       active: true
@@ -76,7 +77,7 @@ export class FinancialRuleComponent implements OnChanges {
   }
 
   editRule(rule: ExclusionRule): void {
-    this.rule = { ...rule };
+    this.rule = { ...rule, name: rule.name ?? '' };
     this.ruleDialog = true;
   }
 
@@ -90,6 +91,7 @@ export class FinancialRuleComponent implements OnChanges {
       return;
     }
     this.rule.accountNumber = accountNumber;
+    this.rule.name = this.rule.name?.trim() || null;
 
     const call = this.rule.id === undefined
       ? this.financialService.createRule(this.rule)

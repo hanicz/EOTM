@@ -7,14 +7,13 @@ import { Bind } from 'primeng/bind';
 import { TableModule } from 'primeng/table';
 import { PrimeTemplate } from 'primeng/api';
 import { Image } from 'primeng/image';
-import { Tag } from 'primeng/tag';
-import { DecimalPipe, CurrencyPipe } from '@angular/common';
+import { DecimalPipe, CurrencyPipe, NgClass } from '@angular/common';
 
 @Component({
     selector: 'app-cryptoposition',
     templateUrl: './cryptoposition.component.html',
     styleUrls: ['./cryptoposition.component.css'],
-    imports: [Bind, TableModule, PrimeTemplate, Image, Tag, DecimalPipe, CurrencyPipe]
+    imports: [Bind, TableModule, PrimeTemplate, Image, DecimalPipe, CurrencyPipe, NgClass]
 })
 export class CryptopositionComponent implements OnInit {
 

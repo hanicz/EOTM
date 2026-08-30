@@ -17,7 +17,6 @@ import { InterestComponent } from './interest/interest.component';
 import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { DashboardService } from '../service/dashboard.service';
 import { SecurityService } from '../service/security.service';
-import { Tag } from 'primeng/tag';
 import { ChartComponent, ApexChart, ApexNonAxisChartSeries, ApexLegend } from 'ng-apexcharts';
 
 export type AllocationChartOptions = {
@@ -31,7 +30,7 @@ export type AllocationChartOptions = {
     selector: 'app-security',
     templateUrl: './security.component.html',
     styleUrls: ['./security.component.css'],
-    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, Select, FormsModule, HoldingComponent, TransactionComponent, InterestComponent, CurrencyPipe, DecimalPipe, Tag, ChartComponent]
+    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, Select, FormsModule, HoldingComponent, TransactionComponent, InterestComponent, CurrencyPipe, DecimalPipe, ChartComponent]
 })
 export class SecurityComponent implements OnInit {
 

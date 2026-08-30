@@ -58,18 +58,18 @@
         </td>
         <td data-label="Profit">
           @if (forexTransaction.liveValue > forexTransaction.fromAmount) {
-            <p-tag styleClass="p-mr-2" severity="success" value="{{forexTransaction.liveValue - forexTransaction.fromAmount | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}"></p-tag>
+            <span class="p-mr-2 state-chip state-buy">{{forexTransaction.liveValue - forexTransaction.fromAmount | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}</span>
           }
           @if (forexTransaction.liveValue < forexTransaction.fromAmount) {
-            <p-tag styleClass="p-mr-2" severity="danger" value="{{forexTransaction.liveValue - forexTransaction.fromAmount | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}"></p-tag>
+            <span class="p-mr-2 state-chip state-sell">{{forexTransaction.liveValue - forexTransaction.fromAmount | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}</span>
           }
         </td>
         <td data-label="%">
           @if (forexTransaction.liveValue > forexTransaction.fromAmount) {
-            <p-tag styleClass="p-mr-2" severity="success" value="{{(-100 + forexTransaction.liveValue / forexTransaction.fromAmount * 100 | number : '0.0-1') + '%'}}"></p-tag>
+            <span class="p-mr-2 state-chip state-buy">{{(-100 + forexTransaction.liveValue / forexTransaction.fromAmount * 100 | number : '0.0-1') + '%'}}</span>
           }
           @if (forexTransaction.liveValue < forexTransaction.fromAmount) {
-            <p-tag styleClass="p-mr-2" severity="danger" value="{{(-100 + forexTransaction.liveValue / forexTransaction.fromAmount * 100 | number : '0.0-1') + '%'}}"></p-tag>
+            <span class="p-mr-2 state-chip state-sell">{{(-100 + forexTransaction.liveValue / forexTransaction.fromAmount * 100 | number : '0.0-1') + '%'}}</span>
           }
         </td>
       </tr>

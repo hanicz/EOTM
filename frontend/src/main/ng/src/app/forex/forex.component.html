@@ -10,20 +10,18 @@
       </div>
       <div class="summary-stat">Profit:
         @if (diffy > 0) {
-          <p-tag severity="success"
-            value="{{diffy | currency : 'HUF' : 'symbol' : '0.0-2'}}"></p-tag>
+          <span class="state-chip state-buy">{{diffy | currency : 'HUF' : 'symbol' : '0.0-2'}}</span>
         }
         @if (diffy < 0) {
-          <p-tag severity="danger"
-            value="{{diffy | currency : 'HUF' : 'symbol' : '0.0-2'}}"></p-tag>
+          <span class="state-chip state-sell">{{diffy | currency : 'HUF' : 'symbol' : '0.0-2'}}</span>
         }
       </div>
       <div class="summary-stat">Percentage:
         @if (diffy > 0) {
-          <p-tag severity="success" value="{{(percentage | number : '0.0-1') + '%'}}"></p-tag>
+          <span class="state-chip state-buy">{{(percentage | number : '0.0-1') + '%'}}</span>
         }
         @if (diffy < 0) {
-          <p-tag severity="danger" value="{{(percentage | number : '0.0-1') + '%'}}"></p-tag>
+          <span class="state-chip state-sell">{{(percentage | number : '0.0-1') + '%'}}</span>
         }
       </div>
       <div class="summary-actions">

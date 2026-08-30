@@ -50,7 +50,7 @@ class FinancialRuleControllerTest {
 
     @Test
     void createRule_returnsTheCreatedRule() {
-        BankExclusionRuleEditDTO editDTO = new BankExclusionRuleEditDTO(ACCOUNT, AccountSide.PARTNER_ACCOUNT, true);
+        BankExclusionRuleEditDTO editDTO = new BankExclusionRuleEditDTO(null, ACCOUNT, AccountSide.PARTNER_ACCOUNT, true);
         when(this.bankExclusionRuleService.createRule(USER_ID, editDTO)).thenReturn(this.dto(5L));
 
         ResponseEntity<BankExclusionRuleDTO> response = this.financialRuleController.createRule(USER_ID, editDTO);
@@ -61,7 +61,7 @@ class FinancialRuleControllerTest {
 
     @Test
     void updateRule_returnsTheUpdatedRule() {
-        BankExclusionRuleEditDTO editDTO = new BankExclusionRuleEditDTO(ACCOUNT, AccountSide.ANY, false);
+        BankExclusionRuleEditDTO editDTO = new BankExclusionRuleEditDTO(null, ACCOUNT, AccountSide.ANY, false);
         when(this.bankExclusionRuleService.updateRule(USER_ID, 5L, editDTO)).thenReturn(this.dto(5L));
 
         ResponseEntity<BankExclusionRuleDTO> response = this.financialRuleController.updateRule(USER_ID, 5L, editDTO);

@@ -24,10 +24,14 @@ import java.time.LocalDate;
 public class BankExclusionRule {
 
     public static final int ACCOUNT_MAX_LENGTH = 64;
+    public static final int NAME_MAX_LENGTH = 64;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "name", length = NAME_MAX_LENGTH)
+    private String name;
 
     @Column(name = "account_number", nullable = false, length = ACCOUNT_MAX_LENGTH)
     private String accountNumber;

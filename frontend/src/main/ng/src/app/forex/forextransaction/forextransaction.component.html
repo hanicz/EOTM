@@ -28,10 +28,10 @@
             [showClear]="true" placeholder="Any">
             <ng-template let-option pTemplate="item">
               @if (option.label === 'BUY') {
-                <p-tag styleClass="p-mr-2" severity="info" value="BUY"></p-tag>
+                <span class="p-mr-2 state-chip state-info">BUY</span>
               }
               @if (option.label === 'SELL') {
-                <p-tag styleClass="p-mr-2" severity="warn" value="SELL"></p-tag>
+                <span class="p-mr-2 state-chip state-accent">SELL</span>
               }
             </ng-template>
           </p-select>
@@ -63,10 +63,10 @@
       <td data-label="To">{{forexTransaction.toCurrencyId}}</td>
       <td data-label="Type">
         @if (forexTransaction.buySell === 'B') {
-          <p-tag styleClass="p-mr-2" severity="info" value="BUY"></p-tag>
+          <span class="p-mr-2 state-chip state-info">BUY</span>
         }
         @if (forexTransaction.buySell === 'S') {
-          <p-tag styleClass="p-mr-2" severity="warn" value="SELL"></p-tag>
+          <span class="p-mr-2 state-chip state-accent">SELL</span>
         }
       </td>
       <td data-label="Spent">{{forexTransaction.fromAmount | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}</td>
@@ -102,11 +102,10 @@
           [style]="{'width':'100%'}">
           <ng-template let-option pTemplate="item">
             @if (option.label === 'BUY') {
-              <p-tag styleClass="p-mr-2" severity="info" value="BUY">
-              </p-tag>
+              <span class="p-mr-2 state-chip state-info">BUY</span>
             }
             @if (option.label === 'SELL') {
-              <p-tag styleClass="p-mr-2" severity="warn" value="SELL"></p-tag>
+              <span class="p-mr-2 state-chip state-accent">SELL</span>
             }
           </ng-template>
         </p-select>

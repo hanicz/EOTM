@@ -114,14 +114,14 @@
       </td>
       <td data-label="In reports">
         @if (transaction.excluded) {
-          <p-tag severity="secondary" value="Excluded"></p-tag>
+          <span class="state-chip state-neutral">Excluded</span>
         } @else {
-          <p-tag severity="success" value="Counted"></p-tag>
+          <span class="state-chip state-buy">Counted</span>
         }
       </td>
       <td data-label="Tax">
         @if (transaction.taxable) {
-          <p-tag severity="warn" value="Taxable"></p-tag>
+          <span class="state-chip state-accent">Taxable</span>
         }
       </td>
       <td>

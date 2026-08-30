@@ -7,19 +7,18 @@ import { TableModule } from 'primeng/table';
 import { PrimeTemplate } from 'primeng/api';
 import { Skeleton } from 'primeng/skeleton';
 import { Image } from 'primeng/image';
-import { Tag } from 'primeng/tag';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { Tooltip } from 'primeng/tooltip';
 import { AlertService } from '../../service/alert.service';
-import { DecimalPipe, CurrencyPipe } from '@angular/common';
+import { DecimalPipe, CurrencyPipe, NgClass } from '@angular/common';
 
 @Component({
     selector: 'app-cryptoholding',
     templateUrl: './cryptoholding.component.html',
     styleUrls: ['./cryptoholding.component.css'],
-    imports: [Bind, TableModule, PrimeTemplate, Skeleton, Image, Tag, ButtonDirective, Ripple, Tooltip,
-        DecimalPipe, CurrencyPipe]
+    imports: [Bind, TableModule, PrimeTemplate, Skeleton, Image, ButtonDirective, Ripple, Tooltip,
+        DecimalPipe, CurrencyPipe, NgClass]
 })
 export class CryptoholdingComponent implements OnInit {
 

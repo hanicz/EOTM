@@ -104,16 +104,25 @@ export class FinancialService {
   }
 
   createRule(rule: ExclusionRule) {
-    return this.http.post<ExclusionRule>(this.ruleUrl, JSON.stringify(rule), {
+    return this.http.post<ExclusionRule>(this.ruleUrl, JSON.stringify(this.toRulePayload(rule)), {
       headers: this.helper.getHeadersWithToken()
     });
   }
 
   updateRule(rule: ExclusionRule) {
     const url = `${this.ruleUrl}/${rule.id}`;
-    return this.http.put<ExclusionRule>(url, JSON.stringify(rule), {
+    return this.http.put<ExclusionRule>(url, JSON.stringify(this.toRulePayload(rule)), {
       headers: this.helper.getHeadersWithToken()
     });
+  }
+
+  private toRulePayload(rule: ExclusionRule) {
+    return {
+      name: rule.name,
+      accountNumber: rule.accountNumber,
+      side: rule.side,
+      active: rule.active
+    };
   }
 
   deleteRulesByIds(ids: string) {

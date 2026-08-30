@@ -43,6 +43,7 @@ public class BankExclusionRuleService {
         this.rejectDuplicate(userId, normalized, editDTO.side(), null);
 
         BankExclusionRule rule = BankExclusionRule.builder()
+                .name(this.trimToNull(editDTO.name()))
                 .accountNumber(accountNumber)
                 .normalizedAccount(normalized)
                 .side(editDTO.side())
@@ -63,6 +64,7 @@ public class BankExclusionRuleService {
         String normalized = this.normalizeOrReject(accountNumber);
         this.rejectDuplicate(userId, normalized, editDTO.side(), id);
 
+        rule.setName(this.trimToNull(editDTO.name()));
         rule.setAccountNumber(accountNumber);
         rule.setNormalizedAccount(normalized);
         rule.setSide(editDTO.side());
@@ -85,6 +87,14 @@ public class BankExclusionRuleService {
         }
     }
 
+    private String trimToNull(String name) {
+        if (name == null) {
+            return null;
+        }
+        String trimmed = name.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
     private String normalizeOrReject(String accountNumber) {
         String normalized = ExclusionRuleMatcher.normalize(accountNumber);
         if (normalized.isEmpty()) {
@@ -104,6 +114,7 @@ public class BankExclusionRuleService {
     private BankExclusionRuleDTO convertToDTO(BankExclusionRule rule) {
         return BankExclusionRuleDTO.builder()
                 .id(rule.getId())
+                .name(rule.getName())
                 .accountNumber(rule.getAccountNumber())
                 .side(rule.getSide())
                 .active(rule.isActive())

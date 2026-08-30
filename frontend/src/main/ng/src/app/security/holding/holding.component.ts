@@ -6,9 +6,8 @@ import { Bind } from 'primeng/bind';
 import { TableModule } from 'primeng/table';
 import { PrimeTemplate } from 'primeng/api';
 import { Skeleton } from 'primeng/skeleton';
-import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
+import { CurrencyPipe, DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { Divider } from 'primeng/divider';
-import { Tag } from 'primeng/tag';
 import { Tooltip } from 'primeng/tooltip';
 
 const MILLISECONDS_PER_DAY = 86400000;
@@ -31,7 +30,7 @@ export interface PaymentTotal {
     selector: 'app-security-holding',
     templateUrl: './holding.component.html',
     styleUrls: ['./holding.component.css'],
-    imports: [Bind, TableModule, PrimeTemplate, Skeleton, Divider, Tag, Tooltip, CurrencyPipe, DatePipe, DecimalPipe]
+    imports: [Bind, TableModule, PrimeTemplate, Skeleton, Divider, Tooltip, CurrencyPipe, DatePipe, DecimalPipe, NgClass]
 })
 export class HoldingComponent implements OnInit {
 

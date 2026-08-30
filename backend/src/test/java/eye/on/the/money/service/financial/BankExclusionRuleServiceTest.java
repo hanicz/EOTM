@@ -26,6 +26,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -77,7 +78,7 @@ class BankExclusionRuleServiceTest {
     @Test
     void createRule_storesTheNormalizedAccountAndKeepsTheTypedOne() {
         BankExclusionRuleDTO dto = this.bankExclusionRuleService.createRule(USER_ID,
-                new BankExclusionRuleEditDTO("  " + ACCOUNT + "  ", AccountSide.PARTNER_ACCOUNT, true));
+                new BankExclusionRuleEditDTO(null, "  " + ACCOUNT + "  ", AccountSide.PARTNER_ACCOUNT, true));
 
         BankExclusionRule saved = this.captureSave();
         assertEquals(ACCOUNT, saved.getAccountNumber());
@@ -89,9 +90,34 @@ class BankExclusionRuleServiceTest {
     }
 
     @Test
+    void createRule_keepsTheNameWithoutItsSurroundingSpaces() {
+        BankExclusionRuleDTO dto = this.bankExclusionRuleService.createRule(USER_ID,
+                new BankExclusionRuleEditDTO("  Rent  ", ACCOUNT, AccountSide.PARTNER_ACCOUNT, true));
+
+        assertEquals("Rent", this.captureSave().getName());
+        assertEquals("Rent", dto.getName());
+    }
+
+    @Test
+    void createRule_storesABlankNameAsNull() {
+        this.bankExclusionRuleService.createRule(USER_ID,
+                new BankExclusionRuleEditDTO("   ", ACCOUNT, AccountSide.PARTNER_ACCOUNT, true));
+
+        assertNull(this.captureSave().getName());
+    }
+
+    @Test
+    void createRule_storesAMissingNameAsNull() {
+        this.bankExclusionRuleService.createRule(USER_ID,
+                new BankExclusionRuleEditDTO(null, ACCOUNT, AccountSide.PARTNER_ACCOUNT, true));
+
+        assertNull(this.captureSave().getName());
+    }
+
+    @Test
     void createRule_rejectsAnAccountWithNoLettersOrDigits() {
         assertThrows(ValidationException.class, () -> this.bankExclusionRuleService.createRule(USER_ID,
-                new BankExclusionRuleEditDTO("---//---", AccountSide.ANY, true)));
+                new BankExclusionRuleEditDTO(null, "---//---", AccountSide.ANY, true)));
 
         verify(this.bankExclusionRuleRepository, never()).saveAndFlush(any());
     }
@@ -103,7 +129,7 @@ class BankExclusionRuleServiceTest {
                 .thenReturn(Optional.of(this.existingRule(9L, AccountSide.PARTNER_ACCOUNT)));
 
         assertThrows(ValidationException.class, () -> this.bankExclusionRuleService.createRule(USER_ID,
-                new BankExclusionRuleEditDTO(ACCOUNT, AccountSide.PARTNER_ACCOUNT, true)));
+                new BankExclusionRuleEditDTO(null, ACCOUNT, AccountSide.PARTNER_ACCOUNT, true)));
 
         verify(this.bankExclusionRuleRepository, never()).saveAndFlush(any());
     }
@@ -114,13 +140,13 @@ class BankExclusionRuleServiceTest {
                 .thenThrow(new DataIntegrityViolationException("UK_BANK_EXCLUSION_RULE_ACCOUNT"));
 
         assertThrows(ValidationException.class, () -> this.bankExclusionRuleService.createRule(USER_ID,
-                new BankExclusionRuleEditDTO(ACCOUNT, AccountSide.ANY, true)));
+                new BankExclusionRuleEditDTO(null, ACCOUNT, AccountSide.ANY, true)));
     }
 
     @Test
     void createRule_storesAnInactiveRuleWhenAskedTo() {
         this.bankExclusionRuleService.createRule(USER_ID,
-                new BankExclusionRuleEditDTO(ACCOUNT, AccountSide.OWN_ACCOUNT, false));
+                new BankExclusionRuleEditDTO(null, ACCOUNT, AccountSide.OWN_ACCOUNT, false));
 
         assertFalse(this.captureSave().isActive());
     }
@@ -131,9 +157,10 @@ class BankExclusionRuleServiceTest {
                 .thenReturn(Optional.of(this.existingRule(5L, AccountSide.PARTNER_ACCOUNT)));
 
         this.bankExclusionRuleService.updateRule(USER_ID, 5L,
-                new BankExclusionRuleEditDTO("1111-1111", AccountSide.OWN_ACCOUNT, false));
+                new BankExclusionRuleEditDTO("Savings transfer", "1111-1111", AccountSide.OWN_ACCOUNT, false));
 
         BankExclusionRule saved = this.captureSave();
+        assertEquals("Savings transfer", saved.getName());
         assertEquals("1111-1111", saved.getAccountNumber());
         assertEquals("11111111", saved.getNormalizedAccount());
         assertEquals(AccountSide.OWN_ACCOUNT, saved.getSide());
@@ -149,7 +176,7 @@ class BankExclusionRuleServiceTest {
                 .thenReturn(Optional.of(this.existingRule(5L, AccountSide.PARTNER_ACCOUNT)));
 
         this.bankExclusionRuleService.updateRule(USER_ID, 5L,
-                new BankExclusionRuleEditDTO(ACCOUNT, AccountSide.PARTNER_ACCOUNT, false));
+                new BankExclusionRuleEditDTO(null, ACCOUNT, AccountSide.PARTNER_ACCOUNT, false));
 
         assertFalse(this.captureSave().isActive());
     }
@@ -163,7 +190,7 @@ class BankExclusionRuleServiceTest {
                 .thenReturn(Optional.of(this.existingRule(9L, AccountSide.PARTNER_ACCOUNT)));
 
         assertThrows(ValidationException.class, () -> this.bankExclusionRuleService.updateRule(USER_ID, 5L,
-                new BankExclusionRuleEditDTO(ACCOUNT, AccountSide.PARTNER_ACCOUNT, true)));
+                new BankExclusionRuleEditDTO(null, ACCOUNT, AccountSide.PARTNER_ACCOUNT, true)));
     }
 
     @Test
@@ -171,7 +198,7 @@ class BankExclusionRuleServiceTest {
         when(this.bankExclusionRuleRepository.findByIdAndUserId(5L, USER_ID)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class, () -> this.bankExclusionRuleService.updateRule(USER_ID, 5L,
-                new BankExclusionRuleEditDTO(ACCOUNT, AccountSide.ANY, true)));
+                new BankExclusionRuleEditDTO(null, ACCOUNT, AccountSide.ANY, true)));
     }
 
     @Test

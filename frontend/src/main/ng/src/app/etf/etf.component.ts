@@ -3,7 +3,6 @@ import { ETFInvestment } from '../model/etfinvestment';
 import { MenuComponent } from '../menu/menu.component';
 import { Bind } from 'primeng/bind';
 import { Panel } from 'primeng/panel';
-import { Tag } from 'primeng/tag';
 import { Divider } from 'primeng/divider';
 import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primeng/tabs';
 import { Ripple } from 'primeng/ripple';
@@ -30,7 +29,7 @@ export type AllocationChartOptions = {
     selector: 'app-etf',
     templateUrl: './etf.component.html',
     styleUrls: ['./etf.component.css'],
-    imports: [MenuComponent, Bind, Panel, Tag, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, Select, FormsModule, EtfholdingComponent, EtfpositionComponent, EtfinvestmentComponent, EtfdividendComponent, DecimalPipe, CurrencyPipe, ChartComponent]
+    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, Select, FormsModule, EtfholdingComponent, EtfpositionComponent, EtfinvestmentComponent, EtfdividendComponent, DecimalPipe, CurrencyPipe, ChartComponent]
 })
 export class EtfComponent implements OnInit {
 

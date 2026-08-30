@@ -13,7 +13,6 @@ import { TableModule } from 'primeng/table';
 import { InputNumber } from 'primeng/inputnumber';
 import { Select } from 'primeng/select';
 import { Checkbox } from 'primeng/checkbox';
-import { Tag } from 'primeng/tag';
 import { Toast } from 'primeng/toast';
 import { Skeleton } from 'primeng/skeleton';
 import { FormsModule } from '@angular/forms';
@@ -57,7 +56,7 @@ const CHART = { width: 820, height: 340, left: 68, right: 16, top: 16, bottom: 3
     templateUrl: './fire.component.html',
     styleUrls: ['./fire.component.css'],
     imports: [MenuComponent, Bind, Panel, ButtonDirective, Ripple, Tooltip, TableModule, PrimeTemplate,
-        InputNumber, Select, Checkbox, Tag, Toast, Skeleton, FormsModule, DecimalPipe]
+        InputNumber, Select, Checkbox, Toast, Skeleton, FormsModule, DecimalPipe]
 })
 export class FireComponent {
 

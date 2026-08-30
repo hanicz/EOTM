@@ -3,7 +3,6 @@ import { ForexTransaction } from '../model/forextransaction';
 import { MenuComponent } from '../menu/menu.component';
 import { Bind } from 'primeng/bind';
 import { Panel } from 'primeng/panel';
-import { Tag } from 'primeng/tag';
 import { Divider } from 'primeng/divider';
 import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primeng/tabs';
 import { Ripple } from 'primeng/ripple';
@@ -25,7 +24,7 @@ export type AllocationChartOptions = {
     selector: 'app-forex',
     templateUrl: './forex.component.html',
     styleUrls: ['./forex.component.css'],
-    imports: [MenuComponent, Bind, Panel, Tag, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, ForexholdingComponent, ForextransactionComponent, DecimalPipe, CurrencyPipe, ChartComponent]
+    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, ForexholdingComponent, ForextransactionComponent, DecimalPipe, CurrencyPipe, ChartComponent]
 })
 export class ForexComponent implements OnInit {
 

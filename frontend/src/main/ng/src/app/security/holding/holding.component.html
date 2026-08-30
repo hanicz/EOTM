@@ -48,17 +48,15 @@
         <td data-label="Average">{{(transaction.amount / transaction.quantity | number : '0.0-4') + '%'}}</td>
         <td data-label="Rate">
           @if (transaction.rate != null) {
-            <p-tag styleClass="p-mr-2" [severity]="transaction.zeroCoupon ? 'warn' : 'info'"
-              value="{{(transaction.rate | number : '0.2-2') + '%'}}"
-              [pTooltip]="transaction.zeroCoupon ? 'Discount bill: return over the whole holding period, not an annual rate.' : 'Annual rate for the current interest period.'"></p-tag>
+            <span class="p-mr-2 state-chip" [ngClass]="transaction.zeroCoupon ? 'state-accent' : 'state-info'"
+              [pTooltip]="transaction.zeroCoupon ? 'Discount bill: return over the whole holding period, not an annual rate.' : 'Annual rate for the current interest period.'">{{(transaction.rate | number : '0.2-2') + '%'}}</span>
           } @else {
             <span class="text-color-secondary">-</span>
           }
         </td>
         <td data-label="Next Payment">
           @if (transaction.nextPaymentDate) {
-            <p-tag styleClass="p-mr-2" [severity]="isPaymentSoon(transaction) ? 'success' : 'secondary'"
-              value="{{transaction.nextPaymentDate | date : 'yyyy-MM-dd'}}"></p-tag>
+            <span class="p-mr-2 state-chip" [ngClass]="isPaymentSoon(transaction) ? 'state-buy' : 'state-neutral'">{{transaction.nextPaymentDate | date : 'yyyy-MM-dd'}}</span>
           } @else {
             <span class="text-color-secondary">-</span>
           }
@@ -79,9 +77,8 @@
     <div class="flex flex-row flex-wrap align-items-center mb-3 upcoming-header">
       <h3 class="mt-0 mb-0 mr-4">Upcoming payments</h3>
       @for (total of paymentTotals; track total.currencyId) {
-        <p-tag styleClass="p-mr-2 mr-2" severity="success"
-          value="{{total.total | currency : total.currencyId : 'symbol' : '0.0-2'}}"
-          pTooltip="Total of the next payment on every holding in this currency."></p-tag>
+        <span class="p-mr-2 mr-2 state-chip state-buy"
+          pTooltip="Total of the next payment on every holding in this currency.">{{total.total | currency : total.currencyId : 'symbol' : '0.0-2'}}</span>
       }
     </div>
     <p-table [value]="upcomingPayments" styleClass="p-datatable-striped p-datatable-sm table-stack">
@@ -97,8 +94,7 @@
         <tr [class.payment-soon]="payment.daysUntil <= soonInDays">
           <td data-label="Date">{{payment.nextPaymentDate | date : 'yyyy-MM-dd'}}</td>
           <td data-label="Due In">
-            <p-tag styleClass="p-mr-2" [severity]="payment.daysUntil <= soonInDays ? 'success' : 'secondary'"
-              value="{{dueInLabel(payment.daysUntil)}}"></p-tag>
+            <span class="p-mr-2 state-chip" [ngClass]="payment.daysUntil <= soonInDays ? 'state-buy' : 'state-neutral'">{{dueInLabel(payment.daysUntil)}}</span>
           </td>
           <td data-label="Security Name">{{payment.securityName}}</td>
           <td data-label="Amount"><b class="amount">{{payment.nextPaymentAmount | currency : payment.currencyId : 'symbol' : '0.0-2'}}</b></td>

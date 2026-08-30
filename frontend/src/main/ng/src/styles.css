@@ -69,6 +69,7 @@ html {
 .amount {
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
+    font-size: 0.9rem;
 }
 
 /* Marks a price the provider had no live quote for, so it fell back to the
@@ -128,7 +129,7 @@ html {
     .table-stack .p-datatable-tbody > tr > td {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content: flex-end;
         gap: 1rem;
         width: 100%;
         border: 0 none;
@@ -140,6 +141,7 @@ html {
         content: attr(data-label);
         flex: 0 1 auto;
         min-width: 0;
+        margin-right: auto;
         font-weight: 600;
         text-align: left;
         color: #5f5e5a;
@@ -148,6 +150,14 @@ html {
     /* Cells carrying only controls (action buttons) get the full width. */
     .table-stack .p-datatable-tbody > tr > td:not([data-label])::before {
         content: none;
+    }
+
+    .table-stack .p-datatable-tbody > tr > td:not([data-label]):has(button) {
+        gap: 0.25rem;
+    }
+
+    .table-stack .p-datatable-tbody > tr > td:not([data-label]):not(:has(button)) {
+        justify-content: flex-start;
     }
 }
 
@@ -218,7 +228,7 @@ html {
     gap: 0.2rem;
     padding: 0.05rem 0.4rem;
     border-radius: 0.65rem;
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     font-weight: 600;
     white-space: nowrap;
 }
@@ -227,6 +237,8 @@ html {
 .state-sell { color: #a32a30; background-color: rgba(163, 42, 48, 0.14); }
 .state-neutral { color: #5f5e5a; background-color: rgba(95, 94, 90, 0.12); }
 .state-accent { color: #854f0b; background-color: rgba(239, 159, 39, 0.18); }
+.state-info { color: #1d4f8f; background-color: rgba(29, 79, 143, 0.13); }
+.state-contrast { color: #faf9f6; background-color: #2b2a27; }
 
 /* Shared table chrome.
    Add `eotm-table` alongside `table-stack`. Quiet uppercase headers so the

@@ -12,7 +12,6 @@ import { FileUpload } from 'primeng/fileupload';
 import { TableModule } from 'primeng/table';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
-import { Tag } from 'primeng/tag';
 import { FormsModule } from '@angular/forms';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 
@@ -31,7 +30,7 @@ interface TransactionEditValues {
     templateUrl: './transaction.component.html',
     styleUrls: ['./transaction.component.css'],
     imports: [Bind, Toolbar, PrimeTemplate, Toast, ButtonDirective, Ripple, Tooltip, FileUpload, TableModule,
-        InputText, Select, Tag, FormsModule, CurrencyPipe, DatePipe]
+        InputText, Select, FormsModule, CurrencyPipe, DatePipe]
 })
 export class FinancialTransactionComponent {
 

@@ -30,17 +30,14 @@
       }
     </td>
     <td data-label="Position">
-      <p-tag styleClass="p-mr-2" [severity]="(transaction.quantity > 0) ? 'info':'warn'"
-      value="{{(transaction.quantity > 0) ? (transaction.quantity | number: '0.0-4') : 'Closed'}}"></p-tag>
+      <span class="p-mr-2 state-chip" [ngClass]="(transaction.quantity > 0) ? 'state-info' : 'state-accent'">{{(transaction.quantity > 0) ? (transaction.quantity | number: '0.0-4') : 'Closed'}}</span>
     </td>
     <td data-label="Profit">
       @if (transaction.quantity == 0 && transaction.amount < 0) {
-        <p-tag styleClass="p-mr-2" severity="success"
-        value="{{myMath.abs(transaction.amount) | currency : transaction.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
+        <span class="p-mr-2 state-chip state-buy">{{myMath.abs(transaction.amount) | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</span>
       }
       @if (transaction.quantity == 0 && transaction.amount > 0) {
-        <p-tag styleClass="p-mr-2" severity="danger"
-        value="{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
+        <span class="p-mr-2 state-chip state-sell">{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</span>
       }
     </td>
   </tr>

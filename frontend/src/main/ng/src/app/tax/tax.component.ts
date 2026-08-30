@@ -15,7 +15,6 @@ import { TableModule } from 'primeng/table';
 import { InputText } from 'primeng/inputtext';
 import { InputNumber } from 'primeng/inputnumber';
 import { Select } from 'primeng/select';
-import { Tag } from 'primeng/tag';
 import { Toast } from 'primeng/toast';
 import { FormsModule } from '@angular/forms';
 import { DatePipe, DecimalPipe } from '@angular/common';
@@ -25,7 +24,7 @@ import { DatePipe, DecimalPipe } from '@angular/common';
     templateUrl: './tax.component.html',
     styleUrls: ['./tax.component.css'],
     imports: [MenuComponent, Bind, Panel, Tabs, TabList, Tab, TabPanels, TabPanel, ButtonDirective, Ripple,
-        Tooltip, TableModule, PrimeTemplate, InputText, InputNumber, Select, Tag, Toast,
+        Tooltip, TableModule, PrimeTemplate, InputText, InputNumber, Select, Toast,
         FormsModule, DecimalPipe, DatePipe]
 })
 export class TaxComponent {

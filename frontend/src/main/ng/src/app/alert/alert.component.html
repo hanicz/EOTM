@@ -62,7 +62,7 @@
               <ng-template pTemplate="body" let-alert>
                 <tr>
                   <td data-label="Ticker">
-                    <p-tag severity="contrast" value="{{alert.shortName}}.{{alert.exchange}}"></p-tag>
+                    <span class="state-chip state-contrast">{{alert.shortName}}.{{alert.exchange}}</span>
                   </td>
                   <td data-label="Name">
                     <div class="flex align-items-center">

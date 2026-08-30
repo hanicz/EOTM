@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 public class BankExclusionRuleDTO {
 
     private Long id;
+    private String name;
     private String accountNumber;
     private AccountSide side;
     private boolean active;

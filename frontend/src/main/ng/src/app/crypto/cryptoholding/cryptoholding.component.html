@@ -75,14 +75,12 @@
         </td>
         <td data-label="Profit">
           @if (transaction.liveValue != null) {
-            <p-tag styleClass="p-mr-2" [severity]="(transaction.valueDiff > 0) ? 'success':'danger'"
-            value="{{transaction.valueDiff | currency : transaction.currencyId : 'symbol' : '0.0-2'}}"></p-tag>
+            <span class="p-mr-2 state-chip" [ngClass]="(transaction.valueDiff > 0) ? 'state-buy' : 'state-sell'">{{transaction.valueDiff | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</span>
           }
         </td>
         <td data-label="%">
           @if (transaction.liveValue != null) {
-            <p-tag styleClass="p-mr-2" [severity]="(transaction.valueDiff > 0) ? 'success':'danger'"
-            value="{{(transaction.valueDiff / transaction.amount * 100 | number : '0.0-1') + '%'}}"></p-tag>
+            <span class="p-mr-2 state-chip" [ngClass]="(transaction.valueDiff > 0) ? 'state-buy' : 'state-sell'">{{(transaction.valueDiff / transaction.amount * 100 | number : '0.0-1') + '%'}}</span>
           }
         </td>
         <td data-label="Alerts">

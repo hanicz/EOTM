@@ -5,7 +5,6 @@ import { Bind } from 'primeng/bind';
 import { TableModule } from 'primeng/table';
 import { PrimeTemplate } from 'primeng/api';
 import { Skeleton } from 'primeng/skeleton';
-import { Tag } from 'primeng/tag';
 import { Tooltip } from 'primeng/tooltip';
 import { DecimalPipe, CurrencyPipe } from '@angular/common';
 
@@ -13,7 +12,7 @@ import { DecimalPipe, CurrencyPipe } from '@angular/common';
     selector: 'app-forexholding',
     templateUrl: './forexholding.component.html',
     styleUrls: ['./forexholding.component.css'],
-    imports: [Bind, TableModule, PrimeTemplate, Skeleton, Tag, Tooltip, DecimalPipe, CurrencyPipe]
+    imports: [Bind, TableModule, PrimeTemplate, Skeleton, Tooltip, DecimalPipe, CurrencyPipe]
 })
 export class ForexholdingComponent {
 

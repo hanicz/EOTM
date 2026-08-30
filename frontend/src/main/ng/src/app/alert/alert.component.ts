@@ -20,7 +20,6 @@ import { TableModule } from 'primeng/table';
 import { MessageService, PrimeTemplate } from 'primeng/api';
 import { Skeleton } from 'primeng/skeleton';
 import { NgClass, UpperCasePipe } from '@angular/common';
-import { Tag } from 'primeng/tag';
 import { Toast } from 'primeng/toast';
 import { TickerLogoComponent } from '../util/ticker-logo.component';
 import { ExchangeOptionComponent } from '../util/exchange-option.component';
@@ -44,7 +43,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     templateUrl: './alert.component.html',
     styleUrls: ['./alert.component.css'],
     imports: [MenuComponent, Bind, Panel, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip,
-        TableModule, PrimeTemplate, Skeleton, NgClass, Tag, Toast, Dialog, Select, FormsModule, InputNumber,
+        TableModule, PrimeTemplate, Skeleton, NgClass, Toast, Dialog, Select, FormsModule, InputNumber,
         UpperCasePipe, AlertTypePipe, TickerLogoComponent, ExchangeOptionComponent, SymbolOptionComponent,
         Checkbox, InputText]
 })

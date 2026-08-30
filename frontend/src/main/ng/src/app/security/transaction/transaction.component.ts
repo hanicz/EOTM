@@ -14,15 +14,14 @@ import { TableModule } from 'primeng/table';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
-import { Tag } from 'primeng/tag';
 import { Dialog } from 'primeng/dialog';
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe, NgClass } from '@angular/common';
 
 @Component({
     selector: 'app-security-transaction',
     templateUrl: './transaction.component.html',
     styleUrls: ['./transaction.component.css'],
-    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Tag, Dialog, CurrencyPipe, DatePipe, Toast]
+    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Dialog, CurrencyPipe, DatePipe, Toast, NgClass]
 })
 export class TransactionComponent implements OnInit {
 

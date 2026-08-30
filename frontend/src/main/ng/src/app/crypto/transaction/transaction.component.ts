@@ -14,7 +14,6 @@ import { TableModule } from 'primeng/table';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
-import { Tag } from 'primeng/tag';
 import { Image } from 'primeng/image';
 import { Dialog } from 'primeng/dialog';
 import { DecimalPipe, CurrencyPipe, DatePipe } from '@angular/common';
@@ -23,7 +22,7 @@ import { DecimalPipe, CurrencyPipe, DatePipe } from '@angular/common';
     selector: 'app-transaction',
     templateUrl: './transaction.component.html',
     styleUrls: ['./transaction.component.css'],
-    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Tag, Image, Dialog, DecimalPipe, CurrencyPipe, DatePipe, Toast]
+    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Image, Dialog, DecimalPipe, CurrencyPipe, DatePipe, Toast]
 })
 export class TransactionComponent implements OnInit {
 

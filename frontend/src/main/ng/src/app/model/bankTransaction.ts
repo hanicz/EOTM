@@ -42,6 +42,7 @@ export type AccountSide = 'OWN_ACCOUNT' | 'PARTNER_ACCOUNT' | 'ANY';
 
 export interface ExclusionRule {
     id: number;
+    name: string | null;
     accountNumber: string;
     side: AccountSide;
     active: boolean;

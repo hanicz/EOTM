@@ -20,6 +20,7 @@
       <th style="width: 3rem">
         <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
       </th>
+      <th pSortableColumn="name">Name <p-sortIcon field="name"></p-sortIcon></th>
       <th pSortableColumn="accountNumber">Account <p-sortIcon field="accountNumber"></p-sortIcon></th>
       <th>Matches on</th>
       <th>Status</th>
@@ -32,15 +33,22 @@
       <td>
         <p-tableCheckbox [value]="rule"></p-tableCheckbox>
       </td>
-      <td data-label="Account">{{rule.accountNumber}}</td>
+      <td data-label="Name">
+        @if (rule.name) {
+          {{rule.name}}
+        } @else {
+          <span class="cell-none">&mdash;</span>
+        }
+      </td>
+      <td data-label="Account" class="cell-quiet">{{rule.accountNumber}}</td>
       <td data-label="Matches on">
-        <p-tag severity="info" [value]="sideLabel(rule.side)"></p-tag>
+        <span class="state-chip state-info">{{sideLabel(rule.side)}}</span>
       </td>
       <td data-label="Status">
         @if (rule.active) {
-          <p-tag severity="success" value="Active"></p-tag>
+          <span class="state-chip state-buy">Active</span>
         } @else {
-          <p-tag severity="secondary" value="Paused"></p-tag>
+          <span class="state-chip state-neutral">Paused</span>
         }
       </td>
       <td>
@@ -57,7 +65,7 @@
 
   <ng-template pTemplate="emptymessage">
     <tr>
-      <td colspan="5">No exclusion rules yet.</td>
+      <td colspan="6">No exclusion rules yet.</td>
     </tr>
   </ng-template>
 </p-table>
@@ -66,6 +74,13 @@
   header="Exclusion Rule" [modal]="true" styleClass="p-fluid">
   <ng-template pTemplate="content">
     <div class="grid">
+      <div class="col-12 mb-2">
+        <label for="name" class="block mb-2 font-medium text-color-secondary">Name</label>
+        <input pInputText id="name" type="text" [(ngModel)]="rule.name" [maxlength]="nameMaxLength"
+          placeholder="e.g. Rent, Savings transfer" [style]="{'width':'100%'}">
+        <small class="block mt-2 text-color-secondary">Optional, only to help you recognise the rule in this
+          list.</small>
+      </div>
       <div class="col-12 mb-2">
         <label for="accountNumber" class="block mb-2 font-medium text-color-secondary">Account number</label>
         <input pInputText id="accountNumber" type="text" [(ngModel)]="rule.accountNumber"

@@ -3,7 +3,6 @@ import { Transaction } from '../model/transaction';
 import { MenuComponent } from '../menu/menu.component';
 import { Bind } from 'primeng/bind';
 import { Panel } from 'primeng/panel';
-import { Tag } from 'primeng/tag';
 import { Divider } from 'primeng/divider';
 import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primeng/tabs';
 import { Ripple } from 'primeng/ripple';
@@ -29,7 +28,7 @@ export type AllocationChartOptions = {
     selector: 'app-crypto',
     templateUrl: './crypto.component.html',
     styleUrls: ['./crypto.component.css'],
-    imports: [MenuComponent, Bind, Panel, Tag, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, Select, FormsModule, CryptoholdingComponent, CryptopositionComponent, TransactionComponent, DecimalPipe, CurrencyPipe, ChartComponent]
+    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, Select, FormsModule, CryptoholdingComponent, CryptopositionComponent, TransactionComponent, DecimalPipe, CurrencyPipe, ChartComponent]
 })
 export class CryptoComponent implements OnInit {
 

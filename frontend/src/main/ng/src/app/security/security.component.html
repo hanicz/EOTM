@@ -9,14 +9,12 @@
         <b class="amount">{{totalWorth | currency : selectedCurrency : 'symbol' : '0.0-2'}}</b>
       </div>
       <div class="summary-stat">Interest received:
-        <p-tag severity="success"
-          value="{{totalInterest | currency : selectedCurrency : 'symbol' : '0.0-2'}}"
-          pTooltip="Already reinvested into the holdings above, so it is not added to the total worth."></p-tag>
+        <span class="state-chip state-buy"
+          pTooltip="Already reinvested into the holdings above, so it is not added to the total worth.">{{totalInterest | currency : selectedCurrency : 'symbol' : '0.0-2'}}</span>
       </div>
       <div class="summary-stat">Expected return:
-        <p-tag severity="info"
-          value="{{(expectedRate | number : '0.2-2') + '%'}}"
-          pTooltip="Average of the rate on every holding, weighted by quantity, so larger positions count for more."></p-tag>
+        <span class="state-chip state-info"
+          pTooltip="Average of the rate on every holding, weighted by quantity, so larger positions count for more.">{{(expectedRate | number : '0.2-2') + '%'}}</span>
       </div>
       <div class="summary-actions">
         <p-select [options]="currencyOptions" [(ngModel)]="selectedCurrency" optionLabel="label" optionValue="value"

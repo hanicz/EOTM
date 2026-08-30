@@ -26,7 +26,6 @@ import { Bind } from 'primeng/bind';
 import { Panel } from 'primeng/panel';
 import { Select } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
-import { Tag } from 'primeng/tag';
 import { TickerLogoComponent } from '../util/ticker-logo.component';
 import { ExchangeOptionComponent } from '../util/exchange-option.component';
 import { SymbolOptionComponent } from '../util/symbol-option.component';
@@ -52,7 +51,7 @@ export type ChartOptions = {
     selector: 'app-search',
     templateUrl: './search.component.html',
     styleUrls: ['./search.component.css'],
-    imports: [MenuComponent, Bind, Panel, PrimeTemplate, Select, FormsModule, Tag, ButtonDirective, Ripple, Divider, Skeleton, SelectButton, ChartComponent, NewsComponent, DecimalPipe, CurrencyPipe, DatePipe, NgClass, Tooltip, TickerLogoComponent, ExchangeOptionComponent, SymbolOptionComponent]
+    imports: [MenuComponent, Bind, Panel, PrimeTemplate, Select, FormsModule, ButtonDirective, Ripple, Divider, Skeleton, SelectButton, ChartComponent, NewsComponent, DecimalPipe, CurrencyPipe, DatePipe, NgClass, Tooltip, TickerLogoComponent, ExchangeOptionComponent, SymbolOptionComponent]
 })
 export class SearchComponent implements OnInit, AfterViewInit {
 

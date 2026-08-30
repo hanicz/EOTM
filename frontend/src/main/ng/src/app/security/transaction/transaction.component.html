@@ -28,10 +28,10 @@
             [showClear]="true" placeholder="Any">
             <ng-template let-option pTemplate="item">
               @if (option.label === 'BUY') {
-                <p-tag styleClass="p-mr-2" severity="info" value="BUY"></p-tag>
+                <span class="state-chip state-buy">BUY</span>
               }
               @if (option.label === 'SELL') {
-                <p-tag styleClass="p-mr-2" severity="warn" value="SELL"></p-tag>
+                <span class="state-chip state-sell">SELL</span>
               }
             </ng-template>
           </p-select>
@@ -63,12 +63,9 @@
       <td data-label="Security Id">{{transaction.securityId}}</td>
       <td data-label="Security Name">{{transaction.securityName}}</td>
       <td data-label="Type">
-        @if (transaction.buySell === 'B') {
-          <p-tag styleClass="p-mr-2" severity="info" value="BUY"></p-tag>
-        }
-        @if (transaction.buySell === 'S') {
-          <p-tag styleClass="p-mr-2" severity="warn" value="SELL"></p-tag>
-        }
+        <span class="state-chip" [ngClass]="transaction.buySell === 'B' ? 'state-buy' : 'state-sell'">
+          {{transaction.buySell === 'B' ? 'BUY' : 'SELL'}}
+        </span>
       </td>
       <td data-label="Quantity">{{transaction.quantity}}</td>
       <td data-label="Spent">{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</td>
@@ -115,12 +112,11 @@
           [style]="{'width':'100%'}">
           <ng-template let-option pTemplate="item">
             @if (option.label === 'BUY') {
-              <p-tag styleClass="p-mr-2" severity="info" value="BUY">
-              </p-tag>
-            }
-            @if (option.label === 'SELL') {
-              <p-tag styleClass="p-mr-2" severity="warn" value="SELL"></p-tag>
-            }
+                <span class="state-chip state-buy">BUY</span>
+              }
+              @if (option.label === 'SELL') {
+                <span class="state-chip state-sell">SELL</span>
+              }
           </ng-template>
         </p-select>
       </div>

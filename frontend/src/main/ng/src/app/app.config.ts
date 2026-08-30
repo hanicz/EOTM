@@ -80,7 +80,6 @@ import { PanelModule } from 'primeng/panel';
 import { TableModule } from 'primeng/table';
 import { SelectModule } from 'primeng/select';
 import { TabsModule } from 'primeng/tabs';
-import { TagModule } from 'primeng/tag';
 import { ToolbarModule } from 'primeng/toolbar';
 import { FileUploadModule } from 'primeng/fileupload';
 import { DialogModule } from 'primeng/dialog';
@@ -117,7 +116,7 @@ export const appConfig: ApplicationConfig = {
     importProvidersFrom(
       FormsModule, ReactiveFormsModule,
       InputTextModule, ButtonModule, RippleModule, ToastModule, MenubarModule, PanelModule,
-      TableModule, SelectModule, TabsModule, TagModule, ToolbarModule, FileUploadModule,
+      TableModule, SelectModule, TabsModule, ToolbarModule, FileUploadModule,
       DialogModule, DatePickerModule, DividerModule, FieldsetModule, AccordionModule,
       InputMaskModule, CardModule, SelectButtonModule, ImageModule, ChipModule,
       ProgressSpinnerModule, SkeletonModule, DataViewModule, InputNumberModule, PasswordModule,

@@ -362,13 +362,13 @@
             <td data-label="Year">
               {{row.year}}
               @if (isFiYear(row)) {
-                <p-tag severity="success" value="target met"></p-tag>
+                <span class="state-chip state-buy">target met</span>
               }
             </td>
             <td data-label="Age">
               {{row.age}}
               @if (isDrawdown(row)) {
-                <p-tag severity="warn" value="drawdown"></p-tag>
+                <span class="state-chip state-accent">drawdown</span>
               }
             </td>
             <td data-label="Paid in" class="text-right">{{row.contributions | number:'1.0-0'}}</td>

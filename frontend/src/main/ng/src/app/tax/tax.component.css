@@ -19,6 +19,12 @@
     min-width: 10rem;
 }
 
+.tax-field-wide {
+    min-width: 16rem;
+    flex: 1 1 16rem;
+    max-width: 22rem;
+}
+
 .tax-label {
     font-size: 0.8rem;
     font-weight: 500;
@@ -99,6 +105,11 @@
 @media screen and (max-width: 575px) {
     .tax-field {
         min-width: 100%;
+    }
+
+    .tax-field-wide {
+        flex-basis: 100%;
+        max-width: 100%;
     }
 
     .tax-add {

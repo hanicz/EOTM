@@ -17,16 +17,35 @@
           </p>
 
           <div class="tax-form">
-            <div class="tax-field">
-              <label for="shortName" class="tax-label">Ticker</label>
-              <input type="text" pInputText id="shortName" placeholder="AAPL" [(ngModel)]="shortName"
-                (keyup.enter)="addRSU()">
-            </div>
-            <div class="tax-field">
+            <div class="tax-field tax-field-wide">
               <label for="exchange" class="tax-label">Exchange</label>
-              <p-select inputId="exchange" [options]="exchanges" [(ngModel)]="exchange" optionLabel="Code"
-                optionValue="Code" [filter]="true" filterBy="Code,Name" placeholder="US"
-                [style]="{'width':'100%'}"></p-select>
+              <p-select inputId="exchange" class="searchDropdown" [options]="exchanges" optionLabel="Name"
+                [virtualScroll]="true" [virtualScrollItemSize]="31" [filter]="true" filterBy="Name,Code"
+                filterPlaceholder="Search by name or code" (onChange)="exchangeChanged($event)"
+                [(ngModel)]="selectedExchange" placeholder="Select an Exchange" [style]="{'width':'100%'}"
+                [dropdownIcon]="exchangesLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+                <ng-template let-option pTemplate="item">
+                  <app-exchange-option [exchange]="option"></app-exchange-option>
+                </ng-template>
+                <ng-template let-option pTemplate="selectedItem">
+                  <app-exchange-option [exchange]="option" [dense]="true"></app-exchange-option>
+                </ng-template>
+              </p-select>
+            </div>
+            <div class="tax-field tax-field-wide">
+              <label for="ticker" class="tax-label">Ticker</label>
+              <p-select inputId="ticker" class="searchDropdown" [options]="symbols" optionLabel="Name"
+                [virtualScroll]="true" [virtualScrollItemSize]="46" [filter]="true" filterBy="Name,Code,Isin"
+                filterPlaceholder="Search by name, code or ISIN"
+                [(ngModel)]="selectedStock" placeholder="Select a Ticker" [style]="{'width':'100%'}"
+                [dropdownIcon]="stocksLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+                <ng-template let-option pTemplate="item">
+                  <app-symbol-option [symbol]="option"></app-symbol-option>
+                </ng-template>
+                <ng-template let-option pTemplate="selectedItem">
+                  <app-symbol-option [symbol]="option" [dense]="true"></app-symbol-option>
+                </ng-template>
+              </p-select>
             </div>
             <div class="tax-field">
               <label for="date" class="tax-label">Date</label>
@@ -87,9 +106,9 @@
                   <th class="text-right">Value</th>
                   <th class="text-right">MNB rate</th>
                   <th class="text-right">Value (Ft)</th>
-                  <th class="text-right">Tax base</th>
-                  <th class="text-right">Szocho</th>
-                  <th class="text-right">Szja</th>
+                  <th class="text-right">Tax base (89%)</th>
+                  <th class="text-right">Szocho (13%)</th>
+                  <th class="text-right">Szja (15%)</th>
                   <th class="text-right">Tax</th>
                 </tr>
               </ng-template>
@@ -114,9 +133,9 @@
                     }
                   </td>
                   <td data-label="Value (Ft)" class="text-right">{{item.amountInHuf | number:'1.0-0'}} Ft</td>
-                  <td data-label="Tax base" class="text-right">{{item.tax.taxBase | number:'1.0-0'}} Ft</td>
-                  <td data-label="Szocho" class="text-right">{{item.tax.szocho | number:'1.0-0'}} Ft</td>
-                  <td data-label="Szja" class="text-right">{{item.tax.szja | number:'1.0-0'}} Ft</td>
+                  <td data-label="Tax base (89%)" class="text-right">{{item.tax.taxBase | number:'1.0-0'}} Ft</td>
+                  <td data-label="Szocho (13%)" class="text-right">{{item.tax.szocho | number:'1.0-0'}} Ft</td>
+                  <td data-label="Szja (15%)" class="text-right">{{item.tax.szja | number:'1.0-0'}} Ft</td>
                   <td data-label="Tax" class="text-right tax-total-cell">{{item.tax.total | number:'1.0-0'}} Ft</td>
                 </tr>
               </ng-template>
@@ -128,7 +147,7 @@
                 <div class="tax-tile-value">{{report.totalAmountInHuf | number:'1.0-0'}} Ft</div>
               </div>
               <div class="tax-tile">
-                <div class="tax-tile-label">Tax base</div>
+                <div class="tax-tile-label">Tax base (89%)</div>
                 <div class="tax-tile-value">{{report.totalTax.taxBase | number:'1.0-0'}} Ft</div>
               </div>
               <div class="tax-tile">
@@ -212,9 +231,9 @@
                   <th class="text-right">Amount</th>
                   <th class="text-right">MNB rate</th>
                   <th class="text-right">Value (Ft)</th>
-                  <th class="text-right">Tax base</th>
-                  <th class="text-right">Szocho</th>
-                  <th class="text-right">Szja</th>
+                  <th class="text-right">Tax base (89%)</th>
+                  <th class="text-right">Szocho (13%)</th>
+                  <th class="text-right">Szja (15%)</th>
                   <th class="text-right">Tax</th>
                   <th>Paid</th>
                   <th>Calculated</th>
@@ -237,9 +256,9 @@
                     }
                   </td>
                   <td data-label="Value (Ft)" class="text-right">{{item.amountInHuf | number:'1.0-0'}} Ft</td>
-                  <td data-label="Tax base" class="text-right">{{item.tax.taxBase | number:'1.0-0'}} Ft</td>
-                  <td data-label="Szocho" class="text-right">{{item.tax.szocho | number:'1.0-0'}} Ft</td>
-                  <td data-label="Szja" class="text-right">{{item.tax.szja | number:'1.0-0'}} Ft</td>
+                  <td data-label="Tax base (89%)" class="text-right">{{item.tax.taxBase | number:'1.0-0'}} Ft</td>
+                  <td data-label="Szocho (13%)" class="text-right">{{item.tax.szocho | number:'1.0-0'}} Ft</td>
+                  <td data-label="Szja (15%)" class="text-right">{{item.tax.szja | number:'1.0-0'}} Ft</td>
                   <td data-label="Tax" class="text-right tax-total-cell">{{item.tax.total | number:'1.0-0'}} Ft</td>
                   <td data-label="Paid">
                     @if (item.paid) {
@@ -320,9 +339,9 @@
                   <th class="text-right">Value</th>
                   <th class="text-right">MNB rate</th>
                   <th class="text-right">Value (Ft)</th>
-                  <th class="text-right">Tax base</th>
-                  <th class="text-right">Szocho</th>
-                  <th class="text-right">Szja</th>
+                  <th class="text-right">Tax base (89%)</th>
+                  <th class="text-right">Szocho (13%)</th>
+                  <th class="text-right">Szja (15%)</th>
                   <th class="text-right">Tax</th>
                   <th>Paid</th>
                   <th>Calculated</th>
@@ -354,9 +373,9 @@
                     }
                   </td>
                   <td data-label="Value (Ft)" class="text-right">{{item.amountInHuf | number:'1.0-0'}} Ft</td>
-                  <td data-label="Tax base" class="text-right">{{item.tax.taxBase | number:'1.0-0'}} Ft</td>
-                  <td data-label="Szocho" class="text-right">{{item.tax.szocho | number:'1.0-0'}} Ft</td>
-                  <td data-label="Szja" class="text-right">{{item.tax.szja | number:'1.0-0'}} Ft</td>
+                  <td data-label="Tax base (89%)" class="text-right">{{item.tax.taxBase | number:'1.0-0'}} Ft</td>
+                  <td data-label="Szocho (13%)" class="text-right">{{item.tax.szocho | number:'1.0-0'}} Ft</td>
+                  <td data-label="Szja (15%)" class="text-right">{{item.tax.szja | number:'1.0-0'}} Ft</td>
                   <td data-label="Tax" class="text-right tax-total-cell">{{item.tax.total | number:'1.0-0'}} Ft</td>
                   <td data-label="Paid">
                     @if (item.paid) {

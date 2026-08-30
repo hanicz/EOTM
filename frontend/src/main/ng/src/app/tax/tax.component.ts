@@ -4,7 +4,10 @@ import { RSU, StockRSUTaxReport, TaxBreakdown, TaxReport, TaxableEventReport } f
 import { TaxService } from '../service/tax.service';
 import { StockService } from '../service/stock.service';
 import { Exchange } from '../model/exchange';
+import { Symbol } from '../model/symbol';
 import { MenuComponent } from '../menu/menu.component';
+import { ExchangeOptionComponent } from '../util/exchange-option.component';
+import { SymbolOptionComponent } from '../util/symbol-option.component';
 import { Bind } from 'primeng/bind';
 import { Panel } from 'primeng/panel';
 import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primeng/tabs';
@@ -25,7 +28,7 @@ import { DatePipe, DecimalPipe } from '@angular/common';
     styleUrls: ['./tax.component.css'],
     imports: [MenuComponent, Bind, Panel, Tabs, TabList, Tab, TabPanels, TabPanel, ButtonDirective, Ripple,
         Tooltip, TableModule, PrimeTemplate, InputText, InputNumber, Select, Toast,
-        FormsModule, DecimalPipe, DatePipe]
+        FormsModule, DecimalPipe, DatePipe, ExchangeOptionComponent, SymbolOptionComponent]
 })
 export class TaxComponent {
 
@@ -36,12 +39,15 @@ export class TaxComponent {
   report: TaxReport | null = null;
   calculating: boolean = false;
 
-  shortName: string = '';
-  exchange: string = 'US';
   date: string = '';
   quantity: number | null = null;
 
   exchanges: Exchange[] = [];
+  symbols: Symbol[] = [];
+  selectedExchange: Exchange = {} as Exchange;
+  selectedStock: Symbol = {} as Symbol;
+  exchangesLoading: boolean = true;
+  stocksLoading: boolean = false;
 
   amount: number | null = null;
   amountTax: TaxBreakdown | null = null;
@@ -57,7 +63,17 @@ export class TaxComponent {
     private messageService: MessageService, private cdr: ChangeDetectorRef) {
     this.stockService.getAllExchanges().subscribe({
       next: (data) => {
+        this.exchangesLoading = false;
         this.exchanges = data;
+        const us = data.find(e => e.Code === 'US');
+        if (us) {
+          this.selectedExchange = us;
+          this.loadSymbols();
+        }
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.exchangesLoading = false;
         this.cdr.markForCheck();
       }
     });
@@ -154,21 +170,47 @@ export class TaxComponent {
     });
   }
 
+  exchangeChanged(event: any): void {
+    this.selectedStock = {} as Symbol;
+    this.loadSymbols();
+  }
+
+  private loadSymbols(): void {
+    if (!this.selectedExchange?.Code) {
+      this.symbols = [];
+      return;
+    }
+    this.stocksLoading = true;
+    this.stockService.getAllSymbols(this.selectedExchange.Code).subscribe({
+      next: (data) => {
+        this.stocksLoading = false;
+        this.symbols = data;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.stocksLoading = false;
+        this.symbols = [];
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
   get canAdd(): boolean {
-    return !!this.shortName?.trim() && this.isDate(this.date) && !!this.quantity && this.quantity > 0;
+    return !!this.selectedStock?.Code && !!this.selectedExchange?.Code
+      && this.isDate(this.date) && !!this.quantity && this.quantity > 0;
   }
 
   addRSU(): void {
     if (!this.canAdd) return;
 
     this.rsus = [...this.rsus, {
-      shortName: this.shortName.trim().toUpperCase(),
-      exchange: this.exchange?.trim() ? this.exchange.trim().toUpperCase() : 'US',
+      shortName: this.selectedStock.Code,
+      exchange: this.selectedExchange.Code,
       date: this.date.trim(),
       quantity: this.quantity!
     }];
 
-    this.shortName = '';
+    this.selectedStock = {} as Symbol;
     this.date = '';
     this.quantity = null;
     this.report = null;

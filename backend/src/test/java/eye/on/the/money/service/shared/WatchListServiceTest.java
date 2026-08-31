@@ -13,6 +13,7 @@ import eye.on.the.money.repository.watchlist.StockWatchRepository;
 import eye.on.the.money.service.api.CryptoAPIService;
 import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.stock.StockService;
+import eye.on.the.money.service.watchlist.WatchGroupService;
 import eye.on.the.money.service.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,6 +54,8 @@ class WatchListServiceTest {
     private final ModelMapper modelMapper = new ModelMapper();
     @Mock
     private StockService stockService;
+    @Mock
+    private WatchGroupService watchGroupService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private WatchListService watchListService;
@@ -69,7 +72,8 @@ class WatchListServiceTest {
                 this.eodAPIService,
                 this.coinRepository,
                 this.modelMapper,
-                this.stockService
+                this.stockService,
+                this.watchGroupService
         );
     }
 

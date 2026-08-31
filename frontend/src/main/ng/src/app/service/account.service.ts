@@ -31,7 +31,14 @@ export class AccountService {
 
   createAccount(account: Account) {
     const url = `${this.accountUrl}`;
-    return this.http.post(url, account, {
+    return this.http.post<Account>(url, { accountName: account.accountName, creationDate: account.creationDate }, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  }
+
+  updateAccount(id: number, account: Account) {
+    const url = `${this.accountUrl}/${id}`;
+    return this.http.put<Account>(url, { accountName: account.accountName, creationDate: account.creationDate }, {
       headers: this.helper.getHeadersWithToken()
     });
   }

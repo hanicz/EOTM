@@ -96,7 +96,7 @@ class ExportServiceTest {
 
         ExportDTO export = this.exportService.export(USER_ID);
 
-        assertEquals(2, export.getSchemaVersion());
+        assertEquals(3, export.getSchemaVersion());
         assertEquals(USER_EMAIL, export.getEmail());
         assertNotNull(export.getExportedAt());
         assertEquals("Main", export.getAccounts().getFirst().accountName());
@@ -121,7 +121,7 @@ class ExportServiceTest {
 
         ExportDTO.WatchlistSection watchlists = this.exportService.export(USER_ID).getWatchlists();
 
-        assertEquals(new ExportDTO.StockWatchRow(1L, "AAPL", "US", "Apple Inc."), watchlists.stock().getFirst());
+        assertEquals(new ExportDTO.StockWatchRow(1L, "AAPL", "US", "Apple Inc.", null), watchlists.stock().getFirst());
         assertEquals(new ExportDTO.CryptoWatchRow(2L, "bitcoin", "btc", "Bitcoin"), watchlists.crypto().getFirst());
         assertEquals(new ExportDTO.ForexWatchRow(3L, "EUR", "HUF"), watchlists.forex().getFirst());
     }

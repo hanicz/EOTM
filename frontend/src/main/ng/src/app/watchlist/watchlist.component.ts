@@ -3,6 +3,7 @@ import { CryptoWatch } from '../model/cryptowatch';
 import { Crypto } from '../model/crypto';
 import { ForexWatch } from '../model/forexwatch';
 import { StockWatch } from '../model/stockwatch';
+import { WatchGroup } from '../model/watchgroup';
 import { WatchlistService } from '../service/watchlist.service';
 import { filter, interval, Subscription } from 'rxjs';
 import { Globals } from '../util/global';
@@ -15,7 +16,7 @@ import { Symbol } from '../model/symbol';
 import { Exchange } from '../model/exchange';
 import { Bind } from 'primeng/bind';
 import { Toolbar } from 'primeng/toolbar';
-import { PrimeTemplate } from 'primeng/api';
+import { PrimeTemplate, MessageService } from 'primeng/api';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { Tooltip } from 'primeng/tooltip';
@@ -27,6 +28,7 @@ import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primeng/tabs';
 import { Select } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { InputText } from 'primeng/inputtext';
+import { Toast } from 'primeng/toast';
 import { TickerLogoComponent } from '../util/ticker-logo.component';
 import { ExchangeOptionComponent } from '../util/exchange-option.component';
 import { SymbolOptionComponent } from '../util/symbol-option.component';
@@ -37,7 +39,7 @@ import { SymbolOptionComponent } from '../util/symbol-option.component';
     styleUrls: ['./watchlist.component.css'],
     imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, Tooltip, Accordion, AccordionPanel,
         AccordionHeader, AccordionContent, Skeleton, NgClass, Dialog, Tabs, TabList, Tab, TabPanels, TabPanel,
-        Select, FormsModule, InputText, DecimalPipe, CurrencyPipe, UpperCasePipe, TickerLogoComponent, ExchangeOptionComponent, SymbolOptionComponent]
+        Select, FormsModule, InputText, Toast, DecimalPipe, CurrencyPipe, UpperCasePipe, TickerLogoComponent, ExchangeOptionComponent, SymbolOptionComponent]
 })
 export class WatchlistComponent implements OnInit, OnDestroy {
 
@@ -70,6 +72,21 @@ export class WatchlistComponent implements OnInit, OnDestroy {
   exchangesLoading: boolean = true;
   stocksLoading: boolean = false;
 
+  readonly groupNameMaxLength = 64;
+  readonly ungroupedId = -1;
+
+  groups: WatchGroup[] = [];
+  selectedGroupId: number | null = null;
+  manageGroupsDialog: boolean = false;
+  newGroupName: string = '';
+  editedGroup: WatchGroup | null = null;
+  editedGroupName: string = '';
+  moveDialog: boolean = false;
+  movedStock: StockWatch | null = null;
+  movedGroupId: number | null = null;
+
+  private readonly collapsedGroups = new Set<number>();
+
   private readonly subscriptions = new Subscription();
 
   constructor(private watchlistService: WatchlistService,
@@ -77,6 +94,7 @@ export class WatchlistComponent implements OnInit, OnDestroy {
     private router: Router,
     private stockService: StockService,
     private cryptoService: CryptoService,
+    private messageService: MessageService,
     private cdr: ChangeDetectorRef) {
 
     this.assetUrl = environment.assets_url;
@@ -117,6 +135,42 @@ export class WatchlistComponent implements OnInit, OnDestroy {
     this.fetchCryptoWatchList();
     this.fetchStockWatchList();
     this.fetchForexWatchList();
+    this.fetchGroups();
+  }
+
+  fetchGroups(): void {
+    this.watchlistService.getGroups().subscribe({
+      next: (data) => {
+        this.groups = data;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  get stockBuckets(): StockBucket[] {
+    const buckets = this.groups.map(group => ({
+      id: group.id,
+      name: group.name,
+      stocks: this.globals.stockWatchList.filter(s => s.groupId === group.id)
+    }));
+
+    const ungrouped = this.globals.stockWatchList.filter(s => s.groupId == null);
+    if (ungrouped.length) {
+      buckets.push({ id: this.ungroupedId, name: 'Ungrouped', stocks: ungrouped });
+    }
+    return buckets;
+  }
+
+  isCollapsed(groupId: number): boolean {
+    return this.collapsedGroups.has(groupId);
+  }
+
+  toggleGroup(groupId: number): void {
+    if (this.collapsedGroups.has(groupId)) {
+      this.collapsedGroups.delete(groupId);
+    } else {
+      this.collapsedGroups.add(groupId);
+    }
   }
 
   fetchStockWatchList(): void {
@@ -243,12 +297,99 @@ export class WatchlistComponent implements OnInit, OnDestroy {
 
   createStockWatch(): void {
     this.watchlistService.createNewStockWatch(this.selectedStock.Code, this.selectedStock.Name,
-      this.selectedExchange.Code).subscribe({
+      this.selectedExchange.Code, this.selectedGroupId).subscribe({
         next: () => {
           this.display = false;
+          this.selectedGroupId = null;
           this.fetchStockWatchList();
         }
       });
+  }
+
+  openManageGroups(): void {
+    this.newGroupName = '';
+    this.editedGroup = null;
+    this.editedGroupName = '';
+    this.manageGroupsDialog = true;
+  }
+
+  createGroup(): void {
+    const name = this.newGroupName.trim();
+    if (!name) return;
+
+    this.watchlistService.createGroup(name).subscribe({
+      next: () => {
+        this.newGroupName = '';
+        this.fetchGroups();
+        this.cdr.markForCheck();
+      },
+      error: (error) => this.showError(error, 'Could not create the group')
+    });
+  }
+
+  startRename(group: WatchGroup): void {
+    this.editedGroup = group;
+    this.editedGroupName = group.name;
+  }
+
+  cancelRename(): void {
+    this.editedGroup = null;
+    this.editedGroupName = '';
+  }
+
+  saveRename(): void {
+    const name = this.editedGroupName.trim();
+    if (!this.editedGroup || !name) return;
+
+    this.watchlistService.renameGroup(this.editedGroup.id, name).subscribe({
+      next: () => {
+        this.cancelRename();
+        this.fetchGroups();
+        this.fetchStockWatchList();
+        this.cdr.markForCheck();
+      },
+      error: (error) => this.showError(error, 'Could not rename the group')
+    });
+  }
+
+  deleteGroup(group: WatchGroup): void {
+    this.watchlistService.deleteGroup(group.id).subscribe({
+      next: () => {
+        this.fetchGroups();
+        this.fetchStockWatchList();
+        this.cdr.markForCheck();
+      },
+      error: (error) => this.showError(error, 'Could not delete the group')
+    });
+  }
+
+  openMoveDialog(stockWatch: StockWatch, event: Event): void {
+    event.stopPropagation();
+    this.movedStock = stockWatch;
+    this.movedGroupId = stockWatch.groupId;
+    this.moveDialog = true;
+  }
+
+  saveMove(): void {
+    if (!this.movedStock) return;
+
+    this.watchlistService.setStockWatchGroup(this.movedStock.tickerWatchId, this.movedGroupId).subscribe({
+      next: () => {
+        this.moveDialog = false;
+        this.movedStock = null;
+        this.fetchStockWatchList();
+      },
+      error: (error) => this.showError(error, 'Could not move the stock')
+    });
+  }
+
+  private showError(error: any, summary: string): void {
+    this.messageService.add({
+      severity: 'error',
+      summary: summary,
+      detail: error?.error?.error ?? 'Something went wrong, please try again.',
+      life: 8000
+    });
   }
 
   createCryptoWatch(id: string): void {
@@ -301,4 +442,10 @@ export class WatchlistComponent implements OnInit, OnDestroy {
       }
     });
   }
+}
+
+interface StockBucket {
+  id: number;
+  name: string;
+  stocks: StockWatch[];
 }

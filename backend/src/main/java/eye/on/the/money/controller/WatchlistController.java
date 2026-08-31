@@ -1,13 +1,19 @@
 package eye.on.the.money.controller;
 
+import eye.on.the.money.dto.in.WatchGroupEditDTO;
 import eye.on.the.money.dto.out.CryptoWatchDTO;
 import eye.on.the.money.dto.out.ForexWatchDTO;
 import eye.on.the.money.dto.out.StockWatchDTO;
+import eye.on.the.money.dto.out.WatchGroupDTO;
 import eye.on.the.money.model.stock.Stock;
 import eye.on.the.money.service.shared.WatchListService;
+import eye.on.the.money.service.watchlist.WatchGroupService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import eye.on.the.money.security.CurrentUserId;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,10 +23,12 @@ import java.util.List;
 @RestController
 @RequestMapping("api/v1/watchlist")
 @Slf4j
+@Validated
 @RequiredArgsConstructor
 public class WatchlistController {
 
     private final WatchListService watchlistService;
+    private final WatchGroupService watchGroupService;
 
     @GetMapping("/crypto/{currency}")
     public ResponseEntity<List<CryptoWatchDTO>> getCryptoWatchList(@CurrentUserId Long userId, @PathVariable String currency) {
@@ -58,8 +66,15 @@ public class WatchlistController {
     }
 
     @PostMapping("/stock")
-    public ResponseEntity<StockWatchDTO> createStockWatch(@CurrentUserId Long userId, @RequestBody Stock wStock) {
-        return ResponseEntity.ok(this.watchlistService.createNewStockWatch(userId, wStock));
+    public ResponseEntity<StockWatchDTO> createStockWatch(@CurrentUserId Long userId, @RequestBody Stock wStock,
+                                                         @RequestParam(required = false) Long groupId) {
+        return ResponseEntity.ok(this.watchlistService.createNewStockWatch(userId, wStock, groupId));
+    }
+
+    @PutMapping("/stock/{id}/group")
+    public ResponseEntity<StockWatchDTO> setStockWatchGroup(@CurrentUserId Long userId, @PathVariable Long id,
+                                                            @RequestParam(required = false) Long groupId) {
+        return ResponseEntity.ok(this.watchlistService.setStockWatchGroup(userId, id, groupId));
     }
 
     @PostMapping("/crypto/{coinId}")
@@ -71,5 +86,28 @@ public class WatchlistController {
     public ResponseEntity<ForexWatchDTO> createForexWatch(@CurrentUserId Long userId,
                                                           @PathVariable String from, @PathVariable String to) {
         return ResponseEntity.ok(this.watchlistService.createNewForexWatch(userId, from, to));
+    }
+
+    @GetMapping("/group")
+    public ResponseEntity<List<WatchGroupDTO>> getGroups(@CurrentUserId Long userId) {
+        return ResponseEntity.ok(this.watchGroupService.getGroups(userId));
+    }
+
+    @PostMapping("/group")
+    public ResponseEntity<WatchGroupDTO> createGroup(@CurrentUserId Long userId,
+                                                     @RequestBody @Valid WatchGroupEditDTO editDTO) {
+        return ResponseEntity.ok(this.watchGroupService.createGroup(userId, editDTO));
+    }
+
+    @PutMapping("/group/{id}")
+    public ResponseEntity<WatchGroupDTO> updateGroup(@CurrentUserId Long userId, @PathVariable Long id,
+                                                     @RequestBody @Valid WatchGroupEditDTO editDTO) {
+        return ResponseEntity.ok(this.watchGroupService.updateGroup(userId, id, editDTO));
+    }
+
+    @DeleteMapping("/group/{id}")
+    public ResponseEntity<Void> deleteGroup(@CurrentUserId Long userId, @PathVariable Long id) {
+        boolean isDeleted = this.watchGroupService.deleteGroup(userId, id);
+        return ResponseEntity.status(isDeleted ? HttpStatus.OK : HttpStatus.NOT_FOUND).build();
     }
 }

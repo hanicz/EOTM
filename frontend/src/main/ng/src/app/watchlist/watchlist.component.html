@@ -4,6 +4,9 @@
       <h4 class="p-0 m-0 pl-1 watchlist-heading"><i class="pi pi-star-fill"></i>Watchlist</h4>
     </ng-template>
     <ng-template pTemplate="right">
+      <button pButton pRipple type="button" icon="pi pi-folder" (click)="openManageGroups()"
+        pTooltip="Manage groups" aria-label="Manage groups"
+      class="p-button-rounded p-button-text"></button>
       <button pButton pRipple type="button" icon="pi pi-plus" (click)="showDialog()"
         pTooltip="Add to watchlist" aria-label="Add to watchlist"
       class="p-button-rounded p-button-text ml-2"></button>
@@ -32,39 +35,60 @@
             <button pButton pRipple type="button" label="Retry" (click)="fetchStockWatchList()"
               class="p-button-text p-button-sm" severity="secondary"></button>
           </div>
-        } @else if (!globals.stockWatchList.length) {
+        } @else if (!globals.stockWatchList.length && !groups.length) {
           <p class="quote-message">Nothing watched yet. Use + to add a ticker.</p>
         } @else {
-          <ul class="quote-list">
-            @for (stockWatch of globals.stockWatchList; track stockWatch.tickerWatchId) {
-              <li class="quote-row quote-row-clickable" role="button" tabindex="0"
-                [attr.aria-label]="'Open ' + stockWatch.stockShortName + ' in Lookup'"
-                (click)="stockSelected(stockWatch)" (keydown.enter)="stockSelected(stockWatch)"
-                (keydown.space)="stockSelected(stockWatch); $event.preventDefault()">
-                <div class="quote-identity">
-                  <app-ticker-logo [exchange]="stockWatch.stockExchange"
-                    [symbol]="stockWatch.stockShortName"></app-ticker-logo>
-                  <span class="quote-symbol">{{stockWatch.stockShortName}}</span>
-                </div>
-                <span class="quote-price">
-                  @if (stockWatch.stalePrice) {
-                    <i class="pi pi-clock stale-price stale-price-before" pTooltip="No live quote right now, showing the previous close."></i>
-                  }
-                  {{stockWatch.liveValue != null ? (stockWatch.liveValue | currency : stockWatch.currencyId : 'symbol' : '0.0-2') : 'N/A'}}
-                </span>
-                <span class="quote-name">{{stockWatch.stockName}}</span>
-                <span class="quote-delta">
-                  <span class="quote-change" [ngClass]="deltaClass(stockWatch.change)">{{stockWatch.change | number : '1.2-2'}}</span>
-                  <span class="delta-pill" [ngClass]="deltaClass(stockWatch.change)">
-                    <i class="pi quote-caret" [ngClass]="caretClass(stockWatch.change)"></i>{{signed(stockWatch.pchange)}}%
-                  </span>
-                </span>
-                <button pButton pRipple type="button" icon="pi pi-times" class="quote-remove p-button-text"
-                  severity="danger" [attr.aria-label]="'Remove ' + stockWatch.stockShortName"
-                  (click)="removeStockWatch(stockWatch, $event)"></button>
-              </li>
-            }
-          </ul>
+          @for (bucket of stockBuckets; track bucket.id) {
+            <div class="group-block">
+              <button type="button" class="group-header" (click)="toggleGroup(bucket.id)"
+                [attr.aria-expanded]="!isCollapsed(bucket.id)"
+                [attr.aria-label]="(isCollapsed(bucket.id) ? 'Expand ' : 'Collapse ') + bucket.name">
+                <i class="pi group-caret" [ngClass]="isCollapsed(bucket.id) ? 'pi-chevron-right' : 'pi-chevron-down'"></i>
+                <span class="group-name">{{bucket.name}}</span>
+              </button>
+              @if (!isCollapsed(bucket.id)) {
+                @if (!bucket.stocks.length) {
+                  <p class="quote-message group-empty">Nothing in this group yet.</p>
+                } @else {
+                  <ul class="quote-list">
+                    @for (stockWatch of bucket.stocks; track stockWatch.tickerWatchId) {
+                      <li class="quote-row quote-row-clickable" role="button" tabindex="0"
+                        [attr.aria-label]="'Open ' + stockWatch.stockShortName + ' in Lookup'"
+                        (click)="stockSelected(stockWatch)" (keydown.enter)="stockSelected(stockWatch)"
+                        (keydown.space)="stockSelected(stockWatch); $event.preventDefault()">
+                        <div class="quote-identity">
+                          <app-ticker-logo [exchange]="stockWatch.stockExchange"
+                            [symbol]="stockWatch.stockShortName"></app-ticker-logo>
+                          <span class="quote-symbol">{{stockWatch.stockShortName}}</span>
+                        </div>
+                        <span class="quote-price">
+                          @if (stockWatch.stalePrice) {
+                            <i class="pi pi-clock stale-price stale-price-before" pTooltip="No live quote right now, showing the previous close."></i>
+                          }
+                          {{stockWatch.liveValue != null ? (stockWatch.liveValue | currency : stockWatch.currencyId : 'symbol' : '0.0-2') : 'N/A'}}
+                        </span>
+                        <span class="quote-name">{{stockWatch.stockName}}</span>
+                        <span class="quote-delta">
+                          <span class="quote-change" [ngClass]="deltaClass(stockWatch.change)">{{stockWatch.change | number : '1.2-2'}}</span>
+                          <span class="delta-pill" [ngClass]="deltaClass(stockWatch.change)">
+                            <i class="pi quote-caret" [ngClass]="caretClass(stockWatch.change)"></i>{{signed(stockWatch.pchange)}}%
+                          </span>
+                        </span>
+                        <span class="quote-actions">
+                          <button pButton pRipple type="button" icon="pi pi-folder-open" class="quote-action p-button-text"
+                            severity="secondary" [attr.aria-label]="'Move ' + stockWatch.stockShortName + ' to a group'"
+                            pTooltip="Move to group" (click)="openMoveDialog(stockWatch, $event)"></button>
+                          <button pButton pRipple type="button" icon="pi pi-times" class="quote-action p-button-text"
+                            severity="danger" [attr.aria-label]="'Remove ' + stockWatch.stockShortName"
+                            (click)="removeStockWatch(stockWatch, $event)"></button>
+                        </span>
+                      </li>
+                    }
+                  </ul>
+                }
+              }
+            </div>
+          }
         }
       </p-accordion-content>
     </p-accordion-panel>
@@ -111,9 +135,11 @@
                     <i class="pi quote-caret" [ngClass]="caretClass(cryptoWatch.change)"></i>{{signed(cryptoWatch.change)}}%
                   </span>
                 </span>
-                <button pButton pRipple type="button" icon="pi pi-times" class="quote-remove p-button-text"
-                  severity="danger" [attr.aria-label]="'Remove ' + cryptoWatch.name"
-                  (click)="removeCryptoWatch(cryptoWatch, $event)"></button>
+                <span class="quote-actions quote-actions-single">
+                  <button pButton pRipple type="button" icon="pi pi-times" class="quote-action p-button-text"
+                    severity="danger" [attr.aria-label]="'Remove ' + cryptoWatch.name"
+                    (click)="removeCryptoWatch(cryptoWatch, $event)"></button>
+                </span>
               </li>
             }
           </ul>
@@ -167,10 +193,12 @@
                     <i class="pi quote-caret" [ngClass]="caretClass(forexWatch.change)"></i>{{signed(forexWatch.pchange)}}%
                   </span>
                 </span>
-                <button pButton pRipple type="button" icon="pi pi-times" class="quote-remove p-button-text"
-                  severity="danger"
-                  [attr.aria-label]="'Remove ' + forexWatch.fromCurrencyId + forexWatch.toCurrencyId"
-                  (click)="removeForexWatch(forexWatch, $event)"></button>
+                <span class="quote-actions quote-actions-single">
+                  <button pButton pRipple type="button" icon="pi pi-times" class="quote-action p-button-text"
+                    severity="danger"
+                    [attr.aria-label]="'Remove ' + forexWatch.fromCurrencyId + forexWatch.toCurrencyId"
+                    (click)="removeForexWatch(forexWatch, $event)"></button>
+                </span>
               </li>
             }
           </ul>
@@ -219,6 +247,11 @@
               <app-symbol-option [symbol]="option" [dense]="true"></app-symbol-option>
             </ng-template>
           </p-select>
+          @if (groups.length) {
+            <p-select [options]="groups" optionLabel="name" optionValue="id" [(ngModel)]="selectedGroupId"
+              placeholder="No group" [showClear]="true" [style]="{'width':'100%'}"
+              [appendTo]="'body'"></p-select>
+          }
           @if (stockAlreadyWatched) {
             <small class="add-hint">{{selectedStock.Code}} is already on your watchlist.</small>
           }
@@ -278,3 +311,61 @@
     </p-tabpanels>
   </p-tabs>
 </p-dialog>
+
+<p-dialog [(visible)]="manageGroupsDialog" header="Watchlist groups" [modal]="true"
+  [breakpoints]="{'1400px': '40vw', '992px': '75vw', '576px': '100vw'}"
+  [style]="{width: '32vw', minWidth: 'min(26rem, 100vw)'}"
+  [draggable]="false" [resizable]="false" [appendTo]="'body'">
+  <div class="add-form">
+    <div class="group-create">
+      <input pInputText type="text" [(ngModel)]="newGroupName" [maxlength]="groupNameMaxLength"
+        placeholder="e.g. Europe, ETF, Tech" (keyup.enter)="createGroup()" [style]="{'width':'100%'}">
+      <button pButton pRipple type="button" icon="pi pi-plus" label="Add" severity="success"
+        [disabled]="!newGroupName.trim()" (click)="createGroup()"></button>
+    </div>
+
+    @if (!groups.length) {
+      <p class="quote-message">No groups yet. Create one to start organising your stocks.</p>
+    } @else {
+      <ul class="group-manage-list">
+        @for (group of groups; track group.id) {
+          <li class="group-manage-row">
+            @if (editedGroup?.id === group.id) {
+              <input pInputText type="text" [(ngModel)]="editedGroupName" [maxlength]="groupNameMaxLength"
+                (keyup.enter)="saveRename()" (keyup.escape)="cancelRename()" [style]="{'width':'100%'}">
+              <button pButton pRipple type="button" icon="pi pi-check" class="p-button-text"
+                severity="success" aria-label="Save name"
+                [disabled]="!editedGroupName.trim()" (click)="saveRename()"></button>
+              <button pButton pRipple type="button" icon="pi pi-times" class="p-button-text"
+                severity="secondary" aria-label="Cancel rename" (click)="cancelRename()"></button>
+            } @else {
+              <span class="group-manage-name">{{group.name}}</span>
+              <button pButton pRipple type="button" icon="pi pi-pencil" class="p-button-text"
+                severity="secondary" [attr.aria-label]="'Rename ' + group.name"
+                (click)="startRename(group)"></button>
+              <button pButton pRipple type="button" icon="pi pi-trash" class="p-button-text"
+                severity="danger" [attr.aria-label]="'Delete ' + group.name"
+                (click)="deleteGroup(group)"></button>
+            }
+          </li>
+        }
+      </ul>
+      <small class="add-hint">Deleting a group also removes the stocks in it.</small>
+    }
+  </div>
+</p-dialog>
+
+<p-dialog [(visible)]="moveDialog" header="Move to group" [modal]="true"
+  [breakpoints]="{'1400px': '40vw', '992px': '75vw', '576px': '100vw'}"
+  [style]="{width: '28vw', minWidth: 'min(22rem, 100vw)'}"
+  [draggable]="false" [resizable]="false" [appendTo]="'body'">
+  <div class="add-form">
+    <p-select [options]="groups" optionLabel="name" optionValue="id" [(ngModel)]="movedGroupId"
+      placeholder="No group" [showClear]="true" [style]="{'width':'100%'}"
+      [appendTo]="'body'"></p-select>
+    <button pButton pRipple type="button" icon="pi pi-check" label="Move" class="w-full"
+      severity="success" (click)="saveMove()"></button>
+  </div>
+</p-dialog>
+
+<p-toast position="bottom-center"></p-toast>

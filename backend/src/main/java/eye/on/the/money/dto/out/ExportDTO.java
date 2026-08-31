@@ -68,7 +68,7 @@ public class ExportDTO {
     }
 
     /** Watchlist rows are kept flat and price-free; the live values the UI shows are not worth backing up. */
-    public record StockWatchRow(Long id, String shortName, String exchange, String name) {
+    public record StockWatchRow(Long id, String shortName, String exchange, String name, String groupName) {
     }
 
     public record CryptoWatchRow(Long id, String coinId, String symbol, String name) {

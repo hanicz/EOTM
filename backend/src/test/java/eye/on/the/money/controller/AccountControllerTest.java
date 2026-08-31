@@ -1,5 +1,6 @@
 package eye.on.the.money.controller;
 
+import eye.on.the.money.dto.in.AccountEditDTO;
 import eye.on.the.money.model.stock.Account;
 import eye.on.the.money.service.stock.AccountService;
 import org.junit.jupiter.api.Assertions;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,11 +64,24 @@ class AccountControllerTest {
 
     @Test
     public void createAccount() {
-        Account account = Account.builder().id(1L).build();
-        when(this.accountService.createAccount(account, 1L)).thenReturn(account);
+        AccountEditDTO editDTO = new AccountEditDTO("Brokerage", LocalDate.of(2021, 3, 4));
+        Account account = Account.builder().id(1L).accountName("Brokerage").build();
+        when(this.accountService.createAccount(1L, editDTO)).thenReturn(account);
 
-        ResponseEntity<Account> result = this.accountController.createAccount(account, 1L);
+        ResponseEntity<Account> result = this.accountController.createAccount(1L, editDTO);
 
+        Assertions.assertEquals(account, result.getBody());
+    }
+
+    @Test
+    public void updateAccount() {
+        AccountEditDTO editDTO = new AccountEditDTO("Retirement", LocalDate.of(2022, 5, 6));
+        Account account = Account.builder().id(7L).accountName("Retirement").build();
+        when(this.accountService.updateAccount(1L, 7L, editDTO)).thenReturn(account);
+
+        ResponseEntity<Account> result = this.accountController.updateAccount(1L, 7L, editDTO);
+
+        Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
         Assertions.assertEquals(account, result.getBody());
     }
 }

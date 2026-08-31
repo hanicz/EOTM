@@ -15,10 +15,10 @@ plan what they add up to.
   no live market price, so they are valued at what was paid for them. Interest is recorded but deliberately
   left out of that valuation: it gets reinvested by buying more, and those purchases are already counted, so
   adding the interest as well would count the same money twice.
-- **Cash** — a plain forint balance for money sitting in an account rather than invested. It counts towards
-  net worth at face value, so it never shows a gain or a loss, and it is left out of the overall change on
-  both sides: cash was never spent on anything, and counting it as cost would water down the percentage the
-  rest of the portfolio moved.
+- **Cash** — a balance for money sitting in an account rather than invested, held in a currency of your
+  choosing and converted like everything else. It counts towards net worth at face value, so it never shows
+  a gain or a loss, and it is left out of the overall change on both sides: cash was never spent on
+  anything, and counting it as cost would water down the percentage the rest of the portfolio moved.
 - **Multi-currency** — every amount is held in the currency it was traded in and converted on the fly, so a
   portfolio spread across HUF, EUR and USD still totals up.
 
@@ -29,7 +29,8 @@ plan what they add up to.
 
 ### Watchlist and lookup
 
-- **Watchlists** for stocks, crypto and currency pairs, with live prices.
+- **Watchlists** for stocks, crypto and currency pairs, with live prices. Stocks can be sorted into named
+  groups — Europe, ETF, Tech — each a collapsible section of the list.
 - **Lookup** — search any ticker for its profile, fundamentals, price history and analyst recommendations.
 - **Signals** — a buy/hold/sell view built from SMA, EMA, RSI and MACD, each indicator shown with its own
   reading rather than just the verdict.

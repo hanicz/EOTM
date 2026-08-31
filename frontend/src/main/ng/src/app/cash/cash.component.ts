@@ -2,12 +2,14 @@ import { ChangeDetectorRef, Component } from '@angular/core';
 import { MessageService } from 'primeng/api';
 import { Cash } from '../model/cash';
 import { CashService } from '../service/cash.service';
+import { Globals } from '../util/global';
 import { MenuComponent } from '../menu/menu.component';
 import { Bind } from 'primeng/bind';
 import { Panel } from 'primeng/panel';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { InputNumber } from 'primeng/inputnumber';
+import { Select } from 'primeng/select';
 import { Toast } from 'primeng/toast';
 import { Skeleton } from 'primeng/skeleton';
 import { FormsModule } from '@angular/forms';
@@ -16,20 +18,23 @@ import { FormsModule } from '@angular/forms';
     selector: 'app-cash',
     templateUrl: './cash.component.html',
     styleUrls: ['./cash.component.css'],
-    imports: [MenuComponent, Bind, Panel, ButtonDirective, Ripple, InputNumber, Toast, Skeleton, FormsModule]
+    imports: [MenuComponent, Bind, Panel, ButtonDirective, Ripple, InputNumber, Select, Toast, Skeleton, FormsModule]
 })
 export class CashComponent {
 
   amount: number | null = null;
   currency: string = 'HUF';
+  currencies: any[];
   loading: boolean = true;
   saving: boolean = false;
 
   constructor(
     private cashService: CashService,
     private messageService: MessageService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    globals: Globals
   ) {
+    this.currencies = globals.currencies;
     this.load();
   }
 

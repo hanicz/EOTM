@@ -75,7 +75,7 @@
    The remove button keeps its column at all times so the row never reflows on hover. */
 .quote-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto 1.5rem;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   column-gap: 0.5rem;
   padding: 0.35rem 0.25rem 0.35rem 0.5rem;
@@ -159,33 +159,61 @@
   font-size: 0.6rem;
 }
 
-.quote-remove {
+/* Collapsed to nothing so the quote uses the full row, then widened on hover, which slides the
+   price and name left to make room rather than leaving a permanent gap on every row. The negative
+   margin swallows the column gap while there is nothing to show. */
+.quote-actions {
   grid-column: 3;
   grid-row: 1 / span 2;
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+  width: 0;
+  margin-left: -0.5rem;
+  overflow: hidden;
+  opacity: 0;
+  transition: width 0.15s ease-in-out, margin-left 0.15s ease-in-out, opacity 0.15s ease-in-out;
+}
+
+.quote-action {
+  flex: 0 0 auto;
   width: 1.5rem;
   min-width: 1.5rem;
   height: 1.5rem;
   min-height: 1.5rem;
   padding: 0;
-  opacity: 0;
-  transition: opacity 0.15s ease-in-out;
 }
 
-.quote-row:hover .quote-remove,
-.quote-row:focus-within .quote-remove,
-.quote-remove:focus-visible {
+.quote-row:hover .quote-actions,
+.quote-row:focus-within .quote-actions,
+.quote-actions:focus-within {
+  width: 3.1rem;
+  margin-left: 0;
   opacity: 1;
 }
 
-/* Touch has no hover, so the control would otherwise be unreachable. */
+/* Crypto and forex have no group to move to, so they only ever reveal the one button. */
+.quote-row:hover .quote-actions-single,
+.quote-row:focus-within .quote-actions-single,
+.quote-actions-single:focus-within {
+  width: 1.5rem;
+}
+
+/* Touch has no hover, so the controls would otherwise be unreachable. */
 @media (hover: none) {
-  .quote-remove {
+  .quote-actions {
+    width: 3.1rem;
+    margin-left: 0;
     opacity: 1;
+  }
+
+  .quote-actions-single {
+    width: 1.5rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .quote-remove {
+  .quote-actions {
     transition: none;
   }
 }
@@ -263,4 +291,83 @@
   justify-content: center;
   width: 2.5rem;
   color: var(--p-text-muted-color, #5f5e5a);
+}
+
+.group-block {
+  margin-bottom: 0.75rem;
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  margin-bottom: 0.15rem;
+  padding: 0.4rem 0.5rem;
+  border: none;
+  border-left: 3px solid var(--p-primary-color, #ef9f27);
+  border-radius: 0.2rem;
+  background: #efece2;
+  color: #1b1b1b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.group-header:hover,
+.group-header:focus-visible {
+  background: #e6e2d5;
+}
+
+.group-caret {
+  font-size: 0.7rem;
+  color: var(--p-primary-color, #ef9f27);
+}
+
+.group-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.group-empty {
+  padding-left: 0.75rem;
+  font-style: italic;
+}
+
+.group-create {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.group-manage-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.group-manage-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.25rem;
+  border-bottom: 1px solid var(--p-content-border-color, #e3e0d5);
+}
+
+.group-manage-row:last-child {
+  border-bottom: none;
+}
+
+.group-manage-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

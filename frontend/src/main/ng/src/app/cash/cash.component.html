@@ -20,6 +20,15 @@
               [suffix]="' ' + currency" (keyup.enter)="save()"></p-inputnumber>
           }
         </div>
+        <div class="cash-field">
+          <label for="cashCurrency" class="cash-label">Currency</label>
+          @if (loading) {
+            <p-skeleton height="2.5rem"></p-skeleton>
+          } @else {
+            <p-select inputId="cashCurrency" [options]="currencies" [(ngModel)]="currency"
+              optionLabel="label" optionValue="value"></p-select>
+          }
+        </div>
       </div>
       <div class="cash-actions">
         <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-rounded"

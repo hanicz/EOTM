@@ -79,8 +79,12 @@ class NetWorthServiceTest {
     }
 
     private void stubCash(Double amount) {
+        this.stubCash(amount, "HUF");
+    }
+
+    private void stubCash(Double amount, String currency) {
         when(this.cashService.getCash(anyLong()))
-                .thenReturn(CashDTO.builder().amount(amount).currency("HUF").build());
+                .thenReturn(CashDTO.builder().amount(amount).currency(currency).build());
     }
 
     private void stubRates(Map<String, Double> rates) {
@@ -284,6 +288,19 @@ class NetWorthServiceTest {
         assertEquals(0, cash.getSpent().compareTo(new BigDecimal("1000.00")));
         assertEquals(0, cash.getChangePct().signum());
         assertEquals(0, result.getTotalWorth().compareTo(new BigDecimal("1000.00")));
+    }
+
+    @Test
+    void getNetWorth_convertsCashHeldInANonDefaultCurrency() {
+        this.stubCash(1_100.0, "USD");
+
+        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
+
+        AssetClassValueDTO cash = this.assetOf(result, NetWorthService.CASH);
+        assertEquals(0, cash.getWorth().compareTo(new BigDecimal("1000.00")));
+        assertEquals(0, cash.getSpent().compareTo(new BigDecimal("1000.00")));
+        assertEquals(0, result.getTotalWorth().compareTo(new BigDecimal("1000.00")));
+        assertTrue(result.getUnconvertedCurrencies().isEmpty());
     }
 
     @Test

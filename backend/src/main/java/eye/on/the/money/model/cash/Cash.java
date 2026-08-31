@@ -1,6 +1,7 @@
 package eye.on.the.money.model.cash;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
@@ -26,6 +27,11 @@ public class Cash {
 
     @Column(nullable = false)
     private Double amount;
+
+    @ManyToOne
+    @JoinColumn(name = "currency_id", nullable = false)
+    @JsonIgnore
+    private Currency currency;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

@@ -11,5 +11,7 @@ public interface StockWatchRepository extends JpaRepository<TickerWatch, Long> {
 
     Optional<TickerWatch> findByUserIdAndStockId(Long userId, String stockId);
 
+    Optional<TickerWatch> findByIdAndUserId(Long id, Long userId);
+
     void deleteByIdAndUserId(Long id, Long userId);
 }

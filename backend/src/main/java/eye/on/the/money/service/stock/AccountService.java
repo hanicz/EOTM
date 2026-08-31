@@ -1,6 +1,7 @@
 package eye.on.the.money.service.stock;
 
-import eye.on.the.money.model.User;
+import eye.on.the.money.dto.in.AccountEditDTO;
+import eye.on.the.money.exception.ValidationException;
 import eye.on.the.money.model.stock.Account;
 import eye.on.the.money.repository.stock.AccountRepository;
 import eye.on.the.money.service.user.UserService;
@@ -18,6 +19,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class AccountService {
+
+    private static final String DUPLICATE_MESSAGE = "An account with this name already exists";
 
     private final AccountRepository accountRepository;
     private final UserService userService;
@@ -46,10 +49,36 @@ public class AccountService {
     }
 
     @Transactional
-    public Account createAccount(Account account, Long userId) {
-        User user = this.userService.getReference(userId);
-        account.setId(null);
-        account.setUser(user);
+    public Account createAccount(Long userId, AccountEditDTO editDTO) {
+        String accountName = editDTO.accountName().trim();
+        this.rejectDuplicate(userId, accountName, null);
+
+        Account account = Account.builder()
+                .accountName(accountName)
+                .creationDate(editDTO.creationDate())
+                .user(this.userService.getReference(userId))
+                .build();
+
         return this.accountRepository.save(account);
+    }
+
+    @Transactional
+    public Account updateAccount(Long userId, Long id, AccountEditDTO editDTO) {
+        String accountName = editDTO.accountName().trim();
+        Account account = this.getAccount(userId, id);
+        this.rejectDuplicate(userId, accountName, id);
+
+        account.setAccountName(accountName);
+        account.setCreationDate(editDTO.creationDate());
+
+        return this.accountRepository.save(account);
+    }
+
+    private void rejectDuplicate(Long userId, String accountName, Long selfId) {
+        this.accountRepository.findByUserIdAndAccountName(userId, accountName)
+                .filter(existing -> !existing.getId().equals(selfId))
+                .ifPresent(existing -> {
+                    throw new ValidationException(DUPLICATE_MESSAGE);
+                });
     }
 }

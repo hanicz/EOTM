@@ -16,7 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 @ToString
 @Table(name = "EOTM_STOCK_WATCH",
         uniqueConstraints = @UniqueConstraint(name = "UK_STOCK_WATCH_USER_STOCK",
-                columnNames = {"user_id", "stock_id"}))
+                columnNames = {"user_id", "stock_id"}),
+        indexes = @Index(name = "IDX_STOCK_WATCH_USER", columnList = "user_id"))
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
@@ -33,4 +34,9 @@ public class TickerWatch {
     @ManyToOne
     @JoinColumn(name = "stock_id", nullable = false)
     private Stock stock;
+
+    @ManyToOne
+    @JoinColumn(name = "group_id")
+    @JsonIgnore
+    private WatchGroup group;
 }

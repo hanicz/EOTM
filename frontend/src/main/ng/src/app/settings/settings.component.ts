@@ -10,7 +10,8 @@ import { Panel } from 'primeng/panel';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { DataView } from 'primeng/dataview';
-import { PrimeTemplate } from 'primeng/api';
+import { MessageService, PrimeTemplate } from 'primeng/api';
+import { Toast } from 'primeng/toast';
 import { Password } from 'primeng/password';
 import { FormsModule } from '@angular/forms';
 import { Dialog } from 'primeng/dialog';
@@ -21,7 +22,7 @@ import { DatePipe } from '@angular/common';
     selector: 'app-settings',
     templateUrl: './settings.component.html',
     styleUrls: ['./settings.component.css'],
-    imports: [MenuComponent, Bind, Panel, ButtonDirective, Ripple, DataView, PrimeTemplate, Password, FormsModule, Dialog, InputText, DatePipe]
+    imports: [MenuComponent, Bind, Panel, ButtonDirective, Ripple, DataView, PrimeTemplate, Toast, Password, FormsModule, Dialog, InputText, DatePipe]
 })
 export class SettingsComponent implements OnInit {
 
@@ -31,12 +32,13 @@ export class SettingsComponent implements OnInit {
 
   // Dialog states
   addSubRedditDialog: boolean = false;
-  createAccountDialog: boolean = false;
+  accountDialog: boolean = false;
 
   // Form data
   subReddit: string = '';
   description: string = '';
   newAccount: Account = {} as Account;
+  editedAccount: Account | null = null;
   oldPassword: string = '';
   newPassword: string = '';
 
@@ -48,6 +50,7 @@ export class SettingsComponent implements OnInit {
     private newsService: NewsService,
     private userService: UserService,
     private accountService: AccountService,
+    private messageService: MessageService,
     private cdr: ChangeDetectorRef,
   ) { }
 
@@ -140,16 +143,24 @@ export class SettingsComponent implements OnInit {
   }
 
   openAccountDialog(): void {
+    this.editedAccount = null;
     this.newAccount = { creationDate: new Date().toLocaleDateString('en-CA') } as Account;
-    this.createAccountDialog = true;
+    this.accountDialog = true;
+  }
+
+  openEditAccountDialog(account: Account): void {
+    this.editedAccount = account;
+    this.newAccount = { ...account };
+    this.accountDialog = true;
   }
 
   hideAccountDialog(): void {
-    this.createAccountDialog = false;
+    this.accountDialog = false;
+    this.editedAccount = null;
     this.newAccount = {} as Account;
   }
 
-  createAccount(): void {
+  saveAccount(): void {
     if (!this.newAccount.accountName?.trim()) {
       return;
     }
@@ -158,16 +169,22 @@ export class SettingsComponent implements OnInit {
       return;
     }
 
+    const edited = this.editedAccount;
+    const request = edited
+      ? this.accountService.updateAccount(edited.id, this.newAccount)
+      : this.accountService.createAccount(this.newAccount);
+
     this.isLoading = true;
-    this.accountService.createAccount(this.newAccount).subscribe({
+    request.subscribe({
       next: () => {
         this.loadAccounts();
         this.hideAccountDialog();
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error creating account:', error);
+        this.messageService.add({ severity: 'error', detail: error.error?.error ?? 'Could not save the account.' });
         this.isLoading = false;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -183,8 +200,9 @@ export class SettingsComponent implements OnInit {
           this.isLoading = false;
         },
         error: (error) => {
-          console.error('Error deleting account:', error);
+          this.messageService.add({ severity: 'error', detail: error.error?.error ?? 'Could not delete the account.' });
           this.isLoading = false;
+          this.cdr.markForCheck();
         }
       });
     }

@@ -70,10 +70,18 @@
                                             <p class="account-date">Created: {{account.creationDate | date:'mediumDate'}}
                                             </p>
                                         </div>
-                                        <button pButton pRipple type="button" icon="pi pi-trash"
-                                            (click)="deleteAccount(account)"
-                                            class="p-button-rounded p-button-text item-action" severity="danger">
-                                        </button>
+                                        <span class="item-actions">
+                                            <button pButton pRipple type="button" icon="pi pi-pencil"
+                                                (click)="openEditAccountDialog(account)"
+                                                [attr.aria-label]="'Edit ' + account.accountName"
+                                                class="p-button-rounded p-button-text item-action">
+                                            </button>
+                                            <button pButton pRipple type="button" icon="pi pi-trash"
+                                                (click)="deleteAccount(account)"
+                                                [attr.aria-label]="'Delete ' + account.accountName"
+                                                class="p-button-rounded p-button-text item-action" severity="danger">
+                                            </button>
+                                        </span>
                                     </div>
                                 }
                             </ng-template>
@@ -169,8 +177,9 @@
     </ng-template>
 </p-dialog>
 
-<!-- Create Account Dialog -->
-<p-dialog [(visible)]="createAccountDialog" [style]="{width: '100%', maxWidth: '500px'}" header="Create Account"
+<!-- Create / Edit Account Dialog -->
+<p-dialog [(visible)]="accountDialog" [style]="{width: '100%', maxWidth: '500px'}"
+    [header]="editedAccount ? 'Edit Account' : 'Create Account'"
     [modal]="true" styleClass="p-fluid">
     <ng-template pTemplate="content">
         <div class="dialog-field">
@@ -187,7 +196,10 @@
     <ng-template pTemplate="footer">
         <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideAccountDialog()">
         </button>
-        <button pButton pRipple label="Create" icon="pi pi-check" severity="success" (click)="createAccount()">
+        <button pButton pRipple [label]="editedAccount ? 'Save' : 'Create'"
+            [icon]="editedAccount ? 'pi pi-save' : 'pi pi-check'" severity="success" (click)="saveAccount()">
         </button>
     </ng-template>
 </p-dialog>
+
+<p-toast position="bottom-center"></p-toast>

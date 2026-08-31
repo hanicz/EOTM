@@ -1,11 +1,14 @@
 package eye.on.the.money.controller;
 
+import eye.on.the.money.dto.in.WatchGroupEditDTO;
 import eye.on.the.money.dto.out.CryptoWatchDTO;
 import eye.on.the.money.dto.out.ForexWatchDTO;
 import eye.on.the.money.dto.out.StockWatchDTO;
+import eye.on.the.money.dto.out.WatchGroupDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Stock;
 import eye.on.the.money.service.shared.WatchListService;
+import eye.on.the.money.service.watchlist.WatchGroupService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +30,9 @@ class WatchlistControllerTest {
 
     @Mock
     private WatchListService watchlistService;
+
+    @Mock
+    private WatchGroupService watchGroupService;
 
     @InjectMocks
     private WatchlistController watchlistController;
@@ -95,9 +101,9 @@ class WatchlistControllerTest {
         Stock stock = Stock.builder().shortName("s1").exchange("e1").id("i1").build();
         StockWatchDTO sDTO = StockWatchDTO.builder().tickerWatchId(1L).liveValue(32.1).change(33.1).stockExchange("e1").stockName("n1").stockShortName("s1").pChange(3.1).build();
 
-        when(this.watchlistService.createNewStockWatch(this.user.getId(), stock)).thenReturn(sDTO);
+        when(this.watchlistService.createNewStockWatch(this.user.getId(), stock, null)).thenReturn(sDTO);
 
-        Assertions.assertEquals(sDTO, this.watchlistController.createStockWatch(1L, stock).getBody());
+        Assertions.assertEquals(sDTO, this.watchlistController.createStockWatch(1L, stock, null).getBody());
     }
 
     @Test
@@ -107,5 +113,71 @@ class WatchlistControllerTest {
         when(this.watchlistService.createNewCryptoWatch(this.user.getId(), "c1")).thenReturn(cDTO);
 
         Assertions.assertEquals(cDTO, this.watchlistController.createCryptoWatch(1L, "c1").getBody());
+    }
+
+    @Test
+    public void createStockWatchInAGroup() {
+        Stock stock = Stock.builder().shortName("s1").exchange("e1").id("i1").build();
+        StockWatchDTO sDTO = StockWatchDTO.builder().tickerWatchId(1L).stockShortName("s1").groupId(5L).groupName("Tech").build();
+
+        when(this.watchlistService.createNewStockWatch(this.user.getId(), stock, 5L)).thenReturn(sDTO);
+
+        Assertions.assertEquals(sDTO, this.watchlistController.createStockWatch(1L, stock, 5L).getBody());
+    }
+
+    @Test
+    public void setStockWatchGroup() {
+        StockWatchDTO sDTO = StockWatchDTO.builder().tickerWatchId(1L).groupId(5L).groupName("Tech").build();
+
+        when(this.watchlistService.setStockWatchGroup(this.user.getId(), 1L, 5L)).thenReturn(sDTO);
+
+        Assertions.assertEquals(sDTO, this.watchlistController.setStockWatchGroup(1L, 1L, 5L).getBody());
+    }
+
+    @Test
+    public void setStockWatchGroupClearsItWhenNoGroupIsGiven() {
+        StockWatchDTO sDTO = StockWatchDTO.builder().tickerWatchId(1L).build();
+
+        when(this.watchlistService.setStockWatchGroup(this.user.getId(), 1L, null)).thenReturn(sDTO);
+
+        Assertions.assertNull(this.watchlistController.setStockWatchGroup(1L, 1L, null).getBody().getGroupId());
+    }
+
+    @Test
+    public void getGroups() {
+        List<WatchGroupDTO> groups = List.of(WatchGroupDTO.builder().id(1L).name("Tech").build());
+
+        when(this.watchGroupService.getGroups(this.user.getId())).thenReturn(groups);
+
+        Assertions.assertEquals(groups, this.watchlistController.getGroups(1L).getBody());
+    }
+
+    @Test
+    public void createGroup() {
+        WatchGroupEditDTO request = new WatchGroupEditDTO("Tech");
+        WatchGroupDTO saved = WatchGroupDTO.builder().id(1L).name("Tech").build();
+
+        when(this.watchGroupService.createGroup(this.user.getId(), request)).thenReturn(saved);
+
+        Assertions.assertEquals(saved, this.watchlistController.createGroup(1L, request).getBody());
+    }
+
+    @Test
+    public void updateGroup() {
+        WatchGroupEditDTO request = new WatchGroupEditDTO("Technology");
+        WatchGroupDTO saved = WatchGroupDTO.builder().id(1L).name("Technology").build();
+
+        when(this.watchGroupService.updateGroup(this.user.getId(), 1L, request)).thenReturn(saved);
+
+        Assertions.assertEquals(saved, this.watchlistController.updateGroup(1L, 1L, request).getBody());
+    }
+
+    @Test
+    public void deleteGroupAnswers404WhenThereWasNothingToDelete() {
+        when(this.watchGroupService.deleteGroup(this.user.getId(), 1L)).thenReturn(true);
+        when(this.watchGroupService.deleteGroup(this.user.getId(), 2L)).thenReturn(false);
+
+        Assertions.assertEquals(HttpStatus.OK, this.watchlistController.deleteGroup(1L, 1L).getStatusCode());
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, this.watchlistController.deleteGroup(1L, 2L).getStatusCode());
     }
 }

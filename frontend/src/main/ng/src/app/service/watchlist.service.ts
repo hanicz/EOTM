@@ -4,6 +4,7 @@ import { StockWatch } from '../model/stockwatch';
 import { ResourceHelper } from '../util/servicehelper';
 import { ForexWatch } from '../model/forexwatch';
 import { CryptoWatch } from '../model/cryptowatch';
+import { WatchGroup } from '../model/watchgroup';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -52,10 +53,46 @@ export class WatchlistService {
     });
   };
 
-  createNewStockWatch(shortName: string, name: string, exchange: string) {
-    const url = `${this.watchListUrl}/stock`;
+  createNewStockWatch(shortName: string, name: string, exchange: string, groupId?: number | null) {
+    const url = groupId == null ? `${this.watchListUrl}/stock` : `${this.watchListUrl}/stock?groupId=${groupId}`;
     let data = {shortName: shortName, name: name, exchange: exchange}
     return this.http.post(url, data,{
+      headers: this.helper.getHeadersWithToken()
+    });
+  };
+
+  setStockWatchGroup(tickerWatchId: number, groupId: number | null) {
+    const base = `${this.watchListUrl}/stock/${tickerWatchId}/group`;
+    const url = groupId == null ? base : `${base}?groupId=${groupId}`;
+    return this.http.put<StockWatch>(url, {}, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  };
+
+  getGroups() {
+    const url = `${this.watchListUrl}/group`;
+    return this.http.get<WatchGroup[]>(url, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  };
+
+  createGroup(name: string) {
+    const url = `${this.watchListUrl}/group`;
+    return this.http.post<WatchGroup>(url, JSON.stringify({ name: name }), {
+      headers: this.helper.getHeadersWithToken()
+    });
+  };
+
+  renameGroup(id: number, name: string) {
+    const url = `${this.watchListUrl}/group/${id}`;
+    return this.http.put<WatchGroup>(url, JSON.stringify({ name: name }), {
+      headers: this.helper.getHeadersWithToken()
+    });
+  };
+
+  deleteGroup(id: number) {
+    const url = `${this.watchListUrl}/group/${id}`;
+    return this.http.delete(url, {
       headers: this.helper.getHeadersWithToken()
     });
   };

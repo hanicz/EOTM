@@ -169,6 +169,13 @@
   color: var(--p-text-muted-color);
 }
 
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
 .item-action {
   flex-shrink: 0;
   opacity: 0.6;
@@ -176,7 +183,8 @@
 }
 
 .subreddit-item:hover .item-action,
-.account-item:hover .item-action {
+.account-item:hover .item-action,
+.item-action:focus-visible {
   opacity: 1;
 }
 
@@ -322,8 +330,13 @@
     flex-wrap: wrap;
   }
 
-  .item-action {
+  .item-action,
+  .item-actions {
     margin-left: auto;
+  }
+
+  .item-actions .item-action {
+    margin-left: 0;
   }
 
   .password-section {

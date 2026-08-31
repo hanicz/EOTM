@@ -37,7 +37,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ExportService {
 
-    private static final int SCHEMA_VERSION = 2;
+    private static final int SCHEMA_VERSION = 3;
 
     private final UserService userService;
     private final AccountService accountService;
@@ -103,7 +103,8 @@ public class ExportService {
         List<ExportDTO.StockWatchRow> stock =
                 this.stockWatchRepository.findByUserIdOrderByStockShortName(userId).stream()
                         .map(watch -> new ExportDTO.StockWatchRow(watch.getId(), watch.getStock().getShortName(),
-                                watch.getStock().getExchange(), watch.getStock().getName()))
+                                watch.getStock().getExchange(), watch.getStock().getName(),
+                                watch.getGroup() == null ? null : watch.getGroup().getName()))
                         .toList();
 
         List<ExportDTO.CryptoWatchRow> crypto =

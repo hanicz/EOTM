@@ -12,6 +12,7 @@ import eye.on.the.money.model.stock.Stock;
 import eye.on.the.money.model.watchlist.CryptoWatch;
 import eye.on.the.money.model.watchlist.ForexWatch;
 import eye.on.the.money.model.watchlist.TickerWatch;
+import eye.on.the.money.model.watchlist.WatchGroup;
 import eye.on.the.money.repository.crypto.CoinRepository;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.watchlist.CryptoWatchRepository;
@@ -21,6 +22,7 @@ import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.service.api.CryptoAPIService;
 import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.stock.StockService;
+import eye.on.the.money.service.watchlist.WatchGroupService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -49,6 +51,7 @@ public class WatchListService {
     private final CoinRepository coinRepository;
     private final ModelMapper modelMapper;
     private final StockService stockService;
+    private final WatchGroupService watchGroupService;
 
     public List<CryptoWatchDTO> getCryptoWatchlistByUserId(Long userId, String currency) {
         List<CryptoWatchDTO> cryptoList = this.cryptoWatchRepository.findByUserIdOrderByCoin_Symbol(userId).stream()
@@ -134,14 +137,23 @@ public class WatchListService {
     }
 
     @Transactional
-    public StockWatchDTO createNewStockWatch(Long userId, Stock wStock) {
+    public StockWatchDTO createNewStockWatch(Long userId, Stock wStock, Long groupId) {
         Stock stock = this.stockService.getOrCreateStock(wStock.getShortName(), wStock.getExchange(), wStock.getName());
         User user = this.userService.getReference(userId);
+        WatchGroup group = (groupId == null) ? null : this.watchGroupService.getGroup(userId, groupId);
 
         TickerWatch tickerWatch = this.stockWatchRepository.findByUserIdAndStockId(userId, stock.getId())
                 .orElseGet(() -> this.stockWatchRepository.save(
-                        TickerWatch.builder().stock(stock).user(user).build()));
+                        TickerWatch.builder().stock(stock).user(user).group(group).build()));
         return this.convertToStockWatchDTO(tickerWatch);
+    }
+
+    @Transactional
+    public StockWatchDTO setStockWatchGroup(Long userId, Long id, Long groupId) {
+        TickerWatch tickerWatch = this.stockWatchRepository.findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new NoSuchElementException("Stock watch not found: " + id));
+        tickerWatch.setGroup((groupId == null) ? null : this.watchGroupService.getGroup(userId, groupId));
+        return this.convertToStockWatchDTO(this.stockWatchRepository.save(tickerWatch));
     }
 
     @Transactional
@@ -173,7 +185,11 @@ public class WatchListService {
     }
 
     private StockWatchDTO convertToStockWatchDTO(TickerWatch tickerWatch) {
-        return this.modelMapper.map(tickerWatch, StockWatchDTO.class);
+        StockWatchDTO dto = this.modelMapper.map(tickerWatch, StockWatchDTO.class);
+        WatchGroup group = tickerWatch.getGroup();
+        dto.setGroupId(group == null ? null : group.getId());
+        dto.setGroupName(group == null ? null : group.getName());
+        return dto;
     }
 
     private ForexWatchDTO convertToForexDTO(ForexWatch forexWatch) {

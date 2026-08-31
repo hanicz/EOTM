@@ -28,6 +28,8 @@ import java.util.Set;
 @Generated
 public class Account {
 
+    public static final int NAME_MAX_LENGTH = 255;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

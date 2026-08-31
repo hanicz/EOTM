@@ -23,4 +23,6 @@ public class StockWatchDTO {
     private String currencyId;
     private Double change;
     private Double pChange;
+    private Long groupId;
+    private String groupName;
 }

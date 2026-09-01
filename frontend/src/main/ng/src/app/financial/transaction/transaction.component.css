@@ -56,6 +56,18 @@
   opacity: 0.55;
 }
 
+.amount-alert-1 td {
+  background-color: rgba(163, 42, 48, 0.08);
+}
+
+.amount-alert-2 td {
+  background-color: rgba(163, 42, 48, 0.17);
+}
+
+.amount-alert-3 td {
+  background-color: rgba(163, 42, 48, 0.28);
+}
+
 @media screen and (max-width: 991px) {
   .memo-cell {
     max-width: none;

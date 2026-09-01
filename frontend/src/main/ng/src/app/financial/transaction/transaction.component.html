@@ -22,8 +22,9 @@
   </ng-template>
 
   <ng-template pTemplate="right">
-    <p-fileUpload mode="basic" #fileUpload accept=".csv" [customUpload]="true" [auto]="true" label="Import"
-      chooseLabel="Import" chooseStyleClass="p-button-outlined p-button-secondary" (uploadHandler)="onUpload($event)">
+    <p-fileUpload mode="basic" #fileUpload accept=".csv" [multiple]="true" [customUpload]="true" [auto]="true"
+      label="Import" chooseLabel="Import" chooseStyleClass="p-button-outlined p-button-secondary"
+      (uploadHandler)="onUpload($event)">
     </p-fileUpload>
     <button pButton pRipple label="Export" icon="pi pi-upload" severity="secondary" class="p-button-outlined" (click)="download()"></button>
   </ng-template>
@@ -71,7 +72,7 @@
   </ng-template>
 
   <ng-template pTemplate="body" let-transaction>
-    <tr [class.row-excluded]="transaction.excluded">
+    <tr [class.row-excluded]="transaction.excluded" [class]="amountAlertClass(transaction)">
       <td>
         <p-tableCheckbox [value]="transaction"></p-tableCheckbox>
       </td>

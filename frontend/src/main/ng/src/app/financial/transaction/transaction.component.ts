@@ -1,5 +1,7 @@
 import { Component, ChangeDetectorRef, EventEmitter, Output, ViewChild } from '@angular/core';
-import { BankTransaction } from '../../model/bankTransaction';
+import { from, of } from 'rxjs';
+import { catchError, concatMap, map, toArray } from 'rxjs/operators';
+import { BankTransaction, ImportResult } from '../../model/bankTransaction';
 import { FinancialService } from '../../service/financial.service';
 import { Bind } from 'primeng/bind';
 import { Toolbar } from 'primeng/toolbar';
@@ -23,6 +25,12 @@ interface TransactionEditEvent {
 interface TransactionEditValues {
     bookingDate: string;
     memo: string;
+}
+
+interface ImportOutcome {
+    name: string;
+    result: ImportResult | null;
+    error: string;
 }
 
 @Component({
@@ -110,6 +118,14 @@ export class FinancialTransactionComponent {
       case 'counted': return !transaction.excluded;
       default: return true;
     }
+  }
+
+  amountAlertClass(transaction: BankTransaction): string {
+    if (transaction.excluded) return '';
+    if (transaction.amount <= -500000) return 'amount-alert-3';
+    if (transaction.amount <= -200000) return 'amount-alert-2';
+    if (transaction.amount <= -100000) return 'amount-alert-1';
+    return '';
   }
 
   private bookedOn(transaction: BankTransaction): string {
@@ -240,23 +256,47 @@ export class FinancialTransactionComponent {
     });
   }
 
-  onUpload(event: any): void {
-    for (let file of event.files) {
-      this.financialService.uploadCSV(file).subscribe({
-        next: (result) => {
-          this.fetchData();
-          this.fileUpload.clear();
-          this.dataChanged.emit();
-          this.messageService.add({
-            severity: 'success',
-            detail: `Import finished. ${result.created} added, ${result.updated} updated.`
-          });
-        },
-        error: (error) => {
-          this.fileUpload.clear();
-          this.messageService.add({ severity: 'error', detail: error.error?.error ?? 'Import failed.' });
-        }
+  onUpload(event: { files: File[] }): void {
+    const files = Array.from(event.files ?? []);
+    if (!files.length) return;
+
+    from(files).pipe(
+      concatMap(file => this.financialService.uploadCSV(file).pipe(
+        map(result => ({ name: file.name, result, error: '' } as ImportOutcome)),
+        catchError(error => of({
+          name: file.name,
+          result: null,
+          error: error.error?.error ?? 'Import failed.'
+        } as ImportOutcome))
+      )),
+      toArray()
+    ).subscribe(outcomes => {
+      this.fileUpload.clear();
+      this.reportImport(outcomes);
+    });
+  }
+
+  private reportImport(outcomes: ImportOutcome[]): void {
+    const imported = outcomes.filter(outcome => outcome.result);
+    const failed = outcomes.filter(outcome => !outcome.result);
+
+    if (imported.length) {
+      this.fetchData();
+      this.dataChanged.emit();
+      const created = imported.reduce((sum, outcome) => sum + outcome.result!.created, 0);
+      const updated = imported.reduce((sum, outcome) => sum + outcome.result!.updated, 0);
+      const fileCount = imported.length > 1 ? ` from ${imported.length} files` : '';
+      this.messageService.add({
+        severity: 'success',
+        detail: `Import finished. ${created} added, ${updated} updated${fileCount}.`
       });
+    }
+
+    if (failed.length === 1) {
+      this.messageService.add({ severity: 'error', detail: `${failed[0].name}: ${failed[0].error}` });
+    } else if (failed.length > 1) {
+      const names = failed.map(outcome => outcome.name).join(', ');
+      this.messageService.add({ severity: 'error', detail: `${failed.length} files could not be imported: ${names}` });
     }
   }
 }

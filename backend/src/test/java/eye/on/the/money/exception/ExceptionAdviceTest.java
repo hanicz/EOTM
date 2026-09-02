@@ -4,8 +4,11 @@ import eye.on.the.money.exception.dto.ErrorResponse;
 import eye.on.the.money.util.Ticker;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -46,5 +49,17 @@ public class ExceptionAdviceTest {
     @Test
     public void validationExceptionIsAnIllegalArgumentException() {
         Assertions.assertInstanceOf(IllegalArgumentException.class, new ValidationException("x"));
+    }
+
+    @Test
+    public void cooldownIsRejectedWithRetryAfter() {
+        ResponseEntity<ErrorResponse> response = this.advice.handleCooldownException(
+                new CooldownException("You can send it again in 3 hours.", Duration.ofHours(3)));
+
+        Assertions.assertAll("Cooldown",
+                () -> Assertions.assertEquals(HttpStatus.TOO_MANY_REQUESTS, response.getStatusCode()),
+                () -> Assertions.assertEquals(429, response.getBody().code()),
+                () -> Assertions.assertEquals("You can send it again in 3 hours.", response.getBody().error()),
+                () -> Assertions.assertEquals("10800", response.getHeaders().getFirst(HttpHeaders.RETRY_AFTER)));
     }
 }

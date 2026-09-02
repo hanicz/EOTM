@@ -3,9 +3,9 @@ package eye.on.the.money.controller;
 import eye.on.the.money.dto.in.ReportSubscriptionUpdateDTO;
 import eye.on.the.money.dto.out.MonthlyReportDTO;
 import eye.on.the.money.dto.out.ReportSubscriptionDTO;
+import eye.on.the.money.exception.CooldownException;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.report.ReportSubscription;
-import eye.on.the.money.repository.report.ReportSubscriptionRepository;
 import eye.on.the.money.service.mail.EmailService;
 import eye.on.the.money.service.report.MonthlyReportService;
 import eye.on.the.money.service.report.ReportSubscriptionService;
@@ -20,12 +20,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.Duration;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -41,9 +42,6 @@ class ReportControllerTest {
 
     @Mock
     private ReportSubscriptionService reportSubscriptionService;
-
-    @Mock
-    private ReportSubscriptionRepository reportSubscriptionRepository;
 
     @Mock
     private MonthlyReportService monthlyReportService;
@@ -78,10 +76,11 @@ class ReportControllerTest {
     void sendNowConflictsWhenEmailIsNotConfigured() {
         when(this.emailService.isEnabled()).thenReturn(false);
 
-        ResponseEntity<Object> response = this.reportController.sendNow(USER_ID, USER_EMAIL, null, null);
+        ResponseEntity<Object> response = this.reportController.sendNow(USER_ID, null, null);
 
         Assertions.assertAll("Mail not configured",
                 () -> assertEquals(HttpStatus.CONFLICT, response.getStatusCode()),
+                () -> verify(this.reportSubscriptionService, never()).claimManualSend(any()),
                 () -> verify(this.monthlyReportService, never()).build(any(), any(), any()));
     }
 
@@ -93,11 +92,11 @@ class ReportControllerTest {
         MonthlyReportDTO report = MonthlyReportDTO.builder().year(2023).month(9).currency("HUF").build();
 
         when(this.emailService.isEnabled()).thenReturn(true);
-        when(this.reportSubscriptionRepository.findByUserId(USER_ID)).thenReturn(Optional.of(subscription));
+        when(this.reportSubscriptionService.claimManualSend(USER_ID)).thenReturn(subscription);
         when(this.reportSubscriptionService.recipientsOf(subscription)).thenReturn(List.of(USER_EMAIL));
         when(this.monthlyReportService.build(USER_ID, YearMonth.of(2023, 9), "HUF")).thenReturn(report);
 
-        ResponseEntity<Object> response = this.reportController.sendNow(USER_ID, USER_EMAIL, 2023, 9);
+        ResponseEntity<Object> response = this.reportController.sendNow(USER_ID, 2023, 9);
 
         Assertions.assertAll("Manual send",
                 () -> assertEquals(HttpStatus.OK, response.getStatusCode()),
@@ -105,16 +104,34 @@ class ReportControllerTest {
     }
 
     @Test
-    void sendNowFallsBackToTheOwnerWithoutASubscription() {
+    void sendNowSendsToWhoeverTheClaimedSubscriptionNames() {
+        ReportSubscription subscription = ReportSubscription.builder()
+                .user(User.builder().email(USER_EMAIL).build())
+                .enabled(false).currency(ReportSubscription.DEFAULT_CURRENCY).recipients(new ArrayList<>()).build();
+
         when(this.emailService.isEnabled()).thenReturn(true);
-        when(this.reportSubscriptionRepository.findByUserId(USER_ID)).thenReturn(Optional.empty());
+        when(this.reportSubscriptionService.claimManualSend(USER_ID)).thenReturn(subscription);
+        when(this.reportSubscriptionService.recipientsOf(subscription)).thenReturn(List.of(USER_EMAIL));
         when(this.monthlyReportService.build(eq(USER_ID), any(), eq(ReportSubscription.DEFAULT_CURRENCY)))
                 .thenReturn(MonthlyReportDTO.builder().build());
 
-        this.reportController.sendNow(USER_ID, USER_EMAIL, null, null);
+        this.reportController.sendNow(USER_ID, null, null);
 
         ArgumentCaptor<List<String>> recipients = ArgumentCaptor.captor();
         verify(this.emailService).sendMonthlyReportMail(recipients.capture(), any(MonthlyReportDTO.class));
         assertEquals(List.of(USER_EMAIL), recipients.getValue());
+    }
+
+    @Test
+    void sendNowBuildsNothingWhileTheCooldownIsRunning() {
+        when(this.emailService.isEnabled()).thenReturn(true);
+        when(this.reportSubscriptionService.claimManualSend(USER_ID))
+                .thenThrow(new CooldownException("Too soon", Duration.ofHours(3)));
+
+        assertThrows(CooldownException.class, () -> this.reportController.sendNow(USER_ID, null, null));
+
+        Assertions.assertAll("Cooldown",
+                () -> verify(this.monthlyReportService, never()).build(any(), any(), any()),
+                () -> verify(this.emailService, never()).sendMonthlyReportMail(any(), any()));
     }
 }

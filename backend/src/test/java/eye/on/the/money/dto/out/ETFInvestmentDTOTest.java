@@ -36,7 +36,7 @@ class ETFInvestmentDTOTest {
                 .build();
         ETFInvestmentDTO baseDTO = this.getBaseDTO();
 
-        eiDTO1.mergeInvestments(eiDTO2);
+        eiDTO1.merge(eiDTO2);
 
         Assertions.assertAll("Assert all changing values",
                 () -> assertEquals(eiDTO2.getAmount() + baseDTO.getAmount(), eiDTO1.getAmount()),
@@ -60,7 +60,7 @@ class ETFInvestmentDTOTest {
                 .build();
         ETFInvestmentDTO baseDTO = this.getBaseDTO();
 
-        eiDTO1.mergeInvestments(eiDTO2);
+        eiDTO1.merge(eiDTO2);
 
         Assertions.assertAll("Assert all changing values",
                 () -> assertEquals(eiDTO2.getAmount() + baseDTO.getAmount(), eiDTO1.getAmount()),
@@ -82,7 +82,7 @@ class ETFInvestmentDTOTest {
                 .exchange("XETRA")
                 .build();
 
-        eiDTO1.mergeInvestments(eiDTO2);
+        eiDTO1.merge(eiDTO2);
 
         Assertions.assertAll("Assert nothing merged",
                 () -> assertEquals(15.0, eiDTO1.getAmount()),
@@ -104,7 +104,7 @@ class ETFInvestmentDTOTest {
                 .exchange("NASDAQ")
                 .build();
 
-        eiDTO1.mergeInvestments(eiDTO2);
+        eiDTO1.merge(eiDTO2);
 
         Assertions.assertAll("Assert all changing values",
                 () -> assertEquals(15.0, eiDTO1.getAmount()),

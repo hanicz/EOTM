@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import eye.on.the.money.dto.CSVHelper;
+import eye.on.the.money.dto.Lot;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVRecord;
@@ -24,7 +25,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @EqualsAndHashCode
 @NoArgsConstructor
-public class InvestmentDTO implements CSVHelper, Serializable {
+public class InvestmentDTO implements CSVHelper, Serializable, Lot<InvestmentDTO> {
     private Long investmentId;
     private Integer quantity;
     private String buySell;
@@ -46,7 +47,8 @@ public class InvestmentDTO implements CSVHelper, Serializable {
     private Long accountId;
     private boolean rsu;
 
-    public InvestmentDTO mergeInvestments(InvestmentDTO other) {
+    @Override
+    public InvestmentDTO merge(InvestmentDTO other) {
         if (!this.getShortName().equals(other.getShortName())
                 || !Objects.equals(this.getExchange(), other.getExchange())
                 || !this.getAccountId().equals(other.getAccountId()))
@@ -61,11 +63,17 @@ public class InvestmentDTO implements CSVHelper, Serializable {
         return this;
     }
 
+    @Override
     public void negateAmountAndQuantity() {
         this.amount = -this.amount;
         this.quantity = -this.quantity;
     }
 
+    @Override
+    @JsonIgnore
+    public boolean isClosed() {
+        return this.quantity != null && this.quantity == 0;
+    }
 
     @Override
     @JsonIgnore

@@ -16,6 +16,7 @@ import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
 import eye.on.the.money.util.LiveQuote;
+import eye.on.the.money.util.Lots;
 import eye.on.the.money.util.Ticker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -136,27 +137,7 @@ public class InvestmentService implements ICSVService {
     }
 
     private Map<String, InvestmentDTO> getCalculated(List<InvestmentDTO> investments) {
-        Map<String, InvestmentDTO> investmentMap = new LinkedHashMap<>();
-        Map<String, Integer> lotIndexByKey = new HashMap<>();
-
-        investments.stream()
-                .sorted(Comparator.comparing(InvestmentDTO::getTransactionDate))
-                .forEach(i -> {
-                    if (i.getBuySell().equals("S")) {
-                        i.negateAmountAndQuantity();
-                    }
-                    String baseKey = Ticker.symbol(i.getShortName(), i.getExchange()) + "_" + i.getAccountId();
-                    int lotIndex = lotIndexByKey.getOrDefault(baseKey, 0);
-                    String key = baseKey + "_" + lotIndex;
-
-                    InvestmentDTO merged = investmentMap.compute(key, (k, value) -> (value == null) ? i : value.mergeInvestments(i));
-
-                    // Position fully closed: seal this lot and start a fresh cost basis for any later re-buy.
-                    if (merged.getQuantity() == 0) {
-                        lotIndexByKey.put(baseKey, lotIndex + 1);
-                    }
-                });
-        return investmentMap;
+        return Lots.aggregate(investments, i -> Ticker.symbol(i.getShortName(), i.getExchange()) + "_" + i.getAccountId());
     }
 
     private InvestmentDTO convertToInvestmentDTO(Investment investment) {

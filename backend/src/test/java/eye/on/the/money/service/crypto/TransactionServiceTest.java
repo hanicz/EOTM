@@ -26,6 +26,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.StringWriter;
@@ -109,6 +110,27 @@ class TransactionServiceTest {
                 () -> assertEquals("B", testObject.getBuySell()),
                 () -> assertEquals(0.0, testObject.getQuantity()),
                 () -> assertEquals(-1031.24, testObject.getAmount(), this.epsilon));
+    }
+
+    @Test
+    @Transactional
+    public void getAllPositionsReopenedLotIsNotMergedWithClosedLot() {
+        this.transactionService.createTransaction(TransactionDTO.builder()
+                .buySell("B").quantity(20.0).amount(300.0).currencyId("EUR").fee(0.0)
+                .symbol("ADA").transactionString("ttt")
+                .transactionDate(LocalDate.of(2021, 6, 1)).build(), this.user.getId());
+
+        List<TransactionDTO> ada = this.transactionService.getAllPositions(this.user.getId()).stream()
+                .filter(tDTO -> "ADA".equals(tDTO.getSymbol())).toList();
+
+        TransactionDTO closedLot = ada.stream().filter(t -> t.getQuantity() == 0).findFirst().orElseThrow();
+        TransactionDTO openLot = ada.stream().filter(t -> t.getQuantity() > 0).findFirst().orElseThrow();
+
+        Assertions.assertAll("The realised gain stays on the closed lot",
+                () -> assertEquals(2, ada.size()),
+                () -> assertEquals(-1031.24, closedLot.getAmount(), this.epsilon),
+                () -> assertEquals(20.0, openLot.getQuantity(), this.epsilon),
+                () -> assertEquals(300.0, openLot.getAmount(), this.epsilon));
     }
 
     @Test

@@ -2,6 +2,7 @@ package eye.on.the.money.exception;
 
 import eye.on.the.money.exception.dto.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -76,6 +77,14 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
     public ResponseEntity<ErrorResponse> handlePasswordException(PasswordException e) {
         log.warn("Password error: {}", e.getMessage());
         return ResponseEntity.status(FORBIDDEN).body(new ErrorResponse(FORBIDDEN.value(), e.getMessage()));
+    }
+
+    @ExceptionHandler(CooldownException.class)
+    public ResponseEntity<ErrorResponse> handleCooldownException(CooldownException e) {
+        log.warn("Cooldown active: {}", e.getMessage());
+        return ResponseEntity.status(TOO_MANY_REQUESTS)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(e.getRetryAfter().toSeconds()))
+                .body(new ErrorResponse(TOO_MANY_REQUESTS.value(), e.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)

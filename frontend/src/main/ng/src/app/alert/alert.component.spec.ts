@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+﻿import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { MessageService } from 'primeng/api';
@@ -37,9 +37,9 @@ describe('AlertComponent', () => {
     const request = http.expectOne(`${environment.API_URL}/api/v1/report/monthly/subscription`);
     request.flush({ enabled: true, currency: 'EUR', recipients: ['partner@test.test'] });
 
-    expect(component.report.enabled).toBeTrue();
+    expect(component.report.enabled).toBe(true);
     expect(component.report.recipients).toEqual(['partner@test.test']);
-    expect(component.reportLoading).toBeFalse();
+    expect(component.reportLoading).toBe(false);
   });
 
   it('does not reload the subscription on a second visit to the report tab', () => {
@@ -56,20 +56,20 @@ describe('AlertComponent', () => {
     component.report = { enabled: true, currency: 'EUR', recipients: [] };
 
     component.newRecipient = 'not-an-email';
-    expect(component.canAddRecipient).toBeFalse();
+    expect(component.canAddRecipient).toBe(false);
 
     component.newRecipient = ' Partner@Test.test ';
-    expect(component.canAddRecipient).toBeTrue();
+    expect(component.canAddRecipient).toBe(true);
     component.addRecipient();
     expect(component.report.recipients).toEqual(['partner@test.test']);
     expect(component.newRecipient).toBe('');
 
     component.newRecipient = 'partner@test.test';
-    expect(component.canAddRecipient).toBeFalse();
+    expect(component.canAddRecipient).toBe(false);
 
     component.report.recipients = ['a@t.test', 'b@t.test', 'c@t.test', 'd@t.test', 'e@t.test'];
     component.newRecipient = 'f@t.test';
-    expect(component.canAddRecipient).toBeFalse();
+    expect(component.canAddRecipient).toBe(false);
   });
 
   it('removes a recipient', () => {
@@ -90,7 +90,7 @@ describe('AlertComponent', () => {
     expect(request.request.body).toEqual(component.report);
     request.flush({ enabled: true, currency: 'HUF', recipients: ['partner@test.test'] });
 
-    expect(component.reportSaving).toBeFalse();
+    expect(component.reportSaving).toBe(false);
   });
 
   it('triggers a manual send', () => {
@@ -100,6 +100,24 @@ describe('AlertComponent', () => {
     expect(request.request.method).toBe('POST');
     request.flush({});
 
-    expect(component.reportSending).toBeFalse();
+    expect(component.reportSending).toBe(false);
+  });
+
+  it('surfaces the cooldown message when a manual send is rate limited', () => {
+    const messageService = TestBed.inject(MessageService);
+    vi.spyOn(messageService, 'add');
+
+    component.sendReportNow();
+
+    http.expectOne(`${environment.API_URL}/api/v1/report/monthly/send`).flush(
+      { code: 429, error: 'You have already sent this report. You can send it again in 21 hours 4 minutes.' },
+      { status: 429, statusText: 'Too Many Requests' }
+    );
+
+    expect(component.reportSending).toBe(false);
+    expect(messageService.add).toHaveBeenCalledWith({
+      severity: 'error',
+      detail: 'You have already sent this report. You can send it again in 21 hours 4 minutes.'
+    });
   });
 });

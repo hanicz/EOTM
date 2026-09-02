@@ -131,6 +131,28 @@ class ETFInvestmentServiceTest {
 
     @Test
     @Transactional
+    public void getPositionsByAccountId_reopenedLotIsNotMergedWithClosedLot() {
+        this.etfInvestmentService.createInvestment(ETFInvestmentDTO.builder()
+                .buySell("B").quantity(3).amount(330.0).currencyId("EUR").fee(1.5)
+                .shortName("VWCE").exchange("MI").accountId(1L)
+                .transactionDate(LocalDate.of(2023, 9, 5)).build(), this.user.getId());
+
+        List<ETFInvestmentDTO> vwce = this.etfInvestmentService
+                .getPositionsByAccountId(this.user.getId(), 1L).stream()
+                .filter(i -> "VWCE".equals(i.getShortName())).toList();
+
+        ETFInvestmentDTO closedLot = vwce.stream().filter(i -> i.getQuantity() == 0).findFirst().orElseThrow();
+        ETFInvestmentDTO openLot = vwce.stream().filter(i -> i.getQuantity() > 0).findFirst().orElseThrow();
+
+        Assertions.assertAll("The realised gain stays on the closed lot",
+                () -> assertEquals(2, vwce.size()),
+                () -> assertEquals(-40.0, closedLot.getAmount()),
+                () -> assertEquals(3, openLot.getQuantity()),
+                () -> assertEquals(330.0, openLot.getAmount()));
+    }
+
+    @Test
+    @Transactional
     public void getPositionsByAccountId_keepsTheSameTickerOnDifferentExchangesApart() {
         this.etfInvestmentService.createInvestment(ETFInvestmentDTO.builder()
                 .buySell("B").quantity(10).amount(1000.0).currencyId("EUR").fee(0.0)

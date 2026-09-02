@@ -5,6 +5,8 @@ import eye.on.the.money.repository.UserRepository;
 import eye.on.the.money.dto.in.ReportSubscriptionUpdateDTO;
 import eye.on.the.money.dto.out.ReportSubscriptionDTO;
 import eye.on.the.money.exception.APIException;
+import eye.on.the.money.exception.CooldownException;
+import eye.on.the.money.model.report.ReportSubscription;
 import eye.on.the.money.repository.report.ReportSubscriptionRepository;
 import eye.on.the.money.service.report.ReportSubscriptionService;
 import org.junit.jupiter.api.AfterEach;
@@ -20,6 +22,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -100,6 +103,53 @@ class ReportSubscriptionServiceTest {
                 this.reportSubscriptionRepository.findByUserId(this.user).orElseThrow());
 
         assertEquals(List.of(USER_EMAIL, "partner@test.test"), recipients);
+    }
+
+    @Test
+    public void claimManualSendStampsTheTimeOnTheFirstSend() {
+        ReportSubscription claimed = this.reportSubscriptionService.claimManualSend(this.user);
+
+        Assertions.assertAll("First claim",
+                () -> assertEquals(this.user, claimed.getUser().getId()),
+                () -> assertNotNull(this.reportSubscriptionRepository.findByUserId(this.user)
+                        .orElseThrow().getLastManualSendAt()));
+    }
+
+    @Test
+    public void claimManualSendCreatesTheRowForAUserWithoutASubscription() {
+        this.reportSubscriptionRepository.deleteAll();
+
+        ReportSubscription claimed = this.reportSubscriptionService.claimManualSend(this.user);
+
+        Assertions.assertAll("Created on claim",
+                () -> assertEquals(List.of(USER_EMAIL), this.reportSubscriptionService.recipientsOf(claimed)),
+                () -> assertEquals("HUF", claimed.getCurrency()),
+                () -> Assertions.assertFalse(claimed.isEnabled()));
+    }
+
+    @Test
+    public void claimManualSendRejectsASecondSendWithinTheCooldown() {
+        this.reportSubscriptionService.claimManualSend(this.user);
+
+        CooldownException thrown = assertThrows(CooldownException.class,
+                () -> this.reportSubscriptionService.claimManualSend(this.user));
+
+        Assertions.assertAll("Second claim",
+                () -> assertTrue(thrown.getRetryAfter().toHours() >= 23),
+                () -> assertTrue(thrown.getMessage().contains("send it again in")));
+    }
+
+    @Test
+    public void claimManualSendAllowsAnotherSendAfterTheCooldown() {
+        this.reportSubscriptionService.claimManualSend(this.user);
+        ReportSubscription subscription = this.reportSubscriptionRepository.findByUserId(this.user).orElseThrow();
+        subscription.setLastManualSendAt(subscription.getLastManualSendAt().minusHours(25));
+        this.reportSubscriptionRepository.save(subscription);
+
+        this.reportSubscriptionService.claimManualSend(this.user);
+
+        assertTrue(this.reportSubscriptionRepository.findByUserId(this.user).orElseThrow()
+                .getLastManualSendAt().isAfter(subscription.getLastManualSendAt()));
     }
 
     @Test

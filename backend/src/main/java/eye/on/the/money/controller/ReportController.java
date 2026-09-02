@@ -5,8 +5,6 @@ import eye.on.the.money.dto.out.ReportSubscriptionDTO;
 import eye.on.the.money.exception.dto.ErrorResponse;
 import eye.on.the.money.model.report.ReportSubscription;
 import eye.on.the.money.report.MonthlyReportScheduler;
-import eye.on.the.money.repository.report.ReportSubscriptionRepository;
-import eye.on.the.money.security.CurrentUserEmail;
 import eye.on.the.money.security.CurrentUserId;
 import eye.on.the.money.service.mail.EmailService;
 import eye.on.the.money.service.report.MonthlyReportService;
@@ -25,8 +23,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.YearMonth;
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("api/v1/report")
@@ -35,7 +31,6 @@ import java.util.Optional;
 public class ReportController {
 
     private final ReportSubscriptionService reportSubscriptionService;
-    private final ReportSubscriptionRepository reportSubscriptionRepository;
     private final MonthlyReportService monthlyReportService;
     private final EmailService emailService;
 
@@ -54,7 +49,6 @@ public class ReportController {
 
     @PostMapping("monthly/send")
     public ResponseEntity<Object> sendNow(@CurrentUserId Long userId,
-                                          @CurrentUserEmail String userEmail,
                                           @RequestParam(required = false) Integer year,
                                           @RequestParam(required = false) Integer month) {
         log.trace("Enter");
@@ -67,14 +61,10 @@ public class ReportController {
                 ? YearMonth.of(year, month)
                 : YearMonth.now(MonthlyReportScheduler.ZONE).minusMonths(1);
 
-        Optional<ReportSubscription> subscription = this.reportSubscriptionRepository.findByUserId(userId);
-        String currency = subscription.map(ReportSubscription::getCurrency)
-                .orElse(ReportSubscription.DEFAULT_CURRENCY);
-        List<String> recipients = subscription.map(this.reportSubscriptionService::recipientsOf)
-                .orElse(List.of(userEmail));
+        ReportSubscription subscription = this.reportSubscriptionService.claimManualSend(userId);
 
-        this.emailService.sendMonthlyReportMail(recipients,
-                this.monthlyReportService.build(userId, period, currency));
+        this.emailService.sendMonthlyReportMail(this.reportSubscriptionService.recipientsOf(subscription),
+                this.monthlyReportService.build(userId, period, subscription.getCurrency()));
         return ResponseEntity.ok().build();
     }
 }

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import eye.on.the.money.dto.CSVHelper;
+import eye.on.the.money.dto.Lot;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVRecord;
@@ -21,7 +22,7 @@ import java.time.format.DateTimeFormatter;
 @AllArgsConstructor
 @EqualsAndHashCode
 @NoArgsConstructor
-public class SecurityTransactionDTO implements CSVHelper {
+public class SecurityTransactionDTO implements CSVHelper, Lot<SecurityTransactionDTO> {
     private Long transactionId;
     private Integer quantity;
     private String buySell;
@@ -39,7 +40,8 @@ public class SecurityTransactionDTO implements CSVHelper {
     private Double nextPaymentAmount;
     private Boolean zeroCoupon;
 
-    public SecurityTransactionDTO mergeInvestments(SecurityTransactionDTO other) {
+    @Override
+    public SecurityTransactionDTO merge(SecurityTransactionDTO other) {
         if (!this.getSecurityId().equals(other.getSecurityId()))
             return this;
 
@@ -52,9 +54,16 @@ public class SecurityTransactionDTO implements CSVHelper {
         return this;
     }
 
+    @Override
     public void negateAmountAndQuantity() {
         this.amount = -this.amount;
         this.quantity = -this.quantity;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isClosed() {
+        return this.quantity != null && this.quantity == 0;
     }
 
     @Override

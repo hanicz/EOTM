@@ -16,6 +16,7 @@ import eye.on.the.money.service.stock.AccountService;
 import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
 import eye.on.the.money.util.LiveQuote;
+import eye.on.the.money.util.Lots;
 import eye.on.the.money.util.Ticker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -135,15 +136,7 @@ public class ETFInvestmentService implements ICSVService {
     }
 
     private Map<String, ETFInvestmentDTO> getCalculated(List<ETFInvestmentDTO> investments) {
-        Map<String, ETFInvestmentDTO> investmentMap = new HashMap<>();
-        for (ETFInvestmentDTO i : investments) {
-            if (i.getBuySell().equals("S")) {
-                i.negateAmountAndQuantity();
-            }
-            investmentMap.compute(Ticker.symbol(i.getShortName(), i.getExchange()) + "_" + i.getAccountId(),
-                    (key, value) -> (value == null) ? i : value.mergeInvestments(i));
-        }
-        return investmentMap;
+        return Lots.aggregate(investments, i -> Ticker.symbol(i.getShortName(), i.getExchange()) + "_" + i.getAccountId());
     }
 
 

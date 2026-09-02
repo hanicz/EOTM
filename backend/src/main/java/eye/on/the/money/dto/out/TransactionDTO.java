@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import eye.on.the.money.dto.CSVHelper;
+import eye.on.the.money.dto.Lot;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVRecord;
@@ -22,7 +23,10 @@ import java.time.format.DateTimeFormatter;
 @AllArgsConstructor
 @EqualsAndHashCode
 @NoArgsConstructor
-public class TransactionDTO implements CSVHelper, Serializable {
+public class TransactionDTO implements CSVHelper, Serializable, Lot<TransactionDTO> {
+
+    private static final double CLOSED_TOLERANCE = 1e-9;
+
     private Long id;
     private Double quantity;
     private String buySell;
@@ -39,12 +43,18 @@ public class TransactionDTO implements CSVHelper, Serializable {
     private Double fee;
     private String url;
 
-    public TransactionDTO mergeTransactions(TransactionDTO other) {
+    @Override
+    public TransactionDTO merge(TransactionDTO other) {
         if (!this.getSymbol().equals(other.getSymbol()))
             return this;
 
         this.setAmount(this.getAmount() + other.getAmount());
         this.setQuantity(this.getQuantity() + other.getQuantity());
+
+        // Coin quantities are fractional, so a fully sold position rarely lands on an exact zero.
+        if (Math.abs(this.quantity) < TransactionDTO.CLOSED_TOLERANCE) {
+            this.quantity = 0.0;
+        }
 
         if (this.getQuantity() > 0 && "S".equals(this.buySell)) {
             this.buySell = "B";
@@ -52,9 +62,16 @@ public class TransactionDTO implements CSVHelper, Serializable {
         return this;
     }
 
+    @Override
     public void negateAmountAndQuantity() {
         this.amount = -this.amount;
         this.quantity = -this.quantity;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isClosed() {
+        return this.quantity != null && this.quantity == 0.0;
     }
 
     @Override

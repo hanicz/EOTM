@@ -14,6 +14,7 @@ import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
+import eye.on.the.money.util.Lots;
 import eye.on.the.money.service.api.CryptoAPIService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -151,14 +152,7 @@ public class TransactionService implements ICSVService {
     private Map<String, TransactionDTO> getCalculated(Long userId) {
         List<TransactionDTO> transactions = this.transactionRepository.findByUserIdOrderByTransactionDate(userId).stream()
                 .map(this::convertToTransactionDTO).toList();
-        Map<String, TransactionDTO> transactionMap = new HashMap<>();
-        for (TransactionDTO t : transactions) {
-            if (t.getBuySell().equals("S")) {
-                t.negateAmountAndQuantity();
-            }
-            transactionMap.compute(t.getSymbol(), (key, value) -> (value == null) ? t : value.mergeTransactions(t));
-        }
-        return transactionMap;
+        return Lots.aggregate(transactions, TransactionDTO::getSymbol);
     }
 
     public void getCSV(Long userId, Writer writer) {

@@ -34,7 +34,7 @@ class InvestmentDTOTest {
                 .build();
         InvestmentDTO baseDTO = this.getBaseDTO();
 
-        iDTO1.mergeInvestments(iDTO2);
+        iDTO1.merge(iDTO2);
 
         Assertions.assertAll("Assert all changing values",
                 () -> assertEquals(iDTO2.getAmount() + baseDTO.getAmount(), iDTO1.getAmount()),
@@ -56,7 +56,7 @@ class InvestmentDTOTest {
                 .build();
         InvestmentDTO baseDTO = this.getBaseDTO();
 
-        iDTO1.mergeInvestments(iDTO2);
+        iDTO1.merge(iDTO2);
 
         Assertions.assertAll("Assert all changing values",
                 () -> assertEquals(iDTO2.getAmount() + baseDTO.getAmount(), iDTO1.getAmount()),
@@ -76,7 +76,7 @@ class InvestmentDTOTest {
                 .exchange("XETRA")
                 .build();
 
-        iDTO1.mergeInvestments(iDTO2);
+        iDTO1.merge(iDTO2);
 
         Assertions.assertAll("Assert nothing merged",
                 () -> assertEquals(15.0, iDTO1.getAmount()),
@@ -94,7 +94,7 @@ class InvestmentDTOTest {
                 .shortName("CRSR")
                 .build();
 
-        iDTO1.mergeInvestments(iDTO2);
+        iDTO1.merge(iDTO2);
 
         Assertions.assertAll("Assert all changing values",
                 () -> assertEquals(15.0, iDTO1.getAmount()),

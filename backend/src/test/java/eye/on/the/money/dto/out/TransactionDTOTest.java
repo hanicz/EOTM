@@ -32,7 +32,7 @@ class TransactionDTOTest {
                 .build();
         TransactionDTO baseDTO = this.getBaseDTO();
 
-        tDTO1.mergeTransactions(tDTO2);
+        tDTO1.merge(tDTO2);
 
         Assertions.assertAll("Assert all changing values",
                 () -> assertEquals(tDTO2.getAmount() + baseDTO.getAmount(), tDTO1.getAmount()),
@@ -52,12 +52,29 @@ class TransactionDTOTest {
                 .build();
         TransactionDTO baseDTO = this.getBaseDTO();
 
-        tDTO1.mergeTransactions(tDTO2);
+        tDTO1.merge(tDTO2);
 
         Assertions.assertAll("Assert all changing values",
                 () -> assertEquals(tDTO2.getAmount() + baseDTO.getAmount(), tDTO1.getAmount()),
                 () -> assertEquals(tDTO2.getQuantity() + baseDTO.getQuantity(), tDTO1.getQuantity()),
                 () -> assertEquals("B", tDTO1.getBuySell()));
+    }
+
+    @Test
+    public void mergeSnapsAFloatingPointResidueToAClosedPosition() {
+        TransactionDTO tDTO1 = TransactionDTO.builder()
+                .amount(300.0).quantity(0.3).buySell("B").symbol("BTC").build();
+        TransactionDTO tDTO2 = TransactionDTO.builder()
+                .amount(-350.0).quantity(-0.1).buySell("B").symbol("BTC").build();
+        TransactionDTO tDTO3 = TransactionDTO.builder()
+                .amount(-100.0).quantity(-0.2).buySell("B").symbol("BTC").build();
+
+        tDTO1.merge(tDTO2).merge(tDTO3);
+
+        Assertions.assertAll("0.3 - 0.1 - 0.2 leaves a residue that must still count as closed",
+                () -> assertEquals(0.0, tDTO1.getQuantity()),
+                () -> Assertions.assertTrue(tDTO1.isClosed()),
+                () -> assertEquals(-150.0, tDTO1.getAmount()));
     }
 
     @Test
@@ -70,7 +87,7 @@ class TransactionDTOTest {
                 .symbol("ETH")
                 .build();
 
-        tDTO1.mergeTransactions(tDTO2);
+        tDTO1.merge(tDTO2);
 
         Assertions.assertAll("Assert all changing values",
                 () -> assertEquals(15.0, tDTO1.getAmount()),

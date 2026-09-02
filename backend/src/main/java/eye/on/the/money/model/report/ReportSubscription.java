@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +45,9 @@ public class ReportSubscription {
 
     @Column(name = "last_sent_period", length = 7)
     private String lastSentPeriod;
+
+    @Column(name = "last_manual_send_at")
+    private LocalDateTime lastManualSendAt;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "EOTM_REPORT_RECIPIENT", joinColumns = @JoinColumn(name = "subscription_id"))

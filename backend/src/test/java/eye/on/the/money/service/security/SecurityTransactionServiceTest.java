@@ -125,6 +125,31 @@ class SecurityTransactionServiceTest {
     }
 
     @Test
+    void getCurrentHoldings_reopenedPositionStartsAFreshCostBasis() {
+        SecurityTransaction buy = this.buildTransaction(1L, "B", 10, 500.0);
+        SecurityTransaction sell = this.buildTransaction(2L, "S", 10, 650.0);
+        SecurityTransaction rebuy = this.buildTransaction(3L, "B", 5, 250.0);
+
+        SecurityTransactionDTO buyDTO = this.buildDTO(1L, "B", 10, 500.0);
+        SecurityTransactionDTO sellDTO = this.buildDTO(2L, "S", 10, 650.0);
+        sellDTO.setTransactionDate(LocalDate.of(2025, 7, 1));
+        SecurityTransactionDTO rebuyDTO = this.buildDTO(3L, "B", 5, 250.0);
+        rebuyDTO.setTransactionDate(LocalDate.of(2025, 8, 1));
+
+        when(this.securityTransactionRepository.findByUserIdOrderByTransactionDate(1L))
+                .thenReturn(List.of(buy, sell, rebuy));
+        when(this.modelMapper.map(buy, SecurityTransactionDTO.class)).thenReturn(buyDTO);
+        when(this.modelMapper.map(sell, SecurityTransactionDTO.class)).thenReturn(sellDTO);
+        when(this.modelMapper.map(rebuy, SecurityTransactionDTO.class)).thenReturn(rebuyDTO);
+
+        List<SecurityTransactionDTO> result = this.securityTransactionService.getCurrentHoldings(1L);
+
+        assertEquals(1, result.size());
+        assertEquals(5, result.get(0).getQuantity());
+        assertEquals(250.0, result.get(0).getAmount());
+    }
+
+    @Test
     void getCurrentHoldings_sortsByAmountDescending() {
         Security sec2 = Security.builder().id("SEC2").name("Security Two").build();
         SecurityTransaction tx1 = this.buildTransaction(1L, "B", 10, 200.0);

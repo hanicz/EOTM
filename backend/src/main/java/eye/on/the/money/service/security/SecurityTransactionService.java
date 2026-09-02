@@ -11,6 +11,7 @@ import eye.on.the.money.repository.security.SecurityTransactionRepository;
 import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
+import eye.on.the.money.util.Lots;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVParser;
@@ -26,7 +27,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -91,14 +91,7 @@ public class SecurityTransactionService implements ICSVService {
     }
 
     private Map<String, SecurityTransactionDTO> getCalculated(List<SecurityTransactionDTO> transactions) {
-        Map<String, SecurityTransactionDTO> transactionMap = new HashMap<>();
-        transactions.forEach(t -> {
-            if (t.getBuySell().equals("S")) {
-                t.negateAmountAndQuantity();
-            }
-            transactionMap.compute(t.getSecurityId(), (k, value) -> (value == null) ? t : value.mergeInvestments(t));
-        });
-        return transactionMap;
+        return Lots.aggregate(transactions, SecurityTransactionDTO::getSecurityId);
     }
 
     private SecurityTransactionDTO convertToDTO(SecurityTransaction transaction) {

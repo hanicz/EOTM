@@ -13,6 +13,7 @@ import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
 import eye.on.the.money.util.LiveQuote;
+import eye.on.the.money.util.Lots;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVParser;
@@ -113,7 +114,8 @@ public class ForexTransactionService implements ICSVService {
 
     private List<ForexTransactionDTO> allForexHoldings(Long userId) {
         Map<String, ForexTransactionDTO> forexTransactionMap = this.getCalculated(userId);
-        List<ForexTransactionDTO> forexTransactions = new ArrayList<>(forexTransactionMap.values());
+        List<ForexTransactionDTO> forexTransactions = (new ArrayList<>(forexTransactionMap.values()))
+                .stream().filter(f -> (f.getToAmount() > 0)).collect(Collectors.toList());
         if (forexTransactions.isEmpty()) return forexTransactions;
 
         String joinedList = forexTransactions.stream().map(f -> (f.getToCurrencyId() + f.getFromCurrencyId() + ".FOREX")).collect(Collectors.joining(","));
@@ -143,13 +145,9 @@ public class ForexTransactionService implements ICSVService {
     }
 
     private Map<String, ForexTransactionDTO> getCalculated(Long userId) {
-        List<ForexTransactionDTO> forexTransactions = this.forexTransactionRepository.findByUserIdOrderByTransactionDate(userId).stream().map(this::convertToForexTransactionDTO).collect(Collectors.toList());
-        Map<String, ForexTransactionDTO> forexTransactionMap = new HashMap<>();
-        for (ForexTransactionDTO ft : forexTransactions) {
-            String symbol = ft.getFromCurrencyId() + ft.getToCurrencyId();
-            forexTransactionMap.compute(symbol, (key, value) -> (value == null) ? ft : value.mergeTransactions(ft));
-        }
-        return forexTransactionMap;
+        List<ForexTransactionDTO> forexTransactions = this.forexTransactionRepository.findByUserIdOrderByTransactionDate(userId).stream()
+                .map(this::convertToForexTransactionDTO).toList();
+        return Lots.aggregate(forexTransactions, ft -> ft.getFromCurrencyId() + ft.getToCurrencyId());
     }
 
     public void getCSV(Long userId, Writer writer) {

@@ -1,11 +1,11 @@
-.fire-hint-tight {
-    margin: 0.9rem 0 0 0;
-}
-
 .fire-hint {
     margin: 0 0 1.25rem 0;
     font-size: 0.85rem;
     color: #5f5e5a;
+}
+
+.fire-hint-tight {
+    margin: 0.85rem 0 0 0;
 }
 
 .fire-sections {

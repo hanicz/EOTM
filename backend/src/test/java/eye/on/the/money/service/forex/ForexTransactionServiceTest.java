@@ -1,5 +1,6 @@
 package eye.on.the.money.service.forex;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eye.on.the.money.EotmApplication;
 import eye.on.the.money.dto.out.ForexTransactionDTO;
 import eye.on.the.money.model.User;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -72,6 +74,31 @@ class ForexTransactionServiceTest {
         List<ForexTransactionDTO> refreshed = this.forexTransactionService.refreshAllForexHoldings(-1L);
 
         Assertions.assertIterableEquals(cached, refreshed);
+    }
+
+    @Test
+    public void getAllForexHoldingsDropsAFullyUnwoundPair() throws Exception {
+        when(this.eodapiService.getLiveForexValue(anyString()))
+                .thenReturn(new ObjectMapper().readTree("[{\"code\":\"USDHUF.FOREX\",\"close\":360.0}]"));
+
+        ForexTransactionDTO unwind = ForexTransactionDTO.builder()
+                .buySell("S")
+                .fromAmount(2400.0)
+                .toAmount(1000000.0)
+                .fromCurrencyId("EUR")
+                .toCurrencyId("HUF")
+                .transactionDate(LocalDate.parse("2023-01-01"))
+                .build();
+        this.forexTransactionService.createForexTransaction(unwind, this.user.getId());
+
+        List<ForexTransactionDTO> result = this.forexTransactionService.refreshAllForexHoldings(this.user.getId());
+
+        Assertions.assertAll("The closed HUF/EUR pair must not survive, HUF/USD must",
+                () -> Assertions.assertTrue(result.stream().noneMatch(
+                        f -> "HUF".equals(f.getFromCurrencyId()) && "EUR".equals(f.getToCurrencyId()))),
+                () -> Assertions.assertTrue(result.stream().anyMatch(
+                        f -> "HUF".equals(f.getFromCurrencyId()) && "USD".equals(f.getToCurrencyId()))),
+                () -> Assertions.assertTrue(result.stream().allMatch(f -> f.getToAmount() > 0)));
     }
 
     @Test

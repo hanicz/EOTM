@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import eye.on.the.money.dto.CSVHelper;
+import eye.on.the.money.dto.Lot;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVRecord;
@@ -13,6 +14,7 @@ import org.apache.commons.csv.CSVRecord;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -22,7 +24,9 @@ import java.time.format.DateTimeFormatter;
 @AllArgsConstructor
 @EqualsAndHashCode
 @NoArgsConstructor
-public class ForexTransactionDTO implements CSVHelper, Serializable {
+public class ForexTransactionDTO implements CSVHelper, Serializable, Lot<ForexTransactionDTO> {
+
+    private static final double CLOSED_TOLERANCE = 1e-6;
 
     private Long forexTransactionId;
     private Double fromAmount;
@@ -39,12 +43,44 @@ public class ForexTransactionDTO implements CSVHelper, Serializable {
     private String fromCurrencyId;
     private String toCurrencyId;
 
-    public ForexTransactionDTO mergeTransactions(ForexTransactionDTO other) {
+    @Override
+    public void negateAmountAndQuantity() {
+        Double heldAmount = this.fromAmount;
+        String heldCurrencyId = this.fromCurrencyId;
+
+        this.fromAmount = -this.toAmount;
+        this.fromCurrencyId = this.toCurrencyId;
+        this.toAmount = -heldAmount;
+        this.toCurrencyId = heldCurrencyId;
+    }
+
+    @Override
+    public ForexTransactionDTO merge(ForexTransactionDTO other) {
+        if (!Objects.equals(this.getFromCurrencyId(), other.getFromCurrencyId())
+                || !Objects.equals(this.getToCurrencyId(), other.getToCurrencyId()))
+            return this;
+
         this.setFromAmount(this.getFromAmount() + other.getFromAmount());
         this.setToAmount(this.getToAmount() + other.getToAmount());
-        this.setChangeRate(this.getFromAmount() / this.getToAmount());
 
+        if (Math.abs(this.toAmount) < ForexTransactionDTO.CLOSED_TOLERANCE) {
+            this.toAmount = 0.0;
+        }
+
+        if (this.getToAmount() != 0.0) {
+            this.setChangeRate(this.getFromAmount() / this.getToAmount());
+        }
+
+        if (this.getToAmount() > 0 && "S".equals(this.buySell)) {
+            this.buySell = "B";
+        }
         return this;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isClosed() {
+        return this.toAmount != null && this.toAmount == 0.0;
     }
 
     @Override

@@ -22,3 +22,16 @@ export interface Salary {
   raiseAmount?: number | null;
   raisePercent?: number | null;
 }
+
+export interface SalaryRaiseScenario {
+  percent: number;
+  grossMonthly: number;
+  grossAnnual: number;
+  netMonthly: number;
+  netAnnual: number;
+}
+
+export interface SalaryRaise {
+  current: Salary;
+  scenarios: SalaryRaiseScenario[];
+}

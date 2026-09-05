@@ -63,7 +63,7 @@ public class SalaryTaxCalculator {
         return THREE_OR_MORE_DEPENDENTS_BASE;
     }
 
-    private BigDecimal round(BigDecimal amount, String currencyId) {
+    public BigDecimal round(BigDecimal amount, String currencyId) {
         return HUF.equals(currencyId)
                 ? amount.setScale(0, RoundingMode.HALF_UP)
                 : amount.setScale(2, RoundingMode.HALF_UP);

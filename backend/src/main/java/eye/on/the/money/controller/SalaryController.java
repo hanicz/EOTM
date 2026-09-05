@@ -2,6 +2,7 @@ package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.in.SalaryEditDTO;
 import eye.on.the.money.dto.out.SalaryDTO;
+import eye.on.the.money.dto.out.SalaryRaiseDTO;
 import eye.on.the.money.security.CurrentUserId;
 import eye.on.the.money.service.salary.SalaryService;
 import jakarta.validation.Valid;
@@ -26,6 +27,14 @@ public class SalaryController {
     public ResponseEntity<List<SalaryDTO>> getAllSalaries(@CurrentUserId Long userId) {
         log.trace("Enter");
         return ResponseEntity.ok(this.salaryService.getSalaries(userId));
+    }
+
+    @GetMapping("/raise")
+    public ResponseEntity<SalaryRaiseDTO> getRaiseScenarios(@CurrentUserId Long userId) {
+        log.trace("Enter");
+        return this.salaryService.getRaiseScenarios(userId)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @PostMapping()

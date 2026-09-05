@@ -5,11 +5,13 @@ import eye.on.the.money.repository.watchlist.CryptoWatchRepository;
 import eye.on.the.money.repository.watchlist.ForexWatchRepository;
 import eye.on.the.money.repository.watchlist.StockWatchRepository;
 import eye.on.the.money.dto.out.CashDTO;
+import eye.on.the.money.dto.out.NoteDTO;
 import eye.on.the.money.service.cash.CashService;
 import eye.on.the.money.service.crypto.TransactionService;
 import eye.on.the.money.service.etf.ETFDividendService;
 import eye.on.the.money.service.etf.ETFInvestmentService;
 import eye.on.the.money.service.forex.ForexTransactionService;
+import eye.on.the.money.service.note.NoteService;
 import eye.on.the.money.service.reddit.RedditService;
 import eye.on.the.money.service.security.InterestService;
 import eye.on.the.money.service.security.SecurityTransactionService;
@@ -37,7 +39,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ExportService {
 
-    private static final int SCHEMA_VERSION = 3;
+    private static final int SCHEMA_VERSION = 4;
 
     private final UserService userService;
     private final AccountService accountService;
@@ -50,6 +52,7 @@ public class ExportService {
     private final SecurityTransactionService securityTransactionService;
     private final InterestService interestService;
     private final CashService cashService;
+    private final NoteService noteService;
     private final StockWatchRepository stockWatchRepository;
     private final CryptoWatchRepository cryptoWatchRepository;
     private final ForexWatchRepository forexWatchRepository;
@@ -79,6 +82,7 @@ public class ExportService {
                         this.securityTransactionService.getTransactions(userId),
                         this.interestService.getInterest(userId)))
                 .cash(this.cash(userId))
+                .note(this.note(userId))
                 .watchlists(this.watchlists(userId))
                 .alerts(new ExportDTO.AlertSection(
                         this.alertService.getAllStockAlerts(userId),
@@ -97,6 +101,11 @@ public class ExportService {
     private ExportDTO.CashSection cash(Long userId) {
         CashDTO cash = this.cashService.getCash(userId);
         return new ExportDTO.CashSection(cash.getAmount(), cash.getCurrency());
+    }
+
+    private ExportDTO.NoteSection note(Long userId) {
+        NoteDTO note = this.noteService.getNote(userId);
+        return new ExportDTO.NoteSection(note.getContent(), note.getUpdatedAt());
     }
 
     private ExportDTO.WatchlistSection watchlists(Long userId) {

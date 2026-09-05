@@ -1,0 +1,140 @@
+<p-toast position="bottom-center"></p-toast>
+<p class="mt-0 mb-3 text-color-secondary text-sm">
+  What you earn right now, and what a raise on top of it would be worth. Each percentage is a raise on the
+  gross &mdash; the net is worked out again from it with the same Hungarian deductions, so where a family
+  allowance is in play the money you keep grows by a little less than the headline figure.
+</p>
+
+@if (loaded && !raise) {
+  <p class="raise-empty">No salary recorded yet. Add one on the History tab and it will show up here.</p>
+}
+
+@if (raise) {
+  <div class="raise-card">
+    <div class="raise-period">
+      <span class="raise-period-dates">
+        {{raise.current.validFrom | date:'mediumDate'}} &ndash;
+        @if (raise.current.validTo) {
+          {{raise.current.validTo | date:'mediumDate'}}
+        }
+      </span>
+      @if (raise.current.validTo) {
+        <span class="state-chip state-neutral">Last recorded</span>
+      } @else {
+        <span class="state-chip state-buy">Current</span>
+      }
+      <span class="state-chip state-info">{{raise.current.basis === 'ANNUAL' ? 'Annual' : 'Monthly'}}</span>
+      @if (raise.current.dependents) {
+        <span class="state-chip state-neutral">{{raise.current.dependents}} dependants</span>
+      }
+    </div>
+    @if (raise.current.note) {
+      <div class="raise-note">{{raise.current.note}}</div>
+    }
+
+    <div class="raise-tiles">
+      <div class="raise-tile">
+        <div class="raise-tile-label">Gross monthly</div>
+        <div class="raise-tile-value">
+          {{raise.current.grossMonthly | currency : raise.current.currencyId : 'symbol' : '1.0-0'}}
+        </div>
+      </div>
+      <div class="raise-tile">
+        <div class="raise-tile-label">Gross annual</div>
+        <div class="raise-tile-value">
+          {{raise.current.grossAnnual | currency : raise.current.currencyId : 'symbol' : '1.0-0'}}
+        </div>
+      </div>
+      <div class="raise-tile">
+        <div class="raise-tile-label">Net monthly</div>
+        <div class="raise-tile-value">
+          {{raise.current.netMonthly | currency : raise.current.currencyId : 'symbol' : '1.0-0'}}
+        </div>
+      </div>
+      <div class="raise-tile">
+        <div class="raise-tile-label">Net annual</div>
+        <div class="raise-tile-value">
+          {{raise.current.netAnnual | currency : raise.current.currencyId : 'symbol' : '1.0-0'}}
+        </div>
+      </div>
+      <div class="raise-tile">
+        <div class="raise-tile-label">Gross annual in USD</div>
+        @if (grossAnnualUsd == null) {
+          <div class="raise-tile-value cell-none">&mdash;</div>
+          <div class="raise-tile-note">No rate available.</div>
+        } @else {
+          <div class="raise-tile-value">{{grossAnnualUsd | currency : 'USD' : 'symbol' : '1.0-0'}}</div>
+          <div class="raise-tile-note">At today's rate.</div>
+        }
+      </div>
+      <div class="raise-tile">
+        <div class="raise-tile-label">Gross annual in EUR</div>
+        @if (grossAnnualEur == null) {
+          <div class="raise-tile-value cell-none">&mdash;</div>
+          <div class="raise-tile-note">No rate available.</div>
+        } @else {
+          <div class="raise-tile-value">{{grossAnnualEur | currency : 'EUR' : 'symbol' : '1.0-0'}}</div>
+          <div class="raise-tile-note">At today's rate.</div>
+        }
+      </div>
+      <div class="raise-tile">
+        <div class="raise-tile-label">Income tax a year</div>
+        <div class="raise-tile-value">
+          {{raise.current.szjaAnnual | currency : raise.current.currencyId : 'symbol' : '1.0-0'}}
+        </div>
+        <div class="raise-tile-note">15% personal income tax.</div>
+      </div>
+      <div class="raise-tile">
+        <div class="raise-tile-label">Social contribution a year</div>
+        <div class="raise-tile-value">
+          {{raise.current.tbAnnual | currency : raise.current.currencyId : 'symbol' : '1.0-0'}}
+        </div>
+        <div class="raise-tile-note">18.5% of the gross.</div>
+      </div>
+      @if (raise.current.familyAllowanceApplied) {
+        <div class="raise-tile">
+          <div class="raise-tile-label">Family allowance</div>
+          <div class="raise-tile-value">
+            {{raise.current.familyAllowanceMonthly | currency : raise.current.currencyId : 'symbol' : '1.0-0'}}
+          </div>
+          <div class="raise-tile-note">Taken off the tax base each month.</div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <h3 class="raise-heading">What a raise would be worth</h3>
+  <p-table [value]="raise.scenarios" styleClass="p-datatable-striped table-stack eotm-table">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Raise</th>
+        <th class="cell-num">Gross monthly</th>
+        <th class="cell-num">Gross annual</th>
+        <th class="cell-num">Net monthly</th>
+        <th class="cell-num">Net annual</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-scenario>
+      <tr>
+        <td data-label="Raise">
+          <span class="state-chip state-buy">+{{scenario.percent}}%</span>
+        </td>
+        <td data-label="Gross monthly" class="cell-num">
+          {{scenario.grossMonthly | currency : raise.current.currencyId : 'symbol' : '1.0-0'}}
+          <span class="cell-sub">+{{grossMonthlyDiff(scenario) | currency : raise.current.currencyId : 'symbol' : '1.0-0'}}</span>
+        </td>
+        <td data-label="Gross annual" class="cell-num">
+          {{scenario.grossAnnual | currency : raise.current.currencyId : 'symbol' : '1.0-0'}}
+        </td>
+        <td data-label="Net monthly" class="cell-num">
+          {{scenario.netMonthly | currency : raise.current.currencyId : 'symbol' : '1.0-0'}}
+          <span class="cell-sub">+{{netMonthlyDiff(scenario) | currency : raise.current.currencyId : 'symbol' : '1.0-0'}}</span>
+        </td>
+        <td data-label="Net annual" class="cell-num">
+          {{scenario.netAnnual | currency : raise.current.currencyId : 'symbol' : '1.0-0'}}
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+}

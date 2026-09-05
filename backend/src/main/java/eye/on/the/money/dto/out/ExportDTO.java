@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -38,6 +39,7 @@ public class ExportDTO {
     private ForexSection forex;
     private SecuritiesSection securities;
     private CashSection cash;
+    private NoteSection note;
     private WatchlistSection watchlists;
     private AlertSection alerts;
     private PreferencesSection preferences;
@@ -61,6 +63,9 @@ public class ExportDTO {
     }
 
     public record CashSection(Double amount, String currency) {
+    }
+
+    public record NoteSection(String content, LocalDateTime updatedAt) {
     }
 
     public record WatchlistSection(List<StockWatchRow> stock, List<CryptoWatchRow> crypto,

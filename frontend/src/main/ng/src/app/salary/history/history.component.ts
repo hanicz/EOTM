@@ -18,13 +18,13 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 import { DeltaComponent } from '../../util/delta.component';
 
 @Component({
-    selector: 'app-salary',
-    templateUrl: './salary.component.html',
-    styleUrls: ['./salary.component.css'],
+    selector: 'app-salary-history',
+    templateUrl: './history.component.html',
+    styleUrls: ['./history.component.css'],
     imports: [Bind, Toolbar, PrimeTemplate, Toast, ButtonDirective, Ripple, Tooltip, TableModule,
         InputText, Select, Dialog, FormsModule, CurrencyPipe, DatePipe, DeltaComponent]
 })
-export class SalaryComponent {
+export class SalaryHistoryComponent {
 
   salaries: Salary[] = [];
   selectedSalaries: Salary[] = [];

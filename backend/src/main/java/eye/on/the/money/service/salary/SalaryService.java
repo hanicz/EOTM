@@ -3,6 +3,8 @@ package eye.on.the.money.service.salary;
 import eye.on.the.money.dto.in.SalaryEditDTO;
 import eye.on.the.money.dto.out.SalaryDTO;
 import eye.on.the.money.dto.out.SalaryNetDTO;
+import eye.on.the.money.dto.out.SalaryRaiseDTO;
+import eye.on.the.money.dto.out.SalaryRaiseScenarioDTO;
 import eye.on.the.money.exception.ValidationException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.salary.Salary;
@@ -20,6 +22,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -27,6 +30,10 @@ import java.util.NoSuchElementException;
 public class SalaryService {
 
     private static final BigDecimal MONTHS_IN_YEAR = BigDecimal.valueOf(12);
+    private static final BigDecimal PERCENT = BigDecimal.valueOf(100);
+    private static final List<BigDecimal> RAISE_PERCENTS =
+            List.of(new BigDecimal("2"), new BigDecimal("5"), new BigDecimal("10"),
+                    new BigDecimal("20"), new BigDecimal("25"));
 
     private final SalaryRepository salaryRepository;
     private final CurrencyRepository currencyRepository;
@@ -36,6 +43,15 @@ public class SalaryService {
     public List<SalaryDTO> getSalaries(Long userId) {
         return this.salaryRepository.findByUserIdOrderByValidFromDesc(userId)
                 .stream().map(this::convertToDTO).toList();
+    }
+
+    public Optional<SalaryRaiseDTO> getRaiseScenarios(Long userId) {
+        List<Salary> salaries = this.salaryRepository.findByUserIdOrderByValidFromDesc(userId);
+
+        return this.currentSalary(salaries).map(salary -> SalaryRaiseDTO.builder()
+                .current(this.convertToDTO(salary))
+                .scenarios(RAISE_PERCENTS.stream().map(percent -> this.scenario(percent, salary)).toList())
+                .build());
     }
 
     @Transactional
@@ -77,6 +93,27 @@ public class SalaryService {
     @Transactional
     public void deleteSalariesByIds(Long userId, List<Long> ids) {
         this.salaryRepository.deleteByUserIdAndIdIn(userId, ids);
+    }
+
+    private Optional<Salary> currentSalary(List<Salary> salaries) {
+        return salaries.stream().filter(salary -> salary.getValidTo() == null).findFirst()
+                .or(() -> salaries.stream().findFirst());
+    }
+
+    private SalaryRaiseScenarioDTO scenario(BigDecimal percent, Salary salary) {
+        String currencyId = salary.getCurrency().getId();
+        BigDecimal raised = this.grossMonthly(salary)
+                .multiply(BigDecimal.ONE.add(percent.divide(PERCENT, 4, RoundingMode.HALF_UP)));
+        BigDecimal grossMonthly = this.salaryTaxCalculator.round(raised, currencyId);
+        SalaryNetDTO net = this.salaryTaxCalculator.calculate(grossMonthly, currencyId, salary.getDependents());
+
+        return SalaryRaiseScenarioDTO.builder()
+                .percent(percent)
+                .grossMonthly(grossMonthly)
+                .grossAnnual(grossMonthly.multiply(MONTHS_IN_YEAR))
+                .netMonthly(net.getNetMonthly())
+                .netAnnual(net.getNetMonthly().multiply(MONTHS_IN_YEAR))
+                .build();
     }
 
     private void rejectInvalidPeriod(SalaryEditDTO editDTO) {

@@ -1,0 +1,13 @@
+@if (loading()) {
+  <p-skeleton width="100%" height="5.5rem"></p-skeleton>
+} @else {
+  <textarea pTextarea class="notepad-input" rows="4" [ngModel]="content()"
+    (ngModelChange)="onInput($event)" (blur)="onBlur()" placeholder="Anything worth remembering..."></textarea>
+  <div class="notepad-status">
+    @if (failed()) {
+      <span class="notepad-failed">Could not save</span>
+    } @else if (savedAt()) {
+      Saved {{savedAt() | date : 'HH:mm'}}
+    }
+  </div>
+}

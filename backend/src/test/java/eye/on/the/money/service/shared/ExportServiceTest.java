@@ -3,6 +3,7 @@ package eye.on.the.money.service.shared;
 import eye.on.the.money.dto.out.CashDTO;
 import eye.on.the.money.dto.out.DividendDTO;
 import eye.on.the.money.dto.out.ExportDTO;
+import eye.on.the.money.dto.out.NoteDTO;
 import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.dto.out.StockAlertDTO;
 import eye.on.the.money.model.Currency;
@@ -18,6 +19,7 @@ import eye.on.the.money.repository.watchlist.CryptoWatchRepository;
 import eye.on.the.money.repository.watchlist.ForexWatchRepository;
 import eye.on.the.money.repository.watchlist.StockWatchRepository;
 import eye.on.the.money.service.cash.CashService;
+import eye.on.the.money.service.note.NoteService;
 import eye.on.the.money.service.crypto.TransactionService;
 import eye.on.the.money.service.etf.ETFDividendService;
 import eye.on.the.money.service.etf.ETFInvestmentService;
@@ -39,6 +41,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -64,6 +67,7 @@ class ExportServiceTest {
     @Mock private SecurityTransactionService securityTransactionService;
     @Mock private InterestService interestService;
     @Mock private CashService cashService;
+    @Mock private NoteService noteService;
     @Mock private StockWatchRepository stockWatchRepository;
     @Mock private CryptoWatchRepository cryptoWatchRepository;
     @Mock private ForexWatchRepository forexWatchRepository;
@@ -79,6 +83,8 @@ class ExportServiceTest {
                 .thenReturn(User.builder().id(USER_ID).email(USER_EMAIL).build());
         when(this.cashService.getCash(USER_ID))
                 .thenReturn(CashDTO.builder().amount(0.0).currency("HUF").build());
+        when(this.noteService.getNote(USER_ID))
+                .thenReturn(NoteDTO.builder().content("").build());
     }
 
     @Test
@@ -96,7 +102,7 @@ class ExportServiceTest {
 
         ExportDTO export = this.exportService.export(USER_ID);
 
-        assertEquals(3, export.getSchemaVersion());
+        assertEquals(4, export.getSchemaVersion());
         assertEquals(USER_EMAIL, export.getEmail());
         assertNotNull(export.getExportedAt());
         assertEquals("Main", export.getAccounts().getFirst().accountName());
@@ -134,6 +140,17 @@ class ExportServiceTest {
         ExportDTO export = this.exportService.export(USER_ID);
 
         assertEquals(new ExportDTO.CashSection(1250000.0, "HUF"), export.getCash());
+    }
+
+    @Test
+    void export_includesTheNote() {
+        LocalDateTime savedAt = LocalDateTime.of(2026, 3, 14, 9, 30);
+        when(this.noteService.getNote(USER_ID))
+                .thenReturn(NoteDTO.builder().content("Rebalance in October").updatedAt(savedAt).build());
+
+        ExportDTO export = this.exportService.export(USER_ID);
+
+        assertEquals(new ExportDTO.NoteSection("Rebalance in October", savedAt), export.getNote());
     }
 
     @Test

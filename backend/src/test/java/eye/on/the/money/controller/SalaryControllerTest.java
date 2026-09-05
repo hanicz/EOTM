@@ -2,6 +2,8 @@ package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.in.SalaryEditDTO;
 import eye.on.the.money.dto.out.SalaryDTO;
+import eye.on.the.money.dto.out.SalaryRaiseDTO;
+import eye.on.the.money.dto.out.SalaryRaiseScenarioDTO;
 import eye.on.the.money.model.salary.SalaryBasis;
 import eye.on.the.money.service.salary.SalaryService;
 import org.junit.jupiter.api.Test;
@@ -16,8 +18,10 @@ import org.springframework.test.context.ActiveProfiles;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -53,6 +57,30 @@ class SalaryControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(1, response.getBody().size());
         assertEquals(5L, response.getBody().get(0).getId());
+    }
+
+    @Test
+    void getRaiseScenarios_returnsTheCurrentSalaryWithItsScenarios() {
+        SalaryRaiseDTO raise = SalaryRaiseDTO.builder().current(this.dto(5L))
+                .scenarios(List.of(SalaryRaiseScenarioDTO.builder().percent(new BigDecimal("5"))
+                        .grossMonthly(new BigDecimal("630000")).build())).build();
+        when(this.salaryService.getRaiseScenarios(USER_ID)).thenReturn(Optional.of(raise));
+
+        ResponseEntity<SalaryRaiseDTO> response = this.salaryController.getRaiseScenarios(USER_ID);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(5L, response.getBody().getCurrent().getId());
+        assertEquals(1, response.getBody().getScenarios().size());
+    }
+
+    @Test
+    void getRaiseScenarios_returnsNoContentWithoutASalary() {
+        when(this.salaryService.getRaiseScenarios(USER_ID)).thenReturn(Optional.empty());
+
+        ResponseEntity<SalaryRaiseDTO> response = this.salaryController.getRaiseScenarios(USER_ID);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        assertNull(response.getBody());
     }
 
     @Test

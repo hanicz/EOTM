@@ -15,6 +15,12 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
+    overflow: hidden;
+}
+
+.market-identity .cell-sub {
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .market-state {
@@ -23,6 +29,8 @@
     align-items: flex-end;
     gap: 2px;
     white-space: nowrap;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .market-code {

@@ -26,6 +26,10 @@ plan what they add up to.
 
 - Net worth across all asset classes in a currency of your choosing, with the change against what was spent.
 - Allocation by asset class, and the currently active alerts.
+- The **next three interest payments** due on securities — what is coming, when, and how much — taken
+  from the same schedule the securities page works from.
+- A **notepad** for whatever is worth remembering next to the numbers. One free-text note per account,
+  saved as you type and kept on the server, so it is there from any browser.
 
 ### Watchlist and lookup
 
@@ -94,9 +98,9 @@ plan what they add up to.
   the export. Rules can be paused instead of deleted, and one can be created straight from a transaction row.
 - The history exports back out to CSV.
 
-### History
+### Salary
 
-- **Salary** — what you earned and over which period, entered either monthly or annually; the other figure is
+- **History** — what you earned and over which period, entered either monthly or annually; the other figure is
   derived, so the table always shows gross and net at both granularities. A record with no end date is the
   one you are on now.
 - Net pay follows Hungarian employee deductions: **15% szja** on the tax base and **18.5% tb járulék** on the
@@ -116,7 +120,7 @@ plan what they add up to.
 
 - **CSV import and export** on every transaction type, so records can be moved in bulk.
 - **Full account export** to JSON from the settings page: every holding, dividend, watchlist, alert and
-  preference in one document, read straight from the database so it cannot fail on an expired API key.
+  preference in one document, read straight from the database so it cannot fail on an expired API key. The dashboard note comes along too.
 
 ## Overview
 

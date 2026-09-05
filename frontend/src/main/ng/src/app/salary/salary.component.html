@@ -3,11 +3,15 @@
   <p-panel>
     <p-tabs [(value)]="activeTab">
       <p-tablist>
-        <p-tab value="0">Salary</p-tab>
+        <p-tab value="0">History</p-tab>
+        <p-tab value="1">Raise</p-tab>
       </p-tablist>
       <p-tabpanels>
         <p-tabpanel value="0">
-          <app-salary></app-salary>
+          <app-salary-history></app-salary-history>
+        </p-tabpanel>
+        <p-tabpanel value="1" lazy>
+          <app-salary-raise></app-salary-raise>
         </p-tabpanel>
       </p-tabpanels>
     </p-tabs>

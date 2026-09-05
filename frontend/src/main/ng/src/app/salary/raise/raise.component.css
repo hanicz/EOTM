@@ -1,0 +1,65 @@
+.raise-card {
+    padding: 1rem 1.1rem 1.1rem 1.1rem;
+    border: 1px solid #ece9e0;
+    border-radius: 0.6rem;
+    background: #ffffff;
+}
+
+.raise-period {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.raise-period-dates {
+    font-weight: 600;
+}
+
+.raise-note {
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    color: #8a887f;
+}
+
+.raise-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.raise-tile {
+    padding: 0.9rem 1rem;
+    border-radius: 0.6rem;
+    background: #faf9f6;
+    border: 1px solid #ece9e0;
+}
+
+.raise-tile-label {
+    font-size: 0.75rem;
+    color: #5f5e5a;
+    margin-bottom: 0.35rem;
+}
+
+.raise-tile-value {
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+
+.raise-tile-note {
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: #8a887f;
+}
+
+.raise-heading {
+    margin: 2rem 0 0.75rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.raise-empty {
+    margin: 0;
+    color: #5f5e5a;
+}

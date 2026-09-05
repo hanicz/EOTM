@@ -1,0 +1,38 @@
+.interest-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 5px 0;
+    border-bottom: 1px solid #f1efe8;
+}
+
+.interest-row:last-of-type {
+    border-bottom: none;
+}
+
+.interest-identity {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.interest-identity .cell-sub {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.interest-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1b1b1b;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.empty-state {
+    font-size: 12px;
+    color: #888780;
+}

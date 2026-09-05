@@ -1,0 +1,20 @@
+@if (loading()) {
+  @for (row of skeletonRows; track $index) {
+    <div class="interest-row">
+      <p-skeleton width="6rem" height="0.9rem"></p-skeleton>
+      <p-skeleton width="4rem" height="0.9rem"></p-skeleton>
+    </div>
+  }
+} @else if (payments().length === 0) {
+  <div class="empty-state">No upcoming interest</div>
+} @else {
+  @for (payment of payments(); track payment.securityName + payment.nextPaymentDate) {
+    <div class="interest-row">
+      <div class="interest-identity">
+        <span class="interest-name">{{payment.securityName}}</span>
+        <span class="cell-sub">{{payment.nextPaymentDate | date : 'yyyy-MM-dd'}}</span>
+      </div>
+      <b class="amount">{{payment.nextPaymentAmount | currency : payment.currencyId : 'symbol' : '0.0-0'}}</b>
+    </div>
+  }
+}

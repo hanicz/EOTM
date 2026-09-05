@@ -2,6 +2,8 @@ package eye.on.the.money.service.salary;
 
 import eye.on.the.money.dto.in.SalaryEditDTO;
 import eye.on.the.money.dto.out.SalaryDTO;
+import eye.on.the.money.dto.out.SalaryRaiseDTO;
+import eye.on.the.money.dto.out.SalaryRaiseScenarioDTO;
 import eye.on.the.money.exception.ValidationException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
@@ -23,6 +25,7 @@ import org.mockito.quality.Strictness;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -31,6 +34,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -160,6 +164,96 @@ class SalaryServiceTest {
 
         assertEquals(1, salaries.size());
         assertEquals(0, new BigDecimal("597000").compareTo(salaries.get(0).getNetMonthly()));
+    }
+
+    @Test
+    void getRaiseScenarios_returnsNothingWhenTheUserHasNoSalary() {
+        when(this.salaryRepository.findByUserIdOrderByValidFromDesc(USER_ID)).thenReturn(List.of());
+
+        assertTrue(this.salaryService.getRaiseScenarios(USER_ID).isEmpty());
+    }
+
+    @Test
+    void getRaiseScenarios_picksTheSalaryThatIsStillRunning() {
+        Salary past = this.stored("500000", SalaryBasis.MONTHLY, 0);
+        past.setValidTo(FROM.plusMonths(6));
+        Salary current = this.stored("600000", SalaryBasis.MONTHLY, 0);
+        when(this.salaryRepository.findByUserIdOrderByValidFromDesc(USER_ID)).thenReturn(List.of(past, current));
+
+        SalaryRaiseDTO raise = this.salaryService.getRaiseScenarios(USER_ID).orElseThrow();
+
+        assertEquals(0, new BigDecimal("600000").compareTo(raise.getCurrent().getGrossMonthly()));
+        assertNull(raise.getCurrent().getValidTo());
+    }
+
+    @Test
+    void getRaiseScenarios_fallsBackToTheMostRecentClosedSalary() {
+        Salary newest = this.stored("700000", SalaryBasis.MONTHLY, 0);
+        newest.setValidTo(FROM.plusYears(1));
+        Salary older = this.stored("500000", SalaryBasis.MONTHLY, 0);
+        older.setValidTo(FROM.plusMonths(6));
+        when(this.salaryRepository.findByUserIdOrderByValidFromDesc(USER_ID)).thenReturn(List.of(newest, older));
+
+        SalaryRaiseDTO raise = this.salaryService.getRaiseScenarios(USER_ID).orElseThrow();
+
+        assertEquals(0, new BigDecimal("700000").compareTo(raise.getCurrent().getGrossMonthly()));
+        assertEquals(FROM.plusYears(1), raise.getCurrent().getValidTo());
+    }
+
+    @Test
+    void getRaiseScenarios_scalesTheGrossByEveryPercentage() {
+        when(this.salaryRepository.findByUserIdOrderByValidFromDesc(USER_ID))
+                .thenReturn(List.of(this.stored("600000", SalaryBasis.MONTHLY, 0)));
+
+        List<SalaryRaiseScenarioDTO> scenarios = this.salaryService.getRaiseScenarios(USER_ID)
+                .orElseThrow().getScenarios();
+
+        assertEquals(List.of(new BigDecimal("2"), new BigDecimal("5"), new BigDecimal("10"),
+                new BigDecimal("20"), new BigDecimal("25")), scenarios.stream().map(SalaryRaiseScenarioDTO::getPercent).toList());
+        assertEquals(0, new BigDecimal("612000").compareTo(scenarios.get(0).getGrossMonthly()));
+        assertEquals(0, new BigDecimal("7344000").compareTo(scenarios.get(0).getGrossAnnual()));
+        assertEquals(0, new BigDecimal("750000").compareTo(scenarios.get(4).getGrossMonthly()));
+        assertEquals(0, new BigDecimal("9000000").compareTo(scenarios.get(4).getGrossAnnual()));
+    }
+
+    @Test
+    void getRaiseScenarios_recalculatesTheNetInsteadOfScalingIt() {
+        when(this.salaryRepository.findByUserIdOrderByValidFromDesc(USER_ID))
+                .thenReturn(List.of(this.stored("600000", SalaryBasis.MONTHLY, 0)));
+
+        SalaryRaiseScenarioDTO tenPercent = this.salaryService.getRaiseScenarios(USER_ID)
+                .orElseThrow().getScenarios().get(2);
+
+        assertEquals(0, new BigDecimal("660000").compareTo(tenPercent.getGrossMonthly()));
+        assertEquals(0, new BigDecimal("438900").compareTo(tenPercent.getNetMonthly()));
+        assertEquals(0, new BigDecimal("5266800").compareTo(tenPercent.getNetAnnual()));
+    }
+
+    @Test
+    void getRaiseScenarios_liftsTheNetBySmallerStepsWhenAFamilyAllowanceApplies() {
+        when(this.salaryRepository.findByUserIdOrderByValidFromDesc(USER_ID))
+                .thenReturn(List.of(this.stored("600000", SalaryBasis.MONTHLY, 2)));
+
+        SalaryRaiseDTO raise = this.salaryService.getRaiseScenarios(USER_ID).orElseThrow();
+        SalaryRaiseScenarioDTO tenPercent = raise.getScenarios().get(2);
+
+        BigDecimal netGrowth = tenPercent.getNetMonthly()
+                .divide(raise.getCurrent().getNetMonthly(), 6, RoundingMode.HALF_UP);
+
+        assertTrue(netGrowth.compareTo(BigDecimal.ONE) > 0);
+        assertTrue(netGrowth.compareTo(new BigDecimal("1.1")) < 0);
+    }
+
+    @Test
+    void getRaiseScenarios_keepsTheFractionsOfANonForintSalary() {
+        Salary salary = Salary.builder().id(9L).amount(new BigDecimal("4200.55")).basis(SalaryBasis.MONTHLY)
+                .validFrom(FROM).dependents(0).currency(new Currency("EUR", "euro")).user(this.user).build();
+        when(this.salaryRepository.findByUserIdOrderByValidFromDesc(USER_ID)).thenReturn(List.of(salary));
+
+        SalaryRaiseScenarioDTO fivePercent = this.salaryService.getRaiseScenarios(USER_ID)
+                .orElseThrow().getScenarios().get(1);
+
+        assertEquals(new BigDecimal("4410.58"), fivePercent.getGrossMonthly());
     }
 
     @Test

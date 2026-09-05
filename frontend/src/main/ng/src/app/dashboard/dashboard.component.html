@@ -119,6 +119,16 @@
             }
           </div>
 
+          <div class="detail-panel detail-panel-clickable" (click)="navigateTo('/security')">
+            <div class="detail-title">Upcoming interest</div>
+            <app-upcoming-interest></app-upcoming-interest>
+          </div>
+
+          <div class="detail-panel">
+            <div class="detail-title">Markets</div>
+            <app-market-status></app-market-status>
+          </div>
+
           <div class="detail-panel detail-panel-clickable" (click)="navigateTo('/alert')">
             <div class="detail-title">Active alerts</div>
             @if (stockAlerts.length === 0 && cryptoAlerts.length === 0) {
@@ -126,21 +136,21 @@
             }
             @for (alert of stockAlerts; track alert.id) {
               <div class="alert-row">
-                <span>{{alert.shortName}}.{{alert.exchange}} {{alert.type | alertTypePipe}}</span>
+                <span class="alert-name">{{alert.shortName}}.{{alert.exchange}} {{alert.type | alertTypePipe}}</span>
                 <span class="alert-value">{{alert.valuePoint}}</span>
               </div>
             }
             @for (alert of cryptoAlerts; track alert.id) {
               <div class="alert-row">
-                <span>{{alert.symbol}} {{alert.type | alertTypePipe}}</span>
+                <span class="alert-name">{{alert.symbol}} {{alert.type | alertTypePipe}}</span>
                 <span class="alert-value">{{alert.valuePoint}}</span>
               </div>
             }
           </div>
 
-          <div class="detail-panel">
-            <div class="detail-title">Markets</div>
-            <app-market-status></app-market-status>
+          <div class="detail-panel notepad-panel">
+            <div class="detail-title">Notepad</div>
+            <app-notepad></app-notepad>
           </div>
         </div>
       }

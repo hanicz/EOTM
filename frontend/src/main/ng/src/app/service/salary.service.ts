@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Salary } from '../model/salary';
+import { Salary, SalaryRaise } from '../model/salary';
 import { ResourceHelper } from '../util/servicehelper';
 import { environment } from '../../environments/environment';
 
@@ -17,6 +17,12 @@ export class SalaryService {
 
   getSalaries() {
     return this.http.get<Salary[]>(this.salaryUrl, {
+      headers: this.helper.getHeadersWithToken()
+    });
+  }
+
+  getRaise() {
+    return this.http.get<SalaryRaise>(`${this.salaryUrl}/raise`, {
       headers: this.helper.getHeadersWithToken()
     });
   }

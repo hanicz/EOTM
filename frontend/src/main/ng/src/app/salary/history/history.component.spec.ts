@@ -4,14 +4,14 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { MessageService } from 'primeng/api';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
-import { SalaryComponent } from './salary.component';
+import { SalaryHistoryComponent } from './history.component';
 import { Salary } from '../../model/salary';
 import { Globals } from '../../util/global';
 import { environment } from '../../../environments/environment';
 
-describe('SalaryComponent', () => {
-  let component: SalaryComponent;
-  let fixture: ComponentFixture<SalaryComponent>;
+describe('SalaryHistoryComponent', () => {
+  let component: SalaryHistoryComponent;
+  let fixture: ComponentFixture<SalaryHistoryComponent>;
   let http: HttpTestingController;
 
   const salaryUrl = `${environment.API_URL}/api/v1/history/salary`;
@@ -34,12 +34,12 @@ describe('SalaryComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SalaryComponent],
+      imports: [SalaryHistoryComponent],
       providers: [provideHttpClient(), provideHttpClientTesting(), provideNoopAnimations(), MessageService, Globals]
     })
       .compileComponents();
 
-    fixture = TestBed.createComponent(SalaryComponent);
+    fixture = TestBed.createComponent(SalaryHistoryComponent);
     component = fixture.componentInstance;
     http = TestBed.inject(HttpTestingController);
   });

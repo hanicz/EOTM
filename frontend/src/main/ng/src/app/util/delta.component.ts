@@ -11,7 +11,7 @@ import { CurrencyPipe, DecimalPipe, NgClass } from '@angular/common';
     } @else {
       <span class="delta-cell">
         <span class="delta-amount" [ngClass]="direction()">
-          {{ value() | currency : currency() : 'symbol' : '0.0-2' }}
+          {{ value() | currency : currency() : 'symbol' : digits() }}
         </span>
         @if (percent() != null) {
           <span class="delta-pill" [ngClass]="direction()">
@@ -50,6 +50,7 @@ export class DeltaComponent {
   readonly value = input<number | null>(null);
   readonly percent = input<number | null>(null);
   readonly currency = input<string>('');
+  readonly digits = input<string>('0.0-2');
 
   readonly direction = computed(() => {
     const value = this.value() ?? 0;

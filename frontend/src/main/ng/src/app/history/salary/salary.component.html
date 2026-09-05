@@ -1,0 +1,144 @@
+<p-toast position="bottom-center"></p-toast>
+<p class="mt-0 mb-3 text-color-secondary text-sm">
+  Enter what you earned and over which period, either as a monthly or an annual figure &mdash; the other one is
+  worked out for you. Net pay is calculated with Hungarian employee deductions: 15% personal income tax and
+  18.5% social contribution, less the family allowance for the dependants you enter. The raise column compares
+  each net monthly figure with the period before it, so it shows what actually landed in your pocket.
+</p>
+<p-toolbar styleClass="table-toolbar">
+  <ng-template pTemplate="left">
+    <button pButton pRipple label="New salary" icon="pi pi-plus" (click)="openNew()"></button>
+    <button pButton pRipple icon="pi pi-trash" severity="danger" class="p-button-outlined"
+      [disabled]="!selectedSalaries || !selectedSalaries.length" (click)="deleteClicked()"></button>
+  </ng-template>
+</p-toolbar>
+
+<p-table #dt1 [value]="salaries" styleClass="p-datatable-striped table-stack eotm-table"
+  [(selection)]="selectedSalaries" [paginator]="true" [rows]="25" [rowsPerPageOptions]="[25, 50, 100]">
+
+  <ng-template pTemplate="header">
+    <tr>
+      <th style="width: 3rem">
+        <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+      </th>
+      <th pSortableColumn="validFrom">Period <p-sortIcon field="validFrom"></p-sortIcon></th>
+      <th>Entered as</th>
+      <th class="cell-num" pSortableColumn="grossAnnual">Gross annual <p-sortIcon field="grossAnnual"></p-sortIcon></th>
+      <th class="cell-num" pSortableColumn="netAnnual">Net annual <p-sortIcon field="netAnnual"></p-sortIcon></th>
+      <th class="cell-num" pSortableColumn="grossMonthly">Gross monthly <p-sortIcon field="grossMonthly"></p-sortIcon></th>
+      <th class="cell-num" pSortableColumn="netMonthly">Net monthly <p-sortIcon field="netMonthly"></p-sortIcon></th>
+      <th class="cell-num" pSortableColumn="raiseAmount">Raise <p-sortIcon field="raiseAmount"></p-sortIcon></th>
+      <th class="cell-num">Dependants</th>
+      <th></th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-salary>
+    <tr [class.salary-past]="salary.validTo">
+      <td>
+        <p-tableCheckbox [value]="salary"></p-tableCheckbox>
+      </td>
+      <td data-label="Period">
+        {{salary.validFrom | date:'mediumDate'}} &ndash;
+        @if (salary.validTo) {
+          {{salary.validTo | date:'mediumDate'}}
+        } @else {
+          <span class="state-chip state-buy">Current</span>
+        }
+        @if (salary.note) {
+          <span class="cell-sub">{{salary.note}}</span>
+        }
+      </td>
+      <td data-label="Entered as">
+        <span class="state-chip state-info">{{basisLabel(salary.basis)}}</span>
+      </td>
+      <td data-label="Gross annual" class="cell-num">
+        {{salary.grossAnnual | currency : salary.currencyId : 'symbol' : '1.0-0'}}
+      </td>
+      <td data-label="Net annual" class="cell-num">
+        {{salary.netAnnual | currency : salary.currencyId : 'symbol' : '1.0-0'}}
+      </td>
+      <td data-label="Gross monthly" class="cell-num">
+        {{salary.grossMonthly | currency : salary.currencyId : 'symbol' : '1.0-0'}}
+      </td>
+      <td data-label="Net monthly" class="cell-num">
+        {{salary.netMonthly | currency : salary.currencyId : 'symbol' : '1.0-0'}}
+      </td>
+      <td data-label="Raise" class="cell-num">
+        <app-delta [value]="salary.raiseAmount ?? null" [percent]="salary.raisePercent ?? null"
+          [currency]="salary.currencyId" digits="1.0-0"></app-delta>
+      </td>
+      <td data-label="Dependants" class="cell-num">
+        @if (allowanceMissed(salary)) {
+          <span class="state-chip state-neutral"
+            pTooltip="The family allowance is a forint amount, so it is left out of a salary kept in another currency."
+            >{{salary.dependents}} &#9432;</span>
+        } @else if (salary.dependents) {
+          {{salary.dependents}}
+        } @else {
+          <span class="cell-none">&mdash;</span>
+        }
+      </td>
+      <td>
+        <button pButton pRipple type="button" icon="pi pi-pencil" pTooltip="Edit this salary"
+          (click)="editSalary(salary)" class="p-button-rounded p-button-text mr-1" severity="secondary"></button>
+        <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(salary.id)"
+          class="p-button-rounded p-button-text" severity="danger"></button>
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="10">No salaries recorded yet.</td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog [(visible)]="salaryDialog" [style]="{width: '50vw'}" [breakpoints]="{'992px': '75vw', '576px': '100vw'}"
+  header="Salary" [modal]="true" styleClass="p-fluid">
+  <ng-template pTemplate="content">
+    <div class="grid">
+      <div class="col-12 sm:col-6 mb-2">
+        <label for="amount" class="block mb-2 font-medium text-color-secondary">Amount</label>
+        <input type="number" pInputText id="amount" [(ngModel)]="salary.amount" class="w-full" />
+      </div>
+      <div class="col-12 sm:col-6 mb-2">
+        <label for="basis" class="block mb-2 font-medium text-color-secondary">Entered as</label>
+        <p-select id="basis" [options]="bases" optionLabel="label" optionValue="value" [(ngModel)]="salary.basis"
+          [style]="{'width':'100%'}" [appendTo]="'body'"></p-select>
+      </div>
+      <div class="col-12 sm:col-6 mb-2">
+        <label for="currency" class="block mb-2 font-medium text-color-secondary">Currency</label>
+        <p-select id="currency" [options]="currencies" optionLabel="label" optionValue="value"
+          [(ngModel)]="salary.currencyId" [style]="{'width':'100%'}" [appendTo]="'body'"></p-select>
+      </div>
+      <div class="col-12 sm:col-6 mb-2">
+        <label for="dependents" class="block mb-2 font-medium text-color-secondary">Dependants</label>
+        <input type="number" pInputText id="dependents" [(ngModel)]="salary.dependents" min="0"
+          [max]="maxDependents" class="w-full" />
+        <small class="block mt-2 text-color-secondary">Children you claimed the family allowance for. Only applied
+          to a salary kept in forint.</small>
+      </div>
+      <div class="col-12 sm:col-6 mb-2">
+        <label for="validFrom" class="block mb-2 font-medium text-color-secondary">Valid from</label>
+        <input type="date" pInputText id="validFrom" [(ngModel)]="salary.validFrom" class="w-full" />
+      </div>
+      <div class="col-12 sm:col-6 mb-2">
+        <label for="validTo" class="block mb-2 font-medium text-color-secondary">Valid to</label>
+        <input type="date" pInputText id="validTo" [(ngModel)]="salary.validTo" class="w-full" />
+        <small class="block mt-2 text-color-secondary">Leave empty if this is what you earn now.</small>
+      </div>
+      <div class="col-12 mb-2">
+        <label for="note" class="block mb-2 font-medium text-color-secondary">Note</label>
+        <input pInputText id="note" type="text" [(ngModel)]="salary.note" [maxlength]="noteMaxLength"
+          placeholder="e.g. employer or role" [style]="{'width':'100%'}">
+      </div>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+    <button pButton pRipple label="Save" icon="pi pi-check" [disabled]="!salary.amount || !salary.validFrom"
+      (click)="saveSalary()"></button>
+  </ng-template>
+</p-dialog>

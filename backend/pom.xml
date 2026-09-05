@@ -269,4 +269,75 @@
 		</plugins>
 		<finalName>EOTM</finalName>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>docker</id>
+			<properties>
+				<skipTests>true</skipTests>
+				<docker.image>thanicz/eotm:latest</docker.image>
+				<docker.push.skip>true</docker.push.skip>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<version>${exec-maven-plugin.version}</version>
+						<executions>
+							<execution>
+								<id>docker-build</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<executable>docker</executable>
+									<workingDirectory>${project.parent.basedir}</workingDirectory>
+									<arguments>
+										<argument>buildx</argument>
+										<argument>build</argument>
+										<argument>--load</argument>
+										<argument>--platform</argument>
+										<argument>linux/amd64</argument>
+										<argument>-t</argument>
+										<argument>${docker.image}</argument>
+										<argument>.</argument>
+									</arguments>
+								</configuration>
+							</execution>
+							<execution>
+								<id>docker-push</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<skip>${docker.push.skip}</skip>
+									<executable>docker</executable>
+									<workingDirectory>${project.parent.basedir}</workingDirectory>
+									<arguments>
+										<argument>push</argument>
+										<argument>${docker.image}</argument>
+									</arguments>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<id>docker-push</id>
+			<activation>
+				<property>
+					<name>push</name>
+				</property>
+			</activation>
+			<properties>
+				<docker.push.skip>false</docker.push.skip>
+			</properties>
+		</profile>
+	</profiles>
 </project>

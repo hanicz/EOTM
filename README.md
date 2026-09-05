@@ -94,6 +94,24 @@ plan what they add up to.
   the export. Rules can be paused instead of deleted, and one can be created straight from a transaction row.
 - The history exports back out to CSV.
 
+### History
+
+- **Salary** — what you earned and over which period, entered either monthly or annually; the other figure is
+  derived, so the table always shows gross and net at both granularities. A record with no end date is the
+  one you are on now.
+- Net pay follows Hungarian employee deductions: **15% szja** on the tax base and **18.5% tb járulék** on the
+  gross.
+- **Családi kedvezmény** is applied per dependant per month at the current amounts (133 340 / 266 660 /
+  440 000 Ft for one, two, and three or more), including the spillover into the 18.5% contribution when the
+  allowance is larger than the tax base. The number of dependants is stored per record, so a salary from
+  before a child arrived still works out correctly.
+- The allowance is a forint amount, so a salary kept in another currency gets the two percentages only and
+  the row says so.
+- **Raise** against the period before it, as both an amount and a percentage of **net monthly** — what
+  actually landed in your pocket, so a change in dependants counts towards it as much as a change in gross.
+  It is worked out chronologically, so re-sorting the table does not change it, and it is left empty where
+  the previous period was in another currency.
+
 ### Data in and out
 
 - **CSV import and export** on every transaction type, so records can be moved in bulk.

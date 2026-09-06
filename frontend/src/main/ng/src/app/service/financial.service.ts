@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BankTransaction, ExclusionRule, ImportResult, MonthlyCashFlow, MonthlyIncome } from '../model/bankTransaction';
+import { BankTransaction, ExclusionRule, MonthlyCashFlow, MonthlyIncome } from '../model/bankTransaction';
+import { ImportResult } from '../model/importResult';
 import { ResourceHelper } from '../util/servicehelper';
 import { environment } from '../../environments/environment';
 

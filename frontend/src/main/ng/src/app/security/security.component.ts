@@ -18,6 +18,9 @@ import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { DashboardService } from '../service/dashboard.service';
 import { SecurityService } from '../service/security.service';
 import { ChartComponent, ApexChart, ApexNonAxisChartSeries, ApexLegend } from 'ng-apexcharts';
+import { FileUpload } from 'primeng/fileupload';
+import { Toast } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 export type AllocationChartOptions = {
   series: ApexNonAxisChartSeries;
@@ -30,13 +33,14 @@ export type AllocationChartOptions = {
     selector: 'app-security',
     templateUrl: './security.component.html',
     styleUrls: ['./security.component.css'],
-    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, Select, FormsModule, HoldingComponent, TransactionComponent, InterestComponent, CurrencyPipe, DecimalPipe, ChartComponent]
+    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, Select, FormsModule, HoldingComponent, TransactionComponent, InterestComponent, CurrencyPipe, DecimalPipe, ChartComponent, FileUpload, Toast]
 })
 export class SecurityComponent implements OnInit {
 
   @ViewChild(HoldingComponent) holding!: HoldingComponent;
   @ViewChild(TransactionComponent) transaction!: TransactionComponent;
   @ViewChild(InterestComponent) interest!: InterestComponent;
+  @ViewChild('fileUpload') fileUpload: any;
 
   transactions: SecurityTransaction[] = [];
   interests: Interest[] = [];
@@ -75,7 +79,8 @@ export class SecurityComponent implements OnInit {
 
   ratesRefreshing: boolean = false;
 
-  constructor(private dashboardService: DashboardService, private securityService: SecurityService) { }
+  constructor(private dashboardService: DashboardService, private securityService: SecurityService,
+    private messageService: MessageService) { }
 
   ngOnInit(): void {
   }
@@ -103,6 +108,32 @@ export class SecurityComponent implements OnInit {
 
   onCurrencyChange(): void {
     this.loadRatesAndCalculate();
+  }
+
+  onUpload(event: { files: File[] }): void {
+    const file = (event.files ?? [])[0];
+    if (!file) {
+      return;
+    }
+    this.securityService.uploadXls(file).subscribe({
+      next: (result) => {
+        this.fileUpload.clear();
+        this.refreshAll();
+        this.messageService.add({
+          key: 'security-import',
+          severity: 'success',
+          detail: `Import finished. ${result.created} added, ${result.updated} updated.`
+        });
+      },
+      error: (error) => {
+        this.fileUpload.clear();
+        this.messageService.add({
+          key: 'security-import',
+          severity: 'error',
+          detail: error.error?.error ?? 'Import failed.'
+        });
+      }
+    });
   }
 
   loadData(transactions: SecurityTransaction[]) {

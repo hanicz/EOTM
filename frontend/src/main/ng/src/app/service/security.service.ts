@@ -6,6 +6,7 @@ import { SecurityTransaction } from '../model/securityTransaction';
 import { ResourceHelper } from '../util/servicehelper';
 import { environment } from '../../environments/environment';
 import { Security } from '../model/security';
+import { ImportResult } from '../model/importResult';
 
 @Injectable({
   providedIn: 'root'
@@ -85,6 +86,15 @@ export class SecurityService {
     formData.append('file', file, 'file.csv')
     const url = `${this.transactionUrl}/process/csv`;
     return this.http.post<any>(url, formData, {
+      headers: this.helper.getAuthHeaders(),
+    });
+  }
+
+  uploadXls(file: File) {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+    const url = `${this.securityUrl}/process/xls`;
+    return this.http.post<ImportResult>(url, formData, {
       headers: this.helper.getAuthHeaders(),
     });
   }

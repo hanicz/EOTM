@@ -14,11 +14,6 @@ export interface BankTransaction {
     taxable: boolean;
 }
 
-export interface ImportResult {
-    created: number;
-    updated: number;
-}
-
 export interface MonthlyCashFlow {
     year: number;
     month: number;

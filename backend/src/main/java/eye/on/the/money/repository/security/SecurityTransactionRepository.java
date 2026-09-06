@@ -18,4 +18,7 @@ public interface SecurityTransactionRepository extends JpaRepository<SecurityTra
     void deleteByUserIdAndIdIn(Long userId, List<Long> ids);
 
     Optional<SecurityTransaction> findByIdAndUserId(Long id, Long userId);
+
+    List<SecurityTransaction> findByUserIdAndSecurity_IdAndTransactionDateAndBuySellAndQuantityAndAmountOrderById(
+            Long userId, String securityId, LocalDate transactionDate, String buySell, Integer quantity, Double amount);
 }

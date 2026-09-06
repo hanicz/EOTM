@@ -1,4 +1,5 @@
-﻿<div class="shadow-5">
+﻿<p-toast position="bottom-center" key="security-import"></p-toast>
+<div class="shadow-5">
   <menu class="pl-0 mb-0"></menu>
   <p-panel>
     <div class="page-summary">
@@ -19,6 +20,10 @@
       <div class="summary-actions">
         <p-select [options]="currencyOptions" [(ngModel)]="selectedCurrency" optionLabel="label" optionValue="value"
           (onChange)="onCurrencyChange()"></p-select>
+        <p-fileUpload mode="basic" #fileUpload accept=".xls" [customUpload]="true" [auto]="true" chooseLabel="Import"
+          chooseStyleClass="p-button-outlined p-button-secondary"
+          pTooltip="Import the official webkincstár transaction export."
+          (uploadHandler)="onUpload($event)"></p-fileUpload>
         <button pButton pRipple icon="pi pi-cloud-download" class="p-button-rounded p-button-text"
           [loading]="ratesRefreshing" [disabled]="ratesRefreshing"
           pTooltip="Fetch the latest interest rates now. Otherwise they refresh once a week."

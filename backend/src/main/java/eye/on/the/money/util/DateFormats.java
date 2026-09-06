@@ -10,4 +10,6 @@ public final class DateFormats {
     public static final DateTimeFormatter YYYY_MM_DD = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public static final DateTimeFormatter YYYY_MM_DD_DOTTED = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+
+    public static final DateTimeFormatter YYYY_MM_DD_DOTTED_SUFFIX = DateTimeFormatter.ofPattern("yyyy.MM.dd.");
 }

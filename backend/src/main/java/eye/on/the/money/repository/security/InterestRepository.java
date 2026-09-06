@@ -16,4 +16,7 @@ public interface InterestRepository extends JpaRepository<Interest, Long> {
     void deleteByUserIdAndIdIn(Long userId, List<Long> ids);
 
     Optional<Interest> findByIdAndUserId(Long id, Long userId);
+
+    List<Interest> findByUserIdAndSecurity_IdAndInterestDateAndAmountAndCurrency_IdOrderById(
+            Long userId, String securityId, LocalDate interestDate, Double amount, String currencyId);
 }

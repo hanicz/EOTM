@@ -28,6 +28,7 @@
         <lombok.version>1.18.46</lombok.version>
         <modelmapper.version>3.2.6</modelmapper.version>
         <commons-csv.version>1.14.1</commons-csv.version>
+        <poi.version>5.5.1</poi.version>
         <jackson-datatype-jsr310.version>2.22.0</jackson-datatype-jsr310.version>
         <h2.version>2.4.240</h2.version>
         <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
@@ -83,6 +84,11 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-csv</artifactId>
                 <version>${commons-csv.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi</artifactId>
+                <version>${poi.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>

@@ -1,7 +1,8 @@
 import { Component, ChangeDetectorRef, EventEmitter, Output, ViewChild } from '@angular/core';
 import { from, of } from 'rxjs';
 import { catchError, concatMap, map, toArray } from 'rxjs/operators';
-import { BankTransaction, ImportResult } from '../../model/bankTransaction';
+import { BankTransaction } from '../../model/bankTransaction';
+import { ImportResult } from '../../model/importResult';
 import { FinancialService } from '../../service/financial.service';
 import { Bind } from 'primeng/bind';
 import { Toolbar } from 'primeng/toolbar';

@@ -35,6 +35,7 @@ export class MenuComponent implements OnInit {
     },
     { label: 'Financials', icon: 'fa-solid fa-receipt', routerLink: ['/financial'] },
     { label: 'Salary', icon: 'fa-solid fa-clock-rotate-left', routerLink: ['/salary'] },
+    { label: 'Equity', icon: 'fa-solid fa-award', routerLink: ['/equity'] },
     { label: 'FIRE', icon: 'fa-solid fa-fire', routerLink: ['/fire'] },
     { label: 'Tax', icon: 'fa-solid fa-file-invoice-dollar', routerLink: ['/tax'] },
     { label: 'Alerts & Reports', icon: 'fa-solid fa-bell', routerLink: ['/alert'] },

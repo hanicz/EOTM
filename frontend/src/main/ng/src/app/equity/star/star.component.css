@@ -1,0 +1,47 @@
+.star-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.star-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1 1 12rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--p-content-border-color, #e5e7eb);
+  border-radius: 6px;
+}
+
+.star-tile-label {
+  color: var(--p-text-muted-color, #888780);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.star-tile-value {
+  font-size: 18px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.star-tile-tax {
+  color: var(--p-red-500, #ef4444);
+}
+
+.star-error {
+  color: var(--p-red-500, #ef4444);
+}
+
+.star-schedule-cell {
+  padding: 0.5rem 1rem 1rem 1rem;
+}
+
+.star-apply-all {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}

@@ -31,6 +31,10 @@ public class CacheConfig {
                         RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(8L)))
                 .withCacheConfiguration("holdings-forex",
                         RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(8L)))
+                .withCacheConfiguration("grants-rsu",
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(8L)))
+                .withCacheConfiguration("grants-star",
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(8L)))
                 .withCacheConfiguration("rates",
                         RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(8L)));
     }

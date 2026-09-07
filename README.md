@@ -28,6 +28,8 @@ plan what they add up to.
 - Allocation by asset class, and the currently active alerts.
 - The **next three interest payments** due on securities — what is coming, when, and how much — taken
   from the same schedule the securities page works from.
+- The **next RSU vest of every grant** — ticker, date, shares and what lands after tax — so the nearest
+  tranche is visible without opening the equity page.
 - A **notepad** for whatever is worth remembering next to the numbers. One free-text note per account,
   saved as you type and kept on the server, so it is there from any browser.
 

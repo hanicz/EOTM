@@ -95,7 +95,7 @@
 }
 
 .notepad-panel {
-    grid-column: 1 / -1;
+    grid-column: 2 / -1;
 }
 
 .detail-panel-clickable {
@@ -261,6 +261,11 @@
     /* Three panels are too tight below desktop, so Markets wraps onto its own row. */
     .detail-grid {
         grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    }
+
+    /* Below desktop the notepad goes back to its own full-width row. */
+    .notepad-panel {
+        grid-column: 1 / -1;
     }
 }
 

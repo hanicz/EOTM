@@ -1,0 +1,47 @@
+.rsu-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.rsu-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1 1 12rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--p-content-border-color, #e5e7eb);
+  border-radius: 6px;
+}
+
+.rsu-tile-label {
+  color: var(--p-text-muted-color, #888780);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.rsu-tile-value {
+  font-size: 18px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.rsu-tile-tax {
+  color: var(--p-red-500, #ef4444);
+}
+
+.rsu-ticker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.rsu-error {
+  color: var(--p-red-500, #ef4444);
+}
+
+.rsu-schedule-cell {
+  padding: 0.5rem 1rem 1rem 1rem;
+}

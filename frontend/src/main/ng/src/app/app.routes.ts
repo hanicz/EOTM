@@ -17,6 +17,7 @@ import { FireComponent } from './fire/fire.component';
 import { FinancialComponent } from './financial/financial.component';
 import { CashComponent } from './cash/cash.component';
 import { SalaryComponent } from './salary/salary.component';
+import { EquityComponent } from './equity/equity.component';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent },
@@ -36,5 +37,6 @@ export const routes: Routes = [
   { path: 'fire', component: FireComponent },
   { path: 'financial', component: FinancialComponent },
   { path: 'salary', component: SalaryComponent },
+  { path: 'equity', component: EquityComponent },
   { path: 'settings', component: SettingsComponent }
 ];

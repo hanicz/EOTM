@@ -3,6 +3,7 @@ package eye.on.the.money.dto.out;
 import eye.on.the.money.util.Generated;
 import lombok.*;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Getter
@@ -13,7 +14,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
-public class TaxBreakdownDTO {
+public class TaxBreakdownDTO implements Serializable {
 
     private BigDecimal amount;
     private BigDecimal taxBase;

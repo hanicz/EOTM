@@ -1,0 +1,247 @@
+<p-toast position="bottom-center"></p-toast>
+<p class="mt-0 mb-3 text-color-secondary text-sm">
+  A STAR pays out the appreciation, not the whole share &mdash; granted at an FMV of 10 and worth 11 today, each
+  unit is worth 1. The value is not public, so you type in what you were last told it is worth. The schedule is
+  worked out for you: a quarter of the grant vests on the first anniversary of the vesting commencement date and
+  the rest lands in equal quarterly instalments, so a four-year grant is a 25% cliff and then a sixteenth every
+  quarter. Commencement dates only ever fall on 8 January, 8 April, 8 July or 8 October, so whatever date you
+  enter is moved forward to the next of them. Every instalment &mdash; vested or not &mdash; is valued at today's
+  spread and today's MNB rate, then taxed the Hungarian way: 89% of the value is the tax base, carrying 13%
+  szocho and 15% szja. It answers what the grant is worth if you cashed out today, not what any past instalment
+  was actually worth on its own date.
+</p>
+
+@if (report && report.items.length > 0) {
+  <div class="star-summary">
+    <div class="star-tile">
+      <span class="star-tile-label">Gross value</span>
+      <span class="star-tile-value">{{report.totalAmountInHuf | number:'1.0-0'}} Ft</span>
+    </div>
+    <div class="star-tile">
+      <span class="star-tile-label">Tax</span>
+      <span class="star-tile-value star-tile-tax">{{report.totalTax.total | number:'1.0-0'}} Ft</span>
+      <span class="cell-sub">{{report.totalTax.szocho | number:'1.0-0'}} szocho &middot;
+        {{report.totalTax.szja | number:'1.0-0'}} szja</span>
+    </div>
+    <div class="star-tile">
+      <span class="star-tile-label">Net value</span>
+      <span class="star-tile-value">{{report.totalNetInHuf | number:'1.0-0'}} Ft</span>
+    </div>
+  </div>
+}
+
+<p-toolbar styleClass="table-toolbar">
+  <ng-template pTemplate="left">
+    <button pButton pRipple label="New grant" icon="pi pi-plus" (click)="openNew()"></button>
+    <button pButton pRipple icon="pi pi-trash" severity="danger" class="p-button-outlined"
+      [disabled]="!selectedGrants || !selectedGrants.length" (click)="deleteClicked()"></button>
+  </ng-template>
+</p-toolbar>
+
+<p-table #dt1 [value]="report?.items ?? []" styleClass="p-datatable-striped table-stack eotm-table"
+  dataKey="id" [(selection)]="selectedGrants" [expandedRowKeys]="expandedRows" [loading]="loading">
+
+  <ng-template pTemplate="header">
+    <tr>
+      <th style="width: 3rem">
+        <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+      </th>
+      <th style="width: 3rem"></th>
+      <th pSortableColumn="name">Name <p-sortIcon field="name"></p-sortIcon></th>
+      <th pSortableColumn="commencementDate">Commenced <p-sortIcon field="commencementDate"></p-sortIcon></th>
+      <th class="cell-num" pSortableColumn="quantity">Units <p-sortIcon field="quantity"></p-sortIcon></th>
+      <th class="cell-num">Grant FMV</th>
+      <th class="cell-num">Current value</th>
+      <th class="cell-num">Spread</th>
+      <th>Schedule</th>
+      <th class="cell-num" pSortableColumn="totalAmountInHuf">Gross <p-sortIcon field="totalAmountInHuf"></p-sortIcon></th>
+      <th class="cell-num">Tax</th>
+      <th class="cell-num" pSortableColumn="totalNetInHuf">Net <p-sortIcon field="totalNetInHuf"></p-sortIcon></th>
+      <th></th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-grant let-expanded="expanded">
+    <tr>
+      <td>
+        <p-tableCheckbox [value]="grant"></p-tableCheckbox>
+      </td>
+      <td>
+        <button type="button" pButton pRipple [pRowToggler]="grant" class="p-button-rounded p-button-text"
+          severity="secondary" pTooltip="Show the vesting schedule"
+          [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></button>
+      </td>
+      <td data-label="Name">
+        <span class="state-chip state-info">{{grant.name}}</span>
+        @if (grant.note) {
+          <span class="cell-sub">{{grant.note}}</span>
+        }
+        @if (grant.error) {
+          <span class="cell-sub star-error">{{grant.error}}</span>
+        }
+      </td>
+      <td data-label="Commenced">{{grant.commencementDate | date:'mediumDate'}}</td>
+      <td data-label="Units" class="cell-num">{{grant.quantity | number}}</td>
+      <td data-label="Grant FMV" class="cell-num">{{grant.baseValue | number:'1.2-2'}} {{grant.currency}}</td>
+      <td data-label="Current value" class="cell-num">{{grant.currentValue | number:'1.2-2'}} {{grant.currency}}</td>
+      <td data-label="Spread" class="cell-num">
+        @if (isUnderwater(grant)) {
+          <span class="state-chip state-neutral"
+            pTooltip="The current value is not above the grant FMV, so the STARs are worth nothing today."
+            >Underwater &#9432;</span>
+        } @else {
+          {{grant.spreadPerUnit | number:'1.2-2'}} {{grant.currency}}
+          <span class="cell-sub">per unit</span>
+        }
+      </td>
+      <td data-label="Schedule">
+        <span class="state-chip state-neutral">{{scheduleLabel(grant)}}</span>
+      </td>
+      <td data-label="Gross" class="cell-num">{{grant.totalAmountInHuf | number:'1.0-0'}} Ft</td>
+      <td data-label="Tax" class="cell-num">{{grant.totalTax?.total | number:'1.0-0'}} Ft</td>
+      <td data-label="Net" class="cell-num">
+        {{grant.totalNetInHuf | number:'1.0-0'}} Ft
+        <span class="cell-sub">{{grant.vestedNetInHuf | number:'1.0-0'}} vested &middot;
+          {{grant.upcomingNetInHuf | number:'1.0-0'}} to come</span>
+      </td>
+      <td>
+        <button pButton pRipple type="button" icon="pi pi-pencil" pTooltip="Edit this grant"
+          (click)="editGrant(grant)" class="p-button-rounded p-button-text mr-1" severity="secondary"></button>
+        <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(grant.id)"
+          class="p-button-rounded p-button-text" severity="danger"></button>
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="expandedrow" let-grant>
+    <tr>
+      <td colspan="13" class="star-schedule-cell">
+        <p-table [value]="grant.vests" styleClass="p-datatable-sm table-stack eotm-table">
+          <ng-template pTemplate="header">
+            <tr>
+              <th class="cell-num">#</th>
+              <th>Vest date</th>
+              <th class="cell-num">Units</th>
+              <th class="cell-num">Spread</th>
+              <th class="cell-num">Value</th>
+              <th class="cell-num">MNB rate</th>
+              <th class="cell-num">Value (Ft)</th>
+              <th class="cell-num">Tax base</th>
+              <th class="cell-num">Szocho</th>
+              <th class="cell-num">Szja</th>
+              <th class="cell-num">Tax</th>
+              <th class="cell-num">Net (Ft)</th>
+              <th>Status</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-vest>
+            <tr>
+              <td data-label="#" class="cell-num">{{vest.sequence}}</td>
+              <td data-label="Vest date">
+                {{vest.vestDate | date:'mediumDate'}}
+                @if (vest.cliff) {
+                  <span class="cell-sub">cliff</span>
+                }
+              </td>
+              <td data-label="Units" class="cell-num">{{vest.quantity | number}}</td>
+              <td data-label="Spread" class="cell-num">
+                {{vest.spreadPerUnit | number:'1.2-2'}} {{vest.currency}}
+              </td>
+              <td data-label="Value" class="cell-num">{{vest.amount | number:'1.2-2'}}</td>
+              <td data-label="MNB rate" class="cell-num">
+                @if (vest.rate !== null) {
+                  {{vest.rate | number:'1.2-4'}}
+                  <span class="cell-sub">{{vest.rateDate | date:'mediumDate'}}</span>
+                } @else {
+                  <span class="cell-none">&mdash;</span>
+                }
+              </td>
+              <td data-label="Value (Ft)" class="cell-num">{{vest.amountInHuf | number:'1.0-0'}}</td>
+              <td data-label="Tax base" class="cell-num">{{vest.tax.taxBase | number:'1.0-0'}}</td>
+              <td data-label="Szocho" class="cell-num">{{vest.tax.szocho | number:'1.0-0'}}</td>
+              <td data-label="Szja" class="cell-num">{{vest.tax.szja | number:'1.0-0'}}</td>
+              <td data-label="Tax" class="cell-num">{{vest.tax.total | number:'1.0-0'}}</td>
+              <td data-label="Net (Ft)" class="cell-num">{{vest.netInHuf | number:'1.0-0'}}</td>
+              <td data-label="Status">
+                @if (vest.vested) {
+                  <span class="state-chip state-buy">Vested</span>
+                } @else {
+                  <span class="state-chip state-neutral"
+                    pTooltip="Valued at today's spread and MNB rate, held flat."
+                    >Upcoming &#9432;</span>
+                }
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="13">No grants recorded yet.</td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog [(visible)]="grantDialog" [style]="{width: '50vw'}" [breakpoints]="{'992px': '75vw', '576px': '100vw'}"
+  header="STAR grant" [modal]="true" styleClass="p-fluid">
+  <ng-template pTemplate="content">
+    <div class="grid">
+      <div class="col-12 sm:col-6 mb-2">
+        <label for="name" class="block mb-2 font-medium text-color-secondary">Name</label>
+        <input pInputText id="name" type="text" [(ngModel)]="grant.name" [maxlength]="nameMaxLength"
+          placeholder="e.g. Northwind" [style]="{'width':'100%'}">
+      </div>
+      <div class="col-12 sm:col-6 mb-2">
+        <label for="currency" class="block mb-2 font-medium text-color-secondary">Currency</label>
+        <p-select id="currency" [options]="currencies" optionLabel="label" optionValue="value"
+          [(ngModel)]="grant.currency" [style]="{'width':'100%'}" [appendTo]="'body'"></p-select>
+      </div>
+      <div class="col-12 sm:col-6 mb-2">
+        <label for="commencementDate" class="block mb-2 font-medium text-color-secondary">
+          Vesting commencement date</label>
+        <input type="date" pInputText id="commencementDate" [(ngModel)]="grant.commencementDate" class="w-full" />
+        <small class="block mt-2 text-color-secondary">Moved forward to the next 8 January, 8 April, 8 July or
+          8 October, whichever comes first.</small>
+      </div>
+      <div class="col-12 sm:col-6 mb-2">
+        <label for="quantity" class="block mb-2 font-medium text-color-secondary">Units granted</label>
+        <p-inputnumber inputId="quantity" [(ngModel)]="grant.quantity" [min]="1" placeholder="1600"></p-inputnumber>
+      </div>
+      <div class="col-12 sm:col-6 mb-2">
+        <label for="baseValue" class="block mb-2 font-medium text-color-secondary">Grant FMV per unit</label>
+        <p-inputnumber inputId="baseValue" [(ngModel)]="grant.baseValue" [min]="0" [minFractionDigits]="2"
+          [maxFractionDigits]="4" placeholder="10"></p-inputnumber>
+      </div>
+      <div class="col-12 sm:col-6 mb-2">
+        <label for="currentValue" class="block mb-2 font-medium text-color-secondary">Current value per unit</label>
+        <p-inputnumber inputId="currentValue" [(ngModel)]="grant.currentValue" [min]="0" [minFractionDigits]="2"
+          [maxFractionDigits]="4" placeholder="11"></p-inputnumber>
+      </div>
+      <div class="col-12 sm:col-6 mb-2">
+        <label for="vestingYears" class="block mb-2 font-medium text-color-secondary">Vesting period</label>
+        <p-inputnumber inputId="vestingYears" [(ngModel)]="grant.vestingYears" [min]="1"
+          [max]="maxVestingYears" suffix=" years"></p-inputnumber>
+        <small class="block mt-2 text-color-secondary">Four years is a quarter on the first anniversary and a
+          sixteenth every quarter after that.</small>
+      </div>
+      <div class="col-12 mb-2">
+        <div class="star-apply-all">
+          <p-checkbox inputId="applyValueToAll" [(ngModel)]="grant.applyValueToAll" [binary]="true"></p-checkbox>
+          <label for="applyValueToAll" class="font-medium text-color-secondary">{{applyAllLabel()}}</label>
+        </div>
+      </div>
+      <div class="col-12 mb-2">
+        <label for="note" class="block mb-2 font-medium text-color-secondary">Note</label>
+        <input pInputText id="note" type="text" [(ngModel)]="grant.note" [maxlength]="noteMaxLength"
+          placeholder="e.g. joining grant" [style]="{'width':'100%'}">
+      </div>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+    <button pButton pRipple label="Save" icon="pi pi-check" [disabled]="!canSave" (click)="saveGrant()"></button>
+  </ng-template>
+</p-dialog>

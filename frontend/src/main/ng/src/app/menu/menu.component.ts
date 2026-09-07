@@ -30,12 +30,12 @@ export class MenuComponent implements OnInit {
         { label: 'Stock', icon: 'fa-solid fa-arrow-trend-up', routerLink: ['/stock'] },
         { label: 'Forex', icon: 'fa-solid fa-coins', routerLink: ['/forex'] },
         { label: 'Crypto', icon: 'fab fa-bitcoin', routerLink: ['/crypto'] },
-        { label: 'Cash', icon: 'fa-solid fa-wallet', routerLink: ['/cash'] }
+        { label: 'Cash', icon: 'fa-solid fa-money-bill', routerLink: ['/cash'] }
       ]
     },
-    { label: 'Financials', icon: 'fa-solid fa-receipt', routerLink: ['/financial'] },
-    { label: 'Salary', icon: 'fa-solid fa-clock-rotate-left', routerLink: ['/salary'] },
-    { label: 'Equity', icon: 'fa-solid fa-award', routerLink: ['/equity'] },
+    { label: 'Financials', icon: 'fa-solid fa-credit-card', routerLink: ['/financial'] },
+    { label: 'Salary', icon: 'fa-solid fa-wallet', routerLink: ['/salary'] },
+    { label: 'Equity', icon: 'fa-solid fa-star', routerLink: ['/equity'] },
     { label: 'FIRE', icon: 'fa-solid fa-fire', routerLink: ['/fire'] },
     { label: 'Tax', icon: 'fa-solid fa-file-invoice-dollar', routerLink: ['/tax'] },
     { label: 'Alerts & Reports', icon: 'fa-solid fa-bell', routerLink: ['/alert'] },

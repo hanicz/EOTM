@@ -50,6 +50,7 @@
       <th pSortableColumn="name">Name <p-sortIcon field="name"></p-sortIcon></th>
       <th pSortableColumn="commencementDate">Commenced <p-sortIcon field="commencementDate"></p-sortIcon></th>
       <th class="cell-num" pSortableColumn="quantity">Units <p-sortIcon field="quantity"></p-sortIcon></th>
+      <th class="cell-num">Vested</th>
       <th class="cell-num">Grant FMV</th>
       <th class="cell-num">Current value</th>
       <th class="cell-num">Spread</th>
@@ -82,6 +83,10 @@
       </td>
       <td data-label="Commenced">{{grant.commencementDate | date:'mediumDate'}}</td>
       <td data-label="Units" class="cell-num">{{grant.quantity | number}}</td>
+      <td data-label="Vested" class="cell-num">
+        {{vestedUnits(grant) | number}}
+        <span class="cell-sub">{{vestedPercentage(grant) | number:'1.0-0'}}%</span>
+      </td>
       <td data-label="Grant FMV" class="cell-num">{{grant.baseValue | number:'1.2-2'}} {{grant.currency}}</td>
       <td data-label="Current value" class="cell-num">{{grant.currentValue | number:'1.2-2'}} {{grant.currency}}</td>
       <td data-label="Spread" class="cell-num">
@@ -115,7 +120,7 @@
 
   <ng-template pTemplate="expandedrow" let-grant>
     <tr>
-      <td colspan="13" class="star-schedule-cell">
+      <td colspan="14" class="star-schedule-cell">
         <p-table [value]="grant.vests" styleClass="p-datatable-sm table-stack eotm-table">
           <ng-template pTemplate="header">
             <tr>
@@ -180,7 +185,7 @@
 
   <ng-template pTemplate="emptymessage">
     <tr>
-      <td colspan="13">No grants recorded yet.</td>
+      <td colspan="14">No grants recorded yet.</td>
     </tr>
   </ng-template>
 </p-table>

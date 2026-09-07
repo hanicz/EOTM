@@ -22,6 +22,7 @@ import { MarketStatusComponent } from './market-status/market-status.component';
 import { NotepadComponent } from './notepad/notepad.component';
 import { UpcomingInterestComponent } from './upcoming-interest/upcoming-interest.component';
 import { UpcomingVestComponent } from './upcoming-vest/upcoming-vest.component';
+import { UpcomingStarVestComponent } from './upcoming-star-vest/upcoming-star-vest.component';
 
 interface AssetSlice {
   label: string;
@@ -55,7 +56,7 @@ const ASSET_COLOURS: { [assetClass: string]: string } = {
     selector: 'app-dashboard',
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.css'],
-    imports: [MenuComponent, Bind, Panel, ButtonDirective, Ripple, Tooltip, PrimeTemplate, Skeleton, Select, FormsModule, DecimalPipe, CurrencyPipe, AlertTypePipe, MarketStatusComponent, NotepadComponent, UpcomingInterestComponent, UpcomingVestComponent]
+    imports: [MenuComponent, Bind, Panel, ButtonDirective, Ripple, Tooltip, PrimeTemplate, Skeleton, Select, FormsModule, DecimalPipe, CurrencyPipe, AlertTypePipe, MarketStatusComponent, NotepadComponent, UpcomingInterestComponent, UpcomingVestComponent, UpcomingStarVestComponent]
 })
 export class DashboardComponent implements OnInit {
 

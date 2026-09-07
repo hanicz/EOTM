@@ -50,6 +50,7 @@
       <th pSortableColumn="shortName">Ticker <p-sortIcon field="shortName"></p-sortIcon></th>
       <th pSortableColumn="grantDate">Granted <p-sortIcon field="grantDate"></p-sortIcon></th>
       <th class="cell-num" pSortableColumn="quantity">Shares <p-sortIcon field="quantity"></p-sortIcon></th>
+      <th class="cell-num">Vested</th>
       <th>Schedule</th>
       <th class="cell-num" pSortableColumn="totalAmountInHuf">Gross <p-sortIcon field="totalAmountInHuf"></p-sortIcon></th>
       <th class="cell-num">Tax</th>
@@ -82,6 +83,10 @@
       </td>
       <td data-label="Granted">{{grant.grantDate | date:'mediumDate'}}</td>
       <td data-label="Shares" class="cell-num">{{grant.quantity | number}}</td>
+      <td data-label="Vested" class="cell-num">
+        {{vestedShares(grant) | number}}
+        <span class="cell-sub">{{vestedPercentage(grant) | number:'1.0-0'}}%</span>
+      </td>
       <td data-label="Schedule">
         <span class="state-chip state-neutral">{{scheduleLabel(grant)}}</span>
       </td>
@@ -103,7 +108,7 @@
 
   <ng-template pTemplate="expandedrow" let-grant>
     <tr>
-      <td colspan="10" class="rsu-schedule-cell">
+      <td colspan="11" class="rsu-schedule-cell">
         <p-table [value]="grant.vests" styleClass="p-datatable-sm table-stack eotm-table">
           <ng-template pTemplate="header">
             <tr>
@@ -168,7 +173,7 @@
 
   <ng-template pTemplate="emptymessage">
     <tr>
-      <td colspan="10">No grants recorded yet.</td>
+      <td colspan="11">No grants recorded yet.</td>
     </tr>
   </ng-template>
 </p-table>

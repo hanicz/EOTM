@@ -65,6 +65,15 @@ export class EquityStarComponent {
     return (grant.spreadPerUnit ?? 0) <= 0;
   }
 
+  vestedUnits(grant: STARGrant): number {
+    return (grant.vests ?? []).reduce((sum, vest) => vest.vested ? sum + vest.quantity : sum, 0);
+  }
+
+  vestedPercentage(grant: STARGrant): number {
+    const granted = grant.quantity ?? 0;
+    return granted > 0 ? this.vestedUnits(grant) / granted * 100 : 0;
+  }
+
   applyAllLabel(): string {
     const name = this.grant.name?.trim();
     return name ? `Apply this current value to every STAR named ${name}`

@@ -84,8 +84,8 @@
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     grid-template-areas:
-        "allocation interest vests   markets"
-        "alerts     notepad  notepad markets";
+        "allocation vests   starvest markets"
+        "interest   notepad alerts   markets";
     align-items: stretch;
     gap: 16px;
 }
@@ -110,6 +110,10 @@
     grid-area: vests;
 }
 
+.starvest-panel {
+    grid-area: starvest;
+}
+
 .notepad-panel {
     grid-area: notepad;
 }
@@ -126,6 +130,7 @@
 .detail-panel app-upcoming-interest,
 .detail-panel app-market-status,
 .detail-panel app-upcoming-vest,
+.detail-panel app-upcoming-star-vest,
 .detail-panel app-notepad {
     display: flex;
     flex-direction: column;
@@ -303,7 +308,8 @@
         grid-template-areas:
             "allocation markets"
             "interest   markets"
-            "alerts     vests"
+            "vests      starvest"
+            "alerts     alerts"
             "notepad    notepad";
     }
 }
@@ -316,6 +322,7 @@
             "interest"
             "markets"
             "vests"
+            "starvest"
             "alerts"
             "notepad";
     }

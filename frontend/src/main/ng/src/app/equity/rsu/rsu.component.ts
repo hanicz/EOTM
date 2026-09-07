@@ -71,6 +71,15 @@ export class EquityRsuComponent {
     return `${grant.vestingYears}y × ${(frequency?.label ?? grant.vestingFrequency).toLowerCase()}`;
   }
 
+  vestedShares(grant: RSUGrant): number {
+    return (grant.vests ?? []).reduce((sum, vest) => vest.vested ? sum + vest.quantity : sum, 0);
+  }
+
+  vestedPercentage(grant: RSUGrant): number {
+    const granted = grant.quantity ?? 0;
+    return granted > 0 ? this.vestedShares(grant) / granted * 100 : 0;
+  }
+
   openNew(): void {
     this.grant = this.emptyGrant();
     this.selectedStock = {} as Symbol;

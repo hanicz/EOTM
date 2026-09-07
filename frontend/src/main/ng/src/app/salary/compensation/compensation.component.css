@@ -1,0 +1,77 @@
+.comp-card {
+    padding: 1rem 1.1rem 1.1rem 1.1rem;
+    border: 1px solid #ece9e0;
+    border-radius: 0.6rem;
+    background: #ffffff;
+}
+
+.comp-period {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.comp-period-dates {
+    font-weight: 600;
+}
+
+.comp-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.comp-tile {
+    padding: 0.9rem 1rem;
+    border-radius: 0.6rem;
+    background: #faf9f6;
+    border: 1px solid #ece9e0;
+}
+
+.comp-tile-label {
+    font-size: 0.75rem;
+    color: #5f5e5a;
+    margin-bottom: 0.35rem;
+}
+
+.comp-tile-value {
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+
+.comp-tile-note {
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: #8a887f;
+}
+
+.comp-heading {
+    margin: 2rem 0 0.75rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.comp-empty {
+    margin: 0;
+    color: #5f5e5a;
+}
+
+.comp-base-row td {
+    background: #faf9f6;
+    font-weight: 600;
+}
+
+.comp-draft-item {
+    align-items: end;
+    border-top: 1px solid #ece9e0;
+    padding-top: 0.75rem;
+}
+
+.comp-draft-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}

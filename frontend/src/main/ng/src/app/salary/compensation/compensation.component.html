@@ -1,0 +1,417 @@
+<p-toast position="bottom-center"></p-toast>
+<p class="mt-0 mb-3 text-color-secondary text-sm">
+  Everything you are paid on top of the base salary &mdash; SZÉP card, bonus, phone, insurance. The base comes
+  from the salary period you are on now, so you only enter the extras. Each one is either a monthly amount or a
+  share of the annual base, and its tax treatment decides what actually lands: taxed as salary loses 15% income
+  tax and 18.5% social contribution, tax-free and already-net items keep their full value. Build a second
+  package below to see how an offer compares.
+</p>
+
+@if (loaded && !current) {
+  <p class="comp-empty">No salary recorded yet. Add one on the History tab and it will show up here.</p>
+}
+
+@if (current) {
+  <div class="comp-card">
+    <div class="comp-period">
+      <span class="comp-period-dates">
+        {{current.validFrom | date:'mediumDate'}} &ndash;
+        @if (current.validTo) {
+          {{current.validTo | date:'mediumDate'}}
+        }
+      </span>
+      @if (current.validTo) {
+        <span class="state-chip state-neutral">Last recorded</span>
+      } @else {
+        <span class="state-chip state-buy">Current</span>
+      }
+      @if (current.label) {
+        <span class="state-chip state-info">{{current.label}}</span>
+      }
+      @if (current.dependents) {
+        <span class="state-chip state-neutral">{{current.dependents}} dependants</span>
+      }
+    </div>
+
+    <div class="comp-tiles">
+      <div class="comp-tile">
+        <div class="comp-tile-label">Base gross monthly</div>
+        <div class="comp-tile-value">
+          {{current.baseGrossMonthly | currency : current.currencyId : 'symbol' : '1.0-0'}}
+        </div>
+      </div>
+      <div class="comp-tile">
+        <div class="comp-tile-label">Total gross monthly</div>
+        <div class="comp-tile-value">
+          {{current.totalGrossMonthly | currency : current.currencyId : 'symbol' : '1.0-0'}}
+        </div>
+      </div>
+      <div class="comp-tile">
+        <div class="comp-tile-label">Total gross annual</div>
+        <div class="comp-tile-value">
+          {{current.totalGrossAnnual | currency : current.currencyId : 'symbol' : '1.0-0'}}
+        </div>
+      </div>
+      <div class="comp-tile">
+        <div class="comp-tile-label">Total net monthly</div>
+        <div class="comp-tile-value">
+          {{current.totalNetMonthly | currency : current.currencyId : 'symbol' : '1.0-0'}}
+        </div>
+        <div class="comp-tile-note">What lands, base and extras together.</div>
+      </div>
+      <div class="comp-tile">
+        <div class="comp-tile-label">Total net annual</div>
+        <div class="comp-tile-value">
+          {{current.totalNetAnnual | currency : current.currencyId : 'symbol' : '1.0-0'}}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p-toolbar styleClass="table-toolbar">
+    <ng-template pTemplate="left">
+      <button pButton pRipple label="New item" icon="pi pi-plus" (click)="openNew()"></button>
+      <button pButton pRipple icon="pi pi-trash" severity="danger" class="p-button-outlined"
+        [disabled]="!selectedItems || !selectedItems.length" (click)="deleteClicked()"></button>
+    </ng-template>
+  </p-toolbar>
+
+  <p-table [value]="rowsOf(current)" styleClass="p-datatable-striped table-stack eotm-table"
+    [(selection)]="selectedItems">
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 3rem"></th>
+        <th>Item</th>
+        <th>Tax treatment</th>
+        <th class="cell-num">Gross monthly</th>
+        <th class="cell-num">Gross annual</th>
+        <th class="cell-num">Net monthly</th>
+        <th class="cell-num">Net annual</th>
+        <th></th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-row>
+      <tr [class.comp-base-row]="row.base">
+        <td>
+          @if (!row.base) {
+            <p-tableCheckbox [value]="row"></p-tableCheckbox>
+          }
+        </td>
+        <td data-label="Item">
+          @if (row.base) {
+            <span class="state-chip state-info">Base salary</span>
+          } @else {
+            {{row.name}}
+            @if (row.amountMode === 'PERCENT_OF_ANNUAL') {
+              <span class="state-chip state-accent ml-2">{{row.percent | number : '1.0-2'}}% of base</span>
+            }
+          }
+        </td>
+        <td data-label="Tax treatment">
+          @if (row.base) {
+            <span class="cell-none">&mdash;</span>
+          } @else {
+            <span class="state-chip {{treatmentClass(row.taxTreatment)}}">{{treatmentLabel(row.taxTreatment)}}</span>
+          }
+        </td>
+        <td data-label="Gross monthly" class="cell-num">
+          @if (row.grossMonthly == null) {
+            <span class="cell-none" pTooltip="You entered this as what you receive, so there is no gross to show."
+              >&mdash;</span>
+          } @else {
+            {{row.grossMonthly | currency : current.currencyId : 'symbol' : '1.0-0'}}
+          }
+        </td>
+        <td data-label="Gross annual" class="cell-num">
+          @if (row.grossAnnual == null) {
+            <span class="cell-none">&mdash;</span>
+          } @else {
+            {{row.grossAnnual | currency : current.currencyId : 'symbol' : '1.0-0'}}
+          }
+        </td>
+        <td data-label="Net monthly" class="cell-num">
+          {{row.netMonthly | currency : current.currencyId : 'symbol' : '1.0-0'}}
+        </td>
+        <td data-label="Net annual" class="cell-num">
+          {{row.netAnnual | currency : current.currencyId : 'symbol' : '1.0-0'}}
+        </td>
+        <td>
+          @if (!row.base) {
+            <button pButton pRipple type="button" icon="pi pi-pencil" pTooltip="Edit this item"
+              (click)="editItem(row)" class="p-button-rounded p-button-text mr-1" severity="secondary"></button>
+            <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(row.id)"
+              class="p-button-rounded p-button-text" severity="danger"></button>
+          }
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+}
+
+<h3 class="comp-heading">Compare a package</h3>
+<p class="mt-0 mb-3 text-color-secondary text-sm">
+  Type in what someone is offering and price it with the same rules. Nothing here is saved &mdash; it is gone
+  when you leave the tab. A bonus kept as a percentage reprices itself against the base salary you enter, so
+  raising the base moves it too.
+</p>
+
+@if (!draft) {
+  <div class="comp-draft-actions">
+    <button pButton pRipple label="Build a package to compare" icon="pi pi-plus-circle" class="p-button-outlined"
+      (click)="startDraft()"></button>
+    @if (current) {
+      <button pButton pRipple label="Copy from my package" icon="pi pi-copy" class="p-button-text"
+        (click)="copyFromCurrent()"></button>
+    }
+  </div>
+}
+
+@if (draft) {
+  <div class="comp-card">
+    <div class="grid">
+      <div class="col-12 sm:col-4 mb-2">
+        <label for="draftLabel" class="block mb-2 font-medium text-color-secondary">Name</label>
+        <input pInputText id="draftLabel" type="text" [(ngModel)]="draft.label" [maxlength]="nameMaxLength"
+          placeholder="e.g. the offer" class="w-full">
+      </div>
+      <div class="col-12 sm:col-3 mb-2">
+        <label for="draftAmount" class="block mb-2 font-medium text-color-secondary">Base salary</label>
+        <input type="number" pInputText id="draftAmount" [(ngModel)]="draft.baseAmount" class="w-full" />
+      </div>
+      <div class="col-12 sm:col-2 mb-2">
+        <label for="draftBasis" class="block mb-2 font-medium text-color-secondary">Entered as</label>
+        <p-select id="draftBasis" [options]="bases" optionLabel="label" optionValue="value"
+          [(ngModel)]="draft.baseBasis" [style]="{'width':'100%'}"></p-select>
+      </div>
+      <div class="col-12 sm:col-2 mb-2">
+        <label for="draftCurrency" class="block mb-2 font-medium text-color-secondary">Currency</label>
+        <p-select id="draftCurrency" [options]="currencies" optionLabel="label" optionValue="value"
+          [(ngModel)]="draft.currencyId" [style]="{'width':'100%'}"></p-select>
+      </div>
+      <div class="col-12 sm:col-1 mb-2">
+        <label for="draftDependents" class="block mb-2 font-medium text-color-secondary">Deps.</label>
+        <input type="number" pInputText id="draftDependents" [(ngModel)]="draft.dependents" min="0"
+          [max]="maxDependents" class="w-full" />
+      </div>
+    </div>
+
+    @for (item of draft.items; track $index) {
+      <div class="grid comp-draft-item">
+        <div class="col-12 sm:col-5 mb-2">
+          <input pInputText type="text" [(ngModel)]="item.name" [maxlength]="nameMaxLength"
+            placeholder="e.g. SZÉP card" class="w-full">
+        </div>
+        <div class="col-12 sm:col-2 mb-2">
+          <p-select [options]="amountModes" optionLabel="label" optionValue="value" [(ngModel)]="item.amountMode"
+            (onChange)="modeChanged(item)" [style]="{'width':'100%'}"></p-select>
+        </div>
+        <div class="col-12 sm:col-2 mb-2">
+          @if (item.amountMode === 'PERCENT_OF_ANNUAL') {
+            <input type="number" pInputText [(ngModel)]="item.percent" [max]="maxPercent" placeholder="%"
+              class="w-full" />
+          } @else {
+            <input type="number" pInputText [(ngModel)]="item.monthlyAmount" placeholder="A month"
+              class="w-full" />
+          }
+        </div>
+        <div class="col-12 sm:col-2 mb-2">
+          <p-select [options]="treatments" optionLabel="label" optionValue="value" [(ngModel)]="item.taxTreatment"
+            [style]="{'width':'100%'}"></p-select>
+        </div>
+        <div class="col-12 sm:col-1 mb-2">
+          <button pButton pRipple type="button" icon="pi pi-times" (click)="removeDraftItem($index)"
+            class="p-button-rounded p-button-text" severity="danger"></button>
+        </div>
+      </div>
+    }
+
+    <div class="comp-draft-actions">
+      <button pButton pRipple label="Add item" icon="pi pi-plus" class="p-button-text"
+        (click)="addDraftItem()"></button>
+      @if (current) {
+        <button pButton pRipple label="Copy from my package" icon="pi pi-copy" class="p-button-text"
+          (click)="copyFromCurrent()"></button>
+      }
+      <button pButton pRipple label="Clear" icon="pi pi-trash" class="p-button-text" severity="danger"
+        (click)="clearDraft()"></button>
+      <button pButton pRipple label="Compare" icon="pi pi-check" [disabled]="!draftReady()"
+        (click)="compare()"></button>
+    </div>
+  </div>
+}
+
+@if (compared) {
+  <div class="comp-card mt-3">
+    <div class="comp-period">
+      <span class="comp-period-dates">{{compared.label || 'The package you entered'}}</span>
+      <span class="state-chip state-accent">Not saved</span>
+    </div>
+
+    <div class="comp-tiles">
+      <div class="comp-tile">
+        <div class="comp-tile-label">Total gross monthly</div>
+        <div class="comp-tile-value">
+          {{compared.totalGrossMonthly | currency : compared.currencyId : 'symbol' : '1.0-0'}}
+        </div>
+      </div>
+      <div class="comp-tile">
+        <div class="comp-tile-label">Total gross annual</div>
+        <div class="comp-tile-value">
+          {{compared.totalGrossAnnual | currency : compared.currencyId : 'symbol' : '1.0-0'}}
+        </div>
+      </div>
+      <div class="comp-tile">
+        <div class="comp-tile-label">Total net monthly</div>
+        <div class="comp-tile-value">
+          {{compared.totalNetMonthly | currency : compared.currencyId : 'symbol' : '1.0-0'}}
+        </div>
+      </div>
+      <div class="comp-tile">
+        <div class="comp-tile-label">Total net annual</div>
+        <div class="comp-tile-value">
+          {{compared.totalNetAnnual | currency : compared.currencyId : 'symbol' : '1.0-0'}}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (comparable()) {
+    <p-table [value]="comparisonRows()" styleClass="p-datatable-striped table-stack eotm-table mt-3">
+      <ng-template pTemplate="header">
+        <tr>
+          <th></th>
+          <th class="cell-num">Your package</th>
+          <th class="cell-num">{{compared.label || 'The other one'}}</th>
+          <th class="cell-num">Difference</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-row>
+        <tr>
+          <td data-label="Figure">{{row.label}}</td>
+          <td data-label="Your package" class="cell-num">
+            {{row.mine | currency : compared.currencyId : 'symbol' : '1.0-0'}}
+          </td>
+          <td data-label="The other one" class="cell-num">
+            {{row.theirs | currency : compared.currencyId : 'symbol' : '1.0-0'}}
+          </td>
+          <td data-label="Difference" class="cell-num">
+            <app-delta [value]="difference(row)" [percent]="differencePercent(row)"
+              [currency]="compared.currencyId" digits="1.0-0"></app-delta>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  } @else if (current) {
+    <p class="comp-empty mt-3">
+      The package you entered is in {{compared.currencyId}} and yours is in {{current.currencyId}}, so there is
+      nothing sensible to subtract. Put both in the same currency to see the difference.
+    </p>
+  }
+
+  <p-table [value]="compared.items" styleClass="p-datatable-striped table-stack eotm-table mt-3">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Item</th>
+        <th>Tax treatment</th>
+        <th class="cell-num">Gross monthly</th>
+        <th class="cell-num">Gross annual</th>
+        <th class="cell-num">Net monthly</th>
+        <th class="cell-num">Net annual</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-row>
+      <tr>
+        <td data-label="Item">
+          {{row.name}}
+          @if (row.amountMode === 'PERCENT_OF_ANNUAL') {
+            <span class="state-chip state-accent ml-2">{{row.percent | number : '1.0-2'}}% of base</span>
+          }
+        </td>
+        <td data-label="Tax treatment">
+          <span class="state-chip {{treatmentClass(row.taxTreatment)}}">{{treatmentLabel(row.taxTreatment)}}</span>
+        </td>
+        <td data-label="Gross monthly" class="cell-num">
+          @if (row.grossMonthly == null) {
+            <span class="cell-none">&mdash;</span>
+          } @else {
+            {{row.grossMonthly | currency : compared.currencyId : 'symbol' : '1.0-0'}}
+          }
+        </td>
+        <td data-label="Gross annual" class="cell-num">
+          @if (row.grossAnnual == null) {
+            <span class="cell-none">&mdash;</span>
+          } @else {
+            {{row.grossAnnual | currency : compared.currencyId : 'symbol' : '1.0-0'}}
+          }
+        </td>
+        <td data-label="Net monthly" class="cell-num">
+          {{row.netMonthly | currency : compared.currencyId : 'symbol' : '1.0-0'}}
+        </td>
+        <td data-label="Net annual" class="cell-num">
+          {{row.netAnnual | currency : compared.currencyId : 'symbol' : '1.0-0'}}
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="6">Base salary only &mdash; no extras entered.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+}
+
+<p-dialog [(visible)]="itemDialog" [style]="{width: '50vw'}" [breakpoints]="{'992px': '75vw', '576px': '100vw'}"
+  header="Compensation item" [modal]="true" styleClass="p-fluid">
+  <ng-template pTemplate="content">
+    <div class="grid">
+      <div class="col-12 sm:col-6 mb-2">
+        <label for="name" class="block mb-2 font-medium text-color-secondary">Name</label>
+        <input pInputText id="name" type="text" [(ngModel)]="item.name" [maxlength]="nameMaxLength"
+          placeholder="e.g. SZÉP card" class="w-full">
+      </div>
+      <div class="col-12 sm:col-6 mb-2">
+        <label for="amountMode" class="block mb-2 font-medium text-color-secondary">Enter as</label>
+        <p-select id="amountMode" [options]="amountModes" optionLabel="label" optionValue="value"
+          [(ngModel)]="item.amountMode" (onChange)="modeChanged(item)" [style]="{'width':'100%'}"
+          [appendTo]="'body'"></p-select>
+      </div>
+      @if (item.amountMode === 'PERCENT_OF_ANNUAL') {
+        <div class="col-12 sm:col-6 mb-2">
+          <label for="percent" class="block mb-2 font-medium text-color-secondary">Percent</label>
+          <input type="number" pInputText id="percent" [(ngModel)]="item.percent" min="0" [max]="maxPercent"
+            class="w-full" />
+          <small class="block mt-2 text-color-secondary">Taken from the annual gross base salary, then read as
+            a gross or a net figure according to the tax treatment below.</small>
+        </div>
+      } @else {
+        <div class="col-12 sm:col-6 mb-2">
+          <label for="monthlyAmount" class="block mb-2 font-medium text-color-secondary">Amount a month</label>
+          <input type="number" pInputText id="monthlyAmount" [(ngModel)]="item.monthlyAmount" class="w-full" />
+          <small class="block mt-2 text-color-secondary">Enter a yearly figure as its monthly equivalent.</small>
+        </div>
+      }
+      <div class="col-12 sm:col-6 mb-2">
+        <label for="taxTreatment" class="block mb-2 font-medium text-color-secondary">Tax treatment</label>
+        <p-select id="taxTreatment" [options]="treatments" optionLabel="label" optionValue="value"
+          [(ngModel)]="item.taxTreatment" [style]="{'width':'100%'}" [appendTo]="'body'"></p-select>
+        <small class="block mt-2 text-color-secondary">Taxed as salary loses 15% income tax and 18.5% social
+          contribution. Tax-free and received net keep their full value.</small>
+      </div>
+      <div class="col-12 mb-2">
+        <label for="note" class="block mb-2 font-medium text-color-secondary">Note</label>
+        <input pInputText id="note" type="text" [(ngModel)]="item.note" [maxlength]="noteMaxLength"
+          [style]="{'width':'100%'}">
+      </div>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+    <button pButton pRipple label="Save" icon="pi pi-check" [disabled]="incomplete(item)"
+      (click)="saveItem()"></button>
+  </ng-template>
+</p-dialog>

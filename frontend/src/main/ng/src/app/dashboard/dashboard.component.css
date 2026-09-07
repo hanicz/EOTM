@@ -82,20 +82,55 @@
 
 .detail-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
-    align-items: start;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-areas:
+        "allocation interest vests   markets"
+        "alerts     notepad  notepad markets";
+    align-items: stretch;
     gap: 16px;
 }
 
+.allocation-panel {
+    grid-area: allocation;
+}
+
+.interest-panel {
+    grid-area: interest;
+}
+
+.alerts-panel {
+    grid-area: alerts;
+}
+
+.markets-panel {
+    grid-area: markets;
+}
+
+.vests-panel {
+    grid-area: vests;
+}
+
+.notepad-panel {
+    grid-area: notepad;
+}
+
 .detail-panel {
+    display: flex;
+    flex-direction: column;
     border: 1px solid #e3e0d5;
     border-radius: 8px;
     padding: 14px;
     min-width: 0;
 }
 
-.notepad-panel {
-    grid-column: 2 / -1;
+.detail-panel app-upcoming-interest,
+.detail-panel app-market-status,
+.detail-panel app-upcoming-vest,
+.detail-panel app-notepad {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
 }
 
 .detail-panel-clickable {
@@ -116,8 +151,10 @@
 
 .donut-row {
     display: flex;
+    flex: 1;
     align-items: center;
-    gap: 16px;
+    justify-content: center;
+    gap: 18px;
 }
 
 .donut-wrap {
@@ -181,6 +218,9 @@
 
 .legend {
     display: flex;
+    flex: 1;
+    min-width: 0;
+    max-width: 210px;
     flex-direction: column;
     gap: 6px;
 }
@@ -258,20 +298,26 @@
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
-    /* Three panels are too tight below desktop, so Markets wraps onto its own row. */
     .detail-grid {
-        grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-    }
-
-    /* Below desktop the notepad goes back to its own full-width row. */
-    .notepad-panel {
-        grid-column: 1 / -1;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-areas:
+            "allocation markets"
+            "interest   markets"
+            "alerts     vests"
+            "notepad    notepad";
     }
 }
 
 @media (max-width: 991px) {
     .detail-grid {
         grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+            "allocation"
+            "interest"
+            "markets"
+            "vests"
+            "alerts"
+            "notepad";
     }
 }
 
@@ -290,7 +336,6 @@
 }
 
 @media (max-width: 575px) {
-    /* Stack the donut above its legend rather than squeezing both onto one row. */
     .donut-row {
         flex-direction: column;
         align-items: center;
@@ -299,6 +344,7 @@
 
     .legend {
         width: 100%;
+        max-width: none;
     }
 }
 

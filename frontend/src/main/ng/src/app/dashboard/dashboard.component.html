@@ -74,7 +74,7 @@
         </div>
 
         <div class="detail-grid">
-          <div class="detail-panel">
+          <div class="detail-panel allocation-panel">
             <div class="detail-title">Allocation by asset class</div>
             @if (donutSegments.length > 0) {
               <div class="donut-row">
@@ -119,17 +119,17 @@
             }
           </div>
 
-          <div class="detail-panel detail-panel-clickable" (click)="navigateTo('/security')">
+          <div class="detail-panel detail-panel-clickable interest-panel" (click)="navigateTo('/security')">
             <div class="detail-title">Upcoming interest</div>
             <app-upcoming-interest></app-upcoming-interest>
           </div>
 
-          <div class="detail-panel">
+          <div class="detail-panel markets-panel">
             <div class="detail-title">Markets</div>
             <app-market-status></app-market-status>
           </div>
 
-          <div class="detail-panel detail-panel-clickable" (click)="navigateTo('/alert')">
+          <div class="detail-panel detail-panel-clickable alerts-panel" (click)="navigateTo('/alert')">
             <div class="detail-title">Active alerts</div>
             @if (stockAlerts.length === 0 && cryptoAlerts.length === 0) {
               <div class="empty-state">No active alerts</div>
@@ -148,7 +148,7 @@
             }
           </div>
 
-          <div class="detail-panel detail-panel-clickable" (click)="navigateTo('/equity')">
+          <div class="detail-panel detail-panel-clickable vests-panel" (click)="navigateTo('/equity')">
             <div class="detail-title">Upcoming vests</div>
             <app-upcoming-vest></app-upcoming-vest>
           </div>

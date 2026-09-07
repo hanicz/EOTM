@@ -27,20 +27,17 @@ public class WatchGroupService {
     private final UserService userService;
 
     public List<WatchGroupDTO> getGroups(Long userId) {
-        log.trace("Enter");
         return this.watchGroupRepository.findByUserIdOrderByName(userId).stream()
                 .map(this::convertToDTO).toList();
     }
 
     public WatchGroup getGroup(Long userId, Long id) {
-        log.trace("Enter");
         return this.watchGroupRepository.findByUserIdAndId(userId, id)
                 .orElseThrow(() -> new NoSuchElementException("Watch group not found: " + id));
     }
 
     @Transactional
     public WatchGroupDTO createGroup(Long userId, WatchGroupEditDTO editDTO) {
-        log.trace("Enter");
         String name = editDTO.name().trim();
         this.rejectDuplicate(userId, name, null);
 
@@ -54,7 +51,6 @@ public class WatchGroupService {
 
     @Transactional
     public WatchGroupDTO updateGroup(Long userId, Long id, WatchGroupEditDTO editDTO) {
-        log.trace("Enter");
         String name = editDTO.name().trim();
         WatchGroup group = this.getGroup(userId, id);
         this.rejectDuplicate(userId, name, id);
@@ -65,7 +61,6 @@ public class WatchGroupService {
 
     @Transactional
     public boolean deleteGroup(Long userId, Long id) {
-        log.trace("Enter");
         Optional<WatchGroup> group = this.watchGroupRepository.findByUserIdAndId(userId, id);
         group.ifPresent(this.watchGroupRepository::delete);
         return group.isPresent();

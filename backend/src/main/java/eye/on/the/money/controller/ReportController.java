@@ -11,7 +11,6 @@ import eye.on.the.money.service.report.MonthlyReportService;
 import eye.on.the.money.service.report.ReportSubscriptionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +25,6 @@ import java.time.YearMonth;
 
 @RestController
 @RequestMapping("api/v1/report")
-@Slf4j
 @RequiredArgsConstructor
 public class ReportController {
 
@@ -36,14 +34,12 @@ public class ReportController {
 
     @GetMapping("monthly/subscription")
     public ResponseEntity<ReportSubscriptionDTO> getSubscription(@CurrentUserId Long userId) {
-        log.trace("Enter");
         return ResponseEntity.ok(this.reportSubscriptionService.get(userId));
     }
 
     @PutMapping("monthly/subscription")
     public ResponseEntity<ReportSubscriptionDTO> updateSubscription(@CurrentUserId Long userId,
                                                                     @Valid @RequestBody ReportSubscriptionUpdateDTO update) {
-        log.trace("Enter");
         return ResponseEntity.ok(this.reportSubscriptionService.update(userId, update));
     }
 
@@ -51,7 +47,6 @@ public class ReportController {
     public ResponseEntity<Object> sendNow(@CurrentUserId Long userId,
                                           @RequestParam(required = false) Integer year,
                                           @RequestParam(required = false) Integer month) {
-        log.trace("Enter");
         if (!this.emailService.isEnabled()) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new ErrorResponse(HttpStatus.CONFLICT.value(), "Email is not configured on the server"));

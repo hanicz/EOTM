@@ -4,12 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import eye.on.the.money.dto.CSVHelper;
 import eye.on.the.money.util.Generated;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Slf4j
 @Getter
 @Setter
 @Builder

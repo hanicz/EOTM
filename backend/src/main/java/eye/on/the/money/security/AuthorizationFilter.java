@@ -1,5 +1,7 @@
 package eye.on.the.money.security;
 
+import eye.on.the.money.logging.RequestLoggingFilter;
+import eye.on.the.money.model.User;
 import eye.on.the.money.service.user.UserService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -8,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -41,11 +44,15 @@ public class AuthorizationFilter extends OncePerRequestFilter {
             String subject = this.jwtService.extractUsername(token);
             userDetails = this.userService.loadUserByUsername(subject);
         } catch (JwtException | IllegalArgumentException | UsernameNotFoundException e) {
-            log.warn("Auth failed: {}", e.getMessage());
+            log.warn("Auth failed for {} {}: {}", request.getMethod(), request.getRequestURI(), e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             PrintWriter pw = response.getWriter();
             pw.write("HTTP Status 401 - Authorization failed");
             return;
+        }
+
+        if (userDetails instanceof User user) {
+            MDC.put(RequestLoggingFilter.USER_ID, String.valueOf(user.getId()));
         }
 
         UsernamePasswordAuthenticationToken upa =

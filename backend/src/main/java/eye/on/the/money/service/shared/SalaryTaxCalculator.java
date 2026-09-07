@@ -1,14 +1,12 @@
 package eye.on.the.money.service.shared;
 
 import eye.on.the.money.dto.out.SalaryNetDTO;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 @Component
-@Slf4j
 public class SalaryTaxCalculator {
 
     private static final String HUF = "HUF";

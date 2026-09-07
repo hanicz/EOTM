@@ -5,7 +5,6 @@ import eye.on.the.money.model.User;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -15,7 +14,6 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
-@Slf4j
 @ToString(exclude = "user")
 @Table(name = "EOTM_REPORT_SUBSCRIPTION",
         uniqueConstraints = @UniqueConstraint(name = "UK_EOTM_REPORT_SUBSCRIPTION_USER", columnNames = "user_id"))

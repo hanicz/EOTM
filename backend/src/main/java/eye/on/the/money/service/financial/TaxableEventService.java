@@ -13,7 +13,6 @@ import eye.on.the.money.service.api.MNBAPIService;
 import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.shared.TaxCalculator;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +36,6 @@ import java.util.stream.Collectors;
  * on MNB being reachable nor changes under the user when a rate is revised.
  */
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class TaxableEventService implements ICSVService {
 
@@ -51,7 +49,6 @@ public class TaxableEventService implements ICSVService {
 
     @Transactional
     public void setTaxable(Long userId, List<Long> ids, boolean taxable) {
-        log.trace("Enter");
         List<BankTransaction> transactions = this.bankTransactionRepository.findByUserIdAndIdIn(userId, ids);
         if (transactions.isEmpty()) return;
 
@@ -76,7 +73,6 @@ public class TaxableEventService implements ICSVService {
 
     @Transactional
     public void setTaxPaid(Long userId, List<Long> ids, boolean paid) {
-        log.trace("Enter");
         List<BankTransactionTax> taxes =
                 this.bankTransactionTaxRepository.findByUserIdAndBankTransactionIdIn(userId, ids);
         if (taxes.isEmpty()) return;
@@ -86,7 +82,6 @@ public class TaxableEventService implements ICSVService {
     }
 
     public TaxableEventReportDTO getTaxableEvents(Long userId) {
-        log.trace("Enter");
         List<BankTransactionTax> taxes = this.bankTransactionTaxRepository.findTaxableByUserId(userId);
         if (taxes.isEmpty()) return TaxableEventReportDTO.empty();
 
@@ -102,7 +97,6 @@ public class TaxableEventService implements ICSVService {
     }
 
     public void getCSV(Long userId, Writer writer) {
-        log.trace("Enter");
         this.printRecords(this.getTaxableEvents(userId).getItems(), writer);
     }
 

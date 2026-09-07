@@ -9,7 +9,6 @@ import eye.on.the.money.dto.CSVHelper;
 import eye.on.the.money.model.financial.BankTransaction;
 import eye.on.the.money.util.Numbers;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVRecord;
 
 import java.time.LocalDate;
@@ -18,7 +17,6 @@ import java.time.format.DateTimeFormatter;
 @Getter
 @Setter
 @Builder
-@Slf4j
 @ToString
 @AllArgsConstructor
 @EqualsAndHashCode

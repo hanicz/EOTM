@@ -2,7 +2,6 @@ package eye.on.the.money.dto.out;
 
 import eye.on.the.money.util.Generated;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -11,7 +10,6 @@ import java.util.List;
  * A worked-through retirement plan: what the pot does each year, when it clears the target, and whether it
  * lasts.
  */
-@Slf4j
 @Getter
 @Setter
 @Builder
@@ -59,6 +57,8 @@ public class FireProjectionResultDTO {
 
     private Integer retirementYear;
     private Integer retirementAge;
+
+    private Integer pensionYear;
 
     /** Age the pot runs out, or null if it survives to the end of the plan. */
     private Integer depletedAtAge;

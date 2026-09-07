@@ -547,6 +547,119 @@ class FireServiceTest {
     }
 
     @Test
+    void project_paysTheUnemploymentBenefitIntoThePotInTheFirstDrawdownYear() {
+        this.stubPortfolio(100_000_000);
+
+        FireProjectionResultDTO result = this.fireService.project(USER,
+                this.plan().annualSpending(BigDecimal.valueOf(4_800_000)).retirementAge(32)
+                        .unemploymentBenefit(BigDecimal.valueOf(3_000_000)).build());
+
+        assertEquals(0, this.yearOf(result, 2).getPension().signum());
+        assertEquals(3_000_000, this.yearOf(result, 3).getPension().doubleValue(), TOLERANCE);
+        assertEquals(4_800_000, this.yearOf(result, 3).getWithdrawals().doubleValue(), TOLERANCE);
+        assertEquals(98_200_000, this.yearOf(result, 3).getBalance().doubleValue(), TOLERANCE);
+        assertEquals(0, this.yearOf(result, 4).getPension().signum());
+    }
+
+    @Test
+    void project_takesTheUnemploymentBenefitAtFaceValue() {
+        this.stubPortfolio(100_000_000);
+
+        FireProjectionResultDTO result = this.fireService.project(USER,
+                this.plan().annualSpending(BigDecimal.valueOf(4_800_000)).retirementAge(32)
+                        .inflation(BigDecimal.valueOf(10))
+                        .unemploymentBenefit(BigDecimal.valueOf(3_000_000)).build());
+
+        assertEquals(3_000_000, this.yearOf(result, 3).getPension().doubleValue(), TOLERANCE);
+    }
+
+    @Test
+    void project_reportsTheUnemploymentBenefitAlongsideThePension() {
+        this.stubPortfolio(100_000_000);
+
+        FireProjectionResultDTO result = this.fireService.project(USER,
+                this.plan().annualSpending(BigDecimal.valueOf(4_800_000)).retirementAge(32)
+                        .monthlyPension(BigDecimal.valueOf(100_000)).pensionAge(30)
+                        .unemploymentBenefit(BigDecimal.valueOf(3_000_000)).build());
+
+        assertEquals(1_200_000, this.yearOf(result, 2).getPension().doubleValue(), TOLERANCE);
+        assertEquals(4_200_000, this.yearOf(result, 3).getPension().doubleValue(), TOLERANCE);
+        assertEquals(1_200_000, this.yearOf(result, 4).getPension().doubleValue(), TOLERANCE);
+    }
+
+    @Test
+    void project_doesNotBringFinancialIndependenceForwardWithAnUnemploymentBenefit() {
+        FireProjectionDTO.FireProjectionDTOBuilder plan = this.plan()
+                .monthlyContribution(BigDecimal.valueOf(1_000_000));
+
+        FireProjectionResultDTO without = this.fireService.project(USER, plan.build());
+        FireProjectionResultDTO with = this.fireService.project(USER,
+                plan.unemploymentBenefit(BigDecimal.valueOf(50_000_000)).build());
+
+        assertEquals(without.getFiYear(), with.getFiYear());
+        assertEquals(without.getRetirementYear(), with.getRetirementYear());
+    }
+
+    @Test
+    void project_makesThePotLastLongerWithAnUnemploymentBenefit() {
+        this.stubPortfolio(20_000_000);
+
+        FireProjectionDTO.FireProjectionDTOBuilder plan = this.plan()
+                .annualSpending(BigDecimal.valueOf(6_000_000)).retirementAge(30);
+
+        FireProjectionResultDTO without = this.fireService.project(USER, plan.build());
+        FireProjectionResultDTO with = this.fireService.project(USER,
+                plan.unemploymentBenefit(BigDecimal.valueOf(6_000_000)).build());
+
+        assertEquals(34, without.getDepletedAtAge());
+        assertEquals(35, with.getDepletedAtAge());
+    }
+
+    @Test
+    void project_paysNoUnemploymentBenefitWhenTheTargetIsNeverReached() {
+        FireProjectionResultDTO result = this.fireService.project(USER,
+                this.plan().fireNumber(BigDecimal.valueOf(1_000_000_000))
+                        .unemploymentBenefit(BigDecimal.valueOf(3_000_000)).build());
+
+        assertNull(result.getRetirementYear());
+        assertTrue(result.getTimeline().stream().allMatch(point -> point.getPension().signum() == 0));
+    }
+
+    @Test
+    void project_reportsThePensionYearFromThePensionAgeNotTheUnemploymentBenefit() {
+        this.stubPortfolio(100_000_000);
+
+        FireProjectionResultDTO result = this.fireService.project(USER,
+                this.plan().annualSpending(BigDecimal.valueOf(4_800_000)).retirementAge(32)
+                        .monthlyPension(BigDecimal.valueOf(300_000)).pensionAge(65)
+                        .unemploymentBenefit(BigDecimal.valueOf(3_000_000)).build());
+
+        assertEquals(3_000_000, this.yearOf(result, 3).getPension().doubleValue(), TOLERANCE);
+        assertEquals(35, result.getPensionYear());
+    }
+
+    @Test
+    void project_reportsNoPensionYearWithoutAPension() {
+        this.stubPortfolio(100_000_000);
+
+        FireProjectionResultDTO result = this.fireService.project(USER,
+                this.plan().annualSpending(BigDecimal.valueOf(4_800_000)).retirementAge(32).build());
+
+        assertNull(result.getPensionYear());
+    }
+
+    @Test
+    void project_reportsAPensionAlreadyInPaymentAsStartingAtYearZero() {
+        this.stubPortfolio(100_000_000);
+
+        FireProjectionResultDTO result = this.fireService.project(USER,
+                this.plan().annualSpending(BigDecimal.valueOf(4_800_000)).currentAge(70).retirementAge(70)
+                        .lifeExpectancy(90).monthlyPension(BigDecimal.valueOf(250_000)).pensionAge(65).build());
+
+        assertEquals(0, result.getPensionYear());
+    }
+
+    @Test
     void project_reportsTheAgeThePotRunsOut() {
         this.stubPortfolio(10_000_000);
 

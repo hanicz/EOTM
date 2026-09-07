@@ -6,7 +6,6 @@ import eye.on.the.money.model.User;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDate;
@@ -15,7 +14,6 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Builder
-@Slf4j
 @ToString
 @Table(name = "EOTM_STOCK_INVESTMENT", indexes = {
         @Index(name = "IDX_STOCK_INVESTMENT_USER_DATE", columnList = "user_id, transaction_date"),

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eye.on.the.money.exception.APIException;
 import eye.on.the.money.repository.ConfigRepository;
 import eye.on.the.money.repository.CredentialRepository;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.Retryable;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
-@Slf4j
 public class CryptoAPIService extends APIService {
 
     private final static String API = "coingecko";
@@ -28,7 +26,6 @@ public class CryptoAPIService extends APIService {
 
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public JsonNode getLiveValueForCoins(String currency, String ids) {
-        log.trace("Enter");
         String url = this.getApiUrl(CryptoAPIService.API) + this.expandTemplate(CryptoAPIService.CRYPTO_PATH,
                 new Object[]{this.encodeQuery(ids), this.encodeQuery(currency), Boolean.TRUE.toString()});
         ResponseEntity<?> response = this.callGetAPI(url, String.class);

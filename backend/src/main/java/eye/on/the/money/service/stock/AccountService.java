@@ -6,7 +6,6 @@ import eye.on.the.money.model.stock.Account;
 import eye.on.the.money.repository.stock.AccountRepository;
 import eye.on.the.money.service.user.UserService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,7 +15,6 @@ import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class AccountService {
 

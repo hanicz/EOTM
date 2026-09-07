@@ -6,7 +6,6 @@ import eye.on.the.money.dto.out.FireYearDTO;
 import eye.on.the.money.dto.out.NetWorthDTO;
 import eye.on.the.money.exception.FireException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.Writer;
@@ -48,7 +47,6 @@ import java.util.TreeSet;
  * Treat the drawdown as an illustration of the assumptions, not a probability.
  */
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class FireService implements ICSVService {
 
@@ -65,7 +63,6 @@ public class FireService implements ICSVService {
     private final NetWorthService netWorthService;
 
     public FireProjectionResultDTO project(Long userId, FireProjectionDTO input) {
-        log.trace("Enter");
         Assumptions assumptions = this.validate(input);
 
         NetWorthDTO portfolio = this.netWorthService.getNetWorth(userId, input.getCurrency(), false);
@@ -105,6 +102,7 @@ public class FireService implements ICSVService {
                 .fiAge((fiYear == null) ? null : assumptions.currentAge() + fiYear)
                 .retirementYear(retirementYear)
                 .retirementAge((retirementYear == null) ? null : assumptions.currentAge() + retirementYear)
+                .pensionYear(assumptions.pensionStartYear())
                 .depletedAtAge(depletedAtAge)
                 .lastsThroughRetirement(depletedAtAge == null)
                 .finalAge(last.getAge())
@@ -114,7 +112,6 @@ public class FireService implements ICSVService {
     }
 
     public void getCSV(Long userId, FireProjectionDTO input, Writer writer) {
-        log.trace("Enter");
         this.printRecords(this.project(userId, input).getTimeline(), writer);
     }
 
@@ -140,6 +137,7 @@ public class FireService implements ICSVService {
 
             double contributed = 0;
             double pension = 0;
+            double benefit = 0;
             double withdrawn = 0;
             double earned = 0;
 
@@ -151,10 +149,12 @@ public class FireService implements ICSVService {
                 double spending = accumulating ? 0 : annualSpending * inflationToYear;
                 pension = this.pensionPaid(assumptions, year)
                         ? assumptions.monthlyPension() * MONTHS_IN_YEAR * inflationToYear : 0;
+                benefit = this.benefitPaid(assumptions, accumulating, retirementYear, year)
+                        ? assumptions.unemploymentBenefit() : 0;
 
                 // The pension meets the spending first, so only the shortfall comes out of the pot. Anything
                 // left over is income with nowhere else to go, so it joins the pot.
-                double paidIn = contributed + Math.max(0, pension - spending);
+                double paidIn = contributed + benefit + Math.max(0, pension - spending);
                 withdrawn = Math.max(0, spending - pension);
 
                 earned = balance * growthRate;
@@ -168,7 +168,7 @@ public class FireService implements ICSVService {
             }
 
             timeline.add(this.year(year, assumptions, accumulating ? ACCUMULATION : DRAWDOWN,
-                    contributed, earned, pension, withdrawn, balance));
+                    contributed, earned, pension + benefit, withdrawn, balance));
         }
         return timeline;
     }
@@ -250,6 +250,12 @@ public class FireService implements ICSVService {
                 && year >= assumptions.pensionStartYear();
     }
 
+    private boolean benefitPaid(Assumptions assumptions, boolean accumulating, int retirementYear, int year) {
+        return !accumulating
+                && assumptions.unemploymentBenefit() > 0
+                && year == retirementYear + 1;
+    }
+
     private Integer depletedAtAge(List<FireYearDTO> timeline) {
         return timeline.stream()
                 .filter(point -> DRAWDOWN.equals(point.getPhase()))
@@ -318,6 +324,7 @@ public class FireService implements ICSVService {
                 !overridden,
                 monthlyPension,
                 pensionStartYear,
+                this.value(input.getUnemploymentBenefit(), 0),
                 currentAge,
                 input.getRetirementAge(),
                 lifeExpectancy - currentAge);
@@ -345,6 +352,7 @@ public class FireService implements ICSVService {
                                double annualReturn, double inflation, double annualSpending,
                                double withdrawalRate, double fireNumber, boolean fireNumberOverridden,
                                boolean targetInTodaysMoney, double monthlyPension, Integer pensionStartYear,
-                               int currentAge, Integer retirementAge, int horizon) {
+                               double unemploymentBenefit, int currentAge, Integer retirementAge,
+                               int horizon) {
     }
 }

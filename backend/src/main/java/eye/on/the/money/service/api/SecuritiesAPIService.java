@@ -34,13 +34,11 @@ public class SecuritiesAPIService extends APIService {
 
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public JsonNode getActualInterests(LocalDate date) {
-        log.trace("Enter getActualInterests");
         return this.query(this.expandTemplate(SecuritiesAPIService.ACTUAL_INTERESTS, new Object[]{date.toString()}));
     }
 
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public JsonNode getSecurities() {
-        log.trace("Enter getSecurities");
         return this.query(SecuritiesAPIService.SECURITIES);
     }
 

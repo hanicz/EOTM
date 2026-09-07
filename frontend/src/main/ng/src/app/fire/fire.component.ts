@@ -84,6 +84,9 @@ export class FireComponent {
   monthlyPension: number | null = 700000;
   pensionAge: number | null = 65;
 
+  hasUnemploymentBenefit: boolean = false;
+  unemploymentBenefit: number | null = 1000000;
+
   currentAge: number = 32;
   retireWhenReady: boolean = true;
   retirementAge: number | null = null;
@@ -205,6 +208,7 @@ export class FireComponent {
       fireNumber: this.useCustomFireNumber ? this.customFireNumber : null,
       monthlyPension: this.hasPension ? this.monthlyPension : null,
       pensionAge: this.hasPension ? this.pensionAge : null,
+      unemploymentBenefit: this.hasUnemploymentBenefit ? this.unemploymentBenefit : null,
       currentAge: this.currentAge,
       retirementAge: this.retireWhenReady ? null : this.retirementAge,
       lifeExpectancy: this.lifeExpectancy
@@ -251,20 +255,18 @@ export class FireComponent {
       lastYear: lastYear,
       fireY: projection.fireNumber > 0 ? yFor(projection.fireNumber) : null,
       retirementX: projection.retirementYear != null ? xFor(projection.retirementYear) : null,
-      pensionX: this.pensionYear(timeline),
+      pensionX: this.pensionMarkerX(projection, lastYear),
       xTicks: this.xTicks(lastYear, xFor),
       yTicks: this.yTicks(top, yFor),
     };
   }
 
-  /** Where the pension starts, read off the timeline rather than recomputed from the inputs. */
-  private pensionYear(timeline: FireYear[]): number | null {
-    const first = timeline.find(point => point.pension > 0);
-    if (!first || first.year === 0) return null;
+  private pensionMarkerX(projection: FireProjection, lastYear: number): number | null {
+    const year = projection.pensionYear;
+    if (year == null || year === 0) return null;
 
     const plotWidth = CHART.width - CHART.left - CHART.right;
-    const lastYear = timeline[timeline.length - 1].year || 1;
-    return CHART.left + (first.year / lastYear) * plotWidth;
+    return CHART.left + (year / lastYear) * plotWidth;
   }
 
   private toPath(points: ChartPoint[], y: (point: ChartPoint) => number): string {

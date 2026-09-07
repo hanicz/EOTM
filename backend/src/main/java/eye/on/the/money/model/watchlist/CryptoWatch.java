@@ -6,13 +6,11 @@ import eye.on.the.money.model.crypto.Coin;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 
 @Entity
 @Getter
 @Setter
 @Builder
-@Slf4j
 @ToString
 @Table(name = "EOTM_COIN_WATCH",
         uniqueConstraints = @UniqueConstraint(name = "UK_COIN_WATCH_USER_COIN",

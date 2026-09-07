@@ -4,14 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import eye.on.the.money.dto.CSVHelper;
 import eye.on.the.money.util.Generated;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 
 /**
  * One year of the projection, on a timeline that runs from today through to the end of the plan.
  */
-@Slf4j
 @Getter
 @Setter
 @Builder

@@ -11,7 +11,6 @@ import eye.on.the.money.service.api.MNBAPIService;
 import eye.on.the.money.service.stock.StockService;
 import eye.on.the.money.util.Ticker;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.Writer;
@@ -34,7 +33,6 @@ import java.util.stream.Collectors;
  * put through the tax method.
  */
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class TaxService implements ICSVService {
 
@@ -49,12 +47,10 @@ public class TaxService implements ICSVService {
     private final TaxCalculator taxCalculator;
 
     public TaxBreakdownDTO calculateTax(BigDecimal amountInHuf) {
-        log.trace("Enter");
         return this.taxCalculator.calculateTax(amountInHuf);
     }
 
     public TaxReportDTO calculateTaxForRSUs(List<RSUDTO> rsus) {
-        log.trace("Enter");
         if (rsus == null || rsus.isEmpty()) {
             return TaxReportDTO.builder().items(List.of())
                     .totalAmountInHuf(BigDecimal.ZERO).totalTax(TaxBreakdownDTO.zero()).build();
@@ -78,7 +74,6 @@ public class TaxService implements ICSVService {
     }
 
     public void getCSV(List<RSUDTO> rsus, Writer writer) {
-        log.trace("Enter");
         this.printRecords(this.calculateTaxForRSUs(rsus).getItems(), writer);
     }
 

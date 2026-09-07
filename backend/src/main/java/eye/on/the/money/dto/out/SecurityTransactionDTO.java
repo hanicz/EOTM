@@ -8,7 +8,6 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import eye.on.the.money.dto.CSVHelper;
 import eye.on.the.money.dto.Lot;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVRecord;
 
 import java.time.LocalDate;
@@ -17,7 +16,6 @@ import java.time.format.DateTimeFormatter;
 @Getter
 @Setter
 @Builder
-@Slf4j
 @ToString
 @AllArgsConstructor
 @EqualsAndHashCode

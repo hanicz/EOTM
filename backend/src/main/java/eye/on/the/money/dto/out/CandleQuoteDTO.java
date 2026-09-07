@@ -5,14 +5,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import eye.on.the.money.dto.in.EODCandleQuoteDTO;
 import eye.on.the.money.util.LiveQuote;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 
-@Slf4j
 @Getter
 @Setter
 @ToString

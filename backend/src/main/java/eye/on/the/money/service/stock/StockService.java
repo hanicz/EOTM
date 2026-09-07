@@ -30,24 +30,20 @@ public class StockService {
     private final EODAPIService eodAPIService;
 
     public List<Stock> getAllStocks() {
-        log.trace("Enter getAllStocks");
         return this.stockRepository.findAllByOrderByShortNameAsc();
     }
 
     @Cacheable("symbols")
     public List<Symbol> getAllSymbols(String exchange) {
-        log.trace("Enter getAllSymbols");
         return this.eodAPIService.getAllSymbols(exchange);
     }
 
     @Cacheable("exchanges")
     public List<Exchange> getAllExchanges() {
-        log.trace("Enter getAllExchanges");
         return this.eodAPIService.getAllExchanges();
     }
 
     public CandleQuoteDTO getCandleQuoteByShortName(String shortName, int months) {
-        log.trace("Enter getCandleQuoteByShortName");
         List<EODCandleQuoteDTO> eodList = this.eodAPIService.getCandleQuoteByShortName(shortName, months);
 
         JsonNode responseBody = this.eodAPIService.getLiveValueForSingle(shortName);

@@ -5,7 +5,6 @@ import eye.on.the.money.dto.out.MonthlyCashFlowDTO;
 import eye.on.the.money.dto.out.MonthlyReportDTO;
 import eye.on.the.money.dto.out.NetWorthDTO;
 import eye.on.the.money.util.HtmlUtil;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -20,7 +19,6 @@ import java.util.Locale;
 import static java.lang.String.format;
 
 @Component
-@Slf4j
 public class MonthlyReportHtmlBuilder {
 
     private static final int MAX_TRADE_ROWS = 20;

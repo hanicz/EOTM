@@ -3,7 +3,6 @@ package eye.on.the.money.model.security;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,7 +11,6 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
-@Slf4j
 @ToString
 @Table(name = "EOTM_SECURITY_RATE",
         uniqueConstraints = @UniqueConstraint(name = "UQ_SECURITY_RATE_ISIN_PERIOD",

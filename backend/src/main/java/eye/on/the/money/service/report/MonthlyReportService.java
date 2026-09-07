@@ -15,7 +15,6 @@ import eye.on.the.money.service.shared.NetWorthService;
 import eye.on.the.money.service.stock.DividendService;
 import eye.on.the.money.service.stock.InvestmentService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -28,7 +27,6 @@ import java.util.TreeMap;
 import java.util.function.Function;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class MonthlyReportService {
 
@@ -46,7 +44,6 @@ public class MonthlyReportService {
     private final InterestService interestService;
 
     public MonthlyReportDTO build(Long userId, YearMonth period, String currency) {
-        log.trace("Enter");
         LocalDate from = period.atDay(1);
         LocalDate to = period.atEndOfMonth();
 
@@ -75,7 +72,6 @@ public class MonthlyReportService {
                 .cashFlow(this.bankTransactionService.getCashFlowBetween(userId, from, to))
                 .build();
 
-        log.trace("Exit");
         return report;
     }
 

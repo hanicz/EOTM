@@ -2,7 +2,6 @@ package eye.on.the.money.dto.out;
 
 import eye.on.the.money.util.Generated;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -16,7 +15,6 @@ import java.util.List;
  * (stocks, coins, securities, exchanges, currencies) which are re-fetchable and would dwarf the account,
  * and any live or derived value, which would be stale and misleading in a file dated months ago.
  */
-@Slf4j
 @Getter
 @Setter
 @Builder

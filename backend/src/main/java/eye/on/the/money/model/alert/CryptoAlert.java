@@ -9,12 +9,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import lombok.extern.slf4j.Slf4j;
 
 @Entity
 @Getter
 @Setter
-@Slf4j
 @SuperBuilder
 @ToString
 @Table(name = "EOTM_COIN_ALERT", indexes = @Index(name = "IDX_COIN_ALERT_USER", columnList = "user_id"))

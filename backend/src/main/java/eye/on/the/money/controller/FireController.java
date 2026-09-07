@@ -8,7 +8,6 @@ import eye.on.the.money.util.CsvResponseUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +19,6 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("api/v1/fire")
-@Slf4j
 @Validated
 @RequiredArgsConstructor
 public class FireController {
@@ -34,14 +32,12 @@ public class FireController {
     @PostMapping("/projection")
     public ResponseEntity<FireProjectionResultDTO> project(@CurrentUserId Long userId,
                                                            @RequestBody @Valid FireProjectionDTO projectionDTO) {
-        log.trace("Enter");
         return ResponseEntity.ok(this.fireService.project(userId, projectionDTO));
     }
 
     @PostMapping("/projection/csv")
     public void getCSV(@CurrentUserId Long userId, @RequestBody @Valid FireProjectionDTO projectionDTO,
                        HttpServletResponse servletResponse) throws IOException {
-        log.trace("Enter");
         this.fireService.getCSV(userId, projectionDTO, CsvResponseUtil.prepare(servletResponse, "fire-projection.csv"));
     }
 }

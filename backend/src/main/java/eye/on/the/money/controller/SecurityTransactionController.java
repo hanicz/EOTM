@@ -5,7 +5,6 @@ import eye.on.the.money.service.security.SecurityTransactionService;
 import eye.on.the.money.util.CsvResponseUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import eye.on.the.money.security.CurrentUserId;
@@ -17,7 +16,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("api/v1/security/transaction")
-@Slf4j
 @RequiredArgsConstructor
 public class SecurityTransactionController {
 

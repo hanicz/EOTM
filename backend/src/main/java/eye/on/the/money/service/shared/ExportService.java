@@ -20,7 +20,6 @@ import eye.on.the.money.service.stock.DividendService;
 import eye.on.the.money.service.stock.InvestmentService;
 import eye.on.the.money.service.user.UserService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,7 +34,6 @@ import java.util.List;
  * {@link WatchListService}, whose getters enrich each row with a live price.
  */
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class ExportService {
 
@@ -61,7 +59,6 @@ public class ExportService {
 
     @Transactional(readOnly = true)
     public ExportDTO export(Long userId) {
-        log.trace("Enter");
         String userEmail = this.userService.loadUserById(userId).getEmail();
         return ExportDTO.builder()
                 .schemaVersion(SCHEMA_VERSION)

@@ -8,7 +8,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 
@@ -16,7 +15,6 @@ import java.math.BigDecimal;
  * The assumptions behind a retirement projection. Nothing here is persisted; every field arrives with the
  * request.
  */
-@Slf4j
 @Getter
 @Setter
 @Builder
@@ -78,6 +76,9 @@ public class FireProjectionDTO {
     @Min(0)
     @Max(120)
     private Integer pensionAge;
+
+    @PositiveOrZero
+    private BigDecimal unemploymentBenefit;
 
     @NotNull
     @Min(0)

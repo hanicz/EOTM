@@ -5,13 +5,11 @@ import eye.on.the.money.model.User;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 
 @Entity
 @Getter
 @Setter
 @Builder
-@Slf4j
 @ToString
 @Table(name = "EOTM_SUBREDDIT", indexes = @Index(name = "IDX_SUBREDDIT_USER", columnList = "user_id"))
 @AllArgsConstructor

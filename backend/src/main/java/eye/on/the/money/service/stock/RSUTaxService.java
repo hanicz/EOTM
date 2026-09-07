@@ -13,7 +13,6 @@ import eye.on.the.money.repository.stock.RSUTaxDetailsRepository;
 import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.shared.TaxService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +27,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class RSUTaxService implements ICSVService {
 
@@ -40,7 +38,6 @@ public class RSUTaxService implements ICSVService {
 
     @Transactional
     public void setRSU(Long userId, List<Long> ids, boolean rsu) {
-        log.trace("Enter");
         List<Investment> investments = this.investmentRepository.findByUserIdAndIdIn(userId, ids).stream()
                 .filter(investment -> BUY.equals(investment.getBuySell())).toList();
         if (investments.isEmpty()) return;
@@ -71,7 +68,6 @@ public class RSUTaxService implements ICSVService {
 
     @Transactional
     public void setTaxPaid(Long userId, List<Long> ids, boolean paid) {
-        log.trace("Enter");
         List<RSUTaxDetails> details = this.rsuTaxDetailsRepository
                 .findByUserIdAndInvestmentIdIn(userId, ids);
         if (details.isEmpty()) return;
@@ -81,7 +77,6 @@ public class RSUTaxService implements ICSVService {
     }
 
     public RSUTaxEventReportDTO getRSUTaxEvents(Long userId) {
-        log.trace("Enter");
         List<RSUTaxDetails> details = this.rsuTaxDetailsRepository.findFlaggedByUserId(userId);
         if (details.isEmpty()) return RSUTaxEventReportDTO.empty();
 
@@ -97,7 +92,6 @@ public class RSUTaxService implements ICSVService {
     }
 
     public void getCSV(Long userId, Writer writer) {
-        log.trace("Enter");
         this.printRecords(this.getRSUTaxEvents(userId).getItems(), writer);
     }
 

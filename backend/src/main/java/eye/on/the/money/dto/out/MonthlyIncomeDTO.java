@@ -5,12 +5,10 @@ import eye.on.the.money.dto.CSVHelper;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 
 @Getter
 @Setter
 @Builder
-@Slf4j
 @ToString
 @AllArgsConstructor
 @EqualsAndHashCode

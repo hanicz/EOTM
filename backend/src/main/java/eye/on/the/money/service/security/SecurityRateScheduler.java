@@ -19,12 +19,10 @@ public class SecurityRateScheduler {
 
     @Scheduled(cron = "0 30 6 * * *", zone = "Europe/Budapest")
     public void refreshWhenStale() {
-        log.trace("Enter refreshWhenStale");
         try {
             this.securityRateService.refreshIfStale();
         } catch (APIException | NoSuchElementException e) {
             log.error("Failed to refresh security rates, keeping stored rates", e);
         }
-        log.trace("Exit refreshWhenStale");
     }
 }

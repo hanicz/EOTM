@@ -35,7 +35,6 @@ public class MonthlyReportScheduler {
     }
 
     public void sendReportsFor(YearMonth period) {
-        log.trace("Enter");
         if (!this.emailService.isEnabled()) {
             log.info("Email is not configured, skipping monthly reports.");
             return;
@@ -47,7 +46,6 @@ public class MonthlyReportScheduler {
         for (ReportSubscription subscription : subscriptions) {
             this.sendFor(subscription, period);
         }
-        log.trace("Exit");
     }
 
     private void sendFor(ReportSubscription subscription, YearMonth period) {

@@ -38,7 +38,6 @@ public class AlertScheduler {
 
     @Scheduled(fixedDelay = 300000)
     public void checkAlerts() {
-        log.trace("Enter");
         if (!this.emailServiceImpl.isEnabled()) {
             log.info("Email is not configured, skipping alert check.");
             return;
@@ -51,11 +50,9 @@ public class AlertScheduler {
         } catch (InterruptedException e) {
             throw new AlertException("Error during alerts.", e);
         }
-        log.trace("Exit");
     }
 
     private void checkCryptoAlerts() {
-        log.trace("Enter");
         List<CryptoAlert> cryptoAlerts = this.cryptoAlertRepository.findAll();
         if (cryptoAlerts.isEmpty()) return;
         String ids = String.join(",", cryptoAlerts.stream()
@@ -76,11 +73,9 @@ public class AlertScheduler {
             alert.setSymbolOrTicker(alert.getCoin().getId());
             this.evaluateAlert(alert);
         });
-        log.trace("Exit");
     }
 
     private void checkStockAlerts() {
-        log.trace("Enter");
         List<StockAlert> stockAlertList = this.stockAlertRepository.findAll();
         if (stockAlertList.isEmpty()) return;
         String joinedList = String.join(",", stockAlertList.stream()
@@ -110,18 +105,14 @@ public class AlertScheduler {
             alert.setActualValue(price.get().value());
             this.evaluateAlert(alert);
         });
-        log.trace("Exit");
     }
 
     private void evaluateAlert(Alert alert) {
-        log.trace("Enter");
-
         log.trace("Checking alert: {}", alert);
         if (alert.isAlertActive()) {
             this.sendAndDelete(alert);
         }
         log.trace("Alert checked with id: {}", alert.getId());
-        log.trace("Exit");
     }
 
     private void sendAndDelete(Alert alert) {

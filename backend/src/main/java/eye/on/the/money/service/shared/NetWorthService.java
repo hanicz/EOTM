@@ -18,7 +18,6 @@ import eye.on.the.money.service.forex.ForexTransactionService;
 import eye.on.the.money.service.security.SecurityTransactionService;
 import eye.on.the.money.service.stock.InvestmentService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -48,7 +47,6 @@ import java.util.function.Supplier;
  * cost basis is converted from {@code currencyId}.
  */
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class NetWorthService {
 
@@ -71,7 +69,6 @@ public class NetWorthService {
     private final DashboardService dashboardService;
 
     public NetWorthDTO getNetWorth(Long userId, String currency, boolean refresh) {
-        log.trace("Enter");
         String target = (currency == null || currency.isBlank()) ? BASE_CURRENCY : currency.toUpperCase();
 
         Holdings holdings = this.loadHoldings(userId, refresh);

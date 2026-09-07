@@ -4,7 +4,6 @@ import eye.on.the.money.util.Generated;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -17,7 +16,6 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Builder
-@Slf4j
 @ToString
 @EqualsAndHashCode
 @AllArgsConstructor

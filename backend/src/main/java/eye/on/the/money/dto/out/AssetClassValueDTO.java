@@ -2,14 +2,12 @@ package eye.on.the.money.dto.out;
 
 import eye.on.the.money.util.Generated;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 
 /**
  * What one asset class cost and what it is worth now, both already converted to the requested currency.
  */
-@Slf4j
 @Getter
 @Setter
 @Builder

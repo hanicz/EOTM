@@ -8,14 +8,12 @@ import eye.on.the.money.repository.cash.CashRepository;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.service.user.UserService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class CashService {
 
@@ -26,7 +24,6 @@ public class CashService {
     private final UserService userService;
 
     public CashDTO getCash(Long userId) {
-        log.trace("Enter");
         return this.cashRepository.findByUserId(userId)
                 .map(cash -> this.toDTO(cash.getAmount(), this.currencyIdOf(cash)))
                 .orElseGet(() -> this.toDTO(0.0, DEFAULT_CURRENCY));
@@ -34,7 +31,6 @@ public class CashService {
 
     @Transactional
     public CashDTO updateCash(Long userId, CashDTO cashDTO) {
-        log.trace("Enter");
         Currency currency = this.resolveCurrency(cashDTO.getCurrency());
         Cash cash = this.cashRepository.findByUserId(userId).orElseGet(() -> {
             User user = this.userService.getReference(userId);

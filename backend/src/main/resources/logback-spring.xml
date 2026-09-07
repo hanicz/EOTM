@@ -1,43 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <property name="LOGS" value="./logs" />
+    <property name="LOGS" value="${LOGS_PATH:-./logs}" />
+    <property name="MDC_CONTEXT" value="[%X{traceId:-}] [%X{userId:-}]" />
 
-    <appender name="Console"
-              class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <Pattern>
-                %green(%d{ISO8601}) %magenta(%-5level) [%blue(%t)] %yellow(%C{1}.%M\(%line\)): %msg%n%throwable
-            </Pattern>
-        </encoder>
-    </appender>
+    <springProfile name="local,test">
+        <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <Pattern>
+                    %green(%d{ISO8601}) %magenta(%-5level) [%blue(%t)] %cyan(${MDC_CONTEXT}) %yellow(%C{1}.%M\(%line\)): %msg%n%throwable
+                </Pattern>
+            </encoder>
+        </appender>
 
-    <appender name="RollingFile"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOGS}/spring-boot-logger.log</file>
-        <encoder
-                class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <Pattern>%d %p %C{1}.%M\(%line\) [%t] %m%n</Pattern>
-        </encoder>
+        <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOGS}/spring-boot-logger.log</file>
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <Pattern>%d %p ${MDC_CONTEXT} %C{1}.%M\(%line\) [%t] %m%n</Pattern>
+            </encoder>
+            <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+                <fileNamePattern>${LOGS}/archived/eotm-logs-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+                <maxFileSize>5MB</maxFileSize>
+                <maxHistory>30</maxHistory>
+                <totalSizeCap>1GB</totalSizeCap>
+            </rollingPolicy>
+        </appender>
 
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${LOGS}/archived/eotm-logs-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-            <maxFileSize>5MB</maxFileSize>
-            <maxHistory>30</maxHistory>
-            <totalSizeCap>1GB</totalSizeCap>
-        </rollingPolicy>
-    </appender>
+        <root level="info">
+            <appender-ref ref="RollingFile" />
+            <appender-ref ref="Console" />
+        </root>
 
-    <!-- LOG everything at INFO level -->
-    <root level="info">
-        <appender-ref ref="RollingFile" />
-        <appender-ref ref="Console" />
-    </root>
+        <logger name="eye.on.the.money" level="debug" additivity="false">
+            <appender-ref ref="RollingFile" />
+            <appender-ref ref="Console" />
+        </logger>
+    </springProfile>
 
-    <!-- LOG "eye.on.the.money.%" at TRACE level -->
-    <logger name="eye.on.the.money" level="trace" additivity="false">
-        <appender-ref ref="RollingFile" />
-        <appender-ref ref="Console" />
-    </logger>
+    <springProfile name="!local &amp; !test">
+        <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <Pattern>%d{ISO8601} %-5level [%t] ${MDC_CONTEXT} %logger{36}: %msg%n%throwable</Pattern>
+            </encoder>
+        </appender>
+
+        <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOGS}/spring-boot-logger.log</file>
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <Pattern>%d{ISO8601} %-5level [%t] ${MDC_CONTEXT} %logger{36}: %msg%n%throwable</Pattern>
+            </encoder>
+            <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+                <fileNamePattern>${LOGS}/archived/eotm-logs-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+                <maxFileSize>5MB</maxFileSize>
+                <maxHistory>30</maxHistory>
+                <totalSizeCap>1GB</totalSizeCap>
+            </rollingPolicy>
+        </appender>
+
+        <root level="info">
+            <appender-ref ref="RollingFile" />
+            <appender-ref ref="Console" />
+        </root>
+
+        <logger name="eye.on.the.money" level="info" additivity="false">
+            <appender-ref ref="RollingFile" />
+            <appender-ref ref="Console" />
+        </logger>
+    </springProfile>
 
 </configuration>

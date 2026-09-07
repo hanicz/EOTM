@@ -2,7 +2,6 @@ package eye.on.the.money.dto.out;
 
 import eye.on.the.money.util.Generated;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -10,7 +9,6 @@ import java.util.List;
 /**
  * Everything a user holds, valued in a single currency.
  */
-@Slf4j
 @Getter
 @Setter
 @Builder

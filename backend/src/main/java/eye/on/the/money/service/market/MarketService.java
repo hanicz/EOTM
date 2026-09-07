@@ -7,7 +7,6 @@ import eye.on.the.money.model.market.MarketHoliday;
 import eye.on.the.money.repository.market.MarketExchangeRepository;
 import eye.on.the.money.repository.market.MarketHolidayRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -17,7 +16,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class MarketService {
 
@@ -25,7 +23,6 @@ public class MarketService {
     private final MarketHolidayRepository marketHolidayRepository;
 
     public List<MarketExchangeDTO> getExchanges() {
-        log.trace("Enter getExchanges");
         Map<String, List<MarketHolidayDTO>> holidaysByExchange =
                 this.marketHolidayRepository.findByHolidayDateGreaterThanEqualOrderByHolidayDateAsc(LocalDate.now())
                         .stream()

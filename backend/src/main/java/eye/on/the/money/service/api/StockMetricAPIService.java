@@ -38,7 +38,6 @@ public class StockMetricAPIService extends APIService {
 
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public ProfileDTO getProfile(String symbol) {
-        log.trace("Enter");
         String url = this.createURL(StockMetricAPIService.API, PROFILE_PATH, this.encodeQuery(symbol));
         ResponseEntity<?> response = this.callGetAPI(url, ProfileDTO.class);
         return (ProfileDTO) response.getBody();
@@ -46,7 +45,6 @@ public class StockMetricAPIService extends APIService {
 
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public String[] getPeers(String symbol) {
-        log.trace("Enter");
         String url = this.createURL(StockMetricAPIService.API, PEERS_PATH, this.encodeQuery(symbol));
         ResponseEntity<?> response = this.callGetAPI(url, String[].class);
         return (String[]) response.getBody();
@@ -54,7 +52,6 @@ public class StockMetricAPIService extends APIService {
 
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public MetricDTO getMetric(String symbol) {
-        log.trace("Enter");
         String url = this.createURL(StockMetricAPIService.API, METRIC_PATH, this.encodeQuery(symbol));
         ResponseEntity<?> response = this.callGetAPI(url, String.class);
         try {
@@ -68,7 +65,6 @@ public class StockMetricAPIService extends APIService {
 
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public List<RecommendationDTO> getRecommendations(String symbol) {
-        log.trace("Enter");
         ResponseEntity<?> response = this.callGetAPI(this.createURL(StockMetricAPIService.API,
                 RECOMMENDATION_PATH, this.encodeQuery(symbol)), RecommendationDTO[].class);
         return Arrays.asList((RecommendationDTO[]) response.getBody());

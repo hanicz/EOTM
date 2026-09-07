@@ -3,7 +3,6 @@ package eye.on.the.money.model;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -14,7 +13,6 @@ import static java.util.Collections.emptyList;
 @Entity
 @Getter
 @Setter
-@Slf4j
 @Builder
 @ToString(exclude = "password")
 @Table(name = "EOTM_USER", uniqueConstraints = @UniqueConstraint(name = "UK_EOTM_USER_EMAIL", columnNames = "email"))

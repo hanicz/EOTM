@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -12,7 +11,6 @@ import java.time.LocalTime;
 @Entity
 @Getter
 @Setter
-@Slf4j
 @Builder
 @ToString
 @Table(name = "EOTM_MARKET_HOLIDAY",

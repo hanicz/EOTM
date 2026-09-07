@@ -10,6 +10,7 @@ export interface FireProjectionInput {
     fireNumber: number | null;
     monthlyPension: number | null;
     pensionAge: number | null;
+    unemploymentBenefit: number | null;
     currentAge: number;
     retirementAge: number | null;
     lifeExpectancy: number;
@@ -52,6 +53,8 @@ export interface FireProjection {
 
     retirementYear: number | null;
     retirementAge: number | null;
+
+    pensionYear: number | null;
 
     depletedAtAge: number | null;
     lastsThroughRetirement: boolean;

@@ -40,7 +40,6 @@ public class SecurityRateService {
     private final SecuritiesAPIService securitiesAPIService;
 
     public void refreshIfStale() {
-        log.trace("Enter refreshIfStale");
         LocalDateTime staleBefore = LocalDateTime.now().minus(SecurityRateService.REFRESH_INTERVAL);
         Optional<LocalDateTime> lastFetchedAt = this.securityRateRepository.findLastFetchedAt();
         if (lastFetchedAt.isPresent() && lastFetchedAt.get().isAfter(staleBefore)) {
@@ -52,7 +51,6 @@ public class SecurityRateService {
     }
 
     public void refresh() {
-        log.trace("Enter refresh");
         Map<String, JsonNode> referenceByIsin = new HashMap<>();
         Map<String, String> isinByLookupKey = new HashMap<>();
         Set<String> ambiguousKeys = new HashSet<>();
@@ -82,7 +80,6 @@ public class SecurityRateService {
         }
 
         this.storeRates(referenceByIsin, interestByKey);
-        log.trace("Exit refresh");
     }
 
     private void resolveIsins(Map<String, String> isinByLookupKey) {

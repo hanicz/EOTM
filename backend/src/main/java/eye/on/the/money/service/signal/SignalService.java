@@ -5,14 +5,12 @@ import eye.on.the.money.dto.out.IndicatorDetailDTO;
 import eye.on.the.money.dto.out.SignalDTO;
 import eye.on.the.money.service.api.EODAPIService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class SignalService {
 
@@ -26,7 +24,6 @@ public class SignalService {
     private final EODAPIService eodAPIService;
 
     public SignalDTO evaluate(String shortName) {
-        log.trace("Enter evaluate");
         List<EODCandleQuoteDTO> candles = this.eodAPIService.getCandleQuoteByShortName(shortName, HISTORY_MONTHS);
         List<Double> closes = candles.stream().map(EODCandleQuoteDTO::getClose).toList();
 

@@ -6,7 +6,6 @@ import eye.on.the.money.model.news.News;
 import eye.on.the.money.repository.ConfigRepository;
 import eye.on.the.money.repository.CredentialRepository;
 import eye.on.the.money.util.DateFormats;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.Retryable;
@@ -18,7 +17,6 @@ import java.util.Arrays;
 import java.util.List;
 
 @Service
-@Slf4j
 public class NewsAPIService extends APIService {
 
     private final static String API = "finnhub";
@@ -34,7 +32,6 @@ public class NewsAPIService extends APIService {
 
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public List<News> getNews(String category) {
-        log.trace("Enter");
         String url = this.createURL(NewsAPIService.API, NEWS_PATH, this.encodeQuery(category));
         ResponseEntity<?> response = this.callGetAPI(url, News[].class);
         return Arrays.asList((News[]) response.getBody());
@@ -42,7 +39,6 @@ public class NewsAPIService extends APIService {
 
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public List<News> getCompanyNews(String symbol) {
-        log.trace("Enter getCompanyNews");
         String fromDate = LocalDate.now().minusDays(30).format(DateFormats.YYYY_MM_DD);
         String toDate = LocalDate.now().format(DateFormats.YYYY_MM_DD);
         String url = this.createURL(NewsAPIService.API, COMPANY_NEWS_PATH, this.encodeQuery(symbol), fromDate, toDate);

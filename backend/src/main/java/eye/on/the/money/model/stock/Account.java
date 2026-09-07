@@ -10,7 +10,6 @@ import eye.on.the.money.model.etf.ETFInvestment;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -18,7 +17,6 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
-@Slf4j
 @Builder
 @ToString
 @EqualsAndHashCode

@@ -38,7 +38,6 @@ public class DashboardService {
     }
 
     private DashboardRatesDTO conversionRates(List<String> currencies) {
-        log.trace("Enter");
         Set<String> targetCurrencies = currencies.stream()
                 .map(String::toUpperCase)
                 .filter(currency -> !BASE_CURRENCY.equals(currency))

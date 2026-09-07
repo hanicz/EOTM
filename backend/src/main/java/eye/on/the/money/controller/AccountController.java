@@ -5,7 +5,6 @@ import eye.on.the.money.model.stock.Account;
 import eye.on.the.money.service.stock.AccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -18,7 +17,6 @@ import java.util.List;
 @RequestMapping("/api/v1/account")
 @RequiredArgsConstructor
 @Validated
-@Slf4j
 public class AccountController {
 
     private final AccountService accountService;

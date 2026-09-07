@@ -10,7 +10,6 @@ import eye.on.the.money.report.MonthlyReportScheduler;
 import eye.on.the.money.repository.report.ReportSubscriptionRepository;
 import eye.on.the.money.service.user.UserService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +22,6 @@ import java.util.List;
 import java.util.Set;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class ReportSubscriptionService {
 
@@ -44,7 +42,6 @@ public class ReportSubscriptionService {
 
     @Transactional
     public ReportSubscriptionDTO update(Long userId, ReportSubscriptionUpdateDTO update) {
-        log.trace("Enter");
         ReportSubscription subscription = this.reportSubscriptionRepository.findByUserId(userId)
                 .orElseGet(() -> this.create(userId));
 
@@ -56,7 +53,6 @@ public class ReportSubscriptionService {
         subscription.getRecipients().addAll(recipients);
 
         ReportSubscriptionDTO saved = this.toDTO(this.reportSubscriptionRepository.save(subscription));
-        log.trace("Exit");
         return saved;
     }
 
@@ -71,7 +67,6 @@ public class ReportSubscriptionService {
 
     @Transactional
     public ReportSubscription claimManualSend(Long userId) {
-        log.trace("Enter");
         ReportSubscription subscription = this.reportSubscriptionRepository.findByUserId(userId)
                 .orElseGet(() -> this.reportSubscriptionRepository.save(this.create(userId)));
 
@@ -81,7 +76,6 @@ public class ReportSubscriptionService {
         if (this.reportSubscriptionRepository.claimManualSend(subscription.getId(), now, claimableBefore) == 0) {
             throw this.cooldownException(userId, now);
         }
-        log.trace("Exit");
         return subscription;
     }
 

@@ -1,14 +1,12 @@
 package eye.on.the.money.service.shared;
 
 import eye.on.the.money.dto.out.TaxBreakdownDTO;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 @Component
-@Slf4j
 public class TaxCalculator {
 
     private static final BigDecimal BASE_MULTIPLIER = new BigDecimal("0.89");

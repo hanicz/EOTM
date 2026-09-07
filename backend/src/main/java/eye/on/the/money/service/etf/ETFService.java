@@ -4,11 +4,9 @@ import eye.on.the.money.model.etf.ETF;
 import eye.on.the.money.repository.etf.ETFRepository;
 import eye.on.the.money.util.Ticker;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class ETFService {
 

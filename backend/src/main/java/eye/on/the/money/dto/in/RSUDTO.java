@@ -4,11 +4,9 @@ import eye.on.the.money.util.Generated;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 
-@Slf4j
 @Getter
 @Setter
 @Builder

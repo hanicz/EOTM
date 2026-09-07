@@ -8,7 +8,6 @@ import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import eye.on.the.money.security.CurrentUserEmail;
@@ -21,7 +20,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("api/v1/user")
-@Slf4j
 @RequiredArgsConstructor
 public class UserController {
 
@@ -54,7 +52,6 @@ public class UserController {
 
     @GetMapping("/export")
     public ResponseEntity<ExportDTO> export(@CurrentUserId Long userId) {
-        log.trace("Enter");
         String filename = "eotm-export-" + LocalDate.now().format(DateFormats.YYYY_MM_DD) + ".json";
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")

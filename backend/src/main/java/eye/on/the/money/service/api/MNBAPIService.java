@@ -68,7 +68,6 @@ public class MNBAPIService extends APIService {
     @Retryable(retryFor = APIException.class, maxAttempts = 3)
     public Map<String, NavigableMap<LocalDate, BigDecimal>> getExchangeRates(Collection<String> currencies,
                                                                             LocalDate startDate, LocalDate endDate) {
-        log.trace("Enter");
         String currencyNames = currencies.stream()
                 .filter(currency -> !HUF.equalsIgnoreCase(currency))
                 .map(String::toUpperCase)

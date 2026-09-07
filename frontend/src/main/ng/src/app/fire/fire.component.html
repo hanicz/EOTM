@@ -165,6 +165,34 @@
       </section>
 
       <section class="fire-section">
+        <h3 class="fire-section-title">Unemployment benefit</h3>
+        <div class="fire-form">
+          <div class="fire-field fire-field-check">
+            <p-checkbox inputId="hasUnemploymentBenefit" [(ngModel)]="hasUnemploymentBenefit"
+              [binary]="true"></p-checkbox>
+            <label for="hasUnemploymentBenefit" class="fire-check-label">I will get an unemployment benefit</label>
+          </div>
+          @if (hasUnemploymentBenefit) {
+            <div class="fire-field">
+              <label for="unemploymentBenefit" class="fire-label">
+                Total amount
+                <i class="pi pi-info-circle fire-info"
+                  pTooltip="Taken at face value, not adjusted for inflation."></i>
+              </label>
+              <p-inputnumber inputId="unemploymentBenefit" [(ngModel)]="unemploymentBenefit" [min]="0"
+                (keyup.enter)="calculate()"></p-inputnumber>
+            </div>
+          }
+        </div>
+        @if (hasUnemploymentBenefit) {
+          <p class="fire-hint fire-hint-tight">
+            Paid into the pot once, in the first year after you stop working. It arrives too late to help
+            reach the target, and shows in the Pension column for that year.
+          </p>
+        }
+      </section>
+
+      <section class="fire-section">
         <h3 class="fire-section-title">Timing</h3>
         <div class="fire-form">
           <div class="fire-field fire-field-narrow">

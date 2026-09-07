@@ -5,14 +5,12 @@ import eye.on.the.money.model.User;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.Set;
 
 @Entity
 @Getter
 @Setter
-@Slf4j
 @Builder
 @ToString
 @EqualsAndHashCode

@@ -49,6 +49,7 @@ public class ETFInvestment {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnore
+    @ToString.Exclude
     private User user;
 
     @ManyToOne

@@ -223,7 +223,6 @@ public class ETFInvestmentService implements ICSVService {
                 }
             }
         } catch (IOException | DateTimeParseException | IllegalArgumentException e) {
-            log.error("Error while processing CSV", e);
             throw this.csvParseFailure(lineNumber, e);
         }
     }

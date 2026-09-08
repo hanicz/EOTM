@@ -6,6 +6,12 @@
         (input)="dt1.filterGlobal($any($event.target)?.value, 'contains')"
         [value]="$any(dt1.filters['global'])?.value ?? ''" placeholder="Search by Name or Account"
         class="p-column-filter filter-input">
+      <p-columnFilter field="accountName" matchMode="equals" [showMenu]="false" class="filter-type">
+        <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+          <p-select [ngModel]="value" [options]="accountOptions" (onChange)="filter($any($event)?.value)"
+            [showClear]="true" placeholder="Any account" ariaLabel="Account"></p-select>
+        </ng-template>
+      </p-columnFilter>
     </div>
   </ng-template>
 

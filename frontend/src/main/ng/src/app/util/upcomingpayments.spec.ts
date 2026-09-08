@@ -10,7 +10,7 @@ function holding(securityName: string, nextPaymentDate?: string, nextPaymentAmou
     quantity: 100,
     buySell: 'B',
     transactionDate: new Date(2024, 0, 1),
-    securityId: securityName,
+    securityId: 'ID-' + securityName,
     securityName: securityName,
     amount: 100000,
     currencyId: 'HUF',
@@ -113,6 +113,13 @@ describe('buildUpcomingPayments', () => {
     ]);
 
     expect(result).toHaveLength(4);
+  });
+
+  it('carries the short security id through for the dashboard widget', () => {
+    const [payment] = buildUpcomingPayments([holding('Bond A', '2026-09-22', 1000)]);
+
+    expect(payment.securityId).toBe('ID-Bond A');
+    expect(payment.securityName).toBe('Bond A');
   });
 
   it('carries the currency and amount through untouched', () => {

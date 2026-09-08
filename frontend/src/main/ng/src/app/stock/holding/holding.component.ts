@@ -9,21 +9,25 @@ import { PrimeTemplate } from 'primeng/api';
 import { Skeleton } from 'primeng/skeleton';
 import { TickerIdentityComponent } from '../../util/ticker-identity.component';
 import { DeltaComponent } from '../../util/delta.component';
+import { collectAccountOptions } from '../../util/accountoptions';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { Tooltip } from 'primeng/tooltip';
+import { Select } from 'primeng/select';
+import { FormsModule } from '@angular/forms';
 import { CurrencyPipe } from '@angular/common';
 
 @Component({
     selector: 'app-holding',
     templateUrl: './holding.component.html',
     styleUrls: ['./holding.component.css'],
-    imports: [Bind, TableModule, PrimeTemplate, Skeleton, ButtonDirective, Ripple, Tooltip,
+    imports: [Bind, TableModule, PrimeTemplate, Skeleton, ButtonDirective, Ripple, Tooltip, Select, FormsModule,
         CurrencyPipe, TickerIdentityComponent, DeltaComponent]
 })
 export class HoldingComponent implements OnInit {
 
   investments: Investment[] = [];
+  accountOptions: string[] = [];
   @Output() dataLoaded = new EventEmitter<Investment[]>();
   globals: Globals;
 
@@ -59,6 +63,7 @@ export class HoldingComponent implements OnInit {
       next: (data) => {
         this.investmentsLoading = false;
         this.investments = data;
+        this.accountOptions = collectAccountOptions(data);
         this.dataLoaded.emit(this.investments);
         this.cdr.markForCheck();
       },

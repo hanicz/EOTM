@@ -7,6 +7,7 @@ import eye.on.the.money.model.Credential;
 import eye.on.the.money.dto.out.MonthlyReportDTO;
 import eye.on.the.money.repository.CredentialRepository;
 import eye.on.the.money.util.HtmlUtil;
+import eye.on.the.money.util.LogSanitizer;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -63,7 +64,7 @@ public class EmailService {
 
     public void sendAlertMail(String sendTo, String symbolOrTicker, String type, double valuePoint, double actualValue, double actualChange) {
         if (!this.isEnabled()) {
-            log.warn("Email is not configured, skipping alert email to {}", sendTo);
+            log.warn("Email is not configured, skipping alert email to {}", LogSanitizer.maskEmail(sendTo));
             return;
         }
         boolean isPercentType = type.startsWith("PERCENT");
@@ -83,7 +84,7 @@ public class EmailService {
 
     public void sendMonthlyReportMail(List<String> sendTo, MonthlyReportDTO report) {
         if (!this.isEnabled()) {
-            log.warn("Email is not configured, skipping monthly report to {}", sendTo);
+            log.warn("Email is not configured, skipping monthly report to {}", LogSanitizer.maskEmails(sendTo));
             return;
         }
         String subject = format("Eye OTM: your %s report", this.reportHtmlBuilder.periodLabel(report));
@@ -92,7 +93,7 @@ public class EmailService {
     }
 
     private void send(String[] sendTo, String subject, String plainText, String html) {
-        String recipients = String.join(", ", sendTo);
+        String recipients = LogSanitizer.maskEmails(sendTo);
         try {
             MimeMessage mimeMessage = this.javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");

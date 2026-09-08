@@ -5,6 +5,7 @@ const MILLISECONDS_PER_DAY = 86400000;
 export const SOON_IN_DAYS = 30;
 
 export interface UpcomingPayment {
+  securityId: string;
   securityName: string;
   currencyId: string;
   nextPaymentDate: Date;
@@ -31,6 +32,7 @@ export function buildUpcomingPayments(transactions: SecurityTransaction[], limit
   const payments = transactions
     .filter(t => t.nextPaymentDate != null && t.nextPaymentAmount != null)
     .map(t => ({
+      securityId: t.securityId,
       securityName: t.securityName,
       currencyId: t.currencyId,
       nextPaymentDate: t.nextPaymentDate!,

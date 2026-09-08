@@ -8,11 +8,15 @@
 } @else if (payments().length === 0) {
   <div class="empty-state">No upcoming interest</div>
 } @else {
-  @for (payment of payments(); track payment.securityName + payment.nextPaymentDate) {
+  @for (payment of payments(); track payment.securityId + payment.nextPaymentDate) {
     <div class="interest-row">
       <div class="interest-identity">
-        <span class="interest-name">{{payment.securityName}}</span>
-        <span class="cell-sub">{{payment.nextPaymentDate | date : 'yyyy-MM-dd'}}</span>
+        <span class="interest-name" [title]="payment.securityName">{{payment.securityId}}</span>
+        <span class="cell-sub">
+          {{payment.nextPaymentDate | date : 'yyyy-MM-dd'}}
+          <span class="state-chip" [class.state-buy]="isSoon(payment.daysUntil)"
+            [class.state-neutral]="!isSoon(payment.daysUntil)">{{daysLabel(payment.daysUntil)}}</span>
+        </span>
       </div>
       <b class="amount">{{payment.nextPaymentAmount | currency : payment.currencyId : 'symbol' : '0.0-0'}}</b>
     </div>

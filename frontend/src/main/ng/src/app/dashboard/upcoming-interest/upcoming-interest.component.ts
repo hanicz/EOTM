@@ -3,7 +3,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Skeleton } from 'primeng/skeleton';
 import { SecurityService } from '../../service/security.service';
 import { SecurityTransaction } from '../../model/securityTransaction';
-import { buildUpcomingPayments } from '../../util/upcomingpayments';
+import { SOON_IN_DAYS, buildUpcomingPayments, dueInLabel } from '../../util/upcomingpayments';
 
 const PAYMENT_LIMIT = 3;
 
@@ -36,5 +36,13 @@ export class UpcomingInterestComponent implements OnInit {
         this.loading.set(false);
       }
     });
+  }
+
+  isSoon(days: number): boolean {
+    return days <= SOON_IN_DAYS;
+  }
+
+  daysLabel(days: number): string {
+    return dueInLabel(days);
   }
 }

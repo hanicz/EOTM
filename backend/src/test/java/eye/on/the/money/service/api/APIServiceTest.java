@@ -151,21 +151,21 @@ class APIServiceTest {
     void checkForEmptyBody_throwsWhenResponseIsNull() {
         TestAPIService service = this.serviceWithResponse(200, "{}");
 
-        assertThrows(APIException.class, () -> service.checkForEmptyBody(null));
+        assertThrows(APIException.class, () -> service.checkForEmptyBody("https://api.example.com/quote", null));
     }
 
     @Test
     void checkForEmptyBody_throwsWhenBodyIsMissing() {
         TestAPIService service = this.serviceWithResponse(200, "{}");
 
-        assertThrows(APIException.class, () -> service.checkForEmptyBody(ResponseEntity.ok().build()));
+        assertThrows(APIException.class, () -> service.checkForEmptyBody("https://api.example.com/quote", ResponseEntity.ok().build()));
     }
 
     @Test
     void checkForEmptyBody_doesNotThrowWhenBodyPresent() {
         TestAPIService service = this.serviceWithResponse(200, "{}");
 
-        service.checkForEmptyBody(ResponseEntity.ok("body"));
+        service.checkForEmptyBody("https://api.example.com/quote", ResponseEntity.ok("body"));
     }
 
     @Test

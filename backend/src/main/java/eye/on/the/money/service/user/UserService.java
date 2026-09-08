@@ -6,6 +6,7 @@ import eye.on.the.money.exception.PasswordException;
 import eye.on.the.money.exception.UserAlreadyExistsException;
 import eye.on.the.money.model.User;
 import eye.on.the.money.repository.UserRepository;
+import eye.on.the.money.util.LogSanitizer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -25,7 +26,7 @@ public class UserService implements UserDetailsService {
 
     public void signUp(SignUpDTO signUpDTO) {
         if (this.userRepository.existsByEmailIgnoreCase(signUpDTO.email())) {
-            log.info("Sign up rejected, email already registered: {}", signUpDTO.email());
+            log.info("Sign up rejected, email already registered: {}", LogSanitizer.maskEmail(signUpDTO.email()));
             throw new UserAlreadyExistsException("An account already exists for this email address");
         }
 
@@ -37,10 +38,10 @@ public class UserService implements UserDetailsService {
         try {
             this.userRepository.save(user);
         } catch (DataIntegrityViolationException e) {
-            log.info("Sign up rejected, email already registered: {}", signUpDTO.email());
+            log.info("Sign up rejected, email already registered: {}", LogSanitizer.maskEmail(signUpDTO.email()));
             throw new UserAlreadyExistsException("An account already exists for this email address", e);
         }
-        log.info("User created: {}", user.getEmail());
+        log.info("User created: {}", LogSanitizer.maskEmail(user.getEmail()));
     }
 
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -70,9 +71,10 @@ public class UserService implements UserDetailsService {
 
         if(this.passwordEncoder.matches(passwordDTO.oldPassword(), user.getPassword())) {
             user.setPassword(this.passwordEncoder.encode(passwordDTO.newPassword()));
-            log.info("Password changed for user: {}", user.getEmail());
+            log.info("Password changed for user: {}", LogSanitizer.maskEmail(user.getEmail()));
         } else {
-            log.info("Incorrect old password provided while changing password for user: {}", user.getEmail());
+            log.info("Incorrect old password provided while changing password for user: {}",
+                    LogSanitizer.maskEmail(user.getEmail()));
             throw new PasswordException("Invalid old password provided");
         }
     }

@@ -17,5 +17,7 @@ import lombok.*;
 public class Credential {
     @Id
     private String name;
+
+    @ToString.Exclude
     private String secret;
 }

@@ -45,6 +45,12 @@
           </p-select>
         </ng-template>
       </p-columnFilter>
+      <p-columnFilter field="accountName" matchMode="equals" [showMenu]="false" class="filter-type">
+        <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+          <p-select [ngModel]="value" [options]="accountOptions" (onChange)="filter($any($event)?.value)"
+            [showClear]="true" placeholder="Any account" ariaLabel="Account"></p-select>
+        </ng-template>
+      </p-columnFilter>
     </div>
   </ng-template>
   <ng-template pTemplate="header">

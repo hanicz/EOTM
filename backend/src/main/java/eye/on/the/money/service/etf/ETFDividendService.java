@@ -11,7 +11,6 @@ import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.modelmapper.ModelMapper;
@@ -28,7 +27,6 @@ import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class ETFDividendService implements ICSVService {
 
@@ -114,7 +112,6 @@ public class ETFDividendService implements ICSVService {
                 }
             }
         } catch (IOException | DateTimeParseException | IllegalArgumentException e) {
-            log.error("Error while processing CSV", e);
             throw this.csvParseFailure(lineNumber, e);
         }
     }

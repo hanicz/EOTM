@@ -91,7 +91,7 @@ public abstract class APIService {
         } finally {
             this.logElapsed("GET", URL, start);
         }
-        this.checkForEmptyBody(responseEntity);
+        this.checkForEmptyBody(URL, responseEntity);
 
         return responseEntity;
     }
@@ -133,7 +133,7 @@ public abstract class APIService {
         } finally {
             this.logElapsed("POST", URL, start);
         }
-        this.checkForEmptyBody(responseEntity);
+        this.checkForEmptyBody(URL, responseEntity);
 
         return responseEntity;
     }
@@ -151,9 +151,10 @@ public abstract class APIService {
         }
     }
 
-    protected void checkForEmptyBody(ResponseEntity<?> response) {
+    protected void checkForEmptyBody(String URL, ResponseEntity<?> response) {
         if (response == null || !response.hasBody()) {
-            log.error("Empty response API");
+            log.error("Empty response from {} with status {}", this.endpoint(URL),
+                    response == null ? "none" : response.getStatusCode());
             throw new APIException("Empty response from API");
         }
     }
@@ -162,8 +163,7 @@ public abstract class APIService {
         try {
             return this.objectMapper.readTree(body);
         } catch (JsonProcessingException e) {
-            log.error("JSON process failed: {}", e.getMessage());
-            throw new APIException("JSON process failed");
+            throw new APIException("JSON process failed", e);
         }
     }
 }

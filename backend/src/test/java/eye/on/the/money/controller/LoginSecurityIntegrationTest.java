@@ -43,7 +43,8 @@ public class LoginSecurityIntegrationTest {
                         .content("{\"email\":\"nosuchuser@mail.com\",\"password\":\"whatever\"}"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value(401))
-                .andExpect(jsonPath("$.error").value(GENERIC_MESSAGE));
+                .andExpect(jsonPath("$.error").value(GENERIC_MESSAGE))
+                .andExpect(jsonPath("$.traceId").isNotEmpty());
     }
 
     @Test
@@ -72,6 +73,12 @@ public class LoginSecurityIntegrationTest {
             assertNull(response.getHeader("token"), path + " issued a token");
             assertTrue(response.getStatus() >= 400, path + " was accepted with status " + response.getStatus());
         }
+    }
+
+    @Test
+    public void springMvcErrorsCarryATraceId() throws Exception {
+        this.mockMvc.perform(post("/login").contentType(MediaType.TEXT_PLAIN).content("not json"))
+                .andExpect(jsonPath("$.traceId").isNotEmpty());
     }
 
     @Test

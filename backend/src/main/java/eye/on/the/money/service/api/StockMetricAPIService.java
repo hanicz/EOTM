@@ -9,7 +9,6 @@ import eye.on.the.money.dto.out.RecommendationDTO;
 import eye.on.the.money.exception.APIException;
 import eye.on.the.money.repository.ConfigRepository;
 import eye.on.the.money.repository.CredentialRepository;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.Retryable;
@@ -20,7 +19,6 @@ import java.util.Arrays;
 import java.util.List;
 
 @Service
-@Slf4j
 public class StockMetricAPIService extends APIService {
 
     private final static String API = "finnhub";
@@ -58,8 +56,7 @@ public class StockMetricAPIService extends APIService {
             JsonNode metric = this.objectMapper.readTree((String) response.getBody()).path("metric");
             return this.objectMapper.treeToValue(metric, MetricDTO.class);
         } catch (JsonProcessingException | NullPointerException e) {
-            log.error("JSON process failed. {}", e.getMessage());
-            throw new APIException("JSON process failed");
+            throw new APIException("JSON process failed", e);
         }
     }
 

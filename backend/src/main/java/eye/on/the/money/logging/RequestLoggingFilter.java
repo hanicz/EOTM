@@ -19,6 +19,10 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
 
     public static final String USER_ID = "userId";
 
+    public static final String METHOD = "method";
+
+    public static final String PATH = "path";
+
     public static final String REQUEST_ID_HEADER = "X-Request-Id";
 
     private static final int TRACE_ID_LENGTH = 12;
@@ -34,6 +38,8 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         String traceId = this.resolveTraceId(request);
         MDC.put(TRACE_ID, traceId);
+        MDC.put(METHOD, request.getMethod());
+        MDC.put(PATH, request.getRequestURI());
         response.setHeader(REQUEST_ID_HEADER, traceId);
         long start = System.nanoTime();
         try {

@@ -6,20 +6,24 @@ import { TableModule } from 'primeng/table';
 import { PrimeTemplate } from 'primeng/api';
 import { Skeleton } from 'primeng/skeleton';
 import { Tooltip } from 'primeng/tooltip';
+import { Select } from 'primeng/select';
+import { FormsModule } from '@angular/forms';
 import { CurrencyPipe } from '@angular/common';
 import { TickerIdentityComponent } from '../../util/ticker-identity.component';
 import { DeltaComponent } from '../../util/delta.component';
+import { collectAccountOptions } from '../../util/accountoptions';
 
 @Component({
     selector: 'app-etfholding',
     templateUrl: './etfholding.component.html',
     styleUrls: ['./etfholding.component.css'],
-    imports: [Bind, TableModule, PrimeTemplate, Skeleton, Tooltip, CurrencyPipe, TickerIdentityComponent,
-        DeltaComponent]
+    imports: [Bind, TableModule, PrimeTemplate, Skeleton, Tooltip, Select, FormsModule, CurrencyPipe,
+        TickerIdentityComponent, DeltaComponent]
 })
 export class EtfholdingComponent implements OnInit {
 
   investments: ETFInvestment[] = [];
+  accountOptions: string[] = [];
   @Output() dataLoaded = new EventEmitter<ETFInvestment[]>();
 
   investmentsLoading: boolean = true;
@@ -47,6 +51,7 @@ export class EtfholdingComponent implements OnInit {
       next: (data) => {
         this.investmentsLoading = false;
         this.investments = data;
+        this.accountOptions = collectAccountOptions(data);
         this.dataLoaded.emit(this.investments);
         this.cdr.markForCheck();
       },

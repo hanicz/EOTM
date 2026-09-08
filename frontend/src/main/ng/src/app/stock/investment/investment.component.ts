@@ -20,6 +20,7 @@ import { FormsModule } from '@angular/forms';
 import { TickerIdentityComponent } from '../../util/ticker-identity.component';
 import { ExchangeOptionComponent } from '../../util/exchange-option.component';
 import { SymbolOptionComponent } from '../../util/symbol-option.component';
+import { collectAccountOptions } from '../../util/accountoptions';
 import { Dialog } from 'primeng/dialog';
 import { Tooltip } from 'primeng/tooltip';
 import { CurrencyPipe, DatePipe, NgClass } from '@angular/common';
@@ -34,6 +35,8 @@ export class InvestmentComponent implements OnInit {
 
   investments: Investment[] = [];
   accounts: Account[] = [];
+  accountOptions: string[] = [];
+
   currencies: any[];
   statuses: any[];
   selectedInvestments: Investment[] = [];
@@ -90,6 +93,7 @@ export class InvestmentComponent implements OnInit {
     this.stockService.getInvestments().subscribe({
       next: (data) => {
         this.investments = data;
+        this.accountOptions = collectAccountOptions(data);
         this.cdr.markForCheck();
       },
       error: (error) => {

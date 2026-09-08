@@ -136,8 +136,7 @@ public class MNBAPIService extends APIService {
             DocumentBuilder builder = factory.newDocumentBuilder();
             return builder.parse(new InputSource(new StringReader(xml)));
         } catch (ParserConfigurationException | SAXException | IOException e) {
-            log.error("Unable to parse MNB response: {}", e.getMessage());
-            throw new APIException("Unable to parse response from MNB exchange rate service");
+            throw new APIException("Unable to parse response from MNB exchange rate service", e);
         }
     }
 }

@@ -7,6 +7,7 @@ import eye.on.the.money.repository.report.ReportSubscriptionRepository;
 import eye.on.the.money.service.mail.EmailService;
 import eye.on.the.money.service.report.MonthlyReportService;
 import eye.on.the.money.service.report.ReportSubscriptionService;
+import eye.on.the.money.util.LogSanitizer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -49,7 +50,7 @@ public class MonthlyReportScheduler {
     }
 
     private void sendFor(ReportSubscription subscription, YearMonth period) {
-        String userEmail = subscription.getUser().getEmail();
+        String userEmail = LogSanitizer.maskEmail(subscription.getUser().getEmail());
         if (period.toString().equals(subscription.getLastSentPeriod())) {
             log.info("Monthly report for {} already sent to {}, skipping", period, userEmail);
             return;

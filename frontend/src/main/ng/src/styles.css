@@ -294,8 +294,8 @@ html {
 /* Stacked rows already right-align every cell and prepend the column label, so
    the desktop alignment classes would fight the layout rather than help it. */
 @media screen and (max-width: 767px) {
-    .cell-num,
-    .cell-sub {
+    .table-stack .cell-num,
+    .table-stack .cell-sub {
         text-align: right;
     }
 

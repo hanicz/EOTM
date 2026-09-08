@@ -23,6 +23,7 @@ import { CurrencyPipe, DatePipe, NgClass } from '@angular/common';
 import { TickerIdentityComponent } from '../../util/ticker-identity.component';
 import { ExchangeOptionComponent } from '../../util/exchange-option.component';
 import { SymbolOptionComponent } from '../../util/symbol-option.component';
+import { collectAccountOptions } from '../../util/accountoptions';
 
 @Component({
     selector: 'app-etfinvestment',
@@ -33,6 +34,7 @@ import { SymbolOptionComponent } from '../../util/symbol-option.component';
 export class EtfinvestmentComponent implements OnInit {
 
   investments: ETFInvestment[] = [];
+  accountOptions: string[] = [];
   currencies: any[];
   statuses: any[];
   accounts: Account[] = [];
@@ -88,6 +90,7 @@ export class EtfinvestmentComponent implements OnInit {
     this.etfService.getInvestments().subscribe({
       next: (data) => {
         this.investments = data;
+        this.accountOptions = collectAccountOptions(data);
         this.cdr.markForCheck();
       },
       error: (error) => {

@@ -101,7 +101,6 @@ public class WebkincstarImportService implements IExcelService {
                 }
             }
         } catch (IOException | DateTimeParseException | IllegalArgumentException e) {
-            log.error("Error while processing the webkincstár export", e);
             throw this.excelParseFailure(rowNumber, e);
         }
         log.debug("Imported webkincstár export, created {}, updated {}", created, updated);

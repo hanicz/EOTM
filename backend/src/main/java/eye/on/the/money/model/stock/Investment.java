@@ -54,6 +54,7 @@ public class Investment {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnore
+    @ToString.Exclude
     private User user;
 
     @ManyToOne

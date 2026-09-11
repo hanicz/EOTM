@@ -91,6 +91,40 @@
             </div>
 
             <div class="settings-grid">
+                <!-- Left Column: Preferences -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <div>
+                            <h2>
+                                <i class="pi pi-sliders-h"></i>
+                                Preferences
+                            </h2>
+                            <p class="card-description">How your portfolio is displayed across the app</p>
+                        </div>
+                    </div>
+
+                    <div class="card-content">
+                        <div class="dialog-field">
+                            <label for="preferredCurrency">Display currency</label>
+                            <p-select inputId="preferredCurrency" [options]="currencies" optionLabel="name"
+                                optionValue="id" [(ngModel)]="preferredCurrency" placeholder="Select a currency"
+                                [style]="{'width':'100%'}"
+                                [dropdownIcon]="currenciesLoading ? 'pi pi-spinner pi-spin' : 'pi pi-chevron-down'">
+                            </p-select>
+                            <small class="card-description">
+                                Every total on the dashboard and the asset pages is converted to this currency.
+                            </small>
+                        </div>
+
+                        <button pButton pRipple label="Save Preferences" icon="pi pi-check" class="save-button"
+                            severity="info" [loading]="savingPreferences" [disabled]="!preferredCurrency"
+                            (click)="savePreferences()">
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-grid">
                 <!-- Left Column: Security Settings -->
                 <div class="settings-card">
                     <div class="card-header">

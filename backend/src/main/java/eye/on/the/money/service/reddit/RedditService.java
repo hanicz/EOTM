@@ -15,6 +15,8 @@ import eye.on.the.money.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -38,6 +40,7 @@ public class RedditService {
     private String redditLogo;
 
 
+    @Cacheable(cacheNames = "news-reddit", key = "#userId")
     public List<News> getHotNewsFromSubreddits(Long userId) {
         List<Subreddit> subredditList = this.subredditRepository.findByUserIdOrderBySubredditAsc(userId);
         JsonNode token = this.redditAPIService.getToken();
@@ -57,11 +60,13 @@ public class RedditService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "news-reddit", key = "#userId")
     public boolean deleteSubreddit(Long id, Long userId) {
         return this.subredditRepository.deleteByIdAndUserId(id, userId) > 0;
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "news-reddit", key = "#userId")
     public Subreddit addSubreddit(SubredditDTO subreddit, Long userId) {
         User user = this.userService.getReference(userId);
         return this.subredditRepository.save(Subreddit.builder()

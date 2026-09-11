@@ -149,10 +149,7 @@ export class EtfinvestmentComponent implements OnInit {
   }
 
   deleteClicked() {
-    let ids = '';
-    this.selectedInvestments.forEach(t => {
-      ids += t.id + ',';
-    });
+    const ids = this.selectedInvestments.map(i => i.id).join(',');
     this.deleteByIds(ids);
   }
 

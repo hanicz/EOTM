@@ -33,8 +33,6 @@
         }
       </div>
       <div class="summary-actions">
-        <p-select [options]="currencyOptions" [(ngModel)]="selectedCurrency" optionLabel="label" optionValue="value"
-          (onChange)="onCurrencyChange()"></p-select>
         <button pButton pRipple icon="pi pi-refresh" class="p-button-rounded p-button-text"
           pTooltip="Refresh" (click)="refreshAll()"></button>
       </div>

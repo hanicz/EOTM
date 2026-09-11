@@ -140,3 +140,20 @@
     font-size: 1.1rem;
     color: #d8d3c4;
 }
+
+.news-toolbar {
+    padding-top: 1rem;
+}
+
+.news-symbol {
+    flex: 0 0 auto;
+    font-weight: 600;
+    color: #1b1b1b;
+    background-color: #efece2;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+}
+
+.news-data-view ::ng-deep .p-dataview-content {
+    background: transparent;
+}

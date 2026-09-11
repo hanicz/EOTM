@@ -2,16 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Transaction } from '../model/transaction';
 import { Crypto } from '../model/crypto';
-import { ResourceHelper } from '../util/servicehelper';
 import { environment } from '../../environments/environment';
-
 
 @Injectable({
   providedIn: 'root'
 })
 export class CryptoService {
-
-  private helper = new ResourceHelper();
 
   private transactionUrl = `${environment.API_URL}/api/v1/transaction`;
 
@@ -19,68 +15,51 @@ export class CryptoService {
 
   getAllCrypto() {
     const url = `${environment.API_URL}/api/v1/coin`;
-    return this.http.get<Crypto[]>(url, {
-      headers: this.helper.getHeadersWithToken()
-    });
+    return this.http.get<Crypto[]>(url);
   };
 
   getTransactions() {
     const url = `${this.transactionUrl}`;
-    return this.http.get<Transaction[]>(url, {
-      headers: this.helper.getHeadersWithToken()
-    });
+    return this.http.get<Transaction[]>(url);
   };
 
   getPositions() {
     const url = `${this.transactionUrl}/position`;
-    return this.http.get<Transaction[]>(url, {
-      headers: this.helper.getHeadersWithToken()
-    });
+    return this.http.get<Transaction[]>(url);
   };
 
   getHoldings(refresh = false) {
     var data = { "currency": "EUR" }
     const url = `${this.transactionUrl}/holding${refresh ? '?refresh=true' : ''}`;
-    return this.http.post<Transaction[]>(url, JSON.stringify(data), {
-      headers: this.helper.getHeadersWithToken()
-    });
+    return this.http.post<Transaction[]>(url, JSON.stringify(data));
   };
 
   deleteByIds(ids: string) {
     const url = `${this.transactionUrl}?ids=${ids}`;
-    return this.http.delete(url, {
-      headers: this.helper.getHeadersWithToken()
-    });
+    return this.http.delete(url);
   }
 
   download() {
     const url = `${this.transactionUrl}/csv`;
     return this.http.get(url, {
-      headers: this.helper.getHeadersWithToken(),
       responseType: 'blob'
     });
   }
 
   create(transaction: Transaction) {
     const url = `${this.transactionUrl}`;
-    return this.http.post<Transaction>(url, JSON.stringify(transaction), {
-      headers: this.helper.getHeadersWithToken(),
-    });
+    return this.http.post<Transaction>(url, JSON.stringify(transaction));
   }
 
   update(transaction: Transaction) {
     const url = `${this.transactionUrl}`;
-    return this.http.put<Transaction>(url, JSON.stringify(transaction), {
-      headers: this.helper.getHeadersWithToken(),
-    });
+    return this.http.put<Transaction>(url, JSON.stringify(transaction));
   }
 
   uploadCSV(file: File) {
     const formData = new FormData();
     formData.append('file', file, 'file.csv')
     const url = `${this.transactionUrl}/process/csv`;
-    return this.http.post<any>(url, formData, {
-      headers: this.helper.getAuthHeaders(),
-    });
+    return this.http.post<any>(url, formData);
   }
 }

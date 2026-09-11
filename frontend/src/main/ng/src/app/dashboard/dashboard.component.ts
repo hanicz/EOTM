@@ -1,20 +1,20 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
-import { FormsModule } from '@angular/forms';
+import { switchMap } from 'rxjs/operators';
 import { MenuComponent } from '../menu/menu.component';
 import { Bind } from 'primeng/bind';
 import { Panel } from 'primeng/panel';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { Tooltip } from 'primeng/tooltip';
-import { PrimeTemplate } from 'primeng/api';
 import { Skeleton } from 'primeng/skeleton';
-import { Select } from 'primeng/select';
 import { DecimalPipe, CurrencyPipe } from '@angular/common';
 import { NetWorthService } from '../service/networth.service';
 import { AlertService } from '../service/alert.service';
 import { NetWorth } from '../model/networth';
+import { DEFAULT_CURRENCY } from '../model/currency';
+import { UserService } from '../service/user.service';
 import { StockAlert } from '../model/stockalert';
 import { CryptoAlert } from '../model/cryptoalert';
 import { AlertTypePipe } from '../util/pipe';
@@ -23,6 +23,7 @@ import { NotepadComponent } from './notepad/notepad.component';
 import { UpcomingInterestComponent } from './upcoming-interest/upcoming-interest.component';
 import { UpcomingVestComponent } from './upcoming-vest/upcoming-vest.component';
 import { UpcomingStarVestComponent } from './upcoming-star-vest/upcoming-star-vest.component';
+import { FireSummaryComponent } from './fire-summary/fire-summary.component';
 
 interface AssetSlice {
   label: string;
@@ -40,8 +41,6 @@ interface DonutSegment {
   dashOffset: string;
 }
 
-const DEFAULT_CURRENCY = 'HUF';
-
 /** Matches the asset class names the backend reports. */
 const ASSET_COLOURS: { [assetClass: string]: string } = {
   'Stock': '#ef9f27',
@@ -50,19 +49,19 @@ const ASSET_COLOURS: { [assetClass: string]: string } = {
   'Forex': '#b4b2a9',
   'Securities': '#7a8c5c',
   'Cash': '#c9a227',
+  'Pension': '#5c7a8c',
 };
 
 @Component({
     selector: 'app-dashboard',
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.css'],
-    imports: [MenuComponent, Bind, Panel, ButtonDirective, Ripple, Tooltip, PrimeTemplate, Skeleton, Select, FormsModule, DecimalPipe, CurrencyPipe, AlertTypePipe, MarketStatusComponent, NotepadComponent, UpcomingInterestComponent, UpcomingVestComponent, UpcomingStarVestComponent]
+    imports: [MenuComponent, Bind, Panel, ButtonDirective, Ripple, Tooltip, Skeleton, DecimalPipe, CurrencyPipe, AlertTypePipe, MarketStatusComponent, NotepadComponent, UpcomingInterestComponent, UpcomingVestComponent, UpcomingStarVestComponent, FireSummaryComponent]
 })
 export class DashboardComponent implements OnInit {
 
   loading: boolean = true;
 
-  currencyOptions: string[] = [DEFAULT_CURRENCY];
   selectedCurrency: string = DEFAULT_CURRENCY;
 
   stockTotal: number = 0;
@@ -76,6 +75,8 @@ export class DashboardComponent implements OnInit {
   securityTotal: number = 0;
   securityRatePct: number = 0;
   cashTotal: number = 0;
+  pensionTotal: number = 0;
+  pensionChangePct: number = 0;
 
   netWorth: number = 0;
   netWorthChangePct: number = 0;
@@ -92,6 +93,7 @@ export class DashboardComponent implements OnInit {
     private alertService: AlertService,
     private cdr: ChangeDetectorRef,
     private router: Router,
+    private userService: UserService,
   ) {
     this.loadData();
   }
@@ -108,17 +110,17 @@ export class DashboardComponent implements OnInit {
     this.loadData(true);
   }
 
-  onCurrencyChange(): void {
-    this.loading = true;
-    this.loadNetWorth();
-  }
-
   private loadData(forceRefresh = false): void {
-    forkJoin({
-      netWorth: this.netWorthService.getNetWorth(this.selectedCurrency, forceRefresh),
-      stockAlerts: this.alertService.getStockAlerts(),
-      cryptoAlerts: this.alertService.getCryptoAlerts(),
-    }).subscribe({
+    this.userService.getPreferredCurrency().pipe(
+      switchMap(currency => {
+        this.selectedCurrency = currency;
+        return forkJoin({
+          netWorth: this.netWorthService.getNetWorth(currency, forceRefresh),
+          stockAlerts: this.alertService.getStockAlerts(),
+          cryptoAlerts: this.alertService.getCryptoAlerts(),
+        });
+      })
+    ).subscribe({
       next: ({ netWorth, stockAlerts, cryptoAlerts }) => {
         this.stockAlerts = stockAlerts;
         this.cryptoAlerts = cryptoAlerts;
@@ -134,25 +136,7 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  private loadNetWorth(): void {
-    this.netWorthService.getNetWorth(this.selectedCurrency).subscribe({
-      next: (data) => {
-        this.apply(data);
-        this.loading = false;
-        this.cdr.markForCheck();
-      },
-      error: (error) => {
-        console.log(error);
-        this.loading = false;
-        this.cdr.markForCheck();
-      }
-    });
-  }
-
   private apply(netWorth: NetWorth): void {
-    this.currencyOptions = netWorth.availableCurrencies?.length
-      ? netWorth.availableCurrencies : [DEFAULT_CURRENCY];
-
     this.stockTotal = this.worthOf(netWorth, 'Stock');
     this.stockChangePct = this.changeOf(netWorth, 'Stock');
     this.cryptoTotal = this.worthOf(netWorth, 'Crypto');
@@ -164,6 +148,8 @@ export class DashboardComponent implements OnInit {
     this.securityTotal = this.worthOf(netWorth, 'Securities');
     this.securityRatePct = this.expectedRateOf(netWorth, 'Securities');
     this.cashTotal = this.worthOf(netWorth, 'Cash');
+    this.pensionTotal = this.worthOf(netWorth, 'Pension');
+    this.pensionChangePct = this.changeOf(netWorth, 'Pension');
 
     this.netWorth = netWorth.totalWorth;
     this.netWorthChangePct = netWorth.totalChangePct;

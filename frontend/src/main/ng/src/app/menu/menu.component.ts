@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MenuItem, PrimeTemplate } from 'primeng/api';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs/operators';
-import { User } from '../model/user';
+import { UserProfile } from '../model/userprofile';
 import { UserService } from '../service/user.service';
 import { Bind } from 'primeng/bind';
 import { Menubar } from 'primeng/menubar';
@@ -19,7 +19,7 @@ import { Globals } from '../util/global';
 })
 export class MenuComponent implements OnInit {
   items: MenuItem[] = [];
-  user: User = {} as User;
+  user: UserProfile = {} as UserProfile;
   assetUrl: string = environment.assets_url;
 
   readonly menuItems: MenuItem[] = [
@@ -30,7 +30,8 @@ export class MenuComponent implements OnInit {
         { label: 'Stock', icon: 'fa-solid fa-arrow-trend-up', routerLink: ['/stock'] },
         { label: 'Forex', icon: 'fa-solid fa-coins', routerLink: ['/forex'] },
         { label: 'Crypto', icon: 'fab fa-bitcoin', routerLink: ['/crypto'] },
-        { label: 'Cash', icon: 'fa-solid fa-money-bill', routerLink: ['/cash'] }
+        { label: 'Cash', icon: 'fa-solid fa-money-bill', routerLink: ['/cash'] },
+        { label: 'Pension', icon: 'fa-solid fa-piggy-bank', routerLink: ['/pension'] }
       ]
     },
     { label: 'Financials', icon: 'fa-solid fa-credit-card', routerLink: ['/financial'] },
@@ -48,7 +49,7 @@ export class MenuComponent implements OnInit {
     private userService: UserService,
     private globals: Globals
   ) {
-    this.userService.getUserEmail().subscribe(data => this.user = data);
+    this.userService.getCurrentUser().subscribe(data => this.user = data);
   }
 
   ngOnInit(): void {

@@ -1,8 +1,10 @@
 package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.in.ChangePasswordDTO;
+import eye.on.the.money.dto.in.PreferencesUpdateDTO;
 import eye.on.the.money.dto.in.SignUpDTO;
 import eye.on.the.money.dto.out.ExportDTO;
+import eye.on.the.money.dto.out.UserDTO;
 import eye.on.the.money.service.shared.ExportService;
 import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
@@ -10,13 +12,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import eye.on.the.money.security.CurrentUserEmail;
 import eye.on.the.money.security.CurrentUserId;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("api/v1/user")
@@ -38,10 +37,14 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<Map<String, String>> getUserEmail(@CurrentUserEmail String userEmail) {
-        Map<String, String> map = new HashMap<>();
-        map.put("email", userEmail);
-        return ResponseEntity.ok(map);
+    public ResponseEntity<UserDTO> getCurrentUser(@CurrentUserId Long userId) {
+        return ResponseEntity.ok(this.userService.getUser(userId));
+    }
+
+    @PutMapping("/preferences")
+    public ResponseEntity<UserDTO> updatePreferences(@RequestBody @Valid PreferencesUpdateDTO preferencesDTO,
+                                                     @CurrentUserId Long userId) {
+        return ResponseEntity.ok(this.userService.updatePreferredCurrency(userId, preferencesDTO.preferredCurrency()));
     }
 
     @PutMapping("/password")

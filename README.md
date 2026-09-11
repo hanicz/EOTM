@@ -48,7 +48,15 @@ plan what they add up to.
 
 ### News
 
-- Market and company news, plus posts from a configurable list of subreddits.
+- **Your portfolio's news** — company news for every US ticker you hold or watch, gathered in one
+  feed, newest first. Each story is tagged with the ticker it came from, a story carried under two
+  tickers appears once, and a ticker the provider has nothing for is skipped rather than failing the
+  feed. Company news is a US-listing service, so non-US holdings are left out.
+- Market news by category — general, forex and crypto — plus hot posts from a configurable list of
+  subreddits.
+- **Search and filter** the feed by keyword, source and date range, paged rather than dumped in one
+  list.
+- Responses are cached, so switching between feeds does not re-hit the provider on every click.
 
 ### Tax (Hungary)
 

@@ -5,6 +5,7 @@ import eye.on.the.money.dto.out.FireProjectionResultDTO;
 import eye.on.the.money.dto.out.FireYearDTO;
 import eye.on.the.money.dto.out.NetWorthDTO;
 import eye.on.the.money.exception.FireException;
+import eye.on.the.money.util.FireDefaults;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -56,7 +57,7 @@ public class FireService implements ICSVService {
     private static final String DRAWDOWN = "DRAWDOWN";
 
     private static final int MONTHS_IN_YEAR = 12;
-    private static final int DEFAULT_LIFE_EXPECTANCY = 90;
+    private static final int DEFAULT_LIFE_EXPECTANCY = FireDefaults.LIFE_EXPECTANCY;
     private static final double DEFAULT_WITHDRAWAL_RATE = 4.0;
     private static final int SCALE = 2;
 

@@ -124,10 +124,7 @@ export class InvestmentComponent implements OnInit {
   }
 
   deleteClicked() {
-    let ids = '';
-    this.selectedInvestments.forEach(t => {
-      ids += t.investmentId + ',';
-    });
+    const ids = this.selectedInvestments.map(i => i.investmentId).join(',');
     this.deleteByIds(ids);
   }
 

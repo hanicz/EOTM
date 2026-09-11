@@ -8,6 +8,7 @@ import eye.on.the.money.dto.out.ETFInvestmentDTO;
 import eye.on.the.money.dto.out.ForexTransactionDTO;
 import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.dto.out.NetWorthDTO;
+import eye.on.the.money.dto.out.PensionDTO;
 import eye.on.the.money.dto.out.SecurityTransactionDTO;
 import eye.on.the.money.dto.out.TransactionDTO;
 import eye.on.the.money.exception.APIException;
@@ -15,6 +16,7 @@ import eye.on.the.money.service.cash.CashService;
 import eye.on.the.money.service.crypto.TransactionService;
 import eye.on.the.money.service.etf.ETFInvestmentService;
 import eye.on.the.money.service.forex.ForexTransactionService;
+import eye.on.the.money.service.pension.PensionService;
 import eye.on.the.money.service.security.SecurityTransactionService;
 import eye.on.the.money.service.stock.InvestmentService;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,6 +61,8 @@ class NetWorthServiceTest {
     @Mock
     private CashService cashService;
     @Mock
+    private PensionService pensionService;
+    @Mock
     private DashboardService dashboardService;
 
     private NetWorthService netWorthService;
@@ -67,7 +71,7 @@ class NetWorthServiceTest {
     void setUp() {
         this.netWorthService = new NetWorthService(this.investmentService, this.transactionService,
                 this.etfInvestmentService, this.forexTransactionService, this.securityTransactionService,
-                this.cashService, this.dashboardService);
+                this.cashService, this.pensionService, this.dashboardService);
 
         this.stubRates(Map.of("USD", 1.10, "HUF", 400.0));
         when(this.investmentService.getCurrentHoldings(anyLong())).thenReturn(List.of());
@@ -76,6 +80,7 @@ class NetWorthServiceTest {
         when(this.forexTransactionService.getAllForexHoldings(anyLong())).thenReturn(List.of());
         when(this.securityTransactionService.getCurrentHoldings(anyLong())).thenReturn(List.of());
         this.stubCash(0.0);
+        this.stubPension(0.0, 0.0);
     }
 
     private void stubCash(Double amount) {
@@ -85,6 +90,16 @@ class NetWorthServiceTest {
     private void stubCash(Double amount, String currency) {
         when(this.cashService.getCash(anyLong()))
                 .thenReturn(CashDTO.builder().amount(amount).currency(currency).build());
+    }
+
+    private void stubPension(Double totalContribution, Double currentValue) {
+        this.stubPension(totalContribution, currentValue, "HUF");
+    }
+
+    private void stubPension(Double totalContribution, Double currentValue, String currency) {
+        when(this.pensionService.getPension(anyLong()))
+                .thenReturn(PensionDTO.builder().totalContribution(totalContribution)
+                        .currentValue(currentValue).currency(currency).build());
     }
 
     private void stubRates(Map<String, Double> rates) {
@@ -380,5 +395,50 @@ class NetWorthServiceTest {
         assertEquals(0, result.getTotalSpent().signum());
         assertEquals(0, result.getTotalWorth().signum());
         assertEquals(0, result.getTotalChangePct().signum());
+    }
+
+    @Test
+    void getNetWorth_convertsPensionIntoTheTargetCurrency() {
+        this.stubPension(400_000.0, 500_000.0);
+
+        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
+
+        AssetClassValueDTO pension = this.assetOf(result, NetWorthService.PENSION);
+        assertEquals(0, pension.getSpent().compareTo(new BigDecimal("1000.00")));
+        assertEquals(0, pension.getWorth().compareTo(new BigDecimal("1250.00")));
+        assertEquals(0, pension.getChangePct().compareTo(new BigDecimal("25.00")));
+    }
+
+    @Test
+    void getNetWorth_convertsPensionHeldInANonDefaultCurrency() {
+        this.stubPension(1_100.0, 2_200.0, "USD");
+
+        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
+
+        AssetClassValueDTO pension = this.assetOf(result, NetWorthService.PENSION);
+        assertEquals(0, pension.getSpent().compareTo(new BigDecimal("1000.00")));
+        assertEquals(0, pension.getWorth().compareTo(new BigDecimal("2000.00")));
+        assertTrue(result.getUnconvertedCurrencies().isEmpty());
+    }
+
+    @Test
+    void getNetWorth_countsPensionGainInTheTotalChangeUnlikeCash() {
+        this.stubPension(400_000.0, 500_000.0);
+
+        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
+
+        assertEquals(0, result.getTotalChangePct().compareTo(new BigDecimal("25.00")));
+        assertEquals(0, result.getTotalSpent().compareTo(new BigDecimal("1000.00")));
+        assertEquals(0, result.getTotalWorth().compareTo(new BigDecimal("1250.00")));
+    }
+
+    @Test
+    void getNetWorth_looksUpRatesWhenPensionIsTheOnlyHolding() {
+        this.stubPension(400_000.0, 500_000.0);
+
+        NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
+
+        assertTrue(result.getUnconvertedCurrencies().isEmpty());
+        assertEquals(0, result.getTotalWorth().compareTo(new BigDecimal("1250.00")));
     }
 }

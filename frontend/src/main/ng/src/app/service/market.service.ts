@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { finalize, shareReplay } from 'rxjs/operators';
-import { ResourceHelper } from '../util/servicehelper';
 import { environment } from '../../environments/environment';
 import { MarketExchange } from '../model/market';
 
@@ -10,8 +9,6 @@ import { MarketExchange } from '../model/market';
   providedIn: 'root'
 })
 export class MarketService {
-
-  private helper = new ResourceHelper();
 
   private marketUrl = `${environment.API_URL}/api/v1/market`;
 
@@ -21,9 +18,7 @@ export class MarketService {
 
   getExchanges() {
     if (!this.exchangesRequest$) {
-      this.exchangesRequest$ = this.http.get<MarketExchange[]>(this.marketUrl, {
-        headers: this.helper.getHeadersWithToken()
-      }).pipe(
+      this.exchangesRequest$ = this.http.get<MarketExchange[]>(this.marketUrl).pipe(
         shareReplay(1),
         finalize(() => this.exchangesRequest$ = null)
       );

@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { RSUGrant, RSUGrantReport, STARGrant, STARGrantReport } from '../model/equity';
-import { ResourceHelper } from '../util/servicehelper';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -9,58 +8,47 @@ import { environment } from '../../environments/environment';
 })
 export class EquityService {
 
-  private helper = new ResourceHelper();
-
   private rsuUrl = `${environment.API_URL}/api/v1/equity/rsu`;
   private starUrl = `${environment.API_URL}/api/v1/equity/star`;
 
   constructor(private http: HttpClient) { }
 
   getGrants() {
-    return this.http.get<RSUGrantReport>(this.rsuUrl, { headers: this.helper.getHeadersWithToken() });
+    return this.http.get<RSUGrantReport>(this.rsuUrl);
   }
 
   create(grant: RSUGrant) {
-    return this.http.post<RSUGrant>(this.rsuUrl, JSON.stringify(this.toPayload(grant)), {
-      headers: this.helper.getHeadersWithToken()
-    });
+    return this.http.post<RSUGrant>(this.rsuUrl, JSON.stringify(this.toPayload(grant)));
   }
 
   update(grant: RSUGrant) {
-    return this.http.put<RSUGrant>(`${this.rsuUrl}/${grant.id}`, JSON.stringify(this.toPayload(grant)), {
-      headers: this.helper.getHeadersWithToken()
-    });
+    return this.http.put<RSUGrant>(`${this.rsuUrl}/${grant.id}`, JSON.stringify(this.toPayload(grant)));
   }
 
   deleteByIds(ids: string) {
-    return this.http.delete(`${this.rsuUrl}?ids=${ids}`, { headers: this.helper.getHeadersWithToken() });
+    return this.http.delete(`${this.rsuUrl}?ids=${ids}`);
   }
 
   downloadCsv() {
     return this.http.get(`${this.rsuUrl}/csv`, {
-      headers: this.helper.getHeadersWithToken(),
       responseType: 'blob'
     });
   }
 
   getStarGrants() {
-    return this.http.get<STARGrantReport>(this.starUrl, { headers: this.helper.getHeadersWithToken() });
+    return this.http.get<STARGrantReport>(this.starUrl);
   }
 
   createStar(grant: STARGrant) {
-    return this.http.post<STARGrant>(this.starUrl, JSON.stringify(this.toStarPayload(grant)), {
-      headers: this.helper.getHeadersWithToken()
-    });
+    return this.http.post<STARGrant>(this.starUrl, JSON.stringify(this.toStarPayload(grant)));
   }
 
   updateStar(grant: STARGrant) {
-    return this.http.put<STARGrant>(`${this.starUrl}/${grant.id}`, JSON.stringify(this.toStarPayload(grant)), {
-      headers: this.helper.getHeadersWithToken()
-    });
+    return this.http.put<STARGrant>(`${this.starUrl}/${grant.id}`, JSON.stringify(this.toStarPayload(grant)));
   }
 
   deleteStarByIds(ids: string) {
-    return this.http.delete(`${this.starUrl}?ids=${ids}`, { headers: this.helper.getHeadersWithToken() });
+    return this.http.delete(`${this.starUrl}?ids=${ids}`);
   }
 
   private toPayload(grant: RSUGrant) {

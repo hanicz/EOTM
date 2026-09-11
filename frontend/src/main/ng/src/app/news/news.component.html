@@ -1,5 +1,26 @@
-<div class="news-grid">
-  @if (newsLoading) {
+<p-toast position="bottom-center" key="news"></p-toast>
+
+@if (browse && !newsLoading) {
+  <div class="filter-bar news-toolbar">
+    <input pInputText type="text" [(ngModel)]="search" (ngModelChange)="filterChanged()"
+      placeholder="Search headlines" class="p-column-filter filter-input" />
+    <p-select [(ngModel)]="sourceFilter" (ngModelChange)="filterChanged()" [options]="sourceOptions"
+      optionLabel="label" optionValue="value" [showClear]="true" placeholder="Any source"
+      styleClass="filter-type">
+    </p-select>
+    <input pInputText type="date" [(ngModel)]="fromDate" (ngModelChange)="filterChanged()"
+      [max]="toDate || null" class="p-column-filter" />
+    <input pInputText type="date" [(ngModel)]="toDate" (ngModelChange)="filterChanged()"
+      [min]="fromDate || null" class="p-column-filter" />
+    @if (hasFilters) {
+      <button pButton pRipple type="button" icon="pi pi-filter-slash" (click)="clearFilters()"
+        class="p-button-text" pTooltip="Clear filters"></button>
+    }
+  </div>
+}
+
+@if (newsLoading) {
+  <div class="news-grid">
     @for (item of [].constructor(4); track $index) {
       <div class="news-card">
         <div class="news-card-media"><p-skeleton height="100%"></p-skeleton></div>
@@ -11,32 +32,50 @@
         </div>
       </div>
     }
-  }
+  </div>
+}
 
-  @if (!newsLoading) {
-    @for (new of news; track new) {
-      <a class="news-card" href="{{new.url}}" target="_blank">
-        <div class="news-card-media">
-          @if (isRedditSource(new)) {
-            <i class="pi pi-reddit news-reddit-icon"></i>
-          } @else if (hasValidImage(new)) {
-            <p-image src="{{new.image}}" height="100%" width="100%"></p-image>
-          } @else {
-            <i class="pi pi-megaphone news-fallback-icon"></i>
-          }
-        </div>
-        <div class="news-card-body">
-          <div class="news-card-meta">
-            <span>{{new.datetime * 1000 | date: 'yyyy-MM-dd'}}</span>
-            <span class="news-card-source">{{new.source}}</span>
-          </div>
-          <div class="news-card-headline">{{new.headline}}</div>
-          <div class="news-card-summary">{{(new.summary.length > 220) ? (new.summary | slice:
-          0:220) + '...' : new.summary }}</div>
-        </div>
-      </a>
-    } @empty {
-      <div class="news-empty"><i class="pi pi-inbox"></i>No recent news for this ticker.</div>
-    }
-  }
-</div>
+@if (!newsLoading) {
+  <p-dataView [value]="filteredNews" [paginator]="browse" [rows]="12" [rowsPerPageOptions]="[12, 24, 48]"
+    styleClass="news-data-view">
+    <ng-template #list let-items>
+      <div class="news-grid">
+        @for (new of items; track new.url) {
+          <a class="news-card" href="{{new.url}}" target="_blank">
+            <div class="news-card-media">
+              @if (isRedditSource(new)) {
+                <i class="pi pi-reddit news-reddit-icon"></i>
+              } @else if (hasValidImage(new)) {
+                <p-image src="{{new.image}}" height="100%" width="100%"></p-image>
+              } @else {
+                <i class="pi pi-megaphone news-fallback-icon"></i>
+              }
+            </div>
+            <div class="news-card-body">
+              <div class="news-card-meta">
+                <span>{{new.datetime * 1000 | date: 'yyyy-MM-dd'}}</span>
+                @if (new.symbol) {
+                  <span class="news-symbol">{{new.symbol}}</span>
+                }
+                <span class="news-card-source">{{new.source}}</span>
+              </div>
+              <div class="news-card-headline">{{new.headline}}</div>
+              <div class="news-card-summary">{{((new.summary ?? '').length > 220) ? ((new.summary ?? '') | slice:
+              0:220) + '...' : (new.summary ?? '') }}</div>
+            </div>
+          </a>
+        }
+      </div>
+    </ng-template>
+    <ng-template #empty>
+      <div class="news-empty">
+        <i class="pi" [class.pi-inbox]="!loadError" [class.pi-exclamation-triangle]="loadError"></i>
+        <span>{{emptyText}}</span>
+        @if (loadError) {
+          <button pButton pRipple type="button" label="Retry" icon="pi pi-refresh" (click)="retry()"
+            class="p-button-text p-button-sm"></button>
+        }
+      </div>
+    </ng-template>
+  </p-dataView>
+}

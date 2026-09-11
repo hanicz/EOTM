@@ -130,10 +130,7 @@ export class EtfdividendComponent implements OnInit {
   }
 
   deleteClicked() {
-    let ids = '';
-    this.selectedDividends.forEach(d => {
-      ids += d.id + ',';
-    });
+    const ids = this.selectedDividends.map(i => i.id).join(',');
     this.deleteByIds(ids);
   }
 

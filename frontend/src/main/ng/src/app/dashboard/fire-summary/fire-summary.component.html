@@ -1,0 +1,95 @@
+@if (loading()) {
+  <div class="fire-strip">
+    <div class="fire-target">
+      <p-skeleton width="8rem" height="1.2rem" styleClass="mb-2"></p-skeleton>
+      <p-skeleton width="100%" height="0.6rem"></p-skeleton>
+    </div>
+    <div class="fire-stats">
+      @for (stat of skeletonStats; track $index) {
+        <div class="fire-stat">
+          <p-skeleton width="4rem" height="0.7rem" styleClass="mb-2"></p-skeleton>
+          <p-skeleton width="5rem" height="1rem"></p-skeleton>
+        </div>
+      }
+    </div>
+  </div>
+} @else if (!snapshot()) {
+  <div class="empty-state">Could not read your FIRE progress</div>
+} @else {
+  <div class="fire-strip">
+    <div class="fire-target">
+      @if (snapshot()!.fireNumber != null) {
+        <div class="fire-target-head">
+          <span class="fire-stat-label">Target</span>
+          <span class="fire-target-value">
+            {{snapshot()!.fireNumber | currency : currency() : 'symbol' : '0.0-0'}}
+          </span>
+        </div>
+        <div class="fire-bar">
+          <div class="fire-bar-fill" [style.width.%]="barWidth()"></div>
+        </div>
+        <div class="fire-bar-legend">
+          <span>{{snapshot()!.netWorth | currency : currency() : 'symbol' : '0.0-0'}}</span>
+          <span class="fire-pct">{{snapshot()!.progressPct | number : '0.0-1'}}%</span>
+        </div>
+      } @else {
+        <div class="empty-state">No spending recorded, so there is no target to measure against</div>
+      }
+    </div>
+
+    <div class="fire-stats">
+      <div class="fire-stat">
+        <span class="fire-stat-label">Years to FIRE</span>
+        <span class="fire-stat-value">{{yearsLabel()}}</span>
+      </div>
+
+      @if (snapshot()!.hasCashFlow) {
+        <div class="fire-stat">
+          <span class="fire-stat-label">Saving / month</span>
+          <span class="fire-stat-value" [class.negative]="snapshot()!.monthlySavings < 0">
+            {{snapshot()!.monthlySavings | currency : currency() : 'symbol' : '0.0-0'}}
+          </span>
+        </div>
+        <div class="fire-stat">
+          <span class="fire-stat-label">Savings rate</span>
+          <span class="fire-stat-value" [class.negative]="(snapshot()!.savingsRatePct ?? 0) < 0">
+            @if (snapshot()!.savingsRatePct != null) {
+              {{snapshot()!.savingsRatePct | number : '0.0-0'}}%
+            } @else {
+              &mdash;
+            }
+          </span>
+        </div>
+      } @else {
+        <div class="fire-stat fire-stat-prompt">
+          <span class="fire-stat-label">No bank data</span>
+          <span class="fire-prompt">Import bank transactions to project your FIRE date</span>
+        </div>
+      }
+    </div>
+
+    <div class="fire-assumptions">
+      <span class="fire-assumptions-label">Run on</span>
+      <div class="fire-assumption-list">
+        <span class="fire-assumption" pTooltip="Nominal return the pot is grown at every year.">
+          <span class="fire-assumption-label">Annual return</span>
+          <span class="fire-assumption-value">{{snapshot()!.annualReturn | number : '0.0-1'}}%</span>
+        </span>
+        <span class="fire-assumption" pTooltip="Yearly rise in what you put away, inflation is not added on top.">
+          <span class="fire-assumption-label">Annual increase</span>
+          <span class="fire-assumption-value">{{snapshot()!.annualContributionIncrease | number : '0.0-1'}}%</span>
+        </span>
+        @if (snapshot()!.targetSource === 'DERIVED') {
+          <span class="fire-assumption" pTooltip="Share of the pot taken in the first year of retirement. Your spending divided by it is the target.">
+            <span class="fire-assumption-label">Withdrawal rate</span>
+            <span class="fire-assumption-value">{{snapshot()!.withdrawalRate | number : '0.0-2'}}%</span>
+          </span>
+        }
+      </div>
+    </div>
+  </div>
+
+  @if (notes().length > 0) {
+    <div class="fire-notes">{{notes().join(' · ')}}</div>
+  }
+}

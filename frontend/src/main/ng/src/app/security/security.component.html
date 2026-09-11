@@ -18,8 +18,6 @@
           pTooltip="Average of the rate on every holding, weighted by quantity, so larger positions count for more.">{{(expectedRate | number : '0.2-2') + '%'}}</span>
       </div>
       <div class="summary-actions">
-        <p-select [options]="currencyOptions" [(ngModel)]="selectedCurrency" optionLabel="label" optionValue="value"
-          (onChange)="onCurrencyChange()"></p-select>
         <p-fileUpload mode="basic" #fileUpload accept=".xls" [customUpload]="true" [auto]="true" chooseLabel="Import"
           chooseStyleClass="p-button-outlined p-button-secondary"
           pTooltip="Import the official webkincstár transaction export."

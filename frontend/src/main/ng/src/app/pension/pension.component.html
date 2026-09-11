@@ -1,0 +1,60 @@
+<p-toast position="bottom-center"></p-toast>
+<div class="shadow-5">
+  <menu class="pl-0 mb-0"></menu>
+  <p-panel>
+
+    <p class="pension-hint">
+      Your pension pot as it stands on your latest statement. Enter what you have paid in altogether and
+      what it is worth today, and the gain is worked out from the two.
+    </p>
+
+    <section class="pension-section">
+      <h3 class="pension-section-title">Balance</h3>
+      <div class="pension-form">
+        <div class="pension-field">
+          <label for="pensionContribution" class="pension-label">Total contributed</label>
+          @if (loading) {
+            <p-skeleton height="2.5rem"></p-skeleton>
+          } @else {
+            <p-inputnumber inputId="pensionContribution" [(ngModel)]="totalContribution" [min]="0" placeholder="0"
+              [suffix]="' ' + currency" (keyup.enter)="save()"></p-inputnumber>
+          }
+        </div>
+        <div class="pension-field">
+          <label for="pensionValue" class="pension-label">Current value</label>
+          @if (loading) {
+            <p-skeleton height="2.5rem"></p-skeleton>
+          } @else {
+            <p-inputnumber inputId="pensionValue" [(ngModel)]="currentValue" [min]="0" placeholder="0"
+              [suffix]="' ' + currency" (keyup.enter)="save()"></p-inputnumber>
+          }
+        </div>
+        <div class="pension-field">
+          <label for="pensionCurrency" class="pension-label">Currency</label>
+          @if (loading) {
+            <p-skeleton height="2.5rem"></p-skeleton>
+          } @else {
+            <p-select inputId="pensionCurrency" [options]="currencies" [(ngModel)]="currency"
+              optionLabel="label" optionValue="value"></p-select>
+          }
+        </div>
+      </div>
+
+      @if (!loading) {
+        <div class="pension-gain">
+          <span class="pension-gain-label">Gain</span>
+          <span class="pension-gain-value" [class.positive]="gain >= 0" [class.negative]="gain < 0">
+            {{gain >= 0 ? '+' : ''}}{{gain | currency : currency : 'symbol' : '0.0-0'}}
+            ({{gain >= 0 ? '+' : ''}}{{gainPct | number : '0.0-1'}}%)
+          </span>
+        </div>
+      }
+
+      <div class="pension-actions">
+        <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-rounded"
+          [loading]="saving" [disabled]="loading" (click)="save()"></button>
+      </div>
+    </section>
+
+  </p-panel>
+</div>

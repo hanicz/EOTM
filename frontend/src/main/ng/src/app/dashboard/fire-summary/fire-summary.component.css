@@ -1,0 +1,172 @@
+.fire-strip {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.fire-target {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1 1 260px;
+    min-width: 0;
+}
+
+.fire-target-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.fire-target-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1b1b1b;
+    font-variant-numeric: tabular-nums;
+}
+
+.fire-bar {
+    height: 8px;
+    border-radius: 4px;
+    background: #f1efe8;
+    overflow: hidden;
+}
+
+.fire-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: #7a8c5c;
+    transition: width 0.2s ease;
+}
+
+.fire-bar-legend {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 12px;
+    color: #888780;
+    font-variant-numeric: tabular-nums;
+}
+
+.fire-pct {
+    font-weight: 600;
+    color: #5f5e5a;
+}
+
+.fire-stats {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.fire-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.fire-stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #888780;
+}
+
+.fire-stat-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1b1b1b;
+    font-variant-numeric: tabular-nums;
+}
+
+.fire-stat-value.negative {
+    color: #a32d2d;
+}
+
+.fire-assumptions {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding-left: 24px;
+    border-left: 1px solid #eceadf;
+}
+
+.fire-assumptions-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #888780;
+    padding-top: 1px;
+}
+
+.fire-assumption-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+}
+
+.fire-assumption {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.fire-assumption-label {
+    font-size: 11px;
+    color: #888780;
+    white-space: nowrap;
+}
+
+.fire-assumption-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: #5f5e5a;
+    font-variant-numeric: tabular-nums;
+}
+
+.fire-stat-prompt {
+    flex: 1 1 200px;
+}
+
+.fire-prompt {
+    font-size: 12px;
+    color: #888780;
+}
+
+.fire-notes {
+    margin-top: 10px;
+    font-size: 11px;
+    color: #888780;
+}
+
+.empty-state {
+    font-size: 12px;
+    color: #888780;
+}
+
+@media (max-width: 1199px) {
+    .fire-assumptions {
+        padding-left: 0;
+        border-left: none;
+    }
+}
+
+@media (max-width: 767px) {
+    .fire-strip {
+        gap: 14px;
+    }
+
+    .fire-stats {
+        gap: 16px;
+    }
+
+    .fire-assumptions {
+        flex-direction: column;
+        gap: 6px;
+    }
+}

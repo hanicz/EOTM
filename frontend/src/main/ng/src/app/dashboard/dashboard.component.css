@@ -2,17 +2,19 @@
     padding: 0.5rem 0;
 }
 
-::ng-deep .currency-select .p-select-label {
-    padding-top: 6px;
-    padding-bottom: 6px;
-    font-size: 13px;
+.metric-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 1.5rem;
 }
 
 .metric-grid {
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(8, minmax(0, 1fr));
     gap: 8px;
-    margin-bottom: 1.5rem;
+    flex: 1;
+    min-width: 0;
 }
 
 .metric-tile {
@@ -33,10 +35,33 @@
 
 .metric-tile-primary {
     background-color: #1b1b1b;
+    position: relative;
+}
+
+:host ::ng-deep .metric-tile-primary .metric-refresh {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    color: #ef9f27;
+}
+
+:host ::ng-deep .metric-tile-primary .metric-refresh:enabled:hover,
+:host ::ng-deep .metric-tile-primary .metric-refresh:enabled:active,
+:host ::ng-deep .metric-tile-primary .metric-refresh:focus {
+    color: #ef9f27;
+    background-color: transparent;
+}
+
+:host ::ng-deep .metric-tile-primary .metric-refresh .p-button-icon {
+    font-size: 0.85rem;
 }
 
 .metric-tile-primary .metric-label {
     color: #ef9f27;
+    padding-right: 26px;
 }
 
 .metric-tile-primary .metric-value {
@@ -84,6 +109,7 @@
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     grid-template-areas:
+        "fire       fire    fire     fire"
         "allocation vests   starvest markets"
         "interest   notepad alerts   markets";
     align-items: stretch;
@@ -118,6 +144,10 @@
     grid-area: notepad;
 }
 
+.fire-panel {
+    grid-area: fire;
+}
+
 .detail-panel {
     display: flex;
     flex-direction: column;
@@ -127,6 +157,7 @@
     min-width: 0;
 }
 
+.detail-panel app-fire-summary,
 .detail-panel app-upcoming-interest,
 .detail-panel app-market-status,
 .detail-panel app-upcoming-vest,
@@ -306,6 +337,7 @@
     .detail-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         grid-template-areas:
+            "fire       fire"
             "allocation markets"
             "interest   markets"
             "vests      starvest"
@@ -315,9 +347,21 @@
 }
 
 @media (max-width: 991px) {
+    :host ::ng-deep .metric-tile-primary .metric-refresh {
+        top: 0;
+        right: 0;
+        width: 44px;
+        height: 44px;
+        box-sizing: border-box;
+        align-items: flex-start;
+        justify-content: flex-end;
+        padding: 8px 8px 0 0;
+    }
+
     .detail-grid {
         grid-template-columns: minmax(0, 1fr);
         grid-template-areas:
+            "fire"
             "allocation"
             "interest"
             "markets"

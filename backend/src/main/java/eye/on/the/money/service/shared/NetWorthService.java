@@ -8,6 +8,7 @@ import eye.on.the.money.dto.out.ETFInvestmentDTO;
 import eye.on.the.money.dto.out.ForexTransactionDTO;
 import eye.on.the.money.dto.out.InvestmentDTO;
 import eye.on.the.money.dto.out.NetWorthDTO;
+import eye.on.the.money.dto.out.PensionDTO;
 import eye.on.the.money.dto.out.SecurityTransactionDTO;
 import eye.on.the.money.dto.out.TransactionDTO;
 import eye.on.the.money.exception.APIException;
@@ -15,6 +16,7 @@ import eye.on.the.money.service.cash.CashService;
 import eye.on.the.money.service.crypto.TransactionService;
 import eye.on.the.money.service.etf.ETFInvestmentService;
 import eye.on.the.money.service.forex.ForexTransactionService;
+import eye.on.the.money.service.pension.PensionService;
 import eye.on.the.money.service.security.SecurityTransactionService;
 import eye.on.the.money.service.stock.InvestmentService;
 import lombok.RequiredArgsConstructor;
@@ -56,6 +58,7 @@ public class NetWorthService {
     public static final String FOREX = "Forex";
     public static final String SECURITIES = "Securities";
     public static final String CASH = "Cash";
+    public static final String PENSION = "Pension";
 
     private static final String BASE_CURRENCY = "EUR";
     private static final int SCALE = 2;
@@ -66,6 +69,7 @@ public class NetWorthService {
     private final ForexTransactionService forexTransactionService;
     private final SecurityTransactionService securityTransactionService;
     private final CashService cashService;
+    private final PensionService pensionService;
     private final DashboardService dashboardService;
 
     public NetWorthDTO getNetWorth(Long userId, String currency, boolean refresh) {
@@ -88,7 +92,8 @@ public class NetWorthService {
                         ForexTransactionDTO::getFromCurrencyId, ForexTransactionDTO::getLiveValue,
                         ForexTransactionDTO::getFromCurrencyId, converter),
                 this.securities(holdings.securities(), converter),
-                this.cash(holdings.cash(), converter));
+                this.cash(holdings.cash(), converter),
+                this.pension(holdings.pension(), converter));
 
         double spent = assets.stream().mapToDouble(asset -> asset.getSpent().doubleValue()).sum();
         double worth = assets.stream().mapToDouble(asset -> asset.getWorth().doubleValue()).sum();
@@ -130,9 +135,11 @@ public class NetWorthService {
             CompletableFuture<List<SecurityTransactionDTO>> securities = this.async(executor,
                     () -> this.securityTransactionService.getCurrentHoldings(userId));
             CompletableFuture<CashDTO> cash = this.async(executor, () -> this.cashService.getCash(userId));
+            CompletableFuture<PensionDTO> pension = this.async(executor,
+                    () -> this.pensionService.getPension(userId));
 
             return new Holdings(this.join(stock), this.join(crypto), this.join(etf), this.join(forex),
-                    this.join(securities), this.join(cash));
+                    this.join(securities), this.join(cash), this.join(pension));
         }
     }
 
@@ -214,6 +221,13 @@ public class NetWorthService {
         return asset;
     }
 
+    private AssetClassValueDTO pension(PensionDTO pension, Converter converter) {
+        if (pension == null) return this.asset(PENSION, 0, 0);
+        double spent = converter.convert(pension.getTotalContribution(), pension.getCurrency());
+        double worth = converter.convert(pension.getCurrentValue(), pension.getCurrency());
+        return this.asset(PENSION, spent, worth);
+    }
+
     private AssetClassValueDTO asset(String assetClass, double spent, double worth) {
         return AssetClassValueDTO.builder()
                 .assetClass(assetClass)
@@ -236,6 +250,7 @@ public class NetWorthService {
         });
         holdings.securities().forEach(item -> this.add(currencies, item.getCurrencyId()));
         if (holdings.hasCash()) this.add(currencies, holdings.cash().getCurrency());
+        if (holdings.hasPension()) this.add(currencies, holdings.pension().getCurrency());
         return currencies;
     }
 
@@ -258,15 +273,26 @@ public class NetWorthService {
 
     private record Holdings(List<InvestmentDTO> stock, List<TransactionDTO> crypto, List<ETFInvestmentDTO> etf,
                             List<ForexTransactionDTO> forex, List<SecurityTransactionDTO> securities,
-                            CashDTO cash) {
+                            CashDTO cash, PensionDTO pension) {
 
         private boolean isEmpty() {
             return this.stock.isEmpty() && this.crypto.isEmpty() && this.etf.isEmpty()
-                    && this.forex.isEmpty() && this.securities.isEmpty() && !this.hasCash();
+                    && this.forex.isEmpty() && this.securities.isEmpty() && !this.hasCash()
+                    && !this.hasPension();
         }
 
         private boolean hasCash() {
             return this.cash != null && this.cash.getAmount() != null && this.cash.getAmount() != 0;
+        }
+
+        private boolean hasPension() {
+            return this.pension != null
+                    && (this.nonZero(this.pension.getTotalContribution())
+                    || this.nonZero(this.pension.getCurrentValue()));
+        }
+
+        private boolean nonZero(Double value) {
+            return value != null && value != 0;
         }
     }
 

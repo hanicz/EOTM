@@ -4,7 +4,7 @@ import eye.on.the.money.dto.in.SubredditDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.news.News;
 import eye.on.the.money.model.reddit.Subreddit;
-import eye.on.the.money.service.api.NewsAPIService;
+import eye.on.the.money.service.news.NewsService;
 import eye.on.the.money.service.reddit.RedditService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 class NewsControllerTest {
 
     @Mock
-    private NewsAPIService newsAPIService;
+    private NewsService newsService;
     @Mock
     private RedditService redditService;
 
@@ -39,7 +39,7 @@ class NewsControllerTest {
     @Test
     public void getGeneralNews() {
         List<News> news = this.createNewsList();
-        when(this.newsAPIService.getNews(anyString())).thenReturn(news);
+        when(this.newsService.getCategoryNews(anyString())).thenReturn(news);
 
         ResponseEntity<List<News>> result = this.newsController.getGeneralNews("category");
 
@@ -49,7 +49,7 @@ class NewsControllerTest {
     @Test
     public void getCompanyNews() {
         List<News> news = this.createNewsList();
-        when(this.newsAPIService.getCompanyNews(anyString())).thenReturn(news);
+        when(this.newsService.getCompanyNews(anyString())).thenReturn(news);
 
         ResponseEntity<List<News>> result = this.newsController.getCompanyNews("symbol");
 
@@ -63,6 +63,16 @@ class NewsControllerTest {
 
         ResponseEntity<List<News>> result = this.newsController.getHotPosts(1L);
         Assertions.assertEquals(newsList, result.getBody());
+    }
+
+    @Test
+    public void getPortfolioNews() {
+        List<News> news = this.createNewsList();
+        when(this.newsService.getPortfolioNews(this.user.getId())).thenReturn(news);
+
+        ResponseEntity<List<News>> result = this.newsController.getPortfolioNews(1L);
+
+        Assertions.assertEquals(news, result.getBody());
     }
 
     @Test

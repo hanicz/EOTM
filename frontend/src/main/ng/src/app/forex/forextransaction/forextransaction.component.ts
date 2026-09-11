@@ -77,10 +77,7 @@ export class ForextransactionComponent {
   }
 
   deleteClicked() {
-    let ids = '';
-    this.selectedForexTransactions.forEach(t => {
-      ids += t.forexTransactionId + ',';
-    });
+    const ids = this.selectedForexTransactions.map(i => i.forexTransactionId).join(',');
     this.deleteByIds(ids);
   }
 

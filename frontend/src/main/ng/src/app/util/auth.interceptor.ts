@@ -1,23 +1,32 @@
-import { Injectable } from '@angular/core';
-import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, throwError } from 'rxjs';
+import { throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
-@Injectable()
-export class AuthInterceptor implements HttpInterceptor {
+const LOGIN_ENDPOINT = '/login';
 
-  constructor(private router: Router) { }
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const router = inject(Router);
+  const setHeaders: Record<string, string> = {};
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    return next.handle(req).pipe(
-      catchError((error: HttpErrorResponse) => {
-        if (error.status === 401) {
-          localStorage.removeItem('token');
-          this.router.navigate(['/login']);
-        }
-        return throwError(() => error);
-      })
-    );
+  const token = localStorage.getItem('token');
+  if (token && !req.url.endsWith(LOGIN_ENDPOINT)) {
+    setHeaders['Authorization'] = token;
   }
-}
+
+  if (!(req.body instanceof FormData)) {
+    setHeaders['Content-Type'] = 'application/json';
+    setHeaders['Accept'] = 'application/json';
+  }
+
+  return next(req.clone({ setHeaders })).pipe(
+    catchError((error: HttpErrorResponse) => {
+      if (error.status === 401) {
+        localStorage.removeItem('token');
+        router.navigate([LOGIN_ENDPOINT]);
+      }
+      return throwError(() => error);
+    })
+  );
+};

@@ -132,10 +132,7 @@ export class DividendComponent implements OnInit {
   }
 
   deleteClicked() {
-    let ids = '';
-    this.selectedDividends.forEach(d => {
-      ids += d.dividendId + ',';
-    });
+    const ids = this.selectedDividends.map(i => i.dividendId).join(',');
     this.deleteByIds(ids);
   }
 

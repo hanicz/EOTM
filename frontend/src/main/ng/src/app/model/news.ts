@@ -7,4 +7,5 @@ export interface News {
     source: string;
     summary: string;
     url: string;
+    symbol?: string;
 }

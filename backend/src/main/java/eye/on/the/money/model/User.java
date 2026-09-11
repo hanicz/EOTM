@@ -24,6 +24,8 @@ public class User implements UserDetails {
     public static final int EMAIL_MAX_LENGTH = 255;
     public static final int PASSWORD_MIN_LENGTH = 8;
     public static final int PASSWORD_MAX_LENGTH = 72;
+    public static final int CURRENCY_LENGTH = 3;
+    public static final String DEFAULT_CURRENCY = "HUF";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,6 +35,9 @@ public class User implements UserDetails {
     private String email;
 
     private String password;
+
+    @Column(name = "preferred_currency", length = CURRENCY_LENGTH)
+    private String preferredCurrency;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

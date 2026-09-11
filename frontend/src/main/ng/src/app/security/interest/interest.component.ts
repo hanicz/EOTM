@@ -95,10 +95,7 @@ export class InterestComponent implements OnInit {
   }
 
   deleteClicked() {
-    let ids = '';
-    this.selectedInterests.forEach(d => {
-      ids += d.interestId + ',';
-    });
+    const ids = this.selectedInterests.map(i => i.interestId).join(',');
     this.deleteByIds(ids);
   }
 

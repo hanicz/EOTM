@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Salary, SalaryRaise } from '../model/salary';
-import { ResourceHelper } from '../util/servicehelper';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -9,42 +8,30 @@ import { environment } from '../../environments/environment';
 })
 export class SalaryService {
 
-  private helper = new ResourceHelper();
-
   private salaryUrl = `${environment.API_URL}/api/v1/history/salary`;
 
   constructor(private http: HttpClient) { }
 
   getSalaries() {
-    return this.http.get<Salary[]>(this.salaryUrl, {
-      headers: this.helper.getHeadersWithToken()
-    });
+    return this.http.get<Salary[]>(this.salaryUrl);
   }
 
   getRaise() {
-    return this.http.get<SalaryRaise>(`${this.salaryUrl}/raise`, {
-      headers: this.helper.getHeadersWithToken()
-    });
+    return this.http.get<SalaryRaise>(`${this.salaryUrl}/raise`);
   }
 
   create(salary: Salary) {
-    return this.http.post<Salary>(this.salaryUrl, JSON.stringify(this.toPayload(salary)), {
-      headers: this.helper.getHeadersWithToken()
-    });
+    return this.http.post<Salary>(this.salaryUrl, JSON.stringify(this.toPayload(salary)));
   }
 
   update(salary: Salary) {
     const url = `${this.salaryUrl}/${salary.id}`;
-    return this.http.put<Salary>(url, JSON.stringify(this.toPayload(salary)), {
-      headers: this.helper.getHeadersWithToken()
-    });
+    return this.http.put<Salary>(url, JSON.stringify(this.toPayload(salary)));
   }
 
   deleteByIds(ids: string) {
     const url = `${this.salaryUrl}?ids=${ids}`;
-    return this.http.delete(url, {
-      headers: this.helper.getHeadersWithToken()
-    });
+    return this.http.delete(url);
   }
 
   private toPayload(salary: Salary) {

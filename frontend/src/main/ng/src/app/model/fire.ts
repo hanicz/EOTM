@@ -63,3 +63,33 @@ export interface FireProjection {
     finalBalance: number;
     finalRealBalance: number;
 }
+
+export interface FireSnapshot {
+    currency: string;
+
+    netWorth: number;
+    fireNumber: number | null;
+    targetSource: 'FIXED' | 'DERIVED' | null;
+    progressPct: number | null;
+    yearsToFire: number | null;
+    fiReached: boolean;
+
+    monthlyIncome: number;
+    monthlySpending: number;
+    monthlySavings: number;
+    savingsRatePct: number | null;
+
+    withdrawalRate: number;
+    annualReturn: number;
+    annualContributionIncrease: number;
+    inflation: number;
+    horizonYears: number;
+
+    hasCashFlow: boolean;
+    monthsCounted: number;
+    windowStart: string | null;
+    windowEnd: string | null;
+
+    ignoredCurrencies: string[];
+    unconvertedCurrencies: string[];
+}

@@ -9,13 +9,13 @@ import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primeng/tabs';
 import { Ripple } from 'primeng/ripple';
 import { ButtonDirective } from 'primeng/button';
 import { Tooltip } from 'primeng/tooltip';
-import { Select } from 'primeng/select';
-import { FormsModule } from '@angular/forms';
 import { HoldingComponent } from './holding/holding.component';
 import { TransactionComponent } from './transaction/transaction.component';
 import { InterestComponent } from './interest/interest.component';
 import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { DashboardService } from '../service/dashboard.service';
+import { UserService } from '../service/user.service';
+import { DEFAULT_CURRENCY } from '../model/currency';
 import { SecurityService } from '../service/security.service';
 import { ChartComponent, ApexChart, ApexNonAxisChartSeries, ApexLegend } from 'ng-apexcharts';
 import { FileUpload } from 'primeng/fileupload';
@@ -33,7 +33,7 @@ export type AllocationChartOptions = {
     selector: 'app-security',
     templateUrl: './security.component.html',
     styleUrls: ['./security.component.css'],
-    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, Select, FormsModule, HoldingComponent, TransactionComponent, InterestComponent, CurrencyPipe, DecimalPipe, ChartComponent, FileUpload, Toast]
+    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, HoldingComponent, TransactionComponent, InterestComponent, CurrencyPipe, DecimalPipe, ChartComponent, FileUpload, Toast]
 })
 export class SecurityComponent implements OnInit {
 
@@ -62,13 +62,7 @@ export class SecurityComponent implements OnInit {
     }
   };
 
-  currencyOptions = [
-    { label: 'HUF', value: 'HUF' },
-    { label: 'EUR', value: 'EUR' },
-    { label: 'USD', value: 'USD' },
-    { label: 'GBP', value: 'GBP' }
-  ];
-  selectedCurrency: string = 'HUF';
+  selectedCurrency: string = DEFAULT_CURRENCY;
 
   private readonly BASE_CURRENCY = 'EUR';
   private rates: { [currency: string]: number } = { EUR: 1 };
@@ -79,7 +73,7 @@ export class SecurityComponent implements OnInit {
 
   ratesRefreshing: boolean = false;
 
-  constructor(private dashboardService: DashboardService, private securityService: SecurityService,
+  constructor(private dashboardService: DashboardService, private userService: UserService, private securityService: SecurityService,
     private messageService: MessageService) { }
 
   ngOnInit(): void {
@@ -104,10 +98,6 @@ export class SecurityComponent implements OnInit {
         console.log(error);
       }
     });
-  }
-
-  onCurrencyChange(): void {
-    this.loadRatesAndCalculate();
   }
 
   onUpload(event: { files: File[] }): void {
@@ -147,6 +137,13 @@ export class SecurityComponent implements OnInit {
   }
 
   private loadRatesAndCalculate(): void {
+    this.userService.getPreferredCurrency().subscribe(currency => {
+      this.selectedCurrency = currency;
+      this.resolveRates();
+    });
+  }
+
+  private resolveRates(): void {
     if (this.transactions.length === 0 && this.interests.length === 0) {
       this.forceRateRefresh = false;
       this.calculateTotals();

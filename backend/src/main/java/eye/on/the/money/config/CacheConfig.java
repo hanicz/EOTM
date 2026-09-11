@@ -36,6 +36,14 @@ public class CacheConfig {
                 .withCacheConfiguration("grants-star",
                         RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(8L)))
                 .withCacheConfiguration("rates",
-                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(8L)));
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(8L)))
+                .withCacheConfiguration("news-category",
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(1L)))
+                .withCacheConfiguration("news-company",
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(1L)))
+                .withCacheConfiguration("news-portfolio",
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(1L)))
+                .withCacheConfiguration("news-reddit",
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(1L)));
     }
 }

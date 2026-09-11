@@ -4,6 +4,8 @@ import { Subreddit } from '../model/subreddit';
 import { UserService } from '../service/user.service';
 import { AccountService } from '../service/account.service';
 import { Account } from '../model/account';
+import { Currency } from '../model/currency';
+import { CurrencyService } from '../service/currency.service';
 import { MenuComponent } from '../menu/menu.component';
 import { Bind } from 'primeng/bind';
 import { Panel } from 'primeng/panel';
@@ -16,19 +18,21 @@ import { Password } from 'primeng/password';
 import { FormsModule } from '@angular/forms';
 import { Dialog } from 'primeng/dialog';
 import { InputText } from 'primeng/inputtext';
+import { Select } from 'primeng/select';
 import { DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-settings',
     templateUrl: './settings.component.html',
     styleUrls: ['./settings.component.css'],
-    imports: [MenuComponent, Bind, Panel, ButtonDirective, Ripple, DataView, PrimeTemplate, Toast, Password, FormsModule, Dialog, InputText, DatePipe]
+    imports: [MenuComponent, Bind, Panel, ButtonDirective, Ripple, DataView, PrimeTemplate, Toast, Password, FormsModule, Dialog, InputText, Select, DatePipe]
 })
 export class SettingsComponent implements OnInit {
 
   // Data
   subReddits: Subreddit[] = [];
   accounts: Account[] = [];
+  currencies: Currency[] = [];
 
   // Dialog states
   addSubRedditDialog: boolean = false;
@@ -41,15 +45,19 @@ export class SettingsComponent implements OnInit {
   editedAccount: Account | null = null;
   oldPassword: string = '';
   newPassword: string = '';
+  preferredCurrency: string = '';
 
   // Loading states
   isLoading: boolean = false;
   exporting: boolean = false;
+  currenciesLoading: boolean = false;
+  savingPreferences: boolean = false;
 
   constructor(
     private newsService: NewsService,
     private userService: UserService,
     private accountService: AccountService,
+    private currencyService: CurrencyService,
     private messageService: MessageService,
     private cdr: ChangeDetectorRef,
   ) { }
@@ -57,6 +65,56 @@ export class SettingsComponent implements OnInit {
   ngOnInit(): void {
     this.loadSubReddits();
     this.loadAccounts();
+    this.loadPreferences();
+  }
+
+  loadPreferences(): void {
+    this.currenciesLoading = true;
+    this.currencyService.getCurrencies().subscribe({
+      next: (data) => {
+        this.currencies = data;
+        this.currenciesLoading = false;
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        this.currencies = [];
+        this.currenciesLoading = false;
+        this.messageService.add({ severity: 'error', detail: error.error?.error ?? 'Could not load the currencies.' });
+        this.cdr.markForCheck();
+      }
+    });
+
+    this.userService.getCurrentUser().subscribe({
+      next: (user) => {
+        this.preferredCurrency = user.preferredCurrency;
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error loading preferences:', error);
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  savePreferences(): void {
+    if (!this.preferredCurrency) {
+      return;
+    }
+
+    this.savingPreferences = true;
+    this.userService.updatePreferences(this.preferredCurrency).subscribe({
+      next: (user) => {
+        this.preferredCurrency = user.preferredCurrency;
+        this.savingPreferences = false;
+        this.messageService.add({ severity: 'success', detail: 'Preferences saved.' });
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        this.savingPreferences = false;
+        this.messageService.add({ severity: 'error', detail: error.error?.error ?? 'Could not save your preferences.' });
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   // Subreddit Methods

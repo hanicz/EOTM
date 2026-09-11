@@ -1,0 +1,86 @@
+.pension-hint {
+    margin: 0 0 1.25rem 0;
+    font-size: 0.85rem;
+    color: #5f5e5a;
+}
+
+.pension-section {
+    padding: 1rem 1.1rem 1.1rem 1.1rem;
+    border: 1px solid #ece9e0;
+    border-radius: 0.6rem;
+    background: #faf9f6;
+}
+
+.pension-section-title {
+    margin: 0 0 0.9rem 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #5f5e5a;
+}
+
+.pension-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem;
+}
+
+.pension-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-width: 14rem;
+}
+
+.pension-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #5f5e5a;
+}
+
+:host ::ng-deep .pension-field .p-inputnumber {
+    width: 100%;
+}
+
+:host ::ng-deep .pension-field .p-inputnumber input {
+    width: 100%;
+    min-width: 0;
+}
+
+.pension-actions {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 1.25rem;
+}
+
+:host ::ng-deep .pension-field .p-select {
+    width: 100%;
+}
+
+.pension-gain {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin-top: 1.25rem;
+}
+
+.pension-gain-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #5f5e5a;
+}
+
+.pension-gain-value {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.pension-gain-value.positive {
+    color: #3b6d11;
+}
+
+.pension-gain-value.negative {
+    color: #a32d2d;
+}

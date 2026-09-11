@@ -3,6 +3,7 @@ package eye.on.the.money.service.user;
 import eye.on.the.money.EotmApplication;
 import eye.on.the.money.dto.in.ChangePasswordDTO;
 import eye.on.the.money.dto.in.SignUpDTO;
+import eye.on.the.money.dto.out.UserDTO;
 import eye.on.the.money.exception.PasswordException;
 import eye.on.the.money.exception.UserAlreadyExistsException;
 import eye.on.the.money.model.User;
@@ -17,6 +18,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.util.NoSuchElementException;
 
 @SpringBootTest(classes = EotmApplication.class)
 @ActiveProfiles("test")
@@ -117,5 +120,43 @@ class UserServiceTest {
            Long userId = this.userRepository.findByEmail("test@test.test").getId();
            this.userService.changePassword(userId, new ChangePasswordDTO("newPassword", "incorrectOldPassword"));
        });
+    }
+
+    @Test
+    public void getUserFallsBackToTheDefaultCurrency() {
+        this.userService.signUp(new SignUpDTO("nopreference@mail.com", "testPassword"));
+        Long userId = this.userRepository.findByEmail("nopreference@mail.com").getId();
+
+        UserDTO userDTO = this.userService.getUser(userId);
+
+        Assertions.assertAll("An untouched account reads back as forint",
+                () -> Assertions.assertEquals("nopreference@mail.com", userDTO.getEmail()),
+                () -> Assertions.assertEquals("HUF", userDTO.getPreferredCurrency()));
+    }
+
+    @Test
+    public void updatePreferredCurrency() {
+        this.userService.signUp(new SignUpDTO("preference@mail.com", "testPassword"));
+        Long userId = this.userRepository.findByEmail("preference@mail.com").getId();
+
+        Assertions.assertEquals("EUR", this.userService.updatePreferredCurrency(userId, "EUR").getPreferredCurrency());
+        Assertions.assertEquals("EUR", this.userService.getUser(userId).getPreferredCurrency());
+    }
+
+    @Test
+    public void updatePreferredCurrencyNormalisesTheCode() {
+        this.userService.signUp(new SignUpDTO("lowercase@mail.com", "testPassword"));
+        Long userId = this.userRepository.findByEmail("lowercase@mail.com").getId();
+
+        Assertions.assertEquals("USD", this.userService.updatePreferredCurrency(userId, " usd ").getPreferredCurrency());
+    }
+
+    @Test
+    public void updatePreferredCurrencyRejectsAnUnknownCode() {
+        Long userId = this.userRepository.findByEmail("test@test.test").getId();
+
+        Assertions.assertThrows(NoSuchElementException.class, () ->
+                this.userService.updatePreferredCurrency(userId, "XXX"));
+        Assertions.assertEquals("HUF", this.userService.getUser(userId).getPreferredCurrency());
     }
 }

@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { finalize, shareReplay } from 'rxjs/operators';
 import { SecurityTransaction } from '../model/securityTransaction';
-import { ResourceHelper } from '../util/servicehelper';
 import { environment } from '../../environments/environment';
 import { Security } from '../model/security';
 import { ImportResult } from '../model/importResult';
@@ -12,8 +11,6 @@ import { ImportResult } from '../model/importResult';
   providedIn: 'root'
 })
 export class SecurityService {
-
-  private helper = new ResourceHelper();
 
   private securityUrl = `${environment.API_URL}/api/v1/security`;
   private transactionUrl = `${this.securityUrl}/transaction`;
@@ -24,9 +21,7 @@ export class SecurityService {
 
   getAllSecurities() {
     if (!this.allSecuritiesRequest$) {
-      this.allSecuritiesRequest$ = this.http.get<Security[]>(this.securityUrl, {
-        headers: this.helper.getHeadersWithToken()
-      }).pipe(
+      this.allSecuritiesRequest$ = this.http.get<Security[]>(this.securityUrl).pipe(
         shareReplay(1),
         finalize(() => this.allSecuritiesRequest$ = null)
       );
@@ -36,66 +31,49 @@ export class SecurityService {
 
   getHolding() {
     const url = `${this.transactionUrl}/holding`;
-    return this.http.get<SecurityTransaction[]>(url, {
-      headers: this.helper.getHeadersWithToken()
-    });
+    return this.http.get<SecurityTransaction[]>(url);
   };
 
   refreshRates() {
     const url = `${this.securityUrl}/rate/refresh`;
-    return this.http.post(url, null, {
-      headers: this.helper.getHeadersWithToken()
-    });
+    return this.http.post(url, null);
   };
 
   getTransactions() {
-    return this.http.get<SecurityTransaction[]>(this.transactionUrl, {
-      headers: this.helper.getHeadersWithToken()
-    });
+    return this.http.get<SecurityTransaction[]>(this.transactionUrl);
   };
 
   deleteByIds(ids: string) {
     const url = `${this.transactionUrl}?ids=${ids}`;
-    return this.http.delete(url, {
-      headers: this.helper.getHeadersWithToken()
-    });
+    return this.http.delete(url);
   }
 
   download() {
     const url = `${this.transactionUrl}/csv`;
     return this.http.get(url, {
-      headers: this.helper.getHeadersWithToken(),
       responseType: 'blob'
     });
   }
 
   create(transaction: SecurityTransaction) {
-    return this.http.post<SecurityTransaction>(this.transactionUrl, JSON.stringify(transaction), {
-      headers: this.helper.getHeadersWithToken(),
-    });
+    return this.http.post<SecurityTransaction>(this.transactionUrl, JSON.stringify(transaction));
   }
 
   update(transaction: SecurityTransaction) {
-    return this.http.put<SecurityTransaction>(this.transactionUrl, JSON.stringify(transaction), {
-      headers: this.helper.getHeadersWithToken(),
-    });
+    return this.http.put<SecurityTransaction>(this.transactionUrl, JSON.stringify(transaction));
   }
 
   uploadCSV(file: File) {
     const formData = new FormData();
     formData.append('file', file, 'file.csv')
     const url = `${this.transactionUrl}/process/csv`;
-    return this.http.post<any>(url, formData, {
-      headers: this.helper.getAuthHeaders(),
-    });
+    return this.http.post<any>(url, formData);
   }
 
   uploadXls(file: File) {
     const formData = new FormData();
     formData.append('file', file, file.name);
     const url = `${this.securityUrl}/process/xls`;
-    return this.http.post<ImportResult>(url, formData, {
-      headers: this.helper.getAuthHeaders(),
-    });
+    return this.http.post<ImportResult>(url, formData);
   }
 }

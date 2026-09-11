@@ -8,6 +8,6 @@ public class SecurityConstants {
     public static final String[] SPA_ROUTES = {
             "/login", "/dashboard", "/news", "/stock", "/crypto", "/watchlist", "/search",
             "/forex", "/security", "/etf", "/cash", "/alert", "/tax", "/fire", "/financial", "/history", "/salary",
-            "/equity", "/settings"
+            "/equity", "/settings", "/pension"
     };
 }

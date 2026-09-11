@@ -98,10 +98,7 @@ export class TransactionComponent implements OnInit {
   }
 
   deleteClicked() {
-    let ids = '';
-    this.selectedTransactions.forEach(t => {
-      ids += t.transactionId + ',';
-    });
+    const ids = this.selectedTransactions.map(i => i.transactionId).join(',');
     this.deleteByIds(ids);
   }
 

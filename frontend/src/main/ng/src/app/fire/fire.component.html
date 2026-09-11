@@ -2,11 +2,6 @@
 <div class="shadow-5">
   <menu class="pl-0 mb-0"></menu>
   <p-panel>
-    <ng-template pTemplate="icons">
-      <p-select [options]="currencyOptions" [(ngModel)]="currency" (onChange)="onCurrencyChange()"
-        styleClass="currency-select" [style]="{'width':'90px'}"></p-select>
-    </ng-template>
-
     <p class="fire-hint">
       Grows what you hold today at the return you set, then draws an inflation-linked income from it once you
       stop paying in. Every figure is an assumption, not a forecast.
@@ -54,7 +49,11 @@
               (keyup.enter)="calculate()"></p-inputnumber>
           </div>
           <div class="fire-field">
-            <label for="contributionIncrease" class="fire-label">Annual increase</label>
+            <label for="contributionIncrease" class="fire-label">
+              Annual increase
+              <i class="pi pi-info-circle fire-info"
+                pTooltip="Yearly rise in the monthly contribution, inflation is not added on top."></i>
+            </label>
             <p-inputnumber inputId="contributionIncrease" [(ngModel)]="annualContributionIncrease"
               suffix=" %" [minFractionDigits]="0" [maxFractionDigits]="1" [min]="-100" [max]="100"
               (keyup.enter)="calculate()"></p-inputnumber>
@@ -63,7 +62,7 @@
             <label for="annualReturn" class="fire-label">
               Annual return
               <i class="pi pi-info-circle fire-info"
-                pTooltip="Nominal, before inflation. Applied once a year."></i>
+                pTooltip="Nominal return, inflation is not added on top. Applied once a year."></i>
             </label>
             <p-inputnumber inputId="annualReturn" [(ngModel)]="annualReturn" suffix=" %"
               [minFractionDigits]="0" [maxFractionDigits]="1" [min]="-100" [max]="100"

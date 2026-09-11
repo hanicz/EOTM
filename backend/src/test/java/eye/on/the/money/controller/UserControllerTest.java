@@ -1,7 +1,9 @@
 package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.in.ChangePasswordDTO;
+import eye.on.the.money.dto.in.PreferencesUpdateDTO;
 import eye.on.the.money.dto.in.SignUpDTO;
+import eye.on.the.money.dto.out.UserDTO;
 import eye.on.the.money.model.User;
 import eye.on.the.money.service.shared.ExportService;
 import eye.on.the.money.service.user.UserService;
@@ -13,8 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.util.Map;
 
 import static org.mockito.Mockito.*;
 
@@ -60,7 +60,19 @@ class UserControllerTest {
     }
 
     @Test
-    void getUserEmail() {
-        Assertions.assertEquals(Map.of("email", this.user.getUsername()), this.userController.getUserEmail(this.user.getUsername()).getBody());
+    void getCurrentUser() {
+        UserDTO userDTO = UserDTO.builder().email(this.user.getUsername()).preferredCurrency("HUF").build();
+        when(this.userService.getUser(1L)).thenReturn(userDTO);
+
+        Assertions.assertEquals(userDTO, this.userController.getCurrentUser(1L).getBody());
+    }
+
+    @Test
+    void updatePreferences() {
+        UserDTO userDTO = UserDTO.builder().email(this.user.getUsername()).preferredCurrency("EUR").build();
+        when(this.userService.updatePreferredCurrency(1L, "EUR")).thenReturn(userDTO);
+
+        Assertions.assertEquals(userDTO, this.userController.updatePreferences(new PreferencesUpdateDTO("EUR"), 1L).getBody());
+        verify(this.userService, times(1)).updatePreferredCurrency(1L, "EUR");
     }
 }

@@ -8,14 +8,14 @@ import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primeng/tabs';
 import { Ripple } from 'primeng/ripple';
 import { ButtonDirective } from 'primeng/button';
 import { Tooltip } from 'primeng/tooltip';
-import { Select } from 'primeng/select';
-import { FormsModule } from '@angular/forms';
 import { CryptoholdingComponent } from './cryptoholding/cryptoholding.component';
 import { CryptopositionComponent } from './cryptoposition/cryptoposition.component';
 import { TransactionComponent } from './transaction/transaction.component';
 import { DecimalPipe, CurrencyPipe } from '@angular/common';
 import { ChartComponent, ApexChart, ApexNonAxisChartSeries, ApexLegend } from 'ng-apexcharts';
 import { DashboardService } from '../service/dashboard.service';
+import { UserService } from '../service/user.service';
+import { DEFAULT_CURRENCY } from '../model/currency';
 
 export type AllocationChartOptions = {
   series: ApexNonAxisChartSeries;
@@ -28,7 +28,7 @@ export type AllocationChartOptions = {
     selector: 'app-crypto',
     templateUrl: './crypto.component.html',
     styleUrls: ['./crypto.component.css'],
-    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, Select, FormsModule, CryptoholdingComponent, CryptopositionComponent, TransactionComponent, DecimalPipe, CurrencyPipe, ChartComponent]
+    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, CryptoholdingComponent, CryptopositionComponent, TransactionComponent, DecimalPipe, CurrencyPipe, ChartComponent]
 })
 export class CryptoComponent implements OnInit {
 
@@ -42,20 +42,14 @@ export class CryptoComponent implements OnInit {
   diffy: number = 0;
   percentage: number = 0;
 
-  currencyOptions = [
-    { label: 'HUF', value: 'HUF' },
-    { label: 'EUR', value: 'EUR' },
-    { label: 'USD', value: 'USD' },
-    { label: 'GBP', value: 'GBP' }
-  ];
-  selectedCurrency: string = 'HUF';
+  selectedCurrency: string = DEFAULT_CURRENCY;
 
   // Rates are EUR -> currency (e.g. rates['USD'] = how many USD per 1 EUR). EUR itself is always 1.
   private readonly BASE_CURRENCY = 'EUR';
   private rates: { [currency: string]: number } = { EUR: 1 };
   private forceRateRefresh: boolean = false;
 
-  constructor(private dashboardService: DashboardService) { }
+  constructor(private dashboardService: DashboardService, private userService: UserService) { }
 
   allocationChartOptions: Partial<AllocationChartOptions> = {
     series: [],
@@ -79,16 +73,19 @@ export class CryptoComponent implements OnInit {
     this.transaction?.refresh();
   }
 
-  onCurrencyChange(): void {
-    this.loadRatesAndCalculate();
-  }
-
   loadData(transactions: Transaction[]) {
     this.transactions = transactions;
     this.loadRatesAndCalculate();
   }
 
   private loadRatesAndCalculate(): void {
+    this.userService.getPreferredCurrency().subscribe(currency => {
+      this.selectedCurrency = currency;
+      this.resolveRates();
+    });
+  }
+
+  private resolveRates(): void {
     if (this.transactions.length === 0) {
       this.forceRateRefresh = false;
       this.calculateTotals();

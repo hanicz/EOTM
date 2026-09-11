@@ -14,11 +14,12 @@ import { NewsComponent } from '../news/news.component';
 })
 export class HomeComponent implements OnInit {
 
-  selectedType = 'category/reddit';
+  selectedType = 'portfolio';
   options: any[];
 
   constructor() {
     this.options = [
+      { label: 'Portfolio', value: 'portfolio' },
       { label: 'Reddit', value: 'category/reddit' },
       { label: 'General', value: 'category/general' },
       { label: 'Forex', value: 'category/forex' },

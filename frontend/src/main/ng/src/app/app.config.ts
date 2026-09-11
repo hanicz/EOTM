@@ -1,7 +1,7 @@
 import { ApplicationConfig, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
 import { definePreset } from '@primeng/themes';
@@ -100,16 +100,15 @@ import { PasswordModule } from 'primeng/password';
 import { NgApexchartsModule } from 'ng-apexcharts';
 
 import { Globals } from './util/global';
-import { AuthInterceptor } from './util/auth.interceptor';
+import { authInterceptor } from './util/auth.interceptor';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideAnimations(),
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(withInterceptors([authInterceptor])),
     providePrimeNG({ ripple: true, theme: { preset: EotmPreset } }),
-    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     MessageService,
     Globals,
     DatePipe,

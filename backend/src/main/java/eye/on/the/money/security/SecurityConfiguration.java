@@ -56,7 +56,7 @@ public class SecurityConfiguration {
                         .anyRequest().authenticated())
                 .authenticationManager(authenticationManager)
                 .addFilterBefore(new AuthenticationFilter(authenticationManager, this.jwtService, this.objectMapper), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new AuthorizationFilter(this.userService, this.jwtService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new AuthorizationFilter(this.userService, this.jwtService, this.objectMapper), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

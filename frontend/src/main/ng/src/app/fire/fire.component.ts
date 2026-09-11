@@ -1,8 +1,11 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
+import { switchMap } from 'rxjs/operators';
 import { MessageService, PrimeTemplate } from 'primeng/api';
 import { FireProjection, FireProjectionInput, FireYear } from '../model/fire';
 import { FireService } from '../service/fire.service';
 import { NetWorthService } from '../service/networth.service';
+import { UserService } from '../service/user.service';
+import { DEFAULT_CURRENCY } from '../model/currency';
 import { MenuComponent } from '../menu/menu.component';
 import { Bind } from 'primeng/bind';
 import { Panel } from 'primeng/panel';
@@ -11,7 +14,6 @@ import { Ripple } from 'primeng/ripple';
 import { Tooltip } from 'primeng/tooltip';
 import { TableModule } from 'primeng/table';
 import { InputNumber } from 'primeng/inputnumber';
-import { Select } from 'primeng/select';
 import { Checkbox } from 'primeng/checkbox';
 import { Toast } from 'primeng/toast';
 import { Skeleton } from 'primeng/skeleton';
@@ -46,8 +48,6 @@ interface Chart {
   yTicks: AxisTick[];
 }
 
-const DEFAULT_CURRENCY = 'HUF';
-
 /** The plot area inside the SVG viewBox, leaving room for the axis labels. */
 const CHART = { width: 820, height: 340, left: 68, right: 16, top: 16, bottom: 30 };
 
@@ -56,21 +56,20 @@ const CHART = { width: 820, height: 340, left: 68, right: 16, top: 16, bottom: 3
     templateUrl: './fire.component.html',
     styleUrls: ['./fire.component.css'],
     imports: [MenuComponent, Bind, Panel, ButtonDirective, Ripple, Tooltip, TableModule, PrimeTemplate,
-        InputNumber, Select, Checkbox, Toast, Skeleton, FormsModule, DecimalPipe]
+        InputNumber, Checkbox, Toast, Skeleton, FormsModule, DecimalPipe]
 })
 export class FireComponent {
 
   readonly chartBox = CHART;
 
   currency: string = DEFAULT_CURRENCY;
-  currencyOptions: string[] = [DEFAULT_CURRENCY];
 
   portfolioValue: number = 0;
   portfolioLoading: boolean = true;
   unconvertedCurrencies: string[] = [];
 
   otherAssets: number = 0;
-  monthlyContribution: number = 1000000;
+  monthlyContribution: number = 1200000;
   annualContributionIncrease: number = 3;
   annualReturn: number = 4;
   inflation: number = 3;
@@ -101,6 +100,7 @@ export class FireComponent {
   constructor(
     private fireService: FireService,
     private netWorthService: NetWorthService,
+    private userService: UserService,
     private messageService: MessageService,
     private cdr: ChangeDetectorRef
   ) {
@@ -131,21 +131,17 @@ export class FireComponent {
     return this.derivedFireNumber > 0;
   }
 
-  onCurrencyChange(): void {
-    this.projection = null;
-    this.chart = null;
-    this.loadPortfolio();
-  }
-
   private loadPortfolio(): void {
     this.portfolioLoading = true;
-    this.netWorthService.getNetWorth(this.currency).subscribe({
+    this.userService.getPreferredCurrency().pipe(
+      switchMap(currency => {
+        this.currency = currency;
+        return this.netWorthService.getNetWorth(currency);
+      })
+    ).subscribe({
       next: (data) => {
         this.portfolioValue = data.totalWorth;
         this.unconvertedCurrencies = data.unconvertedCurrencies ?? [];
-        if (data.availableCurrencies?.length) {
-          this.currencyOptions = data.availableCurrencies;
-        }
         this.portfolioLoading = false;
         this.cdr.markForCheck();
       },

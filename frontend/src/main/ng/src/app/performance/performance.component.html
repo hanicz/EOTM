@@ -1,0 +1,117 @@
+<div class="shadow-5">
+  <menu class="pl-0 mb-0"></menu>
+  <p-panel>
+    <div class="performance-head">
+      <p class="performance-hint">
+        Your net worth is recorded every night in {{currency()}}. Invested is what you paid in, so the gap
+        between the two lines is what the market added.
+      </p>
+      <div class="range-picker">
+        @for (option of ranges; track option.id) {
+          <button pButton type="button" class="range-button" severity="secondary" [label]="option.label"
+            [class.p-button-outlined]="range() !== option.id" (click)="setRange(option.id)"></button>
+        }
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="summary-grid">
+        @for (option of [1, 2, 3, 4]; track $index) {
+          <div class="summary-tile">
+            <p-skeleton width="60%" styleClass="mb-2"></p-skeleton>
+            <p-skeleton width="80%" height="1.4rem"></p-skeleton>
+          </div>
+        }
+      </div>
+      <p-skeleton height="340px"></p-skeleton>
+    } @else if (!history()) {
+      <div class="empty-state">Could not load your performance history</div>
+    } @else {
+      @if (!hasHistory()) {
+        <div class="empty-state">
+          Snapshots are recorded daily; the chart fills in over the next few days.
+        </div>
+      } @else if (!summary()) {
+        <div class="empty-state">Not enough snapshots in this range yet. Pick a longer one.</div>
+      } @else {
+        <div class="summary-grid">
+          <div class="summary-tile">
+            <div class="summary-label">Net worth</div>
+            <div class="summary-value">{{summary()!.endWorth | currency : currency() : 'symbol' : '0.0-0'}}</div>
+          </div>
+          <div class="summary-tile">
+            <div class="summary-label">Change</div>
+            <div class="summary-value" [class.amount-in]="summary()!.change > 0" [class.amount-out]="summary()!.change < 0">
+              {{summary()!.change | currency : currency() : 'symbol' : '0.0-0'}}
+            </div>
+            @if (summary()!.changePct !== null) {
+              <div class="summary-note">{{summary()!.changePct! >= 0 ? '+' : ''}}{{summary()!.changePct | number : '0.0-1'}}%</div>
+            }
+          </div>
+          <div class="summary-tile" pTooltip="Growth in what you paid in over the range, including cash put aside.">
+            <div class="summary-label">Invested</div>
+            <div class="summary-value">{{summary()!.invested | currency : currency() : 'symbol' : '0.0-0'}}</div>
+          </div>
+          <div class="summary-tile" pTooltip="Change that did not come from new money.">
+            <div class="summary-label">Market gain</div>
+            <div class="summary-value" [class.amount-in]="summary()!.marketGain > 0" [class.amount-out]="summary()!.marketGain < 0">
+              {{summary()!.marketGain | currency : currency() : 'symbol' : '0.0-0'}}
+            </div>
+          </div>
+        </div>
+
+        <h3 class="section-title">Worth vs invested</h3>
+        <apx-chart [series]="worthChart().series!" [chart]="worthChart().chart!" [xaxis]="worthChart().xaxis!"
+          [yaxis]="worthChart().yaxis!" [legend]="worthChart().legend!" [dataLabels]="worthChart().dataLabels!"
+          [tooltip]="worthChart().tooltip!" [stroke]="worthChart().stroke!" [fill]="worthChart().fill!"
+          [colors]="worthChart().colors!">
+        </apx-chart>
+
+        <h3 class="section-title">By asset class</h3>
+        <apx-chart [series]="assetChart().series!" [chart]="assetChart().chart!" [xaxis]="assetChart().xaxis!"
+          [yaxis]="assetChart().yaxis!" [legend]="assetChart().legend!" [dataLabels]="assetChart().dataLabels!"
+          [tooltip]="assetChart().tooltip!" [stroke]="assetChart().stroke!" [fill]="assetChart().fill!"
+          [colors]="assetChart().colors!">
+        </apx-chart>
+      }
+
+      @if (history()!.months.length > 0) {
+        <h3 class="section-title">Monthly returns</h3>
+        <p-table [value]="history()!.months" styleClass="p-datatable-striped p-datatable-sm table-stack">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Month</th>
+              <th>End worth</th>
+              <th>Change</th>
+              <th>Change %</th>
+              <th pTooltip="New money put in during the month.">Contributions</th>
+              <th pTooltip="Change that did not come from new money.">Market gain</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-month>
+            <tr>
+              <td data-label="Month">{{month.month}}</td>
+              <td data-label="End worth">{{month.endWorth | currency : currency() : 'symbol' : '0.0-0'}}</td>
+              <td data-label="Change" [class.amount-in]="month.change > 0" [class.amount-out]="month.change < 0">
+                {{month.change | currency : currency() : 'symbol' : '0.0-0'}}
+              </td>
+              <td data-label="Change %">
+                @if (month.changePct === null) {
+                  <span class="muted">&ndash;</span>
+                } @else {
+                  <span [class.amount-in]="month.changePct > 0" [class.amount-out]="month.changePct < 0">
+                    {{month.changePct | number : '1.0-2'}}%
+                  </span>
+                }
+              </td>
+              <td data-label="Contributions">{{month.contributions | currency : currency() : 'symbol' : '0.0-0'}}</td>
+              <td data-label="Market gain" [class.amount-in]="month.marketGain > 0" [class.amount-out]="month.marketGain < 0">
+                {{month.marketGain | currency : currency() : 'symbol' : '0.0-0'}}
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      }
+    }
+  </p-panel>
+</div>

@@ -25,6 +25,7 @@ export class MenuComponent implements OnInit {
   readonly menuItems: MenuItem[] = [
     {
       label: 'Portfolio', icon: 'fa-solid fa-briefcase', items: [
+        { label: 'Performance', icon: 'fa-solid fa-chart-area', routerLink: ['/performance'] },
         { label: 'Securities', icon: 'fa-solid fa-building-columns', routerLink: ['/security'] },
         { label: 'ETF', icon: 'fas fa-chart-line', routerLink: ['/etf'] },
         { label: 'Stock', icon: 'fa-solid fa-arrow-trend-up', routerLink: ['/stock'] },

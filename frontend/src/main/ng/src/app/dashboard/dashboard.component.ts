@@ -24,6 +24,8 @@ import { UpcomingInterestComponent } from './upcoming-interest/upcoming-interest
 import { UpcomingVestComponent } from './upcoming-vest/upcoming-vest.component';
 import { UpcomingStarVestComponent } from './upcoming-star-vest/upcoming-star-vest.component';
 import { FireSummaryComponent } from './fire-summary/fire-summary.component';
+import { PerformanceSummaryComponent } from './performance-summary/performance-summary.component';
+import { ASSET_COLOURS } from '../util/assetcolours';
 
 interface AssetSlice {
   label: string;
@@ -41,22 +43,11 @@ interface DonutSegment {
   dashOffset: string;
 }
 
-/** Matches the asset class names the backend reports. */
-const ASSET_COLOURS: { [assetClass: string]: string } = {
-  'Stock': '#ef9f27',
-  'Crypto': '#5f5e5a',
-  'ETF': '#1b1b1b',
-  'Forex': '#b4b2a9',
-  'Securities': '#7a8c5c',
-  'Cash': '#c9a227',
-  'Pension': '#5c7a8c',
-};
-
 @Component({
     selector: 'app-dashboard',
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.css'],
-    imports: [MenuComponent, Bind, Panel, ButtonDirective, Ripple, Tooltip, Skeleton, DecimalPipe, CurrencyPipe, AlertTypePipe, MarketStatusComponent, NotepadComponent, UpcomingInterestComponent, UpcomingVestComponent, UpcomingStarVestComponent, FireSummaryComponent]
+    imports: [MenuComponent, Bind, Panel, ButtonDirective, Ripple, Tooltip, Skeleton, DecimalPipe, CurrencyPipe, AlertTypePipe, MarketStatusComponent, NotepadComponent, UpcomingInterestComponent, UpcomingVestComponent, UpcomingStarVestComponent, FireSummaryComponent, PerformanceSummaryComponent]
 })
 export class DashboardComponent implements OnInit {
 

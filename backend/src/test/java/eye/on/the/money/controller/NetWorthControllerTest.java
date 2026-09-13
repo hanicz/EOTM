@@ -1,7 +1,9 @@
 package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.out.NetWorthDTO;
+import eye.on.the.money.dto.out.NetWorthHistoryDTO;
 import eye.on.the.money.service.shared.NetWorthService;
+import eye.on.the.money.service.shared.NetWorthSnapshotService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +23,9 @@ class NetWorthControllerTest {
 
     @Mock
     private NetWorthService netWorthService;
+
+    @Mock
+    private NetWorthSnapshotService netWorthSnapshotService;
 
     @InjectMocks
     private NetWorthController netWorthController;
@@ -47,6 +52,18 @@ class NetWorthControllerTest {
         when(this.netWorthService.getNetWorth(1L, null, false)).thenReturn(dto);
 
         Assertions.assertEquals(dto, this.netWorthController.getNetWorth(1L, null, false).getBody());
+    }
+
+    @Test
+    void getHistory_returnsTheSnapshotHistory() {
+        NetWorthHistoryDTO history = NetWorthHistoryDTO.builder()
+                .currency("HUF")
+                .points(List.of())
+                .months(List.of())
+                .build();
+        when(this.netWorthSnapshotService.getHistory(1L)).thenReturn(history);
+
+        Assertions.assertEquals(history, this.netWorthController.getHistory(1L).getBody());
     }
 
     private NetWorthDTO netWorth() {

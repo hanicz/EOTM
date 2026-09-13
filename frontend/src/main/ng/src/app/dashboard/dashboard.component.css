@@ -109,7 +109,8 @@
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     grid-template-areas:
-        "fire       fire    fire     fire"
+        "fire        fire        fire        fire"
+        "performance performance performance performance"
         "allocation vests   starvest markets"
         "interest   notepad alerts   markets";
     align-items: stretch;
@@ -148,6 +149,10 @@
     grid-area: fire;
 }
 
+.performance-panel {
+    grid-area: performance;
+}
+
 .detail-panel {
     display: flex;
     flex-direction: column;
@@ -158,6 +163,7 @@
 }
 
 .detail-panel app-fire-summary,
+.detail-panel app-performance-summary,
 .detail-panel app-upcoming-interest,
 .detail-panel app-market-status,
 .detail-panel app-upcoming-vest,
@@ -337,7 +343,8 @@
     .detail-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         grid-template-areas:
-            "fire       fire"
+            "fire        fire"
+            "performance performance"
             "allocation markets"
             "interest   markets"
             "vests      starvest"
@@ -362,6 +369,7 @@
         grid-template-columns: minmax(0, 1fr);
         grid-template-areas:
             "fire"
+            "performance"
             "allocation"
             "interest"
             "markets"

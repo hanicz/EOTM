@@ -87,6 +87,11 @@
             <app-fire-summary></app-fire-summary>
           </div>
 
+          <div class="detail-panel detail-panel-clickable performance-panel" (click)="navigateTo('/performance')">
+            <div class="detail-title">Performance</div>
+            <app-performance-summary></app-performance-summary>
+          </div>
+
           <div class="detail-panel allocation-panel">
             <div class="detail-title">Allocation by asset class</div>
             @if (donutSegments.length > 0) {

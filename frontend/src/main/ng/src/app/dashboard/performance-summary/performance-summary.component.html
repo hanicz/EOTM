@@ -1,0 +1,36 @@
+@if (loading()) {
+  <div class="performance-strip">
+    <div class="performance-stats">
+      <p-skeleton width="6rem" height="0.7rem" styleClass="mb-2"></p-skeleton>
+      <p-skeleton width="9rem" height="1.2rem"></p-skeleton>
+    </div>
+    <p-skeleton height="90px" styleClass="performance-spark"></p-skeleton>
+  </div>
+} @else if (!history()) {
+  <div class="empty-state">Could not read your performance history</div>
+} @else if (points().length < 2) {
+  <div class="empty-state">Net worth is recorded every night. The trend appears once there are two days of snapshots.</div>
+} @else {
+  <div class="performance-strip">
+    <div class="performance-stats">
+      <div class="performance-stat">
+        <span class="performance-stat-label">Net worth</span>
+        <span class="performance-stat-value">{{latest()!.totalWorth | currency : currency() : 'symbol' : '0.0-0'}}</span>
+      </div>
+      <div class="performance-stat">
+        <span class="performance-stat-label">Last 90 days</span>
+        <span class="performance-stat-value" [class.positive]="change()! > 0" [class.negative]="change()! < 0">
+          {{change()! >= 0 ? '+' : ''}}{{change() | currency : currency() : 'symbol' : '0.0-0'}}
+          @if (changePct() !== null) {
+            <span class="performance-pct">({{changePct()! >= 0 ? '+' : ''}}{{changePct() | number : '0.0-1'}}%)</span>
+          }
+        </span>
+      </div>
+    </div>
+    <div class="performance-spark">
+      <apx-chart [series]="chart().series!" [chart]="chart().chart!" [xaxis]="chart().xaxis!"
+        [stroke]="chart().stroke!" [fill]="chart().fill!" [colors]="chart().colors!" [tooltip]="chart().tooltip!">
+      </apx-chart>
+    </div>
+  </div>
+}

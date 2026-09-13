@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { NetWorth } from '../model/networth';
+import { NetWorth, NetWorthHistory } from '../model/networth';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -14,5 +14,9 @@ export class NetWorthService {
 
   getNetWorth(currency: string, refresh = false) {
     return this.http.get<NetWorth>(`${this.netWorthUrl}?currency=${encodeURIComponent(currency)}${refresh ? '&refresh=true' : ''}`);
+  }
+
+  getHistory() {
+    return this.http.get<NetWorthHistory>(`${this.netWorthUrl}/history`);
   }
 }

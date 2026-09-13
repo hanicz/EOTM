@@ -20,11 +20,13 @@ import { CashComponent } from './cash/cash.component';
 import { PensionComponent } from './pension/pension.component';
 import { SalaryComponent } from './salary/salary.component';
 import { EquityComponent } from './equity/equity.component';
+import { PerformanceComponent } from './performance/performance.component';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent },
   { path: 'login', component: LoginComponent },
   { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
+  { path: 'performance', component: PerformanceComponent, canActivate: [authGuard] },
   { path: 'news', component: HomeComponent, canActivate: [authGuard] },
   { path: 'stock', component: StockComponent, canActivate: [authGuard] },
   { path: 'crypto', component: CryptoComponent, canActivate: [authGuard] },

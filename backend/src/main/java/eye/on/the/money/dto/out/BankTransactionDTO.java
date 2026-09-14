@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import eye.on.the.money.dto.CSVHelper;
 import eye.on.the.money.model.financial.BankTransaction;
+import eye.on.the.money.model.financial.CategoryColor;
 import eye.on.the.money.util.Numbers;
 import lombok.*;
 import org.apache.commons.csv.CSVRecord;
@@ -58,12 +59,16 @@ public class BankTransactionDTO implements CSVHelper {
     private String memo;
     private boolean excluded;
     private boolean taxable;
+    private Long categoryId;
+    private String categoryName;
+    private CategoryColor categoryColor;
+    private boolean categoryLocked;
 
     @Override
     @JsonIgnore
     public Object[] getHeaders() {
         return new String[]{"Id", BOOKING_DATE, BANK_TRANSACTION_ID, TYPE, ACCOUNT_NUMBER, ACCOUNT_NAME,
-                PARTNER_ACCOUNT, PARTNER_NAME, AMOUNT, CURRENCY, MEMO, "Excluded", "Taxable"};
+                PARTNER_ACCOUNT, PARTNER_NAME, AMOUNT, CURRENCY, MEMO, "Excluded", "Taxable", "Category"};
     }
 
     @Override
@@ -71,7 +76,8 @@ public class BankTransactionDTO implements CSVHelper {
     public Object[] getCSVRecord() {
         return new Object[]{this.getId(), this.getBookingDate(), this.getBankTransactionId(), this.getType(),
                 this.getAccountNumber(), this.getAccountName(), this.getPartnerAccount(), this.getPartnerName(),
-                this.getAmount(), this.getCurrencyId(), this.getMemo(), this.isExcluded(), this.isTaxable()};
+                this.getAmount(), this.getCurrencyId(), this.getMemo(), this.isExcluded(), this.isTaxable(),
+                this.getCategoryName()};
     }
 
     public static BankTransactionDTO createFromKHRecord(CSVRecord csvRecord, DateTimeFormatter formatter) {

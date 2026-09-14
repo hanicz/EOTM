@@ -4,12 +4,16 @@ import eye.on.the.money.dto.in.BankTransactionEditDTO;
 import eye.on.the.money.dto.out.BankTransactionDTO;
 import eye.on.the.money.dto.out.ImportResultDTO;
 import eye.on.the.money.dto.out.MonthlyCashFlowDTO;
+import eye.on.the.money.dto.out.MonthlyCategorySpendingDTO;
 import eye.on.the.money.dto.out.MonthlyIncomeDTO;
+import eye.on.the.money.dto.out.YearlyCashFlowDTO;
 import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.financial.BankTransaction;
+import eye.on.the.money.model.financial.SpendingCategory;
 import eye.on.the.money.repository.financial.BankTransactionRepository;
+import eye.on.the.money.repository.financial.SpendingCategoryRepository;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.user.UserService;
@@ -33,7 +37,10 @@ import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -49,6 +56,8 @@ public class BankTransactionService implements ICSVService {
     private final BankTransactionRepository bankTransactionRepository;
     private final CurrencyRepository currencyRepository;
     private final BankExclusionRuleService bankExclusionRuleService;
+    private final BankCategoryRuleService bankCategoryRuleService;
+    private final SpendingCategoryRepository spendingCategoryRepository;
     private final UserService userService;
     private final ModelMapper modelMapper;
 
@@ -69,9 +78,33 @@ public class BankTransactionService implements ICSVService {
         return this.bankTransactionRepository.findMonthlyIncome(userId);
     }
 
+    public List<MonthlyCategorySpendingDTO> getMonthlyCategorySpending(Long userId) {
+        return this.bankTransactionRepository.findMonthlyCategorySpending(userId);
+    }
+
+    public List<YearlyCashFlowDTO> getYearlyCashFlow(Long userId) {
+        Map<List<Object>, YearlyCashFlowDTO> years = new LinkedHashMap<>();
+        for (MonthlyCashFlowDTO month : this.getMonthlyCashFlow(userId)) {
+            years.computeIfAbsent(List.of(month.getYear(), month.getCurrencyId()),
+                    key -> YearlyCashFlowDTO.empty(month.getYear(), month.getCurrencyId())).add(month);
+        }
+        return years.values().stream()
+                .sorted(Comparator.comparing(YearlyCashFlowDTO::getYear).reversed()
+                        .thenComparing(YearlyCashFlowDTO::getCurrencyId))
+                .toList();
+    }
+
     @Transactional
     public void setExcluded(Long userId, List<Long> ids, boolean excluded) {
         this.bankTransactionRepository.updateExcludedByUserIdAndIdIn(userId, ids, excluded);
+    }
+
+    @Transactional
+    public void setCategory(Long userId, List<Long> ids, Long categoryId) {
+        SpendingCategory category = categoryId == null ? null
+                : this.spendingCategoryRepository.findByIdAndUserId(categoryId, userId)
+                .orElseThrow(() -> new NoSuchElementException("Spending category not found: " + categoryId));
+        this.bankTransactionRepository.updateCategoryByUserIdAndIdIn(userId, ids, category);
     }
 
     @Transactional
@@ -96,6 +129,14 @@ public class BankTransactionService implements ICSVService {
         this.printRecords(this.getMonthlyIncome(userId), writer);
     }
 
+    public void getMonthlyCategorySpendingCSV(Long userId, Writer writer) {
+        this.printRecords(this.getMonthlyCategorySpending(userId), writer);
+    }
+
+    public void getYearlyCashFlowCSV(Long userId, Writer writer) {
+        this.printRecords(this.getYearlyCashFlow(userId), writer);
+    }
+
     public void getCSV(Long userId, Writer writer) {
         List<BankTransactionDTO> transactionList = this.bankTransactionRepository.findByUserIdOrderByBookingDate(userId)
                 .stream()
@@ -108,6 +149,7 @@ public class BankTransactionService implements ICSVService {
     public ImportResultDTO processCSV(Long userId, MultipartFile file) {
         User user = this.userService.getReference(userId);
         ExclusionRuleMatcher matcher = this.bankExclusionRuleService.matcherFor(userId);
+        CategoryRuleMatcher categoryMatcher = this.bankCategoryRuleService.matcherFor(userId);
         int created = 0;
         int updated = 0;
         long lineNumber = 0;
@@ -118,7 +160,7 @@ public class BankTransactionService implements ICSVService {
                     continue;
                 }
                 BankTransactionDTO transaction = BankTransactionDTO.createFromKHRecord(csvRecord, DateFormats.YYYY_MM_DD_DOTTED);
-                if (this.upsert(transaction, user, matcher)) {
+                if (this.upsert(transaction, user, matcher, categoryMatcher)) {
                     created++;
                 } else {
                     updated++;
@@ -131,7 +173,8 @@ public class BankTransactionService implements ICSVService {
         return ImportResultDTO.builder().created(created).updated(updated).build();
     }
 
-    private boolean upsert(BankTransactionDTO transactionDTO, User user, ExclusionRuleMatcher matcher) {
+    private boolean upsert(BankTransactionDTO transactionDTO, User user, ExclusionRuleMatcher matcher,
+                           CategoryRuleMatcher categoryMatcher) {
         Currency currency = this.currencyRepository.findById(transactionDTO.getCurrencyId())
                 .orElseThrow(() -> new CSVException("Unknown currency: " + transactionDTO.getCurrencyId()));
 
@@ -161,6 +204,7 @@ public class BankTransactionService implements ICSVService {
                 .amount(transactionDTO.getAmount())
                 .memo(transactionDTO.getMemo())
                 .excluded(matcher.matches(transactionDTO.getAccountNumber(), transactionDTO.getPartnerAccount()))
+                .category(categoryMatcher.match(transactionDTO.getPartnerName()))
                 .creationDate(LocalDate.now())
                 .currency(currency)
                 .user(user)
@@ -190,6 +234,11 @@ public class BankTransactionService implements ICSVService {
     }
 
     private BankTransactionDTO convertToDTO(BankTransaction transaction) {
-        return this.modelMapper.map(transaction, BankTransactionDTO.class);
+        BankTransactionDTO dto = this.modelMapper.map(transaction, BankTransactionDTO.class);
+        SpendingCategory category = transaction.getCategory();
+        dto.setCategoryId(category == null ? null : category.getId());
+        dto.setCategoryName(category == null ? null : category.getName());
+        dto.setCategoryColor(category == null ? null : category.getColor());
+        return dto;
     }
 }

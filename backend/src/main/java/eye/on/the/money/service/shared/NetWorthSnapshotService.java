@@ -78,13 +78,23 @@ public class NetWorthSnapshotService {
         List<User> users = this.userRepository.findAll();
         log.info("Capturing the {} net worth snapshot for {} users", today, users.size());
 
+        int failed = 0;
         for (User user : users) {
             try {
                 this.capture(user.getId(), today, true);
             } catch (APIException | DataAccessException e) {
+                failed++;
                 log.error("Unable to capture the {} net worth snapshot for {}", today,
                         LogSanitizer.maskEmail(user.getEmail()), e);
             }
+        }
+
+        int captured = users.size() - failed;
+        if (failed == 0) {
+            log.info("Captured the {} net worth snapshot for all {} users", today, captured);
+        } else {
+            log.warn("Captured the {} net worth snapshot for {} of {} users, {} failed", today, captured,
+                    users.size(), failed);
         }
     }
 

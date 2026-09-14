@@ -4,7 +4,9 @@ import eye.on.the.money.dto.in.BankTransactionEditDTO;
 import eye.on.the.money.dto.out.BankTransactionDTO;
 import eye.on.the.money.dto.out.ImportResultDTO;
 import eye.on.the.money.dto.out.MonthlyCashFlowDTO;
+import eye.on.the.money.dto.out.MonthlyCategorySpendingDTO;
 import eye.on.the.money.dto.out.MonthlyIncomeDTO;
+import eye.on.the.money.dto.out.YearlyCashFlowDTO;
 import eye.on.the.money.security.CurrentUserId;
 import eye.on.the.money.service.financial.BankTransactionService;
 import eye.on.the.money.service.financial.TaxableEventService;
@@ -56,10 +58,39 @@ public class FinancialController {
                 CsvResponseUtil.prepare(servletResponse, "monthly_income.csv"));
     }
 
+    @GetMapping("/report/category")
+    public ResponseEntity<List<MonthlyCategorySpendingDTO>> getMonthlyCategorySpending(@CurrentUserId Long userId) {
+        return ResponseEntity.ok(this.bankTransactionService.getMonthlyCategorySpending(userId));
+    }
+
+    @GetMapping("/report/category/csv")
+    public void getMonthlyCategorySpendingCSV(@CurrentUserId Long userId, HttpServletResponse servletResponse) throws IOException {
+        this.bankTransactionService.getMonthlyCategorySpendingCSV(userId,
+                CsvResponseUtil.prepare(servletResponse, "spending_by_category.csv"));
+    }
+
+    @GetMapping("/report/yearly")
+    public ResponseEntity<List<YearlyCashFlowDTO>> getYearlyCashFlow(@CurrentUserId Long userId) {
+        return ResponseEntity.ok(this.bankTransactionService.getYearlyCashFlow(userId));
+    }
+
+    @GetMapping("/report/yearly/csv")
+    public void getYearlyCashFlowCSV(@CurrentUserId Long userId, HttpServletResponse servletResponse) throws IOException {
+        this.bankTransactionService.getYearlyCashFlowCSV(userId,
+                CsvResponseUtil.prepare(servletResponse, "yearly_cash_flow.csv"));
+    }
+
     @PutMapping("/exclusion")
     public ResponseEntity<Void> setExcluded(@CurrentUserId Long userId, @RequestParam List<Long> ids,
                                             @RequestParam boolean excluded) {
         this.bankTransactionService.setExcluded(userId, ids, excluded);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/category")
+    public ResponseEntity<Void> setCategory(@CurrentUserId Long userId, @RequestParam List<Long> ids,
+                                            @RequestParam(required = false) Long categoryId) {
+        this.bankTransactionService.setCategory(userId, ids, categoryId);
         return ResponseEntity.ok().build();
     }
 

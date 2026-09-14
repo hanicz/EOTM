@@ -1,0 +1,150 @@
+<p-toolbar styleClass="table-toolbar">
+  <ng-template pTemplate="left">
+    <span class="text-color-secondary">
+      Money in and out per calendar year. Years with only a few months of data are compared per month, so a
+      partial year stays fair. Records marked excluded on the Transactions tab are left out.
+    </span>
+  </ng-template>
+  <ng-template pTemplate="right">
+    <button pButton pRipple icon="pi pi-refresh" class="p-button-rounded p-button-text" pTooltip="Refresh"
+      (click)="refresh()"></button>
+    <button pButton pRipple label="Export" icon="pi pi-upload" severity="secondary" class="p-button-outlined"
+      [disabled]="!blocks.length" (click)="download()"></button>
+  </ng-template>
+</p-toolbar>
+
+@if (loaded && !blocks.length) {
+  <p class="p-4 text-color-secondary">
+    Nothing to report yet. Import a K&amp;H account history export on the Transactions tab, and make sure at
+    least one record is still counted.
+  </p>
+}
+
+@for (block of blocks; track block.currencyId; let last = $last) {
+  <div class="yearly-block">
+    <div class="page-summary mb-3">
+      <h3 class="mt-0 mb-0">{{block.currencyId}}</h3>
+      <div class="summary-stat">Years:
+        <b>{{block.rows.length}}</b>
+      </div>
+      @if (block.bestSavedYear; as best) {
+        <div class="summary-stat">Best saving year:
+          <b [class.amount-in]="best.savedPercent! > 0" [class.amount-out]="best.savedPercent! < 0">
+            {{best.year}} ({{best.savedPercent | number : '1.0-1'}}%)
+          </b>
+        </div>
+      }
+      <div class="summary-stat">Monthly spending in {{block.latest.year}}:
+        <b class="amount-out">
+          {{block.latest.averageMonthlySpending | currency : block.currencyId : 'symbol' : '0.0-2'}}
+        </b>
+      </div>
+    </div>
+
+    <p-table [value]="block.rows" styleClass="p-datatable-striped p-datatable-sm table-stack">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Year</th>
+          <th>Months</th>
+          <th>In</th>
+          <th>Out</th>
+          <th>Net</th>
+          <th pTooltip="What share of the year's income was left over.">Saved %</th>
+          <th>Avg monthly spending</th>
+          <th pTooltip="Change in average monthly spending against the year before, so a partial year stays fair.">
+            vs previous year
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-row>
+        <tr>
+          <td data-label="Year">{{row.year}}</td>
+          <td data-label="Months">
+            <span [class.muted]="row.monthsCounted < 12">{{row.monthsCounted}} of 12</span>
+          </td>
+          <td data-label="In" class="amount-in">{{row.moneyIn | currency : row.currencyId : 'symbol' : '0.0-2'}}</td>
+          <td data-label="Out" class="amount-out">{{row.moneyOut | currency : row.currencyId : 'symbol' : '0.0-2'}}</td>
+          <td data-label="Net" [class.amount-in]="row.net > 0" [class.amount-out]="row.net < 0">
+            {{row.net | currency : row.currencyId : 'symbol' : '0.0-2'}}
+          </td>
+          <td data-label="Saved %">
+            @if (row.savedPercent === null) {
+              <span class="muted" pTooltip="No income booked this year, so there is nothing to divide by.">
+                &ndash;
+              </span>
+            } @else {
+              <b [class.amount-in]="row.savedPercent > 0" [class.amount-out]="row.savedPercent < 0">
+                {{row.savedPercent | number : '1.0-1'}}%
+              </b>
+            }
+          </td>
+          <td data-label="Avg monthly spending" class="amount-out">
+            {{row.averageMonthlySpending | currency : row.currencyId : 'symbol' : '0.0-2'}}
+          </td>
+          <td data-label="vs previous year">
+            @if (row.spendingChange === null) {
+              <span class="muted">&ndash;</span>
+            } @else {
+              <b [class.amount-out]="row.spendingChange > 0" [class.amount-in]="row.spendingChange < 0">
+                {{row.spendingChange > 0 ? '+' : ''}}{{row.spendingChange | number : '1.0-1'}}%
+              </b>
+            }
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    @if (block.categoryRows.length) {
+      <h4 class="mb-2 mt-4">Spending by category</h4>
+      <p-table [value]="block.categoryRows" styleClass="p-datatable-striped p-datatable-sm table-stack">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Category</th>
+            @for (year of block.categoryYears; track year) {
+              <th>{{year}}</th>
+            }
+            <th pTooltip="Latest year against the year before, compared per month so a partial year stays fair.">
+              Change
+            </th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td data-label="Category">
+              <span class="state-chip" [ngClass]="chipClass(row.categoryColor)">{{row.categoryName}}</span>
+            </td>
+            @for (amount of row.amounts; track $index) {
+              <td [attr.data-label]="block.categoryYears[$index]">
+                @if (amount === 0) {
+                  <span class="muted">&ndash;</span>
+                } @else {
+                  <span class="amount-out">{{amount | currency : block.currencyId : 'symbol' : '0.0-2'}}</span>
+                }
+              </td>
+            }
+            <td data-label="Change">
+              @if (row.change === null) {
+                <span class="muted">&ndash;</span>
+              } @else {
+                <b [class.amount-out]="row.change > 0" [class.amount-in]="row.change < 0">
+                  {{row.change > 0 ? '+' : ''}}{{row.change | number : '1.0-1'}}%
+                </b>
+              }
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+
+    <apx-chart [series]="block.chartOptions.series!" [chart]="block.chartOptions.chart!"
+      [xaxis]="block.chartOptions.xaxis!" [yaxis]="block.chartOptions.yaxis!"
+      [legend]="block.chartOptions.legend!" [dataLabels]="block.chartOptions.dataLabels!"
+      [tooltip]="block.chartOptions.tooltip!" [stroke]="block.chartOptions.stroke!"
+      [colors]="block.chartOptions.colors!">
+    </apx-chart>
+  </div>
+
+  @if (!last) {
+    <p-divider></p-divider>
+  }
+}

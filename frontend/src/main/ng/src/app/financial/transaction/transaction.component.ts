@@ -1,7 +1,7 @@
 import { Component, ChangeDetectorRef, EventEmitter, Output, ViewChild } from '@angular/core';
 import { from, of } from 'rxjs';
 import { catchError, concatMap, map, toArray } from 'rxjs/operators';
-import { BankTransaction } from '../../model/bankTransaction';
+import { BankTransaction, CATEGORY_CHIP_CLASS, CATEGORY_CHIP_NONE, CategoryColor, CategoryRule, SpendingCategory } from '../../model/bankTransaction';
 import { ImportResult } from '../../model/importResult';
 import { FinancialService } from '../../service/financial.service';
 import { Bind } from 'primeng/bind';
@@ -15,8 +15,10 @@ import { FileUpload } from 'primeng/fileupload';
 import { TableModule } from 'primeng/table';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
+import { Dialog } from 'primeng/dialog';
+import { Checkbox } from 'primeng/checkbox';
 import { FormsModule } from '@angular/forms';
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe, NgClass } from '@angular/common';
 
 interface TransactionEditEvent {
     field?: string;
@@ -39,12 +41,13 @@ interface ImportOutcome {
     templateUrl: './transaction.component.html',
     styleUrls: ['./transaction.component.css'],
     imports: [Bind, Toolbar, PrimeTemplate, Toast, ButtonDirective, Ripple, Tooltip, FileUpload, TableModule,
-        InputText, Select, FormsModule, CurrencyPipe, DatePipe]
+        InputText, Select, Dialog, Checkbox, FormsModule, CurrencyPipe, DatePipe, NgClass]
 })
 export class FinancialTransactionComponent {
 
   @Output() dataChanged = new EventEmitter<void>();
   @Output() createRule = new EventEmitter<string>();
+  @Output() categoryRulesChanged = new EventEmitter<void>();
 
   transactions: BankTransaction[] = [];
   filteredTransactions: BankTransaction[] = [];
@@ -58,6 +61,18 @@ export class FinancialTransactionComponent {
   fromDate: string = '';
   toDate: string = '';
   flagFilter: string | null = null;
+  categoryFilter: number | null = null;
+  categories: SpendingCategory[] = [];
+  bulkCategoryId: number | null = null;
+  categoryRuleDialog: boolean = false;
+  categoryRuleSource: BankTransaction | null = null;
+  categoryRulePattern: string = '';
+  categoryRuleCategoryId: number | null = null;
+  categoryRuleApplyToOthers: boolean = true;
+  categoryRuleMatchCount: number = 0;
+  categoryRuleUncategorizedCount: number = 0;
+  savingCategoryRule: boolean = false;
+  readonly patternMaxLength = 64;
   readonly memoMaxLength = 500;
   private readonly editableFields = ['bookingDate', 'memo'];
   private beforeEdit: TransactionEditValues | null = null;
@@ -67,10 +82,24 @@ export class FinancialTransactionComponent {
   constructor(private financialService: FinancialService, private cdr: ChangeDetectorRef,
     private messageService: MessageService) {
     this.fetchData();
+    this.fetchCategories();
   }
 
   refresh(): void {
     this.fetchData();
+    this.fetchCategories();
+  }
+
+  private fetchCategories(): void {
+    this.financialService.getCategories().subscribe({
+      next: (data) => {
+        this.categories = data;
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.log(error);
+      }
+    });
   }
 
   private fetchData(): void {
@@ -87,7 +116,7 @@ export class FinancialTransactionComponent {
   }
 
   get hasFilters(): boolean {
-    return !!this.fromDate || !!this.toDate || !!this.flagFilter;
+    return !!this.fromDate || !!this.toDate || !!this.flagFilter || this.categoryFilter !== null;
   }
 
   filterChanged(): void {
@@ -99,6 +128,7 @@ export class FinancialTransactionComponent {
     this.fromDate = '';
     this.toDate = '';
     this.flagFilter = null;
+    this.categoryFilter = null;
     this.filterChanged();
   }
 
@@ -107,7 +137,8 @@ export class FinancialTransactionComponent {
       const booked = this.bookedOn(transaction);
       return (!this.fromDate || booked >= this.fromDate)
         && (!this.toDate || booked <= this.toDate)
-        && this.matchesFlag(transaction);
+        && this.matchesFlag(transaction)
+        && this.matchesCategory(transaction);
     });
   }
 
@@ -127,6 +158,25 @@ export class FinancialTransactionComponent {
     if (transaction.amount <= -200000) return 'amount-alert-2';
     if (transaction.amount <= -100000) return 'amount-alert-1';
     return '';
+  }
+
+  private matchesCategory(transaction: BankTransaction): boolean {
+    if (this.categoryFilter === null) {
+      return true;
+    }
+    if (this.categoryFilter === 0) {
+      return transaction.categoryId === null;
+    }
+    return transaction.categoryId === this.categoryFilter;
+  }
+
+  chipClass(color: CategoryColor | null): string {
+    return color ? CATEGORY_CHIP_CLASS[color] : CATEGORY_CHIP_NONE;
+  }
+
+  get categoryOptions(): { label: string, value: number }[] {
+    return [{ label: 'Uncategorized', value: 0 }]
+      .concat(this.categories.map(category => ({ label: category.name, value: category.id })));
   }
 
   private bookedOn(transaction: BankTransaction): string {
@@ -151,6 +201,21 @@ export class FinancialTransactionComponent {
     });
   }
 
+  categoryClicked(): void {
+    const ids = this.selectedTransactions.map(t => t.id).join(',');
+    this.financialService.setCategory(ids, this.bulkCategoryId === 0 ? null : this.bulkCategoryId).subscribe({
+      next: () => {
+        this.selectedTransactions = [];
+        this.bulkCategoryId = null;
+        this.fetchData();
+        this.dataChanged.emit();
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', detail: 'Could not set the category.' });
+      }
+    });
+  }
+
   ruleClicked(transaction: BankTransaction): void {
     const account = transaction.partnerAccount?.trim();
     if (!account) {
@@ -158,6 +223,80 @@ export class FinancialTransactionComponent {
       return;
     }
     this.createRule.emit(account);
+  }
+
+  categoryRuleClicked(transaction: BankTransaction): void {
+    const partnerName = this.normalizeName(transaction.partnerName);
+    if (!partnerName) {
+      this.messageService.add({ severity: 'warn', detail: 'This record has no partner name to build a rule on.' });
+      return;
+    }
+    if (!this.categories.length) {
+      this.messageService.add({ severity: 'warn', detail: 'Add a category first, a rule has to point at one.' });
+      return;
+    }
+    this.categoryRuleSource = transaction;
+    this.categoryRulePattern = partnerName.substring(0, this.patternMaxLength);
+    this.categoryRuleCategoryId = transaction.categoryId ?? this.categories[0].id;
+    this.categoryRuleApplyToOthers = true;
+    this.updateCategoryRuleMatches();
+    this.categoryRuleDialog = true;
+  }
+
+  updateCategoryRuleMatches(): void {
+    const pattern = this.normalizeName(this.categoryRulePattern);
+    const matching = pattern
+      ? this.transactions.filter(transaction => this.normalizeName(transaction.partnerName).includes(pattern))
+      : [];
+    this.categoryRuleMatchCount = matching.length;
+    this.categoryRuleUncategorizedCount = matching.filter(transaction => transaction.categoryId === null).length;
+  }
+
+  hideCategoryRuleDialog(): void {
+    this.categoryRuleDialog = false;
+  }
+
+  saveCategoryRule(): void {
+    const source = this.categoryRuleSource;
+    const pattern = this.categoryRulePattern.trim();
+    const categoryId = this.categoryRuleCategoryId;
+    if (!source || !pattern || categoryId === null) {
+      return;
+    }
+    const applyToOthers = this.categoryRuleApplyToOthers;
+    const rule = { name: null, pattern, categoryId, priority: 0, active: true } as CategoryRule;
+    this.savingCategoryRule = true;
+
+    this.financialService.createCategoryRule(rule).pipe(
+      concatMap(() => this.financialService.setCategory(String(source.id), categoryId)),
+      concatMap(() => applyToOthers
+        ? this.financialService.applyCategoryRules().pipe(map(result => result.categorized as number | null))
+        : of(null))
+    ).subscribe({
+      next: (categorized) => {
+        this.savingCategoryRule = false;
+        this.categoryRuleDialog = false;
+        this.fetchData();
+        this.dataChanged.emit();
+        this.categoryRulesChanged.emit();
+        this.messageService.add({
+          severity: 'success',
+          detail: categorized === null
+            ? 'Rule saved and this transaction categorized.'
+            : `Rule saved and this transaction categorized. Re-applying the rules categorized ${categorized} more.`
+        });
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        this.savingCategoryRule = false;
+        this.messageService.add({ severity: 'error', detail: error.error?.error ?? 'Could not save the rule.' });
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  private normalizeName(value: string | null | undefined): string {
+    return (value ?? '').replace(/\s+/g, ' ').trim().toUpperCase();
   }
 
   taxableClicked(taxable: boolean): void {

@@ -488,3 +488,12 @@ menu {
 .p-panel-header-actions {
     margin-left: auto;
 }
+.cat-chip-blue    { color: #1d5296; background-color: rgba(42, 120, 214, 0.15); }
+.cat-chip-orange  { color: #9c3d17; background-color: rgba(235, 104, 52, 0.15); }
+.cat-chip-aqua    { color: #0e6b4a; background-color: rgba(27, 175, 122, 0.16); }
+.cat-chip-yellow  { color: #7d5600; background-color: rgba(237, 161, 0, 0.18); }
+.cat-chip-magenta { color: #a03a61; background-color: rgba(232, 123, 164, 0.18); }
+.cat-chip-green   { color: #005c00; background-color: rgba(0, 131, 0, 0.14); }
+.cat-chip-violet  { color: #372b7c; background-color: rgba(74, 58, 167, 0.14); }
+.cat-chip-red     { color: #9c2726; background-color: rgba(227, 73, 72, 0.15); }
+.cat-chip-none    { color: #5f5e5a; background-color: rgba(95, 94, 90, 0.12); }

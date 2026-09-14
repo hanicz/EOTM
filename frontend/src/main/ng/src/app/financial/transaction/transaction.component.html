@@ -17,6 +17,9 @@
       pTooltip="Leave the selected records out of the tax report"
       [disabled]="!selectedTransactions || !selectedTransactions.length"
       (click)="taxableClicked(false)"></button>
+    <p-select [(ngModel)]="bulkCategoryId" [options]="categoryOptions" optionLabel="label" optionValue="value"
+      placeholder="Set category" [showClear]="true" styleClass="bulk-category" ariaLabel="Set category"
+      [disabled]="!selectedTransactions || !selectedTransactions.length" (onChange)="categoryClicked()"></p-select>
     <button pButton pRipple icon="pi pi-trash" severity="danger" class="p-button-outlined"
       [disabled]="!selectedTransactions || !selectedTransactions.length" (click)="deleteClicked()"></button>
   </ng-template>
@@ -44,6 +47,9 @@
       <p-select [(ngModel)]="flagFilter" [options]="flags" optionLabel="label" optionValue="value"
         (onChange)="filterChanged()" [showClear]="true" placeholder="Any flag" styleClass="filter-type"
         ariaLabel="Flag"></p-select>
+      <p-select [(ngModel)]="categoryFilter" [options]="categoryOptions" optionLabel="label" optionValue="value"
+        (onChange)="filterChanged()" [showClear]="true" placeholder="Any category" styleClass="filter-type"
+        ariaLabel="Category"></p-select>
       <input pInputText type="date" [(ngModel)]="fromDate" (ngModelChange)="filterChanged()"
         [max]="toDate || null" class="p-column-filter filter-input" aria-label="Booked from">
       <input pInputText type="date" [(ngModel)]="toDate" (ngModelChange)="filterChanged()"
@@ -65,6 +71,7 @@
       <th>Partner</th>
       <th>Memo</th>
       <th pSortableColumn="amount">Amount <p-sortIcon field="amount"></p-sortIcon></th>
+      <th>Category</th>
       <th>In reports</th>
       <th>Tax</th>
       <th></th>
@@ -113,6 +120,13 @@
         [class.amount-out]="transaction.amount < 0">
         {{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}
       </td>
+      <td data-label="Category">
+        @if (transaction.categoryName) {
+          <span class="state-chip" [ngClass]="chipClass(transaction.categoryColor)">{{transaction.categoryName}}</span>
+        } @else {
+          <span class="cell-none">&mdash;</span>
+        }
+      </td>
       <td data-label="In reports">
         @if (transaction.excluded) {
           <span class="state-chip state-neutral">Excluded</span>
@@ -138,6 +152,10 @@
           pTooltip="Always leave future imports from this partner account out of the reports"
           [disabled]="!transaction.partnerAccount" (click)="ruleClicked(transaction)"
           class="p-button-rounded p-button-text mr-1" severity="secondary"></button>
+        <button pButton pRipple type="button" icon="pi pi-tag"
+          pTooltip="Create a category rule from this partner name and put this record in its category"
+          [disabled]="!transaction.partnerName || !categories.length" (click)="categoryRuleClicked(transaction)"
+          class="p-button-rounded p-button-text mr-1" severity="secondary"></button>
         <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(transaction.id)"
           class="p-button-rounded p-button-text" severity="danger"></button>
       </td>
@@ -154,3 +172,49 @@
     </tr>
   </ng-template>
 </p-table>
+
+<p-dialog [(visible)]="categoryRuleDialog" [style]="{width: '40vw'}" [breakpoints]="{'992px': '75vw', '576px': '100vw'}"
+  header="Category rule from transaction" [modal]="true" styleClass="p-fluid">
+  <ng-template pTemplate="content">
+    <div class="grid">
+      <div class="col-12 mb-2">
+        <span class="block mb-2 font-medium text-color-secondary">Partner name</span>
+        <div class="partner-value">{{categoryRuleSource?.partnerName}}</div>
+      </div>
+      <div class="col-12 mb-2">
+        <label for="categoryRulePattern" class="block mb-2 font-medium text-color-secondary">Partner name contains</label>
+        <input pInputText id="categoryRulePattern" type="text" [(ngModel)]="categoryRulePattern"
+          (ngModelChange)="updateCategoryRuleMatches()" [maxlength]="patternMaxLength" [style]="{'width':'100%'}">
+        <small class="block mt-2 text-color-secondary">Cut it down to the part that never changes, so the branch
+          and store number do not matter. Matches {{categoryRuleMatchCount}} of your transactions,
+          {{categoryRuleUncategorizedCount}} of them uncategorized.</small>
+      </div>
+      <div class="col-12 mb-2">
+        <label for="categoryRuleCategory" class="block mb-2 font-medium text-color-secondary">Category</label>
+        <p-select id="categoryRuleCategory" [options]="categories" optionLabel="name" optionValue="id"
+          [(ngModel)]="categoryRuleCategoryId" [style]="{'width':'100%'}" [appendTo]="'body'">
+          <ng-template pTemplate="item" let-option>
+            <span class="state-chip" [ngClass]="chipClass(option.color)">{{option.name}}</span>
+          </ng-template>
+        </p-select>
+      </div>
+      <div class="col-12 mb-2">
+        <div class="flex align-items-center gap-2">
+          <p-checkbox inputId="categoryRuleApply" [(ngModel)]="categoryRuleApplyToOthers" [binary]="true"></p-checkbox>
+          <label for="categoryRuleApply" class="font-medium text-color-secondary">Also categorize the other matching
+            transactions</label>
+        </div>
+        <small class="block mt-2 text-color-secondary">Runs all rules again over the transactions whose category was
+          not set by hand. The new rule is checked before your other rules, and this record is set to the category
+          either way.</small>
+      </div>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text"
+      (click)="hideCategoryRuleDialog()"></button>
+    <button pButton pRipple label="Save" icon="pi pi-check"
+      [disabled]="savingCategoryRule || !categoryRulePattern.trim() || categoryRuleCategoryId === null"
+      (click)="saveCategoryRule()"></button>
+  </ng-template>
+</p-dialog>

@@ -6,17 +6,24 @@
         <p-tab value="0">Transactions</p-tab>
         <p-tab value="1">Reports</p-tab>
         <p-tab value="2">Rules</p-tab>
+        <p-tab value="3">Categories</p-tab>
       </p-tablist>
       <p-tabpanels>
         <p-tabpanel value="0">
           <app-financial-transaction (dataChanged)="onDataChanged()"
-            (createRule)="onCreateRule($event)"></app-financial-transaction>
+            (createRule)="onCreateRule($event)"
+            (categoryRulesChanged)="onCategoryRulesChanged()"></app-financial-transaction>
         </p-tabpanel>
         <p-tabpanel value="1" lazy>
           <app-financial-report></app-financial-report>
         </p-tabpanel>
         <p-tabpanel value="2" lazy>
           <app-financial-rule [ruleRequest]="ruleRequest"></app-financial-rule>
+          <p-divider></p-divider>
+          <app-financial-category-rule (rulesApplied)="onCategoriesChanged()"></app-financial-category-rule>
+        </p-tabpanel>
+        <p-tabpanel value="3" lazy>
+          <app-financial-category (categoriesChanged)="onCategoriesChanged()"></app-financial-category>
         </p-tabpanel>
       </p-tabpanels>
     </p-tabs>

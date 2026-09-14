@@ -1,0 +1,126 @@
+<p-toast position="bottom-center"></p-toast>
+<p class="mt-0 mb-3 text-color-secondary text-sm">
+  A category rule reads the partner name a card terminal sends and puts the transaction in a category. The
+  match ignores case and extra spaces, and it only has to appear somewhere in the name &mdash; so
+  <code>LIDL</code> catches every branch and store number. Where two rules could both fit, the one higher up
+  this list wins, which is how <code>SIMPLEP mav</code> stays Transport while <code>SIMPLEP dijnet</code> goes
+  to Utilities. Rules run as records are imported; use <b>Re-apply rules</b> to run them over what you already
+  have.
+</p>
+<p-toolbar styleClass="table-toolbar">
+  <ng-template pTemplate="left">
+    <button pButton pRipple label="New rule" icon="pi pi-plus" [disabled]="!categories.length"
+      (click)="openNew()"></button>
+    <button pButton pRipple icon="pi pi-trash" severity="danger" class="p-button-outlined"
+      [disabled]="!selectedRules || !selectedRules.length" (click)="deleteClicked()"></button>
+  </ng-template>
+  <ng-template pTemplate="right">
+    <button pButton pRipple label="Re-apply rules" icon="pi pi-refresh" severity="secondary"
+      class="p-button-outlined" [disabled]="applying || !rules.length"
+      pTooltip="Run the rules over the transactions you already have. A category you set by hand is left alone."
+      (click)="applyRules()"></button>
+  </ng-template>
+</p-toolbar>
+
+@if (!categories.length) {
+  <p class="p-4 text-color-secondary">Add a category first &mdash; a rule has to point at one.</p>
+}
+
+<p-table #dt2 [value]="rules" styleClass="p-datatable-striped table-stack eotm-table"
+  [(selection)]="selectedRules" [paginator]="true" [rows]="25" [rowsPerPageOptions]="[25, 50, 100]">
+
+  <ng-template pTemplate="header">
+    <tr>
+      <th style="width: 3rem">
+        <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+      </th>
+      <th pSortableColumn="priority">Order <p-sortIcon field="priority"></p-sortIcon></th>
+      <th pSortableColumn="pattern">Partner name contains <p-sortIcon field="pattern"></p-sortIcon></th>
+      <th pSortableColumn="categoryName">Category <p-sortIcon field="categoryName"></p-sortIcon></th>
+      <th>Status</th>
+      <th></th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-rule>
+    <tr [class.rule-paused]="!rule.active">
+      <td>
+        <p-tableCheckbox [value]="rule"></p-tableCheckbox>
+      </td>
+      <td data-label="Order" class="cell-num cell-quiet">{{rule.priority}}</td>
+      <td data-label="Partner name contains">{{rule.pattern}}</td>
+      <td data-label="Category">
+        <span class="state-chip" [ngClass]="chipClass(rule.categoryColor)">{{rule.categoryName}}</span>
+      </td>
+      <td data-label="Status">
+        @if (rule.active) {
+          <span class="state-chip state-buy">Active</span>
+        } @else {
+          <span class="state-chip state-neutral">Paused</span>
+        }
+      </td>
+      <td>
+        <button pButton pRipple type="button" icon="pi pi-pencil" pTooltip="Edit this rule"
+          (click)="editRule(rule)" class="p-button-rounded p-button-text mr-1" severity="secondary"></button>
+        <button pButton pRipple type="button" [icon]="rule.active ? 'pi pi-pause' : 'pi pi-play'"
+          [pTooltip]="rule.active ? 'Stop applying this rule' : 'Apply this rule again'"
+          (click)="toggleActive(rule)" class="p-button-rounded p-button-text mr-1" severity="secondary"></button>
+        <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(rule.id)"
+          class="p-button-rounded p-button-text" severity="danger"></button>
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="6">No category rules yet.</td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog [(visible)]="ruleDialog" [style]="{width: '50vw'}" [breakpoints]="{'992px': '75vw', '576px': '100vw'}"
+  header="Category Rule" [modal]="true" styleClass="p-fluid">
+  <ng-template pTemplate="content">
+    <div class="grid">
+      <div class="col-12 mb-2">
+        <label for="ruleName" class="block mb-2 font-medium text-color-secondary">Name</label>
+        <input pInputText id="ruleName" type="text" [(ngModel)]="rule.name" [maxlength]="nameMaxLength"
+          placeholder="e.g. Supermarket" [style]="{'width':'100%'}">
+        <small class="block mt-2 text-color-secondary">Optional, only to help you recognise the rule in this
+          list.</small>
+      </div>
+      <div class="col-12 mb-2">
+        <label for="pattern" class="block mb-2 font-medium text-color-secondary">Partner name contains</label>
+        <input pInputText id="pattern" type="text" [(ngModel)]="rule.pattern" [maxlength]="patternMaxLength"
+          placeholder="e.g. LIDL" [style]="{'width':'100%'}">
+        <small class="block mt-2 text-color-secondary">Case and extra spaces are ignored. Keep it to the part of
+          the name that never changes, so the branch and store number do not matter.</small>
+      </div>
+      <div class="col-12 mb-2">
+        <label for="ruleCategory" class="block mb-2 font-medium text-color-secondary">Category</label>
+        <p-select id="ruleCategory" [options]="categories" optionLabel="name" optionValue="id"
+          [(ngModel)]="rule.categoryId" [style]="{'width':'100%'}" [appendTo]="'body'">
+          <ng-template pTemplate="item" let-option>
+            <span class="state-chip" [ngClass]="chipClass(option.color)">{{option.name}}</span>
+          </ng-template>
+        </p-select>
+      </div>
+      <div class="col-12 mb-2">
+        <label for="priority" class="block mb-2 font-medium text-color-secondary">Order</label>
+        <p-inputNumber inputId="priority" [(ngModel)]="rule.priority" [min]="0" [showButtons]="true"
+          [style]="{'width':'100%'}"></p-inputNumber>
+        <small class="block mt-2 text-color-secondary">Lower runs first. Give a specific rule a lower number than
+          the broad one it should beat.</small>
+      </div>
+      <div class="col-12 mb-2 flex align-items-center gap-2">
+        <p-checkbox inputId="ruleActive" [(ngModel)]="rule.active" [binary]="true"></p-checkbox>
+        <label for="ruleActive" class="font-medium text-color-secondary">Apply this rule</label>
+      </div>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+    <button pButton pRipple label="Save" icon="pi pi-check" [disabled]="!rule.pattern.trim()"
+      (click)="saveRule()"></button>
+  </ng-template>
+</p-dialog>

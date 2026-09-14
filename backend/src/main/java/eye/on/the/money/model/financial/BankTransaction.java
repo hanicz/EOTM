@@ -54,6 +54,9 @@ public class BankTransaction {
     @Column(name = "taxable", nullable = false)
     private boolean taxable;
 
+    @Column(name = "category_locked", nullable = false)
+    private boolean categoryLocked;
+
     @Column(name = "memo", nullable = false, length = MEMO_MAX_LENGTH)
     private String memo;
 
@@ -64,6 +67,10 @@ public class BankTransaction {
     @JoinColumn(name = "currency_id", nullable = false)
     @JsonIgnore
     private Currency currency;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private SpendingCategory category;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

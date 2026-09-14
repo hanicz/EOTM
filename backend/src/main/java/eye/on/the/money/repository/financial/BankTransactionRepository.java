@@ -1,8 +1,10 @@
 package eye.on.the.money.repository.financial;
 
 import eye.on.the.money.dto.out.MonthlyCashFlowDTO;
+import eye.on.the.money.dto.out.MonthlyCategorySpendingDTO;
 import eye.on.the.money.dto.out.MonthlyIncomeDTO;
 import eye.on.the.money.model.financial.BankTransaction;
+import eye.on.the.money.model.financial.SpendingCategory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -21,6 +23,8 @@ public interface BankTransactionRepository extends JpaRepository<BankTransaction
     List<BankTransaction> findByUserIdAndTaxableTrueOrderByBookingDateDesc(Long userId);
 
     List<BankTransaction> findByUserIdAndIdIn(Long userId, List<Long> ids);
+
+    List<BankTransaction> findByUserIdAndCategoryLockedFalse(Long userId);
 
     void deleteByUserIdAndIdIn(Long userId, List<Long> ids);
 
@@ -47,6 +51,15 @@ public interface BankTransactionRepository extends JpaRepository<BankTransaction
             ORDER BY YEAR(b.bookingDate) DESC, MONTH(b.bookingDate) DESC, b.currency.id
             """)
     List<MonthlyCashFlowDTO> findMonthlyCashFlow(@Param("userId") Long userId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE BankTransaction b SET b.category = :category, b.categoryLocked = true WHERE b.user.id = :userId AND b.id IN :ids")
+    int updateCategoryByUserIdAndIdIn(@Param("userId") Long userId, @Param("ids") List<Long> ids,
+                                      @Param("category") SpendingCategory category);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE BankTransaction b SET b.category = null, b.categoryLocked = false WHERE b.user.id = :userId AND b.category.id IN :categoryIds")
+    int clearCategoryByUserIdAndCategoryIdIn(@Param("userId") Long userId, @Param("categoryIds") List<Long> categoryIds);
 
     @Query("""
             SELECT new eye.on.the.money.dto.out.MonthlyCashFlowDTO(
@@ -79,4 +92,21 @@ public interface BankTransactionRepository extends JpaRepository<BankTransaction
             ORDER BY YEAR(b.bookingDate) DESC, MONTH(b.bookingDate) DESC, b.currency.id, SUM(b.amount) DESC
             """)
     List<MonthlyIncomeDTO> findMonthlyIncome(@Param("userId") Long userId);
+
+    @Query("""
+            SELECT new eye.on.the.money.dto.out.MonthlyCategorySpendingDTO(
+                YEAR(b.bookingDate),
+                MONTH(b.bookingDate),
+                b.currency.id,
+                c.id,
+                c.name,
+                c.color,
+                SUM(ABS(b.amount)),
+                COUNT(b))
+            FROM BankTransaction b LEFT JOIN b.category c
+            WHERE b.user.id = :userId AND b.excluded = false AND b.amount < 0
+            GROUP BY YEAR(b.bookingDate), MONTH(b.bookingDate), b.currency.id, c.id, c.name, c.color
+            ORDER BY YEAR(b.bookingDate) DESC, MONTH(b.bookingDate) DESC, b.currency.id, SUM(ABS(b.amount)) DESC
+            """)
+    List<MonthlyCategorySpendingDTO> findMonthlyCategorySpending(@Param("userId") Long userId);
 }

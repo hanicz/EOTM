@@ -3,13 +3,18 @@ package eye.on.the.money.service.financial;
 import eye.on.the.money.dto.in.BankTransactionEditDTO;
 import eye.on.the.money.dto.out.BankTransactionDTO;
 import eye.on.the.money.dto.out.ImportResultDTO;
+import eye.on.the.money.dto.out.MonthlyCashFlowDTO;
+import eye.on.the.money.dto.out.YearlyCashFlowDTO;
 import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.financial.AccountSide;
 import eye.on.the.money.model.financial.BankExclusionRule;
+import eye.on.the.money.model.financial.BankCategoryRule;
 import eye.on.the.money.model.financial.BankTransaction;
+import eye.on.the.money.model.financial.SpendingCategory;
 import eye.on.the.money.repository.financial.BankTransactionRepository;
+import eye.on.the.money.repository.financial.SpendingCategoryRepository;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.service.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +40,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -64,6 +71,10 @@ class BankTransactionServiceTest {
     @Mock
     private BankExclusionRuleService bankExclusionRuleService;
     @Mock
+    private BankCategoryRuleService bankCategoryRuleService;
+    @Mock
+    private SpendingCategoryRepository spendingCategoryRepository;
+    @Mock
     private UserService userService;
     @Mock
     private ModelMapper modelMapper;
@@ -78,6 +89,7 @@ class BankTransactionServiceTest {
     void setUp() {
         when(this.userService.getReference(USER_ID)).thenReturn(this.user);
         when(this.bankExclusionRuleService.matcherFor(USER_ID)).thenReturn(ExclusionRuleMatcher.empty());
+        when(this.bankCategoryRuleService.matcherFor(USER_ID)).thenReturn(CategoryRuleMatcher.empty());
         when(this.currencyRepository.findById("HUF")).thenReturn(Optional.of(this.huf));
         when(this.bankTransactionRepository
                 .findByUserIdAndBankTransactionIdAndBookingDateAndTypeAndAmountAndMemo(
@@ -461,5 +473,116 @@ class BankTransactionServiceTest {
                 this.file(StandardCharsets.UTF_8, this.rowWithPartner("111111112222222200000000")));
 
         assertTrue(this.captureSingleSave().isExcluded());
+    }
+
+    private String rowWithPartnerName(String partnerName) {
+        String[] fields = new String[BankTransactionDTO.KH_HEADERS.length];
+        Arrays.fill(fields, "");
+        fields[0] = "2025.12.31";
+        fields[1] = BANK_ID;
+        fields[2] = "Vasarlas";
+        fields[3] = ACCOUNT;
+        fields[4] = "ACCOUNT HOLDER";
+        fields[6] = partnerName;
+        fields[7] = "-5";
+        fields[8] = "HUF";
+        fields[9] = "Ref.";
+        return String.join("\t", fields);
+    }
+
+    private BankCategoryRule categoryRule(String pattern, SpendingCategory category) {
+        return BankCategoryRule.builder()
+                .pattern(pattern)
+                .normalizedPattern(CategoryRuleMatcher.normalize(pattern))
+                .priority(0)
+                .active(true)
+                .category(category)
+                .build();
+    }
+
+    @Test
+    void processCSV_categorizesWhenAPartnerNameRuleMatches() {
+        SpendingCategory groceries = SpendingCategory.builder().id(3L).name("Groceries").build();
+        when(this.bankCategoryRuleService.matcherFor(USER_ID))
+                .thenReturn(CategoryRuleMatcher.of(List.of(this.categoryRule("BlueMart", groceries))));
+
+        this.bankTransactionService.processCSV(USER_ID,
+                this.file(StandardCharsets.UTF_8, this.rowWithPartnerName("BLUEMART 118 Riverton   HU")));
+
+        assertSame(groceries, this.captureSingleSave().getCategory());
+    }
+
+    @Test
+    void processCSV_leavesTheCategoryEmptyWhenNoRuleMatches() {
+        SpendingCategory groceries = SpendingCategory.builder().id(3L).name("Groceries").build();
+        when(this.bankCategoryRuleService.matcherFor(USER_ID))
+                .thenReturn(CategoryRuleMatcher.of(List.of(this.categoryRule("BlueMart", groceries))));
+
+        this.bankTransactionService.processCSV(USER_ID,
+                this.file(StandardCharsets.UTF_8, this.rowWithPartnerName("CORNER BAKERY   RIVERTON  HU")));
+
+        assertNull(this.captureSingleSave().getCategory());
+    }
+
+    @Test
+    void processCSV_keepsTheCategoryOnReimport() {
+        SpendingCategory travel = SpendingCategory.builder().id(4L).name("Travel").build();
+        SpendingCategory groceries = SpendingCategory.builder().id(3L).name("Groceries").build();
+        BankTransaction existing = BankTransaction.builder().id(7L).bankTransactionId(BANK_ID)
+                .bookingDate(BOOKING_DATE).type("Vasarlas").amount(-5.0).memo("Ref.")
+                .category(travel).categoryLocked(true).user(this.user).currency(this.huf).build();
+        when(this.bankCategoryRuleService.matcherFor(USER_ID))
+                .thenReturn(CategoryRuleMatcher.of(List.of(this.categoryRule("BlueMart", groceries))));
+        when(this.bankTransactionRepository
+                .findByUserIdAndBankTransactionIdAndBookingDateAndTypeAndAmountAndMemo(
+                        USER_ID, BANK_ID, BOOKING_DATE, "Vasarlas", -5.0, "Ref."))
+                .thenReturn(Optional.of(existing));
+
+        this.bankTransactionService.processCSV(USER_ID,
+                this.file(StandardCharsets.UTF_8, this.rowWithPartnerName("BLUEMART 118 Riverton   HU")));
+
+        assertSame(travel, existing.getCategory());
+    }
+
+    private MonthlyCashFlowDTO month(int year, int month, String currency, double moneyIn, double moneyOut) {
+        return MonthlyCashFlowDTO.builder().year(year).month(month).currencyId(currency)
+                .moneyIn(moneyIn).moneyOut(moneyOut).build();
+    }
+
+    @Test
+    void getYearlyCashFlow_sumsMonthsIntoTheirYear() {
+        when(this.bankTransactionRepository.findMonthlyCashFlow(USER_ID)).thenReturn(List.of(
+                this.month(2025, 12, "HUF", 500000.0, -200000.0),
+                this.month(2025, 11, "HUF", 400000.0, -300000.0)));
+
+        List<YearlyCashFlowDTO> result = this.bankTransactionService.getYearlyCashFlow(USER_ID);
+
+        assertEquals(1, result.size());
+        YearlyCashFlowDTO year = result.getFirst();
+        assertEquals(2025, year.getYear());
+        assertEquals(900000.0, year.getMoneyIn());
+        assertEquals(-500000.0, year.getMoneyOut());
+        assertEquals(2, year.getMonthsCounted());
+    }
+
+    @Test
+    void getYearlyCashFlow_ordersNewestYearFirstAndKeepsCurrenciesApart() {
+        when(this.bankTransactionRepository.findMonthlyCashFlow(USER_ID)).thenReturn(List.of(
+                this.month(2025, 1, "HUF", 100.0, -50.0),
+                this.month(2025, 1, "EUR", 10.0, -5.0),
+                this.month(2024, 12, "HUF", 80.0, -40.0)));
+
+        List<YearlyCashFlowDTO> result = this.bankTransactionService.getYearlyCashFlow(USER_ID);
+
+        assertEquals(List.of("2025 EUR", "2025 HUF", "2024 HUF"),
+                result.stream().map(year -> year.getYear() + " " + year.getCurrencyId()).toList());
+        assertEquals(10.0, result.getFirst().getMoneyIn());
+    }
+
+    @Test
+    void getYearlyCashFlow_emptyWhenThereAreNoMonths() {
+        when(this.bankTransactionRepository.findMonthlyCashFlow(USER_ID)).thenReturn(List.of());
+
+        assertTrue(this.bankTransactionService.getYearlyCashFlow(USER_ID).isEmpty());
     }
 }

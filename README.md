@@ -96,6 +96,10 @@ plan what they add up to.
 - **Monthly income** — every credit broken down by who paid it, per month and per currency, with each source's
   share of that month and how many payments it took. Where the bank leaves the partner blank, the transaction
   type stands in as the source. Shown as a stacked chart and a grouped table, and exports to CSV.
+- **Yearly summary** — money in, money out, the net and the share kept per calendar year and currency, with how
+  many months of each year had data. The change against the previous year compares average monthly spending, so
+  a partial first or current year stays fair. Alongside it, spending per category for the latest five years with
+  the latest year's change. Shown as a chart and tables, and exports to CSV.
 - Individual records can be **left out of the reports** — a transfer between your own accounts is real money
   leaving one account, but counting it distorts what you actually spent. The flag is per record and survives
   re-importing the export.
@@ -106,6 +110,20 @@ plan what they add up to.
   Rules apply only
   when a record is first created: include one again by hand and it stays included, however often you re-import
   the export. Rules can be paused instead of deleted, and one can be created straight from a transaction row.
+- **Spending categories** answer what the money went on. A category is yours to name and colour; **category
+  rules** put a transaction in one by matching the partner name the card terminal sends. The match ignores
+  case and runs of spaces and only has to appear somewhere in the name, so one `LIDL` rule catches every
+  branch and store number the bank prints. Where two rules fit, the one with the lower order wins — which is
+  how `SIMPLEP mav` stays Transport while `SIMPLEP dijnet` goes to Utilities. Rules run as records are
+  imported, and **Re-apply rules** runs them over what is already there; a category set by hand is left alone
+  by both, the same promise the exclusion rules make. A starter set of ten everyday categories and their
+  rules is one click away while the list is empty. A rule can also be made straight from a transaction row:
+  the partner name comes prefilled, a live count shows how many records the pattern would catch, and saving
+  puts that record in the category, checks the new rule before the older ones and can re-apply the rules to
+  the rest.
+- **Spending by category** — every debit grouped by category and month, per currency, with each category's
+  share of the month and what it took in transactions. Anything no rule matched is grouped as Uncategorized.
+  Shown as a stacked chart and a grouped table, and exports to CSV.
 - The history exports back out to CSV.
 
 ### Salary

@@ -2,6 +2,8 @@
   <p-tablist>
     <p-tab value="0">Monthly cash flow</p-tab>
     <p-tab value="1">Monthly income</p-tab>
+    <p-tab value="2">By category</p-tab>
+    <p-tab value="3">Yearly summary</p-tab>
   </p-tablist>
   <p-tabpanels>
     <p-tabpanel value="0">
@@ -9,6 +11,12 @@
     </p-tabpanel>
     <p-tabpanel value="1">
       <app-financial-income></app-financial-income>
+    </p-tabpanel>
+    <p-tabpanel value="2">
+      <app-financial-category-report></app-financial-category-report>
+    </p-tabpanel>
+    <p-tabpanel value="3">
+      <app-financial-yearly></app-financial-yearly>
     </p-tabpanel>
   </p-tabpanels>
 </p-tabs>

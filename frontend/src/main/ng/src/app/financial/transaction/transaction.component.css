@@ -94,3 +94,13 @@
     flex: 0 0 auto;
   }
 }
+
+.bulk-category {
+  min-width: 11rem;
+}
+
+@media screen and (max-width: 767px) {
+  .bulk-category {
+    width: 100%;
+  }
+}

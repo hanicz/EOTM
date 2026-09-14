@@ -394,6 +394,29 @@ html {
     gap: 0.5rem;
 }
 
+.csv-drop-zone {
+    display: block;
+    position: relative;
+}
+
+.csv-drop-active::after {
+    content: "Drop CSV to import";
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 6rem;
+    border: 2px dashed #b4b2a9;
+    border-radius: 8px;
+    background-color: rgba(250, 249, 246, 0.88);
+    color: #5f5e5a;
+    font-size: 1rem;
+    font-weight: 600;
+    pointer-events: none;
+}
+
 @media screen and (max-width: 767px) {
     .table-toolbar {
         margin-bottom: 0.75rem;

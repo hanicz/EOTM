@@ -1,4 +1,5 @@
-import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { CsvDropDirective } from '../../util/csv-drop.directive';
 import { ForexTransaction } from 'src/app/model/forextransaction';
 import { ForexService } from 'src/app/service/forex.service';
 import { Globals } from '../../util/global';
@@ -18,6 +19,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-forextransaction',
+    hostDirectives: [CsvDropDirective],
     templateUrl: './forextransaction.component.html',
     styleUrls: ['./forextransaction.component.css'],
     imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Dialog, CurrencyPipe, DatePipe, Toast]
@@ -33,6 +35,7 @@ export class ForextransactionComponent {
   @ViewChild('fileUpload') fileUpload: any;
 
   constructor(private forexService: ForexService, globals: Globals, private cdr: ChangeDetectorRef, private messageService: MessageService) {
+    inject(CsvDropDirective).csvDropped.subscribe(event => this.onUpload(event));
     this.currencies = globals.currencies;
 
     this.statuses = [

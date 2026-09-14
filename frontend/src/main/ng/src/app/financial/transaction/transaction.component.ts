@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef, EventEmitter, Output, ViewChild } from '@angular/core';
+import { Component, ChangeDetectorRef, EventEmitter, Output, ViewChild, inject } from '@angular/core';
 import { from, of } from 'rxjs';
 import { catchError, concatMap, map, toArray } from 'rxjs/operators';
 import { BankTransaction, CATEGORY_CHIP_CLASS, CATEGORY_CHIP_NONE, CategoryColor, CategoryRule, SpendingCategory } from '../../model/bankTransaction';
@@ -19,6 +19,7 @@ import { Dialog } from 'primeng/dialog';
 import { Checkbox } from 'primeng/checkbox';
 import { FormsModule } from '@angular/forms';
 import { CurrencyPipe, DatePipe, NgClass } from '@angular/common';
+import { CsvDropDirective } from '../../util/csv-drop.directive';
 
 interface TransactionEditEvent {
     field?: string;
@@ -38,6 +39,7 @@ interface ImportOutcome {
 
 @Component({
     selector: 'app-financial-transaction',
+    hostDirectives: [CsvDropDirective],
     templateUrl: './transaction.component.html',
     styleUrls: ['./transaction.component.css'],
     imports: [Bind, Toolbar, PrimeTemplate, Toast, ButtonDirective, Ripple, Tooltip, FileUpload, TableModule,
@@ -81,6 +83,9 @@ export class FinancialTransactionComponent {
 
   constructor(private financialService: FinancialService, private cdr: ChangeDetectorRef,
     private messageService: MessageService) {
+    const csvDrop = inject(CsvDropDirective);
+    csvDrop.multiple.set(true);
+    csvDrop.csvDropped.subscribe(event => this.onUpload(event));
     this.fetchData();
     this.fetchCategories();
   }

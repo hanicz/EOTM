@@ -1,4 +1,5 @@
-import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { CsvDropDirective } from '../../util/csv-drop.directive';
 import { ETFDividend } from 'src/app/model/etfdividend';
 import { EtfdividendService } from 'src/app/service/etfdividend.service';
 import { StockService } from 'src/app/service/stock.service';
@@ -24,6 +25,7 @@ import { SymbolOptionComponent } from '../../util/symbol-option.component';
 
 @Component({
     selector: 'app-etfdividend',
+    hostDirectives: [CsvDropDirective],
     templateUrl: './etfdividend.component.html',
     styleUrls: ['./etfdividend.component.css'],
     imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Dialog, FormsModule, Select, CurrencyPipe, DatePipe, Toast, TickerIdentityComponent, ExchangeOptionComponent, SymbolOptionComponent]
@@ -44,6 +46,7 @@ export class EtfdividendComponent implements OnInit {
   selectedExchange: Exchange = {} as Exchange;
 
   constructor(private etfDividendService: EtfdividendService, globals: Globals, private stockService: StockService, private cdr: ChangeDetectorRef, private messageService: MessageService) {
+    inject(CsvDropDirective).csvDropped.subscribe(event => this.onUpload(event));
     this.currencies = globals.currencies;
 
     this.stockService.getAllExchanges().subscribe({

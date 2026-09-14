@@ -1,4 +1,5 @@
-import { Component, OnInit, Output, EventEmitter, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, Output, EventEmitter, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { CsvDropDirective } from '../../util/csv-drop.directive';
 import { Interest } from 'src/app/model/interest';
 import { InterestService } from 'src/app/service/interest.service';
 import { SecurityService } from 'src/app/service/security.service';
@@ -20,6 +21,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-interest',
+    hostDirectives: [CsvDropDirective],
     templateUrl: './interest.component.html',
     styleUrls: ['./interest.component.css'],
     imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Dialog, FormsModule, Select, CurrencyPipe, DatePipe, Toast]
@@ -38,6 +40,7 @@ export class InterestComponent implements OnInit {
   selectedExistingSecurity: Security | null = null;
 
   constructor(private interestService: InterestService, private securityService: SecurityService, globals: Globals, private cdr: ChangeDetectorRef, private messageService: MessageService) {
+    inject(CsvDropDirective).csvDropped.subscribe(event => this.onUpload(event));
     this.globals = globals;
     this.currencies = globals.currencies;
 

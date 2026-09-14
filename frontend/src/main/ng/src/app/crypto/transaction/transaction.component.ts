@@ -1,4 +1,5 @@
-import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { CsvDropDirective } from '../../util/csv-drop.directive';
 import { Transaction } from '../../model/transaction';
 import { CryptoService } from '../../service/crypto.service';
 import { Globals } from '../../util/global';
@@ -20,6 +21,7 @@ import { DecimalPipe, CurrencyPipe, DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-transaction',
+    hostDirectives: [CsvDropDirective],
     templateUrl: './transaction.component.html',
     styleUrls: ['./transaction.component.css'],
     imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Image, Dialog, DecimalPipe, CurrencyPipe, DatePipe, Toast]
@@ -36,6 +38,7 @@ export class TransactionComponent implements OnInit {
   assetUrl: string;
 
   constructor(private cryptoService: CryptoService, globals: Globals, private cdr: ChangeDetectorRef, private messageService: MessageService) {
+    inject(CsvDropDirective).csvDropped.subscribe(event => this.onUpload(event));
     this.currencies = globals.currencies;
     this.statuses = globals.statuses;
     this.assetUrl = environment.assets_url;

@@ -1,4 +1,5 @@
-import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { CsvDropDirective } from '../../util/csv-drop.directive';
 import { ETFInvestment } from 'src/app/model/etfinvestment';
 import { Account } from 'src/app/model/account';
 import { AccountService } from 'src/app/service/account.service';
@@ -27,6 +28,7 @@ import { collectAccountOptions } from '../../util/accountoptions';
 
 @Component({
     selector: 'app-etfinvestment',
+    hostDirectives: [CsvDropDirective],
     templateUrl: './etfinvestment.component.html',
     styleUrls: ['./etfinvestment.component.css'],
     imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Dialog, CurrencyPipe, DatePipe, NgClass, Toast, TickerIdentityComponent, ExchangeOptionComponent, SymbolOptionComponent]
@@ -50,6 +52,7 @@ export class EtfinvestmentComponent implements OnInit {
   selectedExchange: Exchange = {} as Exchange;
 
   constructor(private etfService: EtfService, globals: Globals, private accountService: AccountService, private stockService: StockService, private cdr: ChangeDetectorRef, private messageService: MessageService) {
+    inject(CsvDropDirective).csvDropped.subscribe(event => this.onUpload(event));
     this.currencies = globals.currencies;
 
     this.statuses = [

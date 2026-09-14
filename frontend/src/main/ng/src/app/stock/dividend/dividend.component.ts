@@ -1,4 +1,5 @@
-import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { CsvDropDirective } from '../../util/csv-drop.directive';
 import { Dividend } from 'src/app/model/dividend';
 import { DividendService } from 'src/app/service/dividend.service';
 import { StockService } from 'src/app/service/stock.service';
@@ -24,6 +25,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-dividend',
+    hostDirectives: [CsvDropDirective],
     templateUrl: './dividend.component.html',
     styleUrls: ['./dividend.component.css'],
     imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Dialog, FormsModule, Select, CurrencyPipe, DatePipe, Toast, TickerIdentityComponent, ExchangeOptionComponent, SymbolOptionComponent]
@@ -45,6 +47,7 @@ export class DividendComponent implements OnInit {
   globals: Globals;
 
   constructor(private dividendService: DividendService, globals: Globals, private stockService: StockService, private cdr: ChangeDetectorRef, private messageService: MessageService) {
+    inject(CsvDropDirective).csvDropped.subscribe(event => this.onUpload(event));
     this.globals = globals;
     this.currencies = globals.currencies;
 

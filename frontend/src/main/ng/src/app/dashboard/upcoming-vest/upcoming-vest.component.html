@@ -14,9 +14,8 @@
         <span class="widget-name">{{vest.shortName}}.{{vest.exchange}}</span>
         <span class="cell-sub">
           {{vest.vestDate | date : 'yyyy-MM-dd'}} &middot; {{vest.quantity | number}} shares
-          @if (isSoon(vest.daysUntil)) {
-            <span class="state-chip state-buy">{{soonLabel(vest.daysUntil)}}</span>
-          }
+          <span class="state-chip" [class.state-buy]="isSoon(vest.daysUntil)"
+            [class.state-neutral]="!isSoon(vest.daysUntil)">{{daysLabel(vest.daysUntil)}}</span>
         </span>
       </div>
       @if (vest.netInHuf !== null) {

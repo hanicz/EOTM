@@ -43,7 +43,7 @@ export class UpcomingVestComponent implements OnInit {
     return days <= SOON_IN_DAYS;
   }
 
-  soonLabel(days: number): string {
+  daysLabel(days: number): string {
     return dueInLabel(days);
   }
 }

@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { MessageService, PrimeTemplate } from 'primeng/api';
-import { STARGrant, STARGrantReport } from '../../model/equity';
+import { STARGrant, STARGrantReport, StarVestingType } from '../../model/equity';
 import { EquityService } from '../../service/equity.service';
 import { Bind } from 'primeng/bind';
 import { Toolbar } from 'primeng/toolbar';
@@ -40,6 +40,10 @@ export class EquityStarComponent {
     { label: 'GBP', value: 'GBP' },
     { label: 'HUF', value: 'HUF' }
   ];
+  readonly vestingTypes: { label: string, value: StarVestingType }[] = [
+    { label: 'Cliff - 25% after a year', value: 'CLIFF' },
+    { label: 'No cliff - every quarter from the start', value: 'NO_CLIFF' }
+  ];
   readonly noteMaxLength = 64;
   readonly nameMaxLength = 32;
   readonly maxVestingYears = 10;
@@ -54,11 +58,14 @@ export class EquityStarComponent {
       && !!this.grant.quantity && this.grant.quantity > 0
       && this.grant.baseValue !== null && this.grant.baseValue >= 0
       && this.grant.currentValue !== null && this.grant.currentValue >= 0
-      && this.grant.vestingYears >= 1 && this.grant.vestingYears <= this.maxVestingYears;
+      && this.grant.vestingYears >= 1 && this.grant.vestingYears <= this.maxVestingYears
+      && !!this.grant.vestingType;
   }
 
   scheduleLabel(grant: STARGrant): string {
-    return `${grant.vestingYears}y · 25% cliff`;
+    return grant.vestingType === 'NO_CLIFF'
+      ? `${grant.vestingYears}y · quarterly, no cliff`
+      : `${grant.vestingYears}y · 25% cliff`;
   }
 
   isUnderwater(grant: STARGrant): boolean {
@@ -95,6 +102,7 @@ export class EquityStarComponent {
       baseValue: grant.baseValue,
       currentValue: grant.currentValue,
       vestingYears: grant.vestingYears,
+      vestingType: grant.vestingType,
       note: grant.note ?? '',
       applyValueToAll: false
     };
@@ -175,6 +183,7 @@ export class EquityStarComponent {
       baseValue: null,
       currentValue: null,
       vestingYears: 4,
+      vestingType: 'CLIFF',
       note: '',
       applyValueToAll: false
     };

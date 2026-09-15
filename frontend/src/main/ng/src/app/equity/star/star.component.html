@@ -2,10 +2,12 @@
 <p class="mt-0 mb-3 text-color-secondary text-sm">
   A STAR pays out the appreciation, not the whole share &mdash; granted at an FMV of 10 and worth 11 today, each
   unit is worth 1. The value is not public, so you type in what you were last told it is worth. The schedule is
-  worked out for you: a quarter of the grant vests on the first anniversary of the vesting commencement date and
-  the rest lands in equal quarterly instalments, so a four-year grant is a 25% cliff and then a sixteenth every
-  quarter. Commencement dates only ever fall on 8 January, 8 April, 8 July or 8 October, so whatever date you
-  enter is moved forward to the next of them. Every instalment &mdash; vested or not &mdash; is valued at today's
+  worked out for you. With a cliff, a quarter of the grant vests on the first anniversary of the vesting
+  commencement date and the rest lands in equal quarterly instalments, so a four-year grant is a 25% cliff and
+  then a sixteenth every quarter. Without a cliff, every quarter from the commencement date vests an equal
+  instalment, so a four-year grant is a sixteenth every quarter and a quarter by the first anniversary.
+  Commencement dates only ever fall on 8 January, 8 April, 8 July or 8 October, so whatever date you enter is
+  moved forward to the next of them. Every instalment &mdash; vested or not &mdash; is valued at today's
   spread and today's MNB rate, then taxed the Hungarian way: 89% of the value is the tax base, carrying 13%
   szocho and 15% szja. It answers what the grant is worth if you cashed out today, not what any past instalment
   was actually worth on its own date.
@@ -229,8 +231,14 @@
         <label for="vestingYears" class="block mb-2 font-medium text-color-secondary">Vesting period</label>
         <p-inputnumber inputId="vestingYears" [(ngModel)]="grant.vestingYears" [min]="1"
           [max]="maxVestingYears" suffix=" years"></p-inputnumber>
-        <small class="block mt-2 text-color-secondary">Four years is a quarter on the first anniversary and a
-          sixteenth every quarter after that.</small>
+      </div>
+      <div class="col-12 sm:col-6 mb-2">
+        <label for="vestingType" class="block mb-2 font-medium text-color-secondary">Vests</label>
+        <p-select id="vestingType" [options]="vestingTypes" optionLabel="label" optionValue="value"
+          [(ngModel)]="grant.vestingType" [style]="{'width':'100%'}" [appendTo]="'body'"></p-select>
+        <small class="block mt-2 text-color-secondary">Over four years, a cliff is a quarter on the first
+          anniversary and a sixteenth every quarter after that. Without a cliff a sixteenth vests every quarter
+          from the start.</small>
       </div>
       <div class="col-12 mb-2">
         <div class="star-apply-all">

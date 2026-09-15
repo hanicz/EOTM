@@ -73,6 +73,7 @@ export class EquityService {
       baseValue: grant.baseValue,
       currentValue: grant.currentValue,
       vestingYears: grant.vestingYears,
+      vestingType: grant.vestingType,
       note: grant.note,
       applyValueToAll: grant.applyValueToAll ?? false
     };

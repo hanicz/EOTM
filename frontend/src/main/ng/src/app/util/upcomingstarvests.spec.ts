@@ -36,6 +36,7 @@ function grant(id: number, name: string, vests: STARVest[] | undefined): STARGra
     baseValue: 100,
     currentValue: 112.5,
     vestingYears: 4,
+    vestingType: 'CLIFF',
     note: null,
     vests
   };

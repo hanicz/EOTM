@@ -1,5 +1,6 @@
 package eye.on.the.money.dto.out;
 
+import eye.on.the.money.model.stock.StarVestingType;
 import eye.on.the.money.util.Generated;
 import lombok.*;
 
@@ -27,6 +28,7 @@ public class STARGrantDTO implements Serializable {
     private BigDecimal currentValue;
     private BigDecimal spreadPerUnit;
     private int vestingYears;
+    private StarVestingType vestingType;
     private String note;
 
     private List<STARVestDTO> vests;

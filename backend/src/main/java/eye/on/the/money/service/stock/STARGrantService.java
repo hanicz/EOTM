@@ -63,6 +63,7 @@ public class STARGrantService {
                 .baseValue(editDTO.baseValue())
                 .currentValue(editDTO.currentValue())
                 .vestingYears(editDTO.vestingYears())
+                .vestingType(editDTO.vestingType())
                 .note(this.trimToNull(editDTO.note()))
                 .user(this.userService.getReference(userId))
                 .build();
@@ -83,6 +84,7 @@ public class STARGrantService {
         grant.setBaseValue(editDTO.baseValue());
         grant.setCurrentValue(editDTO.currentValue());
         grant.setVestingYears(editDTO.vestingYears());
+        grant.setVestingType(editDTO.vestingType());
         grant.setNote(this.trimToNull(editDTO.note()));
 
         return this.saveAndPrice(userId, grant, editDTO.applyValueToAll());
@@ -139,7 +141,7 @@ public class STARGrantService {
         Map.Entry<LocalDate, BigDecimal> rate = this.rateOf(grant, rates, today);
 
         List<STARVestDTO> vests = StarVestingSchedule.tranches(grant.getCommencementDate(),
-                        grant.getQuantity(), grant.getVestingYears()).stream()
+                        grant.getQuantity(), grant.getVestingYears(), grant.getVestingType()).stream()
                 .map(tranche -> this.toVestDTO(grant, tranche, spread, payout, rate, today)).toList();
 
         BigDecimal totalAmountInHuf = vests.stream().map(STARVestDTO::getAmountInHuf)
@@ -157,6 +159,7 @@ public class STARGrantService {
                 .currentValue(grant.getCurrentValue())
                 .spreadPerUnit(spread)
                 .vestingYears(grant.getVestingYears())
+                .vestingType(grant.getVestingType())
                 .note(grant.getNote())
                 .vests(vests)
                 .totalAmountInHuf(totalAmountInHuf)

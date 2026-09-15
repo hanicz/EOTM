@@ -29,18 +29,21 @@ public final class StarVestingSchedule {
         throw new IllegalStateException("No vesting commencement date on or after " + date);
     }
 
-    public static List<Tranche> tranches(LocalDate commencement, int quantity, int vestingYears) {
+    public static List<Tranche> tranches(LocalDate commencement, int quantity, int vestingYears,
+                                         StarVestingType type) {
         int totalQuarters = vestingYears * QUARTERS_IN_YEAR;
         long total = quantity;
+        boolean hasCliff = type == StarVestingType.CLIFF;
+        int firstQuarter = hasCliff ? CLIFF_QUARTERS : 1;
 
         List<Tranche> tranches = new ArrayList<>();
         long allocated = 0;
         int sequence = 0;
-        for (int quarter = CLIFF_QUARTERS; quarter <= totalQuarters; quarter++) {
+        for (int quarter = firstQuarter; quarter <= totalQuarters; quarter++) {
             long cumulative = total * quarter / totalQuarters;
             tranches.add(new Tranche(++sequence,
                     commencement.plusMonths((long) quarter * MONTHS_BETWEEN_QUARTERS),
-                    (int) (cumulative - allocated), quarter == CLIFF_QUARTERS));
+                    (int) (cumulative - allocated), hasCliff && quarter == CLIFF_QUARTERS));
             allocated = cumulative;
         }
         return tranches;

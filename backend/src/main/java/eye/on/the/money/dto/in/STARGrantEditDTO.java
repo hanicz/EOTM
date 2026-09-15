@@ -1,6 +1,7 @@
 package eye.on.the.money.dto.in;
 
 import eye.on.the.money.model.stock.STARGrant;
+import eye.on.the.money.model.stock.StarVestingType;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -19,6 +20,7 @@ public record STARGrantEditDTO(@NotBlank @Size(max = STARGrant.NAME_MAX_LENGTH) 
                                @NotNull @PositiveOrZero BigDecimal baseValue,
                                @NotNull @PositiveOrZero BigDecimal currentValue,
                                @NotNull @Min(1) @Max(STARGrant.MAX_VESTING_YEARS) Integer vestingYears,
+                               @NotNull StarVestingType vestingType,
                                @Size(max = STARGrant.NOTE_MAX_LENGTH) String note,
                                boolean applyValueToAll) {
 }

@@ -2,6 +2,8 @@ import { TaxBreakdown } from './rsu';
 
 export type VestingFrequency = 'ANNUAL' | 'QUARTERLY';
 
+export type StarVestingType = 'CLIFF' | 'NO_CLIFF';
+
 export interface RSUVest {
     grantId: number;
     shortName: string;
@@ -78,6 +80,7 @@ export interface STARGrant {
     baseValue: number | null;
     currentValue: number | null;
     vestingYears: number;
+    vestingType: StarVestingType;
     note: string | null;
     applyValueToAll?: boolean;
     spreadPerUnit?: number;

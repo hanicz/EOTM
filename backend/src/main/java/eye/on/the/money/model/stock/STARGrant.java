@@ -6,6 +6,7 @@ import eye.on.the.money.model.User;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -53,6 +54,11 @@ public class STARGrant extends AuditedEntity {
 
     @Column(name = "vesting_years", nullable = false)
     private int vestingYears;
+
+    @Enumerated(EnumType.STRING)
+    @ColumnDefault("'CLIFF'")
+    @Column(name = "vesting_type", nullable = false, length = 16)
+    private StarVestingType vestingType;
 
     @Column(name = "note", length = NOTE_MAX_LENGTH)
     private String note;

@@ -1,45 +1,5 @@
-.performance-strip {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    flex-wrap: wrap;
-}
-
-.performance-stats {
-    display: flex;
-    align-items: flex-start;
-    gap: 24px;
-    flex-wrap: wrap;
-}
-
-.performance-stat {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    min-width: 0;
-}
-
-.performance-stat-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: #888780;
-}
-
 .performance-stat-value {
-    font-size: 15px;
-    font-weight: 600;
-    color: #1b1b1b;
-    font-variant-numeric: tabular-nums;
     white-space: nowrap;
-}
-
-.performance-stat-value.positive {
-    color: #3b6d11;
-}
-
-.performance-stat-value.negative {
-    color: #a32d2d;
 }
 
 .performance-pct {
@@ -53,20 +13,7 @@
     height: 90px;
 }
 
-.empty-state {
-    font-size: 12px;
-    color: #888780;
-}
-
 @media (max-width: 767px) {
-    .performance-strip {
-        gap: 14px;
-    }
-
-    .performance-stats {
-        gap: 16px;
-    }
-
     .performance-spark {
         flex-basis: 100%;
     }

@@ -1,6 +1,7 @@
 package eye.on.the.money.model.networth;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eye.on.the.money.model.AuditedEntity;
 import eye.on.the.money.model.User;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
@@ -19,7 +20,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
-public class NetWorthSnapshot {
+public class NetWorthSnapshot extends AuditedEntity {
 
     public static final int ASSET_CLASS_MAX_LENGTH = 20;
 

@@ -93,7 +93,6 @@ class BankTransactionRepositoryTest {
                 .memo("memo")
                 .amount(amount)
                 .excluded(excluded)
-                .creationDate(LocalDate.now())
                 .currency(currency)
                 .user(this.user)
                 .build());
@@ -198,7 +197,6 @@ class BankTransactionRepositoryTest {
                 .memo("memo")
                 .amount(amount)
                 .excluded(false)
-                .creationDate(LocalDate.now())
                 .currency(this.huf)
                 .user(this.user)
                 .build());

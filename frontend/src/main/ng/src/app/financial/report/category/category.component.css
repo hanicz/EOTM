@@ -2,16 +2,6 @@
   margin-bottom: 1.5rem;
 }
 
-.amount-out {
-  color: var(--p-red-600);
-  font-weight: 600;
-}
-
-.month-header {
-  background: var(--p-content-hover-background);
-  font-weight: 700;
-}
-
 .month-header-inner {
   display: flex;
   align-items: center;
@@ -20,25 +10,6 @@
 
 .month-total {
   margin-left: auto;
-}
-
-.share-cell {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-width: 8rem;
-}
-
-.share-bar {
-  height: 0.6rem;
-  border-radius: 3px;
-  min-width: 2px;
-  max-width: 60%;
-}
-
-.share-value {
-  color: var(--p-text-muted-color);
-  font-size: 0.85rem;
 }
 
 @media screen and (max-width: 767px) {

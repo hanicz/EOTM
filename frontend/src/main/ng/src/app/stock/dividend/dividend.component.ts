@@ -27,7 +27,6 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
     selector: 'app-dividend',
     hostDirectives: [CsvDropDirective],
     templateUrl: './dividend.component.html',
-    styleUrls: ['./dividend.component.css'],
     imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Dialog, FormsModule, Select, CurrencyPipe, DatePipe, Toast, TickerIdentityComponent, ExchangeOptionComponent, SymbolOptionComponent]
 })
 export class DividendComponent implements OnInit {

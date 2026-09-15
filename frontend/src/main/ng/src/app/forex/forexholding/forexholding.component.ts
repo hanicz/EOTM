@@ -11,7 +11,6 @@ import { DecimalPipe, CurrencyPipe } from '@angular/common';
 @Component({
     selector: 'app-forexholding',
     templateUrl: './forexholding.component.html',
-    styleUrls: ['./forexholding.component.css'],
     imports: [Bind, TableModule, PrimeTemplate, Skeleton, Tooltip, DecimalPipe, CurrencyPipe]
 })
 export class ForexholdingComponent {

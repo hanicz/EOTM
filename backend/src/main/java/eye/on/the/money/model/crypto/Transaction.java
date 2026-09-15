@@ -1,6 +1,7 @@
 package eye.on.the.money.model.crypto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eye.on.the.money.model.AuditedEntity;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.util.Generated;
@@ -21,7 +22,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
-public class Transaction {
+public class Transaction extends AuditedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,9 +33,6 @@ public class Transaction {
 
     @Column(nullable = false)
     private String buySell;
-
-    @Column(nullable = false)
-    private LocalDate creationDate;
 
     private String transactionString;
 

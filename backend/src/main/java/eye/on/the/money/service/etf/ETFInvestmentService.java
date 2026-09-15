@@ -156,7 +156,6 @@ public class ETFInvestmentService implements ICSVService {
 
         ETFInvestment investment = ETFInvestment.builder()
                 .buySell(investmentDTO.getBuySell())
-                .creationDate(LocalDate.now())
                 .transactionDate(investmentDTO.getTransactionDate())
                 .user(user)
                 .quantity(investmentDTO.getQuantity())

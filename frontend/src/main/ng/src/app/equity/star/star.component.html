@@ -12,20 +12,20 @@
 </p>
 
 @if (report && report.items.length > 0) {
-  <div class="star-summary">
-    <div class="star-tile">
-      <span class="star-tile-label">Gross value</span>
-      <span class="star-tile-value">{{report.totalAmountInHuf | number:'1.0-0'}} Ft</span>
+  <div class="equity-summary">
+    <div class="equity-tile">
+      <span class="equity-tile-label">Gross value</span>
+      <span class="equity-tile-value">{{report.totalAmountInHuf | number:'1.0-0'}} Ft</span>
     </div>
-    <div class="star-tile">
-      <span class="star-tile-label">Tax</span>
-      <span class="star-tile-value star-tile-tax">{{report.totalTax.total | number:'1.0-0'}} Ft</span>
+    <div class="equity-tile">
+      <span class="equity-tile-label">Tax</span>
+      <span class="equity-tile-value equity-tile-tax">{{report.totalTax.total | number:'1.0-0'}} Ft</span>
       <span class="cell-sub">{{report.totalTax.szocho | number:'1.0-0'}} szocho &middot;
         {{report.totalTax.szja | number:'1.0-0'}} szja</span>
     </div>
-    <div class="star-tile">
-      <span class="star-tile-label">Net value</span>
-      <span class="star-tile-value">{{report.totalNetInHuf | number:'1.0-0'}} Ft</span>
+    <div class="equity-tile">
+      <span class="equity-tile-label">Net value</span>
+      <span class="equity-tile-value">{{report.totalNetInHuf | number:'1.0-0'}} Ft</span>
     </div>
   </div>
 }
@@ -78,7 +78,7 @@
           <span class="cell-sub">{{grant.note}}</span>
         }
         @if (grant.error) {
-          <span class="cell-sub star-error">{{grant.error}}</span>
+          <span class="cell-sub equity-error">{{grant.error}}</span>
         }
       </td>
       <td data-label="Commenced">{{grant.commencementDate | date:'mediumDate'}}</td>
@@ -120,7 +120,7 @@
 
   <ng-template pTemplate="expandedrow" let-grant>
     <tr>
-      <td colspan="14" class="star-schedule-cell">
+      <td colspan="14" class="equity-schedule-cell">
         <p-table [value]="grant.vests" styleClass="p-datatable-sm table-stack eotm-table">
           <ng-template pTemplate="header">
             <tr>

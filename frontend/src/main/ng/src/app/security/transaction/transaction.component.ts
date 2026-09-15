@@ -22,7 +22,6 @@ import { CurrencyPipe, DatePipe, NgClass } from '@angular/common';
     selector: 'app-security-transaction',
     hostDirectives: [CsvDropDirective],
     templateUrl: './transaction.component.html',
-    styleUrls: ['./transaction.component.css'],
     imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Dialog, CurrencyPipe, DatePipe, Toast, NgClass]
 })
 export class TransactionComponent implements OnInit {

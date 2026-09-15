@@ -1,6 +1,5 @@
 package eye.on.the.money.service.shared;
 
-import eye.on.the.money.dto.out.AssetClassValueDTO;
 import eye.on.the.money.dto.out.MonthlyPerformanceDTO;
 import eye.on.the.money.dto.out.NetWorthDTO;
 import eye.on.the.money.dto.out.NetWorthHistoryDTO;
@@ -11,13 +10,11 @@ import eye.on.the.money.model.networth.NetWorthSnapshot;
 import eye.on.the.money.report.MonthlyReportScheduler;
 import eye.on.the.money.repository.UserRepository;
 import eye.on.the.money.repository.networth.NetWorthSnapshotRepository;
-import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.LogSanitizer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -28,7 +25,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,31 +40,7 @@ public class NetWorthSnapshotService {
     private final NetWorthSnapshotRepository netWorthSnapshotRepository;
     private final NetWorthService netWorthService;
     private final UserRepository userRepository;
-    private final UserService userService;
-
-    @Transactional
-    public void capture(Long userId, LocalDate date, boolean refresh) {
-        NetWorthDTO netWorth = this.netWorthService.getNetWorth(userId, CURRENCY, refresh);
-        Map<String, NetWorthSnapshot> existing = this.netWorthSnapshotRepository
-                .findByUserIdAndSnapshotDate(userId, date).stream()
-                .collect(Collectors.toMap(NetWorthSnapshot::getAssetClass, Function.identity()));
-
-        List<NetWorthSnapshot> rows = new ArrayList<>();
-        for (AssetClassValueDTO asset : netWorth.getAssets()) {
-            NetWorthSnapshot row = existing.get(asset.getAssetClass());
-            if (row == null) {
-                row = NetWorthSnapshot.builder()
-                        .user(this.userService.getReference(userId))
-                        .snapshotDate(date)
-                        .assetClass(asset.getAssetClass())
-                        .build();
-            }
-            row.setSpent(asset.getSpent().doubleValue());
-            row.setWorth(asset.getWorth().doubleValue());
-            rows.add(row);
-        }
-        this.netWorthSnapshotRepository.saveAll(rows);
-    }
+    private final NetWorthSnapshotWriter netWorthSnapshotWriter;
 
     public void captureAll() {
         this.captureAll(this.today());
@@ -81,7 +53,8 @@ public class NetWorthSnapshotService {
         int failed = 0;
         for (User user : users) {
             try {
-                this.capture(user.getId(), today, true);
+                NetWorthDTO netWorth = this.netWorthService.getNetWorth(user.getId(), CURRENCY, true);
+                this.netWorthSnapshotWriter.replace(user.getId(), today, netWorth.getAssets());
             } catch (APIException | DataAccessException e) {
                 failed++;
                 log.error("Unable to capture the {} net worth snapshot for {}", today,
@@ -105,7 +78,8 @@ public class NetWorthSnapshotService {
     NetWorthHistoryDTO getHistory(Long userId, LocalDate today) {
         if (!this.netWorthSnapshotRepository.existsByUserIdAndSnapshotDate(userId, today)) {
             try {
-                this.capture(userId, today, false);
+                NetWorthDTO netWorth = this.netWorthService.getNetWorth(userId, CURRENCY, false);
+                this.netWorthSnapshotWriter.insertIfMissing(userId, today, netWorth.getAssets());
             } catch (APIException | DataAccessException e) {
                 log.warn("Unable to capture today's net worth snapshot, returning the stored history", e);
             }

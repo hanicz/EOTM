@@ -1,24 +1,24 @@
 package eye.on.the.money.model.note;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eye.on.the.money.model.AuditedEntity;
 import eye.on.the.money.model.User;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDateTime;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @ToString(exclude = "user")
 @Table(name = "EOTM_NOTE",
         uniqueConstraints = @UniqueConstraint(name = "UK_EOTM_NOTE_USER", columnNames = "user_id"))
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
-public class Note {
+public class Note extends AuditedEntity {
 
     public static final int MAX_CONTENT_LENGTH = 10000;
 
@@ -28,9 +28,6 @@ public class Note {
 
     @Column(length = MAX_CONTENT_LENGTH)
     private String content;
-
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

@@ -1,80 +1,43 @@
-/* You can add global styles to this file, and also import other style files */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
-/* Warm surface tokens.
-   Aura's stock ramp is Tailwind slate, which fights the cream page background
-   and the orange accent. The hand-written CSS across the app already assumes
-   these warm values -- it writes fallbacks like
-   `var(--p-content-border-color, #e3e0d5)` -- but the fallbacks never fire
-   because Aura defines the variables. Overriding them here is what makes those
-   fallbacks finally agree with what renders, and warms every p-datatable,
-   p-panel and p-select in one place. */
 :root {
     --p-content-border-color: #e3e0d5;
     --p-text-muted-color: #5f5e5a;
     --p-surface-50: #faf9f6;
     --p-content-hover-background: #f6f4ee;
+    --eotm-canvas: #f6f4ee;
+    --eotm-paper: #fbfaf7;
+    --eotm-ink: #1b1b1b;
+    --eotm-faint: #888780;
+    --eotm-note: #8a887f;
+    --eotm-cream: #f1efe8;
+    --eotm-tile-border: #ece9e0;
+    --eotm-positive: #3b6d11;
+    --eotm-negative: #a32d2d;
 }
 
-/* Responsive breakpoints.
-   These match PrimeFlex's scale, so a `@media (max-width: 991px)` block and a
-   `lg:col-6` utility class break at the same place. Plain CSS can't use custom
-   properties inside a media query, so these are written out numerically -- but
-   use only these four values so the layout stays consistent:
-
-     576px  sm   large phone / small tablet
-     768px  md   tablet
-     992px  lg   small laptop -- watchlist sidebar collapses below here
-    1200px  xl   desktop
-
-   Write max-width queries one pixel below the boundary (max-width: 991px). */
-
-html { background-color: #f6f4ee; }
+html {
+    background-color: var(--eotm-canvas);
+    overflow-x: hidden;
+}
 
 html, body {
     font-family: 'Poppins', sans-serif;
     font-size: 14px;
 }
 
-/* No page in this app scrolls sideways on purpose; wide content (tables,
-   charts) scrolls inside its own container instead. */
-html {
-    overflow-x: hidden;
-}
-
-/* Set on <body> while the off-canvas watchlist is open so the page behind the
-   backdrop doesn't scroll under the user's finger. Scoped to the widths where
-   the watchlist is actually an overlay -- otherwise widening the viewport with
-   the panel open would leave the page permanently locked. */
-@media screen and (max-width: 991px) {
-    body.no-scroll {
-        overflow: hidden;
-    }
-}
-
-/* Every page wraps its content in p-panel, whose content container is a grid,
-   and most nest a p-tabs, which is a flex row. Grid and flex items default to
-   `min-width: auto`, meaning they refuse to shrink below their widest child --
-   so a single wide table stretched the entire panel past the viewport instead
-   of scrolling inside its own container. Letting these shrink is what allows
-   the table container's own `overflow-x: auto` to do its job. */
 .p-panel-content-wrapper,
 .p-tabpanels,
 .p-tabpanel {
     min-width: 0;
 }
 
-/* Money and quantities. Tabular figures so decimal points line up down a
-   column -- proportional digits leave a table of prices looking ragged. */
 .amount {
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
     font-size: 0.9rem;
 }
 
-/* Marks a price the provider had no live quote for, so it fell back to the
-   previous close. Deliberately quiet -- the number is still usable, it is just
-   not current. */
 .stale-price {
     margin-left: 0.35rem;
     font-size: 0.75rem;
@@ -83,91 +46,11 @@ html {
     cursor: help;
 }
 
-/* Leading variant, for the right-aligned Worth column on the holdings tables:
-   a trailing icon there would sit between the figure and the column edge and
-   break the decimal alignment the rest of the column relies on. */
 .stale-price-before {
     margin-left: 0;
     margin-right: 0.35rem;
 }
 
-/* Stacked tables.
-   Add `table-stack` to a p-table's styleClass and give each <td> a data-label.
-   Below md the header row is hidden and every cell becomes its own label/value
-   row, so a wide table reads as one card per record instead of scrolling
-   sideways.
-
-   Hand-rolled on purpose: PrimeNG's responsiveLayout="stack" is deprecated as
-   of v20 ("stack mode needs custom implementation"), and the CSS it generates
-   has no rule hiding the column labels above the breakpoint. */
-@media screen and (max-width: 767px) {
-    /* Take the table out of table layout entirely. With the rows turned into
-       blocks below, the browser otherwise wraps them all in one anonymous table
-       cell and sizes the auto-layout table from that cell's content, so a long
-       unbreakable value (a memo, a 24-digit account number) widens the table
-       past its container no matter what the cells themselves do. */
-    .table-stack .p-datatable-table,
-    .table-stack .p-datatable-tbody {
-        display: block;
-        width: 100%;
-        max-width: 100%;
-    }
-
-    .table-stack .p-datatable-thead {
-        display: none;
-    }
-
-    .table-stack .p-datatable-tbody > tr {
-        display: block;
-        border-bottom: 2px solid #e3e0d5;
-    }
-
-    .table-stack .p-datatable-tbody > tr:last-child {
-        border-bottom: none;
-    }
-
-    .table-stack .p-datatable-tbody > tr > td {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        gap: 1rem;
-        width: 100%;
-        border: 0 none;
-        padding: 0.4rem 0.75rem;
-        text-align: right;
-    }
-
-    .table-stack .p-datatable-tbody > tr > td::before {
-        content: attr(data-label);
-        flex: 0 1 auto;
-        min-width: 0;
-        margin-right: auto;
-        font-weight: 600;
-        text-align: left;
-        color: #5f5e5a;
-    }
-
-    /* Cells carrying only controls (action buttons) get the full width. */
-    .table-stack .p-datatable-tbody > tr > td:not([data-label])::before {
-        content: none;
-    }
-
-    .table-stack .p-datatable-tbody > tr > td:not([data-label]):has(button) {
-        gap: 0.25rem;
-    }
-
-    .table-stack .p-datatable-tbody > tr > td:not([data-label]):not(:has(button)) {
-        justify-content: flex-start;
-    }
-}
-
-
-/* Delta pill.
-   A signed change, shown as tinted text with an optional caret. Lives here
-   rather than in a component because the watchlist and the alert list had
-   grown byte-identical copies of it, and the Stock/ETF tables are the third
-   user. The 14%-alpha wash keeps it readable on both the cream page and the
-   white table row without a border. */
 .delta-pill {
     display: inline-flex;
     align-items: center;
@@ -181,7 +64,7 @@ html {
 
 .delta-up { color: #14713f; }
 .delta-down { color: #a32a30; }
-.delta-flat { color: #5f5e5a; }
+.delta-flat { color: var(--p-text-muted-color); }
 
 .delta-pill.delta-up { background-color: rgba(20, 113, 63, 0.14); }
 .delta-pill.delta-down { background-color: rgba(163, 42, 48, 0.14); }
@@ -189,12 +72,6 @@ html {
 
 .delta-caret { font-size: 0.6rem; }
 
-/* Table cell roles.
-   `cell-num` is the important one: money and quantities right-aligned with
-   tabular figures, so a column of prices lines up on the decimal point.
-   `cell-sub` is the muted second line of a two-line cell (the average under a
-   price), and `cell-quiet` de-emphasises a whole column that is context rather
-   than data -- account names, currency codes. */
 .cell-num {
     text-align: right;
     font-variant-numeric: tabular-nums;
@@ -213,15 +90,10 @@ html {
     color: var(--p-text-muted-color);
 }
 
-/* A value that does not apply to this row (the cost basis of a closed
-   position). An em dash reads as "deliberately nothing" where a blank cell
-   just looks like missing data. */
 .cell-none {
     color: #b4b2a9;
 }
 
-/* Chip for a non-numeric state -- BUY/SELL, RSU, Closed. Same geometry as the
-   delta pill so a row never mixes two pill shapes. */
 .state-chip {
     display: inline-flex;
     align-items: center;
@@ -235,15 +107,11 @@ html {
 
 .state-buy { color: #14713f; background-color: rgba(20, 113, 63, 0.14); }
 .state-sell { color: #a32a30; background-color: rgba(163, 42, 48, 0.14); }
-.state-neutral { color: #5f5e5a; background-color: rgba(95, 94, 90, 0.12); }
+.state-neutral { color: var(--p-text-muted-color); background-color: rgba(95, 94, 90, 0.12); }
 .state-accent { color: #854f0b; background-color: rgba(239, 159, 39, 0.18); }
 .state-info { color: #1d4f8f; background-color: rgba(29, 79, 143, 0.13); }
 .state-contrast { color: #faf9f6; background-color: #2b2a27; }
 
-/* Shared table chrome.
-   Add `eotm-table` alongside `table-stack`. Quiet uppercase headers so the
-   column labels recede and the figures carry the row, plus a warm hover that
-   matches the watchlist instead of Aura's slate. */
 .eotm-table .p-datatable-thead > tr > th {
     font-size: 0.7rem;
     font-weight: 600;
@@ -252,10 +120,6 @@ html {
     color: var(--p-text-muted-color);
 }
 
-/* PrimeNG injects the Aura datatable CSS at runtime rather than into the built
-   stylesheet, and its `.p-datatable-tbody > tr > td` rule outranks a bare
-   `.cell-num`. These repeat the alignment at a specificity that wins. The
-   Profit column never needed it -- app-delta lays itself out with flex. */
 .eotm-table .p-datatable-thead > tr > th.cell-num,
 .eotm-table .p-datatable-tbody > tr > td.cell-num {
     text-align: right;
@@ -276,7 +140,7 @@ html {
     gap: 0.35rem;
     padding: 2.5rem 1rem;
     text-align: center;
-    color: #888780;
+    color: var(--eotm-faint);
 }
 
 .table-empty .pi {
@@ -288,28 +152,28 @@ html {
 .table-empty-title {
     font-size: 0.95rem;
     font-weight: 600;
-    color: #1b1b1b;
+    color: var(--eotm-ink);
 }
 
-/* Stacked rows already right-align every cell and prepend the column label, so
-   the desktop alignment classes would fight the layout rather than help it. */
-@media screen and (max-width: 767px) {
-    .table-stack .cell-num,
-    .table-stack .cell-sub {
-        text-align: right;
-    }
-
-    .table-stack .p-datatable-tbody > tr > td {
-        flex-wrap: wrap;
-        row-gap: 0;
-    }
-
-    .table-stack .p-datatable-tbody > tr > td > .cell-sub {
-        flex: 0 0 100%;
-    }
+.amount-in {
+    color: var(--p-green-600);
+    font-weight: 600;
 }
-/* The table search boxes carry an inline `width: 16rem`, which overflows a
-   phone-width column. */
+
+.amount-out {
+    color: var(--p-red-600);
+    font-weight: 600;
+}
+
+.muted {
+    color: var(--p-text-muted-color);
+}
+
+.empty-state {
+    font-size: 12px;
+    color: var(--eotm-faint);
+}
+
 .p-column-filter {
     max-width: 100%;
 }
@@ -341,47 +205,6 @@ html {
     margin-left: auto;
 }
 
-@media screen and (max-width: 767px) {
-    .filter-bar > * {
-        flex: 1 1 100%;
-    }
-
-    .filter-input {
-        width: 100%;
-    }
-
-    .filter-type,
-    p-columnfilter.filter-type > div,
-    .filter-type .p-select {
-        width: 100%;
-    }
-
-    .page-summary {
-        gap: 0;
-    }
-
-    .summary-stat {
-        width: 100%;
-        justify-content: space-between;
-        padding: 0.4rem 0;
-    }
-
-    .summary-stat + .summary-stat {
-        border-top: 1px solid #e3e0d5;
-    }
-
-    .summary-actions {
-        width: 100%;
-        margin-left: 0;
-        padding-top: 0.5rem;
-    }
-
-    .summary-actions > p-select {
-        flex: 1 1 auto;
-        min-width: 0;
-    }
-}
-
 .table-toolbar {
     margin-bottom: 1rem;
     padding: 0.6rem 0.75rem;
@@ -411,13 +234,462 @@ html {
     border: 2px dashed #b4b2a9;
     border-radius: 8px;
     background-color: rgba(250, 249, 246, 0.88);
-    color: #5f5e5a;
+    color: var(--p-text-muted-color);
     font-size: 1rem;
     font-weight: 600;
     pointer-events: none;
 }
 
+.form-hint {
+    margin: 0 0 1.25rem 0;
+    font-size: 0.85rem;
+    color: var(--p-text-muted-color);
+}
+
+.form-section {
+    padding: 1rem 1.1rem 1.1rem 1.1rem;
+    border: 1px solid var(--eotm-tile-border);
+    border-radius: 0.6rem;
+    background: var(--p-surface-50);
+}
+
+.form-section-title {
+    margin: 0 0 0.9rem 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--p-text-muted-color);
+}
+
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.form-field-wide {
+    min-width: 14rem;
+}
+
+.form-field .p-inputnumber,
+.form-field .p-select {
+    width: 100%;
+}
+
+.form-field .p-inputnumber input {
+    width: 100%;
+    min-width: 0;
+}
+
+.form-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--p-text-muted-color);
+}
+
+.form-actions {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 1.25rem;
+}
+
+.section-heading {
+    margin: 2rem 0 0.75rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.content-card {
+    padding: 1rem 1.1rem 1.1rem 1.1rem;
+    border: 1px solid var(--eotm-tile-border);
+    border-radius: 0.6rem;
+    background: #ffffff;
+}
+
+.card-empty {
+    margin: 0;
+    color: var(--p-text-muted-color);
+}
+
+.period-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.period-dates {
+    font-weight: 600;
+}
+
+.stat-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.stat-tile {
+    padding: 0.9rem 1rem;
+    border-radius: 0.6rem;
+    background: var(--p-surface-50);
+    border: 1px solid var(--eotm-tile-border);
+}
+
+.stat-tile-label {
+    font-size: 0.75rem;
+    color: var(--p-text-muted-color);
+    margin-bottom: 0.35rem;
+}
+
+.stat-tile-value {
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+
+.stat-tile-note {
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--eotm-note);
+}
+
+.stat-strip {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.stat-strip-stats {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.stat-strip-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.stat-strip-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--eotm-faint);
+}
+
+.stat-strip-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--eotm-ink);
+    font-variant-numeric: tabular-nums;
+}
+
+.stat-strip-value.positive {
+    color: var(--eotm-positive);
+}
+
+.stat-strip-value.negative {
+    color: var(--eotm-negative);
+}
+
+.widget-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--eotm-cream);
+}
+
+.widget-row:last-of-type {
+    border-bottom: none;
+}
+
+.widget-identity {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.widget-identity .cell-sub {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.widget-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--eotm-ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.equity-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.equity-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    flex: 1 1 12rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--p-content-border-color);
+    border-radius: 6px;
+}
+
+.equity-tile-label {
+    color: var(--p-text-muted-color);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.equity-tile-value {
+    font-size: 18px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.equity-tile-tax,
+.cell-sub.equity-error {
+    color: var(--p-red-500);
+}
+
+.p-datatable-tbody > tr > td.equity-schedule-cell {
+    padding: 0.5rem 1rem 1rem 1rem;
+}
+
+.p-datatable-tbody > tr > td.month-header {
+    background: var(--p-content-hover-background);
+    font-weight: 700;
+}
+
+.share-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 8rem;
+}
+
+.share-bar {
+    height: 0.6rem;
+    border-radius: 3px;
+    min-width: 2px;
+    max-width: 60%;
+}
+
+.share-value {
+    color: var(--p-text-muted-color);
+    font-size: 0.85rem;
+}
+
+.alert-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.p-button.alert-button {
+    padding: 0.15rem 0.5rem;
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.rule-paused td {
+    opacity: 0.55;
+}
+
+.allocation-chart {
+    width: 100%;
+    max-width: 380px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.p-accordion .p-accordioncontent-content {
+    padding: 0 !important;
+}
+
+.p-datepicker {
+    padding: 0px;
+    height: 20px;
+    width: 25px;
+}
+
+menu {
+    margin-top: 0px;
+}
+
+.p-panel-header-actions {
+    margin-left: auto;
+}
+
+.cat-chip-blue    { color: #1d5296; background-color: rgba(42, 120, 214, 0.15); }
+.cat-chip-orange  { color: #9c3d17; background-color: rgba(235, 104, 52, 0.15); }
+.cat-chip-aqua    { color: #0e6b4a; background-color: rgba(27, 175, 122, 0.16); }
+.cat-chip-yellow  { color: #7d5600; background-color: rgba(237, 161, 0, 0.18); }
+.cat-chip-magenta { color: #a03a61; background-color: rgba(232, 123, 164, 0.18); }
+.cat-chip-green   { color: #005c00; background-color: rgba(0, 131, 0, 0.14); }
+.cat-chip-violet  { color: #372b7c; background-color: rgba(74, 58, 167, 0.14); }
+.cat-chip-red     { color: #9c2726; background-color: rgba(227, 73, 72, 0.15); }
+.cat-chip-none    { color: var(--p-text-muted-color); background-color: rgba(95, 94, 90, 0.12); }
+
+@media screen and (min-width: 768px) {
+    .filter-input-wide {
+        width: 16rem;
+    }
+}
+
+@media screen and (max-width: 991px) {
+    body.no-scroll {
+        overflow: hidden;
+    }
+
+    .p-button {
+        min-height: 44px;
+    }
+
+    .p-menubar-button,
+    .p-button.p-button-rounded {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .p-tablist .p-tablist-nav-button {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .app-watchlist .p-datatable-tbody > tr > td {
+        height: 44px;
+        padding-top: 0.6rem !important;
+        padding-bottom: 0.6rem !important;
+    }
+}
+
 @media screen and (max-width: 767px) {
+    .table-stack .p-datatable-table,
+    .table-stack .p-datatable-tbody {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .table-stack .p-datatable-thead {
+        display: none;
+    }
+
+    .table-stack .p-datatable-tbody > tr {
+        display: block;
+        border-bottom: 2px solid var(--p-content-border-color);
+    }
+
+    .table-stack .p-datatable-tbody > tr:last-child {
+        border-bottom: none;
+    }
+
+    .table-stack .p-datatable-tbody > tr > td {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 1rem;
+        row-gap: 0;
+        width: 100%;
+        border: 0 none;
+        padding: 0.4rem 0.75rem;
+        text-align: right;
+    }
+
+    .table-stack .p-datatable-tbody > tr > td::before {
+        content: attr(data-label);
+        flex: 0 1 auto;
+        min-width: 0;
+        margin-right: auto;
+        font-weight: 600;
+        text-align: left;
+        color: var(--p-text-muted-color);
+    }
+
+    .table-stack .p-datatable-tbody > tr > td:not([data-label])::before {
+        content: none;
+    }
+
+    .table-stack .p-datatable-tbody > tr > td:not([data-label]):has(button) {
+        gap: 0.25rem;
+    }
+
+    .table-stack .p-datatable-tbody > tr > td:not([data-label]):not(:has(button)) {
+        justify-content: flex-start;
+    }
+
+    .table-stack .cell-num,
+    .table-stack .cell-sub {
+        text-align: right;
+    }
+
+    .table-stack .p-datatable-tbody > tr > td > .cell-sub {
+        flex: 0 0 100%;
+    }
+
+    .filter-bar > * {
+        flex: 1 1 100%;
+    }
+
+    .filter-input {
+        width: 100%;
+    }
+
+    .filter-type,
+    p-columnfilter.filter-type > div,
+    .filter-type .p-select {
+        width: 100%;
+    }
+
+    .page-summary {
+        gap: 0;
+    }
+
+    .summary-stat {
+        width: 100%;
+        justify-content: space-between;
+        padding: 0.4rem 0;
+    }
+
+    .summary-stat + .summary-stat {
+        border-top: 1px solid var(--p-content-border-color);
+    }
+
+    .summary-actions {
+        width: 100%;
+        margin-left: 0;
+        padding-top: 0.5rem;
+    }
+
+    .summary-actions > p-select {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
     .table-toolbar {
         margin-bottom: 0.75rem;
     }
@@ -436,87 +708,12 @@ html {
         flex-wrap: wrap;
         justify-content: center;
     }
-}
 
-/* Touch targets.
-   Measured at 375px before this block: the menubar hamburger was 25px square,
-   the rounded icon buttons (log out, watchlist, row edit/delete, refresh) 35px,
-   and the tab scroll chevrons 35px wide -- all under the ~44px a fingertip
-   needs. Scoped to the widths where the app is being driven by touch, so the
-   desktop control sizes are untouched. */
-@media screen and (max-width: 991px) {
-    .p-button {
-        min-height: 44px;
+    .stat-strip {
+        gap: 14px;
     }
 
-    .p-menubar-button,
-    .p-button.p-button-rounded {
-        min-width: 44px;
-        min-height: 44px;
-    }
-
-    /* Qualified with the parent because PrimeNG injects its own
-       `.p-tablist-nav-button` rule into <head> at runtime -- that lands after
-       this file, so a bare single-class selector loses the tie. */
-    .p-tablist .p-tablist-nav-button {
-        min-width: 44px;
-        min-height: 44px;
-    }
-
-    /* Things that take a click without being a button: the delete icon in the
-       alerts table and the percentage shortcuts on the holdings table. Marked
-       with `tap-target` in the template rather than matched by selector, so a
-       decorative icon never gets padded out by accident. */
-    .tap-target {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 44px;
-        min-height: 44px;
-    }
-
-    /* The watchlist rows navigate on tap. Scoped to the panel rather than to
-       `.p-datatable-sm`, which would also catch the alert and tax tables.
-       `!important` because PrimeNG injects its small-table padding into <head>
-       at runtime, so it lands after this file and wins on cascade order no
-       matter how this selector is weighted. */
-    .app-watchlist .p-datatable-tbody > tr > td {
-        height: 44px;
-        padding-top: 0.6rem !important;
-        padding-bottom: 0.6rem !important;
+    .stat-strip-stats {
+        gap: 16px;
     }
 }
-
-/* The allocation pie charts ask ApexCharts for `width: '100%'` so they track
-   the viewport; the cap keeps them at the 380px they used to be hardcoded to
-   on wide screens. */
-.allocation-chart {
-    width: 100%;
-    max-width: 380px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.p-accordion .p-accordioncontent-content {
-    padding: 0 !important;
-}
-
-.p-datepicker { padding: 0px; }
-.p-datepicker {  height: 20px;width: 25px; }
-
-menu {
-    margin-top: 0px;
-}
-
-.p-panel-header-actions {
-    margin-left: auto;
-}
-.cat-chip-blue    { color: #1d5296; background-color: rgba(42, 120, 214, 0.15); }
-.cat-chip-orange  { color: #9c3d17; background-color: rgba(235, 104, 52, 0.15); }
-.cat-chip-aqua    { color: #0e6b4a; background-color: rgba(27, 175, 122, 0.16); }
-.cat-chip-yellow  { color: #7d5600; background-color: rgba(237, 161, 0, 0.18); }
-.cat-chip-magenta { color: #a03a61; background-color: rgba(232, 123, 164, 0.18); }
-.cat-chip-green   { color: #005c00; background-color: rgba(0, 131, 0, 0.14); }
-.cat-chip-violet  { color: #372b7c; background-color: rgba(74, 58, 167, 0.14); }
-.cat-chip-red     { color: #9c2726; background-color: rgba(227, 73, 72, 0.15); }
-.cat-chip-none    { color: #5f5e5a; background-color: rgba(95, 94, 90, 0.12); }

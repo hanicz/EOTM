@@ -20,7 +20,6 @@ import { CurrencyPipe } from '@angular/common';
 @Component({
     selector: 'app-holding',
     templateUrl: './holding.component.html',
-    styleUrls: ['./holding.component.css'],
     imports: [Bind, TableModule, PrimeTemplate, Skeleton, ButtonDirective, Ripple, Tooltip, Select, FormsModule,
         CurrencyPipe, TickerIdentityComponent, DeltaComponent]
 })

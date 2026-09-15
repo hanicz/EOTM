@@ -18,7 +18,6 @@ import { FormsModule } from '@angular/forms';
 @Component({
     selector: 'app-financial-rule',
     templateUrl: './rule.component.html',
-    styleUrls: ['./rule.component.css'],
     imports: [Bind, Toolbar, PrimeTemplate, Toast, ButtonDirective, Ripple, Tooltip, TableModule,
         InputText, Select, Dialog, Checkbox, FormsModule]
 })

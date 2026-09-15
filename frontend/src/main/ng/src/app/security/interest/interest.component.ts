@@ -23,7 +23,6 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
     selector: 'app-interest',
     hostDirectives: [CsvDropDirective],
     templateUrl: './interest.component.html',
-    styleUrls: ['./interest.component.css'],
     imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Dialog, FormsModule, Select, CurrencyPipe, DatePipe, Toast]
 })
 export class InterestComponent implements OnInit {

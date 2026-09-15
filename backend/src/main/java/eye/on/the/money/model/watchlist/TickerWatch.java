@@ -1,6 +1,7 @@
 package eye.on.the.money.model.watchlist;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eye.on.the.money.model.AuditedEntity;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Stock;
 import eye.on.the.money.util.Generated;
@@ -19,7 +20,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
-public class TickerWatch {
+public class TickerWatch extends AuditedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

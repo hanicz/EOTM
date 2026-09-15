@@ -1,6 +1,7 @@
 package eye.on.the.money.model.report;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eye.on.the.money.model.AuditedEntity;
 import eye.on.the.money.model.User;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
@@ -20,8 +21,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
-@EqualsAndHashCode(exclude = "user")
-public class ReportSubscription {
+@EqualsAndHashCode(callSuper = false, exclude = "user")
+public class ReportSubscription extends AuditedEntity {
 
     public static final int MAX_RECIPIENTS = 5;
     public static final String DEFAULT_CURRENCY = "HUF";

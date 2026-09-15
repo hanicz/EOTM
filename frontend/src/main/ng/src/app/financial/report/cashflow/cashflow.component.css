@@ -2,20 +2,6 @@
   margin-bottom: 1.5rem;
 }
 
-.amount-in {
-  color: var(--p-green-600);
-  font-weight: 600;
-}
-
-.amount-out {
-  color: var(--p-red-600);
-  font-weight: 600;
-}
-
-.muted {
-  color: var(--p-text-muted-color);
-}
-
 @media screen and (max-width: 767px) {
   :host .average-cell::before {
     flex: 0 1 auto;

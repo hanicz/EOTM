@@ -6,13 +6,13 @@
 </p>
 
 @if (loaded && !raise) {
-  <p class="raise-empty">No salary recorded yet. Add one on the History tab and it will show up here.</p>
+  <p class="card-empty">No salary recorded yet. Add one on the History tab and it will show up here.</p>
 }
 
 @if (raise) {
-  <div class="raise-card">
-    <div class="raise-period">
-      <span class="raise-period-dates">
+  <div class="content-card">
+    <div class="period-bar">
+      <span class="period-dates">
         {{raise.current.validFrom | date:'mediumDate'}} &ndash;
         @if (raise.current.validTo) {
           {{raise.current.validTo | date:'mediumDate'}}
@@ -32,78 +32,78 @@
       <div class="raise-note">{{raise.current.note}}</div>
     }
 
-    <div class="raise-tiles">
-      <div class="raise-tile">
-        <div class="raise-tile-label">Gross monthly</div>
-        <div class="raise-tile-value">
+    <div class="stat-tiles">
+      <div class="stat-tile">
+        <div class="stat-tile-label">Gross monthly</div>
+        <div class="stat-tile-value">
           {{raise.current.grossMonthly | currency : raise.current.currencyId : 'symbol' : '1.0-0'}}
         </div>
       </div>
-      <div class="raise-tile">
-        <div class="raise-tile-label">Gross annual</div>
-        <div class="raise-tile-value">
+      <div class="stat-tile">
+        <div class="stat-tile-label">Gross annual</div>
+        <div class="stat-tile-value">
           {{raise.current.grossAnnual | currency : raise.current.currencyId : 'symbol' : '1.0-0'}}
         </div>
       </div>
-      <div class="raise-tile">
-        <div class="raise-tile-label">Net monthly</div>
-        <div class="raise-tile-value">
+      <div class="stat-tile">
+        <div class="stat-tile-label">Net monthly</div>
+        <div class="stat-tile-value">
           {{raise.current.netMonthly | currency : raise.current.currencyId : 'symbol' : '1.0-0'}}
         </div>
       </div>
-      <div class="raise-tile">
-        <div class="raise-tile-label">Net annual</div>
-        <div class="raise-tile-value">
+      <div class="stat-tile">
+        <div class="stat-tile-label">Net annual</div>
+        <div class="stat-tile-value">
           {{raise.current.netAnnual | currency : raise.current.currencyId : 'symbol' : '1.0-0'}}
         </div>
       </div>
-      <div class="raise-tile">
-        <div class="raise-tile-label">Gross annual in USD</div>
+      <div class="stat-tile">
+        <div class="stat-tile-label">Gross annual in USD</div>
         @if (grossAnnualUsd == null) {
-          <div class="raise-tile-value cell-none">&mdash;</div>
-          <div class="raise-tile-note">No rate available.</div>
+          <div class="stat-tile-value cell-none">&mdash;</div>
+          <div class="stat-tile-note">No rate available.</div>
         } @else {
-          <div class="raise-tile-value">{{grossAnnualUsd | currency : 'USD' : 'symbol' : '1.0-0'}}</div>
-          <div class="raise-tile-note">At today's rate.</div>
+          <div class="stat-tile-value">{{grossAnnualUsd | currency : 'USD' : 'symbol' : '1.0-0'}}</div>
+          <div class="stat-tile-note">At today's rate.</div>
         }
       </div>
-      <div class="raise-tile">
-        <div class="raise-tile-label">Gross annual in EUR</div>
+      <div class="stat-tile">
+        <div class="stat-tile-label">Gross annual in EUR</div>
         @if (grossAnnualEur == null) {
-          <div class="raise-tile-value cell-none">&mdash;</div>
-          <div class="raise-tile-note">No rate available.</div>
+          <div class="stat-tile-value cell-none">&mdash;</div>
+          <div class="stat-tile-note">No rate available.</div>
         } @else {
-          <div class="raise-tile-value">{{grossAnnualEur | currency : 'EUR' : 'symbol' : '1.0-0'}}</div>
-          <div class="raise-tile-note">At today's rate.</div>
+          <div class="stat-tile-value">{{grossAnnualEur | currency : 'EUR' : 'symbol' : '1.0-0'}}</div>
+          <div class="stat-tile-note">At today's rate.</div>
         }
       </div>
-      <div class="raise-tile">
-        <div class="raise-tile-label">Income tax a year</div>
-        <div class="raise-tile-value">
+      <div class="stat-tile">
+        <div class="stat-tile-label">Income tax a year</div>
+        <div class="stat-tile-value">
           {{raise.current.szjaAnnual | currency : raise.current.currencyId : 'symbol' : '1.0-0'}}
         </div>
-        <div class="raise-tile-note">15% personal income tax.</div>
+        <div class="stat-tile-note">15% personal income tax.</div>
       </div>
-      <div class="raise-tile">
-        <div class="raise-tile-label">Social contribution a year</div>
-        <div class="raise-tile-value">
+      <div class="stat-tile">
+        <div class="stat-tile-label">Social contribution a year</div>
+        <div class="stat-tile-value">
           {{raise.current.tbAnnual | currency : raise.current.currencyId : 'symbol' : '1.0-0'}}
         </div>
-        <div class="raise-tile-note">18.5% of the gross.</div>
+        <div class="stat-tile-note">18.5% of the gross.</div>
       </div>
       @if (raise.current.familyAllowanceApplied) {
-        <div class="raise-tile">
-          <div class="raise-tile-label">Family allowance</div>
-          <div class="raise-tile-value">
+        <div class="stat-tile">
+          <div class="stat-tile-label">Family allowance</div>
+          <div class="stat-tile-value">
             {{raise.current.familyAllowanceMonthly | currency : raise.current.currencyId : 'symbol' : '1.0-0'}}
           </div>
-          <div class="raise-tile-note">Taken off the tax base each month.</div>
+          <div class="stat-tile-note">Taken off the tax base each month.</div>
         </div>
       }
     </div>
   </div>
 
-  <h3 class="raise-heading">What a raise would be worth</h3>
+  <h3 class="section-heading">What a raise would be worth</h3>
   <p-table [value]="raise.scenarios" styleClass="p-datatable-striped table-stack eotm-table">
     <ng-template pTemplate="header">
       <tr>

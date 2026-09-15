@@ -1,18 +1,18 @@
 .signal-card {
     border-radius: 10px;
     padding: 16px 18px;
-    border: 1px solid #e3e0d5;
-    border-left: 4px solid #888780;
-    background-color: #fbfaf7;
+    border: 1px solid var(--p-content-border-color);
+    border-left: 4px solid var(--eotm-faint);
+    background-color: var(--eotm-paper);
 }
 
 .signal-card-buy {
-    border-left-color: #3b6d11;
+    border-left-color: var(--eotm-positive);
     background-color: #f3f8ec;
 }
 
 .signal-card-sell {
-    border-left-color: #a32d2d;
+    border-left-color: var(--eotm-negative);
     background-color: #fbf1f1;
 }
 
@@ -23,12 +23,12 @@
 
 .signal-card-header {
     font-size: 15px;
-    color: #1b1b1b;
+    color: var(--eotm-ink);
 }
 
 .signal-card-subtitle {
     font-size: 12px;
-    color: #888780;
+    color: var(--eotm-faint);
     margin-top: 4px;
 }
 
@@ -62,11 +62,11 @@
 }
 
 .indicator-icon-buy {
-    background-color: #3b6d11;
+    background-color: var(--eotm-positive);
 }
 
 .indicator-icon-sell {
-    background-color: #a32d2d;
+    background-color: var(--eotm-negative);
 }
 
 .indicator-icon-neutral {
@@ -76,18 +76,18 @@
 .indicator-name {
     font-weight: 600;
     font-size: 13px;
-    color: #1b1b1b;
+    color: var(--eotm-ink);
 }
 
 .indicator-description {
     font-size: 12px;
-    color: #888780;
+    color: var(--eotm-faint);
     margin-top: 2px;
 }
 
 .indicator-detail {
     font-size: 13px;
-    color: #1b1b1b;
+    color: var(--eotm-ink);
     margin-top: 4px;
     font-style: italic;
 }
@@ -102,26 +102,26 @@
 
 .ticker-logo {
     border-radius: 8px;
-    background-color: #fbfaf7;
+    background-color: var(--eotm-paper);
     padding: 4px;
-    border: 1px solid #e3e0d5;
+    border: 1px solid var(--p-content-border-color);
 }
 
 .ticker-name {
     font-size: 18px;
     font-weight: 700;
-    color: #1b1b1b;
+    color: var(--eotm-ink);
 }
 
 .ticker-subline {
     font-size: 12px;
-    color: #888780;
+    color: var(--eotm-faint);
 }
 
 .ticker-price {
     font-size: 22px;
     font-weight: 700;
-    color: #1b1b1b;
+    color: var(--eotm-ink);
 }
 
 .chart-toolbar {
@@ -140,8 +140,8 @@
 .info-card {
     border-radius: 10px;
     padding: 10px 14px;
-    border: 1px solid #e3e0d5;
-    background-color: #fbfaf7;
+    border: 1px solid var(--p-content-border-color);
+    background-color: var(--eotm-paper);
 }
 
 .info-card-title {
@@ -149,7 +149,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #ef9f27;
+    color: var(--p-primary-color);
     margin-bottom: 2px;
 }
 
@@ -177,7 +177,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    color: #888780;
+    color: var(--eotm-faint);
     flex: 0 0 auto;
 }
 
@@ -189,11 +189,11 @@
 
 .info-label .pi {
     font-size: 12px;
-    color: #ef9f27;
+    color: var(--p-primary-color);
 }
 
 .info-value {
-    color: #1b1b1b;
+    color: var(--eotm-ink);
     font-weight: 500;
     text-align: right;
     font-size: 12px;
@@ -203,6 +203,7 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
+    gap: 0.25rem;
 }
 
 .info-link {
@@ -214,9 +215,6 @@
     text-decoration: underline;
 }
 
-/* Replaces the ml-5/mr-5 utilities these rows used to carry: 2rem of gutter is
-   fine on a desktop but eats a quarter of a phone screen. Two classes so it
-   beats PrimeFlex's own negative .grid margins. */
 .grid.search-gutter {
     margin-left: 2rem;
     margin-right: 2rem;
@@ -228,8 +226,6 @@
         margin-right: 0;
     }
 
-    /* The vertical rule between the chart and the info panel only reads as a
-       separator while the two sit side by side. */
     .search-divider {
         display: none;
     }
@@ -240,7 +236,7 @@
     margin-bottom: 0.35rem;
     font-size: 0.8rem;
     font-weight: 500;
-    color: #5f5e5a;
+    color: var(--p-text-muted-color);
 }
 
 .lookup-empty {
@@ -250,7 +246,7 @@
     text-align: center;
     gap: 0.35rem;
     padding: 3.5rem 1.5rem;
-    color: #888780;
+    color: var(--eotm-faint);
 }
 
 .lookup-empty .pi {
@@ -262,7 +258,7 @@
 .lookup-empty-title {
     font-size: 16px;
     font-weight: 600;
-    color: #1b1b1b;
+    color: var(--eotm-ink);
 }
 
 .lookup-empty-text {
@@ -275,15 +271,11 @@
 }
 
 .peer-chip {
-    background-color: #f1efe8;
+    background-color: var(--eotm-cream);
     border-radius: 999px;
     padding: 0.1rem 0.45rem;
     font-size: 11px;
-    color: #1b1b1b;
-}
-
-.info-value-wrap {
-    gap: 0.25rem;
+    color: var(--eotm-ink);
 }
 
 .info-value-truncate {
@@ -300,7 +292,7 @@
     margin-top: 8px;
     font-size: 11px;
     line-height: 1.35;
-    color: #888780;
+    color: var(--eotm-faint);
 }
 
 .info-note .pi {

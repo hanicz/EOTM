@@ -1,6 +1,7 @@
 package eye.on.the.money.model.alert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eye.on.the.money.model.AuditedEntity;
 import eye.on.the.money.model.User;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
@@ -15,7 +16,7 @@ import lombok.experimental.SuperBuilder;
 @Generated
 @SuperBuilder
 @MappedSuperclass
-public abstract class Alert {
+public abstract class Alert extends AuditedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

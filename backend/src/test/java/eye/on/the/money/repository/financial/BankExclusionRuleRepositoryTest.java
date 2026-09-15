@@ -15,7 +15,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,7 +54,6 @@ class BankExclusionRuleRepositoryTest {
                 .normalizedAccount(normalized)
                 .side(side)
                 .active(active)
-                .creationDate(LocalDate.now())
                 .user(this.user)
                 .build());
     }

@@ -205,7 +205,6 @@ public class BankTransactionService implements ICSVService {
                 .memo(transactionDTO.getMemo())
                 .excluded(matcher.matches(transactionDTO.getAccountNumber(), transactionDTO.getPartnerAccount()))
                 .category(categoryMatcher.match(transactionDTO.getPartnerName()))
-                .creationDate(LocalDate.now())
                 .currency(currency)
                 .user(user)
                 .build());

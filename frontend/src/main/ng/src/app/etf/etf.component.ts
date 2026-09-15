@@ -28,7 +28,6 @@ export type AllocationChartOptions = {
 @Component({
     selector: 'app-etf',
     templateUrl: './etf.component.html',
-    styleUrls: ['./etf.component.css'],
     imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, EtfholdingComponent, EtfpositionComponent, EtfinvestmentComponent, EtfdividendComponent, DecimalPipe, CurrencyPipe, ChartComponent]
 })
 export class EtfComponent implements OnInit {

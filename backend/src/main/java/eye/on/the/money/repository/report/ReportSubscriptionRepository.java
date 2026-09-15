@@ -16,7 +16,7 @@ public interface ReportSubscriptionRepository extends JpaRepository<ReportSubscr
     List<ReportSubscription> findByEnabledTrue();
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("update ReportSubscription s set s.lastManualSendAt = :now "
+    @Query("update ReportSubscription s set s.lastManualSendAt = :now, s.updatedAt = :now "
             + "where s.id = :id and (s.lastManualSendAt is null or s.lastManualSendAt <= :claimableBefore)")
     int claimManualSend(@Param("id") Long id,
                         @Param("now") LocalDateTime now,

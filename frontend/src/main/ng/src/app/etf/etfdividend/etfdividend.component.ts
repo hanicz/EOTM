@@ -27,7 +27,6 @@ import { SymbolOptionComponent } from '../../util/symbol-option.component';
     selector: 'app-etfdividend',
     hostDirectives: [CsvDropDirective],
     templateUrl: './etfdividend.component.html',
-    styleUrls: ['./etfdividend.component.css'],
     imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Dialog, FormsModule, Select, CurrencyPipe, DatePipe, Toast, TickerIdentityComponent, ExchangeOptionComponent, SymbolOptionComponent]
 })
 export class EtfdividendComponent implements OnInit {

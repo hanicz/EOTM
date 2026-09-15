@@ -1,6 +1,7 @@
 package eye.on.the.money.model.financial;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eye.on.the.money.model.AuditedEntity;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
 import lombok.*;
@@ -16,7 +17,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
-public class BankTransactionTax {
+public class BankTransactionTax extends AuditedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

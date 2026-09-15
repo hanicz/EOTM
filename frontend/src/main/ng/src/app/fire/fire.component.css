@@ -1,9 +1,3 @@
-.fire-hint {
-    margin: 0 0 1.25rem 0;
-    font-size: 0.85rem;
-    color: #5f5e5a;
-}
-
 .fire-hint-tight {
     margin: 0.85rem 0 0 0;
 }
@@ -14,33 +8,7 @@
     gap: 1.25rem;
 }
 
-.fire-section {
-    padding: 1rem 1.1rem 1.1rem 1.1rem;
-    border: 1px solid #ece9e0;
-    border-radius: 0.6rem;
-    background: #faf9f6;
-}
-
-.fire-section-title {
-    margin: 0 0 0.9rem 0;
-    font-size: 0.8rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: #5f5e5a;
-}
-
-.fire-form {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    gap: 1rem;
-}
-
 .fire-field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
     min-width: 11rem;
 }
 
@@ -56,15 +24,9 @@
     padding-bottom: 0.55rem;
 }
 
-.fire-label {
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: #5f5e5a;
-}
-
 .fire-check-label {
     font-size: 0.8rem;
-    color: #5f5e5a;
+    color: var(--p-text-muted-color);
     cursor: pointer;
 }
 
@@ -75,25 +37,14 @@
     cursor: help;
 }
 
-/* Reads as a value rather than a disabled input, since these are results and not fields. */
 .fire-readonly {
     padding: 0.55rem 0;
     font-size: 0.95rem;
-    color: #1b1b1b;
+    color: var(--eotm-ink);
 }
 
 .fire-readonly-strong {
     font-weight: 600;
-}
-
-/* PrimeNG's host element does not stretch, so the inner input would collapse. */
-:host ::ng-deep .fire-field .p-inputnumber {
-    width: 100%;
-}
-
-:host ::ng-deep .fire-field .p-inputnumber input {
-    width: 100%;
-    min-width: 0;
 }
 
 .fire-warning {
@@ -113,32 +64,12 @@
     margin-top: 1.25rem;
 }
 
-.fire-heading {
-    margin: 2rem 0 0.75rem 0;
-    font-size: 1rem;
-    font-weight: 600;
-}
-
-.text-right {
-    text-align: right;
-}
-
 .fire-total-cell {
     font-weight: 600;
 }
 
 .fire-summary {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-    gap: 0.75rem;
     margin-top: 1.75rem;
-}
-
-.fire-tile {
-    padding: 0.9rem 1rem;
-    border-radius: 0.6rem;
-    background: #faf9f6;
-    border: 1px solid #ece9e0;
 }
 
 .fire-tile-good {
@@ -151,23 +82,6 @@
     border-color: #e8d3ce;
 }
 
-.fire-tile-label {
-    font-size: 0.75rem;
-    color: #5f5e5a;
-    margin-bottom: 0.35rem;
-}
-
-.fire-tile-value {
-    font-size: 1.15rem;
-    font-weight: 600;
-}
-
-.fire-tile-note {
-    margin-top: 0.25rem;
-    font-size: 0.75rem;
-    color: #8a887f;
-}
-
 .fire-chart-wrap {
     position: relative;
     padding: 0.5rem 0 0 0;
@@ -175,26 +89,24 @@
 
 .fire-chart {
     width: 100%;
-    /* Height follows the viewBox aspect so the chart scales uniformly. A fixed height here would
-       need preserveAspectRatio="none", which stretches the labels and strokes on wide screens. */
     height: auto;
     display: block;
     overflow: visible;
 }
 
 .fire-gridline {
-    stroke: #ece9e0;
+    stroke: var(--eotm-tile-border);
     stroke-width: 1;
 }
 
 .fire-axis-label {
     font-size: 11px;
-    fill: #8a887f;
+    fill: var(--eotm-note);
 }
 
 .fire-marker-label {
     font-size: 10px;
-    fill: #8a887f;
+    fill: var(--eotm-note);
 }
 
 .fire-target-line {
@@ -223,24 +135,23 @@
 .fire-line {
     fill: none;
     stroke-width: 2.5;
-    /* The plot is stretched horizontally by preserveAspectRatio="none"; this keeps the stroke even. */
     vector-effect: non-scaling-stroke;
 }
 
 .fire-line-nominal {
-    stroke: #ef9f27;
+    stroke: var(--p-primary-color);
 }
 
 .fire-line-real {
-    stroke: #1b1b1b;
+    stroke: var(--eotm-ink);
 }
 
 .fire-dot-nominal {
-    fill: #ef9f27;
+    fill: var(--p-primary-color);
 }
 
 .fire-dot-real {
-    fill: #1b1b1b;
+    fill: var(--eotm-ink);
 }
 
 .fire-chart-readout {
@@ -250,7 +161,7 @@
     padding: 0.6rem 0.75rem;
     border-radius: 0.5rem;
     background: #ffffff;
-    border: 1px solid #ece9e0;
+    border: 1px solid var(--eotm-tile-border);
     box-shadow: 0 2px 8px rgba(27, 27, 27, 0.08);
     font-size: 0.78rem;
     pointer-events: none;
@@ -264,7 +175,7 @@
 .fire-readout-phase {
     margin-left: 0.35rem;
     font-weight: 400;
-    color: #8a887f;
+    color: var(--eotm-note);
 }
 
 .fire-readout-row {
@@ -280,7 +191,7 @@
     gap: 1rem;
     margin-top: 0.5rem;
     font-size: 0.78rem;
-    color: #5f5e5a;
+    color: var(--p-text-muted-color);
 }
 
 .fire-legend-item {
@@ -297,25 +208,24 @@
 }
 
 .fire-swatch-nominal {
-    background: #ef9f27;
+    background: var(--p-primary-color);
 }
 
 .fire-swatch-real {
-    background: #1b1b1b;
+    background: var(--eotm-ink);
 }
 
 .fire-caveat {
     margin: 1.75rem 0 0 0;
     font-size: 0.78rem;
     line-height: 1.6;
-    color: #8a887f;
+    color: var(--eotm-note);
 }
 
 .fire-caveat i {
     margin-right: 0.35rem;
 }
 
-/* The year the target is cleared sits among the fixed horizons; it should be findable at a glance. */
 :host ::ng-deep .fire-row-fi > td {
     background: #f2f5ec;
     font-weight: 600;
@@ -323,10 +233,7 @@
 
 @media screen and (max-width: 575px) {
     .fire-field,
-    .fire-field-narrow {
-        min-width: 100%;
-    }
-
+    .fire-field-narrow,
     .fire-field-check {
         min-width: 100%;
     }
@@ -335,7 +242,6 @@
         width: 100%;
     }
 
-    /* Pinned to a corner it would cover the curve on a narrow screen. */
     .fire-chart-readout {
         position: static;
         margin-top: 0.5rem;

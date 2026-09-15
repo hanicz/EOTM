@@ -119,7 +119,6 @@ public class WebkincstarImportService implements IExcelService {
         }
         this.securityTransactionRepository.save(SecurityTransaction.builder()
                 .buySell(buySell)
-                .creationDate(LocalDate.now())
                 .transactionDate(transactionDate)
                 .quantity(quantity)
                 .amount(amount)

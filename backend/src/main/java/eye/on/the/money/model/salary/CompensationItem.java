@@ -1,6 +1,7 @@
 package eye.on.the.money.model.salary;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eye.on.the.money.model.AuditedEntity;
 import eye.on.the.money.model.User;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
@@ -18,7 +19,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
-public class CompensationItem {
+public class CompensationItem extends AuditedEntity {
 
     public static final int NAME_MAX_LENGTH = 64;
     public static final int NOTE_MAX_LENGTH = 64;

@@ -75,6 +75,21 @@ class NetWorthSnapshotRepositoryTest {
     }
 
     @Test
+    void deleteByUserIdAndSnapshotDate_removesOnlyThatDay() {
+        this.netWorthSnapshotRepository.saveAllAndFlush(List.of(
+                this.snapshot(LocalDate.of(2026, 5, 1), "Stock"),
+                this.snapshot(LocalDate.of(2026, 5, 1), "Cash"),
+                this.snapshot(LocalDate.of(2026, 5, 2), "Stock")));
+
+        int deleted = this.netWorthSnapshotRepository.deleteByUserIdAndSnapshotDate(this.user.getId(),
+                LocalDate.of(2026, 5, 1));
+
+        assertEquals(2, deleted);
+        assertFalse(this.netWorthSnapshotRepository.existsByUserIdAndSnapshotDate(this.user.getId(), LocalDate.of(2026, 5, 1)));
+        assertTrue(this.netWorthSnapshotRepository.existsByUserIdAndSnapshotDate(this.user.getId(), LocalDate.of(2026, 5, 2)));
+    }
+
+    @Test
     void save_rejectsASecondRowForTheSameDayAndAssetClass() {
         this.netWorthSnapshotRepository.saveAndFlush(this.snapshot(LocalDate.of(2026, 5, 1), "Stock"));
 

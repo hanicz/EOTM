@@ -154,7 +154,6 @@ public class InvestmentService implements ICSVService {
 
         Investment investment = Investment.builder()
                 .buySell(investmentDTO.getBuySell())
-                .creationDate(LocalDate.now())
                 .transactionDate(investmentDTO.getTransactionDate())
                 .user(user)
                 .quantity(investmentDTO.getQuantity())

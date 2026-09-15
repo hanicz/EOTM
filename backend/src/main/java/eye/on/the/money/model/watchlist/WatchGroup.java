@@ -1,6 +1,7 @@
 package eye.on.the.money.model.watchlist;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eye.on.the.money.model.AuditedEntity;
 import eye.on.the.money.model.User;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
@@ -13,14 +14,14 @@ import java.util.Set;
 @Setter
 @Builder
 @ToString
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 @Table(name = "EOTM_WATCH_GROUP",
         uniqueConstraints = @UniqueConstraint(name = "UK_WATCH_GROUP_USER_NAME",
                 columnNames = {"user_id", "name"}))
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
-public class WatchGroup {
+public class WatchGroup extends AuditedEntity {
 
     public static final int NAME_MAX_LENGTH = 64;
 

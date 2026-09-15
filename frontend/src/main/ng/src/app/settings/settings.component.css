@@ -1,30 +1,9 @@
-/* Settings Container & Layout */
 .settings-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
 }
 
-.settings-header {
-  margin-bottom: 3rem;
-  border-bottom: 2px solid var(--p-surface-200);
-  padding-bottom: 2rem;
-}
-
-.settings-header h1 {
-  font-size: 2.5rem;
-  font-weight: 600;
-  margin: 0 0 0.5rem 0;
-  color: var(--p-text-color);
-}
-
-.settings-subtitle {
-  font-size: 1rem;
-  color: var(--p-text-muted-color);
-  margin: 0;
-}
-
-/* Grid Layout */
 .settings-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
@@ -38,14 +17,12 @@
   }
 }
 
-/* Settings Card */
 .settings-card {
   background: var(--p-surface-0);
   border: 1px solid var(--p-surface-200);
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   overflow: hidden;
-  transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .settings-card:hover {
@@ -53,11 +30,6 @@
   border-color: var(--p-primary-color);
 }
 
-.settings-card.full-width {
-  grid-column: 1 / -1;
-}
-
-/* Card Header */
 .card-header {
   display: flex;
   align-items: center;
@@ -98,12 +70,10 @@
   margin-left: 1rem;
 }
 
-/* Card Content */
 .card-content {
   padding: 1.5rem;
 }
 
-/* Data View Items */
 .subreddit-item,
 .account-item {
   display: flex;
@@ -114,7 +84,6 @@
   background: var(--p-surface-50);
   border-radius: 8px;
   border: 1px solid var(--p-surface-200);
-  transition: all 0.2s ease;
 }
 
 .subreddit-item:last-child,
@@ -188,24 +157,17 @@
   opacity: 1;
 }
 
-/* PrimeNG DataView Override */
 .data-view-minimal {
   background: transparent;
   border: none;
 }
 
-.data-view-minimal .p-dataview-content {
-  padding: 0;
-}
-
-/* Empty Message */
 ::ng-deep .p-dataview-emptymessage {
   padding: 2rem 1rem;
   text-align: center;
   color: var(--p-text-muted-color);
 }
 
-/* Password Section */
 .password-section {
   display: flex;
   flex-direction: column;
@@ -236,7 +198,6 @@
   margin-top: 1rem;
 }
 
-/* Dialog Styling */
 .dialog-field {
   margin-bottom: 1.5rem;
   display: flex;
@@ -258,7 +219,6 @@
   width: 100%;
 }
 
-/* PrimeNG Component Overrides */
 ::ng-deep .p-button.p-button-success {
   background: var(--p-green-500);
   border-color: var(--p-green-500);
@@ -287,27 +247,14 @@
   background: rgba(239, 68, 68, 0.1);
 }
 
-::ng-deep .p-password {
-  width: 100%;
-}
-
+::ng-deep .p-password,
 ::ng-deep .p-password input {
   width: 100%;
 }
 
-/* Responsive Design */
 @media (max-width: 575px) {
   .settings-container {
     padding: 1rem;
-  }
-
-  .settings-header {
-    margin-bottom: 2rem;
-    padding-bottom: 1.5rem;
-  }
-
-  .settings-header h1 {
-    font-size: 1.75rem;
   }
 
   .settings-grid {
@@ -362,13 +309,11 @@
   }
 }
 
-/* Accessibility */
 .settings-card:focus-within {
   outline: 2px solid var(--p-primary-color);
   outline-offset: 2px;
 }
 
-/* Animation */
 @media (prefers-reduced-motion: no-preference) {
   .settings-card {
     transition: box-shadow 0.3s ease, border-color 0.3s ease;

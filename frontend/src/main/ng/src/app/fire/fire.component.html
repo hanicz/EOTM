@@ -2,31 +2,31 @@
 <div class="shadow-5">
   <menu class="pl-0 mb-0"></menu>
   <p-panel>
-    <p class="fire-hint">
+    <p class="form-hint">
       Grows what you hold today at the return you set, then draws an inflation-linked income from it once you
       stop paying in. Every figure is an assumption, not a forecast.
     </p>
 
     <div class="fire-sections">
 
-      <section class="fire-section">
-        <h3 class="fire-section-title">Starting point</h3>
-        <div class="fire-form">
-          <div class="fire-field">
-            <label class="fire-label">Portfolio (live)</label>
+      <section class="form-section">
+        <h3 class="form-section-title">Starting point</h3>
+        <div class="form-row">
+          <div class="form-field fire-field">
+            <label class="form-label">Portfolio (live)</label>
             @if (portfolioLoading) {
               <p-skeleton height="2.5rem"></p-skeleton>
             } @else {
               <div class="fire-readonly">{{portfolioValue | number:'1.0-0'}} {{currency}}</div>
             }
           </div>
-          <div class="fire-field">
-            <label for="otherAssets" class="fire-label">Other assets</label>
+          <div class="form-field fire-field">
+            <label for="otherAssets" class="form-label">Other assets</label>
             <p-inputnumber inputId="otherAssets" [(ngModel)]="otherAssets" [min]="0" placeholder="0"
               (keyup.enter)="calculate()"></p-inputnumber>
           </div>
-          <div class="fire-field">
-            <label class="fire-label">Starting value</label>
+          <div class="form-field fire-field">
+            <label class="form-label">Starting value</label>
             <div class="fire-readonly fire-readonly-strong">{{startingValue | number:'1.0-0'}} {{currency}}</div>
           </div>
         </div>
@@ -40,16 +40,16 @@
         }
       </section>
 
-      <section class="fire-section">
-        <h3 class="fire-section-title">Contributions and growth</h3>
-        <div class="fire-form">
-          <div class="fire-field">
-            <label for="monthlyContribution" class="fire-label">Monthly contribution</label>
+      <section class="form-section">
+        <h3 class="form-section-title">Contributions and growth</h3>
+        <div class="form-row">
+          <div class="form-field fire-field">
+            <label for="monthlyContribution" class="form-label">Monthly contribution</label>
             <p-inputnumber inputId="monthlyContribution" [(ngModel)]="monthlyContribution" [min]="0"
               (keyup.enter)="calculate()"></p-inputnumber>
           </div>
-          <div class="fire-field">
-            <label for="contributionIncrease" class="fire-label">
+          <div class="form-field fire-field">
+            <label for="contributionIncrease" class="form-label">
               Annual increase
               <i class="pi pi-info-circle fire-info"
                 pTooltip="Yearly rise in the monthly contribution, inflation is not added on top."></i>
@@ -58,8 +58,8 @@
               suffix=" %" [minFractionDigits]="0" [maxFractionDigits]="1" [min]="-100" [max]="100"
               (keyup.enter)="calculate()"></p-inputnumber>
           </div>
-          <div class="fire-field">
-            <label for="annualReturn" class="fire-label">
+          <div class="form-field fire-field">
+            <label for="annualReturn" class="form-label">
               Annual return
               <i class="pi pi-info-circle fire-info"
                 pTooltip="Nominal return, inflation is not added on top. Applied once a year."></i>
@@ -68,8 +68,8 @@
               [minFractionDigits]="0" [maxFractionDigits]="1" [min]="-100" [max]="100"
               (keyup.enter)="calculate()"></p-inputnumber>
           </div>
-          <div class="fire-field">
-            <label for="inflation" class="fire-label">Inflation</label>
+          <div class="form-field fire-field">
+            <label for="inflation" class="form-label">Inflation</label>
             <p-inputnumber inputId="inflation" [(ngModel)]="inflation" suffix=" %"
               [minFractionDigits]="0" [maxFractionDigits]="1" [min]="-100" [max]="100"
               (keyup.enter)="calculate()"></p-inputnumber>
@@ -77,11 +77,11 @@
         </div>
       </section>
 
-      <section class="fire-section">
-        <h3 class="fire-section-title">Target</h3>
-        <div class="fire-form">
-          <div class="fire-field">
-            <label for="withdrawalRate" class="fire-label">
+      <section class="form-section">
+        <h3 class="form-section-title">Target</h3>
+        <div class="form-row">
+          <div class="form-field fire-field">
+            <label for="withdrawalRate" class="form-label">
               Withdrawal rate
               <i class="pi pi-info-circle fire-info"
                 pTooltip="Share of the pot taken in the first year of retirement. 4% is the usual rule of thumb."></i>
@@ -92,21 +92,21 @@
           </div>
 
           @if (!useCustomFireNumber) {
-            <div class="fire-field">
-              <label for="annualSpending" class="fire-label">
+            <div class="form-field fire-field">
+              <label for="annualSpending" class="form-label">
                 Annual spending
                 <i class="pi pi-info-circle fire-info" pTooltip="In today's money."></i>
               </label>
               <p-inputnumber inputId="annualSpending" [(ngModel)]="annualSpending" [min]="0"
                 (keyup.enter)="calculate()"></p-inputnumber>
             </div>
-            <div class="fire-field">
-              <label class="fire-label">FIRE number</label>
+            <div class="form-field fire-field">
+              <label class="form-label">FIRE number</label>
               <div class="fire-readonly fire-readonly-strong">{{derivedFireNumber | number:'1.0-0'}} {{currency}}</div>
             </div>
           } @else {
-            <div class="fire-field">
-              <label for="customFireNumber" class="fire-label">
+            <div class="form-field fire-field">
+              <label for="customFireNumber" class="form-label">
                 FIRE number
                 <i class="pi pi-info-circle fire-info"
                   pTooltip="The balance you want to see in the account. Taken at face value, not adjusted for inflation."></i>
@@ -114,8 +114,8 @@
               <p-inputnumber inputId="customFireNumber" [(ngModel)]="customFireNumber" [min]="0"
                 (keyup.enter)="calculate()"></p-inputnumber>
             </div>
-            <div class="fire-field">
-              <label class="fire-label">
+            <div class="form-field fire-field">
+              <label class="form-label">
                 Supports spending of
                 <i class="pi pi-info-circle fire-info"
                   pTooltip="In the money of the year you get there, which buys less than the same figure would today."></i>
@@ -124,23 +124,23 @@
             </div>
           }
 
-          <div class="fire-field fire-field-check">
+          <div class="form-field fire-field fire-field-check">
             <p-checkbox inputId="customTarget" [(ngModel)]="useCustomFireNumber" [binary]="true"></p-checkbox>
             <label for="customTarget" class="fire-check-label">Set the target directly</label>
           </div>
         </div>
       </section>
 
-      <section class="fire-section">
-        <h3 class="fire-section-title">Pension</h3>
-        <div class="fire-form">
-          <div class="fire-field fire-field-check">
+      <section class="form-section">
+        <h3 class="form-section-title">Pension</h3>
+        <div class="form-row">
+          <div class="form-field fire-field fire-field-check">
             <p-checkbox inputId="hasPension" [(ngModel)]="hasPension" [binary]="true"></p-checkbox>
             <label for="hasPension" class="fire-check-label">I will get a pension</label>
           </div>
           @if (hasPension) {
-            <div class="fire-field">
-              <label for="monthlyPension" class="fire-label">
+            <div class="form-field fire-field">
+              <label for="monthlyPension" class="form-label">
                 Monthly pension
                 <i class="pi pi-info-circle fire-info"
                   pTooltip="What you expect to receive each month, in today's money, rising with inflation like your spending."></i>
@@ -148,32 +148,32 @@
               <p-inputnumber inputId="monthlyPension" [(ngModel)]="monthlyPension" [min]="0"
                 (keyup.enter)="calculate()"></p-inputnumber>
             </div>
-            <div class="fire-field fire-field-narrow">
-              <label for="pensionAge" class="fire-label">Starts at age</label>
+            <div class="form-field fire-field fire-field-narrow">
+              <label for="pensionAge" class="form-label">Starts at age</label>
               <p-inputnumber inputId="pensionAge" [(ngModel)]="pensionAge" [min]="0" [max]="120"
                 (keyup.enter)="calculate()"></p-inputnumber>
             </div>
           }
         </div>
         @if (hasPension) {
-          <p class="fire-hint fire-hint-tight">
+          <p class="form-hint fire-hint-tight">
             Counted as income from that age on. It covers your spending first, so the Taken out column shows
             only the shortfall the pot has to cover &mdash; anything left over goes into it.
           </p>
         }
       </section>
 
-      <section class="fire-section">
-        <h3 class="fire-section-title">Unemployment benefit</h3>
-        <div class="fire-form">
-          <div class="fire-field fire-field-check">
+      <section class="form-section">
+        <h3 class="form-section-title">Unemployment benefit</h3>
+        <div class="form-row">
+          <div class="form-field fire-field fire-field-check">
             <p-checkbox inputId="hasUnemploymentBenefit" [(ngModel)]="hasUnemploymentBenefit"
               [binary]="true"></p-checkbox>
             <label for="hasUnemploymentBenefit" class="fire-check-label">I will get an unemployment benefit</label>
           </div>
           @if (hasUnemploymentBenefit) {
-            <div class="fire-field">
-              <label for="unemploymentBenefit" class="fire-label">
+            <div class="form-field fire-field">
+              <label for="unemploymentBenefit" class="form-label">
                 Total amount
                 <i class="pi pi-info-circle fire-info"
                   pTooltip="Taken at face value, not adjusted for inflation."></i>
@@ -184,37 +184,37 @@
           }
         </div>
         @if (hasUnemploymentBenefit) {
-          <p class="fire-hint fire-hint-tight">
+          <p class="form-hint fire-hint-tight">
             Paid into the pot once, in the first year after you stop working. It arrives too late to help
             reach the target, and shows in the Pension column for that year.
           </p>
         }
       </section>
 
-      <section class="fire-section">
-        <h3 class="fire-section-title">Timing</h3>
-        <div class="fire-form">
-          <div class="fire-field fire-field-narrow">
-            <label for="currentAge" class="fire-label">Current age</label>
+      <section class="form-section">
+        <h3 class="form-section-title">Timing</h3>
+        <div class="form-row">
+          <div class="form-field fire-field fire-field-narrow">
+            <label for="currentAge" class="form-label">Current age</label>
             <p-inputnumber inputId="currentAge" [(ngModel)]="currentAge" [min]="0" [max]="120"
               (keyup.enter)="calculate()"></p-inputnumber>
           </div>
           @if (!retireWhenReady) {
-            <div class="fire-field fire-field-narrow">
-              <label for="retirementAge" class="fire-label">Retirement age</label>
+            <div class="form-field fire-field fire-field-narrow">
+              <label for="retirementAge" class="form-label">Retirement age</label>
               <p-inputnumber inputId="retirementAge" [(ngModel)]="retirementAge" [min]="0" [max]="120"
                 (keyup.enter)="calculate()"></p-inputnumber>
             </div>
           }
-          <div class="fire-field fire-field-narrow">
-            <label for="lifeExpectancy" class="fire-label">
+          <div class="form-field fire-field fire-field-narrow">
+            <label for="lifeExpectancy" class="form-label">
               Plan until age
               <i class="pi pi-info-circle fire-info" pTooltip="How long the money has to last."></i>
             </label>
             <p-inputnumber inputId="lifeExpectancy" [(ngModel)]="lifeExpectancy" [min]="1" [max]="130"
               (keyup.enter)="calculate()"></p-inputnumber>
           </div>
-          <div class="fire-field fire-field-check">
+          <div class="form-field fire-field fire-field-check">
             <p-checkbox inputId="retireWhenReady" [(ngModel)]="retireWhenReady" [binary]="true"></p-checkbox>
             <label for="retireWhenReady" class="fire-check-label">Retire as soon as the target is reached</label>
           </div>
@@ -233,17 +233,17 @@
     </div>
 
     @if (projection) {
-      <div class="fire-summary">
-        <div class="fire-tile">
-          <div class="fire-tile-label">FIRE number</div>
-          <div class="fire-tile-value">{{projection.fireNumber | number:'1.0-0'}} {{projection.currency}}</div>
+      <div class="stat-tiles fire-summary">
+        <div class="stat-tile">
+          <div class="stat-tile-label">FIRE number</div>
+          <div class="stat-tile-value">{{projection.fireNumber | number:'1.0-0'}} {{projection.currency}}</div>
           @if (projection.fireNumberInTodaysMoney) {
-            <div class="fire-tile-note">
+            <div class="stat-tile-note">
               {{projection.annualSpending | number:'1.0-0'}}/yr at {{projection.withdrawalRate | number:'1.0-2'}}%,
               in today's money
             </div>
           } @else {
-            <div class="fire-tile-note">
+            <div class="stat-tile-note">
               A balance of {{projection.fireNumber | number:'1.0-0'}}, taken at face value
               @if (projection.retirementAge != null) {
                 &mdash; worth {{projection.annualSpending | number:'1.0-0'}}/yr in today's money
@@ -251,41 +251,41 @@
             </div>
           }
         </div>
-        <div class="fire-tile" [class.fire-tile-good]="projection.fiReached"
+        <div class="stat-tile" [class.fire-tile-good]="projection.fiReached"
           [class.fire-tile-bad]="!projection.fiReached">
-          <div class="fire-tile-label">Financial independence</div>
+          <div class="stat-tile-label">Financial independence</div>
           @if (projection.fiReached) {
-            <div class="fire-tile-value">Year {{projection.fiYear}}</div>
-            <div class="fire-tile-note">at age {{projection.fiAge}}</div>
+            <div class="stat-tile-value">Year {{projection.fiYear}}</div>
+            <div class="stat-tile-note">at age {{projection.fiAge}}</div>
           } @else {
-            <div class="fire-tile-value">Not reached</div>
-            <div class="fire-tile-note">not by age {{projection.finalAge}} on these assumptions</div>
+            <div class="stat-tile-value">Not reached</div>
+            <div class="stat-tile-note">not by age {{projection.finalAge}} on these assumptions</div>
           }
         </div>
         @if (projection.retirementAge != null) {
-          <div class="fire-tile">
-            <div class="fire-tile-label">Retires at</div>
-            <div class="fire-tile-value">Age {{projection.retirementAge}}</div>
-            <div class="fire-tile-note">after {{projection.retirementYear}} years</div>
+          <div class="stat-tile">
+            <div class="stat-tile-label">Retires at</div>
+            <div class="stat-tile-value">Age {{projection.retirementAge}}</div>
+            <div class="stat-tile-note">after {{projection.retirementYear}} years</div>
           </div>
-          <div class="fire-tile" [class.fire-tile-good]="projection.lastsThroughRetirement"
+          <div class="stat-tile" [class.fire-tile-good]="projection.lastsThroughRetirement"
             [class.fire-tile-bad]="!projection.lastsThroughRetirement">
-            <div class="fire-tile-label">Money lasts</div>
+            <div class="stat-tile-label">Money lasts</div>
             @if (projection.lastsThroughRetirement) {
-              <div class="fire-tile-value">To age {{projection.finalAge}}</div>
-              <div class="fire-tile-note">
+              <div class="stat-tile-value">To age {{projection.finalAge}}</div>
+              <div class="stat-tile-note">
                 {{projection.finalRealBalance | number:'1.0-0'}} left in today's money
               </div>
             } @else {
-              <div class="fire-tile-value">Runs out at {{projection.depletedAtAge}}</div>
-              <div class="fire-tile-note">short of age {{projection.finalAge}}</div>
+              <div class="stat-tile-value">Runs out at {{projection.depletedAtAge}}</div>
+              <div class="stat-tile-note">short of age {{projection.finalAge}}</div>
             }
           </div>
         }
       </div>
 
       @if (chart) {
-        <h3 class="fire-heading">Projection</h3>
+        <h3 class="section-heading">Projection</h3>
         <div class="fire-chart-wrap">
           <svg class="fire-chart" [attr.viewBox]="'0 0 ' + chartBox.width + ' ' + chartBox.height"
             preserveAspectRatio="xMidYMid meet" (mousemove)="onChartMove($event)" (mouseleave)="setHoveredYear(null)">
@@ -360,7 +360,7 @@
         </div>
       }
 
-      <h3 class="fire-heading">Milestones</h3>
+      <h3 class="section-heading">Milestones</h3>
       <p-table [value]="projection.milestones" styleClass="p-datatable-striped p-datatable-sm table-stack">
         <ng-template pTemplate="header">
           <tr>
@@ -412,8 +412,8 @@
       </p-table>
 
       @if (drawdownRows.length > 0) {
-        <h3 class="fire-heading">Retirement</h3>
-        <p class="fire-hint">
+        <h3 class="section-heading">Retirement</h3>
+        <p class="form-hint">
           From age {{projection.retirementAge}} the contributions stop and
           {{projection.annualSpending | number:'1.0-0'}} {{projection.currency}} a year, in today's money, comes
           out instead &mdash; rising with inflation each year.

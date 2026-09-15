@@ -5,7 +5,7 @@
       <input pInputText type="text"
         (input)="dt1.filterGlobal($any($event.target)?.value, 'contains')"
         [value]="$any(dt1.filters['global'])?.value ?? ''" placeholder="Search by Name or Account"
-        class="p-column-filter filter-input">
+        class="p-column-filter filter-input filter-input-wide">
       <p-columnFilter field="accountName" matchMode="equals" [showMenu]="false" class="filter-type">
         <ng-template pTemplate="filter" let-value let-filter="filterCallback">
           <p-select [ngModel]="value" [options]="accountOptions" (onChange)="filter($any($event)?.value)"

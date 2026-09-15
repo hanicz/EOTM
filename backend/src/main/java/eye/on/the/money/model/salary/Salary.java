@@ -1,6 +1,7 @@
 package eye.on.the.money.model.salary;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eye.on.the.money.model.AuditedEntity;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.util.Generated;
@@ -21,7 +22,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
-public class Salary {
+public class Salary extends AuditedEntity {
 
     public static final int NOTE_MAX_LENGTH = 64;
     public static final int MAX_DEPENDENTS = 10;

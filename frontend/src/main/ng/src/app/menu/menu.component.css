@@ -12,26 +12,23 @@
     min-width: 0;
 }
 
-::ng-deep .p-menubar-button {
-    flex: 0 0 auto;
-}
-
+::ng-deep .p-menubar-button,
 ::ng-deep .p-menubar-end {
     flex: 0 0 auto;
 }
 
 ::ng-deep .p-menubar-item-link-active {
     background: rgba(239, 159, 39, 0.12) !important;
-    color: #ef9f27 !important;
+    color: var(--p-primary-color) !important;
 }
 
 ::ng-deep .p-menubar-item-link-active .p-menubar-item-icon {
-    color: #ef9f27 !important;
+    color: var(--p-primary-color) !important;
 }
 
 ::ng-deep .p-menubar-item-group-active > .p-menubar-item-content > .p-menubar-item-link,
 ::ng-deep .p-menubar-item-group-active > .p-menubar-item-content > .p-menubar-item-link .p-menubar-item-icon {
-    color: #ef9f27 !important;
+    color: var(--p-primary-color) !important;
 }
 
 ::ng-deep .p-menubar-item-group-active > .p-menubar-item-content > .p-menubar-item-link {
@@ -50,7 +47,6 @@
     max-width: 100%;
     object-fit: contain;
     object-position: left center;
-    /* cancel the menubar's 0.5rem 0.75rem padding so the logo bleeds to the edges */
     margin: -0.5rem 0.5rem -0.5rem -0.75rem;
 }
 
@@ -70,7 +66,7 @@
     align-items: center;
     gap: 0.5rem;
     font-size: 0.875rem;
-    color: #f1efe8;
+    color: var(--eotm-cream);
 }
 
 .user-section > button {
@@ -84,7 +80,6 @@
     max-width: 16rem;
 }
 
-/* The watchlist is a static column at lg and up, so it needs no toggle there. */
 .watchlist-toggle {
     display: none;
 }
@@ -98,8 +93,6 @@
         height: 2.5rem;
     }
 
-    /* The hamburger plus three toolbar buttons leave no room for an address;
-       the Settings page shows the signed-in address anyway. */
     .user-email {
         display: none;
     }
@@ -119,5 +112,3 @@
         height: 2.25rem;
     }
 }
-
-

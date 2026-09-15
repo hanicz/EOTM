@@ -9,7 +9,6 @@ import { NewsComponent } from '../news/news.component';
 @Component({
     selector: 'app-home',
     templateUrl: './home.component.html',
-    styleUrls: ['./home.component.css'],
     imports: [MenuComponent, Bind, Panel, SelectButton, FormsModule, NewsComponent]
 })
 export class HomeComponent implements OnInit {

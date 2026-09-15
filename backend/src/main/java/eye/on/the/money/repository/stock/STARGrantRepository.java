@@ -19,7 +19,7 @@ public interface STARGrantRepository extends JpaRepository<STARGrant, Long> {
     void deleteByUserIdAndIdIn(Long userId, List<Long> ids);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("update STARGrant g set g.currentValue = :currentValue "
+    @Query("update STARGrant g set g.currentValue = :currentValue, g.updatedAt = LOCAL DATETIME "
             + "where g.user.id = :userId and upper(g.name) = upper(:name)")
     int updateCurrentValue(@Param("userId") Long userId, @Param("name") String name,
                            @Param("currentValue") BigDecimal currentValue);

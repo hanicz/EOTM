@@ -14,7 +14,6 @@ const SKELETON_ROWS = 3;
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [DatePipe, DecimalPipe, Skeleton, Tooltip],
   templateUrl: './upcoming-vest.component.html',
-  styleUrls: ['./upcoming-vest.component.css']
 })
 export class UpcomingVestComponent implements OnInit {
 

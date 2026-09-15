@@ -31,7 +31,6 @@ class BankTransactionMappingTest {
                 .partnerName("PARTNER KFT")
                 .amount(-275.0)
                 .memo("Ref.: ABCDE123456AB1CDEF")
-                .creationDate(LocalDate.of(2026, 1, 1))
                 .currency(new Currency("HUF", "forint"))
                 .user(User.builder().id(1L).email("test@email.com").build())
                 .build();

@@ -106,7 +106,6 @@ public class SecurityTransactionService implements ICSVService {
 
         SecurityTransaction transaction = SecurityTransaction.builder()
                 .buySell(transactionDTO.getBuySell())
-                .creationDate(LocalDate.now())
                 .transactionDate(transactionDTO.getTransactionDate())
                 .quantity(transactionDTO.getQuantity())
                 .amount(transactionDTO.getAmount())

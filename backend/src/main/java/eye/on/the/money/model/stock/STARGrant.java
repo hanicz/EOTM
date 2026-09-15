@@ -1,6 +1,7 @@
 package eye.on.the.money.model.stock;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eye.on.the.money.model.AuditedEntity;
 import eye.on.the.money.model.User;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
@@ -19,7 +20,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
-public class STARGrant {
+public class STARGrant extends AuditedEntity {
 
     public static final int NAME_MAX_LENGTH = 32;
     public static final int CURRENCY_MAX_LENGTH = 8;

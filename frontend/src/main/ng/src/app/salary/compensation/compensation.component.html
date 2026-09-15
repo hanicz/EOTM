@@ -8,13 +8,13 @@
 </p>
 
 @if (loaded && !current) {
-  <p class="comp-empty">No salary recorded yet. Add one on the History tab and it will show up here.</p>
+  <p class="card-empty">No salary recorded yet. Add one on the History tab and it will show up here.</p>
 }
 
 @if (current) {
-  <div class="comp-card">
-    <div class="comp-period">
-      <span class="comp-period-dates">
+  <div class="content-card">
+    <div class="period-bar">
+      <span class="period-dates">
         {{current.validFrom | date:'mediumDate'}} &ndash;
         @if (current.validTo) {
           {{current.validTo | date:'mediumDate'}}
@@ -33,35 +33,35 @@
       }
     </div>
 
-    <div class="comp-tiles">
-      <div class="comp-tile">
-        <div class="comp-tile-label">Base gross monthly</div>
-        <div class="comp-tile-value">
+    <div class="stat-tiles">
+      <div class="stat-tile">
+        <div class="stat-tile-label">Base gross monthly</div>
+        <div class="stat-tile-value">
           {{current.baseGrossMonthly | currency : current.currencyId : 'symbol' : '1.0-0'}}
         </div>
       </div>
-      <div class="comp-tile">
-        <div class="comp-tile-label">Total gross monthly</div>
-        <div class="comp-tile-value">
+      <div class="stat-tile">
+        <div class="stat-tile-label">Total gross monthly</div>
+        <div class="stat-tile-value">
           {{current.totalGrossMonthly | currency : current.currencyId : 'symbol' : '1.0-0'}}
         </div>
       </div>
-      <div class="comp-tile">
-        <div class="comp-tile-label">Total gross annual</div>
-        <div class="comp-tile-value">
+      <div class="stat-tile">
+        <div class="stat-tile-label">Total gross annual</div>
+        <div class="stat-tile-value">
           {{current.totalGrossAnnual | currency : current.currencyId : 'symbol' : '1.0-0'}}
         </div>
       </div>
-      <div class="comp-tile">
-        <div class="comp-tile-label">Total net monthly</div>
-        <div class="comp-tile-value">
+      <div class="stat-tile">
+        <div class="stat-tile-label">Total net monthly</div>
+        <div class="stat-tile-value">
           {{current.totalNetMonthly | currency : current.currencyId : 'symbol' : '1.0-0'}}
         </div>
-        <div class="comp-tile-note">What lands, base and extras together.</div>
+        <div class="stat-tile-note">What lands, base and extras together.</div>
       </div>
-      <div class="comp-tile">
-        <div class="comp-tile-label">Total net annual</div>
-        <div class="comp-tile-value">
+      <div class="stat-tile">
+        <div class="stat-tile-label">Total net annual</div>
+        <div class="stat-tile-value">
           {{current.totalNetAnnual | currency : current.currencyId : 'symbol' : '1.0-0'}}
         </div>
       </div>
@@ -150,7 +150,7 @@
   </p-table>
 }
 
-<h3 class="comp-heading">Compare a package</h3>
+<h3 class="section-heading">Compare a package</h3>
 <p class="mt-0 mb-3 text-color-secondary text-sm">
   Type in what someone is offering and price it with the same rules. Nothing here is saved &mdash; it is gone
   when you leave the tab. A bonus kept as a percentage reprices itself against the base salary you enter, so
@@ -169,7 +169,7 @@
 }
 
 @if (draft) {
-  <div class="comp-card">
+  <div class="content-card">
     <div class="grid">
       <div class="col-12 sm:col-4 mb-2">
         <label for="draftLabel" class="block mb-2 font-medium text-color-secondary">Name</label>
@@ -243,34 +243,34 @@
 }
 
 @if (compared) {
-  <div class="comp-card mt-3">
-    <div class="comp-period">
-      <span class="comp-period-dates">{{compared.label || 'The package you entered'}}</span>
+  <div class="content-card mt-3">
+    <div class="period-bar">
+      <span class="period-dates">{{compared.label || 'The package you entered'}}</span>
       <span class="state-chip state-accent">Not saved</span>
     </div>
 
-    <div class="comp-tiles">
-      <div class="comp-tile">
-        <div class="comp-tile-label">Total gross monthly</div>
-        <div class="comp-tile-value">
+    <div class="stat-tiles">
+      <div class="stat-tile">
+        <div class="stat-tile-label">Total gross monthly</div>
+        <div class="stat-tile-value">
           {{compared.totalGrossMonthly | currency : compared.currencyId : 'symbol' : '1.0-0'}}
         </div>
       </div>
-      <div class="comp-tile">
-        <div class="comp-tile-label">Total gross annual</div>
-        <div class="comp-tile-value">
+      <div class="stat-tile">
+        <div class="stat-tile-label">Total gross annual</div>
+        <div class="stat-tile-value">
           {{compared.totalGrossAnnual | currency : compared.currencyId : 'symbol' : '1.0-0'}}
         </div>
       </div>
-      <div class="comp-tile">
-        <div class="comp-tile-label">Total net monthly</div>
-        <div class="comp-tile-value">
+      <div class="stat-tile">
+        <div class="stat-tile-label">Total net monthly</div>
+        <div class="stat-tile-value">
           {{compared.totalNetMonthly | currency : compared.currencyId : 'symbol' : '1.0-0'}}
         </div>
       </div>
-      <div class="comp-tile">
-        <div class="comp-tile-label">Total net annual</div>
-        <div class="comp-tile-value">
+      <div class="stat-tile">
+        <div class="stat-tile-label">Total net annual</div>
+        <div class="stat-tile-value">
           {{compared.totalNetAnnual | currency : compared.currencyId : 'symbol' : '1.0-0'}}
         </div>
       </div>
@@ -305,7 +305,7 @@
       </ng-template>
     </p-table>
   } @else if (current) {
-    <p class="comp-empty mt-3">
+    <p class="card-empty mt-3">
       The package you entered is in {{compared.currencyId}} and yours is in {{current.currencyId}}, so there is
       nothing sensible to subtract. Put both in the same currency to see the difference.
     </p>

@@ -8,20 +8,20 @@
 </p>
 
 @if (report && report.items.length > 0) {
-  <div class="rsu-summary">
-    <div class="rsu-tile">
-      <span class="rsu-tile-label">Gross value</span>
-      <span class="rsu-tile-value">{{report.totalAmountInHuf | number:'1.0-0'}} Ft</span>
+  <div class="equity-summary">
+    <div class="equity-tile">
+      <span class="equity-tile-label">Gross value</span>
+      <span class="equity-tile-value">{{report.totalAmountInHuf | number:'1.0-0'}} Ft</span>
     </div>
-    <div class="rsu-tile">
-      <span class="rsu-tile-label">Tax</span>
-      <span class="rsu-tile-value rsu-tile-tax">{{report.totalTax.total | number:'1.0-0'}} Ft</span>
+    <div class="equity-tile">
+      <span class="equity-tile-label">Tax</span>
+      <span class="equity-tile-value equity-tile-tax">{{report.totalTax.total | number:'1.0-0'}} Ft</span>
       <span class="cell-sub">{{report.totalTax.szocho | number:'1.0-0'}} szocho &middot;
         {{report.totalTax.szja | number:'1.0-0'}} szja</span>
     </div>
-    <div class="rsu-tile">
-      <span class="rsu-tile-label">Net value</span>
-      <span class="rsu-tile-value">{{report.totalNetInHuf | number:'1.0-0'}} Ft</span>
+    <div class="equity-tile">
+      <span class="equity-tile-label">Net value</span>
+      <span class="equity-tile-value">{{report.totalNetInHuf | number:'1.0-0'}} Ft</span>
     </div>
   </div>
 }
@@ -78,7 +78,7 @@
           <span class="cell-sub">{{grant.note}}</span>
         }
         @if (grant.error) {
-          <span class="cell-sub rsu-error">{{grant.error}}</span>
+          <span class="cell-sub equity-error">{{grant.error}}</span>
         }
       </td>
       <td data-label="Granted">{{grant.grantDate | date:'mediumDate'}}</td>
@@ -108,7 +108,7 @@
 
   <ng-template pTemplate="expandedrow" let-grant>
     <tr>
-      <td colspan="11" class="rsu-schedule-cell">
+      <td colspan="11" class="equity-schedule-cell">
         <p-table [value]="grant.vests" styleClass="p-datatable-sm table-stack eotm-table">
           <ng-template pTemplate="header">
             <tr>

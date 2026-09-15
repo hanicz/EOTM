@@ -12,7 +12,7 @@
 }
 
 .loginContainer {
-    background-color: #1b1b1b;
+    background-color: var(--eotm-ink);
     border-radius: 12px;
     padding: 2.5rem 3rem;
     width: 100%;
@@ -20,7 +20,6 @@
 }
 
 .loginContainer .logo {
-    /* bleed into the container's 3rem side padding to render larger than the form */
     width: calc(100% + 3rem);
     max-width: none;
     margin: 0 -1.5rem 2rem;
@@ -34,7 +33,7 @@
 .loginContainer label {
     display: block;
     margin-bottom: 0.5rem;
-    color: #f1efe8;
+    color: var(--eotm-cream);
     font-size: 0.875rem;
 }
 

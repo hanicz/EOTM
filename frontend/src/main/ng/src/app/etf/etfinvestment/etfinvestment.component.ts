@@ -30,7 +30,6 @@ import { collectAccountOptions } from '../../util/accountoptions';
     selector: 'app-etfinvestment',
     hostDirectives: [CsvDropDirective],
     templateUrl: './etfinvestment.component.html',
-    styleUrls: ['./etfinvestment.component.css'],
     imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Dialog, CurrencyPipe, DatePipe, NgClass, Toast, TickerIdentityComponent, ExchangeOptionComponent, SymbolOptionComponent]
 })
 export class EtfinvestmentComponent implements OnInit {

@@ -5,25 +5,11 @@
     padding-top: 0.25rem;
 }
 
-.alert-field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-}
-
-.alert-label {
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: #5f5e5a;
-}
-
 .alert-hint {
-    color: var(--p-text-muted-color, #5f5e5a);
+    color: var(--p-text-muted-color);
     font-size: 0.75rem;
 }
 
-/* Size modifier on the shared .delta-pill -- the alert list runs a touch larger
-   than the table pills. Colours come from .delta-up / .delta-down. */
 .alert-type {
     gap: 0.3rem;
     padding: 0.1rem 0.45rem;
@@ -81,7 +67,7 @@
     justify-content: space-between;
     gap: 0.5rem;
     padding: 0.25rem 0.25rem 0.25rem 0.6rem;
-    border: 1px solid var(--p-content-border-color, #e3e0d5);
+    border: 1px solid var(--p-content-border-color);
     border-radius: 0.5rem;
     font-size: 0.85rem;
     word-break: break-all;
@@ -99,5 +85,5 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem 1rem;
-    color: var(--p-text-muted-color, #5f5e5a);
+    color: var(--p-text-muted-color);
 }

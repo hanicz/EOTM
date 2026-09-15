@@ -3,16 +3,16 @@
   <menu class="pl-0 mb-0"></menu>
   <p-panel>
 
-    <p class="cash-hint">
+    <p class="form-hint">
       Money sitting in an account rather than invested. It counts towards your net worth at face value, so
       it never shows a gain or a loss.
     </p>
 
-    <section class="cash-section">
-      <h3 class="cash-section-title">Balance</h3>
-      <div class="cash-form">
-        <div class="cash-field">
-          <label for="cashAmount" class="cash-label">Cash</label>
+    <section class="form-section">
+      <h3 class="form-section-title">Balance</h3>
+      <div class="form-row">
+        <div class="form-field form-field-wide">
+          <label for="cashAmount" class="form-label">Cash</label>
           @if (loading) {
             <p-skeleton height="2.5rem"></p-skeleton>
           } @else {
@@ -20,8 +20,8 @@
               [suffix]="' ' + currency" (keyup.enter)="save()"></p-inputnumber>
           }
         </div>
-        <div class="cash-field">
-          <label for="cashCurrency" class="cash-label">Currency</label>
+        <div class="form-field form-field-wide">
+          <label for="cashCurrency" class="form-label">Currency</label>
           @if (loading) {
             <p-skeleton height="2.5rem"></p-skeleton>
           } @else {
@@ -30,7 +30,7 @@
           }
         </div>
       </div>
-      <div class="cash-actions">
+      <div class="form-actions">
         <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-rounded"
           [loading]="saving" [disabled]="loading" (click)="save()"></button>
       </div>

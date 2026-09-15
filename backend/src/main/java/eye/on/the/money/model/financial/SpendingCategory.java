@@ -1,12 +1,11 @@
 package eye.on.the.money.model.financial;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eye.on.the.money.model.AuditedEntity;
 import eye.on.the.money.model.User;
 import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -19,7 +18,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
-public class SpendingCategory {
+public class SpendingCategory extends AuditedEntity {
 
     public static final int NAME_MAX_LENGTH = 64;
 
@@ -39,9 +38,6 @@ public class SpendingCategory {
 
     @Column(name = "display_order", nullable = false)
     private int position;
-
-    @Column(name = "creation_date", nullable = false)
-    private LocalDate creationDate;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

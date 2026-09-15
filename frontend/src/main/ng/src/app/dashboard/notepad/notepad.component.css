@@ -5,7 +5,7 @@
     resize: vertical;
     font-size: 13px;
     line-height: 1.5;
-    border: 1px solid #e3e0d5;
+    border: 1px solid var(--p-content-border-color);
     border-radius: 6px;
     padding: 8px 10px;
 }
@@ -15,7 +15,7 @@
     margin-top: 6px;
     text-align: right;
     font-size: 11px;
-    color: #888780;
+    color: var(--eotm-faint);
 }
 
 .notepad-failed {

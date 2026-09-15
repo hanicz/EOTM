@@ -1,6 +1,7 @@
 package eye.on.the.money.model.financial;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eye.on.the.money.model.AuditedEntity;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.util.Generated;
@@ -23,7 +24,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
-public class BankTransaction {
+public class BankTransaction extends AuditedEntity {
 
     public static final int MEMO_MAX_LENGTH = 500;
 
@@ -59,9 +60,6 @@ public class BankTransaction {
 
     @Column(name = "memo", nullable = false, length = MEMO_MAX_LENGTH)
     private String memo;
-
-    @Column(name = "creation_date", nullable = false)
-    private LocalDate creationDate;
 
     @ManyToOne
     @JoinColumn(name = "currency_id", nullable = false)

@@ -1,6 +1,7 @@
 package eye.on.the.money.model.cash;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eye.on.the.money.model.AuditedEntity;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.util.Generated;
@@ -17,7 +18,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
-public class Cash {
+public class Cash extends AuditedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

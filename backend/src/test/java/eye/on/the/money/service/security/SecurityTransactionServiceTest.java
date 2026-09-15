@@ -51,7 +51,7 @@ class SecurityTransactionServiceTest {
 
     private SecurityTransaction buildTransaction(Long id, String buySell, int quantity, double amount) {
         return SecurityTransaction.builder().id(id).buySell(buySell).quantity(quantity).amount(amount)
-                .transactionDate(LocalDate.of(2025, 6, 1)).creationDate(LocalDate.of(2025, 6, 1))
+                .transactionDate(LocalDate.of(2025, 6, 1))
                 .currency(this.currency).security(this.security).user(this.user).build();
     }
 
@@ -154,7 +154,7 @@ class SecurityTransactionServiceTest {
         Security sec2 = Security.builder().id("SEC2").name("Security Two").build();
         SecurityTransaction tx1 = this.buildTransaction(1L, "B", 10, 200.0);
         SecurityTransaction tx2 = SecurityTransaction.builder().id(2L).buySell("B").quantity(5).amount(1000.0)
-                .transactionDate(LocalDate.of(2025, 6, 1)).creationDate(LocalDate.of(2025, 6, 1))
+                .transactionDate(LocalDate.of(2025, 6, 1))
                 .currency(this.currency).security(sec2).user(this.user).build();
 
         SecurityTransactionDTO dto1 = this.buildDTO(1L, "B", 10, 200.0);

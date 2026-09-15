@@ -34,7 +34,7 @@ public interface BankTransactionRepository extends JpaRepository<BankTransaction
             Long userId, String bankTransactionId, LocalDate bookingDate, String type, Double amount, String memo);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("UPDATE BankTransaction b SET b.excluded = :excluded WHERE b.user.id = :userId AND b.id IN :ids")
+    @Query("UPDATE BankTransaction b SET b.excluded = :excluded, b.updatedAt = LOCAL DATETIME WHERE b.user.id = :userId AND b.id IN :ids")
     int updateExcludedByUserIdAndIdIn(@Param("userId") Long userId, @Param("ids") List<Long> ids,
                                          @Param("excluded") boolean excluded);
 
@@ -53,12 +53,12 @@ public interface BankTransactionRepository extends JpaRepository<BankTransaction
     List<MonthlyCashFlowDTO> findMonthlyCashFlow(@Param("userId") Long userId);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("UPDATE BankTransaction b SET b.category = :category, b.categoryLocked = true WHERE b.user.id = :userId AND b.id IN :ids")
+    @Query("UPDATE BankTransaction b SET b.category = :category, b.categoryLocked = true, b.updatedAt = LOCAL DATETIME WHERE b.user.id = :userId AND b.id IN :ids")
     int updateCategoryByUserIdAndIdIn(@Param("userId") Long userId, @Param("ids") List<Long> ids,
                                       @Param("category") SpendingCategory category);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("UPDATE BankTransaction b SET b.category = null, b.categoryLocked = false WHERE b.user.id = :userId AND b.category.id IN :categoryIds")
+    @Query("UPDATE BankTransaction b SET b.category = null, b.categoryLocked = false, b.updatedAt = LOCAL DATETIME WHERE b.user.id = :userId AND b.category.id IN :categoryIds")
     int clearCategoryByUserIdAndCategoryIdIn(@Param("userId") Long userId, @Param("categoryIds") List<Long> categoryIds);
 
     @Query("""

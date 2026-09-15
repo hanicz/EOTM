@@ -13,7 +13,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -48,7 +47,6 @@ public class BankExclusionRuleService {
                 .normalizedAccount(normalized)
                 .side(editDTO.side())
                 .active(Boolean.TRUE.equals(editDTO.active()))
-                .creationDate(LocalDate.now())
                 .user(this.userService.getReference(userId))
                 .build();
 

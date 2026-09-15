@@ -16,7 +16,6 @@ import { DecimalPipe, CurrencyPipe, NgClass } from '@angular/common';
 @Component({
     selector: 'app-cryptoholding',
     templateUrl: './cryptoholding.component.html',
-    styleUrls: ['./cryptoholding.component.css'],
     imports: [Bind, TableModule, PrimeTemplate, Skeleton, Image, ButtonDirective, Ripple, Tooltip,
         DecimalPipe, CurrencyPipe, NgClass]
 })

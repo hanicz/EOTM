@@ -27,7 +27,6 @@ export type AllocationChartOptions = {
 @Component({
     selector: 'app-crypto',
     templateUrl: './crypto.component.html',
-    styleUrls: ['./crypto.component.css'],
     imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, CryptoholdingComponent, CryptopositionComponent, TransactionComponent, DecimalPipe, CurrencyPipe, ChartComponent]
 })
 export class CryptoComponent implements OnInit {

@@ -15,7 +15,6 @@ import { collectAccountOptions } from '../../util/accountoptions';
 @Component({
     selector: 'app-etfposition',
     templateUrl: './etfposition.component.html',
-    styleUrls: ['./etfposition.component.css'],
     imports: [Bind, TableModule, PrimeTemplate, InputText, Select, FormsModule, DecimalPipe, CurrencyPipe, TickerIdentityComponent, DeltaComponent]
 })
 export class EtfpositionComponent implements OnInit {

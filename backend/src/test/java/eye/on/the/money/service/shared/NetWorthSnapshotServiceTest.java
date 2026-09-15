@@ -10,11 +10,9 @@ import eye.on.the.money.model.User;
 import eye.on.the.money.model.networth.NetWorthSnapshot;
 import eye.on.the.money.repository.UserRepository;
 import eye.on.the.money.repository.networth.NetWorthSnapshotRepository;
-import eye.on.the.money.service.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -28,15 +26,15 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,57 +51,33 @@ class NetWorthSnapshotServiceTest {
     @Mock
     private UserRepository userRepository;
     @Mock
-    private UserService userService;
+    private NetWorthSnapshotWriter netWorthSnapshotWriter;
 
     private NetWorthSnapshotService netWorthSnapshotService;
+    private NetWorthDTO netWorth;
 
     @BeforeEach
     void setUp() {
         this.netWorthSnapshotService = new NetWorthSnapshotService(this.netWorthSnapshotRepository,
-                this.netWorthService, this.userRepository, this.userService);
+                this.netWorthService, this.userRepository, this.netWorthSnapshotWriter);
 
-        when(this.userService.getReference(anyLong()))
-                .thenAnswer(invocation -> User.builder().id(invocation.getArgument(0)).build());
-        when(this.netWorthSnapshotRepository.findByUserIdAndSnapshotDate(anyLong(), any()))
-                .thenReturn(List.of());
-        when(this.netWorthService.getNetWorth(anyLong(), anyString(), anyBoolean()))
-                .thenReturn(this.netWorth(Map.of("Stock", new double[]{1000, 1250}, "Cash", new double[]{300, 300})));
+        this.netWorth = this.netWorth(Map.of("Stock", new double[]{1000, 1250}, "Cash", new double[]{300, 300}));
+        when(this.netWorthService.getNetWorth(anyLong(), anyString(), anyBoolean())).thenReturn(this.netWorth);
     }
 
     @Test
-    void capture_storesOneHufRowPerAssetClass() {
-        this.netWorthSnapshotService.capture(USER, TODAY, true);
+    void captureAll_replacesEachUsersSnapshotWithRefreshedValues() {
+        User first = User.builder().id(1L).email("first@example.com").build();
+        User second = User.builder().id(2L).email("second@example.com").build();
+        when(this.userRepository.findAll()).thenReturn(List.of(first, second));
 
-        verify(this.netWorthService).getNetWorth(USER, "HUF", true);
-        List<NetWorthSnapshot> saved = this.savedRows();
-        assertEquals(2, saved.size());
+        this.netWorthSnapshotService.captureAll(TODAY);
 
-        NetWorthSnapshot stock = this.rowFor(saved, "Stock");
-        assertEquals(TODAY, stock.getSnapshotDate());
-        assertEquals(1000.0, stock.getSpent());
-        assertEquals(1250.0, stock.getWorth());
-        assertEquals(USER, stock.getUser().getId());
-
-        NetWorthSnapshot cash = this.rowFor(saved, "Cash");
-        assertEquals(300.0, cash.getSpent());
-        assertEquals(300.0, cash.getWorth());
-    }
-
-    @Test
-    void capture_overwritesTheRowsAlreadyStoredForThatDay() {
-        NetWorthSnapshot existingStock = this.row(TODAY, "Stock", 900, 950);
-        existingStock.setId(55L);
-        when(this.netWorthSnapshotRepository.findByUserIdAndSnapshotDate(USER, TODAY))
-                .thenReturn(List.of(existingStock));
-
-        this.netWorthSnapshotService.capture(USER, TODAY, false);
-
-        List<NetWorthSnapshot> saved = this.savedRows();
-        assertEquals(2, saved.size());
-        NetWorthSnapshot stock = this.rowFor(saved, "Stock");
-        assertSame(existingStock, stock);
-        assertEquals(1000.0, stock.getSpent());
-        assertEquals(1250.0, stock.getWorth());
+        verify(this.netWorthService).getNetWorth(1L, "HUF", true);
+        verify(this.netWorthService).getNetWorth(2L, "HUF", true);
+        verify(this.netWorthSnapshotWriter).replace(1L, TODAY, this.netWorth.getAssets());
+        verify(this.netWorthSnapshotWriter).replace(2L, TODAY, this.netWorth.getAssets());
+        verify(this.netWorthSnapshotWriter, never()).insertIfMissing(anyLong(), any(), any());
     }
 
     @Test
@@ -116,7 +90,8 @@ class NetWorthSnapshotServiceTest {
         this.netWorthSnapshotService.captureAll(TODAY);
 
         verify(this.netWorthService).getNetWorth(2L, "HUF", true);
-        verify(this.netWorthSnapshotRepository, times(1)).saveAll(anyList());
+        verify(this.netWorthSnapshotWriter, times(1)).replace(anyLong(), any(), any());
+        verify(this.netWorthSnapshotWriter).replace(eq(2L), eq(TODAY), any());
     }
 
     @Test
@@ -127,6 +102,8 @@ class NetWorthSnapshotServiceTest {
         this.netWorthSnapshotService.getHistory(USER, TODAY);
 
         verify(this.netWorthService).getNetWorth(USER, "HUF", false);
+        verify(this.netWorthSnapshotWriter).insertIfMissing(USER, TODAY, this.netWorth.getAssets());
+        verify(this.netWorthSnapshotWriter, never()).replace(anyLong(), any(), any());
     }
 
     @Test
@@ -137,6 +114,7 @@ class NetWorthSnapshotServiceTest {
         this.netWorthSnapshotService.getHistory(USER, TODAY);
 
         verify(this.netWorthService, never()).getNetWorth(anyLong(), anyString(), anyBoolean());
+        verifyNoInteractions(this.netWorthSnapshotWriter);
     }
 
     @Test
@@ -149,6 +127,7 @@ class NetWorthSnapshotServiceTest {
         NetWorthHistoryDTO history = this.netWorthSnapshotService.getHistory(USER, TODAY);
 
         assertEquals(1, history.getPoints().size());
+        verifyNoInteractions(this.netWorthSnapshotWriter);
     }
 
     @Test
@@ -220,17 +199,6 @@ class NetWorthSnapshotServiceTest {
     private void storedHistory(List<NetWorthSnapshot> rows) {
         when(this.netWorthSnapshotRepository.existsByUserIdAndSnapshotDate(USER, TODAY)).thenReturn(true);
         when(this.netWorthSnapshotRepository.findByUserIdOrderBySnapshotDate(USER)).thenReturn(rows);
-    }
-
-    @SuppressWarnings("unchecked")
-    private List<NetWorthSnapshot> savedRows() {
-        ArgumentCaptor<List<NetWorthSnapshot>> captor = ArgumentCaptor.forClass(List.class);
-        verify(this.netWorthSnapshotRepository).saveAll(captor.capture());
-        return captor.getValue();
-    }
-
-    private NetWorthSnapshot rowFor(List<NetWorthSnapshot> rows, String assetClass) {
-        return rows.stream().filter(row -> assetClass.equals(row.getAssetClass())).findFirst().orElseThrow();
     }
 
     private NetWorthSnapshot row(LocalDate date, String assetClass, double spent, double worth) {

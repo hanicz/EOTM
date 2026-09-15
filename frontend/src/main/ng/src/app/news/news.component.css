@@ -15,7 +15,7 @@
     gap: 1rem;
     min-width: 0;
     background-color: #ffffff;
-    border: 1px solid #e3e0d5;
+    border: 1px solid var(--p-content-border-color);
     border-radius: 10px;
     padding: 1rem;
     color: inherit;
@@ -24,7 +24,7 @@
 }
 
 .news-card:hover {
-    border-color: #1b1b1b;
+    border-color: var(--eotm-ink);
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
     transform: translateY(-2px);
 }
@@ -37,7 +37,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #f6f4ee;
+    background-color: var(--eotm-canvas);
 }
 
 .news-card-media ::ng-deep .p-image {
@@ -77,7 +77,7 @@
     gap: 0.5rem;
     min-width: 0;
     font-size: 0.75rem;
-    color: #888780;
+    color: var(--eotm-faint);
 }
 
 .news-card-meta > span:first-child {
@@ -93,8 +93,8 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     font-weight: 500;
-    color: #1b1b1b;
-    background-color: #f1efe8;
+    color: var(--eotm-ink);
+    background-color: var(--eotm-cream);
     padding: 0.1rem 0.5rem;
     border-radius: 999px;
 }
@@ -111,7 +111,7 @@
 
 .news-card-summary {
     font-size: 0.825rem;
-    color: #5f5e5a;
+    color: var(--p-text-muted-color);
     line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 3;
@@ -133,7 +133,7 @@
     gap: 0.5rem;
     padding: 2rem 1rem;
     font-size: 13px;
-    color: #888780;
+    color: var(--eotm-faint);
 }
 
 .news-empty .pi {
@@ -148,7 +148,7 @@
 .news-symbol {
     flex: 0 0 auto;
     font-weight: 600;
-    color: #1b1b1b;
+    color: var(--eotm-ink);
     background-color: #efece2;
     padding: 0.1rem 0.5rem;
     border-radius: 999px;

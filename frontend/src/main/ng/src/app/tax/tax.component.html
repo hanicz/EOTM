@@ -12,13 +12,13 @@
       <p-tabpanels>
 
         <p-tabpanel value="0">
-          <p class="tax-hint">
+          <p class="form-hint">
             Each row is valued at the closing price on its date and converted to forint at that day's MNB rate.
           </p>
 
-          <div class="tax-form">
-            <div class="tax-field tax-field-wide">
-              <label for="exchange" class="tax-label">Exchange</label>
+          <div class="form-row tax-form">
+            <div class="form-field tax-field tax-field-wide">
+              <label for="exchange" class="form-label">Exchange</label>
               <p-select inputId="exchange" class="searchDropdown" [options]="exchanges" optionLabel="Name"
                 [virtualScroll]="true" [virtualScrollItemSize]="31" [filter]="true" filterBy="Name,Code"
                 filterPlaceholder="Search by name or code" (onChange)="exchangeChanged($event)"
@@ -32,8 +32,8 @@
                 </ng-template>
               </p-select>
             </div>
-            <div class="tax-field tax-field-wide">
-              <label for="ticker" class="tax-label">Ticker</label>
+            <div class="form-field tax-field tax-field-wide">
+              <label for="ticker" class="form-label">Ticker</label>
               <p-select inputId="ticker" class="searchDropdown" [options]="symbols" optionLabel="Name"
                 [virtualScroll]="true" [virtualScrollItemSize]="46" [filter]="true" filterBy="Name,Code,Isin"
                 filterPlaceholder="Search by name, code or ISIN"
@@ -47,13 +47,13 @@
                 </ng-template>
               </p-select>
             </div>
-            <div class="tax-field">
-              <label for="date" class="tax-label">Date</label>
+            <div class="form-field tax-field">
+              <label for="date" class="form-label">Date</label>
               <input type="text" pInputText id="date" placeholder="YYYY-MM-DD" [(ngModel)]="date"
                 (keyup.enter)="addRSU()">
             </div>
-            <div class="tax-field">
-              <label for="quantity" class="tax-label">Quantity</label>
+            <div class="form-field tax-field">
+              <label for="quantity" class="form-label">Quantity</label>
               <p-inputnumber inputId="quantity" [(ngModel)]="quantity" [min]="1" placeholder="10"
                 (keyup.enter)="addRSU()"></p-inputnumber>
             </div>
@@ -95,7 +95,7 @@
           }
 
           @if (report) {
-            <h3 class="tax-heading">Result</h3>
+            <h3 class="section-heading">Result</h3>
             <p-table [value]="report.items" styleClass="p-datatable-striped p-datatable-sm table-stack">
               <ng-template pTemplate="header">
                 <tr>
@@ -141,39 +141,39 @@
               </ng-template>
             </p-table>
 
-            <div class="tax-summary">
-              <div class="tax-tile">
-                <div class="tax-tile-label">Total value</div>
-                <div class="tax-tile-value">{{report.totalAmountInHuf | number:'1.0-0'}} Ft</div>
+            <div class="stat-tiles tax-summary">
+              <div class="stat-tile">
+                <div class="stat-tile-label">Total value</div>
+                <div class="stat-tile-value">{{report.totalAmountInHuf | number:'1.0-0'}} Ft</div>
               </div>
-              <div class="tax-tile">
-                <div class="tax-tile-label">Tax base (89%)</div>
-                <div class="tax-tile-value">{{report.totalTax.taxBase | number:'1.0-0'}} Ft</div>
+              <div class="stat-tile">
+                <div class="stat-tile-label">Tax base (89%)</div>
+                <div class="stat-tile-value">{{report.totalTax.taxBase | number:'1.0-0'}} Ft</div>
               </div>
-              <div class="tax-tile">
-                <div class="tax-tile-label">Szocho (13%)</div>
-                <div class="tax-tile-value">{{report.totalTax.szocho | number:'1.0-0'}} Ft</div>
+              <div class="stat-tile">
+                <div class="stat-tile-label">Szocho (13%)</div>
+                <div class="stat-tile-value">{{report.totalTax.szocho | number:'1.0-0'}} Ft</div>
               </div>
-              <div class="tax-tile">
-                <div class="tax-tile-label">Szja (15%)</div>
-                <div class="tax-tile-value">{{report.totalTax.szja | number:'1.0-0'}} Ft</div>
+              <div class="stat-tile">
+                <div class="stat-tile-label">Szja (15%)</div>
+                <div class="stat-tile-value">{{report.totalTax.szja | number:'1.0-0'}} Ft</div>
               </div>
-              <div class="tax-tile tax-tile-primary">
-                <div class="tax-tile-label">Total tax</div>
-                <div class="tax-tile-value">{{report.totalTax.total | number:'1.0-0'}} Ft</div>
+              <div class="stat-tile tax-tile-primary">
+                <div class="stat-tile-label">Total tax</div>
+                <div class="stat-tile-value">{{report.totalTax.total | number:'1.0-0'}} Ft</div>
               </div>
             </div>
           }
         </p-tabpanel>
 
         <p-tabpanel value="1">
-          <p class="tax-hint">
+          <p class="form-hint">
             Taxes a forint amount you have already worked out - no price or rate lookups involved.
           </p>
 
-          <div class="tax-form">
-            <div class="tax-field">
-              <label for="amount" class="tax-label">Amount (Ft)</label>
+          <div class="form-row tax-form">
+            <div class="form-field tax-field">
+              <label for="amount" class="form-label">Amount (Ft)</label>
               <p-inputnumber inputId="amount" [(ngModel)]="amount" placeholder="100000"
                 (keyup.enter)="calculateAmount()"></p-inputnumber>
             </div>
@@ -182,33 +182,33 @@
           </div>
 
           @if (amountTax) {
-            <div class="tax-summary">
-              <div class="tax-tile">
-                <div class="tax-tile-label">Amount</div>
-                <div class="tax-tile-value">{{amountTax.amount | number:'1.0-0'}} Ft</div>
+            <div class="stat-tiles tax-summary">
+              <div class="stat-tile">
+                <div class="stat-tile-label">Amount</div>
+                <div class="stat-tile-value">{{amountTax.amount | number:'1.0-0'}} Ft</div>
               </div>
-              <div class="tax-tile">
-                <div class="tax-tile-label">Tax base (89%)</div>
-                <div class="tax-tile-value">{{amountTax.taxBase | number:'1.0-0'}} Ft</div>
+              <div class="stat-tile">
+                <div class="stat-tile-label">Tax base (89%)</div>
+                <div class="stat-tile-value">{{amountTax.taxBase | number:'1.0-0'}} Ft</div>
               </div>
-              <div class="tax-tile">
-                <div class="tax-tile-label">Szocho (13%)</div>
-                <div class="tax-tile-value">{{amountTax.szocho | number:'1.0-0'}} Ft</div>
+              <div class="stat-tile">
+                <div class="stat-tile-label">Szocho (13%)</div>
+                <div class="stat-tile-value">{{amountTax.szocho | number:'1.0-0'}} Ft</div>
               </div>
-              <div class="tax-tile">
-                <div class="tax-tile-label">Szja (15%)</div>
-                <div class="tax-tile-value">{{amountTax.szja | number:'1.0-0'}} Ft</div>
+              <div class="stat-tile">
+                <div class="stat-tile-label">Szja (15%)</div>
+                <div class="stat-tile-value">{{amountTax.szja | number:'1.0-0'}} Ft</div>
               </div>
-              <div class="tax-tile tax-tile-primary">
-                <div class="tax-tile-label">Total tax</div>
-                <div class="tax-tile-value">{{amountTax.total | number:'1.0-0'}} Ft</div>
+              <div class="stat-tile tax-tile-primary">
+                <div class="stat-tile-label">Total tax</div>
+                <div class="stat-tile-value">{{amountTax.total | number:'1.0-0'}} Ft</div>
               </div>
             </div>
           }
         </p-tabpanel>
 
         <p-tabpanel value="2">
-          <p class="tax-hint">
+          <p class="form-hint">
             The bank transactions you flagged as taxable events on the Financials page. The tax is worked out
             once, when you flag the transaction, at the MNB rate of the booking date - flag it again to
             recalculate it.
@@ -288,26 +288,26 @@
             </p-table>
 
             @if (taxableReport.items.length > 0) {
-              <div class="tax-summary">
-                <div class="tax-tile">
-                  <div class="tax-tile-label">Total value</div>
-                  <div class="tax-tile-value">{{taxableReport.totalAmountInHuf | number:'1.0-0'}} Ft</div>
+              <div class="stat-tiles tax-summary">
+                <div class="stat-tile">
+                  <div class="stat-tile-label">Total value</div>
+                  <div class="stat-tile-value">{{taxableReport.totalAmountInHuf | number:'1.0-0'}} Ft</div>
                 </div>
-                <div class="tax-tile">
-                  <div class="tax-tile-label">Tax base (89%)</div>
-                  <div class="tax-tile-value">{{taxableReport.totalTax.taxBase | number:'1.0-0'}} Ft</div>
+                <div class="stat-tile">
+                  <div class="stat-tile-label">Tax base (89%)</div>
+                  <div class="stat-tile-value">{{taxableReport.totalTax.taxBase | number:'1.0-0'}} Ft</div>
                 </div>
-                <div class="tax-tile">
-                  <div class="tax-tile-label">Szocho (13%)</div>
-                  <div class="tax-tile-value">{{taxableReport.totalTax.szocho | number:'1.0-0'}} Ft</div>
+                <div class="stat-tile">
+                  <div class="stat-tile-label">Szocho (13%)</div>
+                  <div class="stat-tile-value">{{taxableReport.totalTax.szocho | number:'1.0-0'}} Ft</div>
                 </div>
-                <div class="tax-tile">
-                  <div class="tax-tile-label">Szja (15%)</div>
-                  <div class="tax-tile-value">{{taxableReport.totalTax.szja | number:'1.0-0'}} Ft</div>
+                <div class="stat-tile">
+                  <div class="stat-tile-label">Szja (15%)</div>
+                  <div class="stat-tile-value">{{taxableReport.totalTax.szja | number:'1.0-0'}} Ft</div>
                 </div>
-                <div class="tax-tile tax-tile-primary">
-                  <div class="tax-tile-label">Total tax</div>
-                  <div class="tax-tile-value">{{taxableReport.totalTax.total | number:'1.0-0'}} Ft</div>
+                <div class="stat-tile tax-tile-primary">
+                  <div class="stat-tile-label">Total tax</div>
+                  <div class="stat-tile-value">{{taxableReport.totalTax.total | number:'1.0-0'}} Ft</div>
                 </div>
               </div>
             }
@@ -315,7 +315,7 @@
         </p-tabpanel>
 
         <p-tabpanel value="3">
-          <p class="tax-hint">
+          <p class="form-hint">
             The stock buys you flagged as RSUs on the Stock page. The shares were granted, not bought, so each
             one is valued at its closing price on the transaction date rather than at the amount you recorded.
             The tax is worked out once, when you flag the transaction - flag it again to recalculate it.
@@ -405,26 +405,26 @@
             </p-table>
 
             @if (stockReport.items.length > 0) {
-              <div class="tax-summary">
-                <div class="tax-tile">
-                  <div class="tax-tile-label">Total value</div>
-                  <div class="tax-tile-value">{{stockReport.totalAmountInHuf | number:'1.0-0'}} Ft</div>
+              <div class="stat-tiles tax-summary">
+                <div class="stat-tile">
+                  <div class="stat-tile-label">Total value</div>
+                  <div class="stat-tile-value">{{stockReport.totalAmountInHuf | number:'1.0-0'}} Ft</div>
                 </div>
-                <div class="tax-tile">
-                  <div class="tax-tile-label">Tax base (89%)</div>
-                  <div class="tax-tile-value">{{stockReport.totalTax.taxBase | number:'1.0-0'}} Ft</div>
+                <div class="stat-tile">
+                  <div class="stat-tile-label">Tax base (89%)</div>
+                  <div class="stat-tile-value">{{stockReport.totalTax.taxBase | number:'1.0-0'}} Ft</div>
                 </div>
-                <div class="tax-tile">
-                  <div class="tax-tile-label">Szocho (13%)</div>
-                  <div class="tax-tile-value">{{stockReport.totalTax.szocho | number:'1.0-0'}} Ft</div>
+                <div class="stat-tile">
+                  <div class="stat-tile-label">Szocho (13%)</div>
+                  <div class="stat-tile-value">{{stockReport.totalTax.szocho | number:'1.0-0'}} Ft</div>
                 </div>
-                <div class="tax-tile">
-                  <div class="tax-tile-label">Szja (15%)</div>
-                  <div class="tax-tile-value">{{stockReport.totalTax.szja | number:'1.0-0'}} Ft</div>
+                <div class="stat-tile">
+                  <div class="stat-tile-label">Szja (15%)</div>
+                  <div class="stat-tile-value">{{stockReport.totalTax.szja | number:'1.0-0'}} Ft</div>
                 </div>
-                <div class="tax-tile tax-tile-primary">
-                  <div class="tax-tile-label">Total tax</div>
-                  <div class="tax-tile-value">{{stockReport.totalTax.total | number:'1.0-0'}} Ft</div>
+                <div class="stat-tile tax-tile-primary">
+                  <div class="stat-tile-label">Total tax</div>
+                  <div class="stat-tile-value">{{stockReport.totalTax.total | number:'1.0-0'}} Ft</div>
                 </div>
               </div>
             }

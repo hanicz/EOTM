@@ -20,7 +20,6 @@ import { FormsModule } from '@angular/forms';
 @Component({
     selector: 'app-financial-category-rule',
     templateUrl: './categoryrule.component.html',
-    styleUrls: ['./categoryrule.component.css'],
     imports: [NgClass, Bind, Toolbar, PrimeTemplate, Toast, ButtonDirective, Ripple, Tooltip, TableModule,
         InputText, InputNumber, Select, Dialog, Checkbox, FormsModule]
 })

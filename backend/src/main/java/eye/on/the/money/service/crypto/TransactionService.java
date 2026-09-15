@@ -116,7 +116,6 @@ public class TransactionService implements ICSVService {
                 .transactionDate(transactionDTO.getTransactionDate())
                 .transactionString(transactionDTO.getTransactionString())
                 .quantity(transactionDTO.getQuantity())
-                .creationDate(LocalDate.now())
                 .coin(coin)
                 .amount(transactionDTO.getAmount())
                 .currency(currency)

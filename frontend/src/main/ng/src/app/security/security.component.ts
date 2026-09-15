@@ -32,7 +32,6 @@ export type AllocationChartOptions = {
 @Component({
     selector: 'app-security',
     templateUrl: './security.component.html',
-    styleUrls: ['./security.component.css'],
     imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, HoldingComponent, TransactionComponent, InterestComponent, CurrencyPipe, DecimalPipe, ChartComponent, FileUpload, Toast]
 })
 export class SecurityComponent implements OnInit {

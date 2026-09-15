@@ -3,7 +3,8 @@
   white-space: nowrap;
 }
 
-.booked-cell:hover {
+.booked-cell:hover,
+.memo-cell:hover {
   outline: 1px dashed var(--p-content-border-color);
   outline-offset: -1px;
 }
@@ -26,11 +27,6 @@
   white-space: nowrap;
 }
 
-.memo-cell:hover {
-  outline: 1px dashed var(--p-content-border-color);
-  outline-offset: -1px;
-}
-
 .memo-input {
   width: 100%;
   max-width: 100%;
@@ -40,16 +36,6 @@
 .partner-value {
   min-width: 0;
   overflow-wrap: anywhere;
-}
-
-.amount-in {
-  color: var(--p-green-600);
-  font-weight: 600;
-}
-
-.amount-out {
-  color: var(--p-red-600);
-  font-weight: 600;
 }
 
 .row-excluded td {
@@ -68,6 +54,10 @@
   background-color: rgba(163, 42, 48, 0.28);
 }
 
+.bulk-category {
+  min-width: 11rem;
+}
+
 @media screen and (max-width: 991px) {
   .memo-cell {
     max-width: none;
@@ -80,10 +70,7 @@
     overflow-wrap: anywhere;
   }
 
-  .memo-cell:hover {
-    outline: none;
-  }
-
+  .memo-cell:hover,
   .booked-cell:hover {
     outline: none;
   }
@@ -93,13 +80,7 @@
   .filter-bar > .filter-clear {
     flex: 0 0 auto;
   }
-}
 
-.bulk-category {
-  min-width: 11rem;
-}
-
-@media screen and (max-width: 767px) {
   .bulk-category {
     width: 100%;
   }

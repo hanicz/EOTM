@@ -18,7 +18,7 @@
 }
 
 .metric-tile {
-    background-color: #f6f4ee;
+    background-color: var(--eotm-canvas);
     border-radius: 8px;
     padding: 10px;
 }
@@ -34,7 +34,7 @@
 }
 
 .metric-tile-primary {
-    background-color: #1b1b1b;
+    background-color: var(--eotm-ink);
     position: relative;
 }
 
@@ -45,13 +45,13 @@
     width: 1.5rem;
     height: 1.5rem;
     padding: 0;
-    color: #ef9f27;
+    color: var(--p-primary-color);
 }
 
 :host ::ng-deep .metric-tile-primary .metric-refresh:enabled:hover,
 :host ::ng-deep .metric-tile-primary .metric-refresh:enabled:active,
 :host ::ng-deep .metric-tile-primary .metric-refresh:focus {
-    color: #ef9f27;
+    color: var(--p-primary-color);
     background-color: transparent;
 }
 
@@ -60,17 +60,17 @@
 }
 
 .metric-tile-primary .metric-label {
-    color: #ef9f27;
+    color: var(--p-primary-color);
     padding-right: 26px;
 }
 
 .metric-tile-primary .metric-value {
-    color: #f1efe8;
+    color: var(--eotm-cream);
 }
 
 .metric-label {
     font-size: 11px;
-    color: #888780;
+    color: var(--eotm-faint);
     margin-bottom: 4px;
     white-space: nowrap;
     overflow: hidden;
@@ -80,7 +80,7 @@
 .metric-value {
     font-size: 15px;
     font-weight: 600;
-    color: #1b1b1b;
+    color: var(--eotm-ink);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -91,18 +91,12 @@
     margin-top: 2px;
 }
 
-.metric-note {
-    font-size: 11px;
-    margin-top: 2px;
-    color: #888780;
-}
-
 .metric-change.positive {
-    color: #3b6d11;
+    color: var(--eotm-positive);
 }
 
 .metric-change.negative {
-    color: #a32d2d;
+    color: var(--eotm-negative);
 }
 
 .detail-grid {
@@ -156,7 +150,7 @@
 .detail-panel {
     display: flex;
     flex-direction: column;
-    border: 1px solid #e3e0d5;
+    border: 1px solid var(--p-content-border-color);
     border-radius: 8px;
     padding: 14px;
     min-width: 0;
@@ -187,7 +181,7 @@
 .detail-title {
     font-size: 13px;
     font-weight: 500;
-    color: #1b1b1b;
+    color: var(--eotm-ink);
     margin-bottom: 10px;
 }
 
@@ -238,7 +232,7 @@
 .donut-center-label {
     font-size: 9px;
     line-height: 1.2;
-    color: #888780;
+    color: var(--eotm-faint);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -249,13 +243,13 @@
     font-size: 13px;
     line-height: 1.2;
     font-weight: 600;
-    color: #1b1b1b;
+    color: var(--eotm-ink);
 }
 
 .donut-center-pct {
     font-size: 10px;
     line-height: 1.2;
-    color: #5f5e5a;
+    color: var(--p-text-muted-color);
 }
 
 .legend {
@@ -272,7 +266,7 @@
     align-items: center;
     gap: 6px;
     font-size: 12px;
-    color: #5f5e5a;
+    color: var(--p-text-muted-color);
     cursor: pointer;
     border-radius: 4px;
     padding: 2px 4px;
@@ -281,7 +275,7 @@
 }
 
 .legend-row-active {
-    background-color: #f1efe8;
+    background-color: var(--eotm-cream);
 }
 
 .legend-dot {
@@ -301,7 +295,7 @@
 
 .legend-pct {
     font-weight: 500;
-    color: #1b1b1b;
+    color: var(--eotm-ink);
 }
 
 .alert-row {
@@ -310,8 +304,8 @@
     gap: 10px;
     font-size: 12px;
     padding: 6px 0;
-    border-bottom: 1px solid #f1efe8;
-    color: #1b1b1b;
+    border-bottom: 1px solid var(--eotm-cream);
+    color: var(--eotm-ink);
 }
 
 .alert-name {
@@ -326,13 +320,12 @@
 }
 
 .alert-value {
-    color: #888780;
+    color: var(--eotm-faint);
     white-space: nowrap;
 }
 
 .empty-state {
     font-size: 13px;
-    color: #888780;
 }
 
 @media (max-width: 1199px) {
@@ -404,11 +397,5 @@
     .legend {
         width: 100%;
         max-width: none;
-    }
-}
-
-@media (max-width: 400px) {
-    .metric-value {
-        font-size: 13px;
     }
 }

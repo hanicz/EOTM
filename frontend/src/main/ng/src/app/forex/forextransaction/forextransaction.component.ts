@@ -21,7 +21,6 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
     selector: 'app-forextransaction',
     hostDirectives: [CsvDropDirective],
     templateUrl: './forextransaction.component.html',
-    styleUrls: ['./forextransaction.component.css'],
     imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Dialog, CurrencyPipe, DatePipe, Toast]
 })
 export class ForextransactionComponent {

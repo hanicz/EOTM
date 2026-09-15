@@ -16,7 +16,6 @@ import { collectAccountOptions } from '../../util/accountoptions';
 @Component({
     selector: 'app-etfholding',
     templateUrl: './etfholding.component.html',
-    styleUrls: ['./etfholding.component.css'],
     imports: [Bind, TableModule, PrimeTemplate, Skeleton, Tooltip, Select, FormsModule, CurrencyPipe,
         TickerIdentityComponent, DeltaComponent]
 })

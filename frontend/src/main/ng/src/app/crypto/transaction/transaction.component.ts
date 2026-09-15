@@ -23,7 +23,6 @@ import { DecimalPipe, CurrencyPipe, DatePipe } from '@angular/common';
     selector: 'app-transaction',
     hostDirectives: [CsvDropDirective],
     templateUrl: './transaction.component.html',
-    styleUrls: ['./transaction.component.css'],
     imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Image, Dialog, DecimalPipe, CurrencyPipe, DatePipe, Toast]
 })
 export class TransactionComponent implements OnInit {

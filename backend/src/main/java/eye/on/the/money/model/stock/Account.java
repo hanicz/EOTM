@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import eye.on.the.money.model.AuditedEntity;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.etf.ETFInvestment;
 import eye.on.the.money.util.Generated;
@@ -19,12 +20,12 @@ import java.util.Set;
 @Setter
 @Builder
 @ToString
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 @Table(name = "EOTM_USER_ACCOUNT", indexes = @Index(name = "IDX_USER_ACCOUNT_USER", columnList = "user_id"))
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
-public class Account {
+public class Account extends AuditedEntity {
 
     public static final int NAME_MAX_LENGTH = 255;
 

@@ -23,7 +23,6 @@ export type AllocationChartOptions = {
 @Component({
     selector: 'app-forex',
     templateUrl: './forex.component.html',
-    styleUrls: ['./forex.component.css'],
     imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, ForexholdingComponent, ForextransactionComponent, DecimalPipe, CurrencyPipe, ChartComponent]
 })
 export class ForexComponent implements OnInit {

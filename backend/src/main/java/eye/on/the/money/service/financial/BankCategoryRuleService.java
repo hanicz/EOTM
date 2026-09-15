@@ -17,7 +17,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -57,7 +56,6 @@ public class BankCategoryRuleService {
                 .category(this.category(userId, editDTO.categoryId()))
                 .priority(editDTO.priority() == null ? this.nextPriority(userId) : editDTO.priority())
                 .active(Boolean.TRUE.equals(editDTO.active()))
-                .creationDate(LocalDate.now())
                 .user(this.userService.getReference(userId))
                 .build();
 

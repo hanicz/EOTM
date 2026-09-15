@@ -13,7 +13,6 @@ const SKELETON_ROWS = 3;
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [DatePipe, DecimalPipe, Skeleton],
   templateUrl: './upcoming-star-vest.component.html',
-  styleUrls: ['./upcoming-star-vest.component.css']
 })
 export class UpcomingStarVestComponent implements OnInit {
 

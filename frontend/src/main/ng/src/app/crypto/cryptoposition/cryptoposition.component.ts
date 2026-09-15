@@ -12,7 +12,6 @@ import { DecimalPipe, CurrencyPipe, NgClass } from '@angular/common';
 @Component({
     selector: 'app-cryptoposition',
     templateUrl: './cryptoposition.component.html',
-    styleUrls: ['./cryptoposition.component.css'],
     imports: [Bind, TableModule, PrimeTemplate, Image, DecimalPipe, CurrencyPipe, NgClass]
 })
 export class CryptopositionComponent implements OnInit {

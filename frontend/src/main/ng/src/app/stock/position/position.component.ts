@@ -16,7 +16,6 @@ import { DecimalPipe, CurrencyPipe } from '@angular/common';
 @Component({
     selector: 'app-position',
     templateUrl: './position.component.html',
-    styleUrls: ['./position.component.css'],
     imports: [Bind, TableModule, PrimeTemplate, InputText, Select, FormsModule, DecimalPipe, CurrencyPipe, TickerIdentityComponent, DeltaComponent]
 })
 export class PositionComponent implements OnInit {

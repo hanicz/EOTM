@@ -1,6 +1,7 @@
 package eye.on.the.money.model.watchlist;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eye.on.the.money.model.AuditedEntity;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.crypto.Coin;
 import eye.on.the.money.util.Generated;
@@ -18,7 +19,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
-public class CryptoWatch {
+public class CryptoWatch extends AuditedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

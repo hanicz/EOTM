@@ -30,7 +30,6 @@ import { CurrencyPipe, DatePipe, NgClass } from '@angular/common';
     selector: 'app-investment',
     hostDirectives: [CsvDropDirective],
     templateUrl: './investment.component.html',
-    styleUrls: ['./investment.component.css'],
     imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Dialog, Tooltip, CurrencyPipe, DatePipe, NgClass, Toast, TickerIdentityComponent, ExchangeOptionComponent, SymbolOptionComponent]
 })
 export class InvestmentComponent implements OnInit {

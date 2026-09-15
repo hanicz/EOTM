@@ -16,7 +16,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -50,7 +49,6 @@ public class SpendingCategoryService {
                 .normalizedName(normalized)
                 .color(editDTO.color())
                 .position(editDTO.position() == null ? this.nextPosition(userId) : editDTO.position())
-                .creationDate(LocalDate.now())
                 .user(this.userService.getReference(userId))
                 .build();
 
@@ -97,7 +95,6 @@ public class SpendingCategoryService {
                     .normalizedName(CategoryRuleMatcher.normalize(definition.name()))
                     .color(definition.color())
                     .position(position++)
-                    .creationDate(LocalDate.now())
                     .user(user)
                     .build());
             for (String pattern : definition.patterns()) {
@@ -106,7 +103,6 @@ public class SpendingCategoryService {
                         .pattern(pattern)
                         .normalizedPattern(CategoryRuleMatcher.normalize(pattern))
                         .active(true)
-                        .creationDate(LocalDate.now())
                         .category(category)
                         .user(user)
                         .build());

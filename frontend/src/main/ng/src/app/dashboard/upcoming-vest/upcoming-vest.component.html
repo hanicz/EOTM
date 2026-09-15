@@ -1,6 +1,6 @@
 @if (loading()) {
   @for (row of skeletonRows; track $index) {
-    <div class="vest-row">
+    <div class="widget-row">
       <p-skeleton width="6rem" height="0.9rem"></p-skeleton>
       <p-skeleton width="4rem" height="0.9rem"></p-skeleton>
     </div>
@@ -9,9 +9,9 @@
   <div class="empty-state">No upcoming vests</div>
 } @else {
   @for (vest of vests(); track vest.grantId) {
-    <div class="vest-row">
-      <div class="vest-identity">
-        <span class="vest-name">{{vest.shortName}}.{{vest.exchange}}</span>
+    <div class="widget-row">
+      <div class="widget-identity">
+        <span class="widget-name">{{vest.shortName}}.{{vest.exchange}}</span>
         <span class="cell-sub">
           {{vest.vestDate | date : 'yyyy-MM-dd'}} &middot; {{vest.quantity | number}} shares
           @if (isSoon(vest.daysUntil)) {

@@ -1,6 +1,7 @@
 package eye.on.the.money.model.etf;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eye.on.the.money.model.AuditedEntity;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.stock.Account;
@@ -23,7 +24,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Generated
-public class ETFInvestment {
+public class ETFInvestment extends AuditedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,9 +35,6 @@ public class ETFInvestment {
 
     @Column(nullable = false)
     private String buySell;
-
-    @Column(nullable = false)
-    private LocalDate creationDate;
 
     @Column(nullable = false)
     private LocalDate transactionDate;

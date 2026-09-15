@@ -28,7 +28,6 @@ export type AllocationChartOptions = {
 @Component({
     selector: 'app-stock',
     templateUrl: './stock.component.html',
-    styleUrls: ['./stock.component.css'],
     imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, HoldingComponent, PositionComponent, InvestmentComponent, DividendComponent, DecimalPipe, CurrencyPipe, ChartComponent]
 })
 export class StockComponent implements OnInit {

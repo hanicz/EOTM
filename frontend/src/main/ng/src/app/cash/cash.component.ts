@@ -17,7 +17,6 @@ import { FormsModule } from '@angular/forms';
 @Component({
     selector: 'app-cash',
     templateUrl: './cash.component.html',
-    styleUrls: ['./cash.component.css'],
     imports: [MenuComponent, Bind, Panel, ButtonDirective, Ripple, InputNumber, Select, Toast, Skeleton, FormsModule]
 })
 export class CashComponent {

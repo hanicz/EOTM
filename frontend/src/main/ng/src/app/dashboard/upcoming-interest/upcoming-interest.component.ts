@@ -12,7 +12,6 @@ const PAYMENT_LIMIT = 3;
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CurrencyPipe, DatePipe, Skeleton],
   templateUrl: './upcoming-interest.component.html',
-  styleUrls: ['./upcoming-interest.component.css']
 })
 export class UpcomingInterestComponent implements OnInit {
 

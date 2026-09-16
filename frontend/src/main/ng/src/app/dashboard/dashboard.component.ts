@@ -26,28 +26,24 @@ import { UpcomingStarVestComponent } from './upcoming-star-vest/upcoming-star-ve
 import { FireSummaryComponent } from './fire-summary/fire-summary.component';
 import { PerformanceSummaryComponent } from './performance-summary/performance-summary.component';
 import { ASSET_COLOURS } from '../util/assetcolours';
+import { AllocationItem } from '../util/allocation';
+import { AllocationDonutComponent } from '../util/allocation-donut.component';
 
-interface AssetSlice {
-  label: string;
-  value: number;
-  percentage: number;
-  color: string;
-}
-
-interface DonutSegment {
-  label: string;
-  value: number;
-  percentage: number;
-  color: string;
-  dashArray: string;
-  dashOffset: string;
-}
+const ASSET_CLASS_ROUTES: { [assetClass: string]: string } = {
+  'Stock': '/stock',
+  'Crypto': '/crypto',
+  'ETF': '/etf',
+  'Forex': '/forex',
+  'Securities': '/security',
+  'Cash': '/cash',
+  'Pension': '/pension',
+};
 
 @Component({
     selector: 'app-dashboard',
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.css'],
-    imports: [MenuComponent, Bind, Panel, ButtonDirective, Ripple, Tooltip, Skeleton, DecimalPipe, CurrencyPipe, AlertTypePipe, MarketStatusComponent, NotepadComponent, UpcomingInterestComponent, UpcomingVestComponent, UpcomingStarVestComponent, FireSummaryComponent, PerformanceSummaryComponent]
+    imports: [MenuComponent, Bind, Panel, ButtonDirective, Ripple, Tooltip, Skeleton, DecimalPipe, CurrencyPipe, AlertTypePipe, MarketStatusComponent, NotepadComponent, UpcomingInterestComponent, UpcomingVestComponent, UpcomingStarVestComponent, FireSummaryComponent, PerformanceSummaryComponent, AllocationDonutComponent]
 })
 export class DashboardComponent implements OnInit {
 
@@ -72,9 +68,8 @@ export class DashboardComponent implements OnInit {
   netWorth: number = 0;
   netWorthChangePct: number = 0;
 
-  slices: AssetSlice[] = [];
-  donutSegments: DonutSegment[] = [];
-  hoveredLabel: string | null = null;
+  allocationItems: AllocationItem[] = [];
+  readonly assetColours = ASSET_COLOURS;
 
   stockAlerts: StockAlert[] = [];
   cryptoAlerts: CryptoAlert[] = [];
@@ -92,8 +87,15 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  navigateTo(path: string): void {
-    this.router.navigate([path]);
+  navigateTo(path: string, queryParams?: { [name: string]: string }): void {
+    this.router.navigate([path], { queryParams });
+  }
+
+  openAssetClass(assetClass: string): void {
+    const path = ASSET_CLASS_ROUTES[assetClass];
+    if (path) {
+      this.navigateTo(path);
+    }
   }
 
   refresh(): void {
@@ -145,7 +147,11 @@ export class DashboardComponent implements OnInit {
     this.netWorth = netWorth.totalWorth;
     this.netWorthChangePct = netWorth.totalChangePct;
 
-    this.buildAllocation(netWorth);
+    this.allocationItems = (netWorth.assets ?? []).map(asset => ({ label: asset.assetClass, value: asset.worth }));
+  }
+
+  get hasAllocation(): boolean {
+    return this.allocationItems.some(item => item.value > 0);
   }
 
   private worthOf(netWorth: NetWorth, assetClass: string): number {
@@ -158,61 +164,5 @@ export class DashboardComponent implements OnInit {
 
   private expectedRateOf(netWorth: NetWorth, assetClass: string): number {
     return netWorth.assets?.find(a => a.assetClass === assetClass)?.expectedRatePct ?? 0;
-  }
-
-  private buildAllocation(netWorth: NetWorth): void {
-    const raw: AssetSlice[] = (netWorth.assets ?? []).map(asset => ({
-      label: asset.assetClass,
-      value: asset.worth,
-      percentage: 0,
-      color: ASSET_COLOURS[asset.assetClass] ?? '#b4b2a9',
-    })).sort((a, b) => b.value - a.value);
-
-    const total = raw.reduce((sum, slice) => sum + slice.value, 0);
-    if (total <= 0) {
-      this.slices = raw;
-      this.donutSegments = [];
-      return;
-    }
-
-    raw.forEach(slice => slice.percentage = (slice.value / total) * 100);
-    this.slices = raw;
-
-    const circumference = 2 * Math.PI * 40;
-    let offset = 0;
-    this.donutSegments = raw.filter(s => s.value > 0).map(slice => {
-      const length = (slice.percentage / 100) * circumference;
-      const segment: DonutSegment = {
-        label: slice.label,
-        value: slice.value,
-        percentage: slice.percentage,
-        color: slice.color,
-        dashArray: `${length} ${circumference - length}`,
-        dashOffset: `${-offset}`,
-      };
-      offset += length;
-      return segment;
-    });
-  }
-
-  setHoveredSlice(label: string | null): void {
-    this.hoveredLabel = label;
-  }
-
-  get hoveredSegment(): DonutSegment | null {
-    return this.donutSegments.find(s => s.label === this.hoveredLabel) ?? null;
-  }
-
-  formatCompact(value: number): string {
-    try {
-      return new Intl.NumberFormat(undefined, {
-        style: 'currency',
-        currency: this.selectedCurrency,
-        notation: 'compact',
-        maximumFractionDigits: 1
-      }).format(value);
-    } catch {
-      return value.toFixed(0);
-    }
   }
 }

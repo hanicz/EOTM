@@ -12,22 +12,17 @@ import { CryptoholdingComponent } from './cryptoholding/cryptoholding.component'
 import { CryptopositionComponent } from './cryptoposition/cryptoposition.component';
 import { TransactionComponent } from './transaction/transaction.component';
 import { DecimalPipe, CurrencyPipe } from '@angular/common';
-import { ChartComponent, ApexChart, ApexNonAxisChartSeries, ApexLegend } from 'ng-apexcharts';
+import { AllocationItem } from '../util/allocation';
+import { AllocationDonutComponent } from '../util/allocation-donut.component';
+import { AlignToTableDirective } from '../util/align-to-table.directive';
 import { DashboardService } from '../service/dashboard.service';
 import { UserService } from '../service/user.service';
 import { DEFAULT_CURRENCY } from '../model/currency';
 
-export type AllocationChartOptions = {
-  series: ApexNonAxisChartSeries;
-  chart: ApexChart;
-  labels: string[];
-  legend: ApexLegend;
-};
-
 @Component({
     selector: 'app-crypto',
     templateUrl: './crypto.component.html',
-    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, CryptoholdingComponent, CryptopositionComponent, TransactionComponent, DecimalPipe, CurrencyPipe, ChartComponent]
+    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, CryptoholdingComponent, CryptopositionComponent, TransactionComponent, DecimalPipe, CurrencyPipe, AllocationDonutComponent, AlignToTableDirective]
 })
 export class CryptoComponent implements OnInit {
 
@@ -50,17 +45,7 @@ export class CryptoComponent implements OnInit {
 
   constructor(private dashboardService: DashboardService, private userService: UserService) { }
 
-  allocationChartOptions: Partial<AllocationChartOptions> = {
-    series: [],
-    chart: {
-      type: 'pie',
-      width: '100%'
-    },
-    labels: [],
-    legend: {
-      position: 'bottom'
-    }
-  };
+  allocationItems: AllocationItem[] = [];
 
   ngOnInit(): void {
   }
@@ -140,8 +125,7 @@ export class CryptoComponent implements OnInit {
     this.diffy = this.totalWorth - this.totalSpent;
     this.percentage = this.diffy / this.totalSpent * 100;
 
-    this.allocationChartOptions.series = this.transactions.map(t => this.convert(t.amount, t.currencyId));
-    this.allocationChartOptions.labels = this.transactions.map(t => t.symbol);
+    this.allocationItems = this.transactions.map(t => ({ label: t.symbol, value: this.convert(t.liveValue ?? t.amount, t.currencyId) }));
 
     this.cryptoholding?.markForCheck();
   }

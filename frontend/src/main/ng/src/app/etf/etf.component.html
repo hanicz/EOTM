@@ -1,4 +1,4 @@
-﻿<div class="shadow-5">
+<div class="shadow-5">
   <menu class="pl-0 mb-0"></menu>
   <p-panel>
     <div class="page-summary">
@@ -37,6 +37,64 @@
           pTooltip="Refresh" (click)="refreshAll()"></button>
       </div>
     </div>
+    @if (accountTotals.length > 1) {
+      <div class="account-breakdown">
+        <button type="button" class="account-breakdown-toggle" (click)="toggleAccounts()"
+          [attr.aria-expanded]="accountsExpanded"
+          [attr.aria-label]="(accountsExpanded ? 'Hide' : 'Show') + ' the per-account breakdown'">
+          <i class="pi account-breakdown-caret"
+            [ngClass]="accountsExpanded ? 'pi-chevron-down' : 'pi-chevron-right'"></i>
+          <span>Accounts</span>
+        </button>
+        @if (accountsExpanded) {
+          <div class="account-breakdown-grid">
+            <div class="account-breakdown-head">
+              <span>Account</span>
+              <span>Spent</span>
+              <span>Worth</span>
+              <span>Today</span>
+              <span>Profit</span>
+              <span>Percentage</span>
+            </div>
+            @for (account of accountTotals; track account.accountName) {
+              <div class="account-breakdown-row">
+                <span class="account-breakdown-name">{{account.accountName}}</span>
+                <span data-label="Spent">
+                  <b class="amount">{{account.spent | currency : selectedCurrency : 'symbol' : '0.0-2'}}</b>
+                </span>
+                <span data-label="Worth">
+                  <b class="amount">{{account.worth | currency : selectedCurrency : 'symbol' : '0.0-2'}}</b>
+                </span>
+                <span data-label="Today">
+                  @if (account.todayDiff > 0) {
+                    <span class="state-chip state-buy">{{(account.todayDiff | currency : selectedCurrency : 'symbol' : '0.0-2') + ' (' + (account.todayPercentage | number : '0.0-1') + '%)'}}</span>
+                  }
+                  @if (account.todayDiff < 0) {
+                    <span class="state-chip state-sell">{{(account.todayDiff | currency : selectedCurrency : 'symbol' : '0.0-2') + ' (' + (account.todayPercentage | number : '0.0-1') + '%)'}}</span>
+                  }
+                </span>
+                <span data-label="Profit">
+                  @if (account.diff > 0) {
+                    <span class="state-chip state-buy">{{account.diff | currency : selectedCurrency : 'symbol' : '0.0-2'}}</span>
+                  }
+                  @if (account.diff < 0) {
+                    <span class="state-chip state-sell">{{account.diff | currency : selectedCurrency : 'symbol' : '0.0-2'}}</span>
+                  }
+                </span>
+                <span data-label="Percentage">
+                  @if (account.diff > 0) {
+                    <span class="state-chip state-buy">{{(account.percentage | number : '0.0-1') + '%'}}</span>
+                  }
+                  @if (account.diff < 0) {
+                    <span class="state-chip state-sell">{{(account.percentage | number : '0.0-1') + '%'}}</span>
+                  }
+                </span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
 <p-divider></p-divider>
 <p-tabs value="0">
   <p-tablist>
@@ -47,15 +105,17 @@
   </p-tablist>
   <p-tabpanels>
     <p-tabpanel value="0">
-      <app-etfholding (dataLoaded)="loadData($event)"></app-etfholding>
-      @if (allocationChartOptions.series && allocationChartOptions.series.length > 0) {
-        <p-divider></p-divider>
-        <div class="flex justify-content-center allocation-chart">
-          <apx-chart [series]="allocationChartOptions.series" [chart]="allocationChartOptions.chart!"
-            [labels]="allocationChartOptions.labels!" [legend]="allocationChartOptions.legend!">
-          </apx-chart>
+      <div class="holdings-layout" [class.holdings-layout-split]="allocationItems.length > 0">
+        <div class="holdings-main" #holdingsMain>
+          <app-etfholding (dataLoaded)="loadData($event)"></app-etfholding>
         </div>
-      }
+        @if (allocationItems.length > 0) {
+          <aside class="holdings-aside" [appAlignToTable]="holdingsMain">
+            <div class="holdings-aside-title">Allocation</div>
+            <app-allocation-donut [items]="allocationItems" [currency]="selectedCurrency" [stacked]="true"></app-allocation-donut>
+          </aside>
+        }
+      </div>
     </p-tabpanel>
     <p-tabpanel value="1">
       <app-etfposition></app-etfposition>

@@ -1,4 +1,4 @@
-﻿<p-toast position="bottom-center" key="security-import"></p-toast>
+<p-toast position="bottom-center" key="security-import"></p-toast>
 <div class="shadow-5">
   <menu class="pl-0 mb-0"></menu>
   <p-panel>
@@ -39,15 +39,17 @@
       </p-tablist>
       <p-tabpanels>
         <p-tabpanel value="0">
-          <app-security-holding (dataLoaded)="loadData($event)"></app-security-holding>
-          @if (allocationChartOptions.series && allocationChartOptions.series.length > 0) {
-          <p-divider></p-divider>
-          <div class="flex justify-content-center allocation-chart">
-            <apx-chart [series]="allocationChartOptions.series" [chart]="allocationChartOptions.chart!"
-              [labels]="allocationChartOptions.labels!" [legend]="allocationChartOptions.legend!">
-            </apx-chart>
+          <div class="holdings-layout" [class.holdings-layout-split]="allocationItems.length > 0">
+            <div class="holdings-main" #holdingsMain>
+              <app-security-holding (dataLoaded)="loadData($event)"></app-security-holding>
+            </div>
+            @if (allocationItems.length > 0) {
+              <aside class="holdings-aside" [appAlignToTable]="holdingsMain">
+                <div class="holdings-aside-title">Allocation</div>
+                <app-allocation-donut [items]="allocationItems" [currency]="selectedCurrency" [stacked]="true"></app-allocation-donut>
+              </aside>
+            }
           </div>
-          }
         </p-tabpanel>
         <p-tabpanel value="1">
           <app-security-transaction></app-security-transaction>

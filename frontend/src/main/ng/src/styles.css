@@ -205,6 +205,79 @@ html, body {
     margin-left: auto;
 }
 
+.account-breakdown {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--eotm-tile-border);
+}
+
+.account-breakdown-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.1rem 0;
+    border: none;
+    background: none;
+    color: var(--p-text-muted-color);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.account-breakdown-toggle:hover,
+.account-breakdown-toggle:focus-visible {
+    color: var(--eotm-ink);
+}
+
+.account-breakdown-caret {
+    font-size: 0.7rem;
+    color: var(--p-primary-color);
+}
+
+.account-breakdown-grid {
+    margin-top: 0.5rem;
+    display: grid;
+    grid-template-columns: minmax(6rem, max-content) repeat(5, max-content);
+    align-items: center;
+    gap: 0.4rem 2.5rem;
+}
+
+.account-breakdown-head,
+.account-breakdown-row {
+    display: contents;
+}
+
+.account-breakdown-head > span {
+    justify-self: end;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--p-text-muted-color);
+}
+
+.account-breakdown-row > span {
+    justify-self: end;
+}
+
+.account-breakdown-head > span:first-child,
+.account-breakdown-row > .account-breakdown-name {
+    justify-self: start;
+}
+
+.account-breakdown-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--eotm-ink);
+}
+
+.account-breakdown .amount {
+    font-size: 0.85rem;
+    color: var(--eotm-ink);
+}
+
 .table-toolbar {
     margin-bottom: 1rem;
     padding: 0.6rem 0.75rem;
@@ -518,11 +591,47 @@ html, body {
     opacity: 0.55;
 }
 
-.allocation-chart {
-    width: 100%;
-    max-width: 380px;
-    margin-left: auto;
-    margin-right: auto;
+.holdings-layout {
+    display: block;
+}
+
+.holdings-main {
+    min-width: 0;
+}
+
+.holdings-layout-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 1.25rem;
+    align-items: start;
+}
+
+.holdings-aside {
+    position: sticky;
+    top: 1rem;
+    min-width: 0;
+    overflow: hidden;
+    padding: 1rem;
+    background: var(--eotm-paper);
+    border: 1px solid var(--eotm-tile-border);
+    border-radius: 8px;
+}
+
+.holdings-aside-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--eotm-ink);
+    margin-bottom: 0.75rem;
+}
+
+@media screen and (max-width: 1199px) {
+    .holdings-layout-split {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .holdings-aside {
+        position: static;
+    }
 }
 
 .p-accordion .p-accordioncontent-content {
@@ -688,6 +797,44 @@ menu {
     .summary-actions > p-select {
         flex: 1 1 auto;
         min-width: 0;
+    }
+
+    .account-breakdown-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .account-breakdown-head {
+        display: none;
+    }
+
+    .account-breakdown-row {
+        display: flex;
+        flex-direction: column;
+        padding: 0.5rem 0;
+    }
+
+    .account-breakdown-row + .account-breakdown-row {
+        border-top: 1px solid var(--p-content-border-color);
+    }
+
+    .account-breakdown-row > span {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        justify-self: auto;
+        padding: 0.2rem 0;
+    }
+
+    .account-breakdown-row > span[data-label]::before {
+        content: attr(data-label);
+        font-size: 0.8rem;
+        color: var(--p-text-muted-color);
+    }
+
+    .account-breakdown-row > .account-breakdown-name {
+        padding-bottom: 0.1rem;
     }
 
     .table-toolbar {

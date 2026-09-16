@@ -17,22 +17,17 @@ import { DashboardService } from '../service/dashboard.service';
 import { UserService } from '../service/user.service';
 import { DEFAULT_CURRENCY } from '../model/currency';
 import { SecurityService } from '../service/security.service';
-import { ChartComponent, ApexChart, ApexNonAxisChartSeries, ApexLegend } from 'ng-apexcharts';
+import { AllocationItem } from '../util/allocation';
+import { AllocationDonutComponent } from '../util/allocation-donut.component';
+import { AlignToTableDirective } from '../util/align-to-table.directive';
 import { FileUpload } from 'primeng/fileupload';
 import { Toast } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 
-export type AllocationChartOptions = {
-  series: ApexNonAxisChartSeries;
-  chart: ApexChart;
-  labels: string[];
-  legend: ApexLegend;
-};
-
 @Component({
     selector: 'app-security',
     templateUrl: './security.component.html',
-    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, HoldingComponent, TransactionComponent, InterestComponent, CurrencyPipe, DecimalPipe, ChartComponent, FileUpload, Toast]
+    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, HoldingComponent, TransactionComponent, InterestComponent, CurrencyPipe, DecimalPipe, AllocationDonutComponent, AlignToTableDirective, FileUpload, Toast]
 })
 export class SecurityComponent implements OnInit {
 
@@ -48,18 +43,7 @@ export class SecurityComponent implements OnInit {
   totalInterest: number = 0;
   expectedRate: number = 0;
 
-  allocationChartOptions: Partial<AllocationChartOptions> = {
-    series: [],
-    chart: {
-      type: 'pie',
-      width: '100%',
-      height: 500
-    },
-    labels: [],
-    legend: {
-      position: 'bottom'
-    }
-  };
+  allocationItems: AllocationItem[] = [];
 
   selectedCurrency: string = DEFAULT_CURRENCY;
 
@@ -235,8 +219,7 @@ export class SecurityComponent implements OnInit {
     });
     this.expectedRate = quantity === 0 ? 0 : weighted / quantity;
 
-    this.allocationChartOptions.series = this.transactions.map(t => this.convert(t.amount, t.currencyId));
-    this.allocationChartOptions.labels = this.transactions.map(t => t.securityName);
+    this.allocationItems = this.transactions.map(t => ({ label: t.securityId, value: this.convert(t.zeroCoupon ? t.amount : t.quantity, t.currencyId) }));
 
     this.holding?.markForCheck();
   }

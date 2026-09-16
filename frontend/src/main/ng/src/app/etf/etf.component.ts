@@ -12,23 +12,19 @@ import { EtfholdingComponent } from './etfholding/etfholding.component';
 import { EtfpositionComponent } from './etfposition/etfposition.component';
 import { EtfinvestmentComponent } from './etfinvestment/etfinvestment.component';
 import { EtfdividendComponent } from './etfdividend/etfdividend.component';
-import { DecimalPipe, CurrencyPipe } from '@angular/common';
-import { ChartComponent, ApexChart, ApexNonAxisChartSeries, ApexLegend } from 'ng-apexcharts';
+import { DecimalPipe, CurrencyPipe, NgClass } from '@angular/common';
+import { AllocationItem } from '../util/allocation';
+import { AllocationDonutComponent } from '../util/allocation-donut.component';
+import { AlignToTableDirective } from '../util/align-to-table.directive';
 import { DashboardService } from '../service/dashboard.service';
 import { UserService } from '../service/user.service';
 import { DEFAULT_CURRENCY } from '../model/currency';
-
-export type AllocationChartOptions = {
-  series: ApexNonAxisChartSeries;
-  chart: ApexChart;
-  labels: string[];
-  legend: ApexLegend;
-};
+import { AccountTotals, calculateAccountTotals } from '../util/accounttotals';
 
 @Component({
     selector: 'app-etf',
     templateUrl: './etf.component.html',
-    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, EtfholdingComponent, EtfpositionComponent, EtfinvestmentComponent, EtfdividendComponent, DecimalPipe, CurrencyPipe, ChartComponent]
+    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, EtfholdingComponent, EtfpositionComponent, EtfinvestmentComponent, EtfdividendComponent, DecimalPipe, CurrencyPipe, NgClass, AllocationDonutComponent, AlignToTableDirective]
 })
 export class EtfComponent implements OnInit {
 
@@ -44,6 +40,8 @@ export class EtfComponent implements OnInit {
   percentage: number = 0;
   todayDiff: number = 0;
   todayPercentage: number = 0;
+  accountTotals: AccountTotals[] = [];
+  accountsExpanded: boolean = false;
 
   selectedCurrency: string = DEFAULT_CURRENCY;
 
@@ -54,19 +52,13 @@ export class EtfComponent implements OnInit {
 
   constructor(private dashboardService: DashboardService, private userService: UserService) { }
 
-  allocationChartOptions: Partial<AllocationChartOptions> = {
-    series: [],
-    chart: {
-      type: 'pie',
-      width: '100%'
-    },
-    labels: [],
-    legend: {
-      position: 'bottom'
-    }
-  };
+  allocationItems: AllocationItem[] = [];
 
   ngOnInit(): void {
+  }
+
+  toggleAccounts(): void {
+    this.accountsExpanded = !this.accountsExpanded;
   }
 
   refreshAll(): void {
@@ -151,8 +143,9 @@ export class EtfComponent implements OnInit {
     const previousWorth = this.totalWorth - this.todayDiff;
     this.todayPercentage = previousWorth !== 0 ? this.todayDiff / previousWorth * 100 : 0;
 
-    this.allocationChartOptions.series = this.investments.map(i => this.convert(i.liveValue ?? i.amount, i.currencyId));
-    this.allocationChartOptions.labels = this.investments.map(i => `${i.shortName}.${i.exchange}`);
+    this.allocationItems = this.investments.map(i => ({ label: i.shortName, value: this.convert(i.liveValue ?? i.amount, i.currencyId) }));
+
+    this.accountTotals = calculateAccountTotals(this.investments, (amount, currency) => this.convert(amount, currency));
 
     this.etfholding?.markForCheck();
   }

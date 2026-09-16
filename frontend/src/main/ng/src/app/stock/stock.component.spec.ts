@@ -29,4 +29,14 @@ describe('StockComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('toggles the account breakdown open and closed', () => {
+    expect(component.accountsExpanded).toBe(false);
+
+    component.toggleAccounts();
+    expect(component.accountsExpanded).toBe(true);
+
+    component.toggleAccounts();
+    expect(component.accountsExpanded).toBe(false);
+  });
 });

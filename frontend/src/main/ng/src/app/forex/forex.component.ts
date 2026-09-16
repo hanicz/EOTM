@@ -11,19 +11,14 @@ import { Tooltip } from 'primeng/tooltip';
 import { ForexholdingComponent } from './forexholding/forexholding.component';
 import { ForextransactionComponent } from './forextransaction/forextransaction.component';
 import { DecimalPipe, CurrencyPipe } from '@angular/common';
-import { ChartComponent, ApexChart, ApexNonAxisChartSeries, ApexLegend } from 'ng-apexcharts';
-
-export type AllocationChartOptions = {
-  series: ApexNonAxisChartSeries;
-  chart: ApexChart;
-  labels: string[];
-  legend: ApexLegend;
-};
+import { AllocationItem } from '../util/allocation';
+import { AllocationDonutComponent } from '../util/allocation-donut.component';
+import { AlignToTableDirective } from '../util/align-to-table.directive';
 
 @Component({
     selector: 'app-forex',
     templateUrl: './forex.component.html',
-    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, ForexholdingComponent, ForextransactionComponent, DecimalPipe, CurrencyPipe, ChartComponent]
+    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, ForexholdingComponent, ForextransactionComponent, DecimalPipe, CurrencyPipe, AllocationDonutComponent, AlignToTableDirective]
 })
 export class ForexComponent implements OnInit {
 
@@ -36,17 +31,7 @@ export class ForexComponent implements OnInit {
   diffy: number = 0;
   percentage: number = 0;
 
-  allocationChartOptions: Partial<AllocationChartOptions> = {
-    series: [],
-    chart: {
-      type: 'pie',
-      width: '100%'
-    },
-    labels: [],
-    legend: {
-      position: 'bottom'
-    }
-  };
+  allocationItems: AllocationItem[] = [];
 
   ngOnInit(): void {
   }
@@ -72,8 +57,7 @@ export class ForexComponent implements OnInit {
     this.diffy = this.totalWorth - this.totalSpent;
     this.percentage = this.diffy / this.totalSpent * 100;
 
-    this.allocationChartOptions.series = this.forexTransactions.map(i => i.liveValue ?? i.fromAmount);
-    this.allocationChartOptions.labels = this.forexTransactions.map(i => `${i.fromCurrencyId}/${i.toCurrencyId}`);
+    this.allocationItems = this.forexTransactions.map(i => ({ label: `${i.fromCurrencyId}/${i.toCurrencyId}`, value: i.liveValue ?? i.fromAmount }));
   }
 
 }

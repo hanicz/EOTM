@@ -1,0 +1,49 @@
+@if (slices().length > 0) {
+  <div class="donut-row" [class.donut-row-compact]="compact()" [class.donut-row-stacked]="stacked()"
+    [class.donut-row-clickable]="clickable()">
+    <div class="donut-wrap" (mouseleave)="hover(null)">
+      <svg viewBox="0 0 100 100" class="donut" role="img"
+        [attr.aria-label]="centerLabel() + ' ' + formatCompact(shownTotal())">
+        <circle cx="50" cy="50" [attr.r]="radius" fill="none" class="donut-track" stroke-width="13"></circle>
+        @for (slice of slices(); track slice.label) {
+          <circle cx="50" cy="50" [attr.r]="radius" fill="none" class="donut-segment"
+            [attr.stroke]="slice.color"
+            [attr.stroke-width]="hoveredLabel() === slice.label ? 16 : 13"
+            [class.donut-segment-dim]="hoveredLabel() && hoveredLabel() !== slice.label"
+            [attr.stroke-dasharray]="slice.dashArray" [attr.stroke-dashoffset]="slice.dashOffset"
+            (mouseenter)="hover(slice.label)" (click)="select(slice.label)"></circle>
+        }
+      </svg>
+      <div class="donut-center">
+        @if (hovered(); as slice) {
+          <div class="donut-center-label">{{slice.label}}</div>
+          <div class="donut-center-value">{{formatCompact(slice.value)}}</div>
+          <div class="donut-center-pct">{{slice.percentage | number : '0.0-1'}}%</div>
+        } @else {
+          <div class="donut-center-label">{{centerLabel()}}</div>
+          <div class="donut-center-value">{{formatCompact(shownTotal())}}</div>
+          @if (!compact()) {
+            <div class="donut-center-pct">{{holdingCount()}} {{holdingCount() === 1 ? 'holding' : 'holdings'}}</div>
+          }
+        }
+      </div>
+    </div>
+    <div class="legend">
+      @for (slice of slices(); track slice.label) {
+        <div class="legend-row" [class.legend-row-active]="hoveredLabel() === slice.label"
+          [attr.role]="clickable() ? 'link' : null" [attr.tabindex]="clickable() ? 0 : null"
+          [attr.aria-label]="clickable() ? 'Open ' + slice.label : null"
+          (mouseenter)="hover(slice.label)" (mouseleave)="hover(null)"
+          (focus)="hover(slice.label)" (blur)="hover(null)"
+          (click)="select(slice.label)" (keydown.enter)="select(slice.label)">
+          <span class="legend-dot" [style.background]="slice.color"></span>
+          <span class="legend-label" [attr.title]="slice.label">{{slice.label}}</span>
+          @if (!compact()) {
+            <span class="legend-amount">{{formatCompact(slice.value)}}</span>
+          }
+          <span class="legend-pct">{{slice.percentage | number : '0.0-0'}}%</span>
+        </div>
+      }
+    </div>
+  </div>
+}

@@ -60,6 +60,34 @@ class PensionProjectionServiceTest {
         this.stubSalaries();
     }
 
+    @Test
+    void project_capsTheMinimumAtTheEarningsBase() {
+        PensionScenarioResultDTO result = this.only(this.service.project(USER, this.plan()
+                .currentAge(35).yearsAlreadyWorked(0).stopWorkingAge(55)
+                .currentGrossMonthlyOverride(new BigDecimal("100"))
+                .inflation(BigDecimal.ZERO).build()));
+
+        assertEquals(69.28, result.getMonthlyPension().doubleValue(), TOLERANCE);
+    }
+
+    @Test
+    void project_discountsTheFrozenMinimumToTodaysMoney() {
+        PensionScenarioResultDTO result = this.only(this.service.project(USER, this.plan()
+                .currentAge(35).yearsAlreadyWorked(0).stopWorkingAge(55)
+                .currentGrossMonthlyOverride(new BigDecimal("20000")).build()));
+
+        assertEquals(28_500 / Math.pow(1.03, 30), result.getMonthlyPension().doubleValue(), TOLERANCE);
+    }
+
+    @Test
+    void project_discountsFrozenThresholdsUntilThePensionStarts() {
+        PensionProjectionResultDTO result = this.service.project(USER, this.plan()
+                .currentAge(64).stopWorkingAge(65).retirementAge(65)
+                .degresszio(DegressioMode.FROZEN).build());
+
+        assertEquals(372_000 / 1.03, result.getDegressioLowerThreshold().doubleValue(), TOLERANCE);
+        assertEquals(421_000 / 1.03, result.getDegressioUpperThreshold().doubleValue(), TOLERANCE);
+    }
     private void stubSalaries(Salary... salaries) {
         when(this.salaryRepository.findByUserIdOrderByValidFromDesc(anyLong())).thenReturn(List.of(salaries));
     }
@@ -168,7 +196,8 @@ class PensionProjectionServiceTest {
     void project_liftsAFullPensionToTheStatutoryMinimum() {
         PensionProjectionResultDTO result = this.service.project(USER, this.plan()
                 .currentAge(35).yearsAlreadyWorked(0).stopWorkingAge(55)
-                .currentGrossMonthlyOverride(new BigDecimal("100"))
+                .currentGrossMonthlyOverride(new BigDecimal("50000"))
+                .inflation(BigDecimal.ZERO)
                 .build());
 
         assertEquals(20, result.getServiceYears());

@@ -3,7 +3,6 @@ import { switchMap } from 'rxjs/operators';
 import { MessageService, PrimeTemplate } from 'primeng/api';
 import { FireProjection, FireProjectionInput, FireYear } from '../model/fire';
 import { FireService } from '../service/fire.service';
-import { NetWorthService } from '../service/networth.service';
 import { UserService } from '../service/user.service';
 import { DEFAULT_CURRENCY } from '../model/currency';
 import { MenuComponent } from '../menu/menu.component';
@@ -101,7 +100,6 @@ export class FireComponent {
 
   constructor(
     private fireService: FireService,
-    private netWorthService: NetWorthService,
     private userService: UserService,
     private messageService: MessageService,
     private cdr: ChangeDetectorRef
@@ -138,14 +136,17 @@ export class FireComponent {
     this.userService.getPreferredCurrency().pipe(
       switchMap(currency => {
         this.currency = currency;
-        this.loadDefaultContribution(currency);
-        return this.netWorthService.getNetWorth(currency);
+        return this.fireService.getSnapshot(currency);
       })
     ).subscribe({
       next: (data) => {
-        this.portfolioValue = data.totalWorth;
+        this.portfolioValue = data.netWorth;
         this.unconvertedCurrencies = data.unconvertedCurrencies ?? [];
         this.portfolioLoading = false;
+        if (data.hasCashFlow && data.monthlySavings > 0
+          && this.monthlyContribution === DEFAULT_MONTHLY_CONTRIBUTION) {
+          this.monthlyContribution = Math.round(data.monthlySavings);
+        }
         this.cdr.markForCheck();
       },
       error: (error) => {
@@ -153,20 +154,6 @@ export class FireComponent {
         this.portfolioLoading = false;
         this.showError(error, 'Could not read your portfolio');
         this.cdr.markForCheck();
-      }
-    });
-  }
-
-  private loadDefaultContribution(currency: string): void {
-    this.fireService.getSnapshot(currency).subscribe({
-      next: (data) => {
-        if (!data.hasCashFlow || data.monthlySavings <= 0) return;
-        if (this.monthlyContribution !== DEFAULT_MONTHLY_CONTRIBUTION) return;
-        this.monthlyContribution = Math.round(data.monthlySavings);
-        this.cdr.markForCheck();
-      },
-      error: (error) => {
-        console.log(error);
       }
     });
   }

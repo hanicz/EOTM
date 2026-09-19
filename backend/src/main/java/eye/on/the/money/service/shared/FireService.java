@@ -81,6 +81,9 @@ public class FireService implements ICSVService {
                 ? accumulationOnly
                 : this.simulate(startingValue, assumptions, retirementYear, annualSpending);
 
+        // A fixed retirement age changes the cash flows, so report FI on the actual plan.
+        fiYear = this.firstYearAtTarget(timeline, assumptions);
+
         FireYearDTO last = timeline.getLast();
         Integer depletedAtAge = this.depletedAtAge(timeline);
 
@@ -161,7 +164,7 @@ public class FireService implements ICSVService {
                     // The withdrawal only partly landed; report what was actually taken.
                     withdrawn += balance;
                     balance = 0;
-                    depleted = true;
+                    depleted = !accumulating;
                 }
             }
 
@@ -193,7 +196,6 @@ public class FireService implements ICSVService {
     /** Financial independence is the first year the pot covers the target, in whichever money it was set. */
     private Integer firstYearAtTarget(List<FireYearDTO> timeline, Assumptions assumptions) {
         return timeline.stream()
-                .filter(point -> point.getYear() > 0)
                 .filter(point -> this.measuredBalance(point, assumptions) >= assumptions.fireNumber())
                 .map(FireYearDTO::getYear)
                 .findFirst()

@@ -203,11 +203,14 @@ public class PensionProjectionService implements ICSVService {
         double scalePct = HungarianPensionScale.percentFor(serviceYears);
         double monthlyPension = degressedBase * scalePct / 100;
 
+        // The statutory minimum is nominal at pension commencement, capped by the earnings base.
+        double minimum = Math.min(pensionBase, HungarianPensionScale.MINIMUM_PENSION
+                / Math.pow(1 + assumptions.inflation(), assumptions.retirementYear() - assumptions.currentYear()));
         boolean minimumApplied = serviceYears >= HungarianPensionScale.MIN_SERVICE_YEARS_FULL
                 && monthlyPension > 0
-                && monthlyPension < HungarianPensionScale.MINIMUM_PENSION;
+                && monthlyPension < minimum;
         if (minimumApplied) {
-            monthlyPension = HungarianPensionScale.MINIMUM_PENSION;
+            monthlyPension = minimum;
         }
 
         return new Outcome(serviceYears, scalePct, pensionBase, degressedBase, monthlyPension, finalGross,
@@ -275,7 +278,7 @@ public class PensionProjectionService implements ICSVService {
     private double threshold(double statutory, Assumptions assumptions) {
         int years = Math.max(0, assumptions.valorizationTargetYear() - assumptions.currentYear());
         return (assumptions.degresszio() == DegressioMode.FROZEN)
-                ? statutory / Math.pow(1 + assumptions.inflation(), years)
+                ? statutory / Math.pow(1 + assumptions.inflation(), assumptions.retirementYear() - assumptions.currentYear())
                 : statutory * Math.pow(1 + assumptions.realWageGrowth(), years);
     }
 

@@ -46,6 +46,34 @@ class FireServiceTest {
         this.stubPortfolio(0);
     }
 
+    @Test
+    void project_retiresTodayWhenTheTargetIsAlreadyMet() {
+        this.stubPortfolio(25_000_000);
+        FireProjectionResultDTO result = this.fireService.project(USER, this.plan().build());
+
+        assertEquals(0, result.getFiYear());
+        assertEquals(0, result.getRetirementYear());
+        assertEquals(24_000_000, this.yearOf(result, 1).getBalance().doubleValue(), TOLERANCE);
+    }
+
+    @Test
+    void project_keepsAccumulatingAfterAnEmptyYearUntilPensionStarts() {
+        FireProjectionResultDTO result = this.fireService.project(USER, this.plan()
+                .monthlyPension(BigDecimal.valueOf(100_000)).pensionAge(32).build());
+
+        assertEquals(1_200_000, this.yearOf(result, 2).getBalance().doubleValue(), TOLERANCE);
+        assertTrue(result.isFiReached());
+    }
+
+    @Test
+    void project_doesNotReportAHypotheticalTargetAfterEarlyRetirement() {
+        FireProjectionResultDTO result = this.fireService.project(USER, this.plan()
+                .monthlyContribution(BigDecimal.valueOf(1_000_000)).retirementAge(31).build());
+
+        assertFalse(result.isFiReached());
+        assertNull(result.getFiYear());
+        assertEquals(1, result.getRetirementYear());
+    }
     private void stubPortfolio(double worth) {
         when(this.netWorthService.getNetWorth(anyLong(), any(), anyBoolean())).thenReturn(NetWorthDTO.builder()
                 .currency("HUF")

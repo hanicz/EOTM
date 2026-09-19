@@ -62,7 +62,6 @@ public class BankTransactionDTO implements CSVHelper {
     private Long categoryId;
     private String categoryName;
     private CategoryColor categoryColor;
-    private boolean categoryLocked;
 
     @Override
     @JsonIgnore

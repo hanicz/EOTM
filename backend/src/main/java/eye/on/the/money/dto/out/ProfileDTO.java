@@ -21,7 +21,6 @@ import java.util.List;
 @Generated
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ProfileDTO {
-    private String country;
     private String currency;
     private String exchange;
     private String finnhubIndustry;

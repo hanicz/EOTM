@@ -81,6 +81,11 @@ export class EquityStarComponent {
     return granted > 0 ? this.vestedUnits(grant) / granted * 100 : 0;
   }
 
+  isFullyVested(grant: STARGrant): boolean {
+    const vests = grant.vests ?? [];
+    return vests.length > 0 && vests.every(vest => vest.vested);
+  }
+
   applyAllLabel(): string {
     const name = this.grant.name?.trim();
     return name ? `Apply this current value to every STAR named ${name}`

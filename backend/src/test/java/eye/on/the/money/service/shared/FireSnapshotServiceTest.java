@@ -14,6 +14,7 @@ import org.mockito.quality.Strictness;
 
 import java.math.BigDecimal;
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -84,19 +85,15 @@ class FireSnapshotServiceTest {
     }
 
     @Test
-    void snapshot_averagesThreeCompleteMonths() {
+    void snapshot_averagesTheCompleteMonthsItHas() {
         this.stubSteadyHufMonths(2_000_000, -1_200_000);
 
         FireSnapshotDTO snapshot = this.snapshotService.snapshot(USER, "HUF", TODAY);
 
         assertTrue(snapshot.isHasCashFlow());
         assertEquals(3, snapshot.getMonthsCounted());
-        assertEquals(2_000_000, snapshot.getMonthlyIncome().doubleValue(), TOLERANCE);
-        assertEquals(1_200_000, snapshot.getMonthlySpending().doubleValue(), TOLERANCE);
         assertEquals(800_000, snapshot.getMonthlySavings().doubleValue(), TOLERANCE);
         assertEquals(40, snapshot.getSavingsRatePct().doubleValue(), TOLERANCE);
-        assertEquals("2026-01", snapshot.getWindowStart());
-        assertEquals("2026-03", snapshot.getWindowEnd());
     }
 
     @Test
@@ -148,8 +145,7 @@ class FireSnapshotServiceTest {
         FireSnapshotDTO snapshot = this.snapshotService.snapshot(USER, "HUF", TODAY);
 
         assertEquals(3, snapshot.getMonthsCounted());
-        assertEquals("2026-03", snapshot.getWindowEnd());
-        assertEquals(2_000_000, snapshot.getMonthlyIncome().doubleValue(), TOLERANCE);
+        assertEquals(800_000, snapshot.getMonthlySavings().doubleValue(), TOLERANCE);
     }
 
     @Test
@@ -163,8 +159,24 @@ class FireSnapshotServiceTest {
 
         assertTrue(snapshot.isHasCashFlow());
         assertEquals(3, snapshot.getMonthsCounted());
-        assertEquals("2025-06", snapshot.getWindowStart());
-        assertEquals("2025-08", snapshot.getWindowEnd());
+        assertEquals(400_000, snapshot.getMonthlySavings().doubleValue(), TOLERANCE);
+    }
+
+    @Test
+    void snapshot_averagesAtMostTheNewestTwelveMonths() {
+        List<MonthlyCashFlowDTO> rows = new ArrayList<>();
+        for (int back = 0; back < 12; back++) {
+            YearMonth month = YearMonth.of(2026, 3).minusMonths(back);
+            rows.add(this.month(month.getYear(), month.getMonthValue(), "HUF", 2_000_000, -1_200_000));
+        }
+        rows.add(this.month(2025, 3, "HUF", 10_000_000, -9_000_000));
+        this.stubCashFlow(rows.toArray(new MonthlyCashFlowDTO[0]));
+
+        FireSnapshotDTO snapshot = this.snapshotService.snapshot(USER, "HUF", TODAY);
+
+        assertEquals(12, snapshot.getMonthsCounted());
+        assertEquals(800_000, snapshot.getMonthlySavings().doubleValue(), TOLERANCE);
+        assertEquals(40, snapshot.getSavingsRatePct().doubleValue(), TOLERANCE);
     }
 
     @Test
@@ -176,8 +188,8 @@ class FireSnapshotServiceTest {
         FireSnapshotDTO snapshot = this.snapshotService.snapshot(USER, "HUF", TODAY);
 
         assertEquals(2, snapshot.getMonthsCounted());
-        assertEquals(1_500_000, snapshot.getMonthlyIncome().doubleValue(), TOLERANCE);
-        assertEquals(750_000, snapshot.getMonthlySpending().doubleValue(), TOLERANCE);
+        assertEquals(750_000, snapshot.getMonthlySavings().doubleValue(), TOLERANCE);
+        assertEquals(50, snapshot.getSavingsRatePct().doubleValue(), TOLERANCE);
     }
 
     @Test
@@ -191,7 +203,7 @@ class FireSnapshotServiceTest {
         FireSnapshotDTO snapshot = this.snapshotService.snapshot(USER, "HUF", TODAY);
 
         assertEquals(3, snapshot.getMonthsCounted());
-        assertEquals(2_000_000, snapshot.getMonthlyIncome().doubleValue(), TOLERANCE);
+        assertEquals(800_000, snapshot.getMonthlySavings().doubleValue(), TOLERANCE);
         assertEquals(List.of("EUR"), snapshot.getIgnoredCurrencies());
     }
 
@@ -281,7 +293,6 @@ class FireSnapshotServiceTest {
         FireSnapshotDTO snapshot = this.snapshotService.snapshot(USER, "HUF", TODAY);
 
         assertEquals(22, snapshot.getYearsToFire());
-        assertEquals(90, snapshot.getHorizonYears());
     }
 
     @Test
@@ -290,8 +301,7 @@ class FireSnapshotServiceTest {
 
         FireSnapshotDTO snapshot = this.snapshotService.snapshot(USER, "HUF", TODAY);
 
-        assertEquals(5, snapshot.getAnnualReturn().doubleValue(), TOLERANCE);
+        assertEquals(5.5, snapshot.getAnnualReturn().doubleValue(), TOLERANCE);
         assertEquals(2.5, snapshot.getAnnualContributionIncrease().doubleValue(), TOLERANCE);
-        assertEquals(3, snapshot.getInflation().doubleValue(), TOLERANCE);
     }
 }

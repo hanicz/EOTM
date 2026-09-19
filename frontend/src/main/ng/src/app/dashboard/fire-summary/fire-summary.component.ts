@@ -8,7 +8,7 @@ import { UserService } from '../../service/user.service';
 import { FireSnapshot } from '../../model/fire';
 import { DEFAULT_CURRENCY } from '../../model/currency';
 
-const FULL_WINDOW_MONTHS = 3;
+const FULL_WINDOW_MONTHS = 12;
 const SKELETON_STATS = 3;
 
 @Component({

@@ -118,7 +118,7 @@ class WatchlistControllerTest {
     @Test
     public void createStockWatchInAGroup() {
         Stock stock = Stock.builder().shortName("s1").exchange("e1").id("i1").build();
-        StockWatchDTO sDTO = StockWatchDTO.builder().tickerWatchId(1L).stockShortName("s1").groupId(5L).groupName("Tech").build();
+        StockWatchDTO sDTO = StockWatchDTO.builder().tickerWatchId(1L).stockShortName("s1").groupId(5L).build();
 
         when(this.watchlistService.createNewStockWatch(this.user.getId(), stock, 5L)).thenReturn(sDTO);
 
@@ -127,7 +127,7 @@ class WatchlistControllerTest {
 
     @Test
     public void setStockWatchGroup() {
-        StockWatchDTO sDTO = StockWatchDTO.builder().tickerWatchId(1L).groupId(5L).groupName("Tech").build();
+        StockWatchDTO sDTO = StockWatchDTO.builder().tickerWatchId(1L).groupId(5L).build();
 
         when(this.watchlistService.setStockWatchGroup(this.user.getId(), 1L, 5L)).thenReturn(sDTO);
 

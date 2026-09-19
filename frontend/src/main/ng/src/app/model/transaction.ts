@@ -4,7 +4,6 @@ export interface Transaction {
     buySell: string;
     transactionDate: Date;
     symbol: string;
-    transactionString?: string;
     amount: number;
     currencyId: string;
     liveValue?: number;

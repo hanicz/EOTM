@@ -22,5 +22,4 @@ public class StockWatchDTO {
     private Double change;
     private Double pChange;
     private Long groupId;
-    private String groupName;
 }

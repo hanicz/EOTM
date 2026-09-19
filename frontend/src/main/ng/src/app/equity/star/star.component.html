@@ -65,7 +65,7 @@
   </ng-template>
 
   <ng-template pTemplate="body" let-grant let-expanded="expanded">
-    <tr>
+    <tr [class.grant-fully-vested]="isFullyVested(grant)">
       <td>
         <p-tableCheckbox [value]="grant"></p-tableCheckbox>
       </td>
@@ -87,7 +87,15 @@
       <td data-label="Units" class="cell-num">{{grant.quantity | number}}</td>
       <td data-label="Vested" class="cell-num">
         {{vestedUnits(grant) | number}}
-        <span class="cell-sub">{{vestedPercentage(grant) | number:'1.0-0'}}%</span>
+        <span class="vest-meter" [class.vest-meter-full]="isFullyVested(grant)">
+          <span class="vest-meter-fill" [style.width.%]="vestedPercentage(grant)"></span>
+        </span>
+        @if (isFullyVested(grant)) {
+          <span class="state-chip state-buy vest-complete"
+            pTooltip="Every unit in this grant has vested."><i class="pi pi-check-circle"></i>Fully vested</span>
+        } @else {
+          <span class="cell-sub">{{vestedPercentage(grant) | number:'1.0-0'}}%</span>
+        }
       </td>
       <td data-label="Grant FMV" class="cell-num">{{grant.baseValue | number:'1.2-2'}} {{grant.currency}}</td>
       <td data-label="Current value" class="cell-num">{{grant.currentValue | number:'1.2-2'}} {{grant.currency}}</td>

@@ -95,9 +95,7 @@ public class FireService implements ICSVService {
                 .fireNumber(this.scaled(assumptions.fireNumber()))
                 .fireNumberInTodaysMoney(assumptions.targetInTodaysMoney())
                 .annualSpending(this.scaled(annualSpending))
-                .firstYearWithdrawal(this.scaled(this.firstYearWithdrawal(assumptions, retirementYear, annualSpending)))
                 .withdrawalRate(this.scaled(assumptions.withdrawalRate()))
-                .fireNumberOverridden(assumptions.fireNumberOverridden())
                 .fiReached(fiYear != null)
                 .fiYear(fiYear)
                 .fiAge((fiYear == null) ? null : assumptions.currentAge() + fiYear)
@@ -107,7 +105,6 @@ public class FireService implements ICSVService {
                 .depletedAtAge(depletedAtAge)
                 .lastsThroughRetirement(depletedAtAge == null)
                 .finalAge(last.getAge())
-                .finalBalance(last.getBalance())
                 .finalRealBalance(last.getRealBalance())
                 .build();
     }
@@ -221,12 +218,6 @@ public class FireService implements ICSVService {
         return atRetirement / Math.pow(1 + assumptions.inflation() / 100.0, years);
     }
 
-    /** The cash actually drawn in the first year of retirement, in the money of that year. */
-    private double firstYearWithdrawal(Assumptions assumptions, Integer retirementYear, double annualSpending) {
-        if (retirementYear == null) return 0;
-        return annualSpending * Math.pow(1 + assumptions.inflation() / 100.0, retirementYear + 1);
-    }
-
     /**
      * A stated retirement age wins; otherwise retirement happens as soon as the target is cleared. Null means
      * no drawdown to model, because the plan never gets there.
@@ -321,7 +312,6 @@ public class FireService implements ICSVService {
                 annualSpending,
                 withdrawalRate,
                 fireNumber,
-                overridden,
                 !overridden,
                 monthlyPension,
                 pensionStartYear,
@@ -351,7 +341,7 @@ public class FireService implements ICSVService {
     /** The request once defaults are filled in and the target has been resolved, in plain numbers. */
     private record Assumptions(double otherAssets, double monthlyContribution, double contributionIncrease,
                                double annualReturn, double inflation, double annualSpending,
-                               double withdrawalRate, double fireNumber, boolean fireNumberOverridden,
+                               double withdrawalRate, double fireNumber,
                                boolean targetInTodaysMoney, double monthlyPension, Integer pensionStartYear,
                                double unemploymentBenefit, int currentAge, Integer retirementAge,
                                int horizon) {

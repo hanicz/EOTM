@@ -15,7 +15,6 @@ export interface BankTransaction {
     categoryId: number | null;
     categoryName: string | null;
     categoryColor: CategoryColor | null;
-    categoryLocked: boolean;
 }
 
 export interface MonthlyCashFlow {
@@ -36,7 +35,6 @@ export interface YearlyCashFlow {
     monthsCounted: number;
     net: number;
     savedPercent: number | null;
-    averageMonthlyNet: number | null;
     averageMonthlySpending: number | null;
 }
 

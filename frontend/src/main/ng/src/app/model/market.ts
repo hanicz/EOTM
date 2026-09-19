@@ -9,7 +9,6 @@ export interface MarketExchange {
   name: string;
   timeZone: string;
   currency: string;
-  countryISO2: string;
   openTime: string;
   closeTime: string;
   holidays: MarketHoliday[];

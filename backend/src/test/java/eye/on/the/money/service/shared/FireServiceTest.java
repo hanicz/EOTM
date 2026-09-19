@@ -94,7 +94,7 @@ class FireServiceTest {
 
         // 4,000,000 / 4% = 100,000,000
         assertEquals(0, result.getFireNumber().compareTo(new BigDecimal("100000000.00")));
-        assertFalse(result.isFireNumberOverridden());
+        assertTrue(result.isFireNumberInTodaysMoney());
     }
 
     @Test
@@ -105,7 +105,7 @@ class FireServiceTest {
 
         assertEquals(0, result.getFireNumber().compareTo(new BigDecimal("50000000.00")));
         assertEquals(0, result.getAnnualSpending().compareTo(new BigDecimal("2000000.00")));
-        assertTrue(result.isFireNumberOverridden());
+        assertFalse(result.isFireNumberInTodaysMoney());
     }
 
     @Test
@@ -329,11 +329,10 @@ class FireServiceTest {
         // over those five years that is 6,000,000 / 1.1^5.
         assertEquals(5, result.getRetirementYear());
         assertEquals(3_725_528.05, result.getAnnualSpending().doubleValue(), 1.0);
-        assertEquals(6_600_000, result.getFirstYearWithdrawal().doubleValue(), 1.0);
     }
 
     @Test
-    void project_drawsTheReportedFirstYearAmountInTheFirstYearOfRetirement() {
+    void project_drawsTheInflatedIncomeInTheFirstYearOfRetirement() {
         this.stubPortfolio(100_000_000);
 
         FireProjectionResultDTO result = this.fireService.project(USER,
@@ -342,8 +341,7 @@ class FireServiceTest {
 
         FireYearDTO firstRetired = this.yearOf(result, result.getRetirementYear() + 1);
         assertEquals("DRAWDOWN", firstRetired.getPhase());
-        assertEquals(result.getFirstYearWithdrawal().doubleValue(),
-                firstRetired.getWithdrawals().doubleValue(), 1.0);
+        assertEquals(6_600_000, firstRetired.getWithdrawals().doubleValue(), 1.0);
     }
 
     @Test

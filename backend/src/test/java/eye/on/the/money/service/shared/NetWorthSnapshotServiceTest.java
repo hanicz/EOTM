@@ -168,7 +168,6 @@ class NetWorthSnapshotServiceTest {
         MonthlyPerformanceDTO august = months.getFirst();
         assertEquals("2026-08", august.getMonth());
         assertEquals(new BigDecimal("2100.00"), august.getEndWorth());
-        assertEquals(new BigDecimal("1900.00"), august.getEndSpent());
         assertEquals(new BigDecimal("500.00"), august.getChange());
         assertEquals(new BigDecimal("31.25"), august.getChangePct());
         assertEquals(new BigDecimal("400.00"), august.getContributions());

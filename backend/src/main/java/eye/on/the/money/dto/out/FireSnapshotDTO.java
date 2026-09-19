@@ -30,10 +30,6 @@ public class FireSnapshotDTO {
 
     private boolean fiReached;
 
-    private BigDecimal monthlyIncome;
-
-    private BigDecimal monthlySpending;
-
     private BigDecimal monthlySavings;
 
     private BigDecimal savingsRatePct;
@@ -41,16 +37,10 @@ public class FireSnapshotDTO {
     private BigDecimal withdrawalRate;
     private BigDecimal annualReturn;
     private BigDecimal annualContributionIncrease;
-    private BigDecimal inflation;
-
-    private int horizonYears;
 
     private boolean hasCashFlow;
 
     private int monthsCounted;
-
-    private String windowStart;
-    private String windowEnd;
 
     private List<String> ignoredCurrencies;
 

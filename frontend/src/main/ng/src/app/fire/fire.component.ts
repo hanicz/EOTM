@@ -51,6 +51,8 @@ interface Chart {
 /** The plot area inside the SVG viewBox, leaving room for the axis labels. */
 const CHART = { width: 820, height: 340, left: 68, right: 16, top: 16, bottom: 30 };
 
+const DEFAULT_MONTHLY_CONTRIBUTION = 1200000;
+
 @Component({
     selector: 'app-fire',
     templateUrl: './fire.component.html',
@@ -69,9 +71,9 @@ export class FireComponent {
   unconvertedCurrencies: string[] = [];
 
   otherAssets: number = 0;
-  monthlyContribution: number = 1200000;
+  monthlyContribution: number = DEFAULT_MONTHLY_CONTRIBUTION;
   annualContributionIncrease: number = 3;
-  annualReturn: number = 4;
+  annualReturn: number = 5.5;
   inflation: number = 3;
 
   annualSpending: number = 6000000;
@@ -136,6 +138,7 @@ export class FireComponent {
     this.userService.getPreferredCurrency().pipe(
       switchMap(currency => {
         this.currency = currency;
+        this.loadDefaultContribution(currency);
         return this.netWorthService.getNetWorth(currency);
       })
     ).subscribe({
@@ -150,6 +153,20 @@ export class FireComponent {
         this.portfolioLoading = false;
         this.showError(error, 'Could not read your portfolio');
         this.cdr.markForCheck();
+      }
+    });
+  }
+
+  private loadDefaultContribution(currency: string): void {
+    this.fireService.getSnapshot(currency).subscribe({
+      next: (data) => {
+        if (!data.hasCashFlow || data.monthlySavings <= 0) return;
+        if (this.monthlyContribution !== DEFAULT_MONTHLY_CONTRIBUTION) return;
+        this.monthlyContribution = Math.round(data.monthlySavings);
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.log(error);
       }
     });
   }

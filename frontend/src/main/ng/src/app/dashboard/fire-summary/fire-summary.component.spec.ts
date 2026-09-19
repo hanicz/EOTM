@@ -23,19 +23,13 @@ describe('FireSummaryComponent', () => {
     progressPct: 20,
     yearsToFire: 25,
     fiReached: false,
-    monthlyIncome: 2000000,
-    monthlySpending: 1200000,
     monthlySavings: 800000,
     savingsRatePct: 40,
     withdrawalRate: 3,
-    annualReturn: 5,
+    annualReturn: 5.5,
     annualContributionIncrease: 2.5,
-    inflation: 3,
-    horizonYears: 90,
     hasCashFlow: true,
-    monthsCounted: 3,
-    windowStart: '2026-01',
-    windowEnd: '2026-03',
+    monthsCounted: 12,
     ignoredCurrencies: [],
     unconvertedCurrencies: [],
     ...overrides
@@ -105,6 +99,12 @@ describe('FireSummaryComponent', () => {
     load({ monthsCounted: 2 });
 
     expect(component.notes()).toContain('Based on 2 months');
+  });
+
+  it('says nothing about the window when a full year was counted', () => {
+    load();
+
+    expect(component.notes()).toEqual([]);
   });
 
   it('notes a target that was derived rather than fixed', () => {

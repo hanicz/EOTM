@@ -14,7 +14,6 @@ export interface ETFInvestment {
     dayChange?: number;
     dayChangePercent?: number;
     fee: number;
-    eodDate: Date;
     accountId: number;
     accountName: string;
 }

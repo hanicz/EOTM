@@ -145,7 +145,6 @@ public class NetWorthSnapshotService {
         return MonthlyPerformanceDTO.builder()
                 .month(month.toString())
                 .endWorth(end.getTotalWorth())
-                .endSpent(end.getTotalSpent())
                 .change(change)
                 .changePct(this.pct(change, start.getTotalWorth()))
                 .contributions(contributions)

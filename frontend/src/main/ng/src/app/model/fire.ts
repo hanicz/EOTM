@@ -43,9 +43,7 @@ export interface FireProjection {
     fireNumber: number;
     annualSpending: number;
     withdrawalRate: number;
-    fireNumberOverridden: boolean;
     fireNumberInTodaysMoney: boolean;
-    firstYearWithdrawal: number;
 
     fiReached: boolean;
     fiYear: number | null;
@@ -60,7 +58,6 @@ export interface FireProjection {
     lastsThroughRetirement: boolean;
 
     finalAge: number;
-    finalBalance: number;
     finalRealBalance: number;
 }
 
@@ -74,21 +71,15 @@ export interface FireSnapshot {
     yearsToFire: number | null;
     fiReached: boolean;
 
-    monthlyIncome: number;
-    monthlySpending: number;
     monthlySavings: number;
     savingsRatePct: number | null;
 
     withdrawalRate: number;
     annualReturn: number;
     annualContributionIncrease: number;
-    inflation: number;
-    horizonYears: number;
 
     hasCashFlow: boolean;
     monthsCounted: number;
-    windowStart: string | null;
-    windowEnd: string | null;
 
     ignoredCurrencies: string[];
     unconvertedCurrencies: string[];

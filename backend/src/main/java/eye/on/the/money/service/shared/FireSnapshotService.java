@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.YearMonth;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -49,20 +48,14 @@ public class FireSnapshotService {
 
         FireSnapshotDTO.FireSnapshotDTOBuilder snapshot = FireSnapshotDTO.builder()
                 .currency(target)
-                .monthlyIncome(this.scaled(averages.income()))
-                .monthlySpending(this.scaled(averages.spending()))
                 .monthlySavings(this.scaled(averages.savings()))
                 .savingsRatePct(averages.income() == 0 ? null
                         : this.scaled(averages.savings() / averages.income() * 100))
                 .withdrawalRate(this.scaled(FireDefaults.SNAPSHOT_WITHDRAWAL_RATE))
                 .annualReturn(this.scaled(FireDefaults.ANNUAL_RETURN))
                 .annualContributionIncrease(this.scaled(FireDefaults.SNAPSHOT_CONTRIBUTION_INCREASE))
-                .inflation(this.scaled(FireDefaults.INFLATION))
-                .horizonYears(FireDefaults.LIFE_EXPECTANCY - FireDefaults.SNAPSHOT_AGE)
                 .hasCashFlow(!window.isEmpty())
                 .monthsCounted(averages.months())
-                .windowStart(this.label(window, Comparator.comparingInt(this::monthIndex)))
-                .windowEnd(this.label(window, Comparator.comparingInt(this::monthIndex).reversed()))
                 .ignoredCurrencies(this.ignored(
                         window.isEmpty() ? complete : this.inSameMonths(complete, window), target));
 
@@ -185,13 +178,6 @@ public class FireSnapshotService {
                 .collect(Collectors.toCollection(TreeSet::new))
                 .stream()
                 .toList();
-    }
-
-    private String label(List<MonthlyCashFlowDTO> window, Comparator<MonthlyCashFlowDTO> order) {
-        return window.stream()
-                .min(order)
-                .map(row -> String.format("%04d-%02d", row.getYear(), row.getMonth()))
-                .orElse(null);
     }
 
     private int monthIndex(MonthlyCashFlowDTO row) {

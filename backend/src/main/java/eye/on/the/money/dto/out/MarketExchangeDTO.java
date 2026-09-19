@@ -20,7 +20,6 @@ public class MarketExchangeDTO {
     private String name;
     private String timeZone;
     private String currency;
-    private String countryISO2;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     private LocalTime openTime;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")

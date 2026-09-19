@@ -16,7 +16,6 @@ export interface NetWorthPoint {
 export interface MonthlyPerformance {
     month: string;
     endWorth: number;
-    endSpent: number;
     change: number;
     changePct: number | null;
     contributions: number;

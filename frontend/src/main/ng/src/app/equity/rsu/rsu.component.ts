@@ -80,6 +80,11 @@ export class EquityRsuComponent {
     return granted > 0 ? this.vestedShares(grant) / granted * 100 : 0;
   }
 
+  isFullyVested(grant: RSUGrant): boolean {
+    const vests = grant.vests ?? [];
+    return vests.length > 0 && vests.every(vest => vest.vested);
+  }
+
   openNew(): void {
     this.grant = this.emptyGrant();
     this.selectedStock = {} as Symbol;

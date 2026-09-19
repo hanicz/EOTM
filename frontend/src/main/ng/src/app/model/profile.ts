@@ -1,5 +1,4 @@
 export interface Profile {
-    country: string;
     currency: string;
     exchange: string;
     finnhubIndustry: string;

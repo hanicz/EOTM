@@ -63,7 +63,6 @@ class StockMetricAPIServiceTest {
         ProfileDTO result = service.getProfile("AAPL");
 
         assertNotNull(result);
-        assertEquals("US", result.getCountry());
         assertEquals("USD", result.getCurrency());
         assertEquals("Apple Inc", result.getName());
         assertEquals("AAPL", result.getTicker());

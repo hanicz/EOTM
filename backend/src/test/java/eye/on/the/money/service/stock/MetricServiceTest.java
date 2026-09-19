@@ -33,7 +33,7 @@ class MetricServiceTest {
 
     @Test
     public void getProfileBySymbol() {
-        ProfileDTO profileDTO = ProfileDTO.builder().ipo(LocalDate.now()).country("country").logo("logo")
+        ProfileDTO profileDTO = ProfileDTO.builder().ipo(LocalDate.now()).logo("logo")
                 .name("name").currency("currency").exchange("exchange").finnhubIndustry("industry")
                 .marketCapitalization(1.0).ticker("ticket").weburl("webUrl").shareOutstanding(1L).build();
         String[] peers = new String[]{"peer1", "peer2"};

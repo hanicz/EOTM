@@ -41,7 +41,6 @@ public class MarketService {
                 .name(exchange.getName())
                 .timeZone(exchange.getTimeZone())
                 .currency(exchange.getCurrency())
-                .countryISO2(exchange.getCountryISO2())
                 .openTime(exchange.getOpenTime())
                 .closeTime(exchange.getCloseTime())
                 .holidays(holidays)

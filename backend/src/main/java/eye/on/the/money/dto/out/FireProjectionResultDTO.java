@@ -44,12 +44,6 @@ public class FireProjectionResultDTO {
     private BigDecimal annualSpending;
     private BigDecimal withdrawalRate;
 
-    /** The cash actually drawn in the first year of retirement, in the money of that year. */
-    private BigDecimal firstYearWithdrawal;
-
-    /** True when the FIRE number was supplied directly rather than derived from spending. */
-    private boolean fireNumberOverridden;
-
     /** Whether the target is reached inside the plan, on whichever basis {@link #fireNumberInTodaysMoney} sets. */
     private boolean fiReached;
     private Integer fiYear;
@@ -65,6 +59,5 @@ public class FireProjectionResultDTO {
     private boolean lastsThroughRetirement;
 
     private Integer finalAge;
-    private BigDecimal finalBalance;
     private BigDecimal finalRealBalance;
 }

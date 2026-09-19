@@ -550,6 +550,35 @@ html, body {
     padding: 0.5rem 1rem 1rem 1rem;
 }
 
+.vest-meter {
+    display: block;
+    width: 4.5rem;
+    height: 0.3rem;
+    margin: 0.25rem 0 0.15rem auto;
+    border-radius: 3px;
+    background-color: rgba(95, 94, 90, 0.16);
+    overflow: hidden;
+}
+
+.vest-meter-fill {
+    display: block;
+    height: 100%;
+    border-radius: 3px;
+    background-color: #ef9f27;
+}
+
+.vest-meter-full .vest-meter-fill {
+    background-color: #14713f;
+}
+
+.vest-complete .pi {
+    font-size: 0.7rem;
+}
+
+.p-datatable-tbody > tr.grant-fully-vested > td:first-child {
+    box-shadow: inset 3px 0 0 0 #14713f;
+}
+
 .p-datatable-tbody > tr > td.month-header {
     background: var(--p-content-hover-background);
     font-weight: 700;
@@ -758,6 +787,24 @@ menu {
 
     .table-stack .p-datatable-tbody > tr > td > .cell-sub {
         flex: 0 0 100%;
+    }
+
+    .table-stack .p-datatable-tbody > tr > td > .vest-meter {
+        flex: 0 0 100%;
+        width: auto;
+        margin: 0.25rem 0 0.15rem 0;
+    }
+
+    .table-stack .p-datatable-tbody > tr > td > .vest-complete {
+        margin-left: auto;
+    }
+
+    .table-stack .p-datatable-tbody > tr.grant-fully-vested {
+        border-left: 3px solid #14713f;
+    }
+
+    .table-stack .p-datatable-tbody > tr.grant-fully-vested > td:first-child {
+        box-shadow: none;
     }
 
     .filter-bar > * {

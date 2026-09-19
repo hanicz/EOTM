@@ -1,10 +1,15 @@
 package eye.on.the.money.controller;
 
+import eye.on.the.money.dto.in.PensionProjectionDTO;
+import eye.on.the.money.dto.in.PensionScenarioInputDTO;
 import eye.on.the.money.dto.in.SalaryEditDTO;
+import eye.on.the.money.dto.out.PensionProjectionResultDTO;
 import eye.on.the.money.dto.out.SalaryDTO;
 import eye.on.the.money.dto.out.SalaryRaiseDTO;
 import eye.on.the.money.dto.out.SalaryRaiseScenarioDTO;
+import eye.on.the.money.model.salary.PensionScenarioType;
 import eye.on.the.money.model.salary.SalaryBasis;
+import eye.on.the.money.service.salary.PensionProjectionService;
 import eye.on.the.money.service.salary.SalaryService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,8 +18,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -22,6 +30,9 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,6 +45,9 @@ class SalaryControllerTest {
 
     @Mock
     private SalaryService salaryService;
+
+    @Mock
+    private PensionProjectionService pensionProjectionService;
 
     @InjectMocks
     private SalaryController salaryController;
@@ -111,5 +125,38 @@ class SalaryControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(this.salaryService).deleteSalariesByIds(USER_ID, List.of(1L, 2L));
+    }
+
+    private PensionProjectionDTO pensionInput() {
+        return PensionProjectionDTO.builder().currentAge(35).stopWorkingAge(50).retirementAge(65)
+                .yearsAlreadyWorked(10)
+                .scenarios(List.of(new PensionScenarioInputDTO("Frozen", PensionScenarioType.REAL_FLAT,
+                        null, null)))
+                .build();
+    }
+
+    @Test
+    void projectPension_returnsTheProjection() {
+        PensionProjectionDTO input = this.pensionInput();
+        when(this.pensionProjectionService.project(USER_ID, input)).thenReturn(
+                PensionProjectionResultDTO.builder().currency("HUF").serviceYears(25).gapYears(15).build());
+
+        ResponseEntity<PensionProjectionResultDTO> response =
+                this.salaryController.projectPension(USER_ID, input);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(25, response.getBody().getServiceYears());
+        assertEquals(15, response.getBody().getGapYears());
+    }
+
+    @Test
+    void getPensionCSV_namesTheDownloadAndHandsTheWriterToTheService() throws IOException {
+        PensionProjectionDTO input = this.pensionInput();
+        MockHttpServletResponse servletResponse = new MockHttpServletResponse();
+
+        this.salaryController.getPensionCSV(USER_ID, input, servletResponse);
+
+        assertTrue(servletResponse.getHeader("Content-Disposition").contains("pension-projection.csv"));
+        verify(this.pensionProjectionService).getCSV(eq(USER_ID), eq(input), any(Writer.class));
     }
 }

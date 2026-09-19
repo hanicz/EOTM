@@ -30,9 +30,7 @@ public class SalaryDTO {
     private BigDecimal grossAnnual;
     private BigDecimal netMonthly;
     private BigDecimal netAnnual;
-    private BigDecimal szjaMonthly;
     private BigDecimal szjaAnnual;
-    private BigDecimal tbMonthly;
     private BigDecimal tbAnnual;
     private BigDecimal familyAllowanceMonthly;
     private boolean familyAllowanceApplied;

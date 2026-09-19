@@ -188,7 +188,6 @@ public class WatchListService {
         StockWatchDTO dto = this.modelMapper.map(tickerWatch, StockWatchDTO.class);
         WatchGroup group = tickerWatch.getGroup();
         dto.setGroupId(group == null ? null : group.getId());
-        dto.setGroupName(group == null ? null : group.getName());
         return dto;
     }
 

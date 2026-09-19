@@ -11,5 +11,4 @@ import lombok.*;
 @Generated
 public class TaxEntry {
     private Long investmentId;
-    private Integer quantityUsed;
 }

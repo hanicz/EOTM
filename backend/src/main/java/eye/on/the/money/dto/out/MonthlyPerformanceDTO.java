@@ -18,7 +18,6 @@ public class MonthlyPerformanceDTO {
     private String month;
 
     private BigDecimal endWorth;
-    private BigDecimal endSpent;
     private BigDecimal change;
     private BigDecimal changePct;
     private BigDecimal contributions;

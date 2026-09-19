@@ -13,9 +13,7 @@ export interface Salary {
   grossAnnual?: number;
   netMonthly?: number;
   netAnnual?: number;
-  szjaMonthly?: number;
   szjaAnnual?: number;
-  tbMonthly?: number;
   tbAnnual?: number;
   familyAllowanceMonthly?: number;
   familyAllowanceApplied?: boolean;

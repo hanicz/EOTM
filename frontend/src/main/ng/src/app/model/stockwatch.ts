@@ -9,5 +9,4 @@ export interface StockWatch {
     pchange: number;
     stockExchange: string;
     groupId: number | null;
-    groupName: string | null;
 }

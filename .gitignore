@@ -1,4 +1,6 @@
 HELP.md
+docker/.env
+docker/.deploy.lock
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/

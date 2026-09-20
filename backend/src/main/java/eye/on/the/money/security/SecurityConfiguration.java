@@ -52,6 +52,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, SIGN_UP_URL).denyAll()
                         .requestMatchers("/", "/resources/**", "/index.html", "/favicon.ico").permitAll()
+                        .requestMatchers("/actuator/health", "/actuator/health/liveness", "/actuator/health/readiness").permitAll()
                         .requestMatchers(SecurityConstants.SPA_ROUTES).permitAll()
                         .anyRequest().authenticated())
                 .authenticationManager(authenticationManager)

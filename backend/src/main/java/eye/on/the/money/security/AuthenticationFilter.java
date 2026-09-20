@@ -1,7 +1,9 @@
 package eye.on.the.money.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eye.on.the.money.dto.out.LoginResultDTO;
 import eye.on.the.money.exception.dto.ErrorResponse;
+import eye.on.the.money.service.user.TotpService;
 import eye.on.the.money.util.LogSanitizer;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,14 +36,28 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final JwtService jwtService;
 
+    private final TotpService totpService;
+
     private final ObjectMapper objectMapper;
 
     @Override
     protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res, FilterChain chain,
-                                            Authentication auth) {
+                                            Authentication auth) throws IOException {
         String email = ((UserDetails) auth.getPrincipal()).getUsername();
         log.info("Login succeeded for {} from {}", LogSanitizer.maskEmail(email), req.getRemoteAddr());
-        res.addHeader("token", this.jwtService.generateToken(email));
+
+        LoginResultDTO result;
+        if (this.totpService.isEnabled(email)) {
+            result = new LoginResultDTO(true, this.jwtService.generateChallengeToken(email));
+        } else {
+            res.addHeader("token", this.jwtService.generateAccessToken(email));
+            result = new LoginResultDTO(false, null);
+        }
+
+        res.setStatus(HttpServletResponse.SC_OK);
+        res.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        res.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        this.objectMapper.writeValue(res.getWriter(), result);
     }
 
     @Override

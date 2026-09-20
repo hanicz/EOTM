@@ -144,6 +144,19 @@ plan what they add up to.
   It is worked out chronologically, so re-sorting the table does not change it, and it is left empty where
   the previous period was in another currency.
 
+### Account security
+
+- **Two-factor authentication**, opt-in per account from the settings page. Scan the QR code with Google
+  Authenticator (or Authy, 1Password, Aegis — it is plain RFC 6238: HMAC-SHA1, 6 digits, 30 seconds) and every
+  later login asks for the 6-digit code after the password.
+- The password step then returns a 5-minute challenge instead of a session, and only a valid code exchanges
+  that for one. A code is accepted once: replaying it within its 30-second window is rejected.
+- The shared secret is encrypted at rest with `EOTM_TOTP_KEY` and `EOTM_TOTP_SALT`, so a copy of the database
+  is not enough to generate codes. The salt is hex and need not be secret, but both values must stay stable:
+  change either and every enrolled secret becomes undecryptable.
+- **There are no recovery codes.** Lose the authenticator and the only way back in is deleting the account's
+  row from `EOTM_USER_TOTP` on the server. Turning it off from the settings page needs the account password.
+
 ### Data in and out
 
 - **CSV import and export** on every transaction type, so records can be moved in bulk.

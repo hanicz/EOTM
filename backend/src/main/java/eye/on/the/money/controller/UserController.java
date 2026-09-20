@@ -3,9 +3,14 @@ package eye.on.the.money.controller;
 import eye.on.the.money.dto.in.ChangePasswordDTO;
 import eye.on.the.money.dto.in.PreferencesUpdateDTO;
 import eye.on.the.money.dto.in.SignUpDTO;
+import eye.on.the.money.dto.in.TotpCodeDTO;
+import eye.on.the.money.dto.in.TotpDisableDTO;
 import eye.on.the.money.dto.out.ExportDTO;
+import eye.on.the.money.dto.out.TotpSetupDTO;
+import eye.on.the.money.dto.out.TotpStatusDTO;
 import eye.on.the.money.dto.out.UserDTO;
 import eye.on.the.money.service.shared.ExportService;
+import eye.on.the.money.service.user.TotpService;
 import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
 import jakarta.validation.Valid;
@@ -24,6 +29,7 @@ public class UserController {
 
     private final UserService userService;
     private final ExportService exportService;
+    private final TotpService totpService;
 
     @PostMapping("/signup")
     public ResponseEntity<Void> createNewUser(@RequestBody @Valid SignUpDTO signUpDTO) {
@@ -51,6 +57,28 @@ public class UserController {
     public ResponseEntity<Void> changePassword(@RequestBody @Valid ChangePasswordDTO passwordDTO, @CurrentUserId Long userId) {
         this.userService.changePassword(userId, passwordDTO);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/2fa")
+    public ResponseEntity<TotpStatusDTO> twoFactorStatus(@CurrentUserId Long userId) {
+        return ResponseEntity.ok(new TotpStatusDTO(this.totpService.isEnabled(userId)));
+    }
+
+    @PostMapping("/2fa/setup")
+    public ResponseEntity<TotpSetupDTO> startTwoFactorSetup(@CurrentUserId Long userId) {
+        return ResponseEntity.ok(this.totpService.startEnrolment(userId));
+    }
+
+    @PostMapping("/2fa/confirm")
+    public ResponseEntity<Void> confirmTwoFactor(@RequestBody @Valid TotpCodeDTO codeDTO, @CurrentUserId Long userId) {
+        this.totpService.confirmEnrolment(userId, codeDTO.code());
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/2fa")
+    public ResponseEntity<Void> disableTwoFactor(@RequestBody @Valid TotpDisableDTO disableDTO, @CurrentUserId Long userId) {
+        this.totpService.disable(userId, disableDTO.password());
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/export")

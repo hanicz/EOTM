@@ -324,3 +324,32 @@
     transition: all 0.2s ease;
   }
 }
+
+.totp-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--p-green-600);
+}
+
+.totp-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.totp-qr img {
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 0.5rem;
+}
+
+.totp-secret {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  background: var(--p-surface-100);
+  font-size: 0.95rem;
+  letter-spacing: 0.1rem;
+  word-break: break-all;
+}

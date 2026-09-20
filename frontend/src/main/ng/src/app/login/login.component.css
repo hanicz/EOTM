@@ -52,3 +52,15 @@
         margin: 0 -0.75rem 1.5rem;
     }
 }
+
+.loginContainer .mfaHint {
+    color: var(--eotm-cream);
+    font-size: 0.875rem;
+    margin: 0 0 1.5rem;
+}
+
+.loginContainer .mfaCode {
+    text-align: center;
+    font-size: 1.5rem;
+    letter-spacing: 0.4rem;
+}

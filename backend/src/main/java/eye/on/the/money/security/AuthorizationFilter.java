@@ -47,7 +47,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         }
         UserDetails userDetails;
         try {
-            String subject = this.jwtService.extractUsername(token);
+            String subject = this.jwtService.extractUsername(token, TokenType.ACCESS);
             userDetails = this.userService.loadUserByUsername(subject);
         } catch (JwtException | IllegalArgumentException | UsernameNotFoundException e) {
             log.warn("Auth failed for {} {}: {}", request.getMethod(), request.getRequestURI(), e.getMessage());

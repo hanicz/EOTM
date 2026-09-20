@@ -11,6 +11,8 @@ x-app: &app
     - SPRING_DATASOURCE_PASSWORD=xx
     - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     - EOTM_KEY=xx
+    - EOTM_TOTP_KEY=xx
+    - EOTM_TOTP_SALT=xx
     - SPRING_DATA_REDIS_HOST=redis
     - JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=35
 

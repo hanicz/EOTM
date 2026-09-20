@@ -124,6 +124,43 @@
             </div>
 
             <div class="settings-grid">
+                <div class="settings-card">
+                    <div class="card-header">
+                        <div>
+                            <h2>
+                                <i class="pi pi-shield"></i>
+                                Two-factor authentication
+                            </h2>
+                            <p class="card-description">
+                                Ask for a code from your authenticator app on top of your password
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="card-content">
+                        @if (totpEnabled) {
+                        <p class="card-description totp-status">
+                            <i class="pi pi-check-circle"></i>
+                            On. You will be asked for a code every time you log in.
+                        </p>
+                        <button pButton pRipple label="Turn off" icon="pi pi-times"
+                            class="save-button p-button-outlined" severity="danger" [loading]="totpLoading"
+                            (click)="openTotpDisableDialog()">
+                        </button>
+                        } @else {
+                        <p class="card-description">
+                            Scan a QR code with Google Authenticator, Authy or 1Password. Keep the app safe: without
+                            it there is no way back into this account.
+                        </p>
+                        <button pButton pRipple label="Turn on" icon="pi pi-shield" class="save-button"
+                            severity="info" [loading]="totpLoading" (click)="startTwoFactorSetup()">
+                        </button>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-grid">
                 <!-- Left Column: Security Settings -->
                 <div class="settings-card">
                     <div class="card-header">
@@ -236,3 +273,42 @@
 </p-dialog>
 
 <p-toast position="bottom-center"></p-toast>
+
+<p-dialog [(visible)]="totpDialog" [modal]="true" [style]="{width: '420px'}" header="Set up two-factor"
+    (onHide)="hideTotpDialog()">
+    @if (totpSetup) {
+    <div class="dialog-field totp-qr">
+        <img [src]="totpSetup.qrPng" alt="Scan this with your authenticator app" width="240" height="240">
+    </div>
+    <div class="dialog-field">
+        <label>Or type this key in by hand</label>
+        <code class="totp-secret">{{ totpSetup.secret }}</code>
+    </div>
+    <div class="dialog-field">
+        <label for="totpCode">Code from the app</label>
+        <input id="totpCode" pInputText type="text" maxlength="6" inputmode="numeric" placeholder="000000"
+            [(ngModel)]="totpCode">
+    </div>
+    }
+    <ng-template pTemplate="footer">
+        <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text"
+            (click)="hideTotpDialog()"></button>
+        <button pButton pRipple label="Confirm" icon="pi pi-check" [loading]="totpLoading"
+            [disabled]="!totpCode" (click)="confirmTwoFactor()"></button>
+    </ng-template>
+</p-dialog>
+
+<p-dialog [(visible)]="totpDisableDialog" [modal]="true" [style]="{width: '400px'}" header="Turn off two-factor"
+    (onHide)="hideTotpDisableDialog()">
+    <div class="dialog-field">
+        <label for="disablePassword">Confirm with your password</label>
+        <p-password [toggleMask]="true" [feedback]="false" [(ngModel)]="disablePassword" id="disablePassword">
+        </p-password>
+    </div>
+    <ng-template pTemplate="footer">
+        <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text"
+            (click)="hideTotpDisableDialog()"></button>
+        <button pButton pRipple label="Turn off" icon="pi pi-times" severity="danger" [loading]="totpLoading"
+            [disabled]="!disablePassword" (click)="disableTwoFactor()"></button>
+    </ng-template>
+</p-dialog>

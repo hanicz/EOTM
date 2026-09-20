@@ -2,6 +2,7 @@
 <div class="loginPage">
     <div class="loginContainer shadow-3 text-center">
         <img class="logo" [src]="assetUrl + 'logo-horizontal.png'" alt="Eye OTM">
+        @if (!mfaRequired) {
         <div class="fluid">
             <div class="field">
                 <label for="username">Email</label>
@@ -14,9 +15,26 @@
                     [(ngModel)]="user.password" [formControl]="passwordControl">
             </div>
             <div class="field mt-4">
-                <button pButton pRipple type="button" class="p-button-primary w-full" (click)="login()">Login<i
-                        class="pi pi-lock-open ml-2"></i></button>
+                <button pButton pRipple type="button" class="p-button-primary w-full" [disabled]="loggingIn"
+                    (click)="login()">Login<i class="pi pi-lock-open ml-2"></i></button>
             </div>
         </div>
+        } @else {
+        <div class="fluid">
+            <p class="mfaHint">Enter the 6-digit code from your authenticator app.</p>
+            <div class="field">
+                <label for="code">Verification code</label>
+                <input id="code" class="w-full mfaCode" type="text" pInputText placeholder="000000" maxlength="6"
+                    inputmode="numeric" autocomplete="one-time-code" autofocus [formControl]="codeControl">
+            </div>
+            <div class="field mt-4">
+                <button pButton pRipple type="button" class="p-button-primary w-full" [disabled]="verifying"
+                    (click)="verifyCode()">Verify<i class="pi pi-shield ml-2"></i></button>
+            </div>
+            <div class="field">
+                <button pButton pRipple type="button" class="p-button-text w-full" (click)="backToPassword()">Back</button>
+            </div>
+        </div>
+        }
     </div>
 </div>

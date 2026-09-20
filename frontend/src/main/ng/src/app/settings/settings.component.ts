@@ -5,6 +5,7 @@ import { UserService } from '../service/user.service';
 import { AccountService } from '../service/account.service';
 import { Account } from '../model/account';
 import { Currency } from '../model/currency';
+import { TotpSetup } from '../model/totpsetup';
 import { CurrencyService } from '../service/currency.service';
 import { MenuComponent } from '../menu/menu.component';
 import { Bind } from 'primeng/bind';
@@ -46,6 +47,15 @@ export class SettingsComponent implements OnInit {
   oldPassword: string = '';
   newPassword: string = '';
   preferredCurrency: string = '';
+  totpCode: string = '';
+  disablePassword: string = '';
+
+  // Two-factor
+  totpEnabled: boolean = false;
+  totpSetup: TotpSetup | null = null;
+  totpDialog: boolean = false;
+  totpDisableDialog: boolean = false;
+  totpLoading: boolean = false;
 
   // Loading states
   isLoading: boolean = false;
@@ -66,6 +76,99 @@ export class SettingsComponent implements OnInit {
     this.loadSubReddits();
     this.loadAccounts();
     this.loadPreferences();
+    this.loadTwoFactorStatus();
+  }
+
+  loadTwoFactorStatus(): void {
+    this.userService.getTwoFactorStatus().subscribe({
+      next: (status) => {
+        this.totpEnabled = status.enabled;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.totpEnabled = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  startTwoFactorSetup(): void {
+    this.totpLoading = true;
+    this.userService.startTwoFactorSetup().subscribe({
+      next: (setup) => {
+        this.totpSetup = setup;
+        this.totpCode = '';
+        this.totpDialog = true;
+        this.totpLoading = false;
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        this.totpLoading = false;
+        this.messageService.add({ severity: 'error', detail: error.error?.error ?? 'Could not start the setup.' });
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  confirmTwoFactor(): void {
+    if (!this.totpCode.trim()) {
+      return;
+    }
+
+    this.totpLoading = true;
+    this.userService.confirmTwoFactor(this.totpCode.trim()).subscribe({
+      next: () => {
+        this.totpEnabled = true;
+        this.totpLoading = false;
+        this.hideTotpDialog();
+        this.messageService.add({ severity: 'success', detail: 'Two-factor authentication is on.' });
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        this.totpLoading = false;
+        this.totpCode = '';
+        this.messageService.add({ severity: 'error', detail: error.error?.error ?? 'That code is not right.' });
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  hideTotpDialog(): void {
+    this.totpDialog = false;
+    this.totpSetup = null;
+    this.totpCode = '';
+  }
+
+  openTotpDisableDialog(): void {
+    this.disablePassword = '';
+    this.totpDisableDialog = true;
+  }
+
+  hideTotpDisableDialog(): void {
+    this.totpDisableDialog = false;
+    this.disablePassword = '';
+  }
+
+  disableTwoFactor(): void {
+    if (!this.disablePassword) {
+      return;
+    }
+
+    this.totpLoading = true;
+    this.userService.disableTwoFactor(this.disablePassword).subscribe({
+      next: () => {
+        this.totpEnabled = false;
+        this.totpLoading = false;
+        this.hideTotpDisableDialog();
+        this.messageService.add({ severity: 'success', detail: 'Two-factor authentication is off.' });
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        this.totpLoading = false;
+        this.messageService.add({ severity: 'error', detail: error.error?.error ?? 'Could not turn it off.' });
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   loadPreferences(): void {

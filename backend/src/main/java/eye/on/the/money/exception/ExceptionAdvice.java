@@ -87,6 +87,18 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(FORBIDDEN).body(new ErrorResponse(FORBIDDEN.value(), e.getMessage()));
     }
 
+    @ExceptionHandler(TotpException.class)
+    public ResponseEntity<ErrorResponse> handleTotpException(TotpException e) {
+        log.warn("Two-factor error on {}: {}", this.at(), e.getMessage());
+        return ResponseEntity.status(BAD_REQUEST).body(new ErrorResponse(BAD_REQUEST.value(), e.getMessage()));
+    }
+
+    @ExceptionHandler(TotpChallengeException.class)
+    public ResponseEntity<ErrorResponse> handleTotpChallengeException(TotpChallengeException e) {
+        log.warn("Two-factor challenge failed on {}: {}", this.at(), e.getMessage());
+        return ResponseEntity.status(UNAUTHORIZED).body(new ErrorResponse(UNAUTHORIZED.value(), e.getMessage()));
+    }
+
     @ExceptionHandler(CooldownException.class)
     public ResponseEntity<ErrorResponse> handleCooldownException(CooldownException e) {
         log.warn("Cooldown active on {}: {}", this.at(), e.getMessage());

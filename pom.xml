@@ -29,6 +29,7 @@
         <modelmapper.version>3.2.6</modelmapper.version>
         <commons-csv.version>1.14.1</commons-csv.version>
         <poi.version>5.5.1</poi.version>
+        <zxing.version>3.5.3</zxing.version>
         <jackson-datatype-jsr310.version>2.22.0</jackson-datatype-jsr310.version>
         <h2.version>2.4.240</h2.version>
         <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
@@ -89,6 +90,11 @@
                 <groupId>org.apache.poi</groupId>
                 <artifactId>poi</artifactId>
                 <version>${poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.zxing</groupId>
+                <artifactId>core</artifactId>
+                <version>${zxing.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>

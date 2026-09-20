@@ -1,6 +1,7 @@
 package eye.on.the.money.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eye.on.the.money.service.user.TotpService;
 import eye.on.the.money.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,16 +30,18 @@ public class SecurityConfiguration {
     private final PasswordEncoder passwordEncoder;
     private final CorsConfigurationSource corsConfigurationSource;
     private final JwtService jwtService;
+    private final TotpService totpService;
     private final ObjectMapper objectMapper;
 
     @Autowired
     public SecurityConfiguration(UserService userService, PasswordEncoder passwordEncoder,
                                  @Qualifier("cors") CorsConfigurationSource corsConfigurationSource,
-                                 JwtService jwtService, ObjectMapper objectMapper) {
+                                 JwtService jwtService, TotpService totpService, ObjectMapper objectMapper) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.corsConfigurationSource = corsConfigurationSource;
         this.jwtService = jwtService;
+        this.totpService = totpService;
         this.objectMapper = objectMapper;
     }
 
@@ -51,12 +54,13 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, SIGN_UP_URL).denyAll()
+                        .requestMatchers(HttpMethod.POST, SecurityConstants.TOTP_VERIFY_URL).permitAll()
                         .requestMatchers("/", "/resources/**", "/index.html", "/favicon.ico").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/health/liveness", "/actuator/health/readiness").permitAll()
                         .requestMatchers(SecurityConstants.SPA_ROUTES).permitAll()
                         .anyRequest().authenticated())
                 .authenticationManager(authenticationManager)
-                .addFilterBefore(new AuthenticationFilter(authenticationManager, this.jwtService, this.objectMapper), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new AuthenticationFilter(authenticationManager, this.jwtService, this.totpService, this.objectMapper), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new AuthorizationFilter(this.userService, this.jwtService, this.objectMapper), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

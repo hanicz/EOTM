@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { MenuItem, PrimeTemplate } from 'primeng/api';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs/operators';
@@ -19,7 +19,7 @@ import { Globals } from '../util/global';
 })
 export class MenuComponent implements OnInit {
   items: MenuItem[] = [];
-  user: UserProfile = {} as UserProfile;
+  readonly user = signal<UserProfile>({} as UserProfile);
   assetUrl: string = environment.assets_url;
 
   readonly menuItems: MenuItem[] = [
@@ -50,7 +50,7 @@ export class MenuComponent implements OnInit {
     private userService: UserService,
     private globals: Globals
   ) {
-    this.userService.getCurrentUser().subscribe(data => this.user = data);
+    this.userService.getCurrentUser().subscribe(data => this.user.set(data));
   }
 
   ngOnInit(): void {

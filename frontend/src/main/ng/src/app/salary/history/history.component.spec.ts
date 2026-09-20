@@ -147,6 +147,24 @@ describe('SalaryHistoryComponent', () => {
     expect(component.salaries.find(s => s.id === 1)!.raiseAmount).toBeNull();
   });
 
+  it('counts the days of a closed period inclusively', () => {
+    const closed: Salary = { ...current, id: 2, validFrom: '2021-03-01', validTo: '2021-03-31' };
+    const leapYear: Salary = { ...current, id: 3, validFrom: '2024-01-01', validTo: '2024-12-31' };
+    http.expectOne(salaryUrl).flush([closed, leapYear]);
+
+    const byId = new Map(component.salaries.map(s => [s.id, s]));
+    expect(byId.get(2)!.durationDays).toBe(31);
+    expect(byId.get(3)!.durationDays).toBe(366);
+  });
+
+  it('counts an open period up to today', () => {
+    const now = new Date();
+    const start = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate() - 9));
+    http.expectOne(salaryUrl).flush([{ ...current, validFrom: start.toISOString().slice(0, 10), validTo: null }]);
+
+    expect(component.salaries[0].durationDays).toBe(10);
+  });
+
   it('flags a row whose dependants earned no allowance', () => {
     const inEuro: Salary = { ...current, currencyId: 'EUR', familyAllowanceApplied: false };
     http.expectOne(salaryUrl).flush([inEuro]);

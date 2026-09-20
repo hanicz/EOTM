@@ -14,15 +14,18 @@ import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { Dialog } from 'primeng/dialog';
 import { FormsModule } from '@angular/forms';
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { DeltaComponent } from '../../util/delta.component';
+import { toTimestamp } from '../../performance/performance.component';
+
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 @Component({
     selector: 'app-salary-history',
     templateUrl: './history.component.html',
     styleUrls: ['./history.component.css'],
     imports: [Bind, Toolbar, PrimeTemplate, Toast, ButtonDirective, Ripple, Tooltip, TableModule,
-        InputText, Select, Dialog, FormsModule, CurrencyPipe, DatePipe, DeltaComponent]
+        InputText, Select, Dialog, FormsModule, CurrencyPipe, DatePipe, DecimalPipe, DeltaComponent]
 })
 export class SalaryHistoryComponent {
 
@@ -48,7 +51,7 @@ export class SalaryHistoryComponent {
   private fetchData(): void {
     this.salaryService.getSalaries().subscribe({
       next: (data) => {
-        this.salaries = this.withRaises(data);
+        this.salaries = this.withDurations(this.withRaises(data));
         this.cdr.markForCheck();
       },
       error: (error) => {
@@ -72,6 +75,19 @@ export class SalaryHistoryComponent {
         salary.raiseAmount = after - before;
         salary.raisePercent = before > 0 ? ((after - before) / before) * 100 : null;
       }
+    }
+
+    return salaries;
+  }
+
+  private withDurations(salaries: Salary[]): Salary[] {
+    const now = new Date();
+    const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+
+    for (const salary of salaries) {
+      const start = toTimestamp(salary.validFrom);
+      const end = salary.validTo ? toTimestamp(salary.validTo) : today;
+      salary.durationDays = Math.max(Math.round((end - start) / DAY_MS) + 1, 0);
     }
 
     return salaries;

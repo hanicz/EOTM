@@ -19,6 +19,7 @@ export interface Salary {
   familyAllowanceApplied?: boolean;
   raiseAmount?: number | null;
   raisePercent?: number | null;
+  durationDays?: number;
 }
 
 export interface SalaryRaiseScenario {

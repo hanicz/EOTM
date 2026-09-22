@@ -1,4 +1,6 @@
 import { Component, OnInit, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
+import { Input } from '@angular/core';
+import { EMPTY_FILTER, PortfolioFilter, filterRows } from '../../util/tablefilter';
 import { Globals } from '../../util/global';
 import { Investment } from '../../model/investment';
 import { StockService } from '../../service/stock.service';
@@ -9,24 +11,33 @@ import { PrimeTemplate } from 'primeng/api';
 import { Skeleton } from 'primeng/skeleton';
 import { TickerIdentityComponent } from '../../util/ticker-identity.component';
 import { DeltaComponent } from '../../util/delta.component';
-import { collectAccountOptions } from '../../util/accountoptions';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { Tooltip } from 'primeng/tooltip';
-import { Select } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
-import { CurrencyPipe } from '@angular/common';
+import { CurrencyPipe, DecimalPipe } from '@angular/common';
 
 @Component({
     selector: 'app-holding',
     templateUrl: './holding.component.html',
-    imports: [Bind, TableModule, PrimeTemplate, Skeleton, ButtonDirective, Ripple, Tooltip, Select, FormsModule,
-        CurrencyPipe, TickerIdentityComponent, DeltaComponent]
+    imports: [Bind, TableModule, PrimeTemplate, Skeleton, ButtonDirective, Ripple, Tooltip, FormsModule,
+        CurrencyPipe, DecimalPipe, TickerIdentityComponent, DeltaComponent]
 })
 export class HoldingComponent implements OnInit {
+  visibleInvestments: Investment[] = [];
+  private activeFilter: PortfolioFilter = EMPTY_FILTER;
+
+  @Input() set filter(value: PortfolioFilter) {
+    this.activeFilter = value ?? EMPTY_FILTER;
+    this.applyFilter();
+  }
+
+  private applyFilter(): void {
+    this.visibleInvestments = filterRows(this.investments, this.activeFilter, ['shortName', 'name'], 'accountName');
+  }
+
 
   investments: Investment[] = [];
-  accountOptions: string[] = [];
   @Output() dataLoaded = new EventEmitter<Investment[]>();
   globals: Globals;
 
@@ -62,7 +73,7 @@ export class HoldingComponent implements OnInit {
       next: (data) => {
         this.investmentsLoading = false;
         this.investments = data;
-        this.accountOptions = collectAccountOptions(data);
+        this.applyFilter();
         this.dataLoaded.emit(this.investments);
         this.cdr.markForCheck();
       },

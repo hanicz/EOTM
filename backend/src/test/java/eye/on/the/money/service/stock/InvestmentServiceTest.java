@@ -77,7 +77,7 @@ class InvestmentServiceTest {
 
         Assertions.assertAll("Assert all merged values",
                 () -> assertEquals("B", testObject.getBuySell()),
-                () -> assertEquals(0, testObject.getQuantity()),
+                () -> assertEquals(0.0, testObject.getQuantity()),
                 () -> assertEquals(-100.0, testObject.getAmount(), this.epsilon));
     }
 
@@ -88,7 +88,7 @@ class InvestmentServiceTest {
 
         Assertions.assertAll("Assert all merged values",
                 () -> assertEquals("B", testObject.getBuySell()),
-                () -> assertEquals(36, testObject.getQuantity()),
+                () -> assertEquals(36.0, testObject.getQuantity()),
                 () -> assertEquals(-189.9, testObject.getAmount(), this.epsilon));
     }
 
@@ -99,7 +99,7 @@ class InvestmentServiceTest {
 
         Assertions.assertAll("Assert all merged values",
                 () -> assertEquals("B", testObject.getBuySell()),
-                () -> assertEquals(2, testObject.getQuantity()),
+                () -> assertEquals(2.0, testObject.getQuantity()),
                 () -> assertEquals(43.77, testObject.getAmount(), this.epsilon));
     }
 
@@ -110,7 +110,7 @@ class InvestmentServiceTest {
 
         Assertions.assertAll("Assert all merged values",
                 () -> assertEquals("B", testObject.getBuySell()),
-                () -> assertEquals(0, testObject.getQuantity()),
+                () -> assertEquals(0.0, testObject.getQuantity()),
                 () -> assertEquals(-100.0, testObject.getAmount(), this.epsilon));
     }
 
@@ -162,7 +162,7 @@ class InvestmentServiceTest {
         Assertions.assertAll("Closed and reopened lots must be tracked separately",
                 () -> assertEquals(2, googPositions.size()),
                 () -> assertEquals(-50.0, closedLot.getAmount(), this.epsilon),
-                () -> assertEquals(5, openLot.getQuantity()),
+                () -> assertEquals(5.0, openLot.getQuantity()),
                 () -> assertEquals(50.0, openLot.getAmount(), this.epsilon));
     }
 

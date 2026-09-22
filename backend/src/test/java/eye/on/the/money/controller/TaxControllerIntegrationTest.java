@@ -60,7 +60,7 @@ class TaxControllerIntegrationTest {
         when(this.taxService.calculateTaxForRSUs(any())).thenReturn(TaxReportDTO.builder()
                 .items(List.of(RSUTaxDTO.builder()
                         .shortName("AAPL").exchange("US").date(date).priceDate(date).rateDate(date)
-                        .quantity(10).currency("USD").amountInHuf(new BigDecimal("1000"))
+                        .quantity(10.0).currency("USD").amountInHuf(new BigDecimal("1000"))
                         .tax(TaxBreakdownDTO.zero()).build()))
                 .totalAmountInHuf(new BigDecimal("1000")).totalTax(TaxBreakdownDTO.zero()).build());
 
@@ -92,7 +92,7 @@ class TaxControllerIntegrationTest {
         when(this.rsuTaxService.getRSUTaxEvents(any())).thenReturn(RSUTaxEventReportDTO.builder()
                 .items(List.of(RSUTaxEventDTO.builder()
                         .id(1L).shortName("AAPL").exchange("US").transactionDate(date).priceDate(date)
-                        .rateDate(date).calculatedOn(date).quantity(10).currency("USD")
+                        .rateDate(date).calculatedOn(date).quantity(10.0).currency("USD")
                         .amountInHuf(new BigDecimal("1000")).paid(true).tax(TaxBreakdownDTO.zero()).build()))
                 .totalAmountInHuf(new BigDecimal("1000")).totalTax(TaxBreakdownDTO.zero()).build());
 

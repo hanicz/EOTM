@@ -2,22 +2,46 @@
 <div class="shadow-5">
   <menu class="pl-0 mb-0"></menu>
   <p-panel>
-    <div class="page-summary">
-      <div class="summary-stat">Total Spent:
-        <b class="amount">{{totalSpent | currency : selectedCurrency : 'symbol' : '0.0-2'}}</b>
+    <div class="total-row">
+      <div class="total-cell total-cell-lead">
+        <span class="total-icon"><i class="pi pi-chart-bar"></i></span>
+        <div class="total-body">
+          <div class="total-label">Total worth</div>
+          <div class="total-value">{{totalWorth | currency : selectedCurrency : 'symbol' : '0.0-2'}}</div>
+        </div>
       </div>
-      <div class="summary-stat">Total Worth:
-        <b class="amount">{{totalWorth | currency : selectedCurrency : 'symbol' : '0.0-2'}}</b>
+      <div class="total-cell">
+        <span class="total-icon"><i class="pi pi-wallet"></i></span>
+        <div class="total-body">
+          <div class="total-label">Invested</div>
+          <div class="total-value">{{totalSpent | currency : selectedCurrency : 'symbol' : '0.0-2'}}</div>
+        </div>
       </div>
-      <div class="summary-stat">Interest received:
-        <span class="state-chip state-buy"
-          pTooltip="Already reinvested into the holdings above, so it is not added to the total worth.">{{totalInterest | currency : selectedCurrency : 'symbol' : '0.0-2'}}</span>
+      <div class="total-cell">
+        <span class="total-icon"><i class="pi pi-money-bill"></i></span>
+        <div class="total-body">
+          <div class="total-label">Interest received</div>
+          <div class="total-value delta-up">{{totalInterest | currency : selectedCurrency : 'symbol' : '0.0-2'}}</div>
+          <div class="total-sub">
+            <span pTooltip="Already reinvested into the holdings above, so it is not added to the total worth.">
+              Reinvested, not added to worth
+            </span>
+          </div>
+        </div>
       </div>
-      <div class="summary-stat">Expected return:
-        <span class="state-chip state-info"
-          pTooltip="Average of the rate on every holding, weighted by quantity, so larger positions count for more.">{{(expectedRate | number : '0.2-2') + '%'}}</span>
+      <div class="total-cell">
+        <span class="total-icon"><i class="pi pi-percentage"></i></span>
+        <div class="total-body">
+          <div class="total-label">Expected return</div>
+          <div class="total-value">{{expectedRate | number : '0.2-2'}}%</div>
+          <div class="total-sub">
+            <span pTooltip="Average of the rate on every holding, weighted by quantity, so larger positions count for more.">
+              Weighted by position size
+            </span>
+          </div>
+        </div>
       </div>
-      <div class="summary-actions">
+      <div class="total-actions">
         <p-fileUpload mode="basic" #fileUpload accept=".xls" [customUpload]="true" [auto]="true" chooseLabel="Import"
           chooseStyleClass="p-button-outlined p-button-secondary"
           pTooltip="Import the official webkincstár transaction export."
@@ -31,17 +55,29 @@
       </div>
     </div>
     <p-divider></p-divider>
-    <p-tabs value="0">
-      <p-tablist>
-        <p-tab value="0">Holdings</p-tab>
-        <p-tab value="1">Transactions</p-tab>
-        <p-tab value="2">Interest</p-tab>
-      </p-tablist>
+    <p-tabs value="0" scrollable>
+      <div class="tab-head">
+        <p-tablist>
+          <p-tab value="0">Holdings</p-tab>
+          <p-tab value="1">Transactions</p-tab>
+          <p-tab value="2">Interest</p-tab>
+        </p-tablist>
+        <div class="tab-head-filters">
+          <span class="tab-head-search">
+            <input pInputText type="text" [(ngModel)]="filter.search"
+              (ngModelChange)="onFilterChange()" placeholder="Search by name or id">
+            @if (filter.search) {
+              <button type="button" class="tab-head-clear" (click)="clearSearch()"
+                aria-label="Clear search"><i class="pi pi-times"></i></button>
+            }
+          </span>
+        </div>
+      </div>
       <p-tabpanels>
         <p-tabpanel value="0">
           <div class="holdings-layout" [class.holdings-layout-split]="allocationItems.length > 0">
             <div class="holdings-main" #holdingsMain>
-              <app-security-holding (dataLoaded)="loadData($event)"></app-security-holding>
+              <app-security-holding [filter]="filter" (dataLoaded)="loadData($event)"></app-security-holding>
             </div>
             @if (allocationItems.length > 0) {
               <aside class="holdings-aside" [appAlignToTable]="holdingsMain">
@@ -52,10 +88,10 @@
           </div>
         </p-tabpanel>
         <p-tabpanel value="1">
-          <app-security-transaction></app-security-transaction>
+          <app-security-transaction [filter]="filter"></app-security-transaction>
         </p-tabpanel>
         <p-tabpanel value="2">
-          <app-interest (dataLoaded)="loadInterestData($event)"></app-interest>
+          <app-interest [filter]="filter" (dataLoaded)="loadInterestData($event)"></app-interest>
         </p-tabpanel>
       </p-tabpanels>
     </p-tabs>

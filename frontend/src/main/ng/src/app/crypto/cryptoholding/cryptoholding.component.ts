@@ -1,4 +1,6 @@
 import { Component, OnInit, Output, EventEmitter, ChangeDetectorRef  } from '@angular/core';
+import { Input } from '@angular/core';
+import { EMPTY_FILTER, PortfolioFilter, filterRows } from '../../util/tablefilter';
 import { Transaction } from '../../model/transaction';
 import { CryptoService } from '../../service/crypto.service';
 import { environment } from '../../../environments/environment';
@@ -20,6 +22,18 @@ import { DecimalPipe, CurrencyPipe, NgClass } from '@angular/common';
         DecimalPipe, CurrencyPipe, NgClass]
 })
 export class CryptoholdingComponent implements OnInit {
+  visibleTransactions: Transaction[] = [];
+  private activeFilter: PortfolioFilter = EMPTY_FILTER;
+
+  @Input() set filter(value: PortfolioFilter) {
+    this.activeFilter = value ?? EMPTY_FILTER;
+    this.applyFilter();
+  }
+
+  private applyFilter(): void {
+    this.visibleTransactions = filterRows(this.transactions, this.activeFilter, ['symbol']);
+  }
+
 
   transactions: Transaction[] = [];
   @Output() dataLoaded = new EventEmitter<Transaction[]>();
@@ -93,6 +107,7 @@ export class CryptoholdingComponent implements OnInit {
       next: (data) => {
         this.transactionsLoading = false;
         this.transactions = data;
+        this.applyFilter();
         this.dataLoaded.emit(this.transactions);
         this.cdr.markForCheck();
       },

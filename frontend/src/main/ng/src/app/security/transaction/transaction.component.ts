@@ -1,4 +1,6 @@
-import { Component, inject, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Input } from '@angular/core';
+import { EMPTY_FILTER, PortfolioFilter, filterRows } from '../../util/tablefilter';
 import { CsvDropDirective } from '../../util/csv-drop.directive';
 import { SecurityTransaction } from '../../model/securityTransaction';
 import { SecurityService } from '../../service/security.service';
@@ -10,7 +12,7 @@ import { MessageService, PrimeTemplate } from 'primeng/api';
 import { Toast } from 'primeng/toast';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
-import { FileUpload } from 'primeng/fileupload';
+import { Tooltip } from 'primeng/tooltip';
 import { TableModule } from 'primeng/table';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
@@ -22,9 +24,21 @@ import { CurrencyPipe, DatePipe, NgClass } from '@angular/common';
     selector: 'app-security-transaction',
     hostDirectives: [CsvDropDirective],
     templateUrl: './transaction.component.html',
-    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Dialog, CurrencyPipe, DatePipe, Toast, NgClass]
+    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, Tooltip, TableModule, InputText, Select, FormsModule, Dialog, CurrencyPipe, DatePipe, Toast, NgClass]
 })
 export class TransactionComponent implements OnInit {
+  visibleTransactions: SecurityTransaction[] = [];
+  private activeFilter: PortfolioFilter = EMPTY_FILTER;
+
+  @Input() set filter(value: PortfolioFilter) {
+    this.activeFilter = value ?? EMPTY_FILTER;
+    this.applyFilter();
+  }
+
+  private applyFilter(): void {
+    this.visibleTransactions = filterRows(this.transactions, this.activeFilter, ['securityName', 'securityId']);
+  }
+
 
   transactions: SecurityTransaction[] = [];
   currencies: any[];
@@ -32,7 +46,7 @@ export class TransactionComponent implements OnInit {
   selectedTransactions: SecurityTransaction[] = [];
   transactionDialog: boolean = false;
   transaction: SecurityTransaction = {} as SecurityTransaction;
-  @ViewChild('fileUpload') fileUpload: any;
+  @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
   globals: Globals;
   securities: Security[] = [];
   selectedExistingSecurity: Security | null = null;
@@ -68,6 +82,7 @@ export class TransactionComponent implements OnInit {
     this.securityService.getTransactions().subscribe({
       next: (data) => {
         this.transactions = data;
+        this.applyFilter();
         this.cdr.markForCheck();
       },
       error: (error) => {
@@ -143,16 +158,25 @@ export class TransactionComponent implements OnInit {
     }
   }
 
+  fileChosen(event: Event) {
+    const files = Array.from((event.target as HTMLInputElement).files ?? []);
+    if (files.length) this.onUpload({ files });
+  }
+
+  private clearFileInput() {
+    if (this.fileInput) this.fileInput.nativeElement.value = '';
+  }
+
   onUpload(event: any) {
     for (let file of event.files) {
       this.securityService.uploadCSV(file).subscribe({
         next: () => {
           this.fetchData();
-          this.fileUpload.clear();
+          this.clearFileInput();
           this.messageService.add({ severity: 'success', detail: 'Import finished.' });
         },
         error: (error) => {
-          this.fileUpload.clear();
+          this.clearFileInput();
           this.messageService.add({ severity: 'error', detail: error.error?.error ?? 'Import failed.' });
         }
       });

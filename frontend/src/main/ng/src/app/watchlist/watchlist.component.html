@@ -53,7 +53,7 @@
                   <ul class="quote-list">
                     @for (stockWatch of bucket.stocks; track stockWatch.tickerWatchId) {
                       <li class="quote-row quote-row-clickable" role="button" tabindex="0"
-                        [attr.aria-label]="'Open ' + stockWatch.stockShortName + ' in Lookup'"
+                        [attr.aria-label]="'Open ' + stockWatch.stockShortName + ' in Research'"
                         (click)="stockSelected(stockWatch)" (keydown.enter)="stockSelected(stockWatch)"
                         (keydown.space)="stockSelected(stockWatch); $event.preventDefault()">
                         <div class="quote-identity">

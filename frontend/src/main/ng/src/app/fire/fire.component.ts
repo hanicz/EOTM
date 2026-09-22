@@ -18,37 +18,35 @@ import { Toast } from 'primeng/toast';
 import { Skeleton } from 'primeng/skeleton';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
+import {
+  ApexAnnotations, ApexAxisChartSeries, ApexChart, ApexDataLabels, ApexFill, ApexGrid, ApexLegend,
+  ApexMarkers, ApexStroke, ApexTooltip, ApexXAxis, ApexYAxis, ChartComponent
+} from 'ng-apexcharts';
+import { compactAmount, money } from '../util/format';
+import { Milestone, dotYears, nextMilestone } from '../util/fireplan';
 
-interface ChartPoint {
-  year: number;
-  age: number;
-  x: number;
-  nominalY: number;
-  realY: number;
-  balance: number;
-  realBalance: number;
-  phase: string;
-}
+export type FireChartOptions = {
+  series: ApexAxisChartSeries;
+  chart: ApexChart;
+  xaxis: ApexXAxis;
+  yaxis: ApexYAxis;
+  legend: ApexLegend;
+  dataLabels: ApexDataLabels;
+  tooltip: ApexTooltip;
+  stroke: ApexStroke;
+  fill: ApexFill;
+  grid: ApexGrid;
+  markers: ApexMarkers;
+  annotations: ApexAnnotations;
+  colors: string[];
+};
 
-interface AxisTick {
-  position: number;
-  label: string;
-}
+const NOMINAL_COLOUR = '#ef9f27';
+const REAL_COLOUR = '#1b1b1b';
+const TARGET_COLOUR = '#7a8c5c';
+const MARKER_COLOUR = '#b4b2a9';
 
-interface Chart {
-  nominalPath: string;
-  realPath: string;
-  points: ChartPoint[];
-  lastYear: number;
-  fireY: number | null;
-  retirementX: number | null;
-  pensionX: number | null;
-  xTicks: AxisTick[];
-  yTicks: AxisTick[];
-}
-
-/** The plot area inside the SVG viewBox, leaving room for the axis labels. */
-const CHART = { width: 820, height: 340, left: 68, right: 16, top: 16, bottom: 30 };
+const CHART_HEIGHT = 560;
 
 const DEFAULT_MONTHLY_CONTRIBUTION = 1200000;
 
@@ -57,11 +55,9 @@ const DEFAULT_MONTHLY_CONTRIBUTION = 1200000;
     templateUrl: './fire.component.html',
     styleUrls: ['./fire.component.css'],
     imports: [MenuComponent, Bind, Panel, ButtonDirective, Ripple, Tooltip, TableModule, PrimeTemplate,
-        InputNumber, Checkbox, Toast, Skeleton, FormsModule, DecimalPipe]
+        InputNumber, Checkbox, Toast, Skeleton, FormsModule, DecimalPipe, ChartComponent]
 })
 export class FireComponent {
-
-  readonly chartBox = CHART;
 
   currency: string = DEFAULT_CURRENCY;
 
@@ -93,10 +89,13 @@ export class FireComponent {
   lifeExpectancy: number = 80;
 
   projection: FireProjection | null = null;
-  chart: Chart | null = null;
+  chart: Partial<FireChartOptions> | null = null;
+  milestone: Milestone | null = null;
   calculating: boolean = false;
 
-  hoveredYear: number | null = null;
+  mobileView: 'projection' | 'assumptions' = 'projection';
+  pensionOpen: boolean = true;
+  timingOpen: boolean = true;
 
   constructor(
     private fireService: FireService,
@@ -148,6 +147,7 @@ export class FireComponent {
           this.monthlyContribution = Math.round(data.monthlySavings);
         }
         this.cdr.markForCheck();
+        this.calculate();
       },
       error: (error) => {
         this.portfolioValue = 0;
@@ -166,15 +166,15 @@ export class FireComponent {
       next: (data) => {
         this.calculating = false;
         this.projection = data;
+        this.chart = this.buildChart(data);
+        this.milestone = nextMilestone(data);
         this.portfolioValue = data.portfolioValue;
         this.unconvertedCurrencies = data.unconvertedCurrencies ?? [];
-        this.chart = this.buildChart(data);
+        this.mobileView = 'projection';
         this.cdr.markForCheck();
       },
       error: (error) => {
         this.calculating = false;
-        this.projection = null;
-        this.chart = null;
         this.showError(error, 'Could not calculate');
         this.cdr.markForCheck();
       }
@@ -193,6 +193,14 @@ export class FireComponent {
       },
       error: (error) => this.showError(error, 'Could not export')
     });
+  }
+
+  showAssumptions(): void {
+    this.mobileView = 'assumptions';
+  }
+
+  showProjection(): void {
+    this.mobileView = 'projection';
   }
 
   private toInput(): FireProjectionInput {
@@ -215,109 +223,133 @@ export class FireComponent {
     };
   }
 
+  /** At year zero the two balances coincide, so this reads the same whichever money the target is in. */
+  get progressPct(): number {
+    const start = this.projection?.timeline?.[0];
+    return start ? Math.max(0, start.pctOfFireNumber) : 0;
+  }
+
+  get monthlySpendingSupported(): number {
+    return (this.projection?.annualSpending ?? 0) / 12;
+  }
+
   /**
-   * Lays the timeline out in SVG user units. Both curves share one scale so the gap between them reads as
-   * what inflation takes out.
+   * One filled curve for the balance, a thin one for what it is worth today, and a flat dashed line for
+   * the target so it earns a legend entry rather than being a bare annotation.
    */
-  private buildChart(projection: FireProjection): Chart | null {
+  private buildChart(projection: FireProjection): Partial<FireChartOptions> | null {
     const timeline = projection.timeline ?? [];
     if (timeline.length < 2) return null;
 
-    const plotWidth = CHART.width - CHART.left - CHART.right;
-    const plotHeight = CHART.height - CHART.top - CHART.bottom;
-    const lastYear = timeline[timeline.length - 1].year || 1;
-
-    // The target sits on the same axis as the curves, so a target far above the pot must still fit.
-    const peak = Math.max(
-      ...timeline.map(point => point.balance),
-      projection.fireNumber || 0,
-      1);
-    const top = this.niceCeiling(peak);
-
-    const xFor = (year: number) => CHART.left + (year / lastYear) * plotWidth;
-    const yFor = (value: number) => CHART.top + plotHeight - (value / top) * plotHeight;
-
-    const points: ChartPoint[] = timeline.map(point => ({
-      year: point.year,
-      age: point.age,
-      x: xFor(point.year),
-      nominalY: yFor(point.balance),
-      realY: yFor(point.realBalance),
-      balance: point.balance,
-      realBalance: point.realBalance,
-      phase: point.phase,
-    }));
-
+    const target = projection.fireNumber;
     return {
-      nominalPath: this.toPath(points, p => p.nominalY),
-      realPath: this.toPath(points, p => p.realY),
-      points: points,
-      lastYear: lastYear,
-      fireY: projection.fireNumber > 0 ? yFor(projection.fireNumber) : null,
-      retirementX: projection.retirementYear != null ? xFor(projection.retirementYear) : null,
-      pensionX: this.pensionMarkerX(projection, lastYear),
-      xTicks: this.xTicks(lastYear, xFor),
-      yTicks: this.yTicks(top, yFor),
+      series: [
+        {
+          name: 'Projected portfolio value',
+          data: timeline.map(point => [point.age, point.balance] as [number, number])
+        },
+        {
+          name: "In today's money",
+          data: timeline.map(point => [point.age, point.realBalance] as [number, number])
+        },
+        {
+          name: 'FIRE target (' + compactAmount(target) + ' ' + projection.currency + ')',
+          data: timeline.map(point => [point.age, target] as [number, number])
+        }
+      ],
+      chart: {
+        type: 'area', height: CHART_HEIGHT, toolbar: { show: false }, zoom: { enabled: false },
+        animations: { enabled: false }, fontFamily: 'Poppins, sans-serif'
+      },
+      colors: [NOMINAL_COLOUR, REAL_COLOUR, TARGET_COLOUR],
+      stroke: { width: [2.5, 1.5, 1.5], curve: 'straight', dashArray: [0, 0, 5] },
+      fill: { type: 'solid', opacity: [0.14, 0, 0] },
+      grid: { borderColor: '#ece9e0', strokeDashArray: 4, padding: { left: 4, right: 16, top: 16 } },
+      dataLabels: { enabled: false },
+      markers: { size: 0, discrete: this.chartDots(projection) },
+      annotations: this.chartAnnotations(projection),
+      xaxis: {
+        type: 'numeric', tickAmount: 6, decimalsInFloat: 0,
+        title: { text: 'Age', style: { fontWeight: 500, color: '#8a887f' } },
+        labels: { formatter: (value: string) => Math.round(Number(value)).toString() },
+        tooltip: { enabled: false }
+      },
+      yaxis: { labels: { formatter: (value: number) => compactAmount(value) } },
+      legend: { position: 'bottom', markers: { strokeWidth: 0 } },
+      tooltip: {
+        shared: true,
+        x: { formatter: (value: number) => 'Age ' + Math.round(value) },
+        y: { formatter: (value: number) => money(value, projection.currency) }
+      }
     };
   }
 
-  private pensionMarkerX(projection: FireProjection, lastYear: number): number | null {
-    const year = projection.pensionYear;
-    if (year == null || year === 0) return null;
-
-    const plotWidth = CHART.width - CHART.left - CHART.right;
-    return CHART.left + (year / lastYear) * plotWidth;
-  }
-
-  private toPath(points: ChartPoint[], y: (point: ChartPoint) => number): string {
-    return points.map((point, index) =>
-      `${index === 0 ? 'M' : 'L'}${point.x.toFixed(2)},${y(point).toFixed(2)}`).join(' ');
-  }
-
-  private xTicks(lastYear: number, xFor: (year: number) => number): AxisTick[] {
-    const step = Math.max(1, Math.round(lastYear / 6));
-    const ticks: AxisTick[] = [];
-    for (let year = 0; year <= lastYear; year += step) {
-      ticks.push({ position: xFor(year), label: `${year}y` });
-    }
-    return ticks;
-  }
-
-  private yTicks(top: number, yFor: (value: number) => number): AxisTick[] {
-    const ticks: AxisTick[] = [];
-    for (let i = 0; i <= 4; i++) {
-      const value = (top / 4) * i;
-      ticks.push({ position: yFor(value), label: this.formatCompact(value) });
-    }
-    return ticks;
-  }
-
-  /** Rounds the axis top up to 1, 2 or 5 times a power of ten so the gridline labels stay readable. */
-  private niceCeiling(value: number): number {
-    const magnitude = Math.pow(10, Math.floor(Math.log10(value)));
-    const normalised = value / magnitude;
-    const rounded = normalised <= 1 ? 1 : normalised <= 2 ? 2 : normalised <= 5 ? 5 : 10;
-    return rounded * magnitude;
+  private chartDots(projection: FireProjection): any[] {
+    const years = dotYears(projection);
+    return projection.timeline
+      .map((point, index) => ({ year: point.year, index: index }))
+      .filter(entry => years.includes(entry.year))
+      .map(entry => ({
+        seriesIndex: 0,
+        dataPointIndex: entry.index,
+        fillColor: NOMINAL_COLOUR,
+        strokeColor: '#ffffff',
+        size: 5
+      }));
   }
 
   /**
-   * The plot stretches to fill its container, so the pointer maps back onto a year by simple proportion.
+   * The dots carry the balance at each step and the vertical markers carry the events. A plan that
+   * retires the moment the target is cleared puts both on the same age, so they share one label.
    */
-  onChartMove(event: MouseEvent): void {
-    if (!this.chart) return;
+  private chartAnnotations(projection: FireProjection): ApexAnnotations {
+    const years = dotYears(projection);
+    const points = projection.timeline
+      .filter(point => years.includes(point.year))
+      .map(point => ({
+        x: point.age,
+        y: point.balance,
+        marker: { size: 0 },
+        label: {
+          text: compactAmount(point.balance),
+          offsetY: -10,
+          borderWidth: 0,
+          style: { background: 'transparent', color: REAL_COLOUR, fontSize: '11px', fontWeight: '600' }
+        }
+      }));
 
-    const bounds = (event.currentTarget as SVGSVGElement).getBoundingClientRect();
-    if (!bounds.width) return;
+    const events: any[] = [];
+    const fiAge = projection.fiReached ? projection.fiAge : null;
+    const retireAge = projection.retirementAge;
+    const startAge = projection.timeline[0].age;
 
-    const svgX = ((event.clientX - bounds.left) / bounds.width) * CHART.width;
-    const plotWidth = CHART.width - CHART.left - CHART.right;
-    const year = Math.round(((svgX - CHART.left) / plotWidth) * this.chart.lastYear);
+    if (fiAge != null) {
+      events.push(this.marker(fiAge, retireAge === fiAge ? 'Target reached · retire' : 'Target reached'));
+    }
+    if (retireAge != null && retireAge !== fiAge) {
+      events.push(this.marker(retireAge, 'Retire'));
+    }
+    if (projection.pensionYear != null && projection.pensionYear > 0) {
+      events.push(this.marker(startAge + projection.pensionYear, 'Pension'));
+    }
 
-    this.hoveredYear = (year < 0 || year > this.chart.lastYear) ? null : year;
+    return { points: points, xaxis: events };
   }
 
-  setHoveredYear(year: number | null): void {
-    this.hoveredYear = year;
+  private marker(age: number, text: string): any {
+    return {
+      x: age,
+      strokeDashArray: 4,
+      borderColor: MARKER_COLOUR,
+      label: {
+        text: text,
+        orientation: 'horizontal',
+        position: 'top',
+        offsetY: -2,
+        borderColor: '#ece9e0',
+        style: { background: '#ffffff', color: '#5f5e5a', fontSize: '11px' }
+      }
+    };
   }
 
   /**
@@ -335,17 +367,6 @@ export class FireComponent {
     const first = shown[0];
     const last = shown[shown.length - 1];
     return shown.filter(point => point === first || point === last || point.age % 5 === 0);
-  }
-
-  get hoveredPoint(): ChartPoint | null {
-    if (this.hoveredYear == null) return null;
-    return this.chart?.points.find(point => point.year === this.hoveredYear) ?? null;
-  }
-
-  /** Keeps the hover readout inside the plot when hovering near the right-hand edge. */
-  tooltipX(point: ChartPoint): number {
-    const width = 132;
-    return Math.min(point.x + 10, CHART.width - CHART.right - width);
   }
 
   /** Which balance the progress column is measured on depends on how the target was set. */
@@ -367,19 +388,6 @@ export class FireComponent {
 
   isDrawdown(year: FireYear): boolean {
     return year.phase === 'DRAWDOWN';
-  }
-
-  formatCompact(value: number): string {
-    try {
-      return new Intl.NumberFormat(undefined, {
-        style: 'currency',
-        currency: this.currency,
-        notation: 'compact',
-        maximumFractionDigits: 1
-      }).format(value);
-    } catch {
-      return value.toFixed(0);
-    }
   }
 
   private showError(error: any, summary: string): void {

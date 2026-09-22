@@ -9,16 +9,24 @@
 </p>
 <p-toolbar styleClass="table-toolbar">
   <ng-template pTemplate="left">
-    <button pButton pRipple label="New rule" icon="pi pi-plus" [disabled]="!categories.length"
-      (click)="openNew()"></button>
-    <button pButton pRipple icon="pi pi-trash" severity="danger" class="p-button-outlined"
-      [disabled]="!selectedRules || !selectedRules.length" (click)="deleteClicked()"></button>
+    <div class="toolbar-icons">
+      <button pButton pRipple type="button" size="small" icon="pi pi-plus" [disabled]="!categories.length"
+        pTooltip="New rule" tooltipPosition="bottom" aria-label="New rule"
+        (click)="openNew()"></button>
+      <span class="toolbar-divider" aria-hidden="true"></span>
+      <button pButton pRipple type="button" size="small" icon="pi pi-trash" severity="danger" [outlined]="true"
+        pTooltip="Delete the selected rules" tooltipPosition="bottom" aria-label="Delete the selected rules"
+        [disabled]="!selectedRules || !selectedRules.length" (click)="deleteClicked()"></button>
+    </div>
   </ng-template>
   <ng-template pTemplate="right">
-    <button pButton pRipple label="Re-apply rules" icon="pi pi-refresh" severity="secondary"
-      class="p-button-outlined" [disabled]="applying || !rules.length"
-      pTooltip="Run the rules over the transactions you already have. A category you set by hand is left alone."
-      (click)="applyRules()"></button>
+    <div class="toolbar-icons">
+      <button pButton pRipple type="button" size="small" icon="pi pi-refresh" severity="secondary" [outlined]="true"
+        [disabled]="applying || !rules.length"
+        pTooltip="Re-apply the rules to the transactions you already have. A category you set by hand is left alone."
+        tooltipPosition="bottom" aria-label="Re-apply rules"
+        (click)="applyRules()"></button>
+    </div>
   </ng-template>
 </p-toolbar>
 

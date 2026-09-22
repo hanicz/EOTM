@@ -34,9 +34,15 @@
 
 <p-toolbar styleClass="table-toolbar">
   <ng-template pTemplate="left">
-    <button pButton pRipple label="New grant" icon="pi pi-plus" (click)="openNew()"></button>
-    <button pButton pRipple icon="pi pi-trash" severity="danger" class="p-button-outlined"
-      [disabled]="!selectedGrants || !selectedGrants.length" (click)="deleteClicked()"></button>
+    <div class="toolbar-icons">
+      <button pButton pRipple type="button" size="small" icon="pi pi-plus"
+        pTooltip="New grant" tooltipPosition="bottom" aria-label="New grant"
+        (click)="openNew()"></button>
+      <span class="toolbar-divider" aria-hidden="true"></span>
+      <button pButton pRipple type="button" size="small" icon="pi pi-trash" severity="danger" [outlined]="true"
+        pTooltip="Delete the selected grants" tooltipPosition="bottom" aria-label="Delete the selected grants"
+        [disabled]="!selectedGrants || !selectedGrants.length" (click)="deleteClicked()"></button>
+    </div>
   </ng-template>
 </p-toolbar>
 

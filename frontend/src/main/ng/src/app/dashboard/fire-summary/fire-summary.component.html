@@ -25,8 +25,8 @@
             {{snapshot()!.fireNumber | currency : currency() : 'symbol' : '0.0-0'}}
           </span>
         </div>
-        <div class="fire-bar">
-          <div class="fire-bar-fill" [style.width.%]="barWidth()"></div>
+        <div class="meter-bar">
+          <div class="meter-bar-fill" [style.width.%]="barWidth()"></div>
         </div>
         <div class="fire-bar-legend">
           <span>{{snapshot()!.netWorth | currency : currency() : 'symbol' : '0.0-0'}}</span>

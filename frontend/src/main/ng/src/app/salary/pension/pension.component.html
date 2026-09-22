@@ -4,266 +4,378 @@
   Works out the Hungarian state pension (&ouml;regs&eacute;gi nyugd&iacute;j) from your salary history and the
   path you expect your pay to take. <strong>Every figure is in today&rsquo;s forints</strong> &mdash; a result of
   700,000 means what 700,000 buys now, not what the number will say in thirty years.
-  Note that valorisation restates your whole career at the <em>wage level of the year before you retire</em>,
-  so the answer sits at today&rsquo;s prices but at future wage levels. That is why it can land well above
-  pensions being paid today, and why the wage growth assumption below moves it so much.
 </p>
 
-<div class="pension-sections">
+<div class="planner-toggle" role="tablist">
+  <button type="button" class="planner-toggle-option" role="tab"
+    [class.planner-toggle-active]="mobileView === 'projection'"
+    [attr.aria-selected]="mobileView === 'projection'" (click)="showProjection()">Projection</button>
+  <button type="button" class="planner-toggle-option" role="tab"
+    [class.planner-toggle-active]="mobileView === 'assumptions'"
+    [attr.aria-selected]="mobileView === 'assumptions'" (click)="showAssumptions()">Assumptions</button>
+</div>
 
-  <section class="form-section">
-    <h3 class="form-section-title">You today</h3>
-    <div class="form-row">
-      <div class="form-field pension-field pension-field-narrow">
-        <label for="pensionCurrentAge" class="form-label">Current age</label>
-        <p-inputnumber inputId="pensionCurrentAge" [(ngModel)]="currentAge" [min]="16" [max]="120"
-          (keyup.enter)="calculate()"></p-inputnumber>
+<div class="planner-body" [class.planner-show-form]="mobileView === 'assumptions'">
+<div class="planner-layout">
+
+  <section class="planner-form-card">
+    <h2 class="planner-card-title">Pension assumptions</h2>
+
+    <div class="planner-group">
+      <h3 class="planner-group-title">You today</h3>
+      <div class="planner-row">
+        <label for="pensionCurrentAge" class="planner-row-label">Current age</label>
+        <span class="planner-input">
+          <p-inputnumber inputId="pensionCurrentAge" [(ngModel)]="currentAge" [min]="16" [max]="120"
+            (keyup.enter)="calculate()"></p-inputnumber>
+        </span>
       </div>
-      <div class="form-field pension-field pension-field-narrow">
-        <label for="yearsAlreadyWorked" class="form-label">
+      <div class="planner-row">
+        <label for="yearsAlreadyWorked" class="planner-row-label">
           Years already worked
-          <i class="pi pi-info-circle pension-info"
+          <i class="pi pi-info-circle planner-info"
             pTooltip="Recognised service time so far. Prefilled from the oldest salary record."></i>
         </label>
-        <p-inputnumber inputId="yearsAlreadyWorked" [(ngModel)]="yearsAlreadyWorked" [min]="0" [max]="60"
-          (keyup.enter)="calculate()"></p-inputnumber>
-      </div>
-      <div class="form-field pension-field">
-        <label class="form-label">Current gross</label>
-        @if (salaryLoading) {
-          <p-skeleton height="2.5rem"></p-skeleton>
-        } @else if (overrideGross) {
-          <p-inputnumber inputId="customGross" [(ngModel)]="customGross" [min]="0" placeholder="0"
+        <span class="planner-input">
+          <p-inputnumber inputId="yearsAlreadyWorked" [(ngModel)]="yearsAlreadyWorked" [min]="0" [max]="60"
             (keyup.enter)="calculate()"></p-inputnumber>
+        </span>
+      </div>
+      <div class="planner-row">
+        <label class="planner-row-label">Current gross</label>
+        @if (salaryLoading) {
+          <p-skeleton height="2.25rem" width="9rem"></p-skeleton>
+        } @else if (overrideGross) {
+          <span class="planner-input">
+            <p-inputnumber inputId="customGross" [(ngModel)]="customGross" [min]="0" placeholder="0"
+              (keyup.enter)="calculate()"></p-inputnumber>
+            <span class="planner-unit">HUF</span>
+          </span>
         } @else {
-          <div class="pension-readonly pension-readonly-strong">
-            {{currentGrossMonthly | number:'1.0-0'}} HUF / month
-          </div>
+          <span class="planner-readonly planner-readonly-strong">
+            {{currentGrossMonthly | number:'1.0-0'}} <span class="planner-unit">HUF/mo</span>
+          </span>
         }
       </div>
-      <div class="form-field pension-field pension-field-check">
+      <div class="planner-check">
         <p-checkbox inputId="overrideGross" [(ngModel)]="overrideGross" [binary]="true"></p-checkbox>
-        <label for="overrideGross" class="pension-check-label">Set the gross by hand</label>
+        <label for="overrideGross" class="planner-check-label">Set the gross by hand</label>
       </div>
-      <div class="form-field pension-field">
-        <label for="priorAverage" class="form-label">
+      <div class="planner-row">
+        <label for="priorAverage" class="planner-row-label">
           Average gross before your records
-          <i class="pi pi-info-circle pension-info"
+          <i class="pi pi-info-circle planner-info"
             pTooltip="In today's forints, for the working years older than your oldest salary record. Left blank it uses your current gross."></i>
         </label>
-        <p-inputnumber inputId="priorAverage" [(ngModel)]="priorAverageGrossMonthly" [min]="0"
-          placeholder="same as today" (keyup.enter)="calculate()"></p-inputnumber>
+        <span class="planner-input">
+          <p-inputnumber inputId="priorAverage" [(ngModel)]="priorAverageGrossMonthly" [min]="0"
+            placeholder="as today" (keyup.enter)="calculate()"></p-inputnumber>
+          <span class="planner-unit">HUF</span>
+        </span>
       </div>
     </div>
-  </section>
 
-  <section class="form-section">
-    <h3 class="form-section-title">When you stop</h3>
-    <div class="form-row">
-      <div class="form-field pension-field pension-field-narrow">
-        <label for="stopWorkingAge" class="form-label">Stop working at</label>
-        <p-inputnumber inputId="stopWorkingAge" [(ngModel)]="stopWorkingAge" [min]="16" [max]="120"
-          (keyup.enter)="calculate()"></p-inputnumber>
+    <div class="planner-group">
+      <h3 class="planner-group-title">When you stop</h3>
+      <div class="planner-row">
+        <label for="stopWorkingAge" class="planner-row-label">Stop working at</label>
+        <span class="planner-input">
+          <p-inputnumber inputId="stopWorkingAge" [(ngModel)]="stopWorkingAge" [min]="16" [max]="120"
+            (keyup.enter)="calculate()"></p-inputnumber>
+        </span>
       </div>
-      <div class="form-field pension-field pension-field-narrow">
-        <label for="pensionRetirementAge" class="form-label">
+      <div class="planner-row">
+        <label for="pensionRetirementAge" class="planner-row-label">
           Pension starts at
-          <i class="pi pi-info-circle pension-info"
+          <i class="pi pi-info-circle planner-info"
             pTooltip="The Hungarian retirement age is 65 for everyone born in 1957 or later."></i>
         </label>
-        <p-inputnumber inputId="pensionRetirementAge" [(ngModel)]="retirementAge" [min]="40" [max]="75"
-          (keyup.enter)="calculate()"></p-inputnumber>
+        <span class="planner-input">
+          <p-inputnumber inputId="pensionRetirementAge" [(ngModel)]="retirementAge" [min]="40" [max]="75"
+            (keyup.enter)="calculate()"></p-inputnumber>
+        </span>
       </div>
-      <div class="form-field pension-field">
-        <label class="form-label">Service time</label>
-        <div class="pension-readonly pension-readonly-strong">{{serviceYears}} years</div>
+      <div class="planner-row">
+        <label class="planner-row-label">Service time</label>
+        <span class="planner-readonly planner-readonly-strong">{{serviceYears}} years</span>
       </div>
-      <div class="form-field pension-field">
-        <label class="form-label">Years without a pension</label>
-        <div class="pension-readonly">{{gapYears}} years</div>
+      <div class="planner-row">
+        <label class="planner-row-label">Years without a pension</label>
+        <span class="planner-readonly">{{gapYears}} years</span>
       </div>
-    </div>
-    @if (serviceYears < 15) {
-      <p class="pension-warning">
-        <i class="pi pi-exclamation-triangle"></i>
-        Below 15 years of service time there is no state pension at all.
-      </p>
-    }
-  </section>
-
-  <section class="form-section">
-    <h3 class="form-section-title">Salary path</h3>
-    <div class="form-row">
-      <div class="form-field pension-field pension-field-check">
-        <p-checkbox inputId="useFlat" [(ngModel)]="useFlat" [binary]="true"></p-checkbox>
-        <label for="useFlat" class="pension-check-label">
-          Frozen (real)
-          <i class="pi pi-info-circle pension-info"
-            pTooltip="Your pay keeps today's buying power: it rises exactly with inflation, no more."></i>
-        </label>
-      </div>
-      <div class="form-field pension-field pension-field-check">
-        <p-checkbox inputId="useGrowth" [(ngModel)]="useGrowth" [binary]="true"></p-checkbox>
-        <label for="useGrowth" class="pension-check-label">Rising</label>
-      </div>
-      @if (useGrowth) {
-        <div class="form-field pension-field pension-field-narrow">
-          <label for="growthPct" class="form-label">
-            Above inflation
-            <i class="pi pi-info-circle pension-info"
-              pTooltip="Real growth each year, on top of inflation."></i>
-          </label>
-          <p-inputnumber inputId="growthPct" [(ngModel)]="growthPct" suffix=" %" [minFractionDigits]="0"
-            [maxFractionDigits]="1" [min]="-50" [max]="50" (keyup.enter)="calculate()"></p-inputnumber>
-        </div>
+      @if (serviceYears < 15) {
+        <p class="planner-warning">
+          <i class="pi pi-exclamation-triangle"></i>
+          Below 15 years of service time there is no state pension at all.
+        </p>
       }
-      <div class="form-field pension-field pension-field-check">
-        <p-checkbox inputId="useNominalLock" [(ngModel)]="useNominalLock" [binary]="true"></p-checkbox>
-        <label for="useNominalLock" class="pension-check-label">
-          Nominal lock
-          <i class="pi pi-info-circle pension-info"
-            pTooltip="The number on your payslip never changes, so it loses buying power every year."></i>
-        </label>
-      </div>
-      <div class="form-field pension-field pension-field-check">
-        <p-checkbox inputId="useSteps" [(ngModel)]="useSteps" [binary]="true"></p-checkbox>
-        <label for="useSteps" class="pension-check-label">Stepped</label>
-      </div>
     </div>
 
-    @if (useSteps) {
-      <div class="pension-steps">
-        @for (step of steps; track $index) {
-          <div class="form-row pension-step-row">
-            <div class="form-field pension-field pension-field-narrow">
-              <label class="form-label">Until age</label>
-              <p-inputnumber [(ngModel)]="step.untilAge" [min]="16" [max]="120"
-                (keyup.enter)="calculate()"></p-inputnumber>
-            </div>
-            <div class="form-field pension-field pension-field-narrow">
-              <label class="form-label">Above inflation</label>
-              <p-inputnumber [(ngModel)]="step.realGrowthPct" suffix=" %" [minFractionDigits]="0"
+    <div class="planner-group">
+      <button type="button" class="planner-group-toggle" (click)="pathOpen = !pathOpen"
+        [attr.aria-expanded]="pathOpen">
+        <span class="planner-group-title">Salary path</span>
+        <i class="pi planner-group-caret" [class.pi-chevron-down]="pathOpen"
+          [class.pi-chevron-right]="!pathOpen"></i>
+      </button>
+      @if (pathOpen) {
+        <div class="planner-check">
+          <p-checkbox inputId="useFlat" [(ngModel)]="useFlat" [binary]="true"></p-checkbox>
+          <label for="useFlat" class="planner-check-label">
+            Frozen (real)
+            <i class="pi pi-info-circle planner-info"
+              pTooltip="Your pay keeps today's buying power: it rises exactly with inflation, no more."></i>
+          </label>
+        </div>
+        <div class="planner-check">
+          <p-checkbox inputId="useGrowth" [(ngModel)]="useGrowth" [binary]="true"></p-checkbox>
+          <label for="useGrowth" class="planner-check-label">Rising</label>
+        </div>
+        @if (useGrowth) {
+          <div class="planner-row">
+            <label for="growthPct" class="planner-row-label">
+              Above inflation
+              <i class="pi pi-info-circle planner-info"
+                pTooltip="Real growth each year, on top of inflation."></i>
+            </label>
+            <span class="planner-input">
+              <p-inputnumber inputId="growthPct" [(ngModel)]="growthPct" [minFractionDigits]="0"
                 [maxFractionDigits]="1" [min]="-50" [max]="50" (keyup.enter)="calculate()"></p-inputnumber>
-            </div>
-            <div class="form-field pension-field-check">
-              <button pButton pRipple type="button" icon="pi pi-trash" severity="secondary"
-                class="p-button-rounded p-button-text" [disabled]="steps.length <= 1"
-                (click)="removeStep($index)"></button>
-            </div>
+              <span class="planner-unit">%</span>
+            </span>
           </div>
         }
-        <button pButton pRipple type="button" label="Add step" icon="pi pi-plus" severity="secondary"
-          class="p-button-rounded p-button-text" (click)="addStep()"></button>
-      </div>
-    }
-  </section>
+        <div class="planner-check">
+          <p-checkbox inputId="useNominalLock" [(ngModel)]="useNominalLock" [binary]="true"></p-checkbox>
+          <label for="useNominalLock" class="planner-check-label">
+            Nominal lock
+            <i class="pi pi-info-circle planner-info"
+              pTooltip="The number on your payslip never changes, so it loses buying power every year."></i>
+          </label>
+        </div>
+        <div class="planner-check">
+          <p-checkbox inputId="useSteps" [(ngModel)]="useSteps" [binary]="true"></p-checkbox>
+          <label for="useSteps" class="planner-check-label">Stepped</label>
+        </div>
 
-  <section class="form-section">
-    <h3 class="form-section-title">Assumptions</h3>
-    <div class="form-row">
-      <div class="form-field pension-field">
-        <label for="realWageGrowth" class="form-label">
-          National real wage growth
-          <i class="pi pi-info-circle pension-info"
-            pTooltip="Valorisation lifts your old earnings to the wage level of the year before you retire, so only wage growth above inflation matters here."></i>
-        </label>
-        <p-inputnumber inputId="realWageGrowth" [(ngModel)]="realWageGrowth" suffix=" %"
-          [minFractionDigits]="0" [maxFractionDigits]="1" [min]="-10" [max]="20"
-          (keyup.enter)="calculate()"></p-inputnumber>
-      </div>
-      <div class="form-field pension-field">
-        <label for="pensionInflation" class="form-label">Inflation</label>
-        <p-inputnumber inputId="pensionInflation" [(ngModel)]="inflation" suffix=" %"
-          [minFractionDigits]="0" [maxFractionDigits]="1" [min]="-99" [max]="100"
-          (keyup.enter)="calculate()"></p-inputnumber>
-      </div>
-      <div class="form-field pension-field">
-        <label for="degresszio" class="form-label">
-          Degressz&iacute;&oacute;
-          <i class="pi pi-info-circle pension-info"
-            pTooltip="Earnings above 372,000 HUF count at 90%, above 421,000 HUF at 80%. Those limits have been frozen in forints since 2013."></i>
-        </label>
-        <p-select inputId="degresszio" [options]="degressioOptions" [(ngModel)]="degresszio"
-          optionLabel="label" optionValue="value"></p-select>
-      </div>
-      <div class="form-field pension-field pension-field-check">
-        <p-checkbox inputId="thirteenthMonth" [(ngModel)]="includeThirteenthMonth"
-          [binary]="true"></p-checkbox>
-        <label for="thirteenthMonth" class="pension-check-label">13th month pension</label>
-      </div>
-    </div>
-  </section>
-</div>
-
-<div class="pension-actions">
-  <button pButton pRipple label="Calculate" icon="pi pi-calculator" class="p-button-rounded"
-    [loading]="calculating" [disabled]="!canCalculate" (click)="calculate()"></button>
-  @if (projection) {
-    <button pButton pRipple label="Download" icon="pi pi-download" class="p-button-rounded"
-      severity="secondary" pTooltip="Export the year-by-year detail as CSV"
-      (click)="downloadCsv()"></button>
-  }
-</div>
-
-@if (projection) {
-  @for (warning of projection.warnings; track warning) {
-    <p class="pension-warning"><i class="pi pi-exclamation-triangle"></i>{{warning}}</p>
-  }
-
-  <div class="stat-tiles pension-summary">
-    <div class="stat-tile">
-      <div class="stat-tile-label">Monthly pension</div>
-      <div class="stat-tile-value">
-        {{projection.scenarios[0].monthlyPension | number:'1.0-0'}} {{projection.currency}}
-      </div>
-      <div class="stat-tile-note">
-        today&rsquo;s prices at {{projection.retirementYear - 1}} wage levels, on the
-        {{projection.scenarios[0].name}} path
-      </div>
-    </div>
-    <div class="stat-tile">
-      <div class="stat-tile-label">Replacement rate</div>
-      <div class="stat-tile-value">{{projection.scenarios[0].replacementRatePct | number:'1.0-0'}}%</div>
-      <div class="stat-tile-note">
-        of your final net pay, {{projection.scenarios[0].finalNetMonthly | number:'1.0-0'}} a month
-      </div>
-    </div>
-    <div class="stat-tile" [class.pension-tile-bad]="!projection.eligible">
-      <div class="stat-tile-label">Service time</div>
-      <div class="stat-tile-value">{{projection.serviceYears}} years</div>
-      <div class="stat-tile-note">
-        @if (projection.eligible) {
-          counts {{projection.scalePct | number:'1.0-1'}}% of the pension base
-          @if (projection.partialPension) {
-            &mdash; a partial pension, below the 20-year full rate
-          }
-        } @else {
-          below the 15 years needed for any pension
+        @if (useSteps) {
+          <div class="pension-steps">
+            @for (step of steps; track $index) {
+              <div class="pension-step-row">
+                <span class="pension-step-label">Until</span>
+                <span class="planner-input">
+                  <p-inputnumber [(ngModel)]="step.untilAge" [min]="16" [max]="120"
+                    (keyup.enter)="calculate()"></p-inputnumber>
+                </span>
+                <span class="pension-step-label">at</span>
+                <span class="planner-input">
+                  <p-inputnumber [(ngModel)]="step.realGrowthPct" [minFractionDigits]="0"
+                    [maxFractionDigits]="1" [min]="-50" [max]="50" (keyup.enter)="calculate()"></p-inputnumber>
+                  <span class="planner-unit">%</span>
+                </span>
+                <button pButton pRipple type="button" icon="pi pi-trash" severity="secondary"
+                  class="p-button-rounded p-button-text" [disabled]="steps.length <= 1"
+                  (click)="removeStep($index)"></button>
+              </div>
+            }
+            <button pButton pRipple type="button" label="Add step" icon="pi pi-plus" severity="secondary"
+              class="p-button-rounded p-button-text" (click)="addStep()"></button>
+          </div>
         }
-      </div>
+      }
     </div>
-    <div class="stat-tile">
-      <div class="stat-tile-label">Against an average earner</div>
-      <div class="stat-tile-value">
-        &times;{{projection.nationalAverageMultiple | number:'1.1-1'}}
-      </div>
-      <div class="stat-tile-note">
-        the same {{projection.serviceYears}} years on the national average wage would pay
-        {{projection.nationalAveragePension | number:'1.0-0'}}
-      </div>
+
+    <div class="planner-group">
+      <button type="button" class="planner-group-toggle" (click)="assumptionsOpen = !assumptionsOpen"
+        [attr.aria-expanded]="assumptionsOpen">
+        <span class="planner-group-title">Economy &amp; rules</span>
+        <i class="pi planner-group-caret" [class.pi-chevron-down]="assumptionsOpen"
+          [class.pi-chevron-right]="!assumptionsOpen"></i>
+      </button>
+      @if (assumptionsOpen) {
+        <div class="planner-row">
+          <label for="realWageGrowth" class="planner-row-label">
+            National real wage growth
+            <i class="pi pi-info-circle planner-info"
+              pTooltip="Valorisation lifts your old earnings to the wage level of the year before you retire, so only wage growth above inflation matters here."></i>
+          </label>
+          <span class="planner-input">
+            <p-inputnumber inputId="realWageGrowth" [(ngModel)]="realWageGrowth" [minFractionDigits]="0"
+              [maxFractionDigits]="1" [min]="-10" [max]="20" (keyup.enter)="calculate()"></p-inputnumber>
+            <span class="planner-unit">%</span>
+          </span>
+        </div>
+        <div class="planner-row">
+          <label for="pensionInflation" class="planner-row-label">Inflation</label>
+          <span class="planner-input">
+            <p-inputnumber inputId="pensionInflation" [(ngModel)]="inflation" [minFractionDigits]="0"
+              [maxFractionDigits]="1" [min]="-99" [max]="100" (keyup.enter)="calculate()"></p-inputnumber>
+            <span class="planner-unit">%</span>
+          </span>
+        </div>
+        <div class="planner-row pension-stack">
+          <label for="degresszio" class="planner-row-label">
+            Degressz&iacute;&oacute;
+            <i class="pi pi-info-circle planner-info"
+              pTooltip="Earnings above 372,000 HUF count at 90%, above 421,000 HUF at 80%. Those limits have been frozen in forints since 2013."></i>
+          </label>
+          <p-select inputId="degresszio" [options]="degressioOptions" [(ngModel)]="degresszio"
+            optionLabel="label" optionValue="value"></p-select>
+        </div>
+        <div class="planner-check">
+          <p-checkbox inputId="thirteenthMonth" [(ngModel)]="includeThirteenthMonth"
+            [binary]="true"></p-checkbox>
+          <label for="thirteenthMonth" class="planner-check-label">13th month pension</label>
+        </div>
+      }
     </div>
-    @if (projection.gapYears > 0) {
-      <div class="stat-tile pension-tile-bad">
-        <div class="stat-tile-label">Nothing paid for</div>
-        <div class="stat-tile-value">{{projection.gapYears}} years</div>
-        <div class="stat-tile-note">
-          you stop at {{projection.stopWorkingAge}} but the state pays nothing until
-          {{projection.retirementAge}}
+
+    <button pButton pRipple label="Calculate pension" icon="pi pi-calculator" class="planner-submit"
+      [loading]="calculating" [disabled]="!canCalculate" (click)="calculate()"></button>
+  </section>
+
+  <section class="planner-result-card">
+    @if (projection) {
+      <span class="planner-eyebrow">Illustrative projection</span>
+      <h2 class="planner-headline">{{headline}}</h2>
+
+      <div class="planner-hero">
+        <div class="planner-hero-item planner-hero-lead">
+          <span class="planner-hero-label">Pension starts at</span>
+          <div class="planner-hero-box">
+            <span class="planner-hero-big">{{projection.retirementAge}}</span>
+            <span class="planner-hero-note">About {{yearsToRetirement}} years from today</span>
+          </div>
+        </div>
+        <div class="planner-hero-item">
+          <span class="planner-hero-label"><i class="pi pi-clock planner-hero-icon"></i> Service time</span>
+          <span class="planner-hero-value">{{projection.serviceYears}} years</span>
+        </div>
+        <div class="planner-hero-item">
+          <span class="planner-hero-label"><i class="pi pi-users planner-hero-icon"></i> vs average earner</span>
+          <span class="planner-hero-value">&times;{{projection.nationalAverageMultiple | number:'1.1-1'}}</span>
         </div>
       </div>
-    }
-  </div>
 
+      @for (warning of projection.warnings; track warning) {
+        <p class="planner-warning"><i class="pi pi-exclamation-triangle"></i>{{warning}}</p>
+      }
+
+      @if (chart) {
+        <div class="planner-chart">
+          <apx-chart [series]="chart.series!" [chart]="chart.chart!"
+            [xaxis]="chart.xaxis!" [yaxis]="chart.yaxis!"
+            [legend]="chart.legend!" [dataLabels]="chart.dataLabels!"
+            [tooltip]="chart.tooltip!" [stroke]="chart.stroke!"
+            [grid]="chart.grid!" [markers]="chart.markers!"
+            [annotations]="chart.annotations!" [colors]="chart.colors!"></apx-chart>
+        </div>
+        <p class="planner-note">
+          Monthly pension in today&rsquo;s forints against the age you stop working. The pension still starts
+          at {{projection.retirementAge}} whichever you choose.
+        </p>
+      }
+
+      <div class="planner-tiles">
+        <div class="planner-tile">
+          <i class="pi pi-wallet planner-tile-icon"></i>
+          <div>
+            <div class="planner-tile-label">A year</div>
+            <div class="planner-tile-value">
+              {{projection.scenarios[0].annualPension | number:'1.0-0'}} {{projection.currency}}
+            </div>
+            <div class="planner-tile-note">On the {{projection.scenarios[0].name}} path.</div>
+          </div>
+        </div>
+        <div class="planner-tile">
+          <i class="pi pi-hourglass planner-tile-icon"></i>
+          <div>
+            <div class="planner-tile-label">Nothing paid for</div>
+            @if (projection.gapYears > 0) {
+              <div class="planner-tile-value planner-tile-bad">{{projection.gapYears}} years</div>
+              <div class="planner-tile-note">
+                You stop at {{projection.stopWorkingAge}} but the state pays nothing until
+                {{projection.retirementAge}}.
+              </div>
+            } @else {
+              <div class="planner-tile-value">No gap</div>
+              <div class="planner-tile-note">The pension starts the year you stop working.</div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="planner-meter">
+        <i class="pi pi-chart-bar planner-meter-icon"></i>
+        <div class="planner-meter-body">
+          <div class="planner-meter-head">
+            <div>
+              <div class="planner-tile-label">Replacement rate</div>
+              <div class="planner-meter-value">Of your final net pay</div>
+            </div>
+            <span class="planner-meter-pct">
+              {{projection.scenarios[0].replacementRatePct | number:'1.0-0'}}%
+            </span>
+          </div>
+          <div class="meter-bar">
+            <div class="meter-bar-fill" [style.width.%]="replacementPct"></div>
+          </div>
+          <div class="planner-meter-legend">
+            <span>
+              @if (projection.eligible) {
+                Counts {{projection.scalePct | number:'1.0-1'}}% of the pension base.
+                @if (projection.partialPension) {
+                  A partial pension, below the 20-year full rate.
+                }
+              } @else {
+                Below the 15 years needed for any pension.
+              }
+            </span>
+            <span>
+              {{projection.scenarios[0].monthlyPension | number:'1.0-0'}} /
+              {{projection.scenarios[0].finalNetMonthly | number:'1.0-0'}} {{projection.currency}}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="planner-recap">
+        <div class="planner-card-title">Your assumptions</div>
+        <div class="planner-recap-row">
+          <span>Current gross</span>
+          <span class="planner-recap-value">{{projection.currentGrossMonthly | number:'1.0-0'}} HUF</span>
+        </div>
+        <div class="planner-recap-row">
+          <span>Real wage growth</span>
+          <span class="planner-recap-value">{{realWageGrowth | number:'1.0-1'}} %</span>
+        </div>
+        <div class="planner-recap-row">
+          <span>Inflation</span>
+          <span class="planner-recap-value">{{inflation | number:'1.0-1'}} %</span>
+        </div>
+        <button pButton pRipple label="Edit assumptions" icon="pi pi-pencil"
+          class="p-button-outlined planner-recap-edit" (click)="showAssumptions()"></button>
+      </div>
+
+      <p class="planner-foot">
+        Valorisation restates your whole career at {{projection.retirementYear - 1}} wage levels.
+      </p>
+    } @else if (calculating || salaryLoading) {
+      <span class="planner-eyebrow">Illustrative projection</span>
+      <p-skeleton height="2.5rem" width="18rem" styleClass="mb-3"></p-skeleton>
+      <p-skeleton height="20rem"></p-skeleton>
+    } @else {
+      <div class="table-empty">
+        <i class="pi pi-chart-line"></i>
+        <div class="table-empty-title">No projection yet</div>
+        <div>Set your assumptions and press Calculate pension.</div>
+      </div>
+    }
+  </section>
+</div>
+
+<div class="planner-results">
+@if (projection) {
   <h3 class="section-heading">Salary paths compared</h3>
   <p-table [value]="projection.scenarios" styleClass="p-datatable-striped p-datatable-sm table-stack">
     <ng-template pTemplate="header">
@@ -272,7 +384,7 @@
         <th class="text-right">Final gross</th>
         <th class="text-right">
           Pension base
-          <i class="pi pi-info-circle pension-info"
+          <i class="pi pi-info-circle planner-info"
             pTooltip="The valorised net lifetime average, before degresszio."></i>
         </th>
         <th class="text-right">After degresszi&oacute;</th>
@@ -294,7 +406,7 @@
         <td data-label="After degresszio" class="text-right">
           {{row.degressedBaseMonthly | number:'1.0-0'}}
         </td>
-        <td data-label="Monthly pension" class="text-right pension-total-cell">
+        <td data-label="Monthly pension" class="text-right planner-total-cell">
           {{row.monthlyPension | number:'1.0-0'}}
         </td>
         <td data-label="A year" class="text-right">{{row.annualPension | number:'1.0-0'}}</td>
@@ -317,7 +429,7 @@
   }
 
   <p class="form-hint pension-hint-tight">
-    <i class="pi pi-info-circle pension-info"></i>
+    <i class="pi pi-info-circle planner-info"></i>
     Sanity check: you earn about
     &times;{{projection.salaryMultipleOfNationalAverage | number:'1.1-1'}} the national average gross wage
     ({{projection.nationalAverageGrossMonthly | number:'1.0-0'}} HUF a month, KSH 2026). On exactly these
@@ -356,85 +468,12 @@
           <td data-label="Valorisation uplift" class="text-right">
             &times;{{row.valorizationUplift | number:'1.2-2'}}
           </td>
-          <td data-label="Monthly pension" class="text-right pension-total-cell">
+          <td data-label="Monthly pension" class="text-right planner-total-cell">
             {{row.monthlyPension | number:'1.0-0'}}
           </td>
         </tr>
       </ng-template>
     </p-table>
-  }
-
-  @if (chart) {
-    <h3 class="section-heading">What each extra year is worth</h3>
-    <p class="form-hint">
-      Monthly pension in today&rsquo;s forints against the age you stop working. The pension still starts at
-      {{projection.retirementAge}} whichever you choose.
-    </p>
-    <div class="pension-chart-wrap">
-      <svg class="pension-chart" [attr.viewBox]="'0 0 ' + chartBox.width + ' ' + chartBox.height"
-        preserveAspectRatio="xMidYMid meet" (mousemove)="onChartMove($event)"
-        (mouseleave)="setHoveredStopAge(null)">
-
-        @for (tick of chart.yTicks; track tick.label) {
-          <line [attr.x1]="chartBox.left" [attr.x2]="chartBox.width - chartBox.right"
-            [attr.y1]="tick.position" [attr.y2]="tick.position" class="pension-gridline"></line>
-          <text [attr.x]="chartBox.left - 8" [attr.y]="tick.position + 4" text-anchor="end"
-            class="pension-axis-label">{{tick.label}}</text>
-        }
-
-        @for (tick of chart.xTicks; track tick.label) {
-          <text [attr.x]="tick.position" [attr.y]="chartBox.height - 8" text-anchor="middle"
-            class="pension-axis-label">{{tick.label}}</text>
-        }
-
-        @if (chart.stopX != null) {
-          <line [attr.x1]="chart.stopX" [attr.x2]="chart.stopX" [attr.y1]="chartBox.top"
-            [attr.y2]="chartBox.height - chartBox.bottom" class="pension-stop-line"></line>
-          <text [attr.x]="chart.stopX + 5" [attr.y]="chartBox.top + 12" class="pension-marker-label">
-            you stop
-          </text>
-        }
-
-        @for (line of chart.series; track line.name) {
-          <path [attr.d]="line.path" class="pension-line" [attr.stroke]="line.color"></path>
-          <text [attr.x]="chartBox.width - chartBox.right + 8" [attr.y]="line.labelY + 4"
-            class="pension-series-label" [attr.fill]="line.color">{{formatCompact(line.labelValue)}}</text>
-        }
-
-        @if (hoveredColumn) {
-          <line [attr.x1]="hoveredColumn.x" [attr.x2]="hoveredColumn.x" [attr.y1]="chartBox.top"
-            [attr.y2]="chartBox.height - chartBox.bottom" class="pension-hover-line"></line>
-          @for (reading of hoveredColumn.readings; track reading.name) {
-            <circle [attr.cx]="hoveredColumn.x" [attr.cy]="reading.y" r="4.5"
-              [attr.fill]="reading.color" class="pension-dot"></circle>
-          }
-        }
-      </svg>
-
-      @if (hoveredColumn) {
-        <div class="pension-chart-readout">
-          <div class="pension-readout-title">
-            Stop at {{hoveredColumn.stopAge}}
-            <span class="pension-readout-note">{{hoveredColumn.serviceYears}} service years</span>
-          </div>
-          @for (reading of hoveredColumn.readings; track reading.name) {
-            <div class="pension-readout-row">
-              <span class="pension-swatch" [style.background]="reading.color"></span>
-              <span>{{reading.name}}</span>
-              <span class="pension-readout-value">{{reading.value | number:'1.0-0'}}</span>
-            </div>
-          }
-        </div>
-      }
-
-      <div class="pension-legend">
-        @for (line of chart.series; track line.name) {
-          <span class="pension-legend-item">
-            <span class="pension-swatch" [style.background]="line.color"></span>{{line.name}}
-          </span>
-        }
-      </div>
-    </div>
   }
 
   @if (extraYearRows.length > 0) {
@@ -459,7 +498,7 @@
         <tr>
           <td data-label="Working until">{{row.fromAge}} &rarr; {{row.toAge}}</td>
           <td data-label="Service years" class="text-right">{{row.serviceYears}}</td>
-          <td data-label="Monthly pension" class="text-right pension-total-cell">
+          <td data-label="Monthly pension" class="text-right planner-total-cell">
             {{row.monthlyPension | number:'1.0-0'}}
           </td>
           <td data-label="Gained that year" class="text-right">
@@ -505,9 +544,17 @@
     </p-table>
   }
 
-  <p class="pension-caveat">
+  <div class="planner-actions">
+    <button pButton pRipple label="Download" icon="pi pi-download" class="p-button-rounded"
+      severity="secondary" pTooltip="Export the year-by-year detail as CSV"
+      (click)="downloadCsv()"></button>
+  </div>
+
+  <p class="planner-caveat">
     <i class="pi pi-info-circle"></i>
-    Valorisation is modelled as a steady national wage growth rather than the published year-by-year
+    Valorisation restates your whole career at the wage level of the year before you retire, so the answer
+    sits at today&rsquo;s prices but at future wage levels &mdash; that is why it can land well above pensions
+    being paid today. It is modelled as a steady national wage growth rather than the published year-by-year
     multipliers, and it compounds over the whole gap to your retirement year, so small changes to that rate
     move the answer a lot. Today&rsquo;s 18.5% contribution and 15% tax rates are assumed to hold for your
     whole career. Past years come from your salary records, day-weighted within each calendar year. The
@@ -516,3 +563,5 @@
     rather than an entitlement.
   </p>
 }
+</div>
+</div>

@@ -20,11 +20,16 @@ import { DashboardService } from '../service/dashboard.service';
 import { UserService } from '../service/user.service';
 import { DEFAULT_CURRENCY } from '../model/currency';
 import { AccountTotals, calculateAccountTotals } from '../util/accounttotals';
+import { AccountService } from '../service/account.service';
+import { PortfolioFilter } from '../util/tablefilter';
+import { InputText } from 'primeng/inputtext';
+import { Select } from 'primeng/select';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-etf',
     templateUrl: './etf.component.html',
-    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, EtfholdingComponent, EtfpositionComponent, EtfinvestmentComponent, EtfdividendComponent, DecimalPipe, CurrencyPipe, NgClass, AllocationDonutComponent, AlignToTableDirective]
+    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, EtfholdingComponent, EtfpositionComponent, EtfinvestmentComponent, EtfdividendComponent, DecimalPipe, CurrencyPipe, NgClass, AllocationDonutComponent, AlignToTableDirective, InputText, Select, FormsModule]
 })
 export class EtfComponent implements OnInit {
 
@@ -43,6 +48,9 @@ export class EtfComponent implements OnInit {
   accountTotals: AccountTotals[] = [];
   accountsExpanded: boolean = false;
 
+  filter: PortfolioFilter = { search: '', account: null };
+  accountOptions: string[] = [];
+
   selectedCurrency: string = DEFAULT_CURRENCY;
 
   // Rates are EUR -> currency (e.g. rates['USD'] = how many USD per 1 EUR). EUR itself is always 1.
@@ -50,11 +58,30 @@ export class EtfComponent implements OnInit {
   private rates: { [currency: string]: number } = { EUR: 1 };
   private forceRateRefresh: boolean = false;
 
-  constructor(private dashboardService: DashboardService, private userService: UserService) { }
+  constructor(private dashboardService: DashboardService, private userService: UserService, private accountService: AccountService) { }
 
   allocationItems: AllocationItem[] = [];
 
   ngOnInit(): void {
+    this.loadAccounts();
+  }
+
+  /** The children re-read the filter through their input, so this only has to replace the object. */
+  /** The picker lists every account the user has, not just the ones holding something today. */
+  private loadAccounts(): void {
+    this.accountService.getAccounts().subscribe({
+      next: (accounts) => this.accountOptions =
+        accounts.map(account => account.accountName).filter(name => !!name).sort(),
+      error: () => this.accountOptions = []
+    });
+  }
+
+  onFilterChange(): void {
+    this.filter = { ...this.filter };
+  }
+
+  clearSearch(): void {
+    this.filter = { ...this.filter, search: '' };
   }
 
   toggleAccounts(): void {

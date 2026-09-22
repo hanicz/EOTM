@@ -1,4 +1,6 @@
 import { Component, OnInit, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
+import { Input } from '@angular/core';
+import { EMPTY_FILTER, PortfolioFilter, filterRows } from '../../util/tablefilter';
 import { Globals } from '../../util/global';
 import { SecurityTransaction } from '../../model/securityTransaction';
 import { SecurityService } from '../../service/security.service';
@@ -23,6 +25,18 @@ export interface PaymentTotal {
     imports: [Bind, TableModule, PrimeTemplate, Skeleton, Divider, Tooltip, CurrencyPipe, DatePipe, DecimalPipe, NgClass]
 })
 export class HoldingComponent implements OnInit {
+  visibleTransactions: SecurityTransaction[] = [];
+  private activeFilter: PortfolioFilter = EMPTY_FILTER;
+
+  @Input() set filter(value: PortfolioFilter) {
+    this.activeFilter = value ?? EMPTY_FILTER;
+    this.applyFilter();
+  }
+
+  private applyFilter(): void {
+    this.visibleTransactions = filterRows(this.transactions, this.activeFilter, ['securityName', 'securityId']);
+  }
+
 
   transactions: SecurityTransaction[] = [];
   upcomingPayments: UpcomingPayment[] = [];
@@ -64,6 +78,7 @@ export class HoldingComponent implements OnInit {
       next: (data) => {
         this.transactionsLoading = false;
         this.transactions = data;
+        this.applyFilter();
         this.applyPayments();
         this.dataLoaded.emit(this.transactions);
         this.cdr.markForCheck();

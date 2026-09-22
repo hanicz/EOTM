@@ -1,58 +1,43 @@
 ﻿<p-toast position="bottom-center"></p-toast>
 <p-toolbar styleClass="table-toolbar">
   <ng-template pTemplate="left">
-    <button pButton pRipple label="New" icon="pi pi-plus"
-    (click)="openNew()"></button>
-    <button pButton pRipple label="RSU" icon="pi pi-percentage" severity="secondary" class="p-button-outlined"
-      pTooltip="Flag the selected buys as RSUs and tax them on the tax page"
-      [disabled]="!selectedInvestments || !selectedInvestments.length"
-      (click)="rsuClicked(true)"></button>
-    <button pButton pRipple label="Not RSU" icon="pi pi-ban" severity="secondary" class="p-button-outlined"
-      pTooltip="Leave the selected buys out of the RSU tax report"
-      [disabled]="!selectedInvestments || !selectedInvestments.length"
-      (click)="rsuClicked(false)"></button>
-    <button pButton pRipple icon="pi pi-trash" severity="danger" class="p-button-outlined"
-    [disabled]="!selectedInvestments || !selectedInvestments.length" (click)="deleteClicked()"></button>
+    <div class="toolbar-icons">
+      <button pButton pRipple type="button" size="small" icon="pi pi-plus"
+        pTooltip="New transaction" tooltipPosition="bottom" aria-label="New transaction"
+        (click)="openNew()"></button>
+      <span class="toolbar-divider" aria-hidden="true"></span>
+      <button pButton pRipple type="button" size="small" icon="pi pi-percentage" severity="secondary" [outlined]="true"
+        pTooltip="Flag the selected buys as RSUs and tax them on the tax page" tooltipPosition="bottom"
+        aria-label="Flag the selected buys as RSUs"
+        [disabled]="!selectedInvestments || !selectedInvestments.length"
+        (click)="rsuClicked(true)"></button>
+      <button pButton pRipple type="button" size="small" icon="pi pi-ban" severity="secondary" [outlined]="true"
+        pTooltip="Leave the selected buys out of the RSU tax report" tooltipPosition="bottom"
+        aria-label="Unflag the selected buys as RSUs"
+        [disabled]="!selectedInvestments || !selectedInvestments.length"
+        (click)="rsuClicked(false)"></button>
+      <button pButton pRipple type="button" size="small" icon="pi pi-trash" severity="danger" [outlined]="true"
+        pTooltip="Delete the selected transactions" tooltipPosition="bottom"
+        aria-label="Delete the selected transactions"
+        [disabled]="!selectedInvestments || !selectedInvestments.length" (click)="deleteClicked()"></button>
+    </div>
   </ng-template>
 
   <ng-template pTemplate="right">
-    <p-fileUpload mode="basic" #fileUpload accept=".csv" [customUpload]="true" [auto]="true" label="Import" chooseLabel="Import" chooseStyleClass="p-button-outlined p-button-secondary" (uploadHandler)="onUpload($event)">
-    </p-fileUpload>
-    <button pButton pRipple label="Export" icon="pi pi-upload" severity="secondary" class="p-button-outlined" (click)="download()"></button>
-  </ng-template>
-</p-toolbar>
-<p-table #dt1 [value]="investments" styleClass="p-datatable-striped table-stack eotm-table"
-  [(selection)]="selectedInvestments" [paginator]="true" [rows]="25">
-
-  <ng-template pTemplate="caption">
-    <div class="filter-bar">
-      <input pInputText type="text"
-        (input)="dt1.filter($any($event.target)?.value, 'shortName', 'contains')"
-        [value]="$any(dt1.filters['shortName'])?.value ?? ''" placeholder="Search by Name"
-        class="p-column-filter filter-input">
-      <p-columnFilter field="buySell" matchMode="equals" [showMenu]="false" class="filter-type">
-        <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-          <p-select [ngModel]="value" [options]="statuses" (onChange)="filter($any($event)?.value)"
-            [showClear]="true" placeholder="Any">
-            <ng-template let-option pTemplate="item">
-              @if (option.label === 'BUY') {
-                <span class="state-chip state-buy">BUY</span>
-              }
-              @if (option.label === 'SELL') {
-                <span class="state-chip state-sell">SELL</span>
-              }
-            </ng-template>
-          </p-select>
-        </ng-template>
-      </p-columnFilter>
-      <p-columnFilter field="accountName" matchMode="equals" [showMenu]="false" class="filter-type">
-        <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-          <p-select [ngModel]="value" [options]="accountOptions" (onChange)="filter($any($event)?.value)"
-            [showClear]="true" placeholder="Any account" ariaLabel="Account"></p-select>
-        </ng-template>
-      </p-columnFilter>
+    <div class="toolbar-icons">
+      <input #fileInput type="file" accept=".csv" hidden (change)="fileChosen($event)" />
+      <button pButton pRipple type="button" size="small" icon="pi pi-upload" severity="secondary" [outlined]="true"
+        pTooltip="Import from CSV" tooltipPosition="bottom" aria-label="Import from CSV"
+        (click)="fileInput.click()"></button>
+      <button pButton pRipple type="button" size="small" icon="pi pi-download" severity="secondary" [outlined]="true"
+        pTooltip="Export to CSV" tooltipPosition="bottom" aria-label="Export to CSV"
+        (click)="download()"></button>
     </div>
   </ng-template>
+</p-toolbar>
+<p-table #dt1 [value]="visibleInvestments" styleClass="p-datatable-striped table-stack eotm-table"
+  [(selection)]="selectedInvestments" [paginator]="true" [rows]="25">
+
   <ng-template pTemplate="header">
     <tr>
       <th style="width: 3rem">
@@ -85,7 +70,7 @@
           {{investment.buySell === 'B' ? 'BUY' : 'SELL'}}
         </span>
       </td>
-      <td data-label="Quantity" class="cell-num">{{investment.quantity}}</td>
+      <td data-label="Quantity" class="cell-num">{{investment.quantity | number : '0.0-6'}}</td>
       <td data-label="Spent" class="cell-num">{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}</td>
       <td data-label="Average" class="cell-num cell-quiet">{{(investment.amount / investment.quantity) | currency : investment.currencyId : 'symbol' : '0.0-3'}}
       </td>
@@ -193,7 +178,7 @@
       </div>
       <div class="col-12 sm:col-4 mb-2">
         <label for="quantity" class="block mb-2 font-medium text-color-secondary">Quantity</label>
-        <input type="number" pInputText id="quantity" [(ngModel)]="investment.quantity" class="w-full" />
+        <input type="number" pInputText id="quantity" [(ngModel)]="investment.quantity" min="0" step="any" class="w-full" />
       </div>
       <div class="col-12 sm:col-4 mb-2">
         <label for="amount" class="block mb-2 font-medium text-color-secondary">Amount</label>

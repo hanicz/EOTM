@@ -60,7 +60,7 @@ class TaxServiceTest {
                 List.of(Exchange.builder().code("US").name("USA Stocks").currency("USD").build()));
     }
 
-    private RSUDTO rsu(int quantity, LocalDate date) {
+    private RSUDTO rsu(double quantity, LocalDate date) {
         return RSUDTO.builder().shortName(SHORT_NAME).date(date).quantity(quantity).build();
     }
 
@@ -128,7 +128,7 @@ class TaxServiceTest {
         when(this.mnbAPIService.getExchangeRates(any(), any(), any())).thenReturn(Map.of("EUR", eur));
 
         RSUTaxDTO item = this.taxService.calculateTaxForRSUs(List.of(
-                RSUDTO.builder().shortName(SHORT_NAME).date(VEST_DATE).quantity(10).currency("EUR").build()
+                RSUDTO.builder().shortName(SHORT_NAME).date(VEST_DATE).quantity(10.0).currency("EUR").build()
         )).getItems().getFirst();
 
         assertEquals("EUR", item.getCurrency());
@@ -142,7 +142,7 @@ class TaxServiceTest {
         this.stubRates(Map.of(VEST_DATE, "350"));
 
         this.taxService.calculateTaxForRSUs(List.of(
-                RSUDTO.builder().shortName("vwrl").exchange("lse").date(VEST_DATE).quantity(1).currency("USD").build()));
+                RSUDTO.builder().shortName("vwrl").exchange("lse").date(VEST_DATE).quantity(1.0).currency("USD").build()));
 
         verify(this.eodAPIService).getHistoricalQuotes(eq("VWRL.LSE"), any(), any());
     }

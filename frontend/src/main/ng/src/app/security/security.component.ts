@@ -1,4 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
+import { PortfolioFilter } from '../util/tablefilter';
+import { InputText } from 'primeng/inputtext';
+import { FormsModule } from '@angular/forms';
 import { SecurityTransaction } from '../model/securityTransaction';
 import { Interest } from '../model/interest';
 import { MenuComponent } from '../menu/menu.component';
@@ -27,9 +30,20 @@ import { MessageService } from 'primeng/api';
 @Component({
     selector: 'app-security',
     templateUrl: './security.component.html',
-    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, HoldingComponent, TransactionComponent, InterestComponent, CurrencyPipe, DecimalPipe, AllocationDonutComponent, AlignToTableDirective, FileUpload, Toast]
+    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, HoldingComponent, TransactionComponent, InterestComponent, CurrencyPipe, DecimalPipe, AllocationDonutComponent, AlignToTableDirective, FileUpload, Toast, InputText, FormsModule]
 })
 export class SecurityComponent implements OnInit {
+  filter: PortfolioFilter = { search: '', account: null };
+
+  /** The children re-read the filter through their input, so this replaces the object. */
+  onFilterChange(): void {
+    this.filter = { ...this.filter };
+  }
+
+  clearSearch(): void {
+    this.filter = { ...this.filter, search: '' };
+  }
+
 
   @ViewChild(HoldingComponent) holding!: HoldingComponent;
   @ViewChild(TransactionComponent) transaction!: TransactionComponent;

@@ -1,4 +1,6 @@
-import { Component, inject, OnInit, Output, EventEmitter, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, Output, EventEmitter, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Input } from '@angular/core';
+import { EMPTY_FILTER, PortfolioFilter, filterRows } from '../../util/tablefilter';
 import { CsvDropDirective } from '../../util/csv-drop.directive';
 import { Interest } from 'src/app/model/interest';
 import { InterestService } from 'src/app/service/interest.service';
@@ -11,7 +13,7 @@ import { MessageService, PrimeTemplate } from 'primeng/api';
 import { Toast } from 'primeng/toast';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
-import { FileUpload } from 'primeng/fileupload';
+import { Tooltip } from 'primeng/tooltip';
 import { TableModule } from 'primeng/table';
 import { InputText } from 'primeng/inputtext';
 import { Dialog } from 'primeng/dialog';
@@ -23,9 +25,21 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
     selector: 'app-interest',
     hostDirectives: [CsvDropDirective],
     templateUrl: './interest.component.html',
-    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Dialog, FormsModule, Select, CurrencyPipe, DatePipe, Toast]
+    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, Tooltip, TableModule, InputText, Dialog, FormsModule, Select, CurrencyPipe, DatePipe, Toast]
 })
 export class InterestComponent implements OnInit {
+  visibleInterests: Interest[] = [];
+  private activeFilter: PortfolioFilter = EMPTY_FILTER;
+
+  @Input() set filter(value: PortfolioFilter) {
+    this.activeFilter = value ?? EMPTY_FILTER;
+    this.applyFilter();
+  }
+
+  private applyFilter(): void {
+    this.visibleInterests = filterRows(this.interests, this.activeFilter, ['securityName', 'securityId']);
+  }
+
 
   interests: Interest[] = [];
   @Output() dataLoaded = new EventEmitter<Interest[]>();
@@ -33,7 +47,7 @@ export class InterestComponent implements OnInit {
   selectedInterests: Interest[] = [];
   interestDialog: boolean = false;
   interest: Interest = {} as Interest;
-  @ViewChild('fileUpload') fileUpload: any;
+  @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
   globals: Globals;
   securities: Security[] = [];
   selectedExistingSecurity: Security | null = null;
@@ -64,6 +78,7 @@ export class InterestComponent implements OnInit {
     this.interestService.getAllInterest().subscribe({
       next: (data) => {
         this.interests = data;
+        this.applyFilter();
         this.dataLoaded.emit(this.interests);
         this.cdr.markForCheck();
       },
@@ -140,16 +155,25 @@ export class InterestComponent implements OnInit {
     }
   }
 
+  fileChosen(event: Event) {
+    const files = Array.from((event.target as HTMLInputElement).files ?? []);
+    if (files.length) this.onUpload({ files });
+  }
+
+  private clearFileInput() {
+    if (this.fileInput) this.fileInput.nativeElement.value = '';
+  }
+
   onUpload(event: any) {
     for (let file of event.files) {
       this.interestService.uploadCSV(file).subscribe({
         next: () => {
           this.fetchData();
-          this.fileUpload.clear();
+          this.clearFileInput();
           this.messageService.add({ severity: 'success', detail: 'Import finished.' });
         },
         error: (error) => {
-          this.fileUpload.clear();
+          this.clearFileInput();
           this.messageService.add({ severity: 'error', detail: error.error?.error ?? 'Import failed.' });
         }
       });

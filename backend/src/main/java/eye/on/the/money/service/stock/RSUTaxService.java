@@ -156,7 +156,7 @@ public class RSUTaxService implements ICSVService {
                 .build();
     }
 
-    private BigDecimal value(BigDecimal price, Integer quantity) {
+    private BigDecimal value(BigDecimal price, Double quantity) {
         if (price == null || quantity == null) return BigDecimal.ZERO;
         return price.multiply(BigDecimal.valueOf(quantity)).setScale(2, RoundingMode.HALF_UP);
     }

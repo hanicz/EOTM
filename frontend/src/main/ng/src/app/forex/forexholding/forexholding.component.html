@@ -30,7 +30,7 @@
 }
 
 @if (!transactionsLoading) {
-  <p-table [value]="forexTransactions" styleClass="p-datatable-striped table-stack">
+  <p-table [value]="visibleTransactions" styleClass="p-datatable-striped table-stack">
     <ng-template pTemplate="header">
       <tr>
         <th>From</th>

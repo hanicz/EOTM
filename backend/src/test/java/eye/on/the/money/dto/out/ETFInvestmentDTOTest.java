@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
@@ -26,7 +27,7 @@ class ETFInvestmentDTOTest {
         ETFInvestmentDTO eiDTO1 = this.getBaseDTO();
         ETFInvestmentDTO eiDTO2 = ETFInvestmentDTO.builder()
                 .amount(15.0)
-                .quantity(667)
+                .quantity(667.0)
                 .id(2L)
                 .buySell("B")
                 .liveValue(55.4)
@@ -50,7 +51,7 @@ class ETFInvestmentDTOTest {
         eiDTO1.setBuySell("S");
         ETFInvestmentDTO eiDTO2 = ETFInvestmentDTO.builder()
                 .amount(10.0)
-                .quantity(6)
+                .quantity(6.0)
                 .id(2L)
                 .buySell("B")
                 .liveValue(22.7)
@@ -73,7 +74,7 @@ class ETFInvestmentDTOTest {
         ETFInvestmentDTO eiDTO1 = this.getBaseDTO();
         ETFInvestmentDTO eiDTO2 = ETFInvestmentDTO.builder()
                 .amount(15.0)
-                .quantity(667)
+                .quantity(667.0)
                 .id(2L)
                 .buySell("B")
                 .liveValue(55.4)
@@ -86,7 +87,7 @@ class ETFInvestmentDTOTest {
 
         Assertions.assertAll("Assert nothing merged",
                 () -> assertEquals(15.0, eiDTO1.getAmount()),
-                () -> assertEquals(667, eiDTO1.getQuantity()),
+                () -> assertEquals(667.0, eiDTO1.getQuantity()),
                 () -> assertEquals("NASDAQ", eiDTO1.getExchange()));
     }
 
@@ -95,7 +96,7 @@ class ETFInvestmentDTOTest {
         ETFInvestmentDTO eiDTO1 = this.getBaseDTO();
         ETFInvestmentDTO eiDTO2 = ETFInvestmentDTO.builder()
                 .amount(15.0)
-                .quantity(667)
+                .quantity(667.0)
                 .id(2L)
                 .buySell("B")
                 .liveValue(55.4)
@@ -108,7 +109,7 @@ class ETFInvestmentDTOTest {
 
         Assertions.assertAll("Assert all changing values",
                 () -> assertEquals(15.0, eiDTO1.getAmount()),
-                () -> assertEquals(667, eiDTO1.getQuantity()),
+                () -> assertEquals(667.0, eiDTO1.getQuantity()),
                 () -> assertEquals(55.4, eiDTO1.getLiveValue()),
                 () -> assertEquals(77.8, eiDTO1.getValueDiff()),
                 () -> assertEquals("B", eiDTO1.getBuySell()));
@@ -116,32 +117,32 @@ class ETFInvestmentDTOTest {
 
     @Test
     public void negateAmountAndQuantity() {
-        ETFInvestmentDTO eiDTO = ETFInvestmentDTO.builder().amount(15.0).quantity(667).build();
+        ETFInvestmentDTO eiDTO = ETFInvestmentDTO.builder().amount(15.0).quantity(667.0).build();
         eiDTO.negateAmountAndQuantity();
 
         Assertions.assertAll("Assert all negated values",
                 () -> assertEquals(-15.0, eiDTO.getAmount()),
-                () -> assertEquals(-667, eiDTO.getQuantity()));
+                () -> assertEquals(-667.0, eiDTO.getQuantity()));
     }
 
     @Test
     public void negateAmountAndZero() {
-        ETFInvestmentDTO eiDTO = ETFInvestmentDTO.builder().amount(0.0).quantity(0).build();
+        ETFInvestmentDTO eiDTO = ETFInvestmentDTO.builder().amount(0.0).quantity(0.0).build();
         eiDTO.negateAmountAndQuantity();
 
         Assertions.assertAll("Assert all negated values",
                 () -> assertEquals(-0.0, eiDTO.getAmount()),
-                () -> assertEquals(0, eiDTO.getQuantity()));
+                () -> assertEquals(-0.0, eiDTO.getQuantity()));
     }
 
     @Test
     public void negateAmountAndMinus() {
-        ETFInvestmentDTO eiDTO = ETFInvestmentDTO.builder().amount(-78.1).quantity(-6123).build();
+        ETFInvestmentDTO eiDTO = ETFInvestmentDTO.builder().amount(-78.1).quantity(-6123.0).build();
         eiDTO.negateAmountAndQuantity();
 
         Assertions.assertAll("Assert all negated values",
                 () -> assertEquals(78.1, eiDTO.getAmount()),
-                () -> assertEquals(6123, eiDTO.getQuantity()));
+                () -> assertEquals(6123.0, eiDTO.getQuantity()));
     }
 
     @Test
@@ -169,7 +170,7 @@ class ETFInvestmentDTOTest {
 
         Assertions.assertAll("Assert all headers",
                 () -> assertEquals(1L, eiDTO.getCSVRecord()[0]),
-                () -> assertEquals(667, eiDTO.getCSVRecord()[1]),
+                () -> assertEquals("667", eiDTO.getCSVRecord()[1]),
                 () -> assertEquals("B", eiDTO.getCSVRecord()[2]),
                 () -> assertEquals(ld, eiDTO.getCSVRecord()[3]),
                 () -> assertEquals("AMD", eiDTO.getCSVRecord()[4]),
@@ -197,7 +198,7 @@ class ETFInvestmentDTOTest {
 
         Assertions.assertAll("Assert all values",
                 () -> assertEquals(1L, eiDTO.getId()),
-                () -> assertEquals(667, eiDTO.getQuantity()),
+                () -> assertEquals(667.0, eiDTO.getQuantity()),
                 () -> assertEquals("B", eiDTO.getBuySell()),
                 () -> assertEquals(LocalDate.parse("2020-01-01"), eiDTO.getTransactionDate()),
                 () -> assertEquals("AMD", eiDTO.getShortName()),
@@ -208,10 +209,35 @@ class ETFInvestmentDTOTest {
         );
     }
 
+    @Test
+    public void fractionalSellClosesTheLot() {
+        ETFInvestmentDTO lot = this.fractional("B", 0.1, 10.0);
+        lot.merge(this.fractional("B", 0.2, 20.0));
+        ETFInvestmentDTO sell = this.fractional("S", 0.3, 35.0);
+        sell.negateAmountAndQuantity();
+
+        lot.merge(sell);
+
+        Assertions.assertAll("Assert the lot is closed",
+                () -> assertEquals(0.0, lot.getQuantity()),
+                () -> assertTrue(lot.isClosed()));
+    }
+
+    private ETFInvestmentDTO fractional(String buySell, double quantity, double amount) {
+        return ETFInvestmentDTO.builder()
+                .quantity(quantity)
+                .amount(amount)
+                .buySell(buySell)
+                .shortName("VWCE")
+                .exchange("XETRA")
+                .accountId(1L)
+                .build();
+    }
+
     private ETFInvestmentDTO getBaseDTO() {
         return ETFInvestmentDTO.builder()
                 .amount(15.0)
-                .quantity(667)
+                .quantity(667.0)
                 .id(1L)
                 .buySell("B")
                 .liveValue(55.4)

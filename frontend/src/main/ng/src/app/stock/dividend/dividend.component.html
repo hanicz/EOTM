@@ -1,29 +1,33 @@
 ﻿<p-toast position="bottom-center"></p-toast>
 <p-toolbar styleClass="table-toolbar">
-    <ng-template pTemplate="left">
-        <button pButton pRipple label="New" icon="pi pi-plus"
-            (click)="openNew()"></button>
-        <button pButton pRipple icon="pi pi-trash" severity="danger" class="p-button-outlined"
-            [disabled]="!selectedDividends || !selectedDividends.length" (click)="deleteClicked()"></button>
-    </ng-template>
+  <ng-template pTemplate="left">
+    <div class="toolbar-icons">
+      <button pButton pRipple type="button" size="small" icon="pi pi-plus"
+        pTooltip="New dividend" tooltipPosition="bottom" aria-label="New dividend"
+        (click)="openNew()"></button>
+      <span class="toolbar-divider" aria-hidden="true"></span>
+      <button pButton pRipple type="button" size="small" icon="pi pi-trash" severity="danger" [outlined]="true"
+        pTooltip="Delete the selected dividends" tooltipPosition="bottom"
+        aria-label="Delete the selected dividends"
+        [disabled]="!selectedDividends || !selectedDividends.length" (click)="deleteClicked()"></button>
+    </div>
+  </ng-template>
 
-    <ng-template pTemplate="right">
-        <p-fileUpload mode="basic" #fileUpload accept=".csv" [customUpload]="true" [auto]="true" label="Import" chooseLabel="Import" chooseStyleClass="p-button-outlined p-button-secondary" (uploadHandler)="onUpload($event)">
-        </p-fileUpload>
-        <button pButton pRipple label="Export" icon="pi pi-upload" severity="secondary" class="p-button-outlined" (click)="download()"></button>
-    </ng-template>
+  <ng-template pTemplate="right">
+    <div class="toolbar-icons">
+      <input #fileInput type="file" accept=".csv" hidden (change)="fileChosen($event)" />
+      <button pButton pRipple type="button" size="small" icon="pi pi-upload" severity="secondary" [outlined]="true"
+        pTooltip="Import from CSV" tooltipPosition="bottom" aria-label="Import from CSV"
+        (click)="fileInput.click()"></button>
+      <button pButton pRipple type="button" size="small" icon="pi pi-download" severity="secondary" [outlined]="true"
+        pTooltip="Export to CSV" tooltipPosition="bottom" aria-label="Export to CSV"
+        (click)="download()"></button>
+    </div>
+  </ng-template>
 </p-toolbar>
-<p-table #dt1 [value]="dividends" styleClass="p-datatable-striped table-stack eotm-table"
+<p-table #dt1 [value]="visibleDividends" styleClass="p-datatable-striped table-stack eotm-table"
     [(selection)]="selectedDividends" [paginator]="true" [rows]="25">
 
-    <ng-template pTemplate="caption">
-        <div class="filter-bar">
-            <input pInputText type="text"
-                (input)="dt1.filter($any($event.target)?.value, 'shortName', 'contains')"
-                [value]="$any(dt1.filters['shortName'])?.value ?? ''" placeholder="Search by Name"
-                class="p-column-filter filter-input">
-        </div>
-    </ng-template>
     <ng-template pTemplate="header">
         <tr>
             <th style="width: 3rem">

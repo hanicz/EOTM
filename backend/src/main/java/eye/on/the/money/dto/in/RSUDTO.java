@@ -31,5 +31,5 @@ public class RSUDTO {
 
     @NotNull
     @Positive
-    private Integer quantity;
+    private Double quantity;
 }

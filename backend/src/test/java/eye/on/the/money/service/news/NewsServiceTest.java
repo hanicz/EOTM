@@ -210,11 +210,11 @@ class NewsServiceTest {
     }
 
     private InvestmentDTO holding(String shortName, String exchange) {
-        return InvestmentDTO.builder().shortName(shortName).exchange(exchange).quantity(5).build();
+        return InvestmentDTO.builder().shortName(shortName).exchange(exchange).quantity(5.0).build();
     }
 
     private ETFInvestmentDTO etfHolding(String shortName, String exchange) {
-        return ETFInvestmentDTO.builder().shortName(shortName).exchange(exchange).quantity(5).build();
+        return ETFInvestmentDTO.builder().shortName(shortName).exchange(exchange).quantity(5.0).build();
     }
 
     private TickerWatch watch(String shortName, String exchange) {

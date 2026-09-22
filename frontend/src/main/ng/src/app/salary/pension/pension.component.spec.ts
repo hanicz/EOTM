@@ -167,11 +167,11 @@ describe('SalaryPensionComponent', () => {
     component.calculate();
     http.expectOne(pensionUrl).flush(projection);
 
-    expect(component.chart!.series.length).toBe(2);
-    expect(component.chart!.series[0].name).toBe('Frozen (real)');
-    expect(component.chart!.series[0].path.startsWith('M')).toBe(true);
-    expect(component.chart!.firstAge).toBe(48);
-    expect(component.chart!.lastAge).toBe(50);
+    const series = component.chart!.series as { name: string; data: [number, number][] }[];
+    expect(series.length).toBe(2);
+    expect(series[0].name).toBe('Frozen (real)');
+    expect(series[0].data[0][0]).toBe(48);
+    expect(series[0].data[series[0].data.length - 1][0]).toBe(50);
   });
 
   it('gives each scenario its own colour', () => {

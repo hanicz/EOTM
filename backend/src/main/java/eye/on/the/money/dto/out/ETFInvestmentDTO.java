@@ -24,8 +24,10 @@ import java.util.Objects;
 @NoArgsConstructor
 public class ETFInvestmentDTO implements CSVHelper, Serializable, Lot<ETFInvestmentDTO> {
 
+    private static final double CLOSED_TOLERANCE = 1e-9;
+
     private Long id;
-    private Integer quantity;
+    private Double quantity;
     private String buySell;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
@@ -54,6 +56,10 @@ public class ETFInvestmentDTO implements CSVHelper, Serializable, Lot<ETFInvestm
         this.setAmount(this.getAmount() + other.getAmount());
         this.setQuantity(this.getQuantity() + other.getQuantity());
 
+        if (Math.abs(this.quantity) < ETFInvestmentDTO.CLOSED_TOLERANCE) {
+            this.quantity = 0.0;
+        }
+
         if (this.getQuantity() > 0 && "S".equals(this.buySell)) {
             this.buySell = "B";
         }
@@ -69,7 +75,7 @@ public class ETFInvestmentDTO implements CSVHelper, Serializable, Lot<ETFInvestm
     @Override
     @JsonIgnore
     public boolean isClosed() {
-        return this.quantity != null && this.quantity == 0;
+        return this.quantity != null && this.quantity == 0.0;
     }
 
     @Override
@@ -81,7 +87,7 @@ public class ETFInvestmentDTO implements CSVHelper, Serializable, Lot<ETFInvestm
     @Override
     @JsonIgnore
     public Object[] getCSVRecord() {
-        return new Object[]{this.getId(), this.getQuantity(), this.getBuySell(), this.getTransactionDate(),
+        return new Object[]{this.getId(), CSVHelper.plainNumber(this.getQuantity()), this.getBuySell(), this.getTransactionDate(),
                 this.getShortName(), this.getExchange(), this.getAmount(), this.getCurrencyId(), this.getFee(), this.getAccountName()};
     }
 
@@ -91,7 +97,7 @@ public class ETFInvestmentDTO implements CSVHelper, Serializable, Lot<ETFInvestm
                 .buySell(csvRecord.get("Type"))
                 .transactionDate(LocalDate.parse(csvRecord.get("Transaction Date"), formatter))
                 .amount(Double.parseDouble(csvRecord.get("Amount")))
-                .quantity(Integer.parseInt(csvRecord.get("Quantity")))
+                .quantity(Double.parseDouble(csvRecord.get("Quantity")))
                 .currencyId(csvRecord.get("Currency"))
                 .shortName(csvRecord.get("Short Name"))
                 .exchange(csvRecord.get("Exchange"))

@@ -2,364 +2,428 @@
 <div class="shadow-5">
   <menu class="pl-0 mb-0"></menu>
   <p-panel>
-    <p class="form-hint">
-      Grows what you hold today at the return you set, then draws an inflation-linked income from it once you
-      stop paying in. Every figure is an assumption, not a forecast.
-    </p>
+    <header class="page-head">
+      <h1 class="page-title">Your FIRE plan</h1>
+      <p class="page-subtitle">Shape your path to financial independence.</p>
+    </header>
 
-    <div class="fire-sections">
+    <div class="planner-toggle" role="tablist">
+      <button type="button" class="planner-toggle-option" role="tab"
+        [class.planner-toggle-active]="mobileView === 'projection'"
+        [attr.aria-selected]="mobileView === 'projection'" (click)="showProjection()">Projection</button>
+      <button type="button" class="planner-toggle-option" role="tab"
+        [class.planner-toggle-active]="mobileView === 'assumptions'"
+        [attr.aria-selected]="mobileView === 'assumptions'" (click)="showAssumptions()">Assumptions</button>
+    </div>
 
-      <section class="form-section">
-        <h3 class="form-section-title">Starting point</h3>
-        <div class="form-row">
-          <div class="form-field fire-field">
-            <label class="form-label">Portfolio (live)</label>
+    <div class="planner-body" [class.planner-show-form]="mobileView === 'assumptions'">
+    <div class="planner-layout">
+
+      <section class="planner-form-card">
+        <h2 class="planner-card-title">Plan assumptions</h2>
+
+        <div class="planner-group">
+          <h3 class="planner-group-title">
+            Starting point
+            <i class="pi pi-info-circle planner-info"
+              pTooltip="What you hold today, before any growth or contributions."></i>
+          </h3>
+          <div class="planner-row">
+            <label class="planner-row-label">Portfolio (live)</label>
             @if (portfolioLoading) {
-              <p-skeleton height="2.5rem"></p-skeleton>
+              <p-skeleton height="2.25rem" width="9rem"></p-skeleton>
             } @else {
-              <div class="fire-readonly">{{portfolioValue | number:'1.0-0'}} {{currency}}</div>
+              <span class="planner-readonly">{{portfolioValue | number:'1.0-0'}} <span class="planner-unit">{{currency}}</span></span>
             }
           </div>
-          <div class="form-field fire-field">
-            <label for="otherAssets" class="form-label">Other assets</label>
-            <p-inputnumber inputId="otherAssets" [(ngModel)]="otherAssets" [min]="0" placeholder="0"
-              (keyup.enter)="calculate()"></p-inputnumber>
+          <div class="planner-row">
+            <label for="otherAssets" class="planner-row-label">Other assets</label>
+            <span class="planner-input">
+              <p-inputnumber inputId="otherAssets" [(ngModel)]="otherAssets" [min]="0" placeholder="0"
+                (keyup.enter)="calculate()"></p-inputnumber>
+              <span class="planner-unit">{{currency}}</span>
+            </span>
           </div>
-          <div class="form-field fire-field">
-            <label class="form-label">Starting value</label>
-            <div class="fire-readonly fire-readonly-strong">{{startingValue | number:'1.0-0'}} {{currency}}</div>
+          <div class="planner-row">
+            <label class="planner-row-label">Starting value</label>
+            <span class="planner-readonly planner-readonly-strong">{{startingValue | number:'1.0-0'}} <span class="planner-unit">{{currency}}</span></span>
           </div>
         </div>
-        @if (unconvertedCurrencies.length > 0) {
-          <p class="fire-warning">
-            <i class="pi pi-exclamation-triangle"></i>
-            No rate available for {{unconvertedCurrencies.join(', ')}} &mdash; holdings in
-            {{unconvertedCurrencies.length === 1 ? 'that currency are' : 'those currencies are'}} missing from
-            the portfolio figure.
-          </p>
-        }
-      </section>
 
-      <section class="form-section">
-        <h3 class="form-section-title">Contributions and growth</h3>
-        <div class="form-row">
-          <div class="form-field fire-field">
-            <label for="monthlyContribution" class="form-label">Monthly contribution</label>
-            <p-inputnumber inputId="monthlyContribution" [(ngModel)]="monthlyContribution" [min]="0"
-              (keyup.enter)="calculate()"></p-inputnumber>
+        <div class="planner-group">
+          <h3 class="planner-group-title">
+            Contributions &amp; growth
+            <i class="pi pi-info-circle planner-info"
+              pTooltip="What you add each year and the rate the pot is grown at."></i>
+          </h3>
+          <div class="planner-row">
+            <label for="monthlyContribution" class="planner-row-label">Monthly contribution</label>
+            <span class="planner-input">
+              <p-inputnumber inputId="monthlyContribution" [(ngModel)]="monthlyContribution" [min]="0"
+                (keyup.enter)="calculate()"></p-inputnumber>
+              <span class="planner-unit">{{currency}}</span>
+            </span>
           </div>
-          <div class="form-field fire-field">
-            <label for="contributionIncrease" class="form-label">
+          <div class="planner-row">
+            <label for="contributionIncrease" class="planner-row-label">
               Annual increase
-              <i class="pi pi-info-circle fire-info"
+              <i class="pi pi-info-circle planner-info"
                 pTooltip="Yearly rise in the monthly contribution, inflation is not added on top."></i>
             </label>
-            <p-inputnumber inputId="contributionIncrease" [(ngModel)]="annualContributionIncrease"
-              suffix=" %" [minFractionDigits]="0" [maxFractionDigits]="1" [min]="-100" [max]="100"
-              (keyup.enter)="calculate()"></p-inputnumber>
+            <span class="planner-input">
+              <p-inputnumber inputId="contributionIncrease" [(ngModel)]="annualContributionIncrease"
+                [minFractionDigits]="0" [maxFractionDigits]="1" [min]="-100" [max]="100"
+                (keyup.enter)="calculate()"></p-inputnumber>
+              <span class="planner-unit">%</span>
+            </span>
           </div>
-          <div class="form-field fire-field">
-            <label for="annualReturn" class="form-label">
+          <div class="planner-row">
+            <label for="annualReturn" class="planner-row-label">
               Annual return
-              <i class="pi pi-info-circle fire-info"
+              <i class="pi pi-info-circle planner-info"
                 pTooltip="Nominal return, inflation is not added on top. Applied once a year."></i>
             </label>
-            <p-inputnumber inputId="annualReturn" [(ngModel)]="annualReturn" suffix=" %"
-              [minFractionDigits]="0" [maxFractionDigits]="1" [min]="-100" [max]="100"
-              (keyup.enter)="calculate()"></p-inputnumber>
+            <span class="planner-input">
+              <p-inputnumber inputId="annualReturn" [(ngModel)]="annualReturn"
+                [minFractionDigits]="0" [maxFractionDigits]="1" [min]="-100" [max]="100"
+                (keyup.enter)="calculate()"></p-inputnumber>
+              <span class="planner-unit">%</span>
+            </span>
           </div>
-          <div class="form-field fire-field">
-            <label for="inflation" class="form-label">Inflation</label>
-            <p-inputnumber inputId="inflation" [(ngModel)]="inflation" suffix=" %"
-              [minFractionDigits]="0" [maxFractionDigits]="1" [min]="-100" [max]="100"
-              (keyup.enter)="calculate()"></p-inputnumber>
+          <div class="planner-row">
+            <label for="inflation" class="planner-row-label">Inflation</label>
+            <span class="planner-input">
+              <p-inputnumber inputId="inflation" [(ngModel)]="inflation"
+                [minFractionDigits]="0" [maxFractionDigits]="1" [min]="-100" [max]="100"
+                (keyup.enter)="calculate()"></p-inputnumber>
+              <span class="planner-unit">%</span>
+            </span>
           </div>
         </div>
-      </section>
 
-      <section class="form-section">
-        <h3 class="form-section-title">Target</h3>
-        <div class="form-row">
-          <div class="form-field fire-field">
-            <label for="withdrawalRate" class="form-label">
-              Withdrawal rate
-              <i class="pi pi-info-circle fire-info"
-                pTooltip="Share of the pot taken in the first year of retirement. 4% is the usual rule of thumb."></i>
-            </label>
-            <p-inputnumber inputId="withdrawalRate" [(ngModel)]="withdrawalRate" suffix=" %"
-              [minFractionDigits]="0" [maxFractionDigits]="2" [min]="0.1" [max]="100"
-              (keyup.enter)="calculate()"></p-inputnumber>
-          </div>
-
+        <div class="planner-group">
+          <h3 class="planner-group-title">
+            Target
+            <i class="pi pi-info-circle planner-info"
+              pTooltip="The pot you are aiming for, and the income it is meant to pay you."></i>
+          </h3>
           @if (!useCustomFireNumber) {
-            <div class="form-field fire-field">
-              <label for="annualSpending" class="form-label">
+            <div class="planner-row">
+              <label for="annualSpending" class="planner-row-label">
                 Annual spending
-                <i class="pi pi-info-circle fire-info" pTooltip="In today's money."></i>
+                <i class="pi pi-info-circle planner-info" pTooltip="In today's money."></i>
               </label>
-              <p-inputnumber inputId="annualSpending" [(ngModel)]="annualSpending" [min]="0"
-                (keyup.enter)="calculate()"></p-inputnumber>
+              <span class="planner-input">
+                <p-inputnumber inputId="annualSpending" [(ngModel)]="annualSpending" [min]="0"
+                  (keyup.enter)="calculate()"></p-inputnumber>
+                <span class="planner-unit">{{currency}}</span>
+              </span>
             </div>
-            <div class="form-field fire-field">
-              <label class="form-label">FIRE number</label>
-              <div class="fire-readonly fire-readonly-strong">{{derivedFireNumber | number:'1.0-0'}} {{currency}}</div>
+            <div class="planner-row">
+              <label class="planner-row-label">FIRE number</label>
+              <span class="planner-readonly planner-readonly-strong">{{derivedFireNumber | number:'1.0-0'}} <span class="planner-unit">{{currency}}</span></span>
             </div>
           } @else {
-            <div class="form-field fire-field">
-              <label for="customFireNumber" class="form-label">
+            <div class="planner-row">
+              <label for="customFireNumber" class="planner-row-label">
                 FIRE number
-                <i class="pi pi-info-circle fire-info"
+                <i class="pi pi-info-circle planner-info"
                   pTooltip="The balance you want to see in the account. Taken at face value, not adjusted for inflation."></i>
               </label>
-              <p-inputnumber inputId="customFireNumber" [(ngModel)]="customFireNumber" [min]="0"
-                (keyup.enter)="calculate()"></p-inputnumber>
+              <span class="planner-input">
+                <p-inputnumber inputId="customFireNumber" [(ngModel)]="customFireNumber" [min]="0"
+                  (keyup.enter)="calculate()"></p-inputnumber>
+                <span class="planner-unit">{{currency}}</span>
+              </span>
             </div>
-            <div class="form-field fire-field">
-              <label class="form-label">
+            <div class="planner-row">
+              <label class="planner-row-label">
                 Supports spending of
-                <i class="pi pi-info-circle fire-info"
+                <i class="pi pi-info-circle planner-info"
                   pTooltip="In the money of the year you get there, which buys less than the same figure would today."></i>
               </label>
-              <div class="fire-readonly fire-readonly-strong">{{impliedSpending | number:'1.0-0'}} {{currency}}/yr</div>
+              <span class="planner-readonly planner-readonly-strong">{{impliedSpending | number:'1.0-0'}} <span class="planner-unit">{{currency}}/yr</span></span>
             </div>
           }
-
-          <div class="form-field fire-field fire-field-check">
-            <p-checkbox inputId="customTarget" [(ngModel)]="useCustomFireNumber" [binary]="true"></p-checkbox>
-            <label for="customTarget" class="fire-check-label">Set the target directly</label>
-          </div>
-        </div>
-      </section>
-
-      <section class="form-section">
-        <h3 class="form-section-title">Pension</h3>
-        <div class="form-row">
-          <div class="form-field fire-field fire-field-check">
-            <p-checkbox inputId="hasPension" [(ngModel)]="hasPension" [binary]="true"></p-checkbox>
-            <label for="hasPension" class="fire-check-label">I will get a pension</label>
-          </div>
-          @if (hasPension) {
-            <div class="form-field fire-field">
-              <label for="monthlyPension" class="form-label">
-                Monthly pension
-                <i class="pi pi-info-circle fire-info"
-                  pTooltip="What you expect to receive each month, in today's money, rising with inflation like your spending."></i>
-              </label>
-              <p-inputnumber inputId="monthlyPension" [(ngModel)]="monthlyPension" [min]="0"
-                (keyup.enter)="calculate()"></p-inputnumber>
-            </div>
-            <div class="form-field fire-field fire-field-narrow">
-              <label for="pensionAge" class="form-label">Starts at age</label>
-              <p-inputnumber inputId="pensionAge" [(ngModel)]="pensionAge" [min]="0" [max]="120"
-                (keyup.enter)="calculate()"></p-inputnumber>
-            </div>
-          }
-        </div>
-        @if (hasPension) {
-          <p class="form-hint fire-hint-tight">
-            Counted as income from that age on. It covers your spending first, so the Taken out column shows
-            only the shortfall the pot has to cover &mdash; anything left over goes into it.
-          </p>
-        }
-      </section>
-
-      <section class="form-section">
-        <h3 class="form-section-title">Unemployment benefit</h3>
-        <div class="form-row">
-          <div class="form-field fire-field fire-field-check">
-            <p-checkbox inputId="hasUnemploymentBenefit" [(ngModel)]="hasUnemploymentBenefit"
-              [binary]="true"></p-checkbox>
-            <label for="hasUnemploymentBenefit" class="fire-check-label">I will get an unemployment benefit</label>
-          </div>
-          @if (hasUnemploymentBenefit) {
-            <div class="form-field fire-field">
-              <label for="unemploymentBenefit" class="form-label">
-                Total amount
-                <i class="pi pi-info-circle fire-info"
-                  pTooltip="Taken at face value, not adjusted for inflation."></i>
-              </label>
-              <p-inputnumber inputId="unemploymentBenefit" [(ngModel)]="unemploymentBenefit" [min]="0"
-                (keyup.enter)="calculate()"></p-inputnumber>
-            </div>
-          }
-        </div>
-        @if (hasUnemploymentBenefit) {
-          <p class="form-hint fire-hint-tight">
-            Paid into the pot once, in the first year after you stop working. It arrives too late to help
-            reach the target, and shows in the Pension column for that year.
-          </p>
-        }
-      </section>
-
-      <section class="form-section">
-        <h3 class="form-section-title">Timing</h3>
-        <div class="form-row">
-          <div class="form-field fire-field fire-field-narrow">
-            <label for="currentAge" class="form-label">Current age</label>
-            <p-inputnumber inputId="currentAge" [(ngModel)]="currentAge" [min]="0" [max]="120"
-              (keyup.enter)="calculate()"></p-inputnumber>
-          </div>
-          @if (!retireWhenReady) {
-            <div class="form-field fire-field fire-field-narrow">
-              <label for="retirementAge" class="form-label">Retirement age</label>
-              <p-inputnumber inputId="retirementAge" [(ngModel)]="retirementAge" [min]="0" [max]="120"
-                (keyup.enter)="calculate()"></p-inputnumber>
-            </div>
-          }
-          <div class="form-field fire-field fire-field-narrow">
-            <label for="lifeExpectancy" class="form-label">
-              Plan until age
-              <i class="pi pi-info-circle fire-info" pTooltip="How long the money has to last."></i>
+          <div class="planner-row">
+            <label for="withdrawalRate" class="planner-row-label">
+              Withdrawal rate
+              <i class="pi pi-info-circle planner-info"
+                pTooltip="Share of the pot taken in the first year of retirement. 4% is the usual rule of thumb."></i>
             </label>
-            <p-inputnumber inputId="lifeExpectancy" [(ngModel)]="lifeExpectancy" [min]="1" [max]="130"
-              (keyup.enter)="calculate()"></p-inputnumber>
+            <span class="planner-input">
+              <p-inputnumber inputId="withdrawalRate" [(ngModel)]="withdrawalRate"
+                [minFractionDigits]="0" [maxFractionDigits]="2" [min]="0.1" [max]="100"
+                (keyup.enter)="calculate()"></p-inputnumber>
+              <span class="planner-unit">%</span>
+            </span>
           </div>
-          <div class="form-field fire-field fire-field-check">
-            <p-checkbox inputId="retireWhenReady" [(ngModel)]="retireWhenReady" [binary]="true"></p-checkbox>
-            <label for="retireWhenReady" class="fire-check-label">Retire as soon as the target is reached</label>
+          <div class="planner-check">
+            <p-checkbox inputId="customTarget" [(ngModel)]="useCustomFireNumber" [binary]="true"></p-checkbox>
+            <label for="customTarget" class="planner-check-label">Set the target directly</label>
           </div>
         </div>
-      </section>
-    </div>
 
-    <div class="fire-actions">
-      <button pButton pRipple label="Calculate" icon="pi pi-calculator" class="p-button-rounded"
-        [loading]="calculating" [disabled]="!canCalculate" (click)="calculate()"></button>
-      @if (projection) {
-        <button pButton pRipple label="Download" icon="pi pi-download" class="p-button-rounded"
-          severity="secondary" pTooltip="Export the full year-by-year timeline as CSV"
-          (click)="download()"></button>
-      }
-    </div>
-
-    @if (projection) {
-      <div class="stat-tiles fire-summary">
-        <div class="stat-tile">
-          <div class="stat-tile-label">FIRE number</div>
-          <div class="stat-tile-value">{{projection.fireNumber | number:'1.0-0'}} {{projection.currency}}</div>
-          @if (projection.fireNumberInTodaysMoney) {
-            <div class="stat-tile-note">
-              {{projection.annualSpending | number:'1.0-0'}}/yr at {{projection.withdrawalRate | number:'1.0-2'}}%,
-              in today's money
+        <div class="planner-group">
+          <button type="button" class="planner-group-toggle" (click)="pensionOpen = !pensionOpen"
+            [attr.aria-expanded]="pensionOpen">
+            <span class="planner-group-title">Pension &amp; benefits</span>
+            <i class="pi planner-group-caret" [class.pi-chevron-down]="pensionOpen"
+              [class.pi-chevron-right]="!pensionOpen"></i>
+          </button>
+          @if (pensionOpen) {
+            <div class="planner-check">
+              <p-checkbox inputId="hasPension" [(ngModel)]="hasPension" [binary]="true"></p-checkbox>
+              <label for="hasPension" class="planner-check-label">I will get a pension</label>
             </div>
+            @if (hasPension) {
+              <div class="planner-row">
+                <label for="monthlyPension" class="planner-row-label">
+                  Monthly pension
+                  <i class="pi pi-info-circle planner-info"
+                    pTooltip="What you expect to receive each month, in today's money, rising with inflation like your spending."></i>
+                </label>
+                <span class="planner-input">
+                  <p-inputnumber inputId="monthlyPension" [(ngModel)]="monthlyPension" [min]="0"
+                    (keyup.enter)="calculate()"></p-inputnumber>
+                  <span class="planner-unit">{{currency}}</span>
+                </span>
+              </div>
+              <div class="planner-row">
+                <label for="pensionAge" class="planner-row-label">Starts at age</label>
+                <span class="planner-input">
+                  <p-inputnumber inputId="pensionAge" [(ngModel)]="pensionAge" [min]="0" [max]="120"
+                    (keyup.enter)="calculate()"></p-inputnumber>
+                </span>
+              </div>
+              <p class="planner-note">
+                Counted as income from that age on. It covers your spending first, so the Taken out column
+                shows only the shortfall the pot has to cover &mdash; anything left over goes into it.
+              </p>
+            }
+            <div class="planner-check">
+              <p-checkbox inputId="hasUnemploymentBenefit" [(ngModel)]="hasUnemploymentBenefit"
+                [binary]="true"></p-checkbox>
+              <label for="hasUnemploymentBenefit" class="planner-check-label">I will get an unemployment benefit</label>
+            </div>
+            @if (hasUnemploymentBenefit) {
+              <div class="planner-row">
+                <label for="unemploymentBenefit" class="planner-row-label">
+                  Total amount
+                  <i class="pi pi-info-circle planner-info"
+                    pTooltip="Taken at face value, not adjusted for inflation."></i>
+                </label>
+                <span class="planner-input">
+                  <p-inputnumber inputId="unemploymentBenefit" [(ngModel)]="unemploymentBenefit" [min]="0"
+                    (keyup.enter)="calculate()"></p-inputnumber>
+                  <span class="planner-unit">{{currency}}</span>
+                </span>
+              </div>
+              <p class="planner-note">
+                Paid into the pot once, in the first year after you stop working. It arrives too late to
+                help reach the target, and shows in the Pension column for that year.
+              </p>
+            }
+          }
+        </div>
+
+        <div class="planner-group">
+          <button type="button" class="planner-group-toggle" (click)="timingOpen = !timingOpen"
+            [attr.aria-expanded]="timingOpen">
+            <span class="planner-group-title">Timing &amp; horizon</span>
+            <i class="pi planner-group-caret" [class.pi-chevron-down]="timingOpen"
+              [class.pi-chevron-right]="!timingOpen"></i>
+          </button>
+          @if (timingOpen) {
+            <div class="planner-row">
+              <label for="currentAge" class="planner-row-label">Current age</label>
+              <span class="planner-input">
+                <p-inputnumber inputId="currentAge" [(ngModel)]="currentAge" [min]="0" [max]="120"
+                  (keyup.enter)="calculate()"></p-inputnumber>
+              </span>
+            </div>
+            @if (!retireWhenReady) {
+              <div class="planner-row">
+                <label for="retirementAge" class="planner-row-label">Retirement age</label>
+                <span class="planner-input">
+                  <p-inputnumber inputId="retirementAge" [(ngModel)]="retirementAge" [min]="0" [max]="120"
+                    (keyup.enter)="calculate()"></p-inputnumber>
+                </span>
+              </div>
+            }
+            <div class="planner-row">
+              <label for="lifeExpectancy" class="planner-row-label">
+                Plan until age
+                <i class="pi pi-info-circle planner-info" pTooltip="How long the money has to last."></i>
+              </label>
+              <span class="planner-input">
+                <p-inputnumber inputId="lifeExpectancy" [(ngModel)]="lifeExpectancy" [min]="1" [max]="130"
+                  (keyup.enter)="calculate()"></p-inputnumber>
+              </span>
+            </div>
+            <div class="planner-check">
+              <p-checkbox inputId="retireWhenReady" [(ngModel)]="retireWhenReady" [binary]="true"></p-checkbox>
+              <label for="retireWhenReady" class="planner-check-label">Retire when the target is reached</label>
+            </div>
+          }
+        </div>
+
+        <button pButton pRipple label="Calculate projection" icon="pi pi-calculator"
+          class="planner-submit" [loading]="calculating" [disabled]="!canCalculate"
+          (click)="calculate()"></button>
+      </section>
+
+      <section class="planner-result-card">
+        @if (projection) {
+          <span class="planner-eyebrow">Illustrative projection</span>
+          @if (projection.fiReached) {
+            <h2 class="planner-headline">{{projection.fiYear}} years to financial independence</h2>
           } @else {
-            <div class="stat-tile-note">
-              A balance of {{projection.fireNumber | number:'1.0-0'}}, taken at face value
-              @if (projection.retirementAge != null) {
-                &mdash; worth {{projection.annualSpending | number:'1.0-0'}}/yr in today's money
+            <h2 class="planner-headline">Not there by age {{projection.finalAge}}</h2>
+          }
+
+          <div class="planner-hero">
+            <div class="planner-hero-item planner-hero-lead">
+              <span class="planner-hero-label">Age</span>
+              @if (projection.fiReached) {
+                <div class="planner-hero-box">
+                  <span class="planner-hero-big">{{projection.fiAge}}</span>
+                  <span class="planner-hero-note">About {{projection.fiYear}} years from today</span>
+                </div>
+              } @else {
+                <span class="planner-hero-value">Not reached</span>
               }
             </div>
-          }
-        </div>
-        <div class="stat-tile" [class.fire-tile-good]="projection.fiReached"
-          [class.fire-tile-bad]="!projection.fiReached">
-          <div class="stat-tile-label">Financial independence</div>
-          @if (projection.fiReached) {
-            <div class="stat-tile-value">Year {{projection.fiYear}}</div>
-            <div class="stat-tile-note">at age {{projection.fiAge}}</div>
-          } @else {
-            <div class="stat-tile-value">Not reached</div>
-            <div class="stat-tile-note">not by age {{projection.finalAge}} on these assumptions</div>
-          }
-        </div>
-        @if (projection.retirementAge != null) {
-          <div class="stat-tile">
-            <div class="stat-tile-label">Retires at</div>
-            <div class="stat-tile-value">Age {{projection.retirementAge}}</div>
-            <div class="stat-tile-note">after {{projection.retirementYear}} years</div>
+            <div class="planner-hero-item">
+              <span class="planner-hero-label"><i class="pi pi-bullseye planner-hero-icon"></i> Target</span>
+              <span class="planner-hero-value">{{projection.fireNumber | number:'1.0-0'}} {{projection.currency}}</span>
+            </div>
+            <div class="planner-hero-item">
+              <span class="planner-hero-label"><i class="pi pi-chart-bar planner-hero-icon"></i> Progress</span>
+              <span class="planner-hero-value">{{progressPct | number:'1.0-1'}}%</span>
+            </div>
           </div>
-          <div class="stat-tile" [class.fire-tile-good]="projection.lastsThroughRetirement"
-            [class.fire-tile-bad]="!projection.lastsThroughRetirement">
-            <div class="stat-tile-label">Money lasts</div>
-            @if (projection.lastsThroughRetirement) {
-              <div class="stat-tile-value">To age {{projection.finalAge}}</div>
-              <div class="stat-tile-note">
-                {{projection.finalRealBalance | number:'1.0-0'}} left in today's money
-              </div>
-            } @else {
-              <div class="stat-tile-value">Runs out at {{projection.depletedAtAge}}</div>
-              <div class="stat-tile-note">short of age {{projection.finalAge}}</div>
-            }
-          </div>
-        }
-      </div>
 
-      @if (chart) {
-        <h3 class="section-heading">Projection</h3>
-        <div class="fire-chart-wrap">
-          <svg class="fire-chart" [attr.viewBox]="'0 0 ' + chartBox.width + ' ' + chartBox.height"
-            preserveAspectRatio="xMidYMid meet" (mousemove)="onChartMove($event)" (mouseleave)="setHoveredYear(null)">
+          @if (unconvertedCurrencies.length > 0) {
+            <p class="planner-warning">
+              <i class="pi pi-exclamation-triangle"></i>
+              No rate available for {{unconvertedCurrencies.join(', ')}} &mdash; holdings in
+              {{unconvertedCurrencies.length === 1 ? 'that currency are' : 'those currencies are'}} missing
+              from the portfolio figure.
+            </p>
+          }
 
-            @for (tick of chart.yTicks; track tick.label) {
-              <line [attr.x1]="chartBox.left" [attr.x2]="chartBox.width - chartBox.right"
-                [attr.y1]="tick.position" [attr.y2]="tick.position" class="fire-gridline"></line>
-              <text [attr.x]="chartBox.left - 8" [attr.y]="tick.position + 4"
-                class="fire-axis-label" text-anchor="end">{{tick.label}}</text>
-            }
-
-            @for (tick of chart.xTicks; track tick.label) {
-              <text [attr.x]="tick.position" [attr.y]="chartBox.height - 8"
-                class="fire-axis-label" text-anchor="middle">{{tick.label}}</text>
-            }
-
-            @if (chart.pensionX != null) {
-              <line [attr.x1]="chart.pensionX" [attr.x2]="chart.pensionX" [attr.y1]="chartBox.top"
-                [attr.y2]="chartBox.height - chartBox.bottom" class="fire-pension-line"></line>
-              <text [attr.x]="chart.pensionX + 5" [attr.y]="chartBox.top + 26"
-                class="fire-marker-label">Pension</text>
-            }
-
-            @if (chart.retirementX != null) {
-              <line [attr.x1]="chart.retirementX" [attr.x2]="chart.retirementX" [attr.y1]="chartBox.top"
-                [attr.y2]="chartBox.height - chartBox.bottom" class="fire-retirement-line"></line>
-              <text [attr.x]="chart.retirementX + 5" [attr.y]="chartBox.top + 12"
-                class="fire-marker-label">Retire</text>
-            }
-
-            @if (chart.fireY != null) {
-              <line [attr.x1]="chartBox.left" [attr.x2]="chartBox.width - chartBox.right"
-                [attr.y1]="chart.fireY" [attr.y2]="chart.fireY" class="fire-target-line"></line>
-              <text [attr.x]="chartBox.left + 5" [attr.y]="chart.fireY - 6"
-                class="fire-marker-label">FIRE number</text>
-            }
-
-            <path [attr.d]="chart.nominalPath" class="fire-line fire-line-nominal"></path>
-            <path [attr.d]="chart.realPath" class="fire-line fire-line-real"></path>
-
-            @if (hoveredPoint) {
-              <line [attr.x1]="hoveredPoint.x" [attr.x2]="hoveredPoint.x" [attr.y1]="chartBox.top"
-                [attr.y2]="chartBox.height - chartBox.bottom" class="fire-hover-line"></line>
-              <circle [attr.cx]="hoveredPoint.x" [attr.cy]="hoveredPoint.nominalY" r="4"
-                class="fire-dot fire-dot-nominal"></circle>
-              <circle [attr.cx]="hoveredPoint.x" [attr.cy]="hoveredPoint.realY" r="4"
-                class="fire-dot fire-dot-real"></circle>
-            }
-          </svg>
-
-          @if (hoveredPoint) {
-            <div class="fire-chart-readout">
-              <div class="fire-readout-title">
-                Year {{hoveredPoint.year}} &middot; age {{hoveredPoint.age}}
-                <span class="fire-readout-phase">{{hoveredPoint.phase === 'DRAWDOWN' ? 'drawdown' : 'saving'}}</span>
-              </div>
-              <div class="fire-readout-row">
-                <span class="fire-swatch fire-swatch-nominal"></span>
-                <span>{{hoveredPoint.balance | number:'1.0-0'}} {{projection.currency}}</span>
-              </div>
-              <div class="fire-readout-row">
-                <span class="fire-swatch fire-swatch-real"></span>
-                <span>{{hoveredPoint.realBalance | number:'1.0-0'}} in today's money</span>
-              </div>
+          @if (chart) {
+            <div class="planner-chart">
+              <apx-chart [series]="chart.series!" [chart]="chart.chart!"
+                [xaxis]="chart.xaxis!" [yaxis]="chart.yaxis!"
+                [legend]="chart.legend!" [dataLabels]="chart.dataLabels!"
+                [tooltip]="chart.tooltip!" [stroke]="chart.stroke!"
+                [fill]="chart.fill!" [grid]="chart.grid!"
+                [markers]="chart.markers!" [annotations]="chart.annotations!"
+                [colors]="chart.colors!"></apx-chart>
             </div>
           }
 
-          <div class="fire-legend">
-            <span class="fire-legend-item"><span class="fire-swatch fire-swatch-nominal"></span>Balance</span>
-            <span class="fire-legend-item"><span class="fire-swatch fire-swatch-real"></span>In today's money</span>
+          <div class="planner-tiles">
+            <div class="planner-tile">
+              <i class="pi pi-wallet planner-tile-icon"></i>
+              <div>
+                <div class="planner-tile-label">Monthly spending supported</div>
+                <div class="planner-tile-value">{{monthlySpendingSupported | number:'1.0-0'}} {{projection.currency}}</div>
+                <div class="planner-tile-note">Based on a {{projection.withdrawalRate | number:'1.0-2'}}% withdrawal rate.</div>
+              </div>
+            </div>
+            <div class="planner-tile">
+              <i class="pi pi-chart-pie planner-tile-icon"></i>
+              <div>
+                <div class="planner-tile-label">Money lasts</div>
+                @if (projection.retirementAge == null) {
+                  <div class="planner-tile-value">&mdash;</div>
+                  <div class="planner-tile-note">No drawdown to model on these assumptions.</div>
+                } @else if (projection.lastsThroughRetirement) {
+                  <div class="planner-tile-value">To age {{projection.finalAge}}</div>
+                  <div class="planner-tile-note">
+                    {{projection.finalRealBalance | number:'1.0-0'}} left in today's money.
+                  </div>
+                } @else {
+                  <div class="planner-tile-value planner-tile-bad">Runs out at {{projection.depletedAtAge}}</div>
+                  <div class="planner-tile-note">Short of age {{projection.finalAge}}.</div>
+                }
+              </div>
+            </div>
           </div>
-        </div>
-      }
 
+          <div class="planner-meter">
+            <i class="pi pi-flag planner-meter-icon"></i>
+            @if (milestone) {
+              <div class="planner-meter-body">
+                <div class="planner-meter-head">
+                  <div>
+                    <div class="planner-tile-label">Your next milestone</div>
+                    <div class="planner-meter-value">
+                      {{milestone.target | number:'1.0-0'}} {{projection.currency}} invested
+                    </div>
+                  </div>
+                  <span class="planner-meter-pct">{{milestone.pct | number:'1.0-1'}}%</span>
+                </div>
+                <div class="meter-bar">
+                  <div class="meter-bar-fill" [style.width.%]="milestone.pct"></div>
+                </div>
+                <div class="planner-meter-legend">
+                  <span>Reaches in about {{milestone.years}} years (age {{milestone.age}}).</span>
+                  <span>
+                    {{projection.startingValue | number:'1.0-0'}} / {{milestone.target | number:'1.0-0'}}
+                    {{projection.currency}}
+                  </span>
+                </div>
+              </div>
+            } @else {
+              <div class="planner-meter-body">
+                <div class="planner-tile-label">Your next milestone</div>
+                <div class="planner-meter-value">The target itself</div>
+                <div class="planner-meter-legend">
+                  <span>You are already at or past your FIRE number.</span>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="planner-recap">
+            <div class="planner-card-title">Your assumptions</div>
+            <div class="planner-recap-row">
+              <span>Monthly contribution</span>
+              <span class="planner-recap-value">{{monthlyContribution | number:'1.0-0'}} {{currency}}</span>
+            </div>
+            <div class="planner-recap-row">
+              <span>Annual return</span>
+              <span class="planner-recap-value">{{annualReturn | number:'1.0-1'}} %</span>
+            </div>
+            <div class="planner-recap-row">
+              <span>Inflation</span>
+              <span class="planner-recap-value">{{inflation | number:'1.0-1'}} %</span>
+            </div>
+            <button pButton pRipple label="Edit assumptions" icon="pi pi-pencil"
+              class="p-button-outlined planner-recap-edit" (click)="showAssumptions()"></button>
+          </div>
+
+          <p class="planner-foot">Projection based on your assumptions.</p>
+        } @else if (calculating || portfolioLoading) {
+          <span class="planner-eyebrow">Illustrative projection</span>
+          <p-skeleton height="2.5rem" width="18rem" styleClass="mb-3"></p-skeleton>
+          <p-skeleton height="20rem"></p-skeleton>
+        } @else {
+          <div class="table-empty">
+            <i class="pi pi-chart-line"></i>
+            <div class="table-empty-title">No projection yet</div>
+            <div>Set your assumptions and press Calculate projection.</div>
+          </div>
+        }
+      </section>
+    </div>
+
+    <div class="planner-results">
+    @if (projection) {
       <h3 class="section-heading">Milestones</h3>
       <p-table [value]="projection.milestones" styleClass="p-datatable-striped p-datatable-sm table-stack">
         <ng-template pTemplate="header">
@@ -369,7 +433,7 @@
             <th class="text-right">Paid in</th>
             <th class="text-right">
               Growth
-              <i class="pi pi-info-circle fire-info"
+              <i class="pi pi-info-circle planner-info"
                 pTooltip="Earned by the pot that year at the annual return, before inflation."></i>
             </th>
             @if (hasPensionRows) {
@@ -380,7 +444,7 @@
             <th class="text-right">In today's money</th>
             <th class="text-right">
               Of FIRE number
-              <i class="pi pi-info-circle fire-info" [pTooltip]="fireNumberBasisHint"></i>
+              <i class="pi pi-info-circle planner-info" [pTooltip]="fireNumberBasisHint"></i>
             </th>
           </tr>
         </ng-template>
@@ -404,7 +468,7 @@
               <td data-label="Pension" class="text-right">{{row.pension | number:'1.0-0'}}</td>
             }
             <td data-label="Taken out" class="text-right">{{row.withdrawals | number:'1.0-0'}}</td>
-            <td data-label="Balance" class="text-right fire-total-cell">{{row.balance | number:'1.0-0'}}</td>
+            <td data-label="Balance" class="text-right planner-total-cell">{{row.balance | number:'1.0-0'}}</td>
             <td data-label="In today's money" class="text-right">{{row.realBalance | number:'1.0-0'}}</td>
             <td data-label="Of FIRE number" class="text-right">{{row.pctOfFireNumber | number:'1.0-0'}}%</td>
           </tr>
@@ -415,8 +479,8 @@
         <h3 class="section-heading">Retirement</h3>
         <p class="form-hint">
           From age {{projection.retirementAge}} the contributions stop and
-          {{projection.annualSpending | number:'1.0-0'}} {{projection.currency}} a year, in today's money, comes
-          out instead &mdash; rising with inflation each year.
+          {{projection.annualSpending | number:'1.0-0'}} {{projection.currency}} a year, in today's money,
+          comes out instead &mdash; rising with inflation each year.
         </p>
         <p-table [value]="drawdownRows" styleClass="p-datatable-striped p-datatable-sm table-stack">
           <ng-template pTemplate="header">
@@ -424,7 +488,7 @@
               <th>Age</th>
               <th class="text-right">
                 Growth
-                <i class="pi pi-info-circle fire-info"
+                <i class="pi pi-info-circle planner-info"
                   pTooltip="Earned by the pot that year at the annual return, before inflation."></i>
               </th>
               @if (hasPensionRows) {
@@ -443,19 +507,28 @@
                 <td data-label="Pension" class="text-right">{{row.pension | number:'1.0-0'}}</td>
               }
               <td data-label="Taken out" class="text-right">{{row.withdrawals | number:'1.0-0'}}</td>
-              <td data-label="Balance" class="text-right fire-total-cell">{{row.balance | number:'1.0-0'}}</td>
+              <td data-label="Balance" class="text-right planner-total-cell">{{row.balance | number:'1.0-0'}}</td>
               <td data-label="In today's money" class="text-right">{{row.realBalance | number:'1.0-0'}}</td>
             </tr>
           </ng-template>
         </p-table>
+
       }
 
-      <p class="fire-caveat">
+      <div class="planner-actions">
+        <button pButton pRipple label="Download" icon="pi pi-download" class="p-button-rounded"
+          severity="secondary" pTooltip="Export the full year-by-year timeline as CSV"
+          (click)="download()"></button>
+      </div>
+
+      <p class="planner-caveat">
         <i class="pi pi-info-circle"></i>
-        A single fixed return every year is a simplification. Real markets vary, and a run of bad years early
-        in retirement does far more damage than the same years later on, so treat the drawdown as an
+        A single fixed return every year is a simplification. Real markets vary, and a run of bad years
+        early in retirement does far more damage than the same years later on, so treat the drawdown as an
         illustration of these assumptions rather than a probability.
       </p>
     }
+    </div>
+    </div>
   </p-panel>
 </div>

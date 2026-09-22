@@ -1,4 +1,6 @@
-import { Component, inject, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Input } from '@angular/core';
+import { EMPTY_FILTER, PortfolioFilter, filterRows } from '../../util/tablefilter';
 import { CsvDropDirective } from '../../util/csv-drop.directive';
 import { ETFInvestment } from 'src/app/model/etfinvestment';
 import { Account } from 'src/app/model/account';
@@ -14,35 +16,45 @@ import { MessageService, PrimeTemplate } from 'primeng/api';
 import { Toast } from 'primeng/toast';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
-import { FileUpload } from 'primeng/fileupload';
+import { Tooltip } from 'primeng/tooltip';
 import { TableModule } from 'primeng/table';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { Dialog } from 'primeng/dialog';
-import { CurrencyPipe, DatePipe, NgClass } from '@angular/common';
+import { CurrencyPipe, DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { TickerIdentityComponent } from '../../util/ticker-identity.component';
 import { ExchangeOptionComponent } from '../../util/exchange-option.component';
 import { SymbolOptionComponent } from '../../util/symbol-option.component';
-import { collectAccountOptions } from '../../util/accountoptions';
 
 @Component({
     selector: 'app-etfinvestment',
     hostDirectives: [CsvDropDirective],
     templateUrl: './etfinvestment.component.html',
-    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Dialog, CurrencyPipe, DatePipe, NgClass, Toast, TickerIdentityComponent, ExchangeOptionComponent, SymbolOptionComponent]
+    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, Tooltip, TableModule, InputText, Select, FormsModule, Dialog, CurrencyPipe, DatePipe, DecimalPipe, NgClass, Toast, TickerIdentityComponent, ExchangeOptionComponent, SymbolOptionComponent]
 })
 export class EtfinvestmentComponent implements OnInit {
+  visibleInvestments: ETFInvestment[] = [];
+  private activeFilter: PortfolioFilter = EMPTY_FILTER;
+
+  @Input() set filter(value: PortfolioFilter) {
+    this.activeFilter = value ?? EMPTY_FILTER;
+    this.applyFilter();
+  }
+
+  private applyFilter(): void {
+    this.visibleInvestments = filterRows(this.investments, this.activeFilter, ['shortName', 'name'], 'accountName');
+  }
+
 
   investments: ETFInvestment[] = [];
-  accountOptions: string[] = [];
   currencies: any[];
   statuses: any[];
   accounts: Account[] = [];
   selectedInvestments: ETFInvestment[] = [];
   investmentDialog: boolean = false;
   investment: ETFInvestment = {} as ETFInvestment;
-  @ViewChild('fileUpload') fileUpload: any;
+  @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
   symbols: Symbol[] = [];
   exchanges: Exchange[] = [];
   exchangesLoading: boolean = true;
@@ -92,7 +104,7 @@ export class EtfinvestmentComponent implements OnInit {
     this.etfService.getInvestments().subscribe({
       next: (data) => {
         this.investments = data;
-        this.accountOptions = collectAccountOptions(data);
+        this.applyFilter();
         this.cdr.markForCheck();
       },
       error: (error) => {
@@ -197,16 +209,25 @@ export class EtfinvestmentComponent implements OnInit {
     }
   }
 
+  fileChosen(event: Event) {
+    const files = Array.from((event.target as HTMLInputElement).files ?? []);
+    if (files.length) this.onUpload({ files });
+  }
+
+  private clearFileInput() {
+    if (this.fileInput) this.fileInput.nativeElement.value = '';
+  }
+
   onUpload(event: any) {
     for (let file of event.files) {
       this.etfService.uploadCSV(file).subscribe({
         next: () => {
           this.fetchData();
-          this.fileUpload.clear();
+          this.clearFileInput();
           this.messageService.add({ severity: 'success', detail: 'Import finished.' });
         },
         error: (error) => {
-          this.fileUpload.clear();
+          this.clearFileInput();
           this.messageService.add({ severity: 'error', detail: error.error?.error ?? 'Import failed.' });
         }
       });

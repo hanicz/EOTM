@@ -1,4 +1,6 @@
-import { Component, inject, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Input } from '@angular/core';
+import { EMPTY_FILTER, PortfolioFilter, filterRows } from '../../util/tablefilter';
 import { CsvDropDirective } from '../../util/csv-drop.directive';
 import { ETFDividend } from 'src/app/model/etfdividend';
 import { EtfdividendService } from 'src/app/service/etfdividend.service';
@@ -12,7 +14,7 @@ import { MessageService, PrimeTemplate } from 'primeng/api';
 import { Toast } from 'primeng/toast';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
-import { FileUpload } from 'primeng/fileupload';
+import { Tooltip } from 'primeng/tooltip';
 import { TableModule } from 'primeng/table';
 import { InputText } from 'primeng/inputtext';
 import { Dialog } from 'primeng/dialog';
@@ -27,16 +29,28 @@ import { SymbolOptionComponent } from '../../util/symbol-option.component';
     selector: 'app-etfdividend',
     hostDirectives: [CsvDropDirective],
     templateUrl: './etfdividend.component.html',
-    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Dialog, FormsModule, Select, CurrencyPipe, DatePipe, Toast, TickerIdentityComponent, ExchangeOptionComponent, SymbolOptionComponent]
+    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, Tooltip, TableModule, InputText, Dialog, FormsModule, Select, CurrencyPipe, DatePipe, Toast, TickerIdentityComponent, ExchangeOptionComponent, SymbolOptionComponent]
 })
 export class EtfdividendComponent implements OnInit {
+  visibleDividends: ETFDividend[] = [];
+  private activeFilter: PortfolioFilter = EMPTY_FILTER;
+
+  @Input() set filter(value: PortfolioFilter) {
+    this.activeFilter = value ?? EMPTY_FILTER;
+    this.applyFilter();
+  }
+
+  private applyFilter(): void {
+    this.visibleDividends = filterRows(this.dividends, this.activeFilter, ['shortName', 'name']);
+  }
+
 
   dividends: ETFDividend[] = [];
   currencies: any[];
   selectedDividends: ETFDividend[] = [];
   dividendDialog: boolean = false;
   dividend: ETFDividend = {} as ETFDividend;
-  @ViewChild('fileUpload') fileUpload: any;
+  @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
   symbols: Symbol[] = [];
   exchanges: Exchange[] = [];
   exchangesLoading: boolean = true;
@@ -74,6 +88,7 @@ export class EtfdividendComponent implements OnInit {
     this.etfDividendService.getAllDividends().subscribe({
       next: (data) => {
         this.dividends = data;
+        this.applyFilter();
         this.cdr.markForCheck();
       },
       error: (error) => {
@@ -178,16 +193,25 @@ export class EtfdividendComponent implements OnInit {
     }
   }
 
+  fileChosen(event: Event) {
+    const files = Array.from((event.target as HTMLInputElement).files ?? []);
+    if (files.length) this.onUpload({ files });
+  }
+
+  private clearFileInput() {
+    if (this.fileInput) this.fileInput.nativeElement.value = '';
+  }
+
   onUpload(event: any) {
     for (let file of event.files) {
       this.etfDividendService.uploadCSV(file).subscribe({
         next: () => {
           this.fetchData();
-          this.fileUpload.clear();
+          this.clearFileInput();
           this.messageService.add({ severity: 'success', detail: 'Import finished.' });
         },
         error: (error) => {
-          this.fileUpload.clear();
+          this.clearFileInput();
           this.messageService.add({ severity: 'error', detail: error.error?.error ?? 'Import failed.' });
         }
       });

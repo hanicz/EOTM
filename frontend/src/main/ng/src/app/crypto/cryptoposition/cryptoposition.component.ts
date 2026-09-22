@@ -1,4 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Input } from '@angular/core';
+import { EMPTY_FILTER, PortfolioFilter, filterRows } from '../../util/tablefilter';
 import { Transaction } from '../../model/transaction';
 import { CryptoService } from '../../service/crypto.service';
 import { Globals } from '../../util/global';
@@ -15,6 +17,18 @@ import { DecimalPipe, CurrencyPipe, NgClass } from '@angular/common';
     imports: [Bind, TableModule, PrimeTemplate, Image, DecimalPipe, CurrencyPipe, NgClass]
 })
 export class CryptopositionComponent implements OnInit {
+  visibleTransactions: Transaction[] = [];
+  private activeFilter: PortfolioFilter = EMPTY_FILTER;
+
+  @Input() set filter(value: PortfolioFilter) {
+    this.activeFilter = value ?? EMPTY_FILTER;
+    this.applyFilter();
+  }
+
+  private applyFilter(): void {
+    this.visibleTransactions = filterRows(this.transactions, this.activeFilter, ['symbol']);
+  }
+
 
   transactions: Transaction[] = [];
   myMath = Math;
@@ -36,6 +50,7 @@ export class CryptopositionComponent implements OnInit {
     this.cryptoService.getPositions().subscribe({
       next: (data) => {
         this.transactions = data;
+        this.applyFilter();
         this.cdr.markForCheck();
       },
       error: (error) => {

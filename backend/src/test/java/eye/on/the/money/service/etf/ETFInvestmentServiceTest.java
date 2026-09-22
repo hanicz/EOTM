@@ -125,7 +125,7 @@ class ETFInvestmentServiceTest {
         List<ETFInvestmentDTO> result = this.etfInvestmentService.getPositionsByAccountId(this.user.getId(), 1L);
 
         ETFInvestmentDTO vwce = result.stream().filter(i -> "VWCE".equals(i.getShortName())).findFirst().orElseThrow();
-        assertEquals(0, vwce.getQuantity());
+        assertEquals(0.0, vwce.getQuantity());
         assertEquals(-40.0, vwce.getAmount());
     }
 
@@ -133,7 +133,7 @@ class ETFInvestmentServiceTest {
     @Transactional
     public void getPositionsByAccountId_reopenedLotIsNotMergedWithClosedLot() {
         this.etfInvestmentService.createInvestment(ETFInvestmentDTO.builder()
-                .buySell("B").quantity(3).amount(330.0).currencyId("EUR").fee(1.5)
+                .buySell("B").quantity(3.0).amount(330.0).currencyId("EUR").fee(1.5)
                 .shortName("VWCE").exchange("MI").accountId(1L)
                 .transactionDate(LocalDate.of(2023, 9, 5)).build(), this.user.getId());
 
@@ -147,7 +147,7 @@ class ETFInvestmentServiceTest {
         Assertions.assertAll("The realised gain stays on the closed lot",
                 () -> assertEquals(2, vwce.size()),
                 () -> assertEquals(-40.0, closedLot.getAmount()),
-                () -> assertEquals(3, openLot.getQuantity()),
+                () -> assertEquals(3.0, openLot.getQuantity()),
                 () -> assertEquals(330.0, openLot.getAmount()));
     }
 
@@ -155,11 +155,11 @@ class ETFInvestmentServiceTest {
     @Transactional
     public void getPositionsByAccountId_keepsTheSameTickerOnDifferentExchangesApart() {
         this.etfInvestmentService.createInvestment(ETFInvestmentDTO.builder()
-                .buySell("B").quantity(10).amount(1000.0).currencyId("EUR").fee(0.0)
+                .buySell("B").quantity(10.0).amount(1000.0).currencyId("EUR").fee(0.0)
                 .shortName("VWCE").exchange("MI").accountId(2L)
                 .transactionDate(LocalDate.of(2024, 1, 10)).build(), this.user.getId());
         this.etfInvestmentService.createInvestment(ETFInvestmentDTO.builder()
-                .buySell("B").quantity(4).amount(700.0).currencyId("EUR").fee(0.0)
+                .buySell("B").quantity(4.0).amount(700.0).currencyId("EUR").fee(0.0)
                 .shortName("VWCE").exchange("XETRA").accountId(2L)
                 .transactionDate(LocalDate.of(2024, 1, 11)).build(), this.user.getId());
 
@@ -179,7 +179,7 @@ class ETFInvestmentServiceTest {
     @Transactional
     public void createInvestment_storesAmountCurrencyAndAccountOnTheInvestment() {
         ETFInvestmentDTO created = this.etfInvestmentService.createInvestment(ETFInvestmentDTO.builder()
-                .buySell("B").quantity(3).amount(123.45).currencyId("EUR").fee(1.0)
+                .buySell("B").quantity(3.0).amount(123.45).currencyId("EUR").fee(1.0)
                 .shortName("VWCE").exchange("MI").accountId(2L)
                 .transactionDate(LocalDate.of(2023, 9, 1)).build(), this.user.getId());
 
@@ -198,7 +198,7 @@ class ETFInvestmentServiceTest {
     @Transactional
     public void createInvestment_rejectsAnAccountTheUserDoesNotOwn() {
         ETFInvestmentDTO dto = ETFInvestmentDTO.builder()
-                .buySell("B").quantity(3).amount(123.45).currencyId("EUR").fee(1.0)
+                .buySell("B").quantity(3.0).amount(123.45).currencyId("EUR").fee(1.0)
                 .shortName("VWCE").exchange("MI").accountId(999L)
                 .transactionDate(LocalDate.of(2023, 9, 1)).build();
 
@@ -213,7 +213,7 @@ class ETFInvestmentServiceTest {
                 this.user.getId(), 2L).getFirst();
 
         this.etfInvestmentService.updateInvestment(ETFInvestmentDTO.builder()
-                .id(existing.getId()).buySell("B").quantity(5).amount(300.0).currencyId("EUR").fee(1.5)
+                .id(existing.getId()).buySell("B").quantity(5.0).amount(300.0).currencyId("EUR").fee(1.5)
                 .shortName("VWRL").exchange("AS").accountId(1L)
                 .transactionDate(existing.getTransactionDate()).build(), this.user.getId());
 

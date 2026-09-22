@@ -22,7 +22,7 @@ public class RSUTaxEventDTO implements CSVHelper {
     private String shortName;
     private String exchange;
     private LocalDate transactionDate;
-    private Integer quantity;
+    private Double quantity;
     private String currency;
     private BigDecimal price;
     private LocalDate priceDate;
@@ -48,7 +48,7 @@ public class RSUTaxEventDTO implements CSVHelper {
     public Object[] getCSVRecord() {
         TaxBreakdownDTO breakdown = (this.getTax() == null) ? TaxBreakdownDTO.zero() : this.getTax();
         return new Object[]{this.getId(), this.getShortName(), this.getExchange(), this.getTransactionDate(),
-                this.getQuantity(), this.getCurrency(), this.getPrice(), this.getPriceDate(), this.getAmount(),
+                CSVHelper.plainNumber(this.getQuantity()), this.getCurrency(), this.getPrice(), this.getPriceDate(), this.getAmount(),
                 this.getRate(), this.getRateDate(), this.getAmountInHuf(), breakdown.getTaxBase(),
                 breakdown.getSzocho(), breakdown.getSzja(), breakdown.getTotal(), this.getCalculatedOn(),
                 this.isPaid()};

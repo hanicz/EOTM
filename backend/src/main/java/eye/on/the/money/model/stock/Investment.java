@@ -32,7 +32,7 @@ public class Investment extends AuditedEntity {
     private Long id;
 
     @Column(nullable = false)
-    private Integer quantity;
+    private Double quantity;
 
     @Column(nullable = false)
     private String buySell;

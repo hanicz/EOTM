@@ -15,6 +15,7 @@ import { NetWorthService } from '../service/networth.service';
 import { NetWorthHistory, NetWorthPoint } from '../model/networth';
 import { DEFAULT_CURRENCY } from '../model/currency';
 import { ASSET_COLOURS, FALLBACK_ASSET_COLOUR } from '../util/assetcolours';
+import { compactAmount, money } from '../util/format';
 
 export type RangeId = '1M' | '3M' | '6M' | 'YTD' | '1Y' | 'ALL';
 
@@ -61,17 +62,6 @@ export function rangeStart(range: RangeId, anchor: string): string | null {
 export function toTimestamp(date: string): number {
   const [year, month, day] = date.split('-').map(Number);
   return Date.UTC(year, month - 1, day);
-}
-
-export function compactAmount(value: number): string {
-  const absolute = Math.abs(value);
-  if (absolute >= 1_000_000) {
-    return `${(value / 1_000_000).toFixed(1)}M`;
-  }
-  if (absolute >= 1_000) {
-    return `${(value / 1_000).toFixed(0)}k`;
-  }
-  return `${Math.round(value)}`;
 }
 
 @Component({
@@ -195,18 +185,9 @@ export class PerformanceComponent implements OnInit {
       tooltip: {
         shared: true,
         x: { format: 'yyyy-MM-dd' },
-        y: { formatter: (value: number) => this.money(value) }
+        y: { formatter: (value: number) => money(value, this.currency()) }
       }
     };
   }
 
-  private money(value: number): string {
-    try {
-      return new Intl.NumberFormat(undefined, {
-        style: 'currency', currency: this.currency(), maximumFractionDigits: 0
-      }).format(value);
-    } catch {
-      return value.toFixed(0);
-    }
-  }
 }

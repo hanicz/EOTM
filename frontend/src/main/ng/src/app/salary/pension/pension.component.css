@@ -1,194 +1,18 @@
-.pension-sections {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-}
-
-.pension-field {
-    min-width: 11rem;
-}
-
-.pension-field-narrow {
-    min-width: 8rem;
-}
-
-.pension-field-check {
-    flex-direction: row;
-    align-items: center;
-    gap: 0.5rem;
-    min-width: 0;
-    padding-bottom: 0.55rem;
-}
-
-.pension-check-label {
-    font-size: 0.8rem;
-    color: var(--p-text-muted-color);
-    cursor: pointer;
-}
-
-.pension-info {
-    margin-left: 0.3rem;
-    font-size: 0.75rem;
-    color: #a8a49b;
-    cursor: help;
-}
-
-.pension-readonly {
-    padding: 0.55rem 0;
-    font-size: 0.95rem;
-    color: var(--eotm-ink);
-}
-
-.pension-readonly-strong {
-    font-weight: 600;
-}
-
-.pension-warning {
-    margin: 0.9rem 0 0 0;
-    font-size: 0.8rem;
-    color: #8a6d3b;
-}
-
-.pension-warning i {
-    margin-right: 0.35rem;
-}
-
 .pension-hint-tight {
     margin: 0.85rem 0 0 0;
 }
 
 .pension-steps {
-    margin-top: 0.75rem;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--eotm-tile-border);
 }
 
 .pension-step-row {
-    align-items: flex-end;
-}
-
-.pension-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 1.25rem;
-}
-
-.pension-summary {
-    margin-top: 1.75rem;
-}
-
-.pension-tile-bad {
-    background: #faf1ef;
-    border-color: #e8d3ce;
-}
-
-.pension-total-cell {
-    font-weight: 600;
-}
-
-.pension-chart-wrap {
-    position: relative;
-    padding: 0.5rem 0 0 0;
-}
-
-.pension-chart {
-    width: 100%;
-    height: auto;
-    display: block;
-    overflow: visible;
-}
-
-.pension-gridline {
-    stroke: var(--eotm-tile-border);
-    stroke-width: 1;
-}
-
-.pension-axis-label {
-    font-size: 11px;
-    fill: var(--eotm-note);
-}
-
-.pension-marker-label {
-    font-size: 10px;
-    fill: var(--eotm-note);
-}
-
-.pension-series-label {
-    font-size: 11px;
-    font-weight: 600;
-}
-
-.pension-stop-line {
-    stroke: #b4b2a9;
-    stroke-width: 1.5;
-    stroke-dasharray: 3 3;
-}
-
-.pension-hover-line {
-    stroke: #b4b2a9;
-    stroke-width: 1;
-}
-
-.pension-line {
-    fill: none;
-    stroke-width: 2;
-    vector-effect: non-scaling-stroke;
-}
-
-.pension-dot {
-    stroke: #ffffff;
-    stroke-width: 2;
-}
-
-.pension-chart-readout {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    padding: 0.6rem 0.75rem;
-    border-radius: 0.5rem;
-    background: #ffffff;
-    border: 1px solid var(--eotm-tile-border);
-    box-shadow: 0 2px 8px rgba(27, 27, 27, 0.08);
-    font-size: 0.78rem;
-    pointer-events: none;
-}
-
-.pension-readout-title {
-    font-weight: 600;
-    margin-bottom: 0.35rem;
-}
-
-.pension-readout-note {
-    margin-left: 0.35rem;
-    font-weight: 400;
-    color: var(--eotm-note);
-}
-
-.pension-readout-row {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    line-height: 1.6;
-}
-
-.pension-readout-value {
-    margin-left: auto;
-    font-variant-numeric: tabular-nums;
-    font-weight: 600;
-}
-
-.pension-legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-top: 0.5rem;
-    font-size: 0.78rem;
-    color: var(--p-text-muted-color);
-}
-
-.pension-legend-item {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
+    gap: 0.35rem;
+    padding: 0.15rem 0;
 }
 
 .pension-swatch {
@@ -201,30 +25,26 @@
     vertical-align: middle;
 }
 
-.pension-caveat {
-    margin: 1.75rem 0 0 0;
+.pension-stack {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.25rem;
+}
+
+:host ::ng-deep .pension-stack .p-select {
+    width: 100%;
+}
+
+.pension-step-label {
     font-size: 0.78rem;
-    line-height: 1.6;
-    color: var(--eotm-note);
+    color: var(--p-text-muted-color);
+    white-space: nowrap;
 }
 
-.pension-caveat i {
-    margin-right: 0.35rem;
+:host ::ng-deep .pension-step-row .planner-input .p-inputnumber input {
+    width: 4.75rem;
+    padding-right: 1.6rem;
 }
 
-@media screen and (max-width: 575px) {
-    .pension-field,
-    .pension-field-narrow,
-    .pension-field-check {
-        min-width: 100%;
-    }
-
-    .pension-actions button {
-        width: 100%;
-    }
-
-    .pension-chart-readout {
-        position: static;
-        margin-top: 0.5rem;
-    }
+:host ::ng-deep .pension-step-row .planner-unit {
+    right: 0.5rem;
 }

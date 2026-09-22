@@ -8,19 +8,37 @@ plan what they add up to.
 ### Portfolio tracking
 
 - **Stocks, ETFs, crypto, forex and securities** — record buys and sells per asset class, with holdings,
-  open positions and full transaction history. Stock investments can be split across named accounts.
+  open positions and full transaction history. Stock and ETF investments can be split across named accounts,
+  with a per-account breakdown of the totals, and quantities can be fractional for brokers that sell part
+  shares.
+- **Search and filter** — every portfolio page has one search box that filters all of its tabs at once; the
+  stock and ETF pages add an account picker next to it.
 - **Live valuation** — holdings are priced against live market data and shown next to what was paid, with the
   gain or loss on each position.
 - **Dividends and interest** — stock and ETF dividends, and interest credited on securities. Securities have
   no live market price, so they are valued at what was paid for them. Interest is recorded but deliberately
   left out of that valuation: it gets reinvested by buying more, and those purchases are already counted, so
   adding the interest as well would count the same money twice.
+- **Securities import and rates** — the official webkincstár transaction export (`.xls`) imports straight
+  into the securities page, and re-importing it updates rows instead of duplicating them. Interest rates are
+  checked every morning and fetched again once they are a week old, or on demand from the page.
 - **Cash** — a balance for money sitting in an account rather than invested, held in a currency of your
   choosing and converted like everything else. It counts towards net worth at face value, so it never shows
   a gain or a loss, and it is left out of the overall change on both sides: cash was never spent on
   anything, and counting it as cost would water down the percentage the rest of the portfolio moved.
+- **Pension pot** — a private pension entered as what you have paid in and what your latest statement says
+  it is worth; the gain is worked out from the two, and the pot counts towards net worth.
 - **Multi-currency** — every amount is held in the currency it was traded in and converted on the fly, so a
   portfolio spread across HUF, EUR and USD still totals up.
+
+### Performance
+
+- Net worth is recorded **every night at 23:15** (Budapest time) in forints, and today's snapshot is taken on
+  the spot if the page is opened before then.
+- **Worth vs invested** over 1M, 3M, 6M, YTD, 1Y or all time, so the gap between the lines is what the market
+  added, with the same history split **by asset class**.
+- **Monthly returns** — each month's end worth and change, split into the new money you put in and the market
+  gain that did not come from it.
 
 ### Dashboard
 
@@ -29,22 +47,44 @@ plan what they add up to.
 - The **next three interest payments** due on securities — what is coming, when, and how much — taken
   from the same schedule the securities page works from.
 - The **next RSU vest of every grant** — ticker, date, shares and what lands after tax — so the nearest
-  tranche is visible without opening the equity page.
+  tranche is visible without opening the equity page, and the next **STAR** instalment the same way.
+- A **performance summary** — net worth and its change over the last 90 days.
+- A **FIRE summary** — years to FIRE, what you save a month and your savings rate, taken from the bank
+  history on the Financials page, with the assumptions behind it.
+- **Market status** — whether each exchange is open right now, its trading hours in local time, and the
+  next market holidays.
 - A **notepad** for whatever is worth remembering next to the numbers. One free-text note per account,
   saved as you type and kept on the server, so it is there from any browser.
 
-### Watchlist and lookup
+### Watchlist and research
 
 - **Watchlists** for stocks, crypto and currency pairs, with live prices. Stocks can be sorted into named
   groups — Europe, ETF, Tech — each a collapsible section of the list.
-- **Lookup** — search any ticker for its profile, fundamentals, price history and analyst recommendations.
+- **Research** — search any ticker for its profile, fundamentals, price history and analyst recommendations.
 - **Signals** — a buy/hold/sell view built from SMA, EMA, RSI and MACD, each indicator shown with its own
   reading rather than just the verdict.
 
-### Alerts
+### Alerts and reports
 
 - Price and percentage-change alerts on stocks and crypto (`PRICE_OVER`, `PRICE_UNDER`, `PERCENT_OVER`,
   `PERCENT_UNDER`), checked every five minutes in the background and delivered by email.
+- A **monthly report** by email — what the portfolio is worth, what you traded and how the bank month went —
+  sent on the **10th of every month at 07:00** (Budapest time) for the month just finished. Opt-in, in a
+  currency of your choosing, to your own address plus up to five extra recipients, and it can be sent on demand.
+  A month is only ever sent once, even if the job runs again.
+
+### Equity
+
+- **RSU grants** — record the grant and the vesting schedule is worked out for you, split as evenly as whole
+  shares allow. Each vest is valued at the closing price on its own date and converted to forint at that
+  day's MNB rate, then taxed the Hungarian way (89% of the value is the tax base, carrying 13% szocho and 15%
+  szja). Vests still to come are priced at the latest close and rate and marked as projected. Every vest
+  exports to CSV.
+- **STAR grants** — these pay out the appreciation over the grant's FMV rather than the whole share, and the
+  value is not public, so you enter what you were last told it is worth. The schedule is quarterly, with or
+  without a one-year cliff, from commencement dates that always fall on 8 January, April, July or October.
+  Every instalment is valued at today's spread and MNB rate — what the grant is worth if cashed out today.
+- Both show gross, tax and net per grant, what has vested so far, and the full schedule per grant.
 
 ### News
 
@@ -64,6 +104,10 @@ plan what they add up to.
   converted to forint at that day's official MNB rate, falling back to the last published rate for weekends
   and holidays.
 - The same calculation is available for a plain forint amount, and the report exports to CSV.
+- **Stock buys flagged as RSUs** on the stock page are taxed here too. The shares were granted, not bought,
+  so each is valued at its closing price on the transaction date rather than the amount recorded.
+- **Bank transactions flagged as taxable** on the Financials page are taxed at the MNB rate of the booking
+  date. Both kinds are worked out once, when flagged — flag again to recalculate — and can be marked paid.
 
 ### FIRE (financial independence / early retirement)
 
@@ -143,6 +187,20 @@ plan what they add up to.
   actually landed in your pocket, so a change in dependants counts towards it as much as a change in gross.
   It is worked out chronologically, so re-sorting the table does not change it, and it is left empty where
   the previous period was in another currency.
+- **Compensation** — everything paid on top of the base salary (SZÉP card, bonus, phone, insurance), each
+  either a monthly amount or a share of the annual base, with its tax treatment deciding what actually lands.
+  A second package can be built alongside to compare an offer.
+- **State pension** — an estimate of the Hungarian öregségi nyugdíj from your salary history and the path you
+  expect your pay to take, in today's forints. It applies valorisation, the degresszió limits and the
+  service-time scale (no pension below 15 years), shows the result against the age you stop working, and
+  exports the year-by-year detail to CSV.
+
+### Settings
+
+- **Preferences** — the currency the portfolio is shown in across the app.
+- **Investment accounts** — the named accounts stock and ETF investments are split across.
+- **Followed subreddits** — the list the Reddit news feed is built from.
+- **Password change**, **two-factor authentication** and the **full account export** described below.
 
 ### Account security
 

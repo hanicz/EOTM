@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef, EventEmitter, Output, ViewChild, inject } from '@angular/core';
+import { Component, ChangeDetectorRef, ElementRef, EventEmitter, Output, ViewChild, inject } from '@angular/core';
 import { from, of } from 'rxjs';
 import { catchError, concatMap, map, toArray } from 'rxjs/operators';
 import { BankTransaction, CATEGORY_CHIP_CLASS, CATEGORY_CHIP_NONE, CategoryColor, CategoryRule, SpendingCategory } from '../../model/bankTransaction';
@@ -11,7 +11,6 @@ import { Toast } from 'primeng/toast';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { Tooltip } from 'primeng/tooltip';
-import { FileUpload } from 'primeng/fileupload';
 import { TableModule } from 'primeng/table';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
@@ -42,7 +41,7 @@ interface ImportOutcome {
     hostDirectives: [CsvDropDirective],
     templateUrl: './transaction.component.html',
     styleUrls: ['./transaction.component.css'],
-    imports: [Bind, Toolbar, PrimeTemplate, Toast, ButtonDirective, Ripple, Tooltip, FileUpload, TableModule,
+    imports: [Bind, Toolbar, PrimeTemplate, Toast, ButtonDirective, Ripple, Tooltip, TableModule,
         InputText, Select, Dialog, Checkbox, FormsModule, CurrencyPipe, DatePipe, NgClass]
 })
 export class FinancialTransactionComponent {
@@ -78,7 +77,7 @@ export class FinancialTransactionComponent {
   readonly memoMaxLength = 500;
   private readonly editableFields = ['bookingDate', 'memo'];
   private beforeEdit: TransactionEditValues | null = null;
-  @ViewChild('fileUpload') fileUpload: any;
+  @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
 
 
   constructor(private financialService: FinancialService, private cdr: ChangeDetectorRef,
@@ -401,6 +400,11 @@ export class FinancialTransactionComponent {
     });
   }
 
+  fileChosen(event: Event): void {
+    const files = Array.from((event.target as HTMLInputElement).files ?? []);
+    if (files.length) this.onUpload({ files });
+  }
+
   onUpload(event: { files: File[] }): void {
     const files = Array.from(event.files ?? []);
     if (!files.length) return;
@@ -416,7 +420,7 @@ export class FinancialTransactionComponent {
       )),
       toArray()
     ).subscribe(outcomes => {
-      this.fileUpload.clear();
+      if (this.fileInput) this.fileInput.nativeElement.value = '';
       this.reportImport(outcomes);
     });
   }

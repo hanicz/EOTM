@@ -1,4 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
+import { PortfolioFilter } from '../util/tablefilter';
+import { InputText } from 'primeng/inputtext';
+import { FormsModule } from '@angular/forms';
 import { Transaction } from '../model/transaction';
 import { MenuComponent } from '../menu/menu.component';
 import { Bind } from 'primeng/bind';
@@ -22,9 +25,20 @@ import { DEFAULT_CURRENCY } from '../model/currency';
 @Component({
     selector: 'app-crypto',
     templateUrl: './crypto.component.html',
-    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, CryptoholdingComponent, CryptopositionComponent, TransactionComponent, DecimalPipe, CurrencyPipe, AllocationDonutComponent, AlignToTableDirective]
+    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, CryptoholdingComponent, CryptopositionComponent, TransactionComponent, DecimalPipe, CurrencyPipe, AllocationDonutComponent, AlignToTableDirective, InputText, FormsModule]
 })
 export class CryptoComponent implements OnInit {
+  filter: PortfolioFilter = { search: '', account: null };
+
+  /** The children re-read the filter through their input, so this replaces the object. */
+  onFilterChange(): void {
+    this.filter = { ...this.filter };
+  }
+
+  clearSearch(): void {
+    this.filter = { ...this.filter, search: '' };
+  }
+
 
   @ViewChild(CryptoholdingComponent) cryptoholding!: CryptoholdingComponent;
   @ViewChild(CryptopositionComponent) cryptoposition!: CryptopositionComponent;

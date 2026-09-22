@@ -1,48 +1,32 @@
 ﻿<p-toast position="bottom-center"></p-toast>
 <p-toolbar styleClass="table-toolbar">
   <ng-template pTemplate="left">
-    <button pButton pRipple label="New" icon="pi pi-plus"
-    (click)="openNew()"></button>
-    <button pButton pRipple icon="pi pi-trash" severity="danger" class="p-button-outlined"
-    [disabled]="!selectedTransactions || !selectedTransactions.length" (click)="deleteClicked()"></button>
+    <div class="toolbar-icons">
+      <button pButton pRipple type="button" size="small" icon="pi pi-plus"
+        pTooltip="New transaction" tooltipPosition="bottom" aria-label="New transaction"
+        (click)="openNew()"></button>
+      <span class="toolbar-divider" aria-hidden="true"></span>
+      <button pButton pRipple type="button" size="small" icon="pi pi-trash" severity="danger" [outlined]="true"
+        pTooltip="Delete the selected transactions" tooltipPosition="bottom"
+        aria-label="Delete the selected transactions"
+        [disabled]="!selectedTransactions || !selectedTransactions.length" (click)="deleteClicked()"></button>
+    </div>
   </ng-template>
 
   <ng-template pTemplate="right">
-    <p-fileUpload mode="basic" #fileUpload accept=".csv" [customUpload]="true" [auto]="true" label="Import" chooseLabel="Import" chooseStyleClass="p-button-outlined p-button-secondary" (uploadHandler)="onUpload($event)">
-    </p-fileUpload>
-    <button pButton pRipple label="Export" icon="pi pi-upload" severity="secondary" class="p-button-outlined" (click)="download()"></button>
-  </ng-template>
-</p-toolbar>
-<p-table #dt1 [value]="transactions" styleClass="p-datatable-striped table-stack"
-  [(selection)]="selectedTransactions">
-  <ng-template pTemplate="caption">
-    <div class="filter-bar">
-      <input pInputText type="text" (input)="dt1.filter($any($event.target)?.value, 'symbol', 'contains')"
-        [value]="$any(dt1.filters['symbol'])?.value ?? ''" placeholder="Search by Symbol"
-        class="p-column-filter filter-input">
-      <p-columnFilter field="buySell" matchMode="equals" [showMenu]="false" class="filter-type">
-        <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-          <p-select [ngModel]="value" [options]="statuses" (onChange)="filter($any($event)?.value)"
-            [showClear]="true" placeholder="Any">
-            <ng-template let-option pTemplate="item">
-              @if (option.label === 'BUY') {
-                <span class="p-mr-2 state-chip state-info">BUY</span>
-              }
-              @if (option.label === 'SELL') {
-                <span class="p-mr-2 state-chip state-accent">SELL</span>
-              }
-              @if (option.label === 'REDEMPTION') {
-                <span class="p-mr-2 state-chip state-buy">REDEMPTION</span>
-              }
-              @if (option.label === 'EARN') {
-                <span class="p-mr-2 state-chip state-buy">EARN</span>
-              }
-            </ng-template>
-          </p-select>
-        </ng-template>
-      </p-columnFilter>
+    <div class="toolbar-icons">
+      <input #fileInput type="file" accept=".csv" hidden (change)="fileChosen($event)" />
+      <button pButton pRipple type="button" size="small" icon="pi pi-upload" severity="secondary" [outlined]="true"
+        pTooltip="Import from CSV" tooltipPosition="bottom" aria-label="Import from CSV"
+        (click)="fileInput.click()"></button>
+      <button pButton pRipple type="button" size="small" icon="pi pi-download" severity="secondary" [outlined]="true"
+        pTooltip="Export to CSV" tooltipPosition="bottom" aria-label="Export to CSV"
+        (click)="download()"></button>
     </div>
   </ng-template>
+</p-toolbar>
+<p-table #dt1 [value]="visibleTransactions" styleClass="p-datatable-striped table-stack"
+  [(selection)]="selectedTransactions">
     <ng-template pTemplate="header">
       <tr>
         <th style="width: 3rem">

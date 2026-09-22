@@ -1,15 +1,5 @@
-<p-table [value]="investmentsLoading ? skeletonRows : investments"
+<p-table [value]="investmentsLoading ? skeletonRows : visibleInvestments"
   styleClass="p-datatable-striped table-stack eotm-table">
-  <ng-template pTemplate="caption">
-    <div class="filter-bar">
-      <p-columnFilter field="accountName" matchMode="equals" [showMenu]="false" class="filter-type">
-        <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-          <p-select [ngModel]="value" [options]="accountOptions" (onChange)="filter($any($event)?.value)"
-            [showClear]="true" placeholder="Any account" ariaLabel="Account"></p-select>
-        </ng-template>
-      </p-columnFilter>
-    </div>
-  </ng-template>
 
   <ng-template pTemplate="header">
     <tr>
@@ -41,7 +31,7 @@
             [name]="investment.name"></app-ticker-identity>
         </td>
         <td data-label="Account" class="cell-quiet">{{investment.accountName}}</td>
-        <td data-label="Quantity" class="cell-num">{{investment.quantity}}</td>
+        <td data-label="Quantity" class="cell-num">{{investment.quantity | number : '0.0-6'}}</td>
         <td data-label="Spent" class="cell-num">{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}</td>
         <td data-label="Worth" class="cell-num">
           @if (investment.liveValue != null) {

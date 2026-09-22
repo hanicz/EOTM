@@ -1,19 +1,5 @@
-<p-table #dt1 [value]="investments" styleClass="p-datatable-striped table-stack eotm-table"
+<p-table #dt1 [value]="visibleInvestments" styleClass="p-datatable-striped table-stack eotm-table"
   sortField="quantity" [sortOrder]="-1" [globalFilterFields]="['shortName', 'accountName']">
-  <ng-template pTemplate="caption">
-    <div class="filter-bar">
-      <input pInputText type="text"
-        (input)="dt1.filterGlobal($any($event.target)?.value, 'contains')"
-        [value]="$any(dt1.filters['global'])?.value ?? ''" placeholder="Search by Name or Account"
-        class="p-column-filter filter-input filter-input-wide">
-      <p-columnFilter field="accountName" matchMode="equals" [showMenu]="false" class="filter-type">
-        <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-          <p-select [ngModel]="value" [options]="accountOptions" (onChange)="filter($any($event)?.value)"
-            [showClear]="true" placeholder="Any account" ariaLabel="Account"></p-select>
-        </ng-template>
-      </p-columnFilter>
-    </div>
-  </ng-template>
 
   <ng-template pTemplate="header">
     <tr>
@@ -21,7 +7,7 @@
       <th pSortableColumn="accountName">Account <p-sortIcon field="accountName"></p-sortIcon></th>
       <th class="cell-num" pSortableColumn="amount">Total Spent <p-sortIcon field="amount"></p-sortIcon></th>
       <th class="cell-num" pSortableColumn="quantity">Position <p-sortIcon field="quantity"></p-sortIcon></th>
-      <th class="cell-num" pSortableColumn="amount">Profit <p-sortIcon field="amount"></p-sortIcon></th>
+      <th class="cell-num" pSortableColumn="profit">Profit <p-sortIcon field="profit"></p-sortIcon></th>
     </tr>
   </ng-template>
 
@@ -42,13 +28,13 @@
       </td>
       <td data-label="Position" class="cell-num">
         @if (investment.quantity > 0) {
-          {{investment.quantity | number: '0.0-4'}}
+          {{investment.quantity | number: '0.0-6'}}
         } @else {
           <span class="state-chip state-neutral">Closed</span>
         }
       </td>
       <td data-label="Profit" class="cell-num">
-        <app-delta [value]="investment.quantity == 0 ? -investment.amount : null"
+        <app-delta [value]="investment.profit"
           [currency]="investment.currencyId"></app-delta>
       </td>
     </tr>

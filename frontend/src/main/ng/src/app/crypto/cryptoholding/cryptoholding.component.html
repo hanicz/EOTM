@@ -32,7 +32,7 @@
 }
 
 @if (!transactionsLoading) {
-  <p-table [value]="transactions" styleClass="p-datatable-striped table-stack">
+  <p-table [value]="visibleTransactions" styleClass="p-datatable-striped table-stack">
     <ng-template pTemplate="header">
       <tr>
         <th>Symbol</th>

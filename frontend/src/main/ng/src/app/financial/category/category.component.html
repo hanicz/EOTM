@@ -6,16 +6,22 @@
 </p>
 <p-toolbar styleClass="table-toolbar">
   <ng-template pTemplate="left">
-    <button pButton pRipple label="New category" icon="pi pi-plus" (click)="openNew()"></button>
-    <button pButton pRipple icon="pi pi-trash" severity="danger" class="p-button-outlined"
-      pTooltip="Deleting a category unlinks it from its transactions and removes its rules"
-      [disabled]="!selectedCategories || !selectedCategories.length" (click)="deleteClicked()"></button>
+    <div class="toolbar-icons">
+      <button pButton pRipple type="button" size="small" icon="pi pi-plus"
+        pTooltip="New category" tooltipPosition="bottom" aria-label="New category"
+        (click)="openNew()"></button>
+      <span class="toolbar-divider" aria-hidden="true"></span>
+      <button pButton pRipple type="button" size="small" icon="pi pi-trash" severity="danger" [outlined]="true"
+        pTooltip="Delete the selected categories. This unlinks them from their transactions and removes their rules"
+        tooltipPosition="bottom" aria-label="Delete the selected categories"
+        [disabled]="!selectedCategories || !selectedCategories.length" (click)="deleteClicked()"></button>
+    </div>
   </ng-template>
   <ng-template pTemplate="right">
     @if (loaded && !categories.length) {
-      <button pButton pRipple label="Add starter set" icon="pi pi-star" severity="secondary"
-        class="p-button-outlined" pTooltip="Ten everyday categories with rules for the shops in your history"
-        (click)="addStarterSet()"></button>
+      <button pButton pRipple type="button" size="small" label="Add starter set" icon="pi pi-star" severity="secondary"
+        [outlined]="true" pTooltip="Ten everyday categories with rules for the shops in your history"
+        tooltipPosition="bottom" (click)="addStarterSet()"></button>
     }
   </ng-template>
 </p-toolbar>

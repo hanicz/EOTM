@@ -12,6 +12,10 @@ import { TableModule } from 'primeng/table';
 import { Toast } from 'primeng/toast';
 import { Tooltip } from 'primeng/tooltip';
 import {
+  ApexAnnotations, ApexAxisChartSeries, ApexChart, ApexDataLabels, ApexFill, ApexGrid, ApexLegend,
+  ApexMarkers, ApexStroke, ApexTooltip, ApexXAxis, ApexYAxis, ChartComponent
+} from 'ng-apexcharts';
+import {
   DegressioMode,
   PensionProjection,
   PensionProjectionInput,
@@ -20,42 +24,23 @@ import {
 } from '../../model/pension-projection';
 import { SalaryService } from '../../service/salary.service';
 import { DeltaComponent } from '../../util/delta.component';
+import { compactAmount, money } from '../../util/format';
 
-interface SeriesPoint {
-  x: number;
-  y: number;
-  value: number;
-}
-
-interface ChartSeries {
-  name: string;
-  color: string;
-  path: string;
-  labelY: number;
-  labelValue: number;
-}
-
-interface ChartColumn {
-  stopAge: number;
-  x: number;
-  serviceYears: number;
-  readings: { name: string; color: string; value: number; y: number }[];
-}
-
-interface AxisTick {
-  position: number;
-  label: string;
-}
-
-interface Chart {
-  series: ChartSeries[];
-  columns: ChartColumn[];
-  xTicks: AxisTick[];
-  yTicks: AxisTick[];
-  stopX: number | null;
-  firstAge: number;
-  lastAge: number;
-}
+export type PensionChartOptions = {
+  series: ApexAxisChartSeries;
+  chart: ApexChart;
+  xaxis: ApexXAxis;
+  yaxis: ApexYAxis;
+  legend: ApexLegend;
+  dataLabels: ApexDataLabels;
+  tooltip: ApexTooltip;
+  stroke: ApexStroke;
+  fill: ApexFill;
+  grid: ApexGrid;
+  markers: ApexMarkers;
+  annotations: ApexAnnotations;
+  colors: string[];
+};
 
 interface ExtraYearRow {
   fromAge: number;
@@ -65,11 +50,11 @@ interface ExtraYearRow {
   gain: number;
 }
 
-const CHART = { width: 820, height: 340, left: 78, right: 104, top: 16, bottom: 30 };
-
 const SERIES_COLORS = ['#a85f00', '#0f8a7a', '#4a7fd4', '#c0407a'];
 
-const LABEL_GAP = 13;
+const MARKER_COLOUR = '#b4b2a9';
+
+const CHART_HEIGHT = 560;
 
 const DEFAULT_CURRENT_AGE = 32;
 const DEFAULT_STOP_AGE = 50;
@@ -83,11 +68,9 @@ const DEFAULT_REAL_GROWTH = 2;
     templateUrl: './pension.component.html',
     styleUrls: ['./pension.component.css'],
     imports: [ButtonDirective, Ripple, Tooltip, TableModule, PrimeTemplate, InputNumber, Checkbox,
-        Select, Toast, Skeleton, FormsModule, DecimalPipe, DeltaComponent]
+        Select, Toast, Skeleton, FormsModule, DecimalPipe, DeltaComponent, ChartComponent]
 })
 export class SalaryPensionComponent {
-
-  readonly chartBox = CHART;
 
   currentAge: number = DEFAULT_CURRENT_AGE;
   stopWorkingAge: number = DEFAULT_STOP_AGE;
@@ -121,10 +104,13 @@ export class SalaryPensionComponent {
   ];
 
   projection: PensionProjection | null = null;
-  chart: Chart | null = null;
+  chart: Partial<PensionChartOptions> | null = null;
   salaryLoading: boolean = true;
   calculating: boolean = false;
-  hoveredStopAge: number | null = null;
+
+  mobileView: 'projection' | 'assumptions' = 'projection';
+  pathOpen: boolean = true;
+  assumptionsOpen: boolean = true;
 
   constructor(
     private salaryService: SalaryService,
@@ -168,7 +154,7 @@ export class SalaryPensionComponent {
       next: (data) => {
         this.projection = data;
         this.chart = this.buildChart(data);
-        this.hoveredStopAge = null;
+        this.mobileView = 'projection';
         this.calculating = false;
         this.cdr.markForCheck();
       },
@@ -196,6 +182,14 @@ export class SalaryPensionComponent {
     });
   }
 
+  showAssumptions(): void {
+    this.mobileView = 'assumptions';
+  }
+
+  showProjection(): void {
+    this.mobileView = 'projection';
+  }
+
   addStep(): void {
     const last = this.steps[this.steps.length - 1];
     const nextAge = Math.min(this.retirementAge, (last?.untilAge ?? this.currentAge) + 5);
@@ -210,31 +204,24 @@ export class SalaryPensionComponent {
     return SERIES_COLORS[index % SERIES_COLORS.length];
   }
 
-  onChartMove(event: MouseEvent): void {
-    if (!this.chart) {
-      return;
-    }
-    const bounds = (event.currentTarget as SVGSVGElement).getBoundingClientRect();
-    if (!bounds.width) {
-      return;
-    }
-    const svgX = ((event.clientX - bounds.left) / bounds.width) * CHART.width;
-    const plotWidth = CHART.width - CHART.left - CHART.right;
-    const span = Math.max(1, this.chart.lastAge - this.chart.firstAge);
-    const age = Math.round(this.chart.firstAge + ((svgX - CHART.left) / plotWidth) * span);
+  get headline(): string {
+    const projection = this.projection;
+    if (!projection) return '';
+    if (!projection.eligible) return 'No state pension on these assumptions';
 
-    this.hoveredStopAge = (age < this.chart.firstAge || age > this.chart.lastAge) ? null : age;
+    const monthly = projection.scenarios[0]?.monthlyPension ?? 0;
+    return money(monthly, projection.currency) + ' a month';
   }
 
-  setHoveredStopAge(age: number | null): void {
-    this.hoveredStopAge = age;
+  get yearsToRetirement(): number {
+    const projection = this.projection;
+    return projection ? Math.max(0, projection.retirementAge - projection.currentAge) : 0;
   }
 
-  get hoveredColumn(): ChartColumn | null {
-    if (this.hoveredStopAge == null) {
-      return null;
-    }
-    return this.chart?.columns.find(column => column.stopAge === this.hoveredStopAge) ?? null;
+  /** The share of final take-home the pension replaces is already a nought-to-a-hundred reading. */
+  get replacementPct(): number {
+    const rate = this.projection?.scenarios[0]?.replacementRatePct ?? 0;
+    return Math.max(0, Math.min(100, rate));
   }
 
   get extraYearRows(): ExtraYearRow[] {
@@ -300,6 +287,7 @@ export class SalaryPensionComponent {
         this.applySalaries(salaries ?? []);
         this.salaryLoading = false;
         this.cdr.markForCheck();
+        this.calculate();
       },
       error: () => {
         this.salaryLoading = false;
@@ -321,110 +309,62 @@ export class SalaryPensionComponent {
     }
   }
 
-  private buildChart(projection: PensionProjection): Chart | null {
+  /**
+   * One line per salary path against the age you stop working, so the curves can be read off each other.
+   * The vertical marker is the age currently set, which is the point the headline figures come from.
+   */
+  private buildChart(projection: PensionProjection): Partial<PensionChartOptions> | null {
     const scenarios = projection.scenarios ?? [];
-    const curve = scenarios[0]?.byStopAge ?? [];
-    if (scenarios.length === 0 || curve.length < 2) {
+    if (scenarios.length === 0 || (scenarios[0]?.byStopAge ?? []).length < 2) {
       return null;
     }
 
-    const plotWidth = CHART.width - CHART.left - CHART.right;
-    const plotHeight = CHART.height - CHART.top - CHART.bottom;
-    const firstAge = curve[0].stopAge;
-    const lastAge = curve[curve.length - 1].stopAge;
-    const span = Math.max(1, lastAge - firstAge);
-
-    const peak = Math.max(
-      ...scenarios.flatMap(scenario => scenario.byStopAge.map(point => point.monthlyPension)), 1);
-    const top = this.niceCeiling(peak);
-
-    const xFor = (age: number) => CHART.left + ((age - firstAge) / span) * plotWidth;
-    const yFor = (value: number) => CHART.top + plotHeight - (value / top) * plotHeight;
-
-    const series: ChartSeries[] = scenarios.map((scenario, index) => {
-      const points = scenario.byStopAge.map(point => ({
-        x: xFor(point.stopAge),
-        y: yFor(point.monthlyPension),
-        value: point.monthlyPension
-      }));
-      const last = points[points.length - 1];
-      return {
-        name: scenario.name,
-        color: this.scenarioColor(index),
-        path: this.toPath(points),
-        labelY: last.y,
-        labelValue: last.value
-      };
-    });
-
-    this.spreadLabels(series);
-
-    const columns: ChartColumn[] = curve.map((point, index) => ({
-      stopAge: point.stopAge,
-      x: xFor(point.stopAge),
-      serviceYears: point.serviceYears,
-      readings: scenarios.map((scenario, position) => ({
-        name: scenario.name,
-        color: this.scenarioColor(position),
-        value: scenario.byStopAge[index]?.monthlyPension ?? 0,
-        y: yFor(scenario.byStopAge[index]?.monthlyPension ?? 0)
-      }))
-    }));
-
     return {
-      series: series,
-      columns: columns,
-      xTicks: this.xTicks(firstAge, lastAge, xFor),
-      yTicks: this.yTicks(top, yFor),
-      stopX: (projection.stopWorkingAge >= firstAge && projection.stopWorkingAge <= lastAge)
-        ? xFor(projection.stopWorkingAge) : null,
-      firstAge: firstAge,
-      lastAge: lastAge
+      series: scenarios.map(scenario => ({
+        name: scenario.name,
+        data: scenario.byStopAge.map(point =>
+          [point.stopAge, point.monthlyPension] as [number, number])
+      })),
+      chart: {
+        type: 'line', height: CHART_HEIGHT, toolbar: { show: false }, zoom: { enabled: false },
+        animations: { enabled: false }, fontFamily: 'Poppins, sans-serif'
+      },
+      colors: scenarios.map((scenario, index) => this.scenarioColor(index)),
+      stroke: { width: 2.5, curve: 'straight' },
+      grid: { borderColor: '#ece9e0', strokeDashArray: 4, padding: { left: 4, right: 16, top: 16 } },
+      dataLabels: { enabled: false },
+      markers: { size: 0, hover: { size: 5 } },
+      annotations: { xaxis: [this.stopMarker(projection)] },
+      xaxis: {
+        type: 'numeric', tickAmount: 6, decimalsInFloat: 0,
+        title: { text: 'Age you stop working', style: { fontWeight: 500, color: '#8a887f' } },
+        labels: { formatter: (value: string) => Math.round(Number(value)).toString() },
+        tooltip: { enabled: false }
+      },
+      yaxis: { labels: { formatter: (value: number) => compactAmount(value) } },
+      legend: { position: 'bottom', markers: { strokeWidth: 0 } },
+      tooltip: {
+        shared: true,
+        x: { formatter: (value: number) => 'Stop at ' + Math.round(value) },
+        y: { formatter: (value: number) => money(value, projection.currency) }
+      }
     };
   }
 
-  private spreadLabels(series: ChartSeries[]): void {
-    const ordered = [...series].sort((left, right) => left.labelY - right.labelY);
-    for (let index = 1; index < ordered.length; index++) {
-      const minimum = ordered[index - 1].labelY + LABEL_GAP;
-      if (ordered[index].labelY < minimum) {
-        ordered[index].labelY = minimum;
+  private stopMarker(projection: PensionProjection): any {
+    return {
+      x: projection.stopWorkingAge,
+      strokeDashArray: 4,
+      borderColor: MARKER_COLOUR,
+      label: {
+        text: 'You stop',
+        orientation: 'horizontal',
+        position: 'top',
+        offsetY: -2,
+        borderColor: '#ece9e0',
+        style: { background: '#ffffff', color: '#5f5e5a', fontSize: '11px' }
       }
-    }
-  }
-
-  private toPath(points: SeriesPoint[]): string {
-    return points.map((point, index) =>
-      `${index === 0 ? 'M' : 'L'}${point.x.toFixed(2)},${point.y.toFixed(2)}`).join(' ');
-  }
-
-  private xTicks(firstAge: number, lastAge: number, xFor: (age: number) => number): AxisTick[] {
-    const step = Math.max(1, Math.round((lastAge - firstAge) / 6));
-    const ticks: AxisTick[] = [];
-    for (let age = firstAge; age <= lastAge; age += step) {
-      ticks.push({ position: xFor(age), label: `${age}` });
-    }
-    return ticks;
-  }
-
-  private yTicks(top: number, yFor: (value: number) => number): AxisTick[] {
-    const ticks: AxisTick[] = [];
-    for (let index = 0; index <= 4; index++) {
-      const value = (top / 4) * index;
-      ticks.push({ position: yFor(value), label: this.formatCompact(value) });
-    }
-    return ticks;
-  }
-
-  private niceCeiling(value: number): number {
-    const magnitude = Math.pow(10, Math.floor(Math.log10(value)));
-    const normalised = value / magnitude;
-    const rounded = normalised <= 1 ? 1 : normalised <= 2 ? 2 : normalised <= 5 ? 5 : 10;
-    return rounded * magnitude;
-  }
-
-  formatCompact(value: number): string {
-    return new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 }).format(value);
+    };
   }
 
   private saveBlob(blob: Blob): void {

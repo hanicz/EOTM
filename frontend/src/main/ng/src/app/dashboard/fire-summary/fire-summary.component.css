@@ -13,20 +13,6 @@
     gap: 10px;
 }
 
-.fire-bar {
-    height: 8px;
-    border-radius: 4px;
-    background: var(--eotm-cream);
-    overflow: hidden;
-}
-
-.fire-bar-fill {
-    height: 100%;
-    border-radius: 4px;
-    background: #7a8c5c;
-    transition: width 0.2s ease;
-}
-
 .fire-bar-legend {
     display: flex;
     align-items: baseline;

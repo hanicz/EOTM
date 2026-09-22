@@ -1,45 +1,69 @@
 <div class="shadow-5">
   <menu class="pl-0 mb-0"></menu>
   <p-panel>
-    <div class="page-summary">
-      <div class="summary-stat">Total Spent:
-        <b class="amount">{{totalSpent | currency : 'HUF' : 'symbol' : '0.0-2'}}</b>
+    <div class="total-row">
+      <div class="total-cell total-cell-lead">
+        <span class="total-icon"><i class="pi pi-chart-bar"></i></span>
+        <div class="total-body">
+          <div class="total-label">Total worth</div>
+          <div class="total-value">{{totalWorth | currency : 'HUF' : 'symbol' : '0.0-2'}}</div>
+          <div class="total-sub">
+            <span [class.delta-up]="diffy > 0" [class.delta-down]="diffy < 0">
+              {{percentage | number : '0.0-1'}}%
+            </span>
+            <span>{{diffy | currency : 'HUF' : 'symbol' : '0.0-2'}} all time</span>
+          </div>
+        </div>
       </div>
-      <div class="summary-stat">Total Worth:
-        <b class="amount">{{totalWorth | currency : 'HUF' : 'symbol' : '0.0-2'}}</b>
+      <div class="total-cell">
+        <span class="total-icon"><i class="pi pi-wallet"></i></span>
+        <div class="total-body">
+          <div class="total-label">Invested</div>
+          <div class="total-value">{{totalSpent | currency : 'HUF' : 'symbol' : '0.0-2'}}</div>
+        </div>
       </div>
-      <div class="summary-stat">Profit:
-        @if (diffy > 0) {
-          <span class="state-chip state-buy">{{diffy | currency : 'HUF' : 'symbol' : '0.0-2'}}</span>
-        }
-        @if (diffy < 0) {
-          <span class="state-chip state-sell">{{diffy | currency : 'HUF' : 'symbol' : '0.0-2'}}</span>
-        }
+      <div class="total-cell">
+        <span class="total-icon"><i class="pi pi-building-columns"></i></span>
+        <div class="total-body">
+          <div class="total-label">Total return</div>
+          <div class="total-value" [class.delta-up]="diffy > 0" [class.delta-down]="diffy < 0">
+            {{diffy | currency : 'HUF' : 'symbol' : '0.0-2'}}
+          </div>
+          <div class="total-sub">
+            <span [class.delta-up]="diffy > 0" [class.delta-down]="diffy < 0">
+              {{percentage | number : '0.0-1'}}%
+            </span>
+          </div>
+        </div>
       </div>
-      <div class="summary-stat">Percentage:
-        @if (diffy > 0) {
-          <span class="state-chip state-buy">{{(percentage | number : '0.0-1') + '%'}}</span>
-        }
-        @if (diffy < 0) {
-          <span class="state-chip state-sell">{{(percentage | number : '0.0-1') + '%'}}</span>
-        }
-      </div>
-      <div class="summary-actions">
+      <div class="total-actions">
         <button pButton pRipple icon="pi pi-refresh" class="p-button-rounded p-button-text"
           pTooltip="Refresh" (click)="refreshAll()"></button>
       </div>
     </div>
 <p-divider></p-divider>
-<p-tabs value="0">
-  <p-tablist>
-    <p-tab value="0">Holdings</p-tab>
-    <p-tab value="1">Transactions</p-tab>
-  </p-tablist>
+<p-tabs value="0" scrollable>
+  <div class="tab-head">
+    <p-tablist>
+      <p-tab value="0">Holdings</p-tab>
+      <p-tab value="1">Transactions</p-tab>
+    </p-tablist>
+    <div class="tab-head-filters">
+      <span class="tab-head-search">
+        <input pInputText type="text" [(ngModel)]="filter.search"
+          (ngModelChange)="onFilterChange()" placeholder="Search by currency">
+        @if (filter.search) {
+          <button type="button" class="tab-head-clear" (click)="clearSearch()"
+            aria-label="Clear search"><i class="pi pi-times"></i></button>
+        }
+      </span>
+    </div>
+  </div>
   <p-tabpanels>
     <p-tabpanel value="0">
       <div class="holdings-layout" [class.holdings-layout-split]="allocationItems.length > 0">
         <div class="holdings-main" #holdingsMain>
-          <app-forexholding (dataLoaded)="loadData($event)"></app-forexholding>
+          <app-forexholding [filter]="filter" (dataLoaded)="loadData($event)"></app-forexholding>
         </div>
         @if (allocationItems.length > 0) {
           <aside class="holdings-aside" [appAlignToTable]="holdingsMain">
@@ -50,7 +74,7 @@
       </div>
     </p-tabpanel>
     <p-tabpanel value="1">
-      <app-forextransaction></app-forextransaction>
+      <app-forextransaction [filter]="filter"></app-forextransaction>
     </p-tabpanel>
   </p-tabpanels>
 </p-tabs>

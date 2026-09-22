@@ -1,4 +1,9 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
+import { PortfolioFilter } from '../util/tablefilter';
+import { InputText } from 'primeng/inputtext';
+import { FormsModule } from '@angular/forms';
+import { Select } from 'primeng/select';
+import { AccountService } from '../service/account.service';
 import { Investment } from '../model/investment';
 import { MenuComponent } from '../menu/menu.component';
 import { Bind } from 'primeng/bind';
@@ -24,9 +29,30 @@ import { AccountTotals, calculateAccountTotals } from '../util/accounttotals';
 @Component({
     selector: 'app-stock',
     templateUrl: './stock.component.html',
-    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, HoldingComponent, PositionComponent, InvestmentComponent, DividendComponent, DecimalPipe, CurrencyPipe, NgClass, AllocationDonutComponent, AlignToTableDirective]
+    imports: [MenuComponent, Bind, Panel, Divider, Tabs, TabList, Ripple, Tab, TabPanels, TabPanel, ButtonDirective, Tooltip, HoldingComponent, PositionComponent, InvestmentComponent, DividendComponent, DecimalPipe, CurrencyPipe, NgClass, AllocationDonutComponent, AlignToTableDirective, InputText, FormsModule, Select]
 })
 export class StockComponent implements OnInit {
+  filter: PortfolioFilter = { search: '', account: null };
+  accountOptions: string[] = [];
+
+  /** The children re-read the filter through their input, so this replaces the object. */
+  /** The picker lists every account the user has, not just the ones holding something today. */
+  private loadAccounts(): void {
+    this.accountService.getAccounts().subscribe({
+      next: (accounts) => this.accountOptions =
+        accounts.map(account => account.accountName).filter(name => !!name).sort(),
+      error: () => this.accountOptions = []
+    });
+  }
+
+  onFilterChange(): void {
+    this.filter = { ...this.filter };
+  }
+
+  clearSearch(): void {
+    this.filter = { ...this.filter, search: '' };
+  }
+
 
   @ViewChild(HoldingComponent) holding!: HoldingComponent;
   @ViewChild(PositionComponent) position!: PositionComponent;
@@ -50,11 +76,12 @@ export class StockComponent implements OnInit {
   private rates: { [currency: string]: number } = { EUR: 1 };
   private forceRateRefresh: boolean = false;
 
-  constructor(private dashboardService: DashboardService, private userService: UserService) { }
+  constructor(private dashboardService: DashboardService, private userService: UserService, private accountService: AccountService) { }
 
   allocationItems: AllocationItem[] = [];
 
   ngOnInit(): void {
+    this.loadAccounts();
   }
 
   toggleAccounts(): void {

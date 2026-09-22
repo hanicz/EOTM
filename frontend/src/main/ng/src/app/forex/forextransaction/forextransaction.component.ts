@@ -1,4 +1,6 @@
-import { Component, inject, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Input } from '@angular/core';
+import { EMPTY_FILTER, PortfolioFilter, filterRows } from '../../util/tablefilter';
 import { CsvDropDirective } from '../../util/csv-drop.directive';
 import { ForexTransaction } from 'src/app/model/forextransaction';
 import { ForexService } from 'src/app/service/forex.service';
@@ -9,7 +11,7 @@ import { MessageService, PrimeTemplate } from 'primeng/api';
 import { Toast } from 'primeng/toast';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
-import { FileUpload } from 'primeng/fileupload';
+import { Tooltip } from 'primeng/tooltip';
 import { TableModule } from 'primeng/table';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
@@ -21,9 +23,21 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
     selector: 'app-forextransaction',
     hostDirectives: [CsvDropDirective],
     templateUrl: './forextransaction.component.html',
-    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, FileUpload, TableModule, InputText, Select, FormsModule, Dialog, CurrencyPipe, DatePipe, Toast]
+    imports: [Bind, Toolbar, PrimeTemplate, ButtonDirective, Ripple, Tooltip, TableModule, InputText, Select, FormsModule, Dialog, CurrencyPipe, DatePipe, Toast]
 })
 export class ForextransactionComponent {
+  visibleTransactions: ForexTransaction[] = [];
+  private activeFilter: PortfolioFilter = EMPTY_FILTER;
+
+  @Input() set filter(value: PortfolioFilter) {
+    this.activeFilter = value ?? EMPTY_FILTER;
+    this.applyFilter();
+  }
+
+  private applyFilter(): void {
+    this.visibleTransactions = filterRows(this.forexTransactions, this.activeFilter, ['fromCurrencyId', 'toCurrencyId']);
+  }
+
 
   forexTransactions: ForexTransaction[] = [];
   currencies: any[];
@@ -31,7 +45,7 @@ export class ForextransactionComponent {
   selectedForexTransactions: ForexTransaction[] = [];
   forexDialog: boolean = false;
   forexTransaction: ForexTransaction = {} as ForexTransaction;
-  @ViewChild('fileUpload') fileUpload: any;
+  @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
 
   constructor(private forexService: ForexService, globals: Globals, private cdr: ChangeDetectorRef, private messageService: MessageService) {
     inject(CsvDropDirective).csvDropped.subscribe(event => this.onUpload(event));
@@ -56,6 +70,7 @@ export class ForextransactionComponent {
     this.forexService.getTransactions().subscribe({
       next: (data) => {
         this.forexTransactions = data;
+        this.applyFilter();
         this.cdr.markForCheck();
       },
       error: (error) => {
@@ -122,16 +137,25 @@ export class ForextransactionComponent {
     }
   }
 
+  fileChosen(event: Event) {
+    const files = Array.from((event.target as HTMLInputElement).files ?? []);
+    if (files.length) this.onUpload({ files });
+  }
+
+  private clearFileInput() {
+    if (this.fileInput) this.fileInput.nativeElement.value = '';
+  }
+
   onUpload(event: any) {
     for (let file of event.files) {
       this.forexService.uploadCSV(file).subscribe({
         next: () => {
           this.fetchData();
-          this.fileUpload.clear();
+          this.clearFileInput();
           this.messageService.add({ severity: 'success', detail: 'Import finished.' });
         },
         error: (error) => {
-          this.fileUpload.clear();
+          this.clearFileInput();
           this.messageService.add({ severity: 'error', detail: error.error?.error ?? 'Import failed.' });
         }
       });

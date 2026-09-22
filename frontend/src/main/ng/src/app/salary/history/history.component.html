@@ -8,9 +8,15 @@
 </p>
 <p-toolbar styleClass="table-toolbar">
   <ng-template pTemplate="left">
-    <button pButton pRipple label="New salary" icon="pi pi-plus" (click)="openNew()"></button>
-    <button pButton pRipple icon="pi pi-trash" severity="danger" class="p-button-outlined"
-      [disabled]="!selectedSalaries || !selectedSalaries.length" (click)="deleteClicked()"></button>
+    <div class="toolbar-icons">
+      <button pButton pRipple type="button" size="small" icon="pi pi-plus"
+        pTooltip="New salary" tooltipPosition="bottom" aria-label="New salary"
+        (click)="openNew()"></button>
+      <span class="toolbar-divider" aria-hidden="true"></span>
+      <button pButton pRipple type="button" size="small" icon="pi pi-trash" severity="danger" [outlined]="true"
+        pTooltip="Delete the selected salaries" tooltipPosition="bottom" aria-label="Delete the selected salaries"
+        [disabled]="!selectedSalaries || !selectedSalaries.length" (click)="deleteClicked()"></button>
+    </div>
   </ng-template>
 </p-toolbar>
 

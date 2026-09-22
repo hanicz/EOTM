@@ -41,7 +41,7 @@ export class MenuComponent implements OnInit {
     { label: 'FIRE', icon: 'fa-solid fa-fire', routerLink: ['/fire'] },
     { label: 'Tax', icon: 'fa-solid fa-file-invoice-dollar', routerLink: ['/tax'] },
     { label: 'Alerts & Reports', icon: 'fa-solid fa-bell', routerLink: ['/alert'] },
-    { label: 'Lookup', icon: 'fas fa-search', routerLink: ['/search'] },
+    { label: 'Research', icon: 'fas fa-search', routerLink: ['/search'] },
     { label: 'News', icon: 'far fa-newspaper', routerLink: ['/news'] }
   ];
 

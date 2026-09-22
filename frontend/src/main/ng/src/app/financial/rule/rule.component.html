@@ -6,9 +6,15 @@
 </p>
 <p-toolbar styleClass="table-toolbar">
   <ng-template pTemplate="left">
-    <button pButton pRipple label="New rule" icon="pi pi-plus" (click)="openNew()"></button>
-    <button pButton pRipple icon="pi pi-trash" severity="danger" class="p-button-outlined"
-      [disabled]="!selectedRules || !selectedRules.length" (click)="deleteClicked()"></button>
+    <div class="toolbar-icons">
+      <button pButton pRipple type="button" size="small" icon="pi pi-plus"
+        pTooltip="New rule" tooltipPosition="bottom" aria-label="New rule"
+        (click)="openNew()"></button>
+      <span class="toolbar-divider" aria-hidden="true"></span>
+      <button pButton pRipple type="button" size="small" icon="pi pi-trash" severity="danger" [outlined]="true"
+        pTooltip="Delete the selected rules" tooltipPosition="bottom" aria-label="Delete the selected rules"
+        [disabled]="!selectedRules || !selectedRules.length" (click)="deleteClicked()"></button>
+    </div>
   </ng-template>
 </p-toolbar>
 

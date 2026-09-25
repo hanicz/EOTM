@@ -6,6 +6,7 @@ import eye.on.the.money.service.api.EODAPIService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,7 +34,7 @@ class DashboardServiceTest {
 
         DashboardRatesDTO result = this.dashboardService.getConversionRates(List.of("USD"));
 
-        assertEquals(1.08, result.getRates().get("USD"));
+        assertEquals(new BigDecimal("1.08"), result.getRates().get("USD"));
     }
 
     @Test
@@ -43,7 +44,7 @@ class DashboardServiceTest {
 
         DashboardRatesDTO result = this.dashboardService.getConversionRates(List.of("HUF"));
 
-        assertEquals(405.2, result.getRates().get("HUF"));
+        assertEquals(new BigDecimal("405.2"), result.getRates().get("HUF"));
     }
 
     @Test
@@ -53,8 +54,8 @@ class DashboardServiceTest {
 
         DashboardRatesDTO result = this.dashboardService.getConversionRates(List.of("USD", "HUF"));
 
-        assertEquals(1.08, result.getRates().get("USD"));
-        assertEquals(405.2, result.getRates().get("HUF"));
+        assertEquals(new BigDecimal("1.08"), result.getRates().get("USD"));
+        assertEquals(new BigDecimal("405.2"), result.getRates().get("HUF"));
     }
 
     @Test

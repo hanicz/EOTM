@@ -2,6 +2,7 @@ package eye.on.the.money.dto.out;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import eye.on.the.money.dto.CSVHelper;
+import eye.on.the.money.util.Numbers;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import lombok.*;
@@ -17,61 +18,61 @@ public class YearlyCashFlowDTO implements CSVHelper {
 
     private Integer year;
     private String currencyId;
-    private Double moneyIn;
-    private Double moneyOut;
+    private BigDecimal moneyIn;
+    private BigDecimal moneyOut;
     private Integer monthsCounted;
 
     public static YearlyCashFlowDTO empty(Integer year, String currencyId) {
         return YearlyCashFlowDTO.builder()
                 .year(year)
                 .currencyId(currencyId)
-                .moneyIn(0.0)
-                .moneyOut(0.0)
+                .moneyIn(BigDecimal.ZERO)
+                .moneyOut(BigDecimal.ZERO)
                 .monthsCounted(0)
                 .build();
     }
 
     public void add(MonthlyCashFlowDTO month) {
-        this.moneyIn = this.moneyIn + month.getMoneyIn();
-        this.moneyOut = this.moneyOut + month.getMoneyOut();
+        this.moneyIn = this.moneyIn.add(month.getMoneyIn());
+        this.moneyOut = this.moneyOut.add(month.getMoneyOut());
         this.monthsCounted = this.monthsCounted + 1;
     }
 
-    public Double getMoneyIn() {
+    public BigDecimal getMoneyIn() {
         return round(this.moneyIn);
     }
 
-    public Double getMoneyOut() {
+    public BigDecimal getMoneyOut() {
         return round(this.moneyOut);
     }
 
-    public Double getNet() {
-        return round(this.moneyIn + this.moneyOut);
+    public BigDecimal getNet() {
+        return round(this.moneyIn.add(this.moneyOut));
     }
 
-    public Double getSavedPercent() {
-        if (this.moneyIn == null || this.moneyIn == 0.0) {
+    public BigDecimal getSavedPercent() {
+        if (this.moneyIn == null || this.moneyIn.signum() == 0) {
             return null;
         }
-        return round(((this.moneyIn + this.moneyOut) / this.moneyIn) * 100.0);
+        return round(Numbers.divide(this.moneyIn.add(this.moneyOut), this.moneyIn).multiply(Numbers.HUNDRED));
     }
 
-    public Double getAverageMonthlyNet() {
+    public BigDecimal getAverageMonthlyNet() {
         if (this.monthsCounted == null || this.monthsCounted == 0) {
             return null;
         }
-        return round((this.moneyIn + this.moneyOut) / this.monthsCounted);
+        return round(Numbers.divide(this.moneyIn.add(this.moneyOut), BigDecimal.valueOf(this.monthsCounted)));
     }
 
-    public Double getAverageMonthlySpending() {
+    public BigDecimal getAverageMonthlySpending() {
         if (this.monthsCounted == null || this.monthsCounted == 0) {
             return null;
         }
-        return round(this.moneyOut / this.monthsCounted);
+        return round(Numbers.divide(this.moneyOut, BigDecimal.valueOf(this.monthsCounted)));
     }
 
-    private static Double round(Double value) {
-        return value == null ? null : BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).doubleValue();
+    private static BigDecimal round(BigDecimal value) {
+        return value == null ? null : value.setScale(2, RoundingMode.HALF_UP);
     }
 
     @Override

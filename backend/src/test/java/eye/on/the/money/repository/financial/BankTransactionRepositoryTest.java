@@ -91,7 +91,7 @@ class BankTransactionRepositoryTest {
                 .bookingDate(bookingDate)
                 .type("Utalas")
                 .memo("memo")
-                .amount(amount)
+                .amount(BigDecimal.valueOf(amount))
                 .excluded(excluded)
                 .currency(currency)
                 .user(this.user)
@@ -114,14 +114,14 @@ class BankTransactionRepositoryTest {
         assertEquals(2025, december.getYear());
         assertEquals(12, december.getMonth());
         assertEquals("HUF", december.getCurrencyId());
-        assertEquals(850000.0, december.getMoneyIn());
-        assertEquals(-1275.0, december.getMoneyOut());
-        assertEquals(848725.0, december.getNet());
+        assertDecimal(850000.0, december.getMoneyIn());
+        assertDecimal(-1275.0, december.getMoneyOut());
+        assertDecimal(848725.0, december.getNet());
 
         MonthlyCashFlowDTO november = result.get(1);
         assertEquals(11, november.getMonth());
-        assertEquals(0.0, november.getMoneyIn());
-        assertEquals(-500.0, november.getMoneyOut());
+        assertDecimal(0.0, november.getMoneyIn());
+        assertDecimal(-500.0, november.getMoneyOut());
     }
 
     @Test
@@ -131,8 +131,8 @@ class BankTransactionRepositoryTest {
 
         MonthlyCashFlowDTO december = this.bankTransactionRepository.findMonthlyCashFlow(this.user.getId()).getFirst();
 
-        assertEquals(600000.0, december.getNet());
-        assertEquals(60.0, december.getSavedPercent());
+        assertDecimal(600000.0, december.getNet());
+        assertDecimal(60.0, december.getSavedPercent());
     }
 
     @Test
@@ -142,7 +142,7 @@ class BankTransactionRepositoryTest {
 
         MonthlyCashFlowDTO december = this.bankTransactionRepository.findMonthlyCashFlow(this.user.getId()).getFirst();
 
-        assertEquals(-50.0, december.getSavedPercent());
+        assertDecimal(-50.0, december.getSavedPercent());
     }
 
     @Test
@@ -151,7 +151,7 @@ class BankTransactionRepositoryTest {
 
         MonthlyCashFlowDTO december = this.bankTransactionRepository.findMonthlyCashFlow(this.user.getId()).getFirst();
 
-        assertEquals(0.0, december.getMoneyIn());
+        assertDecimal(0.0, december.getMoneyIn());
         assertNull(december.getSavedPercent());
     }
 
@@ -164,9 +164,9 @@ class BankTransactionRepositoryTest {
 
         assertEquals(2, result.size());
         assertEquals("EUR", result.getFirst().getCurrencyId());
-        assertEquals(100.0, result.getFirst().getMoneyIn());
+        assertDecimal(100.0, result.getFirst().getMoneyIn());
         assertEquals("HUF", result.get(1).getCurrencyId());
-        assertEquals(850000.0, result.get(1).getMoneyIn());
+        assertDecimal(850000.0, result.get(1).getMoneyIn());
     }
 
     @Test
@@ -177,8 +177,8 @@ class BankTransactionRepositoryTest {
         List<MonthlyCashFlowDTO> result = this.bankTransactionRepository.findMonthlyCashFlow(this.user.getId());
 
         assertEquals(1, result.size());
-        assertEquals(850000.0, result.getFirst().getMoneyIn());
-        assertEquals(0.0, result.getFirst().getMoneyOut());
+        assertDecimal(850000.0, result.getFirst().getMoneyIn());
+        assertDecimal(0.0, result.getFirst().getMoneyOut());
     }
 
     @Test
@@ -195,7 +195,7 @@ class BankTransactionRepositoryTest {
                 .type(type)
                 .partnerName(partnerName)
                 .memo("memo")
-                .amount(amount)
+                .amount(BigDecimal.valueOf(amount))
                 .excluded(false)
                 .currency(this.huf)
                 .user(this.user)
@@ -214,10 +214,10 @@ class BankTransactionRepositoryTest {
 
         assertEquals(2, result.size());
         assertEquals("MUNKAADO ZRT", result.getFirst().getSource());
-        assertEquals(1000000.0, result.getFirst().getAmount());
+        assertDecimal(1000000.0, result.getFirst().getAmount());
         assertEquals(2L, result.getFirst().getTransactionCount());
         assertEquals("MASIK KFT", result.get(1).getSource());
-        assertEquals(30000.0, result.get(1).getAmount());
+        assertDecimal(30000.0, result.get(1).getAmount());
         assertEquals(1L, result.get(1).getTransactionCount());
     }
 
@@ -242,7 +242,7 @@ class BankTransactionRepositoryTest {
         List<MonthlyIncomeDTO> result = this.bankTransactionRepository.findMonthlyIncome(this.user.getId());
 
         assertEquals(1, result.size());
-        assertEquals(850000.0, result.getFirst().getAmount());
+        assertDecimal(850000.0, result.getFirst().getAmount());
     }
 
     @Test
@@ -259,7 +259,7 @@ class BankTransactionRepositoryTest {
         assertEquals(12, result.get(1).getMonth());
         assertEquals("HUF", result.get(1).getCurrencyId());
         assertEquals(11, result.get(2).getMonth());
-        assertEquals(800000.0, result.get(2).getAmount());
+        assertDecimal(800000.0, result.get(2).getAmount());
     }
 
     @Test
@@ -331,5 +331,9 @@ class BankTransactionRepositoryTest {
                 .findByUserIdAndIdIn(this.user.getId(), List.of(transaction.getId())).size());
         assertTrue(this.bankTransactionRepository
                 .findByUserIdAndIdIn(-1L, List.of(transaction.getId())).isEmpty());
+    }
+
+    private static void assertDecimal(double expected, BigDecimal actual) {
+        assertEquals(0, BigDecimal.valueOf(expected).compareTo(actual), () -> "expected " + expected + " but was " + actual);
     }
 }

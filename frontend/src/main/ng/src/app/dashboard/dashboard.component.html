@@ -89,7 +89,7 @@
 
           <div class="detail-panel detail-panel-clickable performance-panel" (click)="navigateTo('/performance')">
             <div class="detail-title">Performance</div>
-            <app-performance-summary></app-performance-summary>
+            <app-performance-summary [refresh]="refreshHistory"></app-performance-summary>
           </div>
 
           <div class="detail-panel allocation-panel">

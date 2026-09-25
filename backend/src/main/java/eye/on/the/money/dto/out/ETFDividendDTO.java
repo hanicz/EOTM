@@ -10,6 +10,7 @@ import eye.on.the.money.util.Generated;
 import lombok.*;
 import org.apache.commons.csv.CSVRecord;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -23,7 +24,7 @@ import java.time.format.DateTimeFormatter;
 @Generated
 public class ETFDividendDTO implements CSVHelper {
     private Long id;
-    private Double amount;
+    private BigDecimal amount;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate dividendDate;
@@ -41,7 +42,7 @@ public class ETFDividendDTO implements CSVHelper {
     @Override
     @JsonIgnore
     public Object[] getCSVRecord() {
-        return new Object[]{this.getId(), this.getAmount(),
+        return new Object[]{this.getId(), CSVHelper.plainNumber(this.getAmount()),
                 this.getDividendDate(), this.getShortName(), this.getExchange(),
                 this.getCurrencyId()};
     }
@@ -50,7 +51,7 @@ public class ETFDividendDTO implements CSVHelper {
         return ETFDividendDTO.builder()
                 .id(csvRecord.get("Dividend Id").isBlank() ? null : Long.parseLong(csvRecord.get("Dividend Id")))
                 .dividendDate(LocalDate.parse(csvRecord.get("Dividend Date"), formatter))
-                .amount(Double.parseDouble(csvRecord.get("Amount")))
+                .amount(new BigDecimal(csvRecord.get("Amount")))
                 .currencyId(csvRecord.get("Currency"))
                 .shortName(csvRecord.get("Short Name"))
                 .exchange(csvRecord.get("Exchange"))

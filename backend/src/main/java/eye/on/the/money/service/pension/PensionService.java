@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.NoSuchElementException;
 
 @Service
@@ -27,7 +28,7 @@ public class PensionService {
         return this.pensionRepository.findByUserId(userId)
                 .map(pension -> this.toDTO(pension.getTotalContribution(), pension.getCurrentValue(),
                         this.currencyIdOf(pension)))
-                .orElseGet(() -> this.toDTO(0.0, 0.0, DEFAULT_CURRENCY));
+                .orElseGet(() -> this.toDTO(BigDecimal.ZERO, BigDecimal.ZERO, DEFAULT_CURRENCY));
     }
 
     @Transactional
@@ -54,7 +55,7 @@ public class PensionService {
         return (pension.getCurrency() == null) ? DEFAULT_CURRENCY : pension.getCurrency().getId();
     }
 
-    private PensionDTO toDTO(Double totalContribution, Double currentValue, String currency) {
+    private PensionDTO toDTO(BigDecimal totalContribution, BigDecimal currentValue, String currency) {
         return PensionDTO.builder()
                 .totalContribution(totalContribution)
                 .currentValue(currentValue)

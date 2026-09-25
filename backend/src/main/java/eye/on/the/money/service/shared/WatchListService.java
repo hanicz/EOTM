@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import eye.on.the.money.util.LiveQuote;
+import eye.on.the.money.util.Numbers;
 import eye.on.the.money.util.Ticker;
 
 import java.util.List;
@@ -62,7 +63,7 @@ public class WatchListService {
         JsonNode root = this.cryptoAPIService.getLiveValueForCoins(currency, ids);
 
         cryptoList.forEach(cryptoWatchDTO -> {
-            cryptoWatchDTO.setLiveValue(root.path(cryptoWatchDTO.getCoinId()).get(currency.toLowerCase()).doubleValue());
+            cryptoWatchDTO.setLiveValue(root.path(cryptoWatchDTO.getCoinId()).get(currency.toLowerCase()).decimalValue());
             cryptoWatchDTO.setChange(root.path(cryptoWatchDTO.getCoinId()).get(currency.toLowerCase() + "_24h_change").doubleValue());
         });
 
@@ -91,7 +92,7 @@ public class WatchListService {
                 stockWatchDTO.get().setLiveValue(price.value());
                 stockWatchDTO.get().setStalePrice(price.stale());
             });
-            stockWatchDTO.get().setChange(LiveQuote.numericOrZero(stock, "change"));
+            stockWatchDTO.get().setChange(Numbers.orZero(LiveQuote.decimal(stock, "change")));
             stockWatchDTO.get().setPChange(LiveQuote.numericOrZero(stock, "change_p"));
         }
 
@@ -114,7 +115,7 @@ public class WatchListService {
                 forexWatchDTO.get().setLiveValue(price.value());
                 forexWatchDTO.get().setStalePrice(price.stale());
             });
-            forexWatchDTO.get().setChange(LiveQuote.numericOrZero(forex, "change") * -1);
+            forexWatchDTO.get().setChange(Numbers.orZero(LiveQuote.decimal(forex, "change")).negate());
             forexWatchDTO.get().setPChange(LiveQuote.numericOrZero(forex, "change_p") * -1);
         }
 

@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @Builder
@@ -17,7 +19,7 @@ public class CashDTO {
 
     @NotNull
     @PositiveOrZero
-    private Double amount;
+    private BigDecimal amount;
 
     private String currency;
 }

@@ -8,6 +8,7 @@ import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
@@ -46,8 +47,8 @@ public class BankTransaction extends AuditedEntity {
     private String partnerAccount;
     private String partnerName;
 
-    @Column(name = "amount", nullable = false)
-    private Double amount;
+    @Column(name = "amount", nullable = false, precision = 19, scale = 4)
+    private BigDecimal amount;
 
     @Column(name = "excluded", nullable = false)
     private boolean excluded;

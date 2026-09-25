@@ -12,6 +12,7 @@ import eye.on.the.money.util.Numbers;
 import lombok.*;
 import org.apache.commons.csv.CSVRecord;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -54,7 +55,7 @@ public class BankTransactionDTO implements CSVHelper {
     private String accountName;
     private String partnerAccount;
     private String partnerName;
-    private Double amount;
+    private BigDecimal amount;
     private String currencyId;
     private String memo;
     private boolean excluded;
@@ -75,7 +76,7 @@ public class BankTransactionDTO implements CSVHelper {
     public Object[] getCSVRecord() {
         return new Object[]{this.getId(), this.getBookingDate(), this.getBankTransactionId(), this.getType(),
                 this.getAccountNumber(), this.getAccountName(), this.getPartnerAccount(), this.getPartnerName(),
-                this.getAmount(), this.getCurrencyId(), this.getMemo(), this.isExcluded(), this.isTaxable(),
+                CSVHelper.plainNumber(this.getAmount()), this.getCurrencyId(), this.getMemo(), this.isExcluded(), this.isTaxable(),
                 this.getCategoryName()};
     }
 

@@ -4,6 +4,7 @@ import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -37,7 +38,8 @@ public class SecurityRate {
     @Column(name = "payment_date", nullable = false)
     private LocalDate paymentDate;
 
-    private Double rate;
+    @Column(precision = 19, scale = 8)
+    private BigDecimal rate;
 
     @Column(nullable = false)
     private Boolean zeroCoupon;

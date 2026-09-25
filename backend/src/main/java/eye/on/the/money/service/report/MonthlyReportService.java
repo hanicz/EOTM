@@ -76,35 +76,35 @@ public class MonthlyReportService {
     }
 
     private List<MonthlyReportDTO.AmountRow> dividendTotals(List<DividendDTO> stock, List<ETFDividendDTO> etf) {
-        Map<String, Double> totals = new TreeMap<>();
+        Map<String, BigDecimal> totals = new TreeMap<>();
         this.accumulate(totals, stock, DividendDTO::getCurrencyId, DividendDTO::getAmount);
         this.accumulate(totals, etf, ETFDividendDTO::getCurrencyId, ETFDividendDTO::getAmount);
         return this.rows(totals);
     }
 
     private List<MonthlyReportDTO.AmountRow> interestTotals(List<InterestDTO> interest) {
-        Map<String, Double> totals = new TreeMap<>();
+        Map<String, BigDecimal> totals = new TreeMap<>();
         this.accumulate(totals, interest, InterestDTO::getCurrencyId, InterestDTO::getAmount);
         return this.rows(totals);
     }
 
-    private <T> void accumulate(Map<String, Double> totals, List<T> rows,
-                                Function<T, String> currency, Function<T, Double> amount) {
+    private <T> void accumulate(Map<String, BigDecimal> totals, List<T> rows,
+                                Function<T, String> currency, Function<T, BigDecimal> amount) {
         for (T row : rows) {
             String key = currency.apply(row);
-            Double value = amount.apply(row);
+            BigDecimal value = amount.apply(row);
             if (key == null || value == null) continue;
-            totals.merge(key.toUpperCase(), value, Double::sum);
+            totals.merge(key.toUpperCase(), value, BigDecimal::add);
         }
     }
 
-    private List<MonthlyReportDTO.AmountRow> rows(Map<String, Double> totals) {
+    private List<MonthlyReportDTO.AmountRow> rows(Map<String, BigDecimal> totals) {
         return totals.entrySet().stream()
                 .map(entry -> new MonthlyReportDTO.AmountRow(entry.getKey(), this.scaled(entry.getValue())))
                 .toList();
     }
 
-    private Double scaled(Double value) {
-        return BigDecimal.valueOf(value).setScale(SCALE, RoundingMode.HALF_UP).doubleValue();
+    private BigDecimal scaled(BigDecimal value) {
+        return value.setScale(SCALE, RoundingMode.HALF_UP);
     }
 }

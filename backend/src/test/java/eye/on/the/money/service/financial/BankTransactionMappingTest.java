@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,7 +30,7 @@ class BankTransactionMappingTest {
                 .accountName("ACCOUNT HOLDER")
                 .partnerAccount("120010000000000000000000")
                 .partnerName("PARTNER KFT")
-                .amount(-275.0)
+                .amount(new BigDecimal("-275"))
                 .memo("Ref.: ABCDE123456AB1CDEF")
                 .currency(new Currency("HUF", "forint"))
                 .user(User.builder().id(1L).email("test@email.com").build())
@@ -45,7 +46,7 @@ class BankTransactionMappingTest {
         assertEquals("ACCOUNT HOLDER", dto.getAccountName());
         assertEquals("120010000000000000000000", dto.getPartnerAccount());
         assertEquals("PARTNER KFT", dto.getPartnerName());
-        assertEquals(-275.0, dto.getAmount());
+        assertEquals(new BigDecimal("-275"), dto.getAmount());
         assertEquals("Ref.: ABCDE123456AB1CDEF", dto.getMemo());
         assertEquals("HUF", dto.getCurrencyId());
     }

@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -26,13 +27,13 @@ class ETFInvestmentDTOTest {
     public void mergeInvestments() {
         ETFInvestmentDTO eiDTO1 = this.getBaseDTO();
         ETFInvestmentDTO eiDTO2 = ETFInvestmentDTO.builder()
-                .amount(15.0)
-                .quantity(667.0)
+                .amount(new BigDecimal("15"))
+                .quantity(new BigDecimal("667"))
                 .id(2L)
                 .buySell("B")
-                .liveValue(55.4)
+                .liveValue(new BigDecimal("55.4"))
                 .shortName("AMD")
-                .valueDiff(77.8)
+                .valueDiff(new BigDecimal("77.8"))
                 .exchange("NASDAQ")
                 .build();
         ETFInvestmentDTO baseDTO = this.getBaseDTO();
@@ -40,8 +41,8 @@ class ETFInvestmentDTOTest {
         eiDTO1.merge(eiDTO2);
 
         Assertions.assertAll("Assert all changing values",
-                () -> assertEquals(eiDTO2.getAmount() + baseDTO.getAmount(), eiDTO1.getAmount()),
-                () -> assertEquals(eiDTO2.getQuantity() + baseDTO.getQuantity(), eiDTO1.getQuantity()),
+                () -> assertDecimal(eiDTO2.getAmount().add(baseDTO.getAmount()), eiDTO1.getAmount()),
+                () -> assertDecimal(eiDTO2.getQuantity().add(baseDTO.getQuantity()), eiDTO1.getQuantity()),
                 () -> assertEquals("B", eiDTO1.getBuySell()));
     }
 
@@ -50,13 +51,13 @@ class ETFInvestmentDTOTest {
         ETFInvestmentDTO eiDTO1 = this.getBaseDTO();
         eiDTO1.setBuySell("S");
         ETFInvestmentDTO eiDTO2 = ETFInvestmentDTO.builder()
-                .amount(10.0)
-                .quantity(6.0)
+                .amount(new BigDecimal("10"))
+                .quantity(new BigDecimal("6"))
                 .id(2L)
                 .buySell("B")
-                .liveValue(22.7)
+                .liveValue(new BigDecimal("22.7"))
                 .shortName("AMD")
-                .valueDiff(55.3)
+                .valueDiff(new BigDecimal("55.3"))
                 .exchange("NASDAQ")
                 .build();
         ETFInvestmentDTO baseDTO = this.getBaseDTO();
@@ -64,8 +65,8 @@ class ETFInvestmentDTOTest {
         eiDTO1.merge(eiDTO2);
 
         Assertions.assertAll("Assert all changing values",
-                () -> assertEquals(eiDTO2.getAmount() + baseDTO.getAmount(), eiDTO1.getAmount()),
-                () -> assertEquals(eiDTO2.getQuantity() + baseDTO.getQuantity(), eiDTO1.getQuantity()),
+                () -> assertDecimal(eiDTO2.getAmount().add(baseDTO.getAmount()), eiDTO1.getAmount()),
+                () -> assertDecimal(eiDTO2.getQuantity().add(baseDTO.getQuantity()), eiDTO1.getQuantity()),
                 () -> assertEquals("B", eiDTO1.getBuySell()));
     }
 
@@ -73,21 +74,21 @@ class ETFInvestmentDTOTest {
     public void mergeInvestmentsDifferentExchange() {
         ETFInvestmentDTO eiDTO1 = this.getBaseDTO();
         ETFInvestmentDTO eiDTO2 = ETFInvestmentDTO.builder()
-                .amount(15.0)
-                .quantity(667.0)
+                .amount(new BigDecimal("15"))
+                .quantity(new BigDecimal("667"))
                 .id(2L)
                 .buySell("B")
-                .liveValue(55.4)
+                .liveValue(new BigDecimal("55.4"))
                 .shortName("AMD")
-                .valueDiff(77.8)
+                .valueDiff(new BigDecimal("77.8"))
                 .exchange("XETRA")
                 .build();
 
         eiDTO1.merge(eiDTO2);
 
         Assertions.assertAll("Assert nothing merged",
-                () -> assertEquals(15.0, eiDTO1.getAmount()),
-                () -> assertEquals(667.0, eiDTO1.getQuantity()),
+                () -> assertDecimal("15", eiDTO1.getAmount()),
+                () -> assertDecimal("667", eiDTO1.getQuantity()),
                 () -> assertEquals("NASDAQ", eiDTO1.getExchange()));
     }
 
@@ -95,54 +96,54 @@ class ETFInvestmentDTOTest {
     public void mergeInvestmentsDifferentShortName() {
         ETFInvestmentDTO eiDTO1 = this.getBaseDTO();
         ETFInvestmentDTO eiDTO2 = ETFInvestmentDTO.builder()
-                .amount(15.0)
-                .quantity(667.0)
+                .amount(new BigDecimal("15"))
+                .quantity(new BigDecimal("667"))
                 .id(2L)
                 .buySell("B")
-                .liveValue(55.4)
+                .liveValue(new BigDecimal("55.4"))
                 .shortName("CRSR")
-                .valueDiff(77.8)
+                .valueDiff(new BigDecimal("77.8"))
                 .exchange("NASDAQ")
                 .build();
 
         eiDTO1.merge(eiDTO2);
 
         Assertions.assertAll("Assert all changing values",
-                () -> assertEquals(15.0, eiDTO1.getAmount()),
-                () -> assertEquals(667.0, eiDTO1.getQuantity()),
-                () -> assertEquals(55.4, eiDTO1.getLiveValue()),
-                () -> assertEquals(77.8, eiDTO1.getValueDiff()),
+                () -> assertDecimal("15", eiDTO1.getAmount()),
+                () -> assertDecimal("667", eiDTO1.getQuantity()),
+                () -> assertDecimal("55.4", eiDTO1.getLiveValue()),
+                () -> assertDecimal("77.8", eiDTO1.getValueDiff()),
                 () -> assertEquals("B", eiDTO1.getBuySell()));
     }
 
     @Test
     public void negateAmountAndQuantity() {
-        ETFInvestmentDTO eiDTO = ETFInvestmentDTO.builder().amount(15.0).quantity(667.0).build();
+        ETFInvestmentDTO eiDTO = ETFInvestmentDTO.builder().amount(new BigDecimal("15")).quantity(new BigDecimal("667")).build();
         eiDTO.negateAmountAndQuantity();
 
         Assertions.assertAll("Assert all negated values",
-                () -> assertEquals(-15.0, eiDTO.getAmount()),
-                () -> assertEquals(-667.0, eiDTO.getQuantity()));
+                () -> assertDecimal("-15", eiDTO.getAmount()),
+                () -> assertDecimal("-667", eiDTO.getQuantity()));
     }
 
     @Test
     public void negateAmountAndZero() {
-        ETFInvestmentDTO eiDTO = ETFInvestmentDTO.builder().amount(0.0).quantity(0.0).build();
+        ETFInvestmentDTO eiDTO = ETFInvestmentDTO.builder().amount(BigDecimal.ZERO).quantity(BigDecimal.ZERO).build();
         eiDTO.negateAmountAndQuantity();
 
         Assertions.assertAll("Assert all negated values",
-                () -> assertEquals(-0.0, eiDTO.getAmount()),
-                () -> assertEquals(-0.0, eiDTO.getQuantity()));
+                () -> assertDecimal("0", eiDTO.getAmount()),
+                () -> assertDecimal("0", eiDTO.getQuantity()));
     }
 
     @Test
     public void negateAmountAndMinus() {
-        ETFInvestmentDTO eiDTO = ETFInvestmentDTO.builder().amount(-78.1).quantity(-6123.0).build();
+        ETFInvestmentDTO eiDTO = ETFInvestmentDTO.builder().amount(new BigDecimal("-78.1")).quantity(new BigDecimal("-6123")).build();
         eiDTO.negateAmountAndQuantity();
 
         Assertions.assertAll("Assert all negated values",
-                () -> assertEquals(78.1, eiDTO.getAmount()),
-                () -> assertEquals(6123.0, eiDTO.getQuantity()));
+                () -> assertDecimal("78.1", eiDTO.getAmount()),
+                () -> assertDecimal("6123", eiDTO.getQuantity()));
     }
 
     @Test
@@ -175,9 +176,9 @@ class ETFInvestmentDTOTest {
                 () -> assertEquals(ld, eiDTO.getCSVRecord()[3]),
                 () -> assertEquals("AMD", eiDTO.getCSVRecord()[4]),
                 () -> assertEquals("NASDAQ", eiDTO.getCSVRecord()[5]),
-                () -> assertEquals(15.0, eiDTO.getCSVRecord()[6]),
+                () -> assertEquals("15", eiDTO.getCSVRecord()[6]),
                 () -> assertEquals("USD", eiDTO.getCSVRecord()[7]),
-                () -> assertEquals(1.2, eiDTO.getCSVRecord()[8])
+                () -> assertEquals("1.2", eiDTO.getCSVRecord()[8])
 
         );
     }
@@ -198,35 +199,35 @@ class ETFInvestmentDTOTest {
 
         Assertions.assertAll("Assert all values",
                 () -> assertEquals(1L, eiDTO.getId()),
-                () -> assertEquals(667.0, eiDTO.getQuantity()),
+                () -> assertDecimal("667", eiDTO.getQuantity()),
                 () -> assertEquals("B", eiDTO.getBuySell()),
                 () -> assertEquals(LocalDate.parse("2020-01-01"), eiDTO.getTransactionDate()),
                 () -> assertEquals("AMD", eiDTO.getShortName()),
                 () -> assertEquals("NASDAQ", eiDTO.getExchange()),
-                () -> assertEquals(15.0, eiDTO.getAmount()),
+                () -> assertDecimal("15", eiDTO.getAmount()),
                 () -> assertEquals("USD", eiDTO.getCurrencyId()),
-                () -> assertEquals(1.2, eiDTO.getFee())
+                () -> assertDecimal("1.2", eiDTO.getFee())
         );
     }
 
     @Test
     public void fractionalSellClosesTheLot() {
-        ETFInvestmentDTO lot = this.fractional("B", 0.1, 10.0);
-        lot.merge(this.fractional("B", 0.2, 20.0));
-        ETFInvestmentDTO sell = this.fractional("S", 0.3, 35.0);
+        ETFInvestmentDTO lot = this.fractional("B", "0.1", "10");
+        lot.merge(this.fractional("B", "0.2", "20"));
+        ETFInvestmentDTO sell = this.fractional("S", "0.3", "35");
         sell.negateAmountAndQuantity();
 
         lot.merge(sell);
 
         Assertions.assertAll("Assert the lot is closed",
-                () -> assertEquals(0.0, lot.getQuantity()),
+                () -> assertDecimal("0", lot.getQuantity()),
                 () -> assertTrue(lot.isClosed()));
     }
 
-    private ETFInvestmentDTO fractional(String buySell, double quantity, double amount) {
+    private ETFInvestmentDTO fractional(String buySell, String quantity, String amount) {
         return ETFInvestmentDTO.builder()
-                .quantity(quantity)
-                .amount(amount)
+                .quantity(new BigDecimal(quantity))
+                .amount(new BigDecimal(amount))
                 .buySell(buySell)
                 .shortName("VWCE")
                 .exchange("XETRA")
@@ -236,16 +237,24 @@ class ETFInvestmentDTOTest {
 
     private ETFInvestmentDTO getBaseDTO() {
         return ETFInvestmentDTO.builder()
-                .amount(15.0)
-                .quantity(667.0)
+                .amount(new BigDecimal("15"))
+                .quantity(new BigDecimal("667"))
                 .id(1L)
                 .buySell("B")
-                .liveValue(55.4)
+                .liveValue(new BigDecimal("55.4"))
                 .shortName("AMD")
                 .currencyId("USD")
-                .valueDiff(77.8)
+                .valueDiff(new BigDecimal("77.8"))
                 .exchange("NASDAQ")
-                .fee(1.2)
+                .fee(new BigDecimal("1.2"))
                 .build();
+    }
+
+    private static void assertDecimal(String expected, BigDecimal actual) {
+        assertDecimal(new BigDecimal(expected), actual);
+    }
+
+    private static void assertDecimal(BigDecimal expected, BigDecimal actual) {
+        assertEquals(0, expected.compareTo(actual), () -> "expected " + expected + " but was " + actual);
     }
 }

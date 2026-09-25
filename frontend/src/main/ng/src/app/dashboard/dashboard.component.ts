@@ -48,6 +48,7 @@ const ASSET_CLASS_ROUTES: { [assetClass: string]: string } = {
 export class DashboardComponent implements OnInit {
 
   loading: boolean = true;
+  refreshHistory: boolean = false;
 
   selectedCurrency: string = DEFAULT_CURRENCY;
 
@@ -118,6 +119,7 @@ export class DashboardComponent implements OnInit {
         this.stockAlerts = stockAlerts;
         this.cryptoAlerts = cryptoAlerts;
         this.apply(netWorth);
+        this.refreshHistory = forceRefresh;
         this.loading = false;
         this.cdr.markForCheck();
       },

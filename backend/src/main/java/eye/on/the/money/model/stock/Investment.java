@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
@@ -31,8 +32,8 @@ public class Investment extends AuditedEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Double quantity;
+    @Column(nullable = false, precision = 28, scale = 10)
+    private BigDecimal quantity;
 
     @Column(nullable = false)
     private String buySell;
@@ -40,10 +41,11 @@ public class Investment extends AuditedEntity {
     @Column(nullable = false)
     private LocalDate transactionDate;
 
-    private Double fee;
+    @Column(precision = 19, scale = 4)
+    private BigDecimal fee;
 
-    @Column(nullable = false)
-    private Double amount;
+    @Column(nullable = false, precision = 19, scale = 4)
+    private BigDecimal amount;
 
     @Column(name = "rsu", nullable = false)
     @ColumnDefault("false")

@@ -4,6 +4,7 @@ import eye.on.the.money.util.Generated;
 import lombok.*;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Map;
 
 @Getter
@@ -16,5 +17,5 @@ import java.util.Map;
 @Generated
 public class DashboardRatesDTO implements Serializable {
 
-    private Map<String, Double> rates;
+    private Map<String, BigDecimal> rates;
 }

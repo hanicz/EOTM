@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import eye.on.the.money.util.LiveQuote;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +44,7 @@ public class DashboardService {
                 .filter(currency -> !BASE_CURRENCY.equals(currency))
                 .collect(Collectors.toSet());
 
-        Map<String, Double> rates = new HashMap<>();
+        Map<String, BigDecimal> rates = new HashMap<>();
         if (targetCurrencies.isEmpty()) {
             return DashboardRatesDTO.builder().rates(rates).build();
         }

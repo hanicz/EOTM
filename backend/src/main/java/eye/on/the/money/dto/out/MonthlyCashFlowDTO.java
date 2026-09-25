@@ -2,6 +2,7 @@ package eye.on.the.money.dto.out;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import eye.on.the.money.dto.CSVHelper;
+import eye.on.the.money.util.Numbers;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import lombok.*;
@@ -18,19 +19,19 @@ public class MonthlyCashFlowDTO implements CSVHelper {
     private Integer year;
     private Integer month;
     private String currencyId;
-    private Double moneyIn;
-    private Double moneyOut;
+    private BigDecimal moneyIn;
+    private BigDecimal moneyOut;
 
-    public Double getMoneyIn() {
+    public BigDecimal getMoneyIn() {
         return round(this.moneyIn);
     }
 
-    public Double getMoneyOut() {
+    public BigDecimal getMoneyOut() {
         return round(this.moneyOut);
     }
 
-    public Double getNet() {
-        return round(this.moneyIn + this.moneyOut);
+    public BigDecimal getNet() {
+        return round(this.moneyIn.add(this.moneyOut));
     }
 
     /**
@@ -38,15 +39,15 @@ public class MonthlyCashFlowDTO implements CSVHelper {
      * can leave the month blank instead of drawing a 0% that would read as "kept nothing" when the truth is
      * "there is nothing to divide by".
      */
-    public Double getSavedPercent() {
-        if (this.moneyIn == null || this.moneyIn == 0.0) {
+    public BigDecimal getSavedPercent() {
+        if (this.moneyIn == null || this.moneyIn.signum() == 0) {
             return null;
         }
-        return round(((this.moneyIn + this.moneyOut) / this.moneyIn) * 100.0);
+        return round(Numbers.divide(this.moneyIn.add(this.moneyOut), this.moneyIn).multiply(Numbers.HUNDRED));
     }
 
-    private static Double round(Double value) {
-        return value == null ? null : BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).doubleValue();
+    private static BigDecimal round(BigDecimal value) {
+        return value == null ? null : value.setScale(2, RoundingMode.HALF_UP);
     }
 
     @Override

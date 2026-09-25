@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
+
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,7 +30,7 @@ class CashControllerTest {
 
     @Test
     void getCash_returnsTheStoredBalance() {
-        CashDTO cash = CashDTO.builder().amount(750000.0).currency("HUF").build();
+        CashDTO cash = CashDTO.builder().amount(new BigDecimal("750000")).currency("HUF").build();
         when(this.cashService.getCash(USER_ID)).thenReturn(cash);
 
         ResponseEntity<CashDTO> response = this.cashController.getCash(USER_ID);
@@ -39,8 +41,8 @@ class CashControllerTest {
 
     @Test
     void updateCash_passesTheNewBalanceToTheService() {
-        CashDTO request = CashDTO.builder().amount(900000.0).build();
-        CashDTO saved = CashDTO.builder().amount(900000.0).currency("HUF").build();
+        CashDTO request = CashDTO.builder().amount(new BigDecimal("900000")).build();
+        CashDTO saved = CashDTO.builder().amount(new BigDecimal("900000")).currency("HUF").build();
         when(this.cashService.updateCash(USER_ID, request)).thenReturn(saved);
 
         ResponseEntity<CashDTO> response = this.cashController.updateCash(USER_ID, request);

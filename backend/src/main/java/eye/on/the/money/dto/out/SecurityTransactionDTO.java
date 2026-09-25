@@ -10,6 +10,7 @@ import eye.on.the.money.dto.Lot;
 import lombok.*;
 import org.apache.commons.csv.CSVRecord;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -29,13 +30,13 @@ public class SecurityTransactionDTO implements CSVHelper, Lot<SecurityTransactio
     private LocalDate transactionDate;
     private String securityId;
     private String securityName;
-    private Double amount;
+    private BigDecimal amount;
     private String currencyId;
-    private Double rate;
+    private BigDecimal rate;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate nextPaymentDate;
-    private Double nextPaymentAmount;
+    private BigDecimal nextPaymentAmount;
     private Boolean zeroCoupon;
 
     @Override
@@ -43,7 +44,7 @@ public class SecurityTransactionDTO implements CSVHelper, Lot<SecurityTransactio
         if (!this.getSecurityId().equals(other.getSecurityId()))
             return this;
 
-        this.setAmount(this.getAmount() + other.getAmount());
+        this.setAmount(this.getAmount().add(other.getAmount()));
         this.setQuantity(this.getQuantity() + other.getQuantity());
 
         if (this.getQuantity() > 0 && "S".equals(this.buySell)) {
@@ -54,8 +55,13 @@ public class SecurityTransactionDTO implements CSVHelper, Lot<SecurityTransactio
 
     @Override
     public void negateAmountAndQuantity() {
-        this.amount = -this.amount;
+        this.amount = this.amount.negate();
         this.quantity = -this.quantity;
+    }
+
+    @Override
+    public Long recordId() {
+        return this.transactionId;
     }
 
     @Override
@@ -76,7 +82,7 @@ public class SecurityTransactionDTO implements CSVHelper, Lot<SecurityTransactio
     public Object[] getCSVRecord() {
         return new Object[]{this.getTransactionId(), this.getQuantity(),
                 this.getBuySell(), this.getTransactionDate(), this.getSecurityId(), this.getSecurityName(),
-                this.getAmount(), this.getCurrencyId()};
+                CSVHelper.plainNumber(this.getAmount()), this.getCurrencyId()};
     }
 
     public static SecurityTransactionDTO createFromCSVRecord(CSVRecord csvRecord, DateTimeFormatter formatter) {
@@ -84,7 +90,7 @@ public class SecurityTransactionDTO implements CSVHelper, Lot<SecurityTransactio
                 .transactionId(csvRecord.get("Transaction Id").isBlank() ? null : Long.parseLong(csvRecord.get("Transaction Id")))
                 .buySell(csvRecord.get("Type"))
                 .transactionDate(LocalDate.parse(csvRecord.get("Transaction Date"), formatter))
-                .amount(Double.parseDouble(csvRecord.get("Amount")))
+                .amount(new BigDecimal(csvRecord.get("Amount")))
                 .quantity(Integer.parseInt(csvRecord.get("Quantity")))
                 .currencyId(csvRecord.get("Currency"))
                 .securityId(csvRecord.get("Security Id"))

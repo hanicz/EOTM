@@ -2,6 +2,8 @@ package eye.on.the.money.dto.out;
 
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @Builder
@@ -13,7 +15,7 @@ public class CryptoWatchDTO implements Comparable<CryptoWatchDTO> {
     private Long cryptoWatchId;
     private String coinId;
     private String symbol;
-    private Double liveValue;
+    private BigDecimal liveValue;
     private String name;
     private Double change;
 

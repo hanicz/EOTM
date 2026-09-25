@@ -45,7 +45,7 @@ public class CandleQuoteDTO {
         }
 
         if (liveQuote != null) {
-            double close = LiveQuote.price(liveQuote).orElseThrow().value();
+            double close = LiveQuote.price(liveQuote).orElseThrow().value().doubleValue();
             LocalDate date = Instant.ofEpochSecond((long) LiveQuote.numericOrZero(liveQuote, "timestamp"))
                     .atZone(ZoneId.systemDefault()).toLocalDate();
             c[eodList.size()] = close;

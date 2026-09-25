@@ -40,8 +40,8 @@ public class NetWorthSnapshotWriter {
                         .user(user)
                         .snapshotDate(date)
                         .assetClass(asset.getAssetClass())
-                        .spent(asset.getSpent().doubleValue())
-                        .worth(asset.getWorth().doubleValue())
+                        .spent(asset.getSpent())
+                        .worth(asset.getWorth())
                         .build())
                 .toList();
     }

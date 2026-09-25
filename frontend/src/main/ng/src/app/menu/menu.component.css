@@ -42,12 +42,13 @@
 }
 
 .logo {
-    height: 3.5rem;
+    width: 15rem;
+    height: auto;
     display: block;
     max-width: 100%;
     object-fit: contain;
     object-position: left center;
-    margin: -0.5rem 0.5rem -0.5rem -0.75rem;
+    margin: 0 0.5rem 0 0;
 }
 
 .toolbar {
@@ -90,7 +91,7 @@
     }
 
     .logo {
-        height: 2.5rem;
+        width: 13.5rem;
     }
 
     .user-email {

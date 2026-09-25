@@ -13,6 +13,7 @@ import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
 import eye.on.the.money.util.LiveQuote;
+import eye.on.the.money.util.Numbers;
 import eye.on.the.money.util.Lots;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.io.IOException;
 import java.io.Writer;
 import java.time.LocalDate;
@@ -76,12 +78,18 @@ public class ForexTransactionService implements ICSVService {
                 .fromCurrency(fromCurrency)
                 .fromAmount(forexTransactionDTO.getFromAmount())
                 .toAmount(forexTransactionDTO.getToAmount())
-                .changeRate(forexTransactionDTO.getBuySell().equals("B") ? forexTransactionDTO.getFromAmount() / forexTransactionDTO.getToAmount() : forexTransactionDTO.getToAmount() / forexTransactionDTO.getFromAmount())
+                .changeRate(this.changeRate(forexTransactionDTO))
                 .user(user)
                 .build();
 
         forexTransaction = this.forexTransactionRepository.save(forexTransaction);
         return this.convertToForexTransactionDTO(forexTransaction);
+    }
+
+    private BigDecimal changeRate(ForexTransactionDTO forexTransactionDTO) {
+        return forexTransactionDTO.getBuySell().equals("B")
+                ? Numbers.divide(forexTransactionDTO.getFromAmount(), forexTransactionDTO.getToAmount())
+                : Numbers.divide(forexTransactionDTO.getToAmount(), forexTransactionDTO.getFromAmount());
     }
 
     @CacheEvict(cacheNames = "holdings-forex", key = "#userId")
@@ -97,7 +105,7 @@ public class ForexTransactionService implements ICSVService {
         forexTransaction.setToAmount(forexTransactionDTO.getToAmount());
         forexTransaction.setToCurrency(toCurrency);
         forexTransaction.setFromCurrency(fromCurrency);
-        forexTransaction.setChangeRate(forexTransactionDTO.getBuySell().equals("B") ? forexTransactionDTO.getFromAmount() / forexTransactionDTO.getToAmount() : forexTransactionDTO.getToAmount() / forexTransactionDTO.getFromAmount());
+        forexTransaction.setChangeRate(this.changeRate(forexTransactionDTO));
 
         return this.convertToForexTransactionDTO(forexTransaction);
     }
@@ -115,7 +123,7 @@ public class ForexTransactionService implements ICSVService {
     private List<ForexTransactionDTO> allForexHoldings(Long userId) {
         Map<String, ForexTransactionDTO> forexTransactionMap = this.getCalculated(userId);
         List<ForexTransactionDTO> forexTransactions = (new ArrayList<>(forexTransactionMap.values()))
-                .stream().filter(f -> (f.getToAmount() > 0)).collect(Collectors.toList());
+                .stream().filter(f -> f.getToAmount().signum() > 0).collect(Collectors.toList());
         if (forexTransactions.isEmpty()) return forexTransactions;
 
         String joinedList = forexTransactions.stream().map(f -> (f.getToCurrencyId() + f.getFromCurrencyId() + ".FOREX")).collect(Collectors.joining(","));
@@ -132,10 +140,10 @@ public class ForexTransactionService implements ICSVService {
                             forex.findValue("code").textValue());
                     continue;
                 }
-                forexTransactionDTO.get().setLiveValue(rate.get().value() * forexTransactionDTO.get().getToAmount());
+                forexTransactionDTO.get().setLiveValue(rate.get().value().multiply(forexTransactionDTO.get().getToAmount()));
                 forexTransactionDTO.get().setLiveChangeRate(rate.get().value());
                 forexTransactionDTO.get().setStalePrice(rate.get().stale());
-                forexTransactionDTO.get().setValueDiff(forexTransactionDTO.get().getLiveValue() - forexTransactionDTO.get().getFromAmount());
+                forexTransactionDTO.get().setValueDiff(forexTransactionDTO.get().getLiveValue().subtract(forexTransactionDTO.get().getFromAmount()));
             }
         } catch (APIException e) {
             log.error("Unable to fetch live forex values, returning holdings without live data", e);

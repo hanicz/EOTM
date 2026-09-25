@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -52,13 +53,13 @@ class CashRepositoryTest {
     void storesAndReadsBackTheCurrency() {
         Currency eur = this.currencyRepository.findById("EUR").orElseThrow();
         this.cashRepository.saveAndFlush(
-                Cash.builder().amount(1500.0).currency(eur).user(this.user).build());
+                Cash.builder().amount(new BigDecimal("1500")).currency(eur).user(this.user).build());
         this.entityManager.clear();
 
         Optional<Cash> found = this.cashRepository.findByUserId(this.user.getId());
 
         assertTrue(found.isPresent());
-        assertEquals(1500.0, found.get().getAmount());
+        assertEquals(0, new BigDecimal("1500").compareTo(found.get().getAmount()));
         assertEquals("EUR", found.get().getCurrency().getId());
     }
 
@@ -67,7 +68,7 @@ class CashRepositoryTest {
         Currency huf = this.currencyRepository.findById("HUF").orElseThrow();
         Currency usd = this.currencyRepository.findById("USD").orElseThrow();
         Cash cash = this.cashRepository.saveAndFlush(
-                Cash.builder().amount(750000.0).currency(huf).user(this.user).build());
+                Cash.builder().amount(new BigDecimal("750000")).currency(huf).user(this.user).build());
 
         cash.setCurrency(usd);
         this.cashRepository.saveAndFlush(cash);
@@ -75,7 +76,7 @@ class CashRepositoryTest {
 
         Cash found = this.cashRepository.findByUserId(this.user.getId()).orElseThrow();
 
-        assertEquals(750000.0, found.getAmount());
+        assertEquals(0, new BigDecimal("750000").compareTo(found.getAmount()));
         assertEquals("USD", found.getCurrency().getId());
     }
 }

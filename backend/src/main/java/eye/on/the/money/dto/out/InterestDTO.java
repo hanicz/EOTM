@@ -10,6 +10,7 @@ import eye.on.the.money.util.Generated;
 import lombok.*;
 import org.apache.commons.csv.CSVRecord;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -23,7 +24,7 @@ import java.time.format.DateTimeFormatter;
 @Generated
 public class InterestDTO implements CSVHelper {
     private Long interestId;
-    private Double amount;
+    private BigDecimal amount;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate interestDate;
@@ -40,7 +41,7 @@ public class InterestDTO implements CSVHelper {
     @Override
     @JsonIgnore
     public Object[] getCSVRecord() {
-        return new Object[]{this.getInterestId(), this.getAmount(),
+        return new Object[]{this.getInterestId(), CSVHelper.plainNumber(this.getAmount()),
                 this.getInterestDate(), this.getSecurityId(), this.getSecurityName(), this.getCurrencyId()};
     }
 
@@ -48,7 +49,7 @@ public class InterestDTO implements CSVHelper {
         return InterestDTO.builder()
                 .interestId(csvRecord.get("Interest Id").isBlank() ? null : Long.parseLong(csvRecord.get("Interest Id")))
                 .interestDate(LocalDate.parse(csvRecord.get("Interest Date"), formatter))
-                .amount(Double.parseDouble(csvRecord.get("Amount")))
+                .amount(new BigDecimal(csvRecord.get("Amount")))
                 .currencyId(csvRecord.get("Currency"))
                 .securityId(csvRecord.get("Security Id"))
                 .securityName(csvRecord.get("Security Name"))

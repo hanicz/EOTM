@@ -88,7 +88,7 @@ public class InvestmentService implements ICSVService {
     private List<InvestmentDTO> getLiveDataForInvestments(List<InvestmentDTO> investments) {
         Map<String, InvestmentDTO> investmentMap = this.getCalculated(investments);
         List<InvestmentDTO> investmentDTOList = (new ArrayList<>(investmentMap.values()))
-                .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
+                .stream().filter(i -> i.getQuantity().signum() > 0).collect(Collectors.toList());
         if (investmentDTOList.isEmpty()) return investmentDTOList;
 
         String joinedList = investmentDTOList.stream().map(i -> Ticker.symbol(i.getShortName(), i.getExchange())).distinct().collect(Collectors.joining(","));
@@ -111,10 +111,10 @@ public class InvestmentService implements ICSVService {
             investmentDTOList.stream()
                     .filter(i -> Ticker.symbol(i.getShortName(), i.getExchange()).equals(code))
                     .forEach(i -> {
-                        i.setLiveValue(price.get().value() * i.getQuantity());
-                        i.setValueDiff(i.getLiveValue() - i.getAmount());
+                        i.setLiveValue(price.get().value().multiply(i.getQuantity()));
+                        i.setValueDiff(i.getLiveValue().subtract(i.getAmount()));
                         i.setStalePrice(price.get().stale());
-                        i.setDayChange(price.get().change() == null ? null : price.get().change() * i.getQuantity());
+                        i.setDayChange(price.get().change() == null ? null : price.get().change().multiply(i.getQuantity()));
                         i.setDayChangePercent(price.get().changePercent());
                     });
         }
@@ -194,7 +194,7 @@ public class InvestmentService implements ICSVService {
 
     private boolean rsuValuationChanged(Investment investment, InvestmentDTO investmentDTO, Stock stock) {
         return !Objects.equals(investment.getTransactionDate(), investmentDTO.getTransactionDate())
-                || !Objects.equals(investment.getQuantity(), investmentDTO.getQuantity())
+                || investment.getQuantity().compareTo(investmentDTO.getQuantity()) != 0
                 || !Objects.equals(investment.getStock().getId(), stock.getId())
                 || !"B".equals(investmentDTO.getBuySell());
     }

@@ -16,6 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.math.BigDecimal;
 import java.time.YearMonth;
 import java.util.List;
 
@@ -73,10 +74,10 @@ class MonthlyReportServiceTest {
 
         Assertions.assertAll("June 2021",
                 () -> assertEquals(1, report.getActivity().dividends().size()),
-                () -> assertEquals(225.0, report.getActivity().dividends().getFirst().getAmount()),
+                () -> assertEquals(0, new BigDecimal("225").compareTo(report.getActivity().dividends().getFirst().getAmount())),
                 () -> assertEquals(1, report.getActivity().dividendTotals().size()),
                 () -> assertEquals("HUF", report.getActivity().dividendTotals().getFirst().currencyId()),
-                () -> assertEquals(225.0, report.getActivity().dividendTotals().getFirst().amount()),
+                () -> assertEquals(new BigDecimal("225.00"), report.getActivity().dividendTotals().getFirst().amount()),
                 () -> assertTrue(report.getActivity().stockTrades().isEmpty()));
     }
 

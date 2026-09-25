@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,8 +72,8 @@ class ForexControllerTest {
 
     @Test
     public void createTransaction() {
-        ForexTransactionDTO ftDTO = ForexTransactionDTO.builder().toAmount(1.0).fromAmount(3.0).transactionDate(LocalDate.now())
-                .buySell("b").changeRate(55.6).liveChangeRate(66.7).liveValue(100.1).valueDiff(5.6).fromCurrencyId("eur").toCurrencyId("usd").build();
+        ForexTransactionDTO ftDTO = ForexTransactionDTO.builder().toAmount(BigDecimal.ONE).fromAmount(new BigDecimal("3")).transactionDate(LocalDate.now())
+                .buySell("b").changeRate(new BigDecimal("55.6")).liveChangeRate(new BigDecimal("66.7")).liveValue(new BigDecimal("100.1")).valueDiff(new BigDecimal("5.6")).fromCurrencyId("eur").toCurrencyId("usd").build();
 
         when(this.forexTransactionService.createForexTransaction(ftDTO, 1L)).thenReturn(ftDTO);
 
@@ -81,8 +82,8 @@ class ForexControllerTest {
 
     @Test
     public void updateTransaction() {
-        ForexTransactionDTO ftDTO = ForexTransactionDTO.builder().toAmount(1.0).fromAmount(3.0).transactionDate(LocalDate.now())
-                .buySell("b").changeRate(55.6).liveChangeRate(66.7).liveValue(100.1).valueDiff(5.6).fromCurrencyId("eur").toCurrencyId("usd").build();
+        ForexTransactionDTO ftDTO = ForexTransactionDTO.builder().toAmount(BigDecimal.ONE).fromAmount(new BigDecimal("3")).transactionDate(LocalDate.now())
+                .buySell("b").changeRate(new BigDecimal("55.6")).liveChangeRate(new BigDecimal("66.7")).liveValue(new BigDecimal("100.1")).valueDiff(new BigDecimal("5.6")).fromCurrencyId("eur").toCurrencyId("usd").build();
 
         when(this.forexTransactionService.updateForexTransaction(ftDTO, 1L)).thenReturn(ftDTO);
 
@@ -91,12 +92,12 @@ class ForexControllerTest {
 
     private List<ForexTransactionDTO> createTransactionList() {
         List<ForexTransactionDTO> ftDTO = new ArrayList<>();
-        ftDTO.add(ForexTransactionDTO.builder().toAmount(1.0).fromAmount(3.0).forexTransactionId(1L).transactionDate(LocalDate.now())
-                .buySell("b").changeRate(55.6).liveChangeRate(66.7).liveValue(100.1).valueDiff(5.6).fromCurrencyId("eur").toCurrencyId("usd").build());
-        ftDTO.add(ForexTransactionDTO.builder().toAmount(1.0).fromAmount(3.0).forexTransactionId(1L).transactionDate(LocalDate.now())
-                .buySell("b").changeRate(55.6).liveChangeRate(66.7).liveValue(100.1).valueDiff(5.6).fromCurrencyId("eur").toCurrencyId("usd").build());
-        ftDTO.add(ForexTransactionDTO.builder().toAmount(1.0).fromAmount(3.0).forexTransactionId(1L).transactionDate(LocalDate.now())
-                .buySell("b").changeRate(55.6).liveChangeRate(66.7).liveValue(100.1).valueDiff(5.6).fromCurrencyId("eur").toCurrencyId("usd").build());
+        ftDTO.add(ForexTransactionDTO.builder().toAmount(BigDecimal.ONE).fromAmount(new BigDecimal("3")).forexTransactionId(1L).transactionDate(LocalDate.now())
+                .buySell("b").changeRate(new BigDecimal("55.6")).liveChangeRate(new BigDecimal("66.7")).liveValue(new BigDecimal("100.1")).valueDiff(new BigDecimal("5.6")).fromCurrencyId("eur").toCurrencyId("usd").build());
+        ftDTO.add(ForexTransactionDTO.builder().toAmount(BigDecimal.ONE).fromAmount(new BigDecimal("3")).forexTransactionId(1L).transactionDate(LocalDate.now())
+                .buySell("b").changeRate(new BigDecimal("55.6")).liveChangeRate(new BigDecimal("66.7")).liveValue(new BigDecimal("100.1")).valueDiff(new BigDecimal("5.6")).fromCurrencyId("eur").toCurrencyId("usd").build());
+        ftDTO.add(ForexTransactionDTO.builder().toAmount(BigDecimal.ONE).fromAmount(new BigDecimal("3")).forexTransactionId(1L).transactionDate(LocalDate.now())
+                .buySell("b").changeRate(new BigDecimal("55.6")).liveChangeRate(new BigDecimal("66.7")).liveValue(new BigDecimal("100.1")).valueDiff(new BigDecimal("5.6")).fromCurrencyId("eur").toCurrencyId("usd").build());
 
         return ftDTO;
     }

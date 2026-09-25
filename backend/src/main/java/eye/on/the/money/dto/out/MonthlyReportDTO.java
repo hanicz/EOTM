@@ -3,6 +3,7 @@ package eye.on.the.money.dto.out;
 import eye.on.the.money.util.Generated;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Getter
@@ -46,6 +47,6 @@ public class MonthlyReportDTO {
         }
     }
 
-    public record AmountRow(String currencyId, Double amount) {
+    public record AmountRow(String currencyId, BigDecimal amount) {
     }
 }

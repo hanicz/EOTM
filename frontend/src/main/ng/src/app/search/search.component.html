@@ -38,30 +38,30 @@
         <div class="grid search-gutter mt-3">
           <div class="col-12 pb-0">
             <div class="ticker-header">
-              <div class="flex flex-wrap align-items-center">
-                <app-ticker-logo class="ticker-logo mr-3" [size]="42"
+              <div class="ticker-identity">
+                <app-ticker-logo class="ticker-logo" [size]="44"
                   [exchange]="globals.selectedExchange"
                   [symbol]="globals.selectedStock"></app-ticker-logo>
-                @if (profileLoading) {
-                  <div>
-                    <p-skeleton width="12rem" height="1.2rem" styleClass="mb-2"></p-skeleton>
-                    <p-skeleton width="5rem" height="0.8rem"></p-skeleton>
-                  </div>
-                  <p-skeleton width="6rem" height="1.5rem" styleClass="ml-4"></p-skeleton>
-                } @else {
-                  <div>
-                    <div class="flex flex-wrap align-items-center">
-                      <div class="ticker-name">{{displayName}}</div>
-                      <span class="ml-2 state-chip state-contrast">{{displayTicker}}</span>
+                <div class="ticker-identity-copy">
+                  @if (profileLoading) {
+                    <p-skeleton width="12rem" height="1.3rem" styleClass="mb-2"></p-skeleton>
+                    <p-skeleton width="9rem" height="0.9rem"></p-skeleton>
+                  } @else {
+                    <h1 class="ticker-name">{{displayName}}</h1>
+                    <div class="ticker-meta">
+                      <span class="ticker-symbol">{{displayTicker}}</span>
+                      <span class="ticker-market">{{displayExchange}}</span>
                     </div>
-                    <div class="ticker-subline mt-1">{{displayExchange}}</div>
-                  </div>
-                  <div class="ticker-price ml-4">
-                    {{endPrice | currency : displayCurrency : 'symbol' : '0.0-2'}}
+                  }
+                </div>
+              </div>
+              <div class="ticker-actions">
+                @if (chartReady && !profileLoading) {
+                  <div class="ticker-price">
+                    <span class="ticker-price-label">Last price</span>
+                    <span class="ticker-price-value">{{endPrice | currency : displayCurrency : 'symbol' : '0.0-2'}}</span>
                   </div>
                 }
-              </div>
-              <div class="flex flex-wrap mt-1">
                 @if (checkStockContain()) {
                   <button pButton pRipple type="button" icon="pi pi-star-fill"
                     (click)="removeFromWatchList()" label="Watching"
@@ -84,20 +84,33 @@
         <div class="grid search-gutter">
           <div class="col-12 lg:col-8">
             <div class="chart-toolbar">
-              <p-selectButton [options]="options" [(ngModel)]="selectedOption" optionLabel="label"
-                optionValue="value" (onChange)="getCandleData()">
-              </p-selectButton>
-              <div class="flex align-items-center">
-                <span class="mr-2 state-chip state-neutral">{{(startPrice | currency : displayCurrency : 'symbol' : '0.0-1') + ' - ' + (endPrice | currency : displayCurrency : 'symbol' : '0.0-1')}}</span>
-                <span class="mr-2 state-chip" [ngClass]="(difference > 0) ? 'state-buy' : 'state-sell'">{{difference | currency : displayCurrency : 'symbol' : '0.0-1'}}</span>
-                <span class="state-chip" [ngClass]="(percentage > 0) ? 'state-buy' : 'state-sell'">{{(percentage | number : '0.0-1') + '%'}}</span>
+              <div class="period-picker" role="group" aria-label="Price history range">
+                @for (option of options; track option.value) {
+                  <button type="button" class="period-option" [class.period-option-active]="selectedOption === option.value"
+                    [attr.aria-pressed]="selectedOption === option.value" (click)="selectPeriod(option.value)">
+                    {{option.label}}
+                  </button>
+                }
               </div>
+              @if (chartReady) {
+                <div class="chart-performance">
+                  <span class="state-chip state-neutral">{{(startPrice | currency : displayCurrency : 'symbol' : '0.0-1') + ' - ' + (endPrice | currency : displayCurrency : 'symbol' : '0.0-1')}}</span>
+                  <span class="state-chip" [ngClass]="(difference > 0) ? 'state-buy' : 'state-sell'">{{difference | currency : displayCurrency : 'symbol' : '0.0-1'}}</span>
+                  <span class="state-chip" [ngClass]="(percentage > 0) ? 'state-buy' : 'state-sell'">{{(percentage | number : '0.0-1') + '%'}}</span>
+                </div>
+              }
             </div>
             <div class="info-card chart-card">
-              <apx-chart #chart [series]=" chartOptions.series" [chart]="chartOptions.chart"
-                [xaxis]="chartOptions.xaxis" [yaxis]="chartOptions.yaxis" [title]="chartOptions.title"
-                [noData]="chartOptions.noData" [tooltip]="chartOptions.tooltip">
-              </apx-chart>
+              @if (chartReady) {
+                <apx-chart [series]="chartOptions.series" [chart]="chartOptions.chart"
+                  [xaxis]="chartOptions.xaxis" [yaxis]="chartOptions.yaxis" [title]="chartOptions.title"
+                  [noData]="chartOptions.noData" [tooltip]="chartOptions.tooltip"
+                  [legend]="chartOptions.legend" [dataLabels]="chartOptions.dataLabels"
+                  [colors]="chartOptions.colors" [stroke]="chartOptions.stroke">
+                </apx-chart>
+              } @else {
+                <div class="chart-status" role="status">{{chartLoading ? 'Loading price history…' : 'No price history available'}}</div>
+              }
             </div>
           </div>
           <div class="col-1 search-divider">
@@ -282,7 +295,7 @@
         </div>
         <div class="grid search-gutter">
           <div class="col-12">
-            <app-news [type]="newsType"></app-news>
+            <app-news [type]="newsType" [browse]="true"></app-news>
           </div>
         </div>
       </div>

@@ -8,6 +8,8 @@ import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Getter
 @Setter
@@ -24,11 +26,11 @@ public class Pension extends AuditedEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Double totalContribution;
+    @Column(nullable = false, precision = 19, scale = 4)
+    private BigDecimal totalContribution;
 
-    @Column(nullable = false)
-    private Double currentValue;
+    @Column(nullable = false, precision = 19, scale = 4)
+    private BigDecimal currentValue;
 
     @ManyToOne
     @JoinColumn(name = "currency_id", nullable = false)

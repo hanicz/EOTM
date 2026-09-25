@@ -6,10 +6,12 @@ import eye.on.the.money.model.security.SecurityRate;
 import eye.on.the.money.repository.security.SecurityRateRepository;
 import eye.on.the.money.repository.security.SecurityRepository;
 import eye.on.the.money.service.api.SecuritiesAPIService;
+import eye.on.the.money.util.Numbers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -117,7 +119,7 @@ public class SecurityRateService {
                         this.date(interest, "interestPeriodStart"),
                         this.date(interest, "interestPeriodEnd"),
                         this.date(interest, "paymentDate"),
-                        interest.path("interest").asDouble(),
+                        this.decimal(interest.path("interest")),
                         false,
                         convention));
             } else if (this.isZeroCoupon(reference)) {
@@ -137,7 +139,7 @@ public class SecurityRateService {
     }
 
     private SecurityRate toRate(String isin, LocalDate periodStart, LocalDate periodEnd, LocalDate paymentDate,
-                                Double rate, boolean zeroCoupon, String convention) {
+                                BigDecimal rate, boolean zeroCoupon, String convention) {
         if (periodStart == null || periodEnd == null || paymentDate == null) {
             log.warn("Incomplete interest period for {}, skipping", isin);
             return null;
@@ -162,10 +164,14 @@ public class SecurityRateService {
         return nextByIsin;
     }
 
-    public double periodFraction(SecurityRate rate) {
+    public BigDecimal periodFraction(SecurityRate rate) {
         long days = ChronoUnit.DAYS.between(rate.getPeriodStart(), rate.getPeriodEnd());
-        double basis = SecurityRateService.ACT_360.equals(rate.getConvention()) ? 360.0 : 365.0;
-        return days / basis;
+        long basis = SecurityRateService.ACT_360.equals(rate.getConvention()) ? 360 : 365;
+        return Numbers.divide(BigDecimal.valueOf(days), BigDecimal.valueOf(basis));
+    }
+
+    private BigDecimal decimal(JsonNode node) {
+        return node.isNumber() ? node.decimalValue() : BigDecimal.valueOf(node.asDouble());
     }
 
     private List<String> lookupKeys(String type, String name) {

@@ -70,7 +70,7 @@ class TaxableEventServiceTest {
                 .type("Utalas")
                 .partnerName("PARTNER KFT")
                 .memo("memo")
-                .amount(amount)
+                .amount(BigDecimal.valueOf(amount))
                 .currency(new Currency(currencyId, currencyId))
                 .user(User.builder().id(1L).email(USER_EMAIL).build())
                 .build();

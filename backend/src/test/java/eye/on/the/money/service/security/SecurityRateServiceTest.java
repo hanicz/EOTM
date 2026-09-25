@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -118,7 +119,7 @@ class SecurityRateServiceTest {
         this.securityRateService.refresh();
 
         SecurityRate stored = this.captureStoredRate();
-        assertEquals(7.38, stored.getRate());
+        assertEquals(new BigDecimal("7.38"), stored.getRate());
         assertFalse(stored.getZeroCoupon());
         assertEquals(LocalDate.of(2026, 8, 25), stored.getPaymentDate());
         assertEquals("_ACT_360", stored.getConvention());
@@ -186,7 +187,7 @@ class SecurityRateServiceTest {
                 .convention("_ACT_360")
                 .build();
 
-        assertEquals(92.0 / 360.0, this.securityRateService.periodFraction(rate), 1e-9);
+        assertEquals(92.0 / 360.0, this.securityRateService.periodFraction(rate).doubleValue(), 1e-9);
     }
 
     @Test
@@ -197,7 +198,7 @@ class SecurityRateServiceTest {
                 .convention("_ACT_ACT")
                 .build();
 
-        assertEquals(1.0, this.securityRateService.periodFraction(rate), 1e-9);
+        assertEquals(0, BigDecimal.ONE.compareTo(this.securityRateService.periodFraction(rate)));
     }
 
     @Test

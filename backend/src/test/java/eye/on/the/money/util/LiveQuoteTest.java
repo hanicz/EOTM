@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.OptionalDouble;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,7 +26,7 @@ class LiveQuoteTest {
     void price_usesCloseWhenQuoted() {
         LiveQuote.Price price = LiveQuote.price(this.quote("AMD.US")).orElseThrow();
 
-        assertEquals(456.745, price.value());
+        assertEquals(new BigDecimal("456.745"), price.value());
         assertFalse(price.stale());
     }
 
@@ -33,7 +34,7 @@ class LiveQuoteTest {
     void price_fallsBackToPreviousCloseWhenCloseIsNotAvailable() {
         LiveQuote.Price price = LiveQuote.price(this.quote("RICHTER.BUD")).orElseThrow();
 
-        assertEquals(12880.0, price.value());
+        assertEquals(new BigDecimal("12880"), price.value());
         assertTrue(price.stale());
     }
 
@@ -46,7 +47,7 @@ class LiveQuoteTest {
     void price_carriesTheDailyChangeWhenQuoted() {
         LiveQuote.Price price = LiveQuote.price(this.quote("AMD.US")).orElseThrow();
 
-        assertEquals(-16.505, price.change());
+        assertEquals(new BigDecimal("-16.505"), price.change());
         assertEquals(-3.4876, price.changePercent());
     }
 

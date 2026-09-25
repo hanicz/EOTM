@@ -188,8 +188,8 @@ public class FireSnapshotService {
         return month.getYear() * MONTHS_IN_YEAR + (month.getMonthValue() - 1);
     }
 
-    private double value(Double amount) {
-        return (amount == null) ? 0 : amount;
+    private double value(BigDecimal amount) {
+        return (amount == null) ? 0 : amount.doubleValue();
     }
 
     private BigDecimal scaled(double value) {

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, input, signal } from '@angular/core';
 import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { Skeleton } from 'primeng/skeleton';
 import { ApexChart, ApexAxisChartSeries, ApexFill, ApexStroke, ApexTooltip, ApexXAxis, ChartComponent } from 'ng-apexcharts';
@@ -28,6 +28,8 @@ export type SparklineOptions = {
   styleUrls: ['./performance-summary.component.css']
 })
 export class PerformanceSummaryComponent implements OnInit {
+
+  readonly refresh = input(false);
 
   readonly loading = signal(true);
   readonly history = signal<NetWorthHistory | null>(null);
@@ -72,7 +74,7 @@ export class PerformanceSummaryComponent implements OnInit {
   constructor(private netWorthService: NetWorthService) { }
 
   ngOnInit(): void {
-    this.netWorthService.getHistory().subscribe({
+    this.netWorthService.getHistory(this.refresh()).subscribe({
       next: data => {
         this.history.set(data);
         this.loading.set(false);

@@ -1,0 +1,27 @@
+/* Local SVG masks inherit normal, hover, and active menu colors. */
+.eotm-icon {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    flex: 0 0 1em;
+    background-color: currentColor;
+    -webkit-mask: var(--eotm-icon) center / contain no-repeat;
+    mask: var(--eotm-icon) center / contain no-repeat;
+}
+.eotm-icon-briefcase { --eotm-icon: url('./briefcase.svg'); }
+.eotm-icon-chart-area { --eotm-icon: url('./chart-area.svg'); }
+.eotm-icon-building-columns { --eotm-icon: url('./building-columns.svg'); }
+.eotm-icon-chart-line { --eotm-icon: url('./chart-line.svg'); }
+.eotm-icon-arrow-trend-up { --eotm-icon: url('./arrow-trend-up.svg'); }
+.eotm-icon-coins { --eotm-icon: url('./coins.svg'); }
+.eotm-icon-bitcoin { --eotm-icon: url('./bitcoin.svg'); }
+.eotm-icon-money-bill { --eotm-icon: url('./money-bill.svg'); }
+.eotm-icon-piggy-bank { --eotm-icon: url('./piggy-bank.svg'); }
+.eotm-icon-credit-card { --eotm-icon: url('./credit-card.svg'); }
+.eotm-icon-wallet { --eotm-icon: url('./wallet.svg'); }
+.eotm-icon-star { --eotm-icon: url('./star.svg'); }
+.eotm-icon-fire { --eotm-icon: url('./fire.svg'); }
+.eotm-icon-file-invoice-dollar { --eotm-icon: url('./file-invoice-dollar.svg'); }
+.eotm-icon-bell { --eotm-icon: url('./bell.svg'); }
+.eotm-icon-search { --eotm-icon: url('./search.svg'); }
+.eotm-icon-newspaper { --eotm-icon: url('./newspaper.svg'); }

@@ -148,7 +148,7 @@ class EmailServiceTest {
                 .transactionDate(LocalDate.of(2023, 9, 8))
                 .buySell("B")
                 .shortName(tradeName)
-                .amount(200.17)
+                .amount(new BigDecimal("200.17"))
                 .currencyId("USD")
                 .build();
 

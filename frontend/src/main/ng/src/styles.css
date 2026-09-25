@@ -1,3 +1,4 @@
+@import './assets/icons/icons.css';
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
 :root {
@@ -1442,6 +1443,11 @@ menu {
     .planner-row {
         grid-template-columns: minmax(0, 1fr);
         gap: 0.25rem;
+    }
+
+    .planner-row > .planner-readonly {
+        justify-self: end;
+        text-align: right;
     }
 
     .planner-input {

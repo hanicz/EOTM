@@ -12,6 +12,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -37,7 +38,7 @@ class ETFDividendWireFormatTest {
         when(this.etfDividendService.getDividends(any())).thenReturn(List.of(
                 ETFDividendDTO.builder()
                         .id(42L)
-                        .amount(105.7)
+                        .amount(new BigDecimal("105.7"))
                         .dividendDate(LocalDate.parse("2021-07-03"))
                         .shortName("VWRL")
                         .name("Vang FTSE AllW-D")

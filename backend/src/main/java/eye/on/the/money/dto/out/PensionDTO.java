@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @Builder
@@ -17,11 +19,11 @@ public class PensionDTO {
 
     @NotNull
     @PositiveOrZero
-    private Double totalContribution;
+    private BigDecimal totalContribution;
 
     @NotNull
     @PositiveOrZero
-    private Double currentValue;
+    private BigDecimal currentValue;
 
     private String currency;
 }

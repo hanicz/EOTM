@@ -6,6 +6,7 @@ import eye.on.the.money.dto.Lot;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 class LotWireFormatTest {
@@ -15,12 +16,12 @@ class LotWireFormatTest {
     @Test
     void theLotBookkeepingFlagStaysOffTheWire() {
         List<Lot<?>> lots = List.of(
-                InvestmentDTO.builder().shortName("CRSR").exchange("US").quantity(0.0).amount(-100.0).build(),
-                ETFInvestmentDTO.builder().shortName("VWCE").exchange("MI").quantity(0.0).amount(-40.0).build(),
-                TransactionDTO.builder().symbol("ADA").quantity(0.0).amount(-1031.24).build(),
-                SecurityTransactionDTO.builder().securityId("SEC1").quantity(0).amount(-25.0).build(),
+                InvestmentDTO.builder().shortName("CRSR").exchange("US").quantity(BigDecimal.ZERO).amount(new BigDecimal("-100")).build(),
+                ETFInvestmentDTO.builder().shortName("VWCE").exchange("MI").quantity(BigDecimal.ZERO).amount(new BigDecimal("-40")).build(),
+                TransactionDTO.builder().symbol("ADA").quantity(BigDecimal.ZERO).amount(new BigDecimal("-1031.24")).build(),
+                SecurityTransactionDTO.builder().securityId("SEC1").quantity(0).amount(new BigDecimal("-25")).build(),
                 ForexTransactionDTO.builder().fromCurrencyId("HUF").toCurrencyId("EUR")
-                        .toAmount(0.0).fromAmount(-20000.0).build());
+                        .toAmount(BigDecimal.ZERO).fromAmount(new BigDecimal("-20000")).build());
 
         for (Lot<?> lot : lots) {
             String json = Assertions.assertDoesNotThrow(() -> this.objectMapper.writeValueAsString(lot));

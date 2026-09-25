@@ -1,5 +1,6 @@
 package eye.on.the.money.dto.out;
 
+import eye.on.the.money.util.Numbers;
 import eye.on.the.money.util.Lots;
 import org.apache.commons.csv.CSVRecord;
 import org.junit.jupiter.api.Assertions;
@@ -9,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -29,50 +31,52 @@ class ForexTransactionDTOTest {
     public void merge() {
         ForexTransactionDTO dto1 = this.getBaseTrans();
         ForexTransactionDTO dto2 = ForexTransactionDTO.builder()
-                .fromAmount(20.3).toAmount(70.9).fromCurrencyId("USD").toCurrencyId("EUR").build();
+                .fromAmount(new BigDecimal("20.3")).toAmount(new BigDecimal("70.9"))
+                .fromCurrencyId("USD").toCurrencyId("EUR").build();
 
         ForexTransactionDTO baseDTO = this.getBaseTrans();
 
         dto1.merge(dto2);
 
         Assertions.assertAll("Assert all changing values",
-                () -> assertEquals(baseDTO.getFromAmount() + dto2.getFromAmount(), dto1.getFromAmount()),
-                () -> assertEquals(baseDTO.getToAmount() + dto2.getToAmount(), dto1.getToAmount()),
-                () -> assertEquals(dto1.getFromAmount() / dto1.getToAmount(), dto1.getChangeRate()));
+                () -> assertDecimal(baseDTO.getFromAmount().add(dto2.getFromAmount()), dto1.getFromAmount()),
+                () -> assertDecimal(baseDTO.getToAmount().add(dto2.getToAmount()), dto1.getToAmount()),
+                () -> assertDecimal(Numbers.divide(dto1.getFromAmount(), dto1.getToAmount()), dto1.getChangeRate()));
     }
 
     @Test
     public void mergeIgnoresADifferentPair() {
         ForexTransactionDTO dto1 = this.getBaseTrans();
         ForexTransactionDTO dto2 = ForexTransactionDTO.builder()
-                .fromAmount(20.3).toAmount(70.9).fromCurrencyId("HUF").toCurrencyId("EUR").build();
+                .fromAmount(new BigDecimal("20.3")).toAmount(new BigDecimal("70.9"))
+                .fromCurrencyId("HUF").toCurrencyId("EUR").build();
 
         dto1.merge(dto2);
 
         Assertions.assertAll("An unrelated pair must not touch the lot",
-                () -> assertEquals(10.5, dto1.getFromAmount()),
-                () -> assertEquals(50.2, dto1.getToAmount()),
-                () -> assertEquals(0.5, dto1.getChangeRate()));
+                () -> assertDecimal("10.5", dto1.getFromAmount()),
+                () -> assertDecimal("50.2", dto1.getToAmount()),
+                () -> assertDecimal("0.5", dto1.getChangeRate()));
     }
 
     @Test
     public void mergeKeepsTheRateOfASealedLot() {
-        ForexTransactionDTO dto1 = this.pair("HUF", 400000.0, "EUR", 1000.0, "B", "2024-01-01", 400.0);
-        ForexTransactionDTO dto2 = this.pair("HUF", -420000.0, "EUR", -1000.0, "S", "2024-02-01", 420.0);
+        ForexTransactionDTO dto1 = this.pair("HUF", "400000", "EUR", "1000", "B", "2024-01-01", "400");
+        ForexTransactionDTO dto2 = this.pair("HUF", "-420000", "EUR", "-1000", "S", "2024-02-01", "420");
 
         dto1.merge(dto2);
 
         Assertions.assertAll("A closed lot must not divide by zero",
-                () -> assertEquals(0.0, dto1.getToAmount()),
-                () -> assertEquals(-20000.0, dto1.getFromAmount()),
-                () -> assertEquals(400.0, dto1.getChangeRate()),
+                () -> assertDecimal("0", dto1.getToAmount()),
+                () -> assertDecimal("-20000", dto1.getFromAmount()),
+                () -> assertDecimal("400", dto1.getChangeRate()),
                 () -> Assertions.assertTrue(dto1.isClosed()));
     }
 
     @Test
     public void mergeFlipsASoldLotBackToBuyWhenItTurnsPositive() {
-        ForexTransactionDTO dto1 = this.pair("HUF", -160000.0, "EUR", -400.0, "S", "2024-02-01", 400.0);
-        ForexTransactionDTO dto2 = this.pair("HUF", 400000.0, "EUR", 1000.0, "B", "2024-01-01", 400.0);
+        ForexTransactionDTO dto1 = this.pair("HUF", "-160000", "EUR", "-400", "S", "2024-02-01", "400");
+        ForexTransactionDTO dto2 = this.pair("HUF", "400000", "EUR", "1000", "B", "2024-01-01", "400");
 
         dto1.merge(dto2);
 
@@ -82,59 +86,59 @@ class ForexTransactionDTOTest {
     @Test
     public void aReversedSellReducesTheMatchingBuy() {
         Map<String, ForexTransactionDTO> lots = Lots.aggregate(List.of(
-                this.pair("HUF", 400000.0, "EUR", 1000.0, "B", "2024-01-01", 400.0),
-                this.pair("EUR", 400.0, "HUF", 160000.0, "S", "2024-02-01", 400.0)), this.pairKey());
+                this.pair("HUF", "400000", "EUR", "1000", "B", "2024-01-01", "400"),
+                this.pair("EUR", "400", "HUF", "160000", "S", "2024-02-01", "400")), this.pairKey());
 
         ForexTransactionDTO lot = lots.get("HUFEUR_0");
 
         Assertions.assertAll("The sell must unwind part of the buy",
                 () -> assertEquals(1, lots.size()),
-                () -> assertEquals(240000.0, lot.getFromAmount()),
-                () -> assertEquals(600.0, lot.getToAmount()),
-                () -> assertEquals(400.0, lot.getChangeRate()),
+                () -> assertDecimal("240000", lot.getFromAmount()),
+                () -> assertDecimal("600", lot.getToAmount()),
+                () -> assertDecimal("400", lot.getChangeRate()),
                 () -> assertEquals("B", lot.getBuySell()));
     }
 
     @Test
     public void aFullyUnwoundPairIsSealedWithItsRealisedGain() {
         Map<String, ForexTransactionDTO> lots = Lots.aggregate(List.of(
-                this.pair("HUF", 400000.0, "EUR", 1000.0, "B", "2024-01-01", 400.0),
-                this.pair("EUR", 1000.0, "HUF", 420000.0, "S", "2024-02-01", 420.0)), this.pairKey());
+                this.pair("HUF", "400000", "EUR", "1000", "B", "2024-01-01", "400"),
+                this.pair("EUR", "1000", "HUF", "420000", "S", "2024-02-01", "420")), this.pairKey());
 
         ForexTransactionDTO lot = lots.get("HUFEUR_0");
 
         Assertions.assertAll("The realised gain stays on the closed lot",
                 () -> assertEquals(1, lots.size()),
-                () -> assertEquals(0.0, lot.getToAmount()),
-                () -> assertEquals(-20000.0, lot.getFromAmount()),
+                () -> assertDecimal("0", lot.getToAmount()),
+                () -> assertDecimal("-20000", lot.getFromAmount()),
                 () -> Assertions.assertTrue(lot.isClosed()));
     }
 
     @Test
     public void aRebuyAfterAFullUnwindStartsAFreshCostBasis() {
         Map<String, ForexTransactionDTO> lots = Lots.aggregate(List.of(
-                this.pair("HUF", 400000.0, "EUR", 1000.0, "B", "2024-01-01", 400.0),
-                this.pair("EUR", 1000.0, "HUF", 420000.0, "S", "2024-02-01", 420.0),
-                this.pair("HUF", 210000.0, "EUR", 500.0, "B", "2024-03-01", 420.0)), this.pairKey());
+                this.pair("HUF", "400000", "EUR", "1000", "B", "2024-01-01", "400"),
+                this.pair("EUR", "1000", "HUF", "420000", "S", "2024-02-01", "420"),
+                this.pair("HUF", "210000", "EUR", "500", "B", "2024-03-01", "420")), this.pairKey());
 
         Assertions.assertAll("The re-buy must not inherit the closed lot",
                 () -> assertEquals(2, lots.size()),
-                () -> assertEquals(0.0, lots.get("HUFEUR_0").getToAmount()),
-                () -> assertEquals(210000.0, lots.get("HUFEUR_1").getFromAmount()),
-                () -> assertEquals(500.0, lots.get("HUFEUR_1").getToAmount()));
+                () -> assertDecimal("0", lots.get("HUFEUR_0").getToAmount()),
+                () -> assertDecimal("210000", lots.get("HUFEUR_1").getFromAmount()),
+                () -> assertDecimal("500", lots.get("HUFEUR_1").getToAmount()));
     }
 
     @Test
     public void aClosedPairDoesNotBlockAnUnrelatedPair() {
         Map<String, ForexTransactionDTO> lots = Lots.aggregate(List.of(
-                this.pair("HUF", 400000.0, "EUR", 1000.0, "B", "2024-01-01", 400.0),
-                this.pair("HUF", 380000.0, "USD", 1000.0, "B", "2024-01-02", 380.0),
-                this.pair("EUR", 1000.0, "HUF", 420000.0, "S", "2024-02-01", 420.0)), this.pairKey());
+                this.pair("HUF", "400000", "EUR", "1000", "B", "2024-01-01", "400"),
+                this.pair("HUF", "380000", "USD", "1000", "B", "2024-01-02", "380"),
+                this.pair("EUR", "1000", "HUF", "420000", "S", "2024-02-01", "420")), this.pairKey());
 
         Assertions.assertAll("Closing HUFEUR must not touch HUFUSD",
                 () -> assertEquals(2, lots.size()),
-                () -> assertEquals(0.0, lots.get("HUFEUR_0").getToAmount()),
-                () -> assertEquals(1000.0, lots.get("HUFUSD_0").getToAmount()));
+                () -> assertDecimal("0", lots.get("HUFEUR_0").getToAmount()),
+                () -> assertDecimal("1000", lots.get("HUFUSD_0").getToAmount()));
     }
 
     @Test
@@ -161,11 +165,11 @@ class ForexTransactionDTOTest {
 
         Assertions.assertAll("Assert all headers",
                 () -> assertEquals(1L, dto.getCSVRecord()[0]),
-                () -> assertEquals(10.5, dto.getCSVRecord()[1]),
-                () -> assertEquals(50.2, dto.getCSVRecord()[2]),
+                () -> assertEquals("10.5", dto.getCSVRecord()[1]),
+                () -> assertEquals("50.2", dto.getCSVRecord()[2]),
                 () -> assertEquals("F", dto.getCSVRecord()[3]),
                 () -> assertEquals(ld, dto.getCSVRecord()[4]),
-                () -> assertEquals(0.5, dto.getCSVRecord()[5]),
+                () -> assertEquals("0.5", dto.getCSVRecord()[5]),
                 () -> assertEquals("USD", dto.getCSVRecord()[6]),
                 () -> assertEquals("EUR", dto.getCSVRecord()[7])
         );
@@ -186,11 +190,11 @@ class ForexTransactionDTOTest {
 
         Assertions.assertAll("Assert all values",
                 () -> assertEquals(1L, tDTO.getForexTransactionId()),
-                () -> assertEquals(10.5, tDTO.getFromAmount()),
-                () -> assertEquals(50.2, tDTO.getToAmount()),
+                () -> assertDecimal("10.5", tDTO.getFromAmount()),
+                () -> assertDecimal("50.2", tDTO.getToAmount()),
                 () -> assertEquals("F", tDTO.getBuySell()),
                 () -> assertEquals(LocalDate.parse("2020-01-01"), tDTO.getTransactionDate()),
-                () -> assertEquals(0.5, tDTO.getChangeRate()),
+                () -> assertDecimal("0.5", tDTO.getChangeRate()),
                 () -> assertEquals("USD", tDTO.getFromCurrencyId()),
                 () -> assertEquals("EUR", tDTO.getToCurrencyId())
         );
@@ -200,28 +204,36 @@ class ForexTransactionDTOTest {
         return ft -> ft.getFromCurrencyId() + ft.getToCurrencyId();
     }
 
-    private ForexTransactionDTO pair(String fromCurrencyId, Double fromAmount, String toCurrencyId, Double toAmount,
-                                     String buySell, String date, Double changeRate) {
+    private ForexTransactionDTO pair(String fromCurrencyId, String fromAmount, String toCurrencyId, String toAmount,
+                                     String buySell, String date, String changeRate) {
         return ForexTransactionDTO.builder()
                 .fromCurrencyId(fromCurrencyId)
-                .fromAmount(fromAmount)
+                .fromAmount(new BigDecimal(fromAmount))
                 .toCurrencyId(toCurrencyId)
-                .toAmount(toAmount)
+                .toAmount(new BigDecimal(toAmount))
                 .buySell(buySell)
                 .transactionDate(LocalDate.parse(date))
-                .changeRate(changeRate)
+                .changeRate(new BigDecimal(changeRate))
                 .build();
     }
 
     private ForexTransactionDTO getBaseTrans() {
         return ForexTransactionDTO.builder()
                 .forexTransactionId(1L)
-                .fromAmount(10.5)
-                .toAmount(50.2)
+                .fromAmount(new BigDecimal("10.5"))
+                .toAmount(new BigDecimal("50.2"))
                 .buySell("F")
-                .changeRate(0.5)
+                .changeRate(new BigDecimal("0.5"))
                 .fromCurrencyId("USD")
                 .toCurrencyId("EUR")
                 .build();
+    }
+
+    private static void assertDecimal(String expected, BigDecimal actual) {
+        assertDecimal(new BigDecimal(expected), actual);
+    }
+
+    private static void assertDecimal(BigDecimal expected, BigDecimal actual) {
+        assertEquals(0, expected.compareTo(actual), () -> "expected " + expected + " but was " + actual);
     }
 }

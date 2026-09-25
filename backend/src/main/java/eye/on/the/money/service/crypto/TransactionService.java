@@ -76,7 +76,7 @@ public class TransactionService implements ICSVService {
     private List<TransactionDTO> currentHoldings(Long userId, TransactionQuery query) {
         Map<String, TransactionDTO> transactionMap = this.getCalculated(userId);
         List<TransactionDTO> transactionDTOList = (new ArrayList<>(transactionMap.values()))
-                .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
+                .stream().filter(i -> i.getQuantity().signum() > 0).collect(Collectors.toList());
         if (transactionDTOList.isEmpty()) return transactionDTOList;
 
         String ids = transactionDTOList.stream().map(TransactionDTO::getCoinId).collect(Collectors.joining(","));
@@ -84,8 +84,8 @@ public class TransactionService implements ICSVService {
         try {
             JsonNode root = this.cryptoAPIService.getLiveValueForCoins(query.getCurrency(), ids);
             transactionDTOList.forEach(transactionDTO -> {
-                transactionDTO.setLiveValue(root.path(transactionDTO.getCoinId()).get(query.getCurrency().toLowerCase()).doubleValue() * transactionDTO.getQuantity());
-                transactionDTO.setValueDiff(transactionDTO.getLiveValue() - transactionDTO.getAmount());
+                transactionDTO.setLiveValue(root.path(transactionDTO.getCoinId()).get(query.getCurrency().toLowerCase()).decimalValue().multiply(transactionDTO.getQuantity()));
+                transactionDTO.setValueDiff(transactionDTO.getLiveValue().subtract(transactionDTO.getAmount()));
             });
         } catch (APIException e) {
             log.error("Unable to fetch live coin values, returning holdings without live data", e);

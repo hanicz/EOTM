@@ -19,6 +19,7 @@ import eye.on.the.money.service.forex.ForexTransactionService;
 import eye.on.the.money.service.pension.PensionService;
 import eye.on.the.money.service.security.SecurityTransactionService;
 import eye.on.the.money.service.stock.InvestmentService;
+import eye.on.the.money.util.Numbers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -77,7 +78,7 @@ public class NetWorthService {
 
         Holdings holdings = this.loadHoldings(userId, refresh);
         Set<String> currencies = this.currenciesIn(holdings, target);
-        Map<String, Double> rates = holdings.isEmpty() ? Map.of()
+        Map<String, BigDecimal> rates = holdings.isEmpty() ? Map.of()
                 : this.conversionRates(new ArrayList<>(currencies), refresh).getRates();
         Converter converter = new Converter(rates, target);
 
@@ -95,16 +96,16 @@ public class NetWorthService {
                 this.cash(holdings.cash(), converter),
                 this.pension(holdings.pension(), converter));
 
-        double spent = assets.stream().mapToDouble(asset -> asset.getSpent().doubleValue()).sum();
-        double worth = assets.stream().mapToDouble(asset -> asset.getWorth().doubleValue()).sum();
-        double gainBase = assets.stream()
+        BigDecimal spent = assets.stream().map(AssetClassValueDTO::getSpent).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal worth = assets.stream().map(AssetClassValueDTO::getWorth).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal gainBase = assets.stream()
                 .filter(asset -> !CASH.equals(asset.getAssetClass()))
-                .mapToDouble(asset -> asset.getSpent().doubleValue())
-                .sum();
-        double gain = assets.stream()
+                .map(AssetClassValueDTO::getSpent)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal gain = assets.stream()
                 .filter(asset -> !SECURITIES.equals(asset.getAssetClass()) && !CASH.equals(asset.getAssetClass()))
-                .mapToDouble(asset -> asset.getWorth().doubleValue() - asset.getSpent().doubleValue())
-                .sum();
+                .map(asset -> asset.getWorth().subtract(asset.getSpent()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return NetWorthDTO.builder()
                 .currency(target)
@@ -167,18 +168,18 @@ public class NetWorthService {
      * everything else quotes it in the currency the position was opened in.
      */
     private <T> AssetClassValueDTO value(String assetClass, List<T> items,
-                                         Function<T, Double> cost, Function<T, String> costCurrency,
-                                         Function<T, Double> live, Function<T, String> liveCurrency,
+                                         Function<T, BigDecimal> cost, Function<T, String> costCurrency,
+                                         Function<T, BigDecimal> live, Function<T, String> liveCurrency,
                                          Converter converter) {
-        double spent = 0;
-        double worth = 0;
+        BigDecimal spent = BigDecimal.ZERO;
+        BigDecimal worth = BigDecimal.ZERO;
         for (T item : items) {
-            spent += converter.convert(cost.apply(item), costCurrency.apply(item));
-            Double liveValue = live.apply(item);
+            spent = spent.add(converter.convert(cost.apply(item), costCurrency.apply(item)));
+            BigDecimal liveValue = live.apply(item);
             // No live value means the price lookup failed; fall back to cost so the holding does not vanish.
-            worth += (liveValue != null)
+            worth = worth.add((liveValue != null)
                     ? converter.convert(liveValue, liveCurrency.apply(item))
-                    : converter.convert(cost.apply(item), costCurrency.apply(item));
+                    : converter.convert(cost.apply(item), costCurrency.apply(item)));
         }
         return this.asset(assetClass, spent, worth);
     }
@@ -192,43 +193,43 @@ public class NetWorthService {
      * twice.
      */
     private AssetClassValueDTO securities(List<SecurityTransactionDTO> transactions, Converter converter) {
-        double spent = 0;
-        double worth = 0;
-        double weighted = 0;
+        BigDecimal spent = BigDecimal.ZERO;
+        BigDecimal worth = BigDecimal.ZERO;
+        BigDecimal weighted = BigDecimal.ZERO;
         for (SecurityTransactionDTO transaction : transactions) {
-            spent += converter.convert(transaction.getAmount(), transaction.getCurrencyId());
-            double converted = converter.convert(this.faceValue(transaction), transaction.getCurrencyId());
-            worth += converted;
-            if (transaction.getRate() != null) weighted += transaction.getRate() * converted;
+            spent = spent.add(converter.convert(transaction.getAmount(), transaction.getCurrencyId()));
+            BigDecimal converted = converter.convert(this.faceValue(transaction), transaction.getCurrencyId());
+            worth = worth.add(converted);
+            if (transaction.getRate() != null) weighted = weighted.add(transaction.getRate().multiply(converted));
         }
         AssetClassValueDTO asset = this.asset(SECURITIES, spent, worth);
-        asset.setChangePct(this.scaled(0));
-        asset.setExpectedRatePct(this.scaled(worth == 0 ? 0 : weighted / worth));
+        asset.setChangePct(this.scaled(BigDecimal.ZERO));
+        asset.setExpectedRatePct(this.scaled(worth.signum() == 0 ? BigDecimal.ZERO : Numbers.divide(weighted, worth)));
         return asset;
     }
 
-    private Double faceValue(SecurityTransactionDTO transaction) {
+    private BigDecimal faceValue(SecurityTransactionDTO transaction) {
         if (Boolean.TRUE.equals(transaction.getZeroCoupon()) || transaction.getQuantity() == null) {
             return transaction.getAmount();
         }
-        return transaction.getQuantity().doubleValue();
+        return BigDecimal.valueOf(transaction.getQuantity());
     }
 
     private AssetClassValueDTO cash(CashDTO cash, Converter converter) {
-        double converted = (cash == null) ? 0 : converter.convert(cash.getAmount(), cash.getCurrency());
+        BigDecimal converted = (cash == null) ? BigDecimal.ZERO : converter.convert(cash.getAmount(), cash.getCurrency());
         AssetClassValueDTO asset = this.asset(CASH, converted, converted);
-        asset.setChangePct(this.scaled(0));
+        asset.setChangePct(this.scaled(BigDecimal.ZERO));
         return asset;
     }
 
     private AssetClassValueDTO pension(PensionDTO pension, Converter converter) {
-        if (pension == null) return this.asset(PENSION, 0, 0);
-        double spent = converter.convert(pension.getTotalContribution(), pension.getCurrency());
-        double worth = converter.convert(pension.getCurrentValue(), pension.getCurrency());
+        if (pension == null) return this.asset(PENSION, BigDecimal.ZERO, BigDecimal.ZERO);
+        BigDecimal spent = converter.convert(pension.getTotalContribution(), pension.getCurrency());
+        BigDecimal worth = converter.convert(pension.getCurrentValue(), pension.getCurrency());
         return this.asset(PENSION, spent, worth);
     }
 
-    private AssetClassValueDTO asset(String assetClass, double spent, double worth) {
+    private AssetClassValueDTO asset(String assetClass, BigDecimal spent, BigDecimal worth) {
         return AssetClassValueDTO.builder()
                 .assetClass(assetClass)
                 .spent(this.scaled(spent))
@@ -258,17 +259,17 @@ public class NetWorthService {
         if (currency != null && !currency.isBlank()) currencies.add(currency.toUpperCase());
     }
 
-    private BigDecimal scaled(double value) {
-        return BigDecimal.valueOf(value).setScale(SCALE, RoundingMode.HALF_UP);
+    private BigDecimal scaled(BigDecimal value) {
+        return value.setScale(SCALE, RoundingMode.HALF_UP);
     }
 
-    private BigDecimal changePct(double spent, double worth) {
-        return this.gainPct(worth - spent, spent);
+    private BigDecimal changePct(BigDecimal spent, BigDecimal worth) {
+        return this.gainPct(worth.subtract(spent), spent);
     }
 
-    private BigDecimal gainPct(double gain, double spent) {
-        if (spent == 0) return BigDecimal.ZERO.setScale(SCALE, RoundingMode.HALF_UP);
-        return BigDecimal.valueOf(gain / spent * 100).setScale(SCALE, RoundingMode.HALF_UP);
+    private BigDecimal gainPct(BigDecimal gain, BigDecimal spent) {
+        if (spent.signum() == 0) return this.scaled(BigDecimal.ZERO);
+        return this.scaled(Numbers.divide(gain, spent).multiply(Numbers.HUNDRED));
     }
 
     private record Holdings(List<InvestmentDTO> stock, List<TransactionDTO> crypto, List<ETFInvestmentDTO> etf,
@@ -282,7 +283,7 @@ public class NetWorthService {
         }
 
         private boolean hasCash() {
-            return this.cash != null && this.cash.getAmount() != null && this.cash.getAmount() != 0;
+            return this.cash != null && this.nonZero(this.cash.getAmount());
         }
 
         private boolean hasPension() {
@@ -291,8 +292,8 @@ public class NetWorthService {
                     || this.nonZero(this.pension.getCurrentValue()));
         }
 
-        private boolean nonZero(Double value) {
-            return value != null && value != 0;
+        private boolean nonZero(BigDecimal value) {
+            return value != null && value.signum() != 0;
         }
     }
 
@@ -303,41 +304,41 @@ public class NetWorthService {
      */
     private static final class Converter {
 
-        private final Map<String, Double> rates;
+        private final Map<String, BigDecimal> rates;
         private final String target;
         private final Set<String> unconverted = new TreeSet<>();
 
-        private Converter(Map<String, Double> rates, String target) {
+        private Converter(Map<String, BigDecimal> rates, String target) {
             this.rates = rates;
             this.target = target;
         }
 
-        private double convert(Double amount, String from) {
-            if (amount == null || amount == 0) return 0;
+        private BigDecimal convert(BigDecimal amount, String from) {
+            if (amount == null || amount.signum() == 0) return BigDecimal.ZERO;
             if (from == null || from.isBlank()) {
                 this.unconverted.add("(unknown)");
-                return 0;
+                return BigDecimal.ZERO;
             }
-            double fromRate = this.rateFor(from.toUpperCase());
-            if (fromRate == 0) {
+            BigDecimal fromRate = this.rateFor(from.toUpperCase());
+            if (fromRate.signum() == 0) {
                 this.unconverted.add(from.toUpperCase());
-                return 0;
+                return BigDecimal.ZERO;
             }
-            return amount / fromRate * this.targetRate();
+            return Numbers.divide(amount.multiply(this.targetRate()), fromRate);
         }
 
-        private double targetRate() {
-            double rate = this.rateFor(this.target);
-            if (rate == 0) {
+        private BigDecimal targetRate() {
+            BigDecimal rate = this.rateFor(this.target);
+            if (rate.signum() == 0) {
                 throw new APIException("No exchange rate available for " + this.target);
             }
             return rate;
         }
 
-        private double rateFor(String currency) {
-            if (BASE_CURRENCY.equals(currency)) return 1;
-            Double rate = this.rates.get(currency);
-            return (rate == null || rate == 0) ? 0 : rate;
+        private BigDecimal rateFor(String currency) {
+            if (BASE_CURRENCY.equals(currency)) return BigDecimal.ONE;
+            BigDecimal rate = this.rates.get(currency);
+            return rate == null ? BigDecimal.ZERO : rate;
         }
 
         private Set<String> unconverted() {

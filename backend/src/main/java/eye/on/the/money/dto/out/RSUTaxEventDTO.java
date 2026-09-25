@@ -22,7 +22,7 @@ public class RSUTaxEventDTO implements CSVHelper {
     private String shortName;
     private String exchange;
     private LocalDate transactionDate;
-    private Double quantity;
+    private BigDecimal quantity;
     private String currency;
     private BigDecimal price;
     private LocalDate priceDate;

@@ -31,6 +31,7 @@ import org.mockito.quality.Strictness;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -83,28 +84,30 @@ class NetWorthServiceTest {
         this.stubPension(0.0, 0.0);
     }
 
-    private void stubCash(Double amount) {
+    private void stubCash(double amount) {
         this.stubCash(amount, "HUF");
     }
 
-    private void stubCash(Double amount, String currency) {
+    private void stubCash(double amount, String currency) {
         when(this.cashService.getCash(anyLong()))
-                .thenReturn(CashDTO.builder().amount(amount).currency(currency).build());
+                .thenReturn(CashDTO.builder().amount(BigDecimal.valueOf(amount)).currency(currency).build());
     }
 
-    private void stubPension(Double totalContribution, Double currentValue) {
+    private void stubPension(double totalContribution, double currentValue) {
         this.stubPension(totalContribution, currentValue, "HUF");
     }
 
-    private void stubPension(Double totalContribution, Double currentValue, String currency) {
+    private void stubPension(double totalContribution, double currentValue, String currency) {
         when(this.pensionService.getPension(anyLong()))
-                .thenReturn(PensionDTO.builder().totalContribution(totalContribution)
-                        .currentValue(currentValue).currency(currency).build());
+                .thenReturn(PensionDTO.builder().totalContribution(BigDecimal.valueOf(totalContribution))
+                        .currentValue(BigDecimal.valueOf(currentValue)).currency(currency).build());
     }
 
     private void stubRates(Map<String, Double> rates) {
+        Map<String, BigDecimal> decimalRates = rates.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> BigDecimal.valueOf(entry.getValue())));
         when(this.dashboardService.getConversionRates(any()))
-                .thenReturn(DashboardRatesDTO.builder().rates(rates).build());
+                .thenReturn(DashboardRatesDTO.builder().rates(decimalRates).build());
     }
 
     private AssetClassValueDTO assetOf(NetWorthDTO netWorth, String assetClass) {
@@ -115,7 +118,7 @@ class NetWorthServiceTest {
     @Test
     void getNetWorth_convertsStockLiveValueIntoTargetCurrency() {
         when(this.investmentService.getCurrentHoldings(USER)).thenReturn(List.of(
-                InvestmentDTO.builder().amount(100.0).liveValue(150.0).currencyId("USD").build()));
+                InvestmentDTO.builder().amount(new BigDecimal("100")).liveValue(new BigDecimal("150")).currencyId("USD").build()));
 
         NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
 
@@ -132,7 +135,7 @@ class NetWorthServiceTest {
     @Test
     void getNetWorth_treatsCryptoLiveValueAsEurNotAsThePurchaseCurrency() {
         when(this.transactionService.getCurrentHoldings(anyLong(), any())).thenReturn(List.of(
-                TransactionDTO.builder().amount(44000.0).liveValue(200.0).currencyId("HUF").build()));
+                TransactionDTO.builder().amount(new BigDecimal("44000")).liveValue(new BigDecimal("200")).currencyId("HUF").build()));
 
         NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
 
@@ -157,7 +160,7 @@ class NetWorthServiceTest {
     @Test
     void getNetWorth_fallsBackToCostWhenNoLivePriceIsAvailable() {
         when(this.etfInvestmentService.getCurrentETFHoldings(USER)).thenReturn(List.of(
-                ETFInvestmentDTO.builder().amount(500.0).liveValue(null).currencyId("EUR").build()));
+                ETFInvestmentDTO.builder().amount(new BigDecimal("500")).liveValue(null).currencyId("EUR").build()));
 
         NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
 
@@ -168,7 +171,7 @@ class NetWorthServiceTest {
     @Test
     void getNetWorth_valuesForexHoldingsInTheCurrencySoldFrom() {
         when(this.forexTransactionService.getAllForexHoldings(USER)).thenReturn(List.of(
-                ForexTransactionDTO.builder().fromAmount(1000.0).liveValue(1100.0)
+                ForexTransactionDTO.builder().fromAmount(new BigDecimal("1000")).liveValue(new BigDecimal("1100"))
                         .fromCurrencyId("EUR").toCurrencyId("USD").build()));
 
         NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
@@ -187,7 +190,7 @@ class NetWorthServiceTest {
     @Test
     void getNetWorth_reportsNoChangeOnSecuritiesEvenWhenParDiffersFromCost() {
         when(this.securityTransactionService.getCurrentHoldings(USER)).thenReturn(List.of(
-                SecurityTransactionDTO.builder().amount(950.0).quantity(1000).currencyId("EUR").build()));
+                SecurityTransactionDTO.builder().amount(new BigDecimal("950")).quantity(1000).currencyId("EUR").build()));
 
         NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
 
@@ -204,9 +207,9 @@ class NetWorthServiceTest {
     @Test
     void getNetWorth_leavesSecuritiesOutOfTheTotalChangeButNotOutOfWhatWasSpent() {
         when(this.investmentService.getCurrentHoldings(USER)).thenReturn(List.of(
-                InvestmentDTO.builder().amount(1_000_000.0).liveValue(1_200_000.0).currencyId("EUR").build()));
+                InvestmentDTO.builder().amount(new BigDecimal("1000000")).liveValue(new BigDecimal("1200000")).currencyId("EUR").build()));
         when(this.securityTransactionService.getCurrentHoldings(USER)).thenReturn(List.of(
-                SecurityTransactionDTO.builder().amount(10_200_000.0).quantity(10_000_000).currencyId("EUR").build()));
+                SecurityTransactionDTO.builder().amount(new BigDecimal("10200000")).quantity(10_000_000).currencyId("EUR").build()));
 
         NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
 
@@ -224,9 +227,9 @@ class NetWorthServiceTest {
     @Test
     void getNetWorth_valuesZeroCouponSecuritiesAtCostNotAtPar() {
         when(this.securityTransactionService.getCurrentHoldings(USER)).thenReturn(List.of(
-                SecurityTransactionDTO.builder().amount(950_000.0).quantity(1_000_000).rate(5.0)
+                SecurityTransactionDTO.builder().amount(new BigDecimal("950000")).quantity(1_000_000).rate(new BigDecimal("5"))
                         .currencyId("EUR").build(),
-                SecurityTransactionDTO.builder().amount(800_000.0).quantity(1_000_000).rate(25.0)
+                SecurityTransactionDTO.builder().amount(new BigDecimal("800000")).quantity(1_000_000).rate(new BigDecimal("25"))
                         .zeroCoupon(true).currencyId("EUR").build()));
 
         NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
@@ -247,8 +250,8 @@ class NetWorthServiceTest {
     @Test
     void getNetWorth_weightsTheSecuritiesRateByQuantityNotByHoldingCount() {
         when(this.securityTransactionService.getCurrentHoldings(USER)).thenReturn(List.of(
-                SecurityTransactionDTO.builder().amount(16_000_000.0).quantity(17_000_000).rate(5.5).currencyId("EUR").build(),
-                SecurityTransactionDTO.builder().amount(950_000.0).quantity(1_000_000).rate(5.0).currencyId("EUR").build()));
+                SecurityTransactionDTO.builder().amount(new BigDecimal("16000000")).quantity(17_000_000).rate(new BigDecimal("5.5")).currencyId("EUR").build(),
+                SecurityTransactionDTO.builder().amount(new BigDecimal("950000")).quantity(1_000_000).rate(new BigDecimal("5")).currencyId("EUR").build()));
 
         NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
 
@@ -260,9 +263,9 @@ class NetWorthServiceTest {
     @Test
     void getNetWorth_countsSecuritiesWithNoRateAsZeroPercent() {
         when(this.securityTransactionService.getCurrentHoldings(USER)).thenReturn(List.of(
-                SecurityTransactionDTO.builder().amount(16_000_000.0).quantity(17_000_000).rate(5.5).currencyId("EUR").build(),
-                SecurityTransactionDTO.builder().amount(950_000.0).quantity(1_000_000).rate(5.0).currencyId("EUR").build(),
-                SecurityTransactionDTO.builder().amount(4_800_000.0).quantity(5_000_000).rate(null).currencyId("EUR").build()));
+                SecurityTransactionDTO.builder().amount(new BigDecimal("16000000")).quantity(17_000_000).rate(new BigDecimal("5.5")).currencyId("EUR").build(),
+                SecurityTransactionDTO.builder().amount(new BigDecimal("950000")).quantity(1_000_000).rate(new BigDecimal("5")).currencyId("EUR").build(),
+                SecurityTransactionDTO.builder().amount(new BigDecimal("4800000")).quantity(5_000_000).rate(null).currencyId("EUR").build()));
 
         NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
 
@@ -274,8 +277,8 @@ class NetWorthServiceTest {
     @Test
     void getNetWorth_convertsQuantitiesBeforeWeightingTheSecuritiesRate() {
         when(this.securityTransactionService.getCurrentHoldings(USER)).thenReturn(List.of(
-                SecurityTransactionDTO.builder().amount(1_000_000.0).quantity(1_000_000).rate(10.0).currencyId("EUR").build(),
-                SecurityTransactionDTO.builder().amount(400_000_000.0).quantity(400_000_000).rate(5.0).currencyId("HUF").build()));
+                SecurityTransactionDTO.builder().amount(new BigDecimal("1000000")).quantity(1_000_000).rate(new BigDecimal("10")).currencyId("EUR").build(),
+                SecurityTransactionDTO.builder().amount(new BigDecimal("400000000")).quantity(400_000_000).rate(new BigDecimal("5")).currencyId("HUF").build()));
 
         NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
 
@@ -332,7 +335,7 @@ class NetWorthServiceTest {
     void getNetWorth_leavesCashOutOfTheTotalChangeOnBothSides() {
         this.stubCash(400_000.0);
         when(this.investmentService.getCurrentHoldings(USER)).thenReturn(List.of(
-                InvestmentDTO.builder().amount(1000.0).liveValue(1200.0).currencyId("EUR").build()));
+                InvestmentDTO.builder().amount(new BigDecimal("1000")).liveValue(new BigDecimal("1200")).currencyId("EUR").build()));
 
         NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
 
@@ -345,7 +348,7 @@ class NetWorthServiceTest {
     void getNetWorth_reportsCurrenciesItCouldNotConvertRatherThanCountingThemAsZero() {
         this.stubRates(Map.of("USD", 1.10));
         when(this.investmentService.getCurrentHoldings(USER)).thenReturn(List.of(
-                InvestmentDTO.builder().amount(100.0).liveValue(100.0).currencyId("GBP").build()));
+                InvestmentDTO.builder().amount(new BigDecimal("100")).liveValue(new BigDecimal("100")).currencyId("GBP").build()));
 
         NetWorthDTO result = this.netWorthService.getNetWorth(USER, "EUR", false);
 
@@ -356,7 +359,7 @@ class NetWorthServiceTest {
     @Test
     void getNetWorth_listsEveryCurrencyHeldSoTheUiCanOfferThem() {
         when(this.investmentService.getCurrentHoldings(USER)).thenReturn(List.of(
-                InvestmentDTO.builder().amount(10.0).liveValue(10.0).currencyId("USD").build()));
+                InvestmentDTO.builder().amount(BigDecimal.TEN).liveValue(BigDecimal.TEN).currencyId("USD").build()));
 
         NetWorthDTO result = this.netWorthService.getNetWorth(USER, "HUF", false);
 
@@ -374,7 +377,7 @@ class NetWorthServiceTest {
     void getNetWorth_throwsWhenTheTargetCurrencyHasNoRate() {
         this.stubRates(Map.of("USD", 1.10));
         when(this.investmentService.getCurrentHoldings(USER)).thenReturn(List.of(
-                InvestmentDTO.builder().amount(100.0).liveValue(150.0).currencyId("USD").build()));
+                InvestmentDTO.builder().amount(new BigDecimal("100")).liveValue(new BigDecimal("150")).currencyId("USD").build()));
 
         assertThrows(APIException.class, () -> this.netWorthService.getNetWorth(USER, "JPY", false));
     }

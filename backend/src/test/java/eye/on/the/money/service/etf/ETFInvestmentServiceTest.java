@@ -22,6 +22,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
@@ -72,8 +73,8 @@ class ETFInvestmentServiceTest {
 
         List<ETFInvestmentDTO> vwrl = result.stream().filter(i -> "VWRL".equals(i.getShortName())).toList();
         assertEquals(2, vwrl.size());
-        assertEquals(500.0, vwrl.stream().filter(i -> i.getAccountId() == 1L).findFirst().orElseThrow().getAmount());
-        assertEquals(260.0, vwrl.stream().filter(i -> i.getAccountId() == 2L).findFirst().orElseThrow().getAmount());
+        assertDecimal("500", vwrl.stream().filter(i -> i.getAccountId() == 1L).findFirst().orElseThrow().getAmount());
+        assertDecimal("260", vwrl.stream().filter(i -> i.getAccountId() == 2L).findFirst().orElseThrow().getAmount());
     }
 
     @Test
@@ -89,9 +90,9 @@ class ETFInvestmentServiceTest {
                 .filter(i -> "VWRL".equals(i.getShortName()) && i.getAccountId() == 2L).findFirst().orElseThrow();
 
         Assertions.assertAll("The daily change scales with each lot's quantity",
-                () -> assertEquals(100.0, firstAccount.getDayChange()),
+                () -> assertDecimal("100", firstAccount.getDayChange()),
                 () -> assertEquals(10.0, firstAccount.getDayChangePercent()),
-                () -> assertEquals(50.0, secondAccount.getDayChange()),
+                () -> assertDecimal("50", secondAccount.getDayChange()),
                 () -> assertEquals(10.0, secondAccount.getDayChangePercent()));
     }
 
@@ -105,7 +106,7 @@ class ETFInvestmentServiceTest {
                 .filter(i -> "VWRL".equals(i.getShortName()) && i.getAccountId() == 1L).findFirst().orElseThrow();
 
         Assertions.assertAll("A previous-close valuation carries no daily move",
-                () -> assertEquals(1000.0, vwrl.getLiveValue()),
+                () -> assertDecimal("1000", vwrl.getLiveValue()),
                 () -> Assertions.assertTrue(vwrl.getStalePrice()),
                 () -> Assertions.assertNull(vwrl.getDayChange()),
                 () -> Assertions.assertNull(vwrl.getDayChangePercent()));
@@ -117,7 +118,7 @@ class ETFInvestmentServiceTest {
 
         assertEquals(1, result.size());
         assertEquals("VWRL", result.getFirst().getShortName());
-        assertEquals(260.0, result.getFirst().getAmount());
+        assertDecimal("260", result.getFirst().getAmount());
     }
 
     @Test
@@ -125,42 +126,42 @@ class ETFInvestmentServiceTest {
         List<ETFInvestmentDTO> result = this.etfInvestmentService.getPositionsByAccountId(this.user.getId(), 1L);
 
         ETFInvestmentDTO vwce = result.stream().filter(i -> "VWCE".equals(i.getShortName())).findFirst().orElseThrow();
-        assertEquals(0.0, vwce.getQuantity());
-        assertEquals(-40.0, vwce.getAmount());
+        assertDecimal("0", vwce.getQuantity());
+        assertDecimal("-40", vwce.getAmount());
     }
 
     @Test
     @Transactional
     public void getPositionsByAccountId_reopenedLotIsNotMergedWithClosedLot() {
         this.etfInvestmentService.createInvestment(ETFInvestmentDTO.builder()
-                .buySell("B").quantity(3.0).amount(330.0).currencyId("EUR").fee(1.5)
-                .shortName("VWCE").exchange("MI").accountId(1L)
+                .buySell("B").quantity(new BigDecimal("3")).amount(new BigDecimal("330")).currencyId("EUR")
+                .fee(new BigDecimal("1.5")).shortName("VWCE").exchange("MI").accountId(1L)
                 .transactionDate(LocalDate.of(2023, 9, 5)).build(), this.user.getId());
 
         List<ETFInvestmentDTO> vwce = this.etfInvestmentService
                 .getPositionsByAccountId(this.user.getId(), 1L).stream()
                 .filter(i -> "VWCE".equals(i.getShortName())).toList();
 
-        ETFInvestmentDTO closedLot = vwce.stream().filter(i -> i.getQuantity() == 0).findFirst().orElseThrow();
-        ETFInvestmentDTO openLot = vwce.stream().filter(i -> i.getQuantity() > 0).findFirst().orElseThrow();
+        ETFInvestmentDTO closedLot = vwce.stream().filter(i -> i.getQuantity().signum() == 0).findFirst().orElseThrow();
+        ETFInvestmentDTO openLot = vwce.stream().filter(i -> i.getQuantity().signum() > 0).findFirst().orElseThrow();
 
         Assertions.assertAll("The realised gain stays on the closed lot",
                 () -> assertEquals(2, vwce.size()),
-                () -> assertEquals(-40.0, closedLot.getAmount()),
-                () -> assertEquals(3.0, openLot.getQuantity()),
-                () -> assertEquals(330.0, openLot.getAmount()));
+                () -> assertDecimal("-40", closedLot.getAmount()),
+                () -> assertDecimal("3", openLot.getQuantity()),
+                () -> assertDecimal("330", openLot.getAmount()));
     }
 
     @Test
     @Transactional
     public void getPositionsByAccountId_keepsTheSameTickerOnDifferentExchangesApart() {
         this.etfInvestmentService.createInvestment(ETFInvestmentDTO.builder()
-                .buySell("B").quantity(10.0).amount(1000.0).currencyId("EUR").fee(0.0)
-                .shortName("VWCE").exchange("MI").accountId(2L)
+                .buySell("B").quantity(new BigDecimal("10")).amount(new BigDecimal("1000")).currencyId("EUR")
+                .fee(BigDecimal.ZERO).shortName("VWCE").exchange("MI").accountId(2L)
                 .transactionDate(LocalDate.of(2024, 1, 10)).build(), this.user.getId());
         this.etfInvestmentService.createInvestment(ETFInvestmentDTO.builder()
-                .buySell("B").quantity(4.0).amount(700.0).currencyId("EUR").fee(0.0)
-                .shortName("VWCE").exchange("XETRA").accountId(2L)
+                .buySell("B").quantity(new BigDecimal("4")).amount(new BigDecimal("700")).currencyId("EUR")
+                .fee(BigDecimal.ZERO).shortName("VWCE").exchange("XETRA").accountId(2L)
                 .transactionDate(LocalDate.of(2024, 1, 11)).build(), this.user.getId());
 
         List<ETFInvestmentDTO> vwce = this.etfInvestmentService
@@ -169,9 +170,9 @@ class ETFInvestmentServiceTest {
 
         Assertions.assertAll("Two exchanges stay two positions",
                 () -> assertEquals(2, vwce.size()),
-                () -> assertEquals(1000.0, vwce.stream().filter(i -> "MI".equals(i.getExchange()))
+                () -> assertDecimal("1000", vwce.stream().filter(i -> "MI".equals(i.getExchange()))
                         .findFirst().orElseThrow().getAmount()),
-                () -> assertEquals(700.0, vwce.stream().filter(i -> "XETRA".equals(i.getExchange()))
+                () -> assertDecimal("700", vwce.stream().filter(i -> "XETRA".equals(i.getExchange()))
                         .findFirst().orElseThrow().getAmount()));
     }
 
@@ -179,14 +180,14 @@ class ETFInvestmentServiceTest {
     @Transactional
     public void createInvestment_storesAmountCurrencyAndAccountOnTheInvestment() {
         ETFInvestmentDTO created = this.etfInvestmentService.createInvestment(ETFInvestmentDTO.builder()
-                .buySell("B").quantity(3.0).amount(123.45).currencyId("EUR").fee(1.0)
-                .shortName("VWCE").exchange("MI").accountId(2L)
+                .buySell("B").quantity(new BigDecimal("3")).amount(new BigDecimal("123.45")).currencyId("EUR")
+                .fee(BigDecimal.ONE).shortName("VWCE").exchange("MI").accountId(2L)
                 .transactionDate(LocalDate.of(2023, 9, 1)).build(), this.user.getId());
 
         ETFInvestment stored = this.etfInvestmentRepository.findByIdAndUserId(created.getId(), this.user.getId()).orElseThrow();
 
         Assertions.assertAll("Assert stored ETF investment",
-                () -> assertEquals(123.45, stored.getAmount()),
+                () -> assertDecimal("123.45", stored.getAmount()),
                 () -> assertEquals("EUR", stored.getCurrency().getId()),
                 () -> assertEquals(2L, stored.getAccount().getId()),
                 () -> assertEquals("ACCOUNT 2", created.getAccountName()),
@@ -198,8 +199,8 @@ class ETFInvestmentServiceTest {
     @Transactional
     public void createInvestment_rejectsAnAccountTheUserDoesNotOwn() {
         ETFInvestmentDTO dto = ETFInvestmentDTO.builder()
-                .buySell("B").quantity(3.0).amount(123.45).currencyId("EUR").fee(1.0)
-                .shortName("VWCE").exchange("MI").accountId(999L)
+                .buySell("B").quantity(new BigDecimal("3")).amount(new BigDecimal("123.45")).currencyId("EUR")
+                .fee(BigDecimal.ONE).shortName("VWCE").exchange("MI").accountId(999L)
                 .transactionDate(LocalDate.of(2023, 9, 1)).build();
 
         assertThrows(NoSuchElementException.class,
@@ -213,14 +214,14 @@ class ETFInvestmentServiceTest {
                 this.user.getId(), 2L).getFirst();
 
         this.etfInvestmentService.updateInvestment(ETFInvestmentDTO.builder()
-                .id(existing.getId()).buySell("B").quantity(5.0).amount(300.0).currencyId("EUR").fee(1.5)
-                .shortName("VWRL").exchange("AS").accountId(1L)
+                .id(existing.getId()).buySell("B").quantity(new BigDecimal("5")).amount(new BigDecimal("300"))
+                .currencyId("EUR").fee(new BigDecimal("1.5")).shortName("VWRL").exchange("AS").accountId(1L)
                 .transactionDate(existing.getTransactionDate()).build(), this.user.getId());
 
         ETFInvestment moved = this.etfInvestmentRepository.findByIdAndUserId(existing.getId(), this.user.getId()).orElseThrow();
 
         assertEquals(1L, moved.getAccount().getId());
-        assertEquals(300.0, moved.getAmount());
+        assertDecimal("300", moved.getAmount());
     }
 
     @Test
@@ -232,7 +233,8 @@ class ETFInvestmentServiceTest {
 
         List<ETFInvestment> inAccountTwo = this.etfInvestmentRepository
                 .findByUserIdAndAccountIdOrderByTransactionDateDesc(this.user.getId(), 2L);
-        assertTrue(inAccountTwo.stream().anyMatch(i -> i.getAmount() == 700.0 && "VWCE".equals(i.getEtf().getShortName())));
+        assertTrue(inAccountTwo.stream().anyMatch(i -> i.getAmount().compareTo(new BigDecimal("700")) == 0
+                && "VWCE".equals(i.getEtf().getShortName())));
     }
 
     @Test
@@ -255,5 +257,9 @@ class ETFInvestmentServiceTest {
 
     private MockMultipartFile csvFile(String content) {
         return new MockMultipartFile("file", "etf.csv", "text/csv", content.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private static void assertDecimal(String expected, BigDecimal actual) {
+        assertEquals(0, new BigDecimal(expected).compareTo(actual), () -> "expected " + expected + " but was " + actual);
     }
 }

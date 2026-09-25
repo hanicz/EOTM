@@ -61,9 +61,21 @@ class NetWorthControllerTest {
                 .points(List.of())
                 .months(List.of())
                 .build();
-        when(this.netWorthSnapshotService.getHistory(1L)).thenReturn(history);
+        when(this.netWorthSnapshotService.getHistory(1L, false)).thenReturn(history);
 
-        Assertions.assertEquals(history, this.netWorthController.getHistory(1L).getBody());
+        Assertions.assertEquals(history, this.netWorthController.getHistory(1L, false).getBody());
+    }
+
+    @Test
+    void getHistory_passesTheRefreshFlagThrough() {
+        NetWorthHistoryDTO history = NetWorthHistoryDTO.builder()
+                .currency("HUF")
+                .points(List.of())
+                .months(List.of())
+                .build();
+        when(this.netWorthSnapshotService.getHistory(1L, true)).thenReturn(history);
+
+        Assertions.assertEquals(history, this.netWorthController.getHistory(1L, true).getBody());
     }
 
     private NetWorthDTO netWorth() {

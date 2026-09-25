@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.HashSet;
@@ -81,7 +82,7 @@ public class WebkincstarImportService implements IExcelService {
                 Currency currency = this.getCurrency(this.stringValue(row, currencyColumn));
                 LocalDate valueDate = LocalDate.parse(this.stringValue(row, valueDateColumn),
                         DateFormats.YYYY_MM_DD_DOTTED_SUFFIX);
-                Double amount = this.numericValue(row, amountColumn);
+                BigDecimal amount = this.numericValue(row, amountColumn);
 
                 boolean isNew;
                 if (INTEREST_PAYMENT.equals(type)) {
@@ -108,7 +109,7 @@ public class WebkincstarImportService implements IExcelService {
     }
 
     private boolean upsertTransaction(Long userId, User user, Security security, Currency currency,
-                                      LocalDate transactionDate, Double amount, int quantity, String buySell,
+                                      LocalDate transactionDate, BigDecimal amount, int quantity, String buySell,
                                       Set<Long> claimed) {
         for (SecurityTransaction existing : this.securityTransactionRepository
                 .findByUserIdAndSecurity_IdAndTransactionDateAndBuySellAndQuantityAndAmountOrderById(
@@ -130,7 +131,7 @@ public class WebkincstarImportService implements IExcelService {
     }
 
     private boolean upsertInterest(Long userId, User user, Security security, Currency currency,
-                                   LocalDate interestDate, Double amount, Set<Long> claimed) {
+                                   LocalDate interestDate, BigDecimal amount, Set<Long> claimed) {
         for (Interest existing : this.interestRepository
                 .findByUserIdAndSecurity_IdAndInterestDateAndAmountAndCurrency_IdOrderById(
                         userId, security.getId(), interestDate, amount, currency.getId())) {

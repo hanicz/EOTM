@@ -117,7 +117,7 @@ public class TaxableEventService implements ICSVService {
                                  Map<String, NavigableMap<LocalDate, BigDecimal>> rates, boolean paid) {
         Map.Entry<LocalDate, BigDecimal> rate = this.rateOn(rates, transaction.getCurrency().getId(),
                 transaction.getBookingDate());
-        BigDecimal amountInHuf = BigDecimal.valueOf(transaction.getAmount())
+        BigDecimal amountInHuf = transaction.getAmount()
                 .multiply(rate.getValue()).setScale(2, RoundingMode.HALF_UP);
         TaxBreakdownDTO tax = this.taxCalculator.calculateTax(amountInHuf);
 
@@ -143,7 +143,7 @@ public class TaxableEventService implements ICSVService {
                 .type(transaction.getType())
                 .partnerName(transaction.getPartnerName())
                 .memo(transaction.getMemo())
-                .amount(BigDecimal.valueOf(transaction.getAmount()).setScale(2, RoundingMode.HALF_UP))
+                .amount(transaction.getAmount().setScale(2, RoundingMode.HALF_UP))
                 .currencyId(transaction.getCurrency().getId())
                 .rate(details.getRate())
                 .rateDate(details.getRateDate())

@@ -22,6 +22,12 @@ class LotsTest {
         private LocalDate transactionDate;
         private Integer quantity;
         private Double amount;
+        private Long id;
+
+        @Override
+        public Long recordId() {
+            return this.id;
+        }
 
         @Override
         public void negateAmountAndQuantity() {
@@ -43,7 +49,39 @@ class LotsTest {
     }
 
     private Trade trade(String symbol, String buySell, String date, int quantity, double amount) {
-        return new Trade(symbol, buySell, LocalDate.parse(date), quantity, amount);
+        return new Trade(symbol, buySell, LocalDate.parse(date), quantity, amount, null);
+    }
+
+    private Trade trade(long id, String buySell, String date, int quantity, double amount) {
+        return new Trade("AAA", buySell, LocalDate.parse(date), quantity, amount, id);
+    }
+
+    @Test
+    public void aSameDaySellEnteredFirstClosesThePositionBeforeTheBuy() {
+        Map<String, Trade> lots = Lots.aggregate(List.of(
+                this.trade(3L, "B", "2024-02-01", 5, 50.0),
+                this.trade(2L, "S", "2024-02-01", 10, 150.0),
+                this.trade(1L, "B", "2024-01-01", 10, 100.0)), Trade::getSymbol);
+
+        Assertions.assertAll("The earlier-entered sell closes the old lot and the buy starts a new one",
+                () -> Assertions.assertEquals(2, lots.size()),
+                () -> Assertions.assertEquals(0, lots.get("AAA_0").getQuantity()),
+                () -> Assertions.assertEquals(-50.0, lots.get("AAA_0").getAmount()),
+                () -> Assertions.assertEquals(5, lots.get("AAA_1").getQuantity()),
+                () -> Assertions.assertEquals(50.0, lots.get("AAA_1").getAmount()));
+    }
+
+    @Test
+    public void aSameDayBuyEnteredFirstJoinsThePositionBeforeTheSell() {
+        Map<String, Trade> lots = Lots.aggregate(List.of(
+                this.trade(3L, "S", "2024-02-01", 10, 150.0),
+                this.trade(2L, "B", "2024-02-01", 5, 50.0),
+                this.trade(1L, "B", "2024-01-01", 10, 100.0)), Trade::getSymbol);
+
+        Assertions.assertAll("The earlier-entered buy is added before the sell, so no lot closes",
+                () -> Assertions.assertEquals(1, lots.size()),
+                () -> Assertions.assertEquals(5, lots.get("AAA_0").getQuantity()),
+                () -> Assertions.assertEquals(0.0, lots.get("AAA_0").getAmount()));
     }
 
     @Test

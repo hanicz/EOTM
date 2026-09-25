@@ -180,7 +180,7 @@ public class RSUGrantService implements ICSVService {
                 .exchange(grant.getExchange())
                 .currency(grant.getCurrency())
                 .date(tranche.vestDate().isAfter(today) ? today : tranche.vestDate())
-                .quantity((double) tranche.quantity())
+                .quantity(BigDecimal.valueOf(tranche.quantity()))
                 .build();
     }
 

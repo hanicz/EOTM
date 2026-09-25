@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -25,8 +26,8 @@ class TransactionDTOTest {
     public void mergeInvestments() {
         TransactionDTO tDTO1 = this.getBaseDTO();
         TransactionDTO tDTO2 = TransactionDTO.builder()
-                .amount(15.0)
-                .quantity(667.4)
+                .amount(new BigDecimal("15"))
+                .quantity(new BigDecimal("667.4"))
                 .buySell("B")
                 .symbol("BTC")
                 .build();
@@ -35,8 +36,8 @@ class TransactionDTOTest {
         tDTO1.merge(tDTO2);
 
         Assertions.assertAll("Assert all changing values",
-                () -> assertEquals(tDTO2.getAmount() + baseDTO.getAmount(), tDTO1.getAmount()),
-                () -> assertEquals(tDTO2.getQuantity() + baseDTO.getQuantity(), tDTO1.getQuantity()),
+                () -> assertDecimal(tDTO2.getAmount().add(baseDTO.getAmount()), tDTO1.getAmount()),
+                () -> assertDecimal(tDTO2.getQuantity().add(baseDTO.getQuantity()), tDTO1.getQuantity()),
                 () -> assertEquals("B", tDTO1.getBuySell()));
     }
 
@@ -45,8 +46,8 @@ class TransactionDTOTest {
         TransactionDTO tDTO1 = this.getBaseDTO();
         tDTO1.setBuySell("S");
         TransactionDTO tDTO2 = TransactionDTO.builder()
-                .amount(10.0)
-                .quantity(6.0)
+                .amount(new BigDecimal("10"))
+                .quantity(new BigDecimal("6"))
                 .buySell("B")
                 .symbol("BTC")
                 .build();
@@ -55,34 +56,34 @@ class TransactionDTOTest {
         tDTO1.merge(tDTO2);
 
         Assertions.assertAll("Assert all changing values",
-                () -> assertEquals(tDTO2.getAmount() + baseDTO.getAmount(), tDTO1.getAmount()),
-                () -> assertEquals(tDTO2.getQuantity() + baseDTO.getQuantity(), tDTO1.getQuantity()),
+                () -> assertDecimal(tDTO2.getAmount().add(baseDTO.getAmount()), tDTO1.getAmount()),
+                () -> assertDecimal(tDTO2.getQuantity().add(baseDTO.getQuantity()), tDTO1.getQuantity()),
                 () -> assertEquals("B", tDTO1.getBuySell()));
     }
 
     @Test
-    public void mergeSnapsAFloatingPointResidueToAClosedPosition() {
+    public void mergeClosesAPositionExactly() {
         TransactionDTO tDTO1 = TransactionDTO.builder()
-                .amount(300.0).quantity(0.3).buySell("B").symbol("BTC").build();
+                .amount(new BigDecimal("300")).quantity(new BigDecimal("0.3")).buySell("B").symbol("BTC").build();
         TransactionDTO tDTO2 = TransactionDTO.builder()
-                .amount(-350.0).quantity(-0.1).buySell("B").symbol("BTC").build();
+                .amount(new BigDecimal("-350")).quantity(new BigDecimal("-0.1")).buySell("B").symbol("BTC").build();
         TransactionDTO tDTO3 = TransactionDTO.builder()
-                .amount(-100.0).quantity(-0.2).buySell("B").symbol("BTC").build();
+                .amount(new BigDecimal("-100")).quantity(new BigDecimal("-0.2")).buySell("B").symbol("BTC").build();
 
         tDTO1.merge(tDTO2).merge(tDTO3);
 
-        Assertions.assertAll("0.3 - 0.1 - 0.2 leaves a residue that must still count as closed",
-                () -> assertEquals(0.0, tDTO1.getQuantity()),
+        Assertions.assertAll("0.3 - 0.1 - 0.2 is exactly zero and counts as closed",
+                () -> assertDecimal("0", tDTO1.getQuantity()),
                 () -> Assertions.assertTrue(tDTO1.isClosed()),
-                () -> assertEquals(-150.0, tDTO1.getAmount()));
+                () -> assertDecimal("-150", tDTO1.getAmount()));
     }
 
     @Test
     public void mergeInvestmentsDifferentSymbol() {
         TransactionDTO tDTO1 = this.getBaseDTO();
         TransactionDTO tDTO2 = TransactionDTO.builder()
-                .amount(15.0)
-                .quantity(667.4)
+                .amount(new BigDecimal("15"))
+                .quantity(new BigDecimal("667.4"))
                 .buySell("B")
                 .symbol("ETH")
                 .build();
@@ -90,39 +91,39 @@ class TransactionDTOTest {
         tDTO1.merge(tDTO2);
 
         Assertions.assertAll("Assert all changing values",
-                () -> assertEquals(15.0, tDTO1.getAmount()),
-                () -> assertEquals(667.4, tDTO1.getQuantity()),
+                () -> assertDecimal("15", tDTO1.getAmount()),
+                () -> assertDecimal("667.4", tDTO1.getQuantity()),
                 () -> assertEquals("B", tDTO1.getBuySell()));
     }
 
     @Test
     public void negateAmountAndQuantity() {
-        TransactionDTO tDTO = TransactionDTO.builder().amount(15.0).quantity(667.2).build();
+        TransactionDTO tDTO = TransactionDTO.builder().amount(new BigDecimal("15")).quantity(new BigDecimal("667.2")).build();
         tDTO.negateAmountAndQuantity();
 
         Assertions.assertAll("Assert all negated values",
-                () -> assertEquals(-15.0, tDTO.getAmount()),
-                () -> assertEquals(-667.2, tDTO.getQuantity()));
+                () -> assertDecimal("-15", tDTO.getAmount()),
+                () -> assertDecimal("-667.2", tDTO.getQuantity()));
     }
 
     @Test
     public void negateAmountAndZero() {
-        TransactionDTO tDTO = TransactionDTO.builder().amount(0.0).quantity(0.0).build();
+        TransactionDTO tDTO = TransactionDTO.builder().amount(BigDecimal.ZERO).quantity(BigDecimal.ZERO).build();
         tDTO.negateAmountAndQuantity();
 
         Assertions.assertAll("Assert all negated values",
-                () -> assertEquals(-0.0, tDTO.getAmount()),
-                () -> assertEquals(-0.0, tDTO.getQuantity()));
+                () -> assertDecimal("0", tDTO.getAmount()),
+                () -> assertDecimal("0", tDTO.getQuantity()));
     }
 
     @Test
     public void negateAmountAndMinus() {
-        TransactionDTO tDTO = TransactionDTO.builder().amount(-78.1).quantity(-6123.3).build();
+        TransactionDTO tDTO = TransactionDTO.builder().amount(new BigDecimal("-78.1")).quantity(new BigDecimal("-6123.3")).build();
         tDTO.negateAmountAndQuantity();
 
         Assertions.assertAll("Assert all negated values",
-                () -> assertEquals(78.1, tDTO.getAmount()),
-                () -> assertEquals(6123.3, tDTO.getQuantity()));
+                () -> assertDecimal("78.1", tDTO.getAmount()),
+                () -> assertDecimal("6123.3", tDTO.getQuantity()));
     }
 
     @Test
@@ -149,13 +150,13 @@ class TransactionDTOTest {
 
         Assertions.assertAll("Assert all headers",
                 () -> assertEquals(1L, tDTO.getCSVRecord()[0]),
-                () -> assertEquals(667.4, tDTO.getCSVRecord()[1]),
+                () -> assertEquals("667.4", tDTO.getCSVRecord()[1]),
                 () -> assertEquals("B", tDTO.getCSVRecord()[2]),
                 () -> assertEquals(ld, tDTO.getCSVRecord()[3]),
                 () -> assertEquals("BTC", tDTO.getCSVRecord()[4]),
-                () -> assertEquals(15.0, tDTO.getCSVRecord()[5]),
+                () -> assertEquals("15", tDTO.getCSVRecord()[5]),
                 () -> assertEquals("USD", tDTO.getCSVRecord()[6]),
-                () -> assertEquals(3.4, tDTO.getCSVRecord()[7])
+                () -> assertEquals("3.4", tDTO.getCSVRecord()[7])
         );
     }
 
@@ -174,25 +175,33 @@ class TransactionDTOTest {
 
         Assertions.assertAll("Assert all values",
                 () -> assertEquals(1L, tDTO.getId()),
-                () -> assertEquals(667.4, tDTO.getQuantity()),
+                () -> assertDecimal("667.4", tDTO.getQuantity()),
                 () -> assertEquals("B", tDTO.getBuySell()),
                 () -> assertEquals(LocalDate.parse("2020-01-01"), tDTO.getTransactionDate()),
                 () -> assertEquals("BTC", tDTO.getSymbol()),
-                () -> assertEquals(15.0, tDTO.getAmount()),
+                () -> assertDecimal("15", tDTO.getAmount()),
                 () -> assertEquals("USD", tDTO.getCurrencyId()),
-                () -> assertEquals(3.4, tDTO.getFee())
+                () -> assertDecimal("3.4", tDTO.getFee())
         );
     }
 
     private TransactionDTO getBaseDTO() {
         return TransactionDTO.builder()
                 .id(1L)
-                .amount(15.0)
-                .quantity(667.4)
+                .amount(new BigDecimal("15"))
+                .quantity(new BigDecimal("667.4"))
                 .buySell("B")
                 .symbol("BTC")
                 .currencyId("USD")
-                .fee(3.4)
+                .fee(new BigDecimal("3.4"))
                 .build();
+    }
+
+    private static void assertDecimal(String expected, BigDecimal actual) {
+        assertDecimal(new BigDecimal(expected), actual);
+    }
+
+    private static void assertDecimal(BigDecimal expected, BigDecimal actual) {
+        assertEquals(0, expected.compareTo(actual), () -> "expected " + expected + " but was " + actual);
     }
 }

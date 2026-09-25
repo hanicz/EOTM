@@ -9,6 +9,7 @@ import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
@@ -30,8 +31,8 @@ public class ETFInvestment extends AuditedEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Double quantity;
+    @Column(nullable = false, precision = 28, scale = 10)
+    private BigDecimal quantity;
 
     @Column(nullable = false)
     private String buySell;
@@ -39,10 +40,11 @@ public class ETFInvestment extends AuditedEntity {
     @Column(nullable = false)
     private LocalDate transactionDate;
 
-    private Double fee;
+    @Column(precision = 19, scale = 4)
+    private BigDecimal fee;
 
-    @Column(nullable = false)
-    private Double amount;
+    @Column(nullable = false, precision = 19, scale = 4)
+    private BigDecimal amount;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

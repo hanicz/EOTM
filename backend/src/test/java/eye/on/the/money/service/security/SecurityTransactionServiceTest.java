@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -50,13 +51,13 @@ class SecurityTransactionServiceTest {
     private final Security security = Security.builder().id("SEC1").name("Security One").build();
 
     private SecurityTransaction buildTransaction(Long id, String buySell, int quantity, double amount) {
-        return SecurityTransaction.builder().id(id).buySell(buySell).quantity(quantity).amount(amount)
+        return SecurityTransaction.builder().id(id).buySell(buySell).quantity(quantity).amount(BigDecimal.valueOf(amount))
                 .transactionDate(LocalDate.of(2025, 6, 1))
                 .currency(this.currency).security(this.security).user(this.user).build();
     }
 
     private SecurityTransactionDTO buildDTO(Long id, String buySell, int quantity, double amount) {
-        return SecurityTransactionDTO.builder().transactionId(id).buySell(buySell).quantity(quantity).amount(amount)
+        return SecurityTransactionDTO.builder().transactionId(id).buySell(buySell).quantity(quantity).amount(BigDecimal.valueOf(amount))
                 .transactionDate(LocalDate.of(2025, 6, 1)).currencyId("EUR").securityId("SEC1")
                 .securityName("Security One").build();
     }
@@ -71,7 +72,7 @@ class SecurityTransactionServiceTest {
         List<SecurityTransactionDTO> result = this.securityTransactionService.getTransactions(1L);
 
         assertEquals(1, result.size());
-        assertEquals(500.0, result.get(0).getAmount());
+        assertDecimal(500.0, result.get(0).getAmount());
     }
 
     @Test
@@ -103,7 +104,7 @@ class SecurityTransactionServiceTest {
 
         assertEquals(1, result.size());
         assertEquals(12, result.get(0).getQuantity());
-        assertEquals(620.0, result.get(0).getAmount());
+        assertDecimal(620.0, result.get(0).getAmount());
     }
 
     @Test
@@ -146,19 +147,19 @@ class SecurityTransactionServiceTest {
 
         assertEquals(1, result.size());
         assertEquals(5, result.get(0).getQuantity());
-        assertEquals(250.0, result.get(0).getAmount());
+        assertDecimal(250.0, result.get(0).getAmount());
     }
 
     @Test
     void getCurrentHoldings_sortsByAmountDescending() {
         Security sec2 = Security.builder().id("SEC2").name("Security Two").build();
         SecurityTransaction tx1 = this.buildTransaction(1L, "B", 10, 200.0);
-        SecurityTransaction tx2 = SecurityTransaction.builder().id(2L).buySell("B").quantity(5).amount(1000.0)
+        SecurityTransaction tx2 = SecurityTransaction.builder().id(2L).buySell("B").quantity(5).amount(new BigDecimal("1000"))
                 .transactionDate(LocalDate.of(2025, 6, 1))
                 .currency(this.currency).security(sec2).user(this.user).build();
 
         SecurityTransactionDTO dto1 = this.buildDTO(1L, "B", 10, 200.0);
-        SecurityTransactionDTO dto2 = SecurityTransactionDTO.builder().transactionId(2L).buySell("B").quantity(5).amount(1000.0)
+        SecurityTransactionDTO dto2 = SecurityTransactionDTO.builder().transactionId(2L).buySell("B").quantity(5).amount(new BigDecimal("1000"))
                 .transactionDate(LocalDate.of(2025, 6, 1)).currencyId("EUR").securityId("SEC2").securityName("Security Two").build();
 
         when(this.securityTransactionRepository.findByUserIdOrderByTransactionDate(1L))
@@ -169,8 +170,8 @@ class SecurityTransactionServiceTest {
         List<SecurityTransactionDTO> result = this.securityTransactionService.getCurrentHoldings(1L);
 
         assertEquals(2, result.size());
-        assertEquals(1000.0, result.get(0).getAmount());
-        assertEquals(200.0, result.get(1).getAmount());
+        assertDecimal(1000.0, result.get(0).getAmount());
+        assertDecimal(200.0, result.get(1).getAmount());
     }
 
     @Test
@@ -234,5 +235,9 @@ class SecurityTransactionServiceTest {
         this.securityTransactionService.deleteTransactionById(1L, ids);
 
         verify(this.securityTransactionRepository, times(1)).deleteByUserIdAndIdIn(1L, ids);
+    }
+
+    private static void assertDecimal(double expected, BigDecimal actual) {
+        assertEquals(0, BigDecimal.valueOf(expected).compareTo(actual), () -> "expected " + expected + " but was " + actual);
     }
 }

@@ -14,6 +14,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,9 +34,9 @@ class InterestControllerTest {
 
     private List<InterestDTO> createInterestList() {
         List<InterestDTO> list = new ArrayList<>();
-        list.add(InterestDTO.builder().interestId(1L).amount(50.0).interestDate(LocalDate.now())
+        list.add(InterestDTO.builder().interestId(1L).amount(new BigDecimal("50")).interestDate(LocalDate.now())
                 .securityId("SEC1").securityName("Security One").currencyId("EUR").build());
-        list.add(InterestDTO.builder().interestId(2L).amount(75.0).interestDate(LocalDate.now())
+        list.add(InterestDTO.builder().interestId(2L).amount(new BigDecimal("75")).interestDate(LocalDate.now())
                 .securityId("SEC2").securityName("Security Two").currencyId("USD").build());
         return list;
     }
@@ -50,7 +51,7 @@ class InterestControllerTest {
 
     @Test
     void createInterest() {
-        InterestDTO dto = InterestDTO.builder().interestId(1L).amount(50.0).interestDate(LocalDate.now())
+        InterestDTO dto = InterestDTO.builder().interestId(1L).amount(new BigDecimal("50")).interestDate(LocalDate.now())
                 .securityId("SEC1").securityName("Security One").currencyId("EUR").build();
         when(this.interestService.createInterest(dto, 1L)).thenReturn(dto);
 
@@ -77,7 +78,7 @@ class InterestControllerTest {
 
     @Test
     void updateInterest() {
-        InterestDTO dto = InterestDTO.builder().interestId(1L).amount(75.0).interestDate(LocalDate.now())
+        InterestDTO dto = InterestDTO.builder().interestId(1L).amount(new BigDecimal("75")).interestDate(LocalDate.now())
                 .securityId("SEC1").securityName("Security One").currencyId("EUR").build();
         when(this.interestService.updateInterest(dto, 1L)).thenReturn(dto);
 

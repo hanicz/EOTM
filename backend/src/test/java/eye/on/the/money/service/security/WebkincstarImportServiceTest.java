@@ -28,6 +28,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -160,7 +161,7 @@ class WebkincstarImportServiceTest {
         SecurityTransaction buy = transactions.getAllValues().get(0);
         assertEquals("B", buy.getBuySell());
         assertEquals(1000000, buy.getQuantity());
-        assertEquals(1012842.0, buy.getAmount());
+        assertEquals(new BigDecimal("1012842"), buy.getAmount());
         assertEquals(LocalDate.of(2026, 1, 20), buy.getTransactionDate());
         assertEquals(BOND_ID, buy.getSecurity().getId());
         assertEquals("HUF", buy.getCurrency().getId());
@@ -169,7 +170,7 @@ class WebkincstarImportServiceTest {
 
         ArgumentCaptor<Interest> interests = ArgumentCaptor.forClass(Interest.class);
         verify(this.interestRepository).save(interests.capture());
-        assertEquals(25000.0, interests.getValue().getAmount());
+        assertEquals(new BigDecimal("25000"), interests.getValue().getAmount());
         assertEquals(LocalDate.of(2026, 3, 20), interests.getValue().getInterestDate());
         assertEquals(BOND_ID, interests.getValue().getSecurity().getId());
     }
@@ -183,7 +184,7 @@ class WebkincstarImportServiceTest {
         ArgumentCaptor<SecurityTransaction> transactions = ArgumentCaptor.forClass(SecurityTransaction.class);
         verify(this.securityTransactionRepository).save(transactions.capture());
         assertEquals(89, transactions.getValue().getQuantity());
-        assertEquals(89.21, transactions.getValue().getAmount());
+        assertEquals(new BigDecimal("89.21"), transactions.getValue().getAmount());
     }
 
     @Test

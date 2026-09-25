@@ -24,16 +24,15 @@ public class MonthlyCategorySpendingDTO implements CSVHelper {
     private Long categoryId;
     private String categoryName;
     private CategoryColor categoryColor;
-    private Double amount;
+    private BigDecimal amount;
     private Long transactionCount;
 
     public String getCategoryName() {
         return this.categoryName == null ? UNCATEGORIZED : this.categoryName;
     }
 
-    public Double getAmount() {
-        return this.amount == null ? null
-                : BigDecimal.valueOf(this.amount).setScale(2, RoundingMode.HALF_UP).doubleValue();
+    public BigDecimal getAmount() {
+        return this.amount == null ? null : this.amount.setScale(2, RoundingMode.HALF_UP);
     }
 
     @Override

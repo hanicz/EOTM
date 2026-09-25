@@ -72,8 +72,8 @@ class FireSnapshotServiceTest {
                 .year(year)
                 .month(month)
                 .currencyId(currency)
-                .moneyIn(in)
-                .moneyOut(out)
+                .moneyIn(BigDecimal.valueOf(in))
+                .moneyOut(BigDecimal.valueOf(out))
                 .build();
     }
 

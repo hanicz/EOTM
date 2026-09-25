@@ -63,7 +63,7 @@ class RSUTaxServiceTest {
                 .id(id)
                 .buySell(buySell)
                 .transactionDate(transactionDate)
-                .quantity(quantity)
+                .quantity(BigDecimal.valueOf(quantity))
                 .stock(Stock.builder().id("aapl.us").shortName("AAPL").exchange("US").name("Apple").build())
                 .user(User.builder().id(1L).email(USER_EMAIL).build())
                 .build();
@@ -94,7 +94,7 @@ class RSUTaxServiceTest {
 
     private RSUTaxDTO valued() {
         return RSUTaxDTO.builder()
-                .shortName("AAPL").exchange("US").date(VEST_DATE).quantity(50.0).currency("USD")
+                .shortName("AAPL").exchange("US").date(VEST_DATE).quantity(new BigDecimal("50")).currency("USD")
                 .price(new BigDecimal("214.50")).priceDate(VEST_DATE)
                 .amount(new BigDecimal("10725.00"))
                 .rate(new BigDecimal("368.42")).rateDate(VEST_DATE)
@@ -161,7 +161,7 @@ class RSUTaxServiceTest {
         assertEquals("AAPL", requested.getShortName());
         assertEquals("US", requested.getExchange());
         assertEquals(VEST_DATE, requested.getDate());
-        assertEquals(50.0, requested.getQuantity());
+        assertEquals(0, new BigDecimal("50").compareTo(requested.getQuantity()));
     }
 
     @Test
@@ -257,7 +257,7 @@ class RSUTaxServiceTest {
         assertEquals(1L, item.getId());
         assertEquals("AAPL", item.getShortName());
         assertEquals("US", item.getExchange());
-        assertEquals(50.0, item.getQuantity());
+        assertEquals(0, new BigDecimal("50").compareTo(item.getQuantity()));
         assertEquals("USD", item.getCurrency());
         assertEquals(0, new BigDecimal("214.50").compareTo(item.getPrice()));
         assertEquals(0, new BigDecimal("10725.00").compareTo(item.getAmount()));

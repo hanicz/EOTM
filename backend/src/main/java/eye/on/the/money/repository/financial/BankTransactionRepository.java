@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +32,7 @@ public interface BankTransactionRepository extends JpaRepository<BankTransaction
     Optional<BankTransaction> findByIdAndUserId(Long id, Long userId);
 
     Optional<BankTransaction> findByUserIdAndBankTransactionIdAndBookingDateAndTypeAndAmountAndMemo(
-            Long userId, String bankTransactionId, LocalDate bookingDate, String type, Double amount, String memo);
+            Long userId, String bankTransactionId, LocalDate bookingDate, String type, BigDecimal amount, String memo);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE BankTransaction b SET b.excluded = :excluded, b.updatedAt = LOCAL DATETIME WHERE b.user.id = :userId AND b.id IN :ids")
@@ -43,8 +44,8 @@ public interface BankTransactionRepository extends JpaRepository<BankTransaction
                 YEAR(b.bookingDate),
                 MONTH(b.bookingDate),
                 b.currency.id,
-                SUM(CASE WHEN b.amount > 0 THEN b.amount ELSE 0.0 END),
-                SUM(CASE WHEN b.amount < 0 THEN b.amount ELSE 0.0 END))
+                SUM(CASE WHEN b.amount > 0 THEN b.amount ELSE 0 END),
+                SUM(CASE WHEN b.amount < 0 THEN b.amount ELSE 0 END))
             FROM BankTransaction b
             WHERE b.user.id = :userId AND b.excluded = false
             GROUP BY YEAR(b.bookingDate), MONTH(b.bookingDate), b.currency.id
@@ -66,8 +67,8 @@ public interface BankTransactionRepository extends JpaRepository<BankTransaction
                 YEAR(b.bookingDate),
                 MONTH(b.bookingDate),
                 b.currency.id,
-                SUM(CASE WHEN b.amount > 0 THEN b.amount ELSE 0.0 END),
-                SUM(CASE WHEN b.amount < 0 THEN b.amount ELSE 0.0 END))
+                SUM(CASE WHEN b.amount > 0 THEN b.amount ELSE 0 END),
+                SUM(CASE WHEN b.amount < 0 THEN b.amount ELSE 0 END))
             FROM BankTransaction b
             WHERE b.user.id = :userId AND b.excluded = false
                 AND b.bookingDate BETWEEN :from AND :to

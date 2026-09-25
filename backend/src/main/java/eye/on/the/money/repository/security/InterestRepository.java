@@ -3,6 +3,7 @@ package eye.on.the.money.repository.security;
 import eye.on.the.money.model.security.Interest;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -18,5 +19,5 @@ public interface InterestRepository extends JpaRepository<Interest, Long> {
     Optional<Interest> findByIdAndUserId(Long id, Long userId);
 
     List<Interest> findByUserIdAndSecurity_IdAndInterestDateAndAmountAndCurrency_IdOrderById(
-            Long userId, String securityId, LocalDate interestDate, Double amount, String currencyId);
+            Long userId, String securityId, LocalDate interestDate, BigDecimal amount, String currencyId);
 }

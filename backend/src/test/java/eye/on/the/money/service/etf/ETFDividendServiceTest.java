@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -101,7 +102,7 @@ class ETFDividendServiceTest {
     private ETFDividendDTO getETFDividendDTO() throws ParseException {
         return ETFDividendDTO.builder()
                 .id(1L)
-                .amount(105.7)
+                .amount(new BigDecimal("105.7"))
                 .dividendDate(LocalDate.parse("2021-07-03", FORMATTER))
                 .shortName("VWRL")
                 .name("Vang FTSE AllW-D")

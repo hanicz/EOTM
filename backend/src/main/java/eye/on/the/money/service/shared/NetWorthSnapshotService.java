@@ -71,15 +71,19 @@ public class NetWorthSnapshotService {
         }
     }
 
-    public NetWorthHistoryDTO getHistory(Long userId) {
-        return this.getHistory(userId, this.today());
+    public NetWorthHistoryDTO getHistory(Long userId, boolean refresh) {
+        return this.getHistory(userId, refresh, this.today());
     }
 
-    NetWorthHistoryDTO getHistory(Long userId, LocalDate today) {
-        if (!this.netWorthSnapshotRepository.existsByUserIdAndSnapshotDate(userId, today)) {
+    NetWorthHistoryDTO getHistory(Long userId, boolean refresh, LocalDate today) {
+        if (refresh || !this.netWorthSnapshotRepository.existsByUserIdAndSnapshotDate(userId, today)) {
             try {
                 NetWorthDTO netWorth = this.netWorthService.getNetWorth(userId, CURRENCY, false);
-                this.netWorthSnapshotWriter.insertIfMissing(userId, today, netWorth.getAssets());
+                if (refresh) {
+                    this.netWorthSnapshotWriter.replace(userId, today, netWorth.getAssets());
+                } else {
+                    this.netWorthSnapshotWriter.insertIfMissing(userId, today, netWorth.getAssets());
+                }
             } catch (APIException | DataAccessException e) {
                 log.warn("Unable to capture today's net worth snapshot, returning the stored history", e);
             }
@@ -105,12 +109,12 @@ public class NetWorthSnapshotService {
     }
 
     private NetWorthPointDTO point(LocalDate date, List<NetWorthSnapshot> rows) {
-        double spent = 0;
-        double worth = 0;
+        BigDecimal spent = BigDecimal.ZERO;
+        BigDecimal worth = BigDecimal.ZERO;
         Map<String, BigDecimal> assetWorth = new LinkedHashMap<>();
         for (NetWorthSnapshot row : rows) {
-            spent += row.getSpent();
-            worth += row.getWorth();
+            spent = spent.add(row.getSpent());
+            worth = worth.add(row.getWorth());
             assetWorth.put(row.getAssetClass(), this.scaled(row.getWorth()));
         }
 
@@ -157,8 +161,8 @@ public class NetWorthSnapshotService {
         return change.multiply(HUNDRED).divide(base, SCALE, RoundingMode.HALF_UP);
     }
 
-    private BigDecimal scaled(double value) {
-        return BigDecimal.valueOf(value).setScale(SCALE, RoundingMode.HALF_UP);
+    private BigDecimal scaled(BigDecimal value) {
+        return value.setScale(SCALE, RoundingMode.HALF_UP);
     }
 
     private LocalDate today() {

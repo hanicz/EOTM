@@ -177,12 +177,12 @@ public class MonthlyReportHtmlBuilder {
         for (MonthlyCashFlowDTO flow : report.getCashFlow()) {
             rows.append(this.row("In", this.amount(flow.getMoneyIn(), flow.getCurrencyId()), INK));
             rows.append(this.row("Out", this.amount(flow.getMoneyOut(), flow.getCurrencyId()), INK));
-            Double net = flow.getNet();
+            BigDecimal net = flow.getNet();
             rows.append(this.row("Net", this.amount(net, flow.getCurrencyId()),
-                    net != null && net < 0 ? NEGATIVE : POSITIVE));
-            Double saved = flow.getSavedPercent();
+                    net != null && net.signum() < 0 ? NEGATIVE : POSITIVE));
+            BigDecimal saved = flow.getSavedPercent();
             if (saved != null) {
-                rows.append(this.row("Saved", format("%.1f%%", saved), saved < 0 ? NEGATIVE : POSITIVE));
+                rows.append(this.row("Saved", format("%.1f%%", saved), saved.signum() < 0 ? NEGATIVE : POSITIVE));
             }
         }
         return this.section("Cash flow", this.table(rows.toString()));
@@ -223,7 +223,7 @@ public class MonthlyReportHtmlBuilder {
                 + "</tr>";
     }
 
-    private String tradeRow(String date, String side, String name, Double value, String currency) {
+    private String tradeRow(String date, String side, String name, BigDecimal value, String currency) {
         return this.row(date + "  " + side + "  " + name, this.amount(value, currency), INK);
     }
 
@@ -260,7 +260,7 @@ public class MonthlyReportHtmlBuilder {
         return this.formatter().format(value) + " " + currency;
     }
 
-    private String amount(Double value, String currency) {
+    private String amount(BigDecimal value, String currency) {
         if (value == null) return "-";
         return this.formatter().format(value) + " " + (currency == null ? "" : currency.toUpperCase());
     }

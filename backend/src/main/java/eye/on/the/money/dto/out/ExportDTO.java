@@ -3,6 +3,7 @@ package eye.on.the.money.dto.out;
 import eye.on.the.money.util.Generated;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -60,7 +61,7 @@ public class ExportDTO {
     public record SecuritiesSection(List<SecurityTransactionDTO> transactions, List<InterestDTO> interest) {
     }
 
-    public record CashSection(Double amount, String currency) {
+    public record CashSection(BigDecimal amount, String currency) {
     }
 
     public record NoteSection(String content, LocalDateTime updatedAt) {

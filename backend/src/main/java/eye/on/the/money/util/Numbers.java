@@ -2,6 +2,9 @@ package eye.on.the.money.util;
 
 import eye.on.the.money.exception.ValidationException;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+
 public final class Numbers {
 
     private static final char NO_BREAK_SPACE = (char) 0x00A0;
@@ -9,10 +12,21 @@ public final class Numbers {
     private static final char GROUPING_SEPARATOR = '.';
     private static final char DECIMAL_SEPARATOR = ',';
 
+    public static final MathContext CONTEXT = MathContext.DECIMAL64;
+    public static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
+
     private Numbers() {
     }
 
-    public static Double parseHungarian(String number) {
+    public static BigDecimal divide(BigDecimal dividend, BigDecimal divisor) {
+        return dividend.divide(divisor, Numbers.CONTEXT);
+    }
+
+    public static BigDecimal orZero(BigDecimal value) {
+        return value == null ? BigDecimal.ZERO : value;
+    }
+
+    public static BigDecimal parseHungarian(String number) {
         StringBuilder normalised = new StringBuilder();
         for (char character : number.toCharArray()) {
             if (Character.isWhitespace(character) || character == NO_BREAK_SPACE
@@ -24,6 +38,6 @@ public final class Numbers {
         if (normalised.isEmpty()) {
             throw new ValidationException("Missing amount");
         }
-        return Double.parseDouble(normalised.toString());
+        return new BigDecimal(normalised.toString());
     }
 }

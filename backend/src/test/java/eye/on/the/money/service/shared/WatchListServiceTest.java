@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -105,11 +106,11 @@ class WatchListServiceTest {
         List<CryptoWatchDTO> resultList = this.watchListService.getCryptoWatchlistByUserId(1L, "EUR");
 
         assertEquals(3, resultList.size());
-        assertEquals(44848.0, resultList.get(0).getLiveValue());
+        assertEquals(new BigDecimal("44848"), resultList.get(0).getLiveValue());
         assertEquals(2.502835261063895, resultList.get(0).getChange());
-        assertEquals(0.512461, resultList.get(1).getLiveValue());
+        assertEquals(new BigDecimal("0.512461"), resultList.get(1).getLiveValue());
         assertEquals(3.637176879372967, resultList.get(1).getChange());
-        assertEquals(2345.27, resultList.get(2).getLiveValue());
+        assertEquals(new BigDecimal("2345.27"), resultList.get(2).getLiveValue());
         assertEquals(1.7125094576440063, resultList.get(2).getChange());
     }
 

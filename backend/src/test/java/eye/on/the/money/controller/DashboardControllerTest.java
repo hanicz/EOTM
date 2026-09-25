@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +31,7 @@ class DashboardControllerTest {
     @Test
     void getConversionRates_returnsRates() {
         DashboardRatesDTO dto = DashboardRatesDTO.builder()
-                .rates(Map.of("USD", 1.08, "GBP", 0.86))
+                .rates(Map.of("USD", new BigDecimal("1.08"), "GBP", new BigDecimal("0.86")))
                 .build();
         when(this.dashboardService.getConversionRates(List.of("USD", "GBP"))).thenReturn(dto);
 
@@ -55,7 +56,7 @@ class DashboardControllerTest {
 
     @Test
     void getConversionRates_refreshBypassesTheCache() {
-        DashboardRatesDTO dto = DashboardRatesDTO.builder().rates(Map.of("USD", 1.08)).build();
+        DashboardRatesDTO dto = DashboardRatesDTO.builder().rates(Map.of("USD", new BigDecimal("1.08"))).build();
         when(this.dashboardService.refreshConversionRates(List.of("USD"))).thenReturn(dto);
 
         Assertions.assertEquals(dto, this.dashboardController.getConversionRates(List.of("USD"), true).getBody());

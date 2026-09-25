@@ -7,6 +7,8 @@ public interface Lot<T extends Lot<T>> {
 
     LocalDate getTransactionDate();
 
+    Long recordId();
+
     void negateAmountAndQuantity();
 
     T merge(T other);

@@ -21,7 +21,7 @@ public class RSUTaxDTO implements CSVHelper {
     private String shortName;
     private String exchange;
     private LocalDate date;
-    private Double quantity;
+    private BigDecimal quantity;
     private String currency;
     private BigDecimal price;
     private LocalDate priceDate;

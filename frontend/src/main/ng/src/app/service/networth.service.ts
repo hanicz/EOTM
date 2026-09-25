@@ -16,7 +16,7 @@ export class NetWorthService {
     return this.http.get<NetWorth>(`${this.netWorthUrl}?currency=${encodeURIComponent(currency)}${refresh ? '&refresh=true' : ''}`);
   }
 
-  getHistory() {
-    return this.http.get<NetWorthHistory>(`${this.netWorthUrl}/history`);
+  getHistory(refresh = false) {
+    return this.http.get<NetWorthHistory>(`${this.netWorthUrl}/history${refresh ? '?refresh=true' : ''}`);
   }
 }

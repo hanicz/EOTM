@@ -93,35 +93,89 @@
 }
 
 .ticker-header {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+    gap: 1.25rem;
+    padding: 1rem 1.15rem;
+    border: 1px solid var(--eotm-tile-border);
+    border-radius: 12px;
+    background: var(--eotm-paper);
+}
+
+.ticker-identity {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    min-width: 0;
 }
 
 .ticker-logo {
     border-radius: 8px;
-    background-color: var(--eotm-paper);
-    padding: 4px;
+    background: #fff;
+    padding: 5px;
     border: 1px solid var(--p-content-border-color);
 }
 
-.ticker-name {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--eotm-ink);
+.ticker-identity-copy {
+    min-width: 0;
 }
 
-.ticker-subline {
+.ticker-name {
+    margin: 0;
+    font-size: clamp(18px, 1.7vw, 24px);
+    line-height: 1.25;
+    font-weight: 700;
+    color: var(--eotm-ink);
+    overflow-wrap: anywhere;
+}
+
+.ticker-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.65rem;
+    margin-top: 0.5rem;
+}
+
+.ticker-symbol {
+    padding: 0.2rem 0.5rem;
+    border-radius: 5px;
+    background: var(--eotm-cream);
+    color: var(--eotm-ink);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.ticker-market {
+    color: var(--p-text-muted-color);
     font-size: 12px;
-    color: var(--eotm-faint);
+}
+
+.ticker-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
 }
 
 .ticker-price {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.ticker-price-label {
+    color: var(--eotm-faint);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.ticker-price-value {
+    color: var(--eotm-ink);
     font-size: 22px;
     font-weight: 700;
-    color: var(--eotm-ink);
+    white-space: nowrap;
 }
 
 .chart-toolbar {
@@ -129,12 +183,65 @@
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
+    gap: 0.75rem;
     padding-bottom: 10px;
+}
+
+.period-picker {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 3px;
+    width: max-content;
+    padding: 4px;
+    border: 1px solid var(--eotm-tile-border);
+    border-radius: 10px;
+    background: var(--eotm-cream);
+}
+
+.period-option {
+    min-height: 38px;
+    padding: 0 0.65rem;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--p-text-muted-color);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.period-option:focus-visible {
+    outline: 2px solid var(--p-primary-color);
+    outline-offset: 2px;
+}
+
+.period-option-active,
+.period-option-active:hover {
+    background: #fff;
+    color: var(--eotm-ink);
+    box-shadow: 0 1px 4px rgba(27, 27, 27, 0.12);
+}
+
+.chart-performance {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
 }
 
 .chart-card {
     padding: 12px 14px;
+    touch-action: pan-y;
+}
+
+.chart-status {
+    min-height: 360px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--eotm-faint);
+    font-size: 13px;
 }
 
 .info-card {
@@ -268,6 +375,49 @@
 
 .watchlist-toggle-button {
     white-space: nowrap;
+}
+
+@media screen and (max-width: 767px) {
+    .ticker-header {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.9rem;
+        padding: 0.9rem;
+    }
+
+    .ticker-identity {
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .ticker-actions {
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        padding-top: 0.85rem;
+        border-top: 1px solid var(--eotm-tile-border);
+    }
+
+    .ticker-price {
+        align-items: flex-start;
+    }
+
+    .watchlist-toggle-button {
+        margin-left: auto;
+    }
+
+    .period-picker {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        width: 100%;
+    }
+
+    .period-option {
+        min-width: 0;
+        min-height: 44px;
+    }
+
+    .chart-performance {
+        width: 100%;
+    }
 }
 
 .peer-chip {

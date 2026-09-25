@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.StringWriter;
 import java.io.Writer;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -101,7 +102,7 @@ class DividendServiceTest {
     public void updateDividend() throws ParseException {
         DividendDTO dividendDTO = this.getDividendDTO();
         DividendDTO created = this.dividendService.createDividend(dividendDTO, this.user.getId());
-        created.setAmount(111.0);
+        created.setAmount(new BigDecimal("111"));
         DividendDTO updated = this.dividendService.updateDividend(created, this.user.getId());
         assertEquals(created, updated);
     }
@@ -145,7 +146,7 @@ class DividendServiceTest {
         this.dividendService.getCSV(this.user.getId(), writer);
         assertAll(
                 () -> assertTrue(writer.toString().contains("Dividend Id,Amount,Dividend Date,Short Name,Exchange,Currency")),
-                () -> assertTrue(writer.toString().contains("2,225.0,2021-08-03,CRSR,US,HUF"))
+                () -> assertTrue(writer.toString().contains("2,225,2021-08-03,CRSR,US,HUF"))
         );
     }
 
@@ -165,7 +166,7 @@ class DividendServiceTest {
 
         Dividend updatedDividend = this.dividendRepository.findById(1L).get();
 
-        Assertions.assertEquals(250.0, updatedDividend.getAmount());
+        Assertions.assertEquals(0, new BigDecimal("250").compareTo(updatedDividend.getAmount()));
     }
 
     @Test
@@ -177,7 +178,7 @@ class DividendServiceTest {
 
         List<Dividend> dividends = this.dividendRepository.findByUserIdOrderByDividendDate(this.user.getId());
 
-        Optional<Dividend> createdDividend = dividends.stream().filter(d -> d.getAmount() == 299.0 && d.getStock().getId().equals("intc.us")).findAny();
+        Optional<Dividend> createdDividend = dividends.stream().filter(d -> d.getAmount().compareTo(new BigDecimal("299")) == 0 && d.getStock().getId().equals("intc.us")).findAny();
 
         Assertions.assertTrue(createdDividend.isPresent());
     }
@@ -203,7 +204,7 @@ class DividendServiceTest {
     private DividendDTO getDividendDTO() throws ParseException {
         return DividendDTO.builder()
                 .dividendId(1L)
-                .amount(10000000.0)
+                .amount(new BigDecimal("10000000"))
                 .dividendDate(LocalDate.parse("2021-07-03", FORMATTER))
                 .shortName("CRSR")
                 .name("Corsair Gaming Inc")

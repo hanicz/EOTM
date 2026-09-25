@@ -12,6 +12,7 @@ import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
 import eye.on.the.money.util.Lots;
+import eye.on.the.money.util.Numbers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVParser;
@@ -23,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -80,12 +82,17 @@ public class SecurityTransactionService implements ICSVService {
             holding.setNextPaymentDate(rate.getPaymentDate());
             holding.setZeroCoupon(rate.getZeroCoupon());
             if (rate.getZeroCoupon()) {
-                holding.setNextPaymentAmount(holding.getQuantity().doubleValue());
-                holding.setRate((holding.getQuantity() / holding.getAmount() - 1.0) * 100.0);
+                BigDecimal faceValue = BigDecimal.valueOf(holding.getQuantity());
+                holding.setNextPaymentAmount(faceValue);
+                if (holding.getAmount().signum() != 0) {
+                    holding.setRate(Numbers.divide(faceValue, holding.getAmount()).subtract(BigDecimal.ONE).multiply(Numbers.HUNDRED));
+                }
             } else {
                 holding.setRate(rate.getRate());
                 holding.setNextPaymentAmount(
-                        holding.getQuantity() * rate.getRate() / 100.0 * this.securityRateService.periodFraction(rate));
+                        BigDecimal.valueOf(holding.getQuantity()).multiply(rate.getRate())
+                                .multiply(this.securityRateService.periodFraction(rate))
+                                .divide(Numbers.HUNDRED, Numbers.CONTEXT));
             }
         }
     }

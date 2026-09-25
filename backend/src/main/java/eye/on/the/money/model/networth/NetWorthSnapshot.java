@@ -7,6 +7,7 @@ import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
@@ -34,11 +35,11 @@ public class NetWorthSnapshot extends AuditedEntity {
     @Column(name = "asset_class", nullable = false, length = ASSET_CLASS_MAX_LENGTH)
     private String assetClass;
 
-    @Column(nullable = false)
-    private Double spent;
+    @Column(nullable = false, precision = 19, scale = 4)
+    private BigDecimal spent;
 
-    @Column(nullable = false)
-    private Double worth;
+    @Column(nullable = false, precision = 19, scale = 4)
+    private BigDecimal worth;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

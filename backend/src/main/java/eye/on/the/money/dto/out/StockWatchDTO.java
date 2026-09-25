@@ -3,6 +3,8 @@ package eye.on.the.money.dto.out;
 import eye.on.the.money.util.Generated;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @ToString
@@ -13,13 +15,13 @@ import lombok.*;
 @Generated
 public class StockWatchDTO {
     private Long tickerWatchId;
-    private Double liveValue;
+    private BigDecimal liveValue;
     private Boolean stalePrice;
     private String stockShortName;
     private String stockExchange;
     private String stockName;
     private String currencyId;
-    private Double change;
+    private BigDecimal change;
     private Double pChange;
     private Long groupId;
 }

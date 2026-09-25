@@ -15,6 +15,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -100,8 +101,8 @@ class ETFControllerTest {
 
     @Test
     public void createInvestment() {
-        ETFInvestmentDTO eiDTO = ETFInvestmentDTO.builder().valueDiff(0.1).transactionDate(LocalDate.now()).id(1L).fee(7.0).liveValue(55.6)
-                .shortName("s1").buySell("b").exchange("e1").currencyId("eur").quantity(645.0).build();
+        ETFInvestmentDTO eiDTO = ETFInvestmentDTO.builder().valueDiff(new BigDecimal("0.1")).transactionDate(LocalDate.now()).id(1L).fee(new BigDecimal("7")).liveValue(new BigDecimal("55.6"))
+                .shortName("s1").buySell("b").exchange("e1").currencyId("eur").quantity(new BigDecimal("645")).build();
 
         when(this.etfInvestmentService.createInvestment(eiDTO, 1L)).thenReturn(eiDTO);
 
@@ -128,8 +129,8 @@ class ETFControllerTest {
 
     @Test
     public void updateInvestment() {
-        ETFInvestmentDTO eiDTO = ETFInvestmentDTO.builder().valueDiff(0.1).transactionDate(LocalDate.now()).id(1L).fee(7.0).liveValue(55.6)
-                .shortName("s1").buySell("b").exchange("e1").currencyId("eur").quantity(645.0).build();
+        ETFInvestmentDTO eiDTO = ETFInvestmentDTO.builder().valueDiff(new BigDecimal("0.1")).transactionDate(LocalDate.now()).id(1L).fee(new BigDecimal("7")).liveValue(new BigDecimal("55.6"))
+                .shortName("s1").buySell("b").exchange("e1").currencyId("eur").quantity(new BigDecimal("645")).build();
 
         when(this.etfInvestmentService.updateInvestment(eiDTO, 1L)).thenReturn(eiDTO);
 
@@ -138,12 +139,12 @@ class ETFControllerTest {
 
     private List<ETFInvestmentDTO> createETFList() {
         List<ETFInvestmentDTO> eiDTO = new ArrayList<>();
-        eiDTO.add(ETFInvestmentDTO.builder().valueDiff(0.1).transactionDate(LocalDate.now()).id(1L).fee(7.0).liveValue(55.6)
-                .shortName("s1").buySell("b").exchange("e1").currencyId("eur").quantity(645.0).build());
-        eiDTO.add(ETFInvestmentDTO.builder().valueDiff(0.2).transactionDate(LocalDate.now()).id(2L).fee(7.3).liveValue(455.6)
-                .shortName("s2").buySell("b").exchange("e2").currencyId("usd").quantity(5423.0).build());
-        eiDTO.add(ETFInvestmentDTO.builder().valueDiff(0.5).transactionDate(LocalDate.now()).id(3L).fee(7.02).liveValue(551.6)
-                .shortName("s3").buySell("s").exchange("e3").currencyId("huf").quantity(4231.0).build());
+        eiDTO.add(ETFInvestmentDTO.builder().valueDiff(new BigDecimal("0.1")).transactionDate(LocalDate.now()).id(1L).fee(new BigDecimal("7")).liveValue(new BigDecimal("55.6"))
+                .shortName("s1").buySell("b").exchange("e1").currencyId("eur").quantity(new BigDecimal("645")).build());
+        eiDTO.add(ETFInvestmentDTO.builder().valueDiff(new BigDecimal("0.2")).transactionDate(LocalDate.now()).id(2L).fee(new BigDecimal("7.3")).liveValue(new BigDecimal("455.6"))
+                .shortName("s2").buySell("b").exchange("e2").currencyId("usd").quantity(new BigDecimal("5423")).build());
+        eiDTO.add(ETFInvestmentDTO.builder().valueDiff(new BigDecimal("0.5")).transactionDate(LocalDate.now()).id(3L).fee(new BigDecimal("7.02")).liveValue(new BigDecimal("551.6"))
+                .shortName("s3").buySell("s").exchange("e3").currencyId("huf").quantity(new BigDecimal("4231")).build());
 
         return eiDTO;
     }

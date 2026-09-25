@@ -91,7 +91,7 @@ public class ETFInvestmentService implements ICSVService {
     private List<ETFInvestmentDTO> getLiveDataForInvestments(List<ETFInvestmentDTO> investments) {
         Map<String, ETFInvestmentDTO> investmentMap = this.getCalculated(investments);
         List<ETFInvestmentDTO> etfInvestmentDTOList = (new ArrayList<>(investmentMap.values()))
-                .stream().filter(i -> (i.getQuantity() > 0)).collect(Collectors.toList());
+                .stream().filter(i -> i.getQuantity().signum() > 0).collect(Collectors.toList());
         if (etfInvestmentDTOList.isEmpty()) return etfInvestmentDTOList;
 
         String joinedList = etfInvestmentDTOList.stream().map(i -> Ticker.symbol(i.getShortName(), i.getExchange())).distinct().collect(Collectors.joining(","));
@@ -108,10 +108,10 @@ public class ETFInvestmentService implements ICSVService {
                 etfInvestmentDTOList.stream()
                         .filter(i -> Ticker.symbol(i.getShortName(), i.getExchange()).equals(code))
                         .forEach(i -> {
-                            i.setLiveValue(price.get().value() * i.getQuantity());
-                            i.setValueDiff(i.getLiveValue() - i.getAmount());
+                            i.setLiveValue(price.get().value().multiply(i.getQuantity()));
+                            i.setValueDiff(i.getLiveValue().subtract(i.getAmount()));
                             i.setStalePrice(price.get().stale());
-                            i.setDayChange(price.get().change() == null ? null : price.get().change() * i.getQuantity());
+                            i.setDayChange(price.get().change() == null ? null : price.get().change().multiply(i.getQuantity()));
                             i.setDayChangePercent(price.get().changePercent());
                         });
             }

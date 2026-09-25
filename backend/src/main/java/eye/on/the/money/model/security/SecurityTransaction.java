@@ -8,6 +8,7 @@ import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
@@ -37,8 +38,8 @@ public class SecurityTransaction extends AuditedEntity {
     @Column(nullable = false)
     private LocalDate transactionDate;
 
-    @Column(nullable = false)
-    private Double amount;
+    @Column(nullable = false, precision = 19, scale = 4)
+    private BigDecimal amount;
 
     @ManyToOne
     @JoinColumn(name = "currency_id", nullable = false)

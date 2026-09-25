@@ -24,25 +24,25 @@ export class MenuComponent implements OnInit {
 
   readonly menuItems: MenuItem[] = [
     {
-      label: 'Portfolio', icon: 'fa-solid fa-briefcase', items: [
-        { label: 'Performance', icon: 'fa-solid fa-chart-area', routerLink: ['/performance'] },
-        { label: 'Securities', icon: 'fa-solid fa-building-columns', routerLink: ['/security'] },
-        { label: 'ETF', icon: 'fas fa-chart-line', routerLink: ['/etf'] },
-        { label: 'Stock', icon: 'fa-solid fa-arrow-trend-up', routerLink: ['/stock'] },
-        { label: 'Forex', icon: 'fa-solid fa-coins', routerLink: ['/forex'] },
-        { label: 'Crypto', icon: 'fab fa-bitcoin', routerLink: ['/crypto'] },
-        { label: 'Cash', icon: 'fa-solid fa-money-bill', routerLink: ['/cash'] },
-        { label: 'Pension', icon: 'fa-solid fa-piggy-bank', routerLink: ['/pension'] }
+      label: 'Portfolio', icon: 'eotm-icon eotm-icon-briefcase', items: [
+        { label: 'Performance', icon: 'eotm-icon eotm-icon-chart-area', routerLink: ['/performance'] },
+        { label: 'Securities', icon: 'eotm-icon eotm-icon-building-columns', routerLink: ['/security'] },
+        { label: 'ETF', icon: 'eotm-icon eotm-icon-chart-line', routerLink: ['/etf'] },
+        { label: 'Stock', icon: 'eotm-icon eotm-icon-arrow-trend-up', routerLink: ['/stock'] },
+        { label: 'Forex', icon: 'eotm-icon eotm-icon-coins', routerLink: ['/forex'] },
+        { label: 'Crypto', icon: 'eotm-icon eotm-icon-bitcoin', routerLink: ['/crypto'] },
+        { label: 'Cash', icon: 'eotm-icon eotm-icon-money-bill', routerLink: ['/cash'] },
+        { label: 'Pension', icon: 'eotm-icon eotm-icon-piggy-bank', routerLink: ['/pension'] }
       ]
     },
-    { label: 'Financials', icon: 'fa-solid fa-credit-card', routerLink: ['/financial'] },
-    { label: 'Salary', icon: 'fa-solid fa-wallet', routerLink: ['/salary'] },
-    { label: 'Equity', icon: 'fa-solid fa-star', routerLink: ['/equity'] },
-    { label: 'FIRE', icon: 'fa-solid fa-fire', routerLink: ['/fire'] },
-    { label: 'Tax', icon: 'fa-solid fa-file-invoice-dollar', routerLink: ['/tax'] },
-    { label: 'Alerts & Reports', icon: 'fa-solid fa-bell', routerLink: ['/alert'] },
-    { label: 'Research', icon: 'fas fa-search', routerLink: ['/search'] },
-    { label: 'News', icon: 'far fa-newspaper', routerLink: ['/news'] }
+    { label: 'Financials', icon: 'eotm-icon eotm-icon-credit-card', routerLink: ['/financial'] },
+    { label: 'Salary', icon: 'eotm-icon eotm-icon-wallet', routerLink: ['/salary'] },
+    { label: 'Equity', icon: 'eotm-icon eotm-icon-star', routerLink: ['/equity'] },
+    { label: 'FIRE', icon: 'eotm-icon eotm-icon-fire', routerLink: ['/fire'] },
+    { label: 'Tax', icon: 'eotm-icon eotm-icon-file-invoice-dollar', routerLink: ['/tax'] },
+    { label: 'Alerts & Reports', icon: 'eotm-icon eotm-icon-bell', routerLink: ['/alert'] },
+    { label: 'Research', icon: 'eotm-icon eotm-icon-search', routerLink: ['/search'] },
+    { label: 'News', icon: 'eotm-icon eotm-icon-newspaper', routerLink: ['/news'] }
   ];
 
   constructor(

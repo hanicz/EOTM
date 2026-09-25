@@ -7,7 +7,7 @@ public interface CSVHelper {
 
     Object[] getCSVRecord();
 
-    static String plainNumber(Double value) {
-        return (value == null) ? null : BigDecimal.valueOf(value).stripTrailingZeros().toPlainString();
+    static String plainNumber(BigDecimal value) {
+        return (value == null) ? null : value.stripTrailingZeros().toPlainString();
     }
 }

@@ -99,7 +99,7 @@ class NetWorthSnapshotServiceTest {
         when(this.netWorthSnapshotRepository.existsByUserIdAndSnapshotDate(USER, TODAY)).thenReturn(false);
         when(this.netWorthSnapshotRepository.findByUserIdOrderBySnapshotDate(USER)).thenReturn(List.of());
 
-        this.netWorthSnapshotService.getHistory(USER, TODAY);
+        this.netWorthSnapshotService.getHistory(USER, false, TODAY);
 
         verify(this.netWorthService).getNetWorth(USER, "HUF", false);
         verify(this.netWorthSnapshotWriter).insertIfMissing(USER, TODAY, this.netWorth.getAssets());
@@ -111,10 +111,22 @@ class NetWorthSnapshotServiceTest {
         when(this.netWorthSnapshotRepository.existsByUserIdAndSnapshotDate(USER, TODAY)).thenReturn(true);
         when(this.netWorthSnapshotRepository.findByUserIdOrderBySnapshotDate(USER)).thenReturn(List.of());
 
-        this.netWorthSnapshotService.getHistory(USER, TODAY);
+        this.netWorthSnapshotService.getHistory(USER, false, TODAY);
 
         verify(this.netWorthService, never()).getNetWorth(anyLong(), anyString(), anyBoolean());
         verifyNoInteractions(this.netWorthSnapshotWriter);
+    }
+
+    @Test
+    void getHistory_replacesTodayOnRefreshEvenWhenItIsAlreadyStored() {
+        when(this.netWorthSnapshotRepository.existsByUserIdAndSnapshotDate(USER, TODAY)).thenReturn(true);
+        when(this.netWorthSnapshotRepository.findByUserIdOrderBySnapshotDate(USER)).thenReturn(List.of());
+
+        this.netWorthSnapshotService.getHistory(USER, true, TODAY);
+
+        verify(this.netWorthService).getNetWorth(USER, "HUF", false);
+        verify(this.netWorthSnapshotWriter).replace(USER, TODAY, this.netWorth.getAssets());
+        verify(this.netWorthSnapshotWriter, never()).insertIfMissing(anyLong(), any(), any());
     }
 
     @Test
@@ -124,7 +136,20 @@ class NetWorthSnapshotServiceTest {
         when(this.netWorthSnapshotRepository.findByUserIdOrderBySnapshotDate(USER))
                 .thenReturn(List.of(this.row(LocalDate.of(2026, 8, 30), "Stock", 100, 110)));
 
-        NetWorthHistoryDTO history = this.netWorthSnapshotService.getHistory(USER, TODAY);
+        NetWorthHistoryDTO history = this.netWorthSnapshotService.getHistory(USER, false, TODAY);
+
+        assertEquals(1, history.getPoints().size());
+        verifyNoInteractions(this.netWorthSnapshotWriter);
+    }
+
+    @Test
+    void getHistory_returnsTheStoredHistoryWhenTheRefreshFails() {
+        when(this.netWorthSnapshotRepository.existsByUserIdAndSnapshotDate(USER, TODAY)).thenReturn(true);
+        when(this.netWorthService.getNetWorth(USER, "HUF", false)).thenThrow(new APIException("Quote service down"));
+        when(this.netWorthSnapshotRepository.findByUserIdOrderBySnapshotDate(USER))
+                .thenReturn(List.of(this.row(LocalDate.of(2026, 8, 31), "Stock", 100, 110)));
+
+        NetWorthHistoryDTO history = this.netWorthSnapshotService.getHistory(USER, true, TODAY);
 
         assertEquals(1, history.getPoints().size());
         verifyNoInteractions(this.netWorthSnapshotWriter);
@@ -138,7 +163,7 @@ class NetWorthSnapshotServiceTest {
                 this.row(LocalDate.of(2026, 8, 2), "Stock", 1000, 1150),
                 this.row(LocalDate.of(2026, 8, 2), "Cash", 500, 500)));
 
-        NetWorthHistoryDTO history = this.netWorthSnapshotService.getHistory(USER, TODAY);
+        NetWorthHistoryDTO history = this.netWorthSnapshotService.getHistory(USER, false, TODAY);
 
         assertEquals("HUF", history.getCurrency());
         assertEquals(2, history.getPoints().size());
@@ -161,7 +186,7 @@ class NetWorthSnapshotServiceTest {
                 this.row(LocalDate.of(2026, 8, 31), "Stock", 1200, 1400),
                 this.row(LocalDate.of(2026, 8, 31), "Cash", 700, 700)));
 
-        List<MonthlyPerformanceDTO> months = this.netWorthSnapshotService.getHistory(USER, TODAY).getMonths();
+        List<MonthlyPerformanceDTO> months = this.netWorthSnapshotService.getHistory(USER, false, TODAY).getMonths();
 
         assertEquals(2, months.size());
 
@@ -187,7 +212,7 @@ class NetWorthSnapshotServiceTest {
                 this.row(LocalDate.of(2026, 8, 1), "Stock", 0, 0),
                 this.row(LocalDate.of(2026, 8, 20), "Stock", 400, 420)));
 
-        MonthlyPerformanceDTO august = this.netWorthSnapshotService.getHistory(USER, TODAY).getMonths().getFirst();
+        MonthlyPerformanceDTO august = this.netWorthSnapshotService.getHistory(USER, false, TODAY).getMonths().getFirst();
 
         assertEquals(new BigDecimal("420.00"), august.getChange());
         assertNull(august.getChangePct());
@@ -205,8 +230,8 @@ class NetWorthSnapshotServiceTest {
                 .user(User.builder().id(USER).build())
                 .snapshotDate(date)
                 .assetClass(assetClass)
-                .spent(spent)
-                .worth(worth)
+                .spent(BigDecimal.valueOf(spent))
+                .worth(BigDecimal.valueOf(worth))
                 .build();
     }
 

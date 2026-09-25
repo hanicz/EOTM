@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Getter
@@ -31,5 +32,5 @@ public class RSUDTO {
 
     @NotNull
     @Positive
-    private Double quantity;
+    private BigDecimal quantity;
 }

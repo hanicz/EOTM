@@ -19,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -96,8 +97,8 @@ class TransactionControllerTest {
 
     @Test
     public void createTransaction() {
-        TransactionDTO tDTO = TransactionDTO.builder().transactionString("s1").transactionDate(LocalDate.now()).amount(555.1).quantity(431.0)
-                .buySell("b").symbol("s1").url("u1").fee(7.0).currencyId("c1").coinId("co1").liveValue(33.1).valueDiff(1.0).build();
+        TransactionDTO tDTO = TransactionDTO.builder().transactionString("s1").transactionDate(LocalDate.now()).amount(new BigDecimal("555.1")).quantity(new BigDecimal("431"))
+                .buySell("b").symbol("s1").url("u1").fee(new BigDecimal("7")).currencyId("c1").coinId("co1").liveValue(new BigDecimal("33.1")).valueDiff(BigDecimal.ONE).build();
 
         when(this.transactionService.createTransaction(tDTO, 1L)).thenReturn(tDTO);
 
@@ -106,8 +107,8 @@ class TransactionControllerTest {
 
     @Test
     public void updateTransaction() {
-        TransactionDTO tDTO = TransactionDTO.builder().id(1L).transactionString("s1").transactionDate(LocalDate.now()).amount(555.1).quantity(431.0)
-                .buySell("b").symbol("s1").url("u1").fee(7.0).currencyId("c1").coinId("co1").liveValue(33.1).valueDiff(1.0).build();
+        TransactionDTO tDTO = TransactionDTO.builder().id(1L).transactionString("s1").transactionDate(LocalDate.now()).amount(new BigDecimal("555.1")).quantity(new BigDecimal("431"))
+                .buySell("b").symbol("s1").url("u1").fee(new BigDecimal("7")).currencyId("c1").coinId("co1").liveValue(new BigDecimal("33.1")).valueDiff(BigDecimal.ONE).build();
 
         when(this.transactionService.updateTransaction(tDTO, 1L)).thenReturn(tDTO);
 
@@ -125,12 +126,12 @@ class TransactionControllerTest {
 
     private List<TransactionDTO> createTransactionList() {
         List<TransactionDTO> tDTO = new ArrayList<>();
-        tDTO.add(TransactionDTO.builder().id(1L).transactionString("s1").transactionDate(LocalDate.now()).amount(555.1).quantity(431.0)
-                .buySell("b").symbol("s1").url("u1").fee(7.0).currencyId("c1").coinId("co1").liveValue(33.1).valueDiff(1.0).build());
-        tDTO.add(TransactionDTO.builder().id(2L).transactionString("s2").transactionDate(LocalDate.now()).amount(1555.1).quantity(3431.0)
-                .buySell("s").symbol("s2").url("u2").fee(7.2).currencyId("c2").coinId("co2").liveValue(233.1).valueDiff(1.1).build());
-        tDTO.add(TransactionDTO.builder().id(3L).transactionString("s3").transactionDate(LocalDate.now()).amount(5553.1).quantity(4321.0)
-                .buySell("b").symbol("s3").url("u3").fee(7.3).currencyId("c3").coinId("co3").liveValue(313.1).valueDiff(22.0).build());
+        tDTO.add(TransactionDTO.builder().id(1L).transactionString("s1").transactionDate(LocalDate.now()).amount(new BigDecimal("555.1")).quantity(new BigDecimal("431"))
+                .buySell("b").symbol("s1").url("u1").fee(new BigDecimal("7")).currencyId("c1").coinId("co1").liveValue(new BigDecimal("33.1")).valueDiff(BigDecimal.ONE).build());
+        tDTO.add(TransactionDTO.builder().id(2L).transactionString("s2").transactionDate(LocalDate.now()).amount(new BigDecimal("1555.1")).quantity(new BigDecimal("3431"))
+                .buySell("s").symbol("s2").url("u2").fee(new BigDecimal("7.2")).currencyId("c2").coinId("co2").liveValue(new BigDecimal("233.1")).valueDiff(new BigDecimal("1.1")).build());
+        tDTO.add(TransactionDTO.builder().id(3L).transactionString("s3").transactionDate(LocalDate.now()).amount(new BigDecimal("5553.1")).quantity(new BigDecimal("4321"))
+                .buySell("b").symbol("s3").url("u3").fee(new BigDecimal("7.3")).currencyId("c3").coinId("co3").liveValue(new BigDecimal("313.1")).valueDiff(new BigDecimal("22")).build());
 
         return tDTO;
     }

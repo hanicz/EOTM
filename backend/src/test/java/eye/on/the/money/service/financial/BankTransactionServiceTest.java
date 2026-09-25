@@ -30,6 +30,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -171,24 +172,24 @@ class BankTransactionServiceTest {
         assertEquals(BOOKING_DATE, saved.get(0).getBookingDate());
         assertEquals(BANK_ID, saved.get(0).getBankTransactionId());
         assertEquals("Mobilinfo uzenetdij", saved.get(0).getType());
-        assertEquals(-275.0, saved.get(0).getAmount());
+        assertDecimal("-275", saved.get(0).getAmount());
         assertEquals(ACCOUNT, saved.get(0).getAccountNumber());
         assertEquals("ACCOUNT HOLDER", saved.get(0).getAccountName());
         assertEquals("", saved.get(0).getPartnerName());
         assertEquals("HUF", saved.get(0).getCurrency().getId());
         assertEquals("Kamatado", saved.get(1).getType());
-        assertEquals(-5.0, saved.get(1).getAmount());
+        assertDecimal("-5", saved.get(1).getAmount());
     }
 
     @Test
     void processCSV_updatesInsteadOfDuplicatingOnReimport() {
         BankTransaction existing = BankTransaction.builder().id(7L).bankTransactionId(BANK_ID)
-                .bookingDate(BOOKING_DATE).type("Kamatado").amount(-5.0).memo("Ref.")
+                .bookingDate(BOOKING_DATE).type("Kamatado").amount(new BigDecimal("-5")).memo("Ref.")
                 .accountNumber("stale").user(this.user).currency(this.huf).build();
 
         when(this.bankTransactionRepository
                 .findByUserIdAndBankTransactionIdAndBookingDateAndTypeAndAmountAndMemo(
-                        USER_ID, BANK_ID, BOOKING_DATE, "Kamatado", -5.0, "Ref."))
+                        USER_ID, BANK_ID, BOOKING_DATE, "Kamatado", new BigDecimal("-5"), "Ref."))
                 .thenReturn(Optional.of(existing));
 
         ImportResultDTO result = this.bankTransactionService.processCSV(USER_ID,
@@ -203,12 +204,12 @@ class BankTransactionServiceTest {
     @Test
     void processCSV_keepsTheExclusionFlagOnReimport() {
         BankTransaction existing = BankTransaction.builder().id(7L).bankTransactionId(BANK_ID)
-                .bookingDate(BOOKING_DATE).type("Kamatado").amount(-5.0).memo("Ref.")
+                .bookingDate(BOOKING_DATE).type("Kamatado").amount(new BigDecimal("-5")).memo("Ref.")
                 .excluded(true).user(this.user).currency(this.huf).build();
 
         when(this.bankTransactionRepository
                 .findByUserIdAndBankTransactionIdAndBookingDateAndTypeAndAmountAndMemo(
-                        USER_ID, BANK_ID, BOOKING_DATE, "Kamatado", -5.0, "Ref."))
+                        USER_ID, BANK_ID, BOOKING_DATE, "Kamatado", new BigDecimal("-5"), "Ref."))
                 .thenReturn(Optional.of(existing));
 
         this.bankTransactionService.processCSV(USER_ID,
@@ -220,12 +221,12 @@ class BankTransactionServiceTest {
     @Test
     void processCSV_createsANewRowWhenTheMemoWasEdited() {
         BankTransaction edited = BankTransaction.builder().id(7L).bankTransactionId(BANK_ID)
-                .bookingDate(BOOKING_DATE).type("Kamatado").amount(-5.0).memo("Rent for December")
+                .bookingDate(BOOKING_DATE).type("Kamatado").amount(new BigDecimal("-5")).memo("Rent for December")
                 .user(this.user).currency(this.huf).build();
 
         when(this.bankTransactionRepository
                 .findByUserIdAndBankTransactionIdAndBookingDateAndTypeAndAmountAndMemo(
-                        USER_ID, BANK_ID, BOOKING_DATE, "Kamatado", -5.0, "Rent for December"))
+                        USER_ID, BANK_ID, BOOKING_DATE, "Kamatado", new BigDecimal("-5"), "Rent for December"))
                 .thenReturn(Optional.of(edited));
 
         ImportResultDTO result = this.bankTransactionService.processCSV(USER_ID,
@@ -275,7 +276,7 @@ class BankTransactionServiceTest {
         this.bankTransactionService.processCSV(USER_ID, this.file(StandardCharsets.UTF_8,
                 this.row("2025.01.02", BANK_ID, "Utalas", "-1.234.567,89", "memo")));
 
-        assertEquals(-1234567.89, this.captureSingleSave().getAmount());
+        assertEquals(new BigDecimal("-1234567.89"), this.captureSingleSave().getAmount());
     }
 
     @Test
@@ -333,15 +334,15 @@ class BankTransactionServiceTest {
 
     @Test
     void getTransactions_returnsMappedDTOs() {
-        BankTransaction transaction = BankTransaction.builder().id(1L).amount(-275.0).build();
-        BankTransactionDTO dto = BankTransactionDTO.builder().id(1L).amount(-275.0).build();
+        BankTransaction transaction = BankTransaction.builder().id(1L).amount(new BigDecimal("-275")).build();
+        BankTransactionDTO dto = BankTransactionDTO.builder().id(1L).amount(new BigDecimal("-275")).build();
         when(this.bankTransactionRepository.findByUserIdOrderByBookingDateDesc(USER_ID)).thenReturn(List.of(transaction));
         when(this.modelMapper.map(transaction, BankTransactionDTO.class)).thenReturn(dto);
 
         List<BankTransactionDTO> result = this.bankTransactionService.getTransactions(USER_ID);
 
         assertEquals(1, result.size());
-        assertEquals(-275.0, result.getFirst().getAmount());
+        assertDecimal("-275", result.getFirst().getAmount());
     }
 
     @Test
@@ -414,14 +415,14 @@ class BankTransactionServiceTest {
     @Test
     void processCSV_doesNotReExcludeOnTheUpdateBranch() {
         BankTransaction included = BankTransaction.builder().id(7L).bankTransactionId(BANK_ID)
-                .bookingDate(BOOKING_DATE).type("Atutalas").amount(-5.0).memo("Ref.")
+                .bookingDate(BOOKING_DATE).type("Atutalas").amount(new BigDecimal("-5")).memo("Ref.")
                 .excluded(false).user(this.user).currency(this.huf).build();
 
         when(this.bankExclusionRuleService.matcherFor(USER_ID))
                 .thenReturn(ExclusionRuleMatcher.of(List.of(this.rule(PARTNER, AccountSide.PARTNER_ACCOUNT))));
         when(this.bankTransactionRepository
                 .findByUserIdAndBankTransactionIdAndBookingDateAndTypeAndAmountAndMemo(
-                        USER_ID, BANK_ID, BOOKING_DATE, "Atutalas", -5.0, "Ref."))
+                        USER_ID, BANK_ID, BOOKING_DATE, "Atutalas", new BigDecimal("-5"), "Ref."))
                 .thenReturn(Optional.of(included));
 
         this.bankTransactionService.processCSV(USER_ID,
@@ -529,13 +530,13 @@ class BankTransactionServiceTest {
         SpendingCategory travel = SpendingCategory.builder().id(4L).name("Travel").build();
         SpendingCategory groceries = SpendingCategory.builder().id(3L).name("Groceries").build();
         BankTransaction existing = BankTransaction.builder().id(7L).bankTransactionId(BANK_ID)
-                .bookingDate(BOOKING_DATE).type("Vasarlas").amount(-5.0).memo("Ref.")
+                .bookingDate(BOOKING_DATE).type("Vasarlas").amount(new BigDecimal("-5")).memo("Ref.")
                 .category(travel).categoryLocked(true).user(this.user).currency(this.huf).build();
         when(this.bankCategoryRuleService.matcherFor(USER_ID))
                 .thenReturn(CategoryRuleMatcher.of(List.of(this.categoryRule("BlueMart", groceries))));
         when(this.bankTransactionRepository
                 .findByUserIdAndBankTransactionIdAndBookingDateAndTypeAndAmountAndMemo(
-                        USER_ID, BANK_ID, BOOKING_DATE, "Vasarlas", -5.0, "Ref."))
+                        USER_ID, BANK_ID, BOOKING_DATE, "Vasarlas", new BigDecimal("-5"), "Ref."))
                 .thenReturn(Optional.of(existing));
 
         this.bankTransactionService.processCSV(USER_ID,
@@ -546,7 +547,7 @@ class BankTransactionServiceTest {
 
     private MonthlyCashFlowDTO month(int year, int month, String currency, double moneyIn, double moneyOut) {
         return MonthlyCashFlowDTO.builder().year(year).month(month).currencyId(currency)
-                .moneyIn(moneyIn).moneyOut(moneyOut).build();
+                .moneyIn(BigDecimal.valueOf(moneyIn)).moneyOut(BigDecimal.valueOf(moneyOut)).build();
     }
 
     @Test
@@ -560,8 +561,8 @@ class BankTransactionServiceTest {
         assertEquals(1, result.size());
         YearlyCashFlowDTO year = result.getFirst();
         assertEquals(2025, year.getYear());
-        assertEquals(900000.0, year.getMoneyIn());
-        assertEquals(-500000.0, year.getMoneyOut());
+        assertDecimal("900000", year.getMoneyIn());
+        assertDecimal("-500000", year.getMoneyOut());
         assertEquals(2, year.getMonthsCounted());
     }
 
@@ -576,7 +577,7 @@ class BankTransactionServiceTest {
 
         assertEquals(List.of("2025 EUR", "2025 HUF", "2024 HUF"),
                 result.stream().map(year -> year.getYear() + " " + year.getCurrencyId()).toList());
-        assertEquals(10.0, result.getFirst().getMoneyIn());
+        assertDecimal("10", result.getFirst().getMoneyIn());
     }
 
     @Test
@@ -584,5 +585,9 @@ class BankTransactionServiceTest {
         when(this.bankTransactionRepository.findMonthlyCashFlow(USER_ID)).thenReturn(List.of());
 
         assertTrue(this.bankTransactionService.getYearlyCashFlow(USER_ID).isEmpty());
+    }
+
+    private static void assertDecimal(String expected, BigDecimal actual) {
+        assertEquals(0, new BigDecimal(expected).compareTo(actual), () -> "expected " + expected + " but was " + actual);
     }
 }

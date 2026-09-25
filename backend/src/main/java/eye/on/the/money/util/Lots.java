@@ -19,7 +19,8 @@ public final class Lots {
         Map<String, Integer> lotIndexByKey = new HashMap<>();
 
         items.stream()
-                .sorted(Comparator.comparing(Lot::getTransactionDate))
+                .sorted(Comparator.comparing((T item) -> item.getTransactionDate())
+                        .thenComparing(Lot::recordId, Comparator.nullsLast(Comparator.naturalOrder())))
                 .forEach(item -> {
                     if ("S".equals(item.getBuySell())) {
                         item.negateAmountAndQuantity();

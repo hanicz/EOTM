@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { Candle } from '../model/candle';
 import { Metric } from '../model/metric';
 import { News } from '../model/news';
@@ -34,10 +34,10 @@ import { Ripple } from 'primeng/ripple';
 import { Divider } from 'primeng/divider';
 import { Skeleton } from 'primeng/skeleton';
 import { PrimeTemplate } from 'primeng/api';
-import { SelectButton } from 'primeng/selectbutton';
 import { Tooltip } from 'primeng/tooltip';
 import { NewsComponent } from '../news/news.component';
 import { SignalResult } from '../model/signal';
+import { Subscription } from 'rxjs';
 
 export type ChartOptions = {
   series: ApexAxisChartSeries;
@@ -51,9 +51,9 @@ export type ChartOptions = {
     selector: 'app-search',
     templateUrl: './search.component.html',
     styleUrls: ['./search.component.css'],
-    imports: [MenuComponent, Bind, Panel, PrimeTemplate, Select, FormsModule, ButtonDirective, Ripple, Divider, Skeleton, SelectButton, ChartComponent, NewsComponent, DecimalPipe, CurrencyPipe, DatePipe, NgClass, Tooltip, TickerLogoComponent, ExchangeOptionComponent, SymbolOptionComponent]
+    imports: [MenuComponent, Bind, Panel, PrimeTemplate, Select, FormsModule, ButtonDirective, Ripple, Divider, Skeleton, ChartComponent, NewsComponent, DecimalPipe, CurrencyPipe, DatePipe, NgClass, Tooltip, TickerLogoComponent, ExchangeOptionComponent, SymbolOptionComponent]
 })
-export class SearchComponent implements OnInit, AfterViewInit {
+export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
   globals: Globals;
 
@@ -98,8 +98,12 @@ export class SearchComponent implements OnInit, AfterViewInit {
   exchangesLoading: boolean = true;
   stocksLoading: boolean = false;
   profileLoading: boolean = false;
+  chartLoading = false;
+  chartReady = false;
+  private candleRequest?: Subscription;
+  private stockSelectedSubscription?: Subscription;
+  private selectionId = 0;
 
-  @ViewChild("chart") chart: ChartComponent | any;
   public chartOptions: Partial<ChartOptions> | any;
   @ViewChild("recChart") recChart: ChartComponent | any;
   public recChartOptions: Partial<ChartOptions> | any;
@@ -110,11 +114,11 @@ export class SearchComponent implements OnInit, AfterViewInit {
 
     this.globals = globals;
     this.options = [
-      { label: '1 M', value: 1 },
-      { label: '6 M', value: 6 },
-      { label: '1 Y', value: 12 },
-      { label: '2 Y', value: 24 },
-      { label: '5 Y', value: 60 },
+      { label: '1M', value: 1 },
+      { label: '6M', value: 6 },
+      { label: '1Y', value: 12 },
+      { label: '2Y', value: 24 },
+      { label: '5Y', value: 60 },
       { label: 'All', value: 100 },
     ];
 
@@ -169,6 +173,10 @@ export class SearchComponent implements OnInit, AfterViewInit {
         id: 'candles'
       },
       series: [],
+      legend: { show: false },
+      dataLabels: { enabled: false },
+      colors: [this.getColor],
+      stroke: { width: [2, 0] },
       title: {
         text: 'Candlestick chart',
         align: 'left',
@@ -183,7 +191,7 @@ export class SearchComponent implements OnInit, AfterViewInit {
         strokeDashArray: 3,
       },
       xaxis: {
-        type: "category",
+        type: 'category',
         labels: {
           show: false
         },
@@ -261,9 +269,15 @@ export class SearchComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.globals.stockSelectedEvent.subscribe(e => {
+    this.stockSelectedSubscription = this.globals.stockSelectedEvent.subscribe(() => {
       this.stockChanged(undefined);
     });
+  }
+
+  ngOnDestroy(): void {
+    ++this.selectionId;
+    this.candleRequest?.unsubscribe();
+    this.stockSelectedSubscription?.unsubscribe();
   }
 
   getTooltip({ series, seriesIndex, dataPointIndex, w }: any) {
@@ -291,6 +305,8 @@ export class SearchComponent implements OnInit, AfterViewInit {
   }
 
   stockChanged(event: any) {
+    const selectionId = ++this.selectionId;
+    this.getCandleData();
     this.profile = {} as Profile;
     this.metric = {} as Metric;
     this.signalResult = undefined;
@@ -300,8 +316,8 @@ export class SearchComponent implements OnInit, AfterViewInit {
     this.profileLoading = this.usExchange;
 
     this.newsType = `company/${this.globals.selectedStock}`;
-    this.getCandleData();
-    this.getSignal();
+    if (!this.globals.selectedStock) return;
+    this.getSignal(selectionId);
 
     if (!this.usExchange) {
       return;
@@ -309,6 +325,7 @@ export class SearchComponent implements OnInit, AfterViewInit {
 
     this.metricService.getMetrics(this.globals.selectedStock).subscribe({
       next: (data) => {
+        if (selectionId !== this.selectionId) return;
         this.metric = data ?? {} as Metric;
         this.metricHasValues = this.metric.peInclExtraTTM != null || this.metric.yearHigh != null
           || this.metric.tenDayAverageTradingVolume != null;
@@ -316,6 +333,7 @@ export class SearchComponent implements OnInit, AfterViewInit {
         this.cdr.markForCheck();
       },
       error: () => {
+        if (selectionId !== this.selectionId) return;
         this.metric = {} as Metric;
         this.metricHasValues = false;
         this.updateDisplayInfo();
@@ -325,12 +343,14 @@ export class SearchComponent implements OnInit, AfterViewInit {
 
     this.metricService.getProfile(this.globals.selectedStock).subscribe({
       next: (data) => {
+        if (selectionId !== this.selectionId) return;
         this.profileLoading = false;
         this.profile = data ?? {} as Profile;
         this.updateDisplayInfo();
         this.cdr.markForCheck();
       },
       error: () => {
+        if (selectionId !== this.selectionId) return;
         this.profileLoading = false;
         this.profile = {} as Profile;
         this.updateDisplayInfo();
@@ -340,11 +360,13 @@ export class SearchComponent implements OnInit, AfterViewInit {
 
     this.metricService.getRecommendations(this.globals.selectedStock).subscribe({
       next: (data) => {
+        if (selectionId !== this.selectionId) return;
         this.recommendations = data ?? [];
         this.createRecChart();
         this.cdr.markForCheck();
       },
       error: () => {
+        if (selectionId !== this.selectionId) return;
         this.recommendations = [];
         this.createRecChart();
         this.cdr.markForCheck();
@@ -377,10 +399,10 @@ export class SearchComponent implements OnInit, AfterViewInit {
   }
 
   applyChartCurrency() {
-    if (!this.chart || !this.candle.c?.length) {
+    if (!this.chartReady) {
       return;
     }
-    this.chart.updateOptions({ yaxis: this.buildYAxis() });
+    this.chartOptions = { ...this.chartOptions, yaxis: this.buildYAxis() };
   }
 
   buildYAxis() {
@@ -402,13 +424,15 @@ export class SearchComponent implements OnInit, AfterViewInit {
     }];
   }
 
-  getSignal() {
+  getSignal(selectionId: number) {
     this.stockService.getSignal(this.globals.selectedStock, this.globals.selectedExchange).subscribe({
       next: (data) => {
+        if (selectionId !== this.selectionId) return;
         this.signalResult = data;
         this.cdr.markForCheck();
       },
       error: (error) => {
+        if (selectionId !== this.selectionId) return;
         console.log(error);
         this.signalResult = undefined;
         this.cdr.markForCheck();
@@ -417,6 +441,10 @@ export class SearchComponent implements OnInit, AfterViewInit {
   }
 
   exchangeChanged(event: any) {
+    ++this.selectionId;
+    this.globals.selectedStock = '';
+    this.symbols = [];
+    this.resetCandleChart();
     this.loadSymbols();
   }
 
@@ -437,39 +465,85 @@ export class SearchComponent implements OnInit, AfterViewInit {
     });
   }
 
+  selectPeriod(months: number) {
+    if (months === this.selectedOption) return;
+    this.selectedOption = months;
+    this.getCandleData();
+  }
+
   getCandleData() {
-    this.stockService.getCandleData(this.globals.selectedStock, this.globals.selectedExchange, this.selectedOption).subscribe({
+    this.resetCandleChart();
+    if (!this.globals.selectedStock) return;
+    const selectionId = this.selectionId;
+    this.chartLoading = true;
+    this.candleRequest = this.stockService.getCandleData(this.globals.selectedStock, this.globals.selectedExchange, this.selectedOption).subscribe({
       next: (data) => {
+        if (selectionId !== this.selectionId) return;
         this.candle = data;
-        this.createChart();
+        if (data?.c?.length) {
+          this.createChart();
+          this.chartReady = true;
+        }
+        this.chartLoading = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        if (selectionId !== this.selectionId) return;
+        this.chartLoading = false;
         this.cdr.markForCheck();
       }
     });
   }
 
+  private resetCandleChart() {
+    this.candleRequest?.unsubscribe();
+    this.candle = {} as Candle;
+    this.chartReady = false;
+    this.chartLoading = false;
+    this.chartOptions = { ...this.chartOptions, series: [] };
+    this.startPrice = 0;
+    this.endPrice = 0;
+    this.difference = 0;
+    this.percentage = 0;
+    this.volume = 0;
+    this.calculatePeriodExtremes();
+    this.cdr.markForCheck();
+  }
+
   createChart() {
-    let chartData = [];
-    let volumeChartData = [];
-    for (let i = 0; i < this.candle.c.length; i++) {
-      let xy = { x: new Date(this.candle.t[i]).toLocaleDateString("en-US"), y: [this.candle.o[i], this.candle.h[i], this.candle.l[i], this.candle.c[i]] }
-      chartData.push(xy);
-      volumeChartData.push({ x: new Date(this.candle.t[i]).toLocaleDateString("en-US"), y: this.candle.v[i] / 1000000 })
+    const chartData = [];
+    const volumeChartData = [];
+    // Bound SVG work on long histories. Buckets retain open, high, low,
+    // close and total volume, so price extremes remain visible.
+    const maxCandles = typeof window !== 'undefined' && window.innerWidth < 768 ? 150 : 450;
+    const bucketSize = Math.ceil(this.candle.c.length / maxCandles);
+    let maxVolume = 0;
+    for (let start = 0; start < this.candle.c.length; start += bucketSize) {
+      const end = Math.min(start + bucketSize, this.candle.c.length) - 1;
+      let high = this.candle.h[start];
+      let low = this.candle.l[start];
+      let volume = 0;
+      for (let i = start; i <= end; i++) {
+        high = Math.max(high, this.candle.h[i]);
+        low = Math.min(low, this.candle.l[i]);
+        volume += this.candle.v[i];
+      }
+      const x = new Date(this.candle.t[end]).toLocaleDateString('en-US');
+      chartData.push({ x, y: [this.candle.o[start], high, low, this.candle.c[end]] });
+      const volumeMillions = volume / 1000000;
+      volumeChartData.push({ x, y: volumeMillions });
+      maxVolume = Math.max(maxVolume, volumeMillions);
     }
-    this.volumeAxisMax = Math.max(...volumeChartData.map(v => v.y)) * 4;
-    this.chart.updateOptions({
-      legend: {
-        show: false
-      },
-      dataLabels: {
-        enabled: false
-      },
-      colors: [this.getColor],
-      stroke: {
-        width: [2, 0]
+    this.volumeAxisMax = maxVolume * 4;
+    this.chartOptions = {
+      ...this.chartOptions,
+      series: [{ name: 'Price', data: chartData, type: 'candlestick' }, { name: 'Volume', data: volumeChartData, type: 'column' }],
+      title: {
+        ...this.chartOptions.title,
+        text: bucketSize > 1 ? 'Candlestick chart (' + bucketSize + '-session candles)' : 'Candlestick chart'
       },
       yaxis: this.buildYAxis()
-    });
-    this.chart.updateSeries([{ name: 'Price', data: chartData, type: 'candlestick' }, { name: 'Volume', data: volumeChartData, type: 'column' }], false);
+    };
 
     this.startPrice = this.candle.c[0];
     this.endPrice = this.candle.c[this.candle.c.length - 1];

@@ -14,6 +14,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,9 +34,9 @@ class SecurityTransactionControllerTest {
 
     private List<SecurityTransactionDTO> createTransactionList() {
         List<SecurityTransactionDTO> list = new ArrayList<>();
-        list.add(SecurityTransactionDTO.builder().transactionId(1L).buySell("B").quantity(10).amount(500.0)
+        list.add(SecurityTransactionDTO.builder().transactionId(1L).buySell("B").quantity(10).amount(new BigDecimal("500"))
                 .transactionDate(LocalDate.now()).securityId("SEC1").securityName("Security One").currencyId("EUR").build());
-        list.add(SecurityTransactionDTO.builder().transactionId(2L).buySell("S").quantity(5).amount(300.0)
+        list.add(SecurityTransactionDTO.builder().transactionId(2L).buySell("S").quantity(5).amount(new BigDecimal("300"))
                 .transactionDate(LocalDate.now()).securityId("SEC2").securityName("Security Two").currencyId("USD").build());
         return list;
     }
@@ -59,7 +60,7 @@ class SecurityTransactionControllerTest {
     @Test
     void createTransaction() {
         SecurityTransactionDTO dto = SecurityTransactionDTO.builder().transactionId(1L).buySell("B").quantity(10)
-                .amount(500.0).transactionDate(LocalDate.now()).securityId("SEC1").securityName("Security One").currencyId("EUR").build();
+                .amount(new BigDecimal("500")).transactionDate(LocalDate.now()).securityId("SEC1").securityName("Security One").currencyId("EUR").build();
         when(this.securityTransactionService.createTransaction(dto, 1L)).thenReturn(dto);
 
         Assertions.assertEquals(HttpStatus.CREATED, this.securityTransactionController.createTransaction(1L, dto).getStatusCode());
@@ -69,7 +70,7 @@ class SecurityTransactionControllerTest {
     @Test
     void updateTransaction() {
         SecurityTransactionDTO dto = SecurityTransactionDTO.builder().transactionId(1L).buySell("B").quantity(15)
-                .amount(750.0).transactionDate(LocalDate.now()).securityId("SEC1").securityName("Security One").currencyId("EUR").build();
+                .amount(new BigDecimal("750")).transactionDate(LocalDate.now()).securityId("SEC1").securityName("Security One").currencyId("EUR").build();
         when(this.securityTransactionService.updateTransaction(dto, 1L)).thenReturn(dto);
 
         Assertions.assertEquals(dto, this.securityTransactionController.updateTransaction(1L, dto).getBody());

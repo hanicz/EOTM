@@ -3,6 +3,7 @@ package eye.on.the.money.repository.security;
 import eye.on.the.money.model.security.SecurityTransaction;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -20,5 +21,5 @@ public interface SecurityTransactionRepository extends JpaRepository<SecurityTra
     Optional<SecurityTransaction> findByIdAndUserId(Long id, Long userId);
 
     List<SecurityTransaction> findByUserIdAndSecurity_IdAndTransactionDateAndBuySellAndQuantityAndAmountOrderById(
-            Long userId, String securityId, LocalDate transactionDate, String buySell, Integer quantity, Double amount);
+            Long userId, String securityId, LocalDate transactionDate, String buySell, Integer quantity, BigDecimal amount);
 }

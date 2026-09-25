@@ -11,6 +11,7 @@ import lombok.*;
 import org.apache.commons.csv.CSVRecord;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -23,10 +24,8 @@ import java.time.format.DateTimeFormatter;
 @NoArgsConstructor
 public class TransactionDTO implements CSVHelper, Serializable, Lot<TransactionDTO> {
 
-    private static final double CLOSED_TOLERANCE = 1e-9;
-
     private Long id;
-    private Double quantity;
+    private BigDecimal quantity;
     private String buySell;
     private String transactionString;
     @JsonSerialize(using = LocalDateSerializer.class)
@@ -34,11 +33,11 @@ public class TransactionDTO implements CSVHelper, Serializable, Lot<TransactionD
     private LocalDate transactionDate;
     private String symbol;
     private String coinId;
-    private Double amount;
+    private BigDecimal amount;
     private String currencyId;
-    private Double liveValue;
-    private Double valueDiff;
-    private Double fee;
+    private BigDecimal liveValue;
+    private BigDecimal valueDiff;
+    private BigDecimal fee;
     private String url;
 
     @Override
@@ -46,15 +45,10 @@ public class TransactionDTO implements CSVHelper, Serializable, Lot<TransactionD
         if (!this.getSymbol().equals(other.getSymbol()))
             return this;
 
-        this.setAmount(this.getAmount() + other.getAmount());
-        this.setQuantity(this.getQuantity() + other.getQuantity());
+        this.setAmount(this.getAmount().add(other.getAmount()));
+        this.setQuantity(this.getQuantity().add(other.getQuantity()));
 
-        // Coin quantities are fractional, so a fully sold position rarely lands on an exact zero.
-        if (Math.abs(this.quantity) < TransactionDTO.CLOSED_TOLERANCE) {
-            this.quantity = 0.0;
-        }
-
-        if (this.getQuantity() > 0 && "S".equals(this.buySell)) {
+        if (this.getQuantity().signum() > 0 && "S".equals(this.buySell)) {
             this.buySell = "B";
         }
         return this;
@@ -62,14 +56,19 @@ public class TransactionDTO implements CSVHelper, Serializable, Lot<TransactionD
 
     @Override
     public void negateAmountAndQuantity() {
-        this.amount = -this.amount;
-        this.quantity = -this.quantity;
+        this.amount = this.amount.negate();
+        this.quantity = this.quantity.negate();
+    }
+
+    @Override
+    public Long recordId() {
+        return this.id;
     }
 
     @Override
     @JsonIgnore
     public boolean isClosed() {
-        return this.quantity != null && this.quantity == 0.0;
+        return this.quantity != null && this.quantity.signum() == 0;
     }
 
     @Override
@@ -81,9 +80,9 @@ public class TransactionDTO implements CSVHelper, Serializable, Lot<TransactionD
     @Override
     @JsonIgnore
     public Object[] getCSVRecord() {
-        return new Object[]{this.getId(), this.getQuantity(),
+        return new Object[]{this.getId(), CSVHelper.plainNumber(this.getQuantity()),
                 this.getBuySell(), this.getTransactionDate(), this.getSymbol(),
-                this.getAmount(), this.getCurrencyId(), this.getFee()};
+                CSVHelper.plainNumber(this.getAmount()), this.getCurrencyId(), CSVHelper.plainNumber(this.getFee())};
     }
 
     public static TransactionDTO createFromCSVRecord(CSVRecord csvRecord, DateTimeFormatter formatter) {
@@ -91,11 +90,11 @@ public class TransactionDTO implements CSVHelper, Serializable, Lot<TransactionD
                 .id(csvRecord.get("Transaction Id").isBlank() ? null : Long.parseLong(csvRecord.get("Transaction Id")))
                 .buySell(csvRecord.get("Type"))
                 .transactionDate(LocalDate.parse(csvRecord.get("Transaction Date"), formatter))
-                .amount(Double.parseDouble(csvRecord.get("Amount")))
-                .quantity(Double.parseDouble(csvRecord.get("Quantity")))
+                .amount(new BigDecimal(csvRecord.get("Amount")))
+                .quantity(new BigDecimal(csvRecord.get("Quantity")))
                 .currencyId(csvRecord.get("Currency"))
                 .symbol(csvRecord.get("Symbol"))
-                .fee(Double.parseDouble(csvRecord.get("Fee")))
+                .fee(new BigDecimal(csvRecord.get("Fee")))
                 .build();
     }
 }

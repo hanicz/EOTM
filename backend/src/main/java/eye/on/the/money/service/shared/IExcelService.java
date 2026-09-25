@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,10 +66,10 @@ public interface IExcelService {
         return cell.getCellType() == CellType.STRING ? cell.getStringCellValue().trim() : "";
     }
 
-    default Double numericValue(Row row, Integer column) {
+    default BigDecimal numericValue(Row row, Integer column) {
         Cell cell = (row == null || column == null) ? null : row.getCell(column);
         if (cell != null && cell.getCellType() == CellType.NUMERIC) {
-            return cell.getNumericCellValue();
+            return BigDecimal.valueOf(cell.getNumericCellValue());
         }
         return Numbers.parseHungarian(this.stringValue(row, column));
     }

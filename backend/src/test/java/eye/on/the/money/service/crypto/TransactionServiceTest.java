@@ -31,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.StringWriter;
 import java.io.Writer;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -62,7 +63,6 @@ class TransactionServiceTest {
     private ObjectMapper objectMapper;
     private User user;
     private final ModelMapper modelMapper = new ModelMapper();
-    double epsilon = 0.000001d;
 
     @BeforeEach
     public void init() {
@@ -86,8 +86,8 @@ class TransactionServiceTest {
 
         Assertions.assertAll("Assert all merged values",
                 () -> assertEquals("B", testObject.getBuySell()),
-                () -> assertEquals(0.98, testObject.getQuantity(), this.epsilon),
-                () -> assertEquals(-43.64, testObject.getAmount(), this.epsilon));
+                () -> assertDecimal("0.98", testObject.getQuantity()),
+                () -> assertDecimal("-43.64", testObject.getAmount()));
     }
 
     @Test
@@ -97,8 +97,8 @@ class TransactionServiceTest {
 
         Assertions.assertAll("Assert all merged values",
                 () -> assertEquals("B", testObject.getBuySell()),
-                () -> assertEquals(87.4, testObject.getQuantity(), this.epsilon),
-                () -> assertEquals(89.13, testObject.getAmount(), this.epsilon));
+                () -> assertDecimal("87.4", testObject.getQuantity()),
+                () -> assertDecimal("89.13", testObject.getAmount()));
     }
 
     @Test
@@ -108,29 +108,29 @@ class TransactionServiceTest {
 
         Assertions.assertAll("Assert all merged values",
                 () -> assertEquals("B", testObject.getBuySell()),
-                () -> assertEquals(0.0, testObject.getQuantity()),
-                () -> assertEquals(-1031.24, testObject.getAmount(), this.epsilon));
+                () -> assertDecimal("0", testObject.getQuantity()),
+                () -> assertDecimal("-1031.24", testObject.getAmount()));
     }
 
     @Test
     @Transactional
     public void getAllPositionsReopenedLotIsNotMergedWithClosedLot() {
         this.transactionService.createTransaction(TransactionDTO.builder()
-                .buySell("B").quantity(20.0).amount(300.0).currencyId("EUR").fee(0.0)
-                .symbol("ADA").transactionString("ttt")
+                .buySell("B").quantity(new BigDecimal("20")).amount(new BigDecimal("300")).currencyId("EUR")
+                .fee(BigDecimal.ZERO).symbol("ADA").transactionString("ttt")
                 .transactionDate(LocalDate.of(2021, 6, 1)).build(), this.user.getId());
 
         List<TransactionDTO> ada = this.transactionService.getAllPositions(this.user.getId()).stream()
                 .filter(tDTO -> "ADA".equals(tDTO.getSymbol())).toList();
 
-        TransactionDTO closedLot = ada.stream().filter(t -> t.getQuantity() == 0).findFirst().orElseThrow();
-        TransactionDTO openLot = ada.stream().filter(t -> t.getQuantity() > 0).findFirst().orElseThrow();
+        TransactionDTO closedLot = ada.stream().filter(t -> t.getQuantity().signum() == 0).findFirst().orElseThrow();
+        TransactionDTO openLot = ada.stream().filter(t -> t.getQuantity().signum() > 0).findFirst().orElseThrow();
 
         Assertions.assertAll("The realised gain stays on the closed lot",
                 () -> assertEquals(2, ada.size()),
-                () -> assertEquals(-1031.24, closedLot.getAmount(), this.epsilon),
-                () -> assertEquals(20.0, openLot.getQuantity(), this.epsilon),
-                () -> assertEquals(300.0, openLot.getAmount(), this.epsilon));
+                () -> assertDecimal("-1031.24", closedLot.getAmount()),
+                () -> assertDecimal("20", openLot.getQuantity()),
+                () -> assertDecimal("300", openLot.getAmount()));
     }
 
     @Test
@@ -162,10 +162,10 @@ class TransactionServiceTest {
 
         Assertions.assertAll("Assert all merged values",
                 () -> assertEquals("B", testObject.getBuySell()),
-                () -> assertEquals(87.4, testObject.getQuantity()),
-                () -> assertEquals(89.13, testObject.getAmount(), this.epsilon),
-                () -> assertEquals(5496673.4, testObject.getLiveValue(), this.epsilon),
-                () -> assertEquals(5496584.27, testObject.getValueDiff(), this.epsilon)
+                () -> assertDecimal("87.4", testObject.getQuantity()),
+                () -> assertDecimal("89.13", testObject.getAmount()),
+                () -> assertDecimal("5496673.4", testObject.getLiveValue()),
+                () -> assertDecimal("5496584.27", testObject.getValueDiff())
         );
     }
 
@@ -178,10 +178,10 @@ class TransactionServiceTest {
 
         Assertions.assertAll("Assert all merged values",
                 () -> assertEquals("B", testObject.getBuySell()),
-                () -> assertEquals(0.98, testObject.getQuantity(), this.epsilon),
-                () -> assertEquals(-43.64, testObject.getAmount(), this.epsilon),
-                () -> assertEquals(6.713, testObject.getLiveValue(), this.epsilon),
-                () -> assertEquals(50.353, testObject.getValueDiff(), this.epsilon)
+                () -> assertDecimal("0.98", testObject.getQuantity()),
+                () -> assertDecimal("-43.64", testObject.getAmount()),
+                () -> assertDecimal("6.713", testObject.getLiveValue()),
+                () -> assertDecimal("50.353", testObject.getValueDiff())
         );
     }
 
@@ -202,10 +202,10 @@ class TransactionServiceTest {
         Assertions.assertAll("Assert new transaction values",
                 () -> assertEquals(transactionDTO.getBuySell(), result.getBuySell()),
                 () -> assertEquals(transactionDTO.getSymbol(), result.getSymbol()),
-                () -> assertEquals(transactionDTO.getQuantity(), result.getQuantity()),
-                () -> assertEquals(transactionDTO.getAmount(), result.getAmount()),
+                () -> assertDecimal(transactionDTO.getQuantity(), result.getQuantity()),
+                () -> assertDecimal(transactionDTO.getAmount(), result.getAmount()),
                 () -> assertEquals(transactionDTO.getTransactionString(), result.getTransactionString()),
-                () -> assertEquals(transactionDTO.getFee(), result.getFee()),
+                () -> assertDecimal(transactionDTO.getFee(), result.getFee()),
                 () -> assertEquals(transactionDTO.getCurrencyId(), result.getCurrencyId())
         );
     }
@@ -248,16 +248,16 @@ class TransactionServiceTest {
         TransactionDTO transactionDTO = this.createNewTransaction();
         TransactionDTO inserted = this.transactionService.createTransaction(transactionDTO, this.user.getId());
         inserted.setBuySell("B");
-        inserted.setQuantity(10.0);
-        inserted.setAmount(100.0);
-        inserted.setFee(5.0);
+        inserted.setQuantity(new BigDecimal("10"));
+        inserted.setAmount(new BigDecimal("100"));
+        inserted.setFee(new BigDecimal("5"));
 
         TransactionDTO result = this.transactionService.updateTransaction(inserted, this.user.getId());
         Assertions.assertAll("Assert new transaction values",
                 () -> assertEquals("B", result.getBuySell()),
-                () -> assertEquals(10.0, result.getQuantity()),
-                () -> assertEquals(100.0, result.getAmount()),
-                () -> assertEquals(5.0, result.getFee())
+                () -> assertDecimal("10", result.getQuantity()),
+                () -> assertDecimal("100", result.getAmount()),
+                () -> assertDecimal("5", result.getFee())
         );
     }
 
@@ -297,8 +297,8 @@ class TransactionServiceTest {
         this.transactionService.getCSV(this.user.getId(), writer);
         Assertions.assertAll(
                 () -> assertTrue(writer.toString().contains("Transaction Id,Quantity,Type,Transaction Date,Symbol,Amount,Currency,Fee")),
-                () -> assertTrue(writer.toString().contains("2,98.5,B,2021-05-07,BTC,100.0,EUR,0.0")),
-                () -> assertTrue(writer.toString().contains("5,100.23,B,2021-05-07,ADA,1000.87,EUR,0.0")),
+                () -> assertTrue(writer.toString().contains("2,98.5,B,2021-05-07,BTC,100,EUR,0")),
+                () -> assertTrue(writer.toString().contains("5,100.23,B,2021-05-07,ADA,1000.87,EUR,0")),
                 () -> assertTrue(writer.toString().contains("1,4.98,B,2021-05-20,DOT,156.8,EUR,3.2"))
         );
     }
@@ -321,9 +321,9 @@ class TransactionServiceTest {
 
         Assertions.assertAll("Assert new transaction values",
                 () -> assertEquals("S", result.getBuySell()),
-                () -> assertEquals(1000.0, result.getQuantity()),
-                () -> assertEquals(2000.0, result.getAmount()),
-                () -> assertEquals(5.0, result.getFee()),
+                () -> assertDecimal("1000", result.getQuantity()),
+                () -> assertDecimal("2000", result.getAmount()),
+                () -> assertDecimal("5", result.getFee()),
                 () -> assertEquals("LUNA", result.getCoin().getSymbol())
         );
     }
@@ -337,7 +337,9 @@ class TransactionServiceTest {
 
         List<Transaction> transactions = this.transactionRepository.findByUserIdOrderByTransactionDateDesc(this.user.getId());
 
-        Optional<Transaction> result = transactions.stream().filter(d -> d.getQuantity() == 399.0 && d.getCoin().getSymbol().equals("LUNA")).findAny();
+        Optional<Transaction> result = transactions.stream()
+                .filter(d -> d.getQuantity().compareTo(new BigDecimal("399")) == 0 && d.getCoin().getSymbol().equals("LUNA"))
+                .findAny();
 
         Assertions.assertTrue(result.isPresent());
     }
@@ -368,11 +370,11 @@ class TransactionServiceTest {
         return TransactionDTO.builder()
                 .buySell("S")
                 .symbol("LUNA")
-                .quantity(20.67)
-                .amount(2001.32)
+                .quantity(new BigDecimal("20.67"))
+                .amount(new BigDecimal("2001.32"))
                 .transactionDate(LocalDate.now())
                 .transactionString("tString")
-                .fee(7.2)
+                .fee(new BigDecimal("7.2"))
                 .currencyId("USD")
                 .build();
     }
@@ -402,5 +404,13 @@ class TransactionServiceTest {
                         }
                     }
                 """);
+    }
+
+    private static void assertDecimal(String expected, BigDecimal actual) {
+        assertDecimal(new BigDecimal(expected), actual);
+    }
+
+    private static void assertDecimal(BigDecimal expected, BigDecimal actual) {
+        assertEquals(0, expected.compareTo(actual), () -> "expected " + expected + " but was " + actual);
     }
 }

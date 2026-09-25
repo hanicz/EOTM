@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -48,12 +49,12 @@ class InterestServiceTest {
     private final Security security = Security.builder().id("SEC1").name("Security One").build();
 
     private Interest buildInterest(Long id) {
-        return Interest.builder().id(id).amount(100.0).interestDate(LocalDate.of(2025, 6, 1))
+        return Interest.builder().id(id).amount(new BigDecimal("100")).interestDate(LocalDate.of(2025, 6, 1))
                 .currency(this.currency).security(this.security).user(this.user).build();
     }
 
     private InterestDTO buildInterestDTO(Long id) {
-        return InterestDTO.builder().interestId(id).amount(100.0).interestDate(LocalDate.of(2025, 6, 1))
+        return InterestDTO.builder().interestId(id).amount(new BigDecimal("100")).interestDate(LocalDate.of(2025, 6, 1))
                 .currencyId("EUR").securityId("SEC1").securityName("Security One").build();
     }
 
@@ -67,7 +68,7 @@ class InterestServiceTest {
         List<InterestDTO> result = this.interestService.getInterest(1L);
 
         assertEquals(1, result.size());
-        assertEquals(100.0, result.get(0).getAmount());
+        assertEquals(new BigDecimal("100"), result.get(0).getAmount());
     }
 
     @Test
@@ -94,7 +95,7 @@ class InterestServiceTest {
         InterestDTO result = this.interestService.createInterest(inputDTO, 1L);
 
         assertEquals(1L, result.getInterestId());
-        assertEquals(100.0, result.getAmount());
+        assertEquals(new BigDecimal("100"), result.getAmount());
         verify(this.interestRepository, times(1)).save(any(Interest.class));
     }
 

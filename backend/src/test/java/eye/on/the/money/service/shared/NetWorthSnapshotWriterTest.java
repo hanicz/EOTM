@@ -64,9 +64,9 @@ class NetWorthSnapshotWriterTest {
 
         Map<String, NetWorthSnapshot> stored = this.storedOn(DAY);
         assertEquals(2, stored.size());
-        assertEquals(200.0, stored.get("Stock").getSpent());
-        assertEquals(260.0, stored.get("Stock").getWorth());
-        assertEquals(70.0, stored.get("Cash").getWorth());
+        assertDecimal(200.0, stored.get("Stock").getSpent());
+        assertDecimal(260.0, stored.get("Stock").getWorth());
+        assertDecimal(70.0, stored.get("Cash").getWorth());
     }
 
     @Test
@@ -80,8 +80,8 @@ class NetWorthSnapshotWriterTest {
         this.entityManager.flush();
         this.entityManager.clear();
 
-        assertEquals(110.0, this.storedOn(previous).get("Stock").getWorth());
-        assertEquals(180.0, this.storedOn(DAY).get("Stock").getWorth());
+        assertDecimal(110.0, this.storedOn(previous).get("Stock").getWorth());
+        assertDecimal(180.0, this.storedOn(DAY).get("Stock").getWorth());
     }
 
     @Test
@@ -95,7 +95,7 @@ class NetWorthSnapshotWriterTest {
 
         Map<String, NetWorthSnapshot> stored = this.storedOn(DAY);
         assertEquals(1, stored.size());
-        assertEquals(110.0, stored.get("Stock").getWorth());
+        assertDecimal(110.0, stored.get("Stock").getWorth());
     }
 
     @Test
@@ -107,9 +107,13 @@ class NetWorthSnapshotWriterTest {
 
         Map<String, NetWorthSnapshot> stored = this.storedOn(DAY);
         assertEquals(2, stored.size());
-        assertEquals(300.0, stored.get("Stock").getSpent());
-        assertEquals(330.0, stored.get("Stock").getWorth());
-        assertEquals(40.0, stored.get("Cash").getSpent());
+        assertDecimal(300.0, stored.get("Stock").getSpent());
+        assertDecimal(330.0, stored.get("Stock").getWorth());
+        assertDecimal(40.0, stored.get("Cash").getSpent());
+    }
+
+    private static void assertDecimal(double expected, BigDecimal actual) {
+        assertEquals(0, BigDecimal.valueOf(expected).compareTo(actual), () -> "expected " + expected + " but was " + actual);
     }
 
     private Map<String, NetWorthSnapshot> storedOn(LocalDate date) {
@@ -130,8 +134,8 @@ class NetWorthSnapshotWriterTest {
                 .user(this.user)
                 .snapshotDate(date)
                 .assetClass(assetClass)
-                .spent(spent)
-                .worth(worth)
+                .spent(BigDecimal.valueOf(spent))
+                .worth(BigDecimal.valueOf(worth))
                 .build();
     }
 }

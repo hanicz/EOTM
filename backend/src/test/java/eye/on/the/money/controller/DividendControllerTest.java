@@ -18,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,9 +41,9 @@ class DividendControllerTest {
     @Test
     public void getAllDividends() {
         List<DividendDTO> dividends = new ArrayList<>();
-        dividends.add(DividendDTO.builder().dividendId(1L).exchange("e1").dividendDate(LocalDate.now()).amount(55.1).currencyId("c1").shortName("s1").build());
-        dividends.add(DividendDTO.builder().dividendId(2L).exchange("e2").dividendDate(LocalDate.now()).amount(51.2).currencyId("c2").shortName("s2").build());
-        dividends.add(DividendDTO.builder().dividendId(3L).exchange("e3").dividendDate(LocalDate.now()).amount(50.3).currencyId("c3").shortName("s3").build());
+        dividends.add(DividendDTO.builder().dividendId(1L).exchange("e1").dividendDate(LocalDate.now()).amount(new BigDecimal("55.1")).currencyId("c1").shortName("s1").build());
+        dividends.add(DividendDTO.builder().dividendId(2L).exchange("e2").dividendDate(LocalDate.now()).amount(new BigDecimal("51.2")).currencyId("c2").shortName("s2").build());
+        dividends.add(DividendDTO.builder().dividendId(3L).exchange("e3").dividendDate(LocalDate.now()).amount(new BigDecimal("50.3")).currencyId("c3").shortName("s3").build());
 
         when(this.dividendService.getDividends(1L)).thenReturn(dividends);
 
@@ -51,7 +52,7 @@ class DividendControllerTest {
 
     @Test
     public void createDividend() {
-        DividendDTO dividendDTO = DividendDTO.builder().dividendId(1L).exchange("e1").dividendDate(LocalDate.now()).amount(55.1).currencyId("c1").shortName("s1").build();
+        DividendDTO dividendDTO = DividendDTO.builder().dividendId(1L).exchange("e1").dividendDate(LocalDate.now()).amount(new BigDecimal("55.1")).currencyId("c1").shortName("s1").build();
         when(this.dividendService.createDividend(dividendDTO, 1L)).thenReturn(dividendDTO);
 
         Assertions.assertEquals(dividendDTO, this.dividendController.createDividend(1L, dividendDTO).getBody());
@@ -76,7 +77,7 @@ class DividendControllerTest {
 
     @Test
     public void updateDividend() {
-        DividendDTO dividendDTO = DividendDTO.builder().dividendId(1L).exchange("e1").dividendDate(LocalDate.now()).amount(55.1).currencyId("c1").shortName("s1").build();
+        DividendDTO dividendDTO = DividendDTO.builder().dividendId(1L).exchange("e1").dividendDate(LocalDate.now()).amount(new BigDecimal("55.1")).currencyId("c1").shortName("s1").build();
         when(this.dividendService.updateDividend(dividendDTO, 1L)).thenReturn(dividendDTO);
 
         Assertions.assertEquals(dividendDTO, this.dividendController.updateDividend(1L, dividendDTO).getBody());

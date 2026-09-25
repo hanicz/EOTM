@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -210,11 +211,11 @@ class NewsServiceTest {
     }
 
     private InvestmentDTO holding(String shortName, String exchange) {
-        return InvestmentDTO.builder().shortName(shortName).exchange(exchange).quantity(5.0).build();
+        return InvestmentDTO.builder().shortName(shortName).exchange(exchange).quantity(new BigDecimal("5")).build();
     }
 
     private ETFInvestmentDTO etfHolding(String shortName, String exchange) {
-        return ETFInvestmentDTO.builder().shortName(shortName).exchange(exchange).quantity(5.0).build();
+        return ETFInvestmentDTO.builder().shortName(shortName).exchange(exchange).quantity(new BigDecimal("5")).build();
     }
 
     private TickerWatch watch(String shortName, String exchange) {

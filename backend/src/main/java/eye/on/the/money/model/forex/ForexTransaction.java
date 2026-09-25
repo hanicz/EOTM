@@ -8,6 +8,7 @@ import eye.on.the.money.util.Generated;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
@@ -28,11 +29,11 @@ public class ForexTransaction extends AuditedEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Double fromAmount;
+    @Column(nullable = false, precision = 19, scale = 4)
+    private BigDecimal fromAmount;
 
-    @Column(nullable = false)
-    private Double toAmount;
+    @Column(nullable = false, precision = 19, scale = 4)
+    private BigDecimal toAmount;
 
     @Column(nullable = false)
     private LocalDate transactionDate;
@@ -40,8 +41,8 @@ public class ForexTransaction extends AuditedEntity {
     @Column(nullable = false)
     private String buySell;
 
-    @Column(nullable = false)
-    private Double changeRate;
+    @Column(nullable = false, precision = 19, scale = 8)
+    private BigDecimal changeRate;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

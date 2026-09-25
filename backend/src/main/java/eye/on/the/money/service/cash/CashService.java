@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.NoSuchElementException;
 
 @Service
@@ -26,7 +27,7 @@ public class CashService {
     public CashDTO getCash(Long userId) {
         return this.cashRepository.findByUserId(userId)
                 .map(cash -> this.toDTO(cash.getAmount(), this.currencyIdOf(cash)))
-                .orElseGet(() -> this.toDTO(0.0, DEFAULT_CURRENCY));
+                .orElseGet(() -> this.toDTO(BigDecimal.ZERO, DEFAULT_CURRENCY));
     }
 
     @Transactional
@@ -52,7 +53,7 @@ public class CashService {
         return (cash.getCurrency() == null) ? DEFAULT_CURRENCY : cash.getCurrency().getId();
     }
 
-    private CashDTO toDTO(Double amount, String currency) {
+    private CashDTO toDTO(BigDecimal amount, String currency) {
         return CashDTO.builder().amount(amount).currency(currency).build();
     }
 }

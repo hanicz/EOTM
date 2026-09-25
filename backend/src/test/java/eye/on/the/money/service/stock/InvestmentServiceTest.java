@@ -55,7 +55,6 @@ class InvestmentServiceTest {
     @Autowired
     private UserRepository userRepository;
     private User user;
-    double epsilon = 0.000001d;
 
     @BeforeEach
     public void init() {
@@ -77,8 +76,8 @@ class InvestmentServiceTest {
 
         Assertions.assertAll("Assert all merged values",
                 () -> assertEquals("B", testObject.getBuySell()),
-                () -> assertEquals(0.0, testObject.getQuantity()),
-                () -> assertEquals(-100.0, testObject.getAmount(), this.epsilon));
+                () -> assertDecimal("0", testObject.getQuantity()),
+                () -> assertDecimal("-100", testObject.getAmount()));
     }
 
     @Test
@@ -88,8 +87,8 @@ class InvestmentServiceTest {
 
         Assertions.assertAll("Assert all merged values",
                 () -> assertEquals("B", testObject.getBuySell()),
-                () -> assertEquals(36.0, testObject.getQuantity()),
-                () -> assertEquals(-189.9, testObject.getAmount(), this.epsilon));
+                () -> assertDecimal("36", testObject.getQuantity()),
+                () -> assertDecimal("-189.9", testObject.getAmount()));
     }
 
     @Test
@@ -99,8 +98,8 @@ class InvestmentServiceTest {
 
         Assertions.assertAll("Assert all merged values",
                 () -> assertEquals("B", testObject.getBuySell()),
-                () -> assertEquals(2.0, testObject.getQuantity()),
-                () -> assertEquals(43.77, testObject.getAmount(), this.epsilon));
+                () -> assertDecimal("2", testObject.getQuantity()),
+                () -> assertDecimal("43.77", testObject.getAmount()));
     }
 
     @Test
@@ -110,8 +109,8 @@ class InvestmentServiceTest {
 
         Assertions.assertAll("Assert all merged values",
                 () -> assertEquals("B", testObject.getBuySell()),
-                () -> assertEquals(0.0, testObject.getQuantity()),
-                () -> assertEquals(-100.0, testObject.getAmount(), this.epsilon));
+                () -> assertDecimal("0", testObject.getQuantity()),
+                () -> assertDecimal("-100", testObject.getAmount()));
     }
 
     @Test
@@ -143,9 +142,9 @@ class InvestmentServiceTest {
         InvestmentDTO intc = result.stream().filter(iDTO -> "INTC".equals(iDTO.getShortName())).findAny().orElseThrow();
 
         Assertions.assertAll("The daily change scales with quantity and stays absent for an unquoted holding",
-                () -> assertEquals(12.5, goog.getDayChange(), this.epsilon),
-                () -> assertEquals(9.0909, goog.getDayChangePercent(), this.epsilon),
-                () -> assertEquals(42.0, intc.getLiveValue(), this.epsilon),
+                () -> assertDecimal("12.5", goog.getDayChange()),
+                () -> assertEquals(9.0909, goog.getDayChangePercent(), 0.000001d),
+                () -> assertDecimal("42", intc.getLiveValue()),
                 () -> Assertions.assertTrue(intc.getStalePrice()),
                 () -> Assertions.assertNull(intc.getDayChange()),
                 () -> Assertions.assertNull(intc.getDayChangePercent()));
@@ -156,26 +155,26 @@ class InvestmentServiceTest {
         List<InvestmentDTO> result = this.investmentService.getAllPositions(this.user.getId());
         List<InvestmentDTO> googPositions = result.stream().filter(iDTO -> "GOOG".equals(iDTO.getShortName())).toList();
 
-        InvestmentDTO closedLot = googPositions.stream().filter(iDTO -> iDTO.getQuantity() == 0).findAny().get();
-        InvestmentDTO openLot = googPositions.stream().filter(iDTO -> iDTO.getQuantity() > 0).findAny().get();
+        InvestmentDTO closedLot = googPositions.stream().filter(iDTO -> iDTO.getQuantity().signum() == 0).findAny().get();
+        InvestmentDTO openLot = googPositions.stream().filter(iDTO -> iDTO.getQuantity().signum() > 0).findAny().get();
 
         Assertions.assertAll("Closed and reopened lots must be tracked separately",
                 () -> assertEquals(2, googPositions.size()),
-                () -> assertEquals(-50.0, closedLot.getAmount(), this.epsilon),
-                () -> assertEquals(5.0, openLot.getQuantity()),
-                () -> assertEquals(50.0, openLot.getAmount(), this.epsilon));
+                () -> assertDecimal("-50", closedLot.getAmount()),
+                () -> assertDecimal("5", openLot.getQuantity()),
+                () -> assertDecimal("50", openLot.getAmount()));
     }
 
     @Test
     public void getPositionsByAccountIdOnlyOpenLotHasPositiveQuantity() {
         List<InvestmentDTO> result = this.investmentService.getPositionsByAccountId(this.user.getId(), 1L);
         List<InvestmentDTO> googHoldings = result.stream()
-                .filter(iDTO -> "GOOG".equals(iDTO.getShortName()) && iDTO.getQuantity() > 0).toList();
+                .filter(iDTO -> "GOOG".equals(iDTO.getShortName()) && iDTO.getQuantity().signum() > 0).toList();
 
         Assertions.assertAll("Only the reopened lot should count towards current holdings",
                 () -> assertEquals(1, googHoldings.size()),
-                () -> assertEquals(5, googHoldings.get(0).getQuantity()),
-                () -> assertEquals(50.0, googHoldings.get(0).getAmount(), this.epsilon));
+                () -> assertDecimal("5", googHoldings.get(0).getQuantity()),
+                () -> assertDecimal("50", googHoldings.get(0).getAmount()));
     }
 
     @Test
@@ -199,7 +198,7 @@ class InvestmentServiceTest {
     public void updateInvestmentKeepsTheRSUFreezeWhenTheValuationInputsAreUnchanged() {
         Investment investment = this.flagAsRSU();
         InvestmentDTO investmentDTO = this.convertToInvestmentDTO(investment);
-        investmentDTO.setFee(9.99);
+        investmentDTO.setFee(new BigDecimal("9.99"));
         when(this.stockService.getOrCreateStock(anyString(), anyString(), anyString()))
                 .thenReturn(investment.getStock());
 
@@ -208,6 +207,20 @@ class InvestmentServiceTest {
         Assertions.assertTrue(investment.isRsu());
         Assertions.assertEquals(1, this.rsuTaxDetailsRepository
                 .findByUserIdAndInvestmentIdIn(this.user.getId(), List.of(investment.getId())).size());
+    }
+
+    @Test
+    @Transactional
+    public void updateInvestmentKeepsTheRSUFreezeWhenTheQuantityOnlyDiffersInScale() {
+        Investment investment = this.flagAsRSU();
+        InvestmentDTO investmentDTO = this.convertToInvestmentDTO(investment);
+        investmentDTO.setQuantity(investment.getQuantity().setScale(10));
+        when(this.stockService.getOrCreateStock(anyString(), anyString(), anyString()))
+                .thenReturn(investment.getStock());
+
+        this.investmentService.updateInvestment(investmentDTO, this.user.getId());
+
+        Assertions.assertTrue(investment.isRsu());
     }
 
     private Investment flagAsRSU() {
@@ -238,5 +251,9 @@ class InvestmentServiceTest {
     private InvestmentDTO convertToInvestmentDTO(Investment investment) {
         this.modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
         return this.modelMapper.map(investment, InvestmentDTO.class);
+    }
+
+    private static void assertDecimal(String expected, BigDecimal actual) {
+        assertEquals(0, new BigDecimal(expected).compareTo(actual), () -> "expected " + expected + " but was " + actual);
     }
 }

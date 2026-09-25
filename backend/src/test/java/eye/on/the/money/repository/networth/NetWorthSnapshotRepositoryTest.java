@@ -14,6 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -102,8 +103,8 @@ class NetWorthSnapshotRepositoryTest {
                 .user(this.user)
                 .snapshotDate(date)
                 .assetClass(assetClass)
-                .spent(1000.0)
-                .worth(1200.0)
+                .spent(new BigDecimal("1000"))
+                .worth(new BigDecimal("1200"))
                 .build();
     }
 }

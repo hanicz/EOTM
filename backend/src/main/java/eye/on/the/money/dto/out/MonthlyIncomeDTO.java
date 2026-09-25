@@ -19,12 +19,11 @@ public class MonthlyIncomeDTO implements CSVHelper {
     private Integer month;
     private String currencyId;
     private String source;
-    private Double amount;
+    private BigDecimal amount;
     private Long transactionCount;
 
-    public Double getAmount() {
-        return this.amount == null ? null
-                : BigDecimal.valueOf(this.amount).setScale(2, RoundingMode.HALF_UP).doubleValue();
+    public BigDecimal getAmount() {
+        return this.amount == null ? null : this.amount.setScale(2, RoundingMode.HALF_UP);
     }
 
     @Override

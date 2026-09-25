@@ -40,6 +40,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -82,7 +83,7 @@ class ExportServiceTest {
         when(this.userService.loadUserById(USER_ID))
                 .thenReturn(User.builder().id(USER_ID).email(USER_EMAIL).build());
         when(this.cashService.getCash(USER_ID))
-                .thenReturn(CashDTO.builder().amount(0.0).currency("HUF").build());
+                .thenReturn(CashDTO.builder().amount(BigDecimal.ZERO).currency("HUF").build());
         when(this.noteService.getNote(USER_ID))
                 .thenReturn(NoteDTO.builder().content("").build());
     }
@@ -135,11 +136,11 @@ class ExportServiceTest {
     @Test
     void export_includesTheCashBalance() {
         when(this.cashService.getCash(USER_ID))
-                .thenReturn(CashDTO.builder().amount(1250000.0).currency("HUF").build());
+                .thenReturn(CashDTO.builder().amount(new BigDecimal("1250000")).currency("HUF").build());
 
         ExportDTO export = this.exportService.export(USER_ID);
 
-        assertEquals(new ExportDTO.CashSection(1250000.0, "HUF"), export.getCash());
+        assertEquals(new ExportDTO.CashSection(new BigDecimal("1250000"), "HUF"), export.getCash());
     }
 
     @Test

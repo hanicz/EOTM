@@ -102,7 +102,7 @@ public class AlertScheduler {
                 return;
             }
             alert.setActualChange(LiveQuote.numericOrZero(stock, "change_p"));
-            alert.setActualValue(price.get().value());
+            alert.setActualValue(price.get().value().doubleValue());
             this.evaluateAlert(alert);
         });
     }

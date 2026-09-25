@@ -28,7 +28,8 @@ public class NetWorthController {
     }
 
     @GetMapping("/history")
-    public ResponseEntity<NetWorthHistoryDTO> getHistory(@CurrentUserId Long userId) {
-        return ResponseEntity.ok(this.netWorthSnapshotService.getHistory(userId));
+    public ResponseEntity<NetWorthHistoryDTO> getHistory(@CurrentUserId Long userId,
+                                                         @RequestParam(defaultValue = "false") boolean refresh) {
+        return ResponseEntity.ok(this.netWorthSnapshotService.getHistory(userId, refresh));
     }
 }

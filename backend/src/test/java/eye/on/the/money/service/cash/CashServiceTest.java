@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -49,29 +50,29 @@ class CashServiceTest {
 
         CashDTO result = this.cashService.getCash(USER_ID);
 
-        Assertions.assertEquals(0.0, result.getAmount());
+        Assertions.assertEquals(BigDecimal.ZERO, result.getAmount());
         Assertions.assertEquals("HUF", result.getCurrency());
     }
 
     @Test
     void getCash_returnsStoredAmountAndCurrency() {
         when(this.cashRepository.findByUserId(USER_ID)).thenReturn(Optional.of(
-                Cash.builder().id(1L).amount(750000.0).currency(this.eur).user(this.user).build()));
+                Cash.builder().id(1L).amount(new BigDecimal("750000")).currency(this.eur).user(this.user).build()));
 
         CashDTO result = this.cashService.getCash(USER_ID);
 
-        Assertions.assertEquals(750000.0, result.getAmount());
+        Assertions.assertEquals(new BigDecimal("750000"), result.getAmount());
         Assertions.assertEquals("EUR", result.getCurrency());
     }
 
     @Test
     void getCash_fallsBackToTheDefaultCurrencyForRowsWithoutOne() {
         when(this.cashRepository.findByUserId(USER_ID))
-                .thenReturn(Optional.of(Cash.builder().id(1L).amount(750000.0).user(this.user).build()));
+                .thenReturn(Optional.of(Cash.builder().id(1L).amount(new BigDecimal("750000")).user(this.user).build()));
 
         CashDTO result = this.cashService.getCash(USER_ID);
 
-        Assertions.assertEquals(750000.0, result.getAmount());
+        Assertions.assertEquals(new BigDecimal("750000"), result.getAmount());
         Assertions.assertEquals("HUF", result.getCurrency());
     }
 
@@ -83,43 +84,43 @@ class CashServiceTest {
         when(this.cashRepository.save(any(Cash.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         CashDTO result = this.cashService.updateCash(USER_ID,
-                CashDTO.builder().amount(320000.0).currency("EUR").build());
+                CashDTO.builder().amount(new BigDecimal("320000")).currency("EUR").build());
 
         ArgumentCaptor<Cash> captor = ArgumentCaptor.forClass(Cash.class);
         verify(this.cashRepository).save(captor.capture());
-        Assertions.assertEquals(320000.0, captor.getValue().getAmount());
+        Assertions.assertEquals(new BigDecimal("320000"), captor.getValue().getAmount());
         Assertions.assertEquals(this.eur, captor.getValue().getCurrency());
         Assertions.assertEquals(this.user, captor.getValue().getUser());
-        Assertions.assertEquals(320000.0, result.getAmount());
+        Assertions.assertEquals(new BigDecimal("320000"), result.getAmount());
         Assertions.assertEquals("EUR", result.getCurrency());
     }
 
     @Test
     void updateCash_updatesExistingRow() {
-        Cash existing = Cash.builder().id(7L).amount(100000.0).currency(this.huf).user(this.user).build();
+        Cash existing = Cash.builder().id(7L).amount(new BigDecimal("100000")).currency(this.huf).user(this.user).build();
         when(this.currencyRepository.findById("EUR")).thenReturn(Optional.of(this.eur));
         when(this.cashRepository.findByUserId(USER_ID)).thenReturn(Optional.of(existing));
         when(this.cashRepository.save(existing)).thenReturn(existing);
 
         CashDTO result = this.cashService.updateCash(USER_ID,
-                CashDTO.builder().amount(900000.0).currency("EUR").build());
+                CashDTO.builder().amount(new BigDecimal("900000")).currency("EUR").build());
 
-        Assertions.assertEquals(900000.0, existing.getAmount());
+        Assertions.assertEquals(new BigDecimal("900000"), existing.getAmount());
         Assertions.assertEquals(this.eur, existing.getCurrency());
         Assertions.assertEquals(7L, existing.getId());
-        Assertions.assertEquals(900000.0, result.getAmount());
+        Assertions.assertEquals(new BigDecimal("900000"), result.getAmount());
         Assertions.assertEquals("EUR", result.getCurrency());
         verify(this.userService, never()).getReference(USER_ID);
     }
 
     @Test
     void updateCash_defaultsToTheDefaultCurrencyWhenNoneIsGiven() {
-        Cash existing = Cash.builder().id(7L).amount(100000.0).user(this.user).build();
+        Cash existing = Cash.builder().id(7L).amount(new BigDecimal("100000")).user(this.user).build();
         when(this.currencyRepository.findById("HUF")).thenReturn(Optional.of(this.huf));
         when(this.cashRepository.findByUserId(USER_ID)).thenReturn(Optional.of(existing));
         when(this.cashRepository.save(existing)).thenReturn(existing);
 
-        CashDTO result = this.cashService.updateCash(USER_ID, CashDTO.builder().amount(900000.0).build());
+        CashDTO result = this.cashService.updateCash(USER_ID, CashDTO.builder().amount(new BigDecimal("900000")).build());
 
         Assertions.assertEquals(this.huf, existing.getCurrency());
         Assertions.assertEquals("HUF", result.getCurrency());
@@ -129,7 +130,7 @@ class CashServiceTest {
     void updateCash_rejectsAnUnknownCurrency() {
         when(this.currencyRepository.findById("XYZ")).thenReturn(Optional.empty());
 
-        CashDTO request = CashDTO.builder().amount(900000.0).currency("XYZ").build();
+        CashDTO request = CashDTO.builder().amount(new BigDecimal("900000")).currency("XYZ").build();
 
         NoSuchElementException exception = Assertions.assertThrows(NoSuchElementException.class,
                 () -> this.cashService.updateCash(USER_ID, request));

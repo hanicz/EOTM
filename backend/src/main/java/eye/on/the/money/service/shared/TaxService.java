@@ -88,7 +88,7 @@ public class TaxService implements ICSVService {
             throw new TaxException("No closing price available for " + ticker + " on or before " + rsu.getDate());
         }
 
-        BigDecimal amount = close.getValue().multiply(BigDecimal.valueOf(rsu.getQuantity()));
+        BigDecimal amount = close.getValue().multiply(rsu.getQuantity());
         Map.Entry<LocalDate, BigDecimal> rate = this.rateOn(rates, currency, rsu.getDate());
         BigDecimal amountInHuf = amount.multiply(rate.getValue()).setScale(2, RoundingMode.HALF_UP);
 

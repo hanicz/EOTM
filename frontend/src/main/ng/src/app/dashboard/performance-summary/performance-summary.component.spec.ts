@@ -67,6 +67,15 @@ describe('PerformanceSummaryComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('two days of snapshots');
   });
 
+  it('asks the backend to refresh today when the dashboard was refreshed', () => {
+    fixture.componentRef.setInput('refresh', true);
+    component.ngOnInit();
+    http.expectOne(`${historyUrl}?refresh=true`).flush(history([point('2026-08-01', 1000), point('2026-08-02', 1100)]));
+
+    expect(component.loading()).toBe(false);
+    expect(component.latest()?.totalWorth).toBe(1100);
+  });
+
   it('stops loading when the history fails', () => {
     component.ngOnInit();
     http.expectOne(historyUrl).flush('nope', { status: 500, statusText: 'Server Error' });

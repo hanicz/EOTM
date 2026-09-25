@@ -10,6 +10,7 @@ import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.repository.forex.ForexTransactionRepository;
 import eye.on.the.money.service.api.EODAPIService;
 import eye.on.the.money.service.user.UserService;
+import eye.on.the.money.util.Numbers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -83,8 +85,8 @@ class ForexTransactionServiceTest {
 
         ForexTransactionDTO unwind = ForexTransactionDTO.builder()
                 .buySell("S")
-                .fromAmount(2400.0)
-                .toAmount(1000000.0)
+                .fromAmount(new BigDecimal("2400"))
+                .toAmount(new BigDecimal("1000000"))
                 .fromCurrencyId("EUR")
                 .toCurrencyId("HUF")
                 .transactionDate(LocalDate.parse("2023-01-01"))
@@ -98,7 +100,7 @@ class ForexTransactionServiceTest {
                         f -> "HUF".equals(f.getFromCurrencyId()) && "EUR".equals(f.getToCurrencyId()))),
                 () -> Assertions.assertTrue(result.stream().anyMatch(
                         f -> "HUF".equals(f.getFromCurrencyId()) && "USD".equals(f.getToCurrencyId()))),
-                () -> Assertions.assertTrue(result.stream().allMatch(f -> f.getToAmount() > 0)));
+                () -> Assertions.assertTrue(result.stream().allMatch(f -> f.getToAmount().signum() > 0)));
     }
 
     @Test
@@ -123,7 +125,7 @@ class ForexTransactionServiceTest {
                 () -> Assertions.assertEquals(ftDTO.getToCurrencyId(), result.getToCurrencyId()),
                 () -> Assertions.assertEquals(ftDTO.getBuySell(), result.getBuySell()),
                 () -> Assertions.assertEquals(ftDTO.getTransactionDate(), result.getTransactionDate()),
-                () -> Assertions.assertEquals(ftDTO.getFromAmount() / ftDTO.getToAmount(), result.getChangeRate())
+                () -> Assertions.assertEquals(0, new BigDecimal("1.2").compareTo(result.getChangeRate()))
         );
     }
 
@@ -142,7 +144,7 @@ class ForexTransactionServiceTest {
                 () -> Assertions.assertEquals(ftDTO.getToCurrencyId(), result.getToCurrencyId()),
                 () -> Assertions.assertEquals(ftDTO.getBuySell(), result.getBuySell()),
                 () -> Assertions.assertEquals(ftDTO.getTransactionDate(), result.getTransactionDate()),
-                () -> Assertions.assertEquals(ftDTO.getToAmount() / ftDTO.getFromAmount(), result.getChangeRate())
+                () -> Assertions.assertEquals(0, Numbers.divide(ftDTO.getToAmount(), ftDTO.getFromAmount()).compareTo(result.getChangeRate()))
         );
     }
 
@@ -172,8 +174,8 @@ class ForexTransactionServiceTest {
     private ForexTransactionDTO getFTDTO() {
         return ForexTransactionDTO.builder()
                 .buySell("B")
-                .fromAmount(120.0)
-                .toAmount(100.0)
+                .fromAmount(new BigDecimal("120"))
+                .toAmount(new BigDecimal("100"))
                 .fromCurrencyId("USD")
                 .toCurrencyId("EUR")
                 .transactionDate(LocalDate.now())

@@ -78,7 +78,7 @@ class RSUGrantServiceTest {
                     .shortName(request.getShortName()).exchange(request.getExchange())
                     .date(request.getDate()).quantity(request.getQuantity()).currency("USD")
                     .price(new BigDecimal("100")).priceDate(request.getDate())
-                    .amount(new BigDecimal("100").multiply(BigDecimal.valueOf(request.getQuantity())))
+                    .amount(new BigDecimal("100").multiply(request.getQuantity()))
                     .rate(new BigDecimal("350")).rateDate(request.getDate())
                     .amountInHuf(amountInHuf)
                     .tax(TaxBreakdownDTO.builder().amount(amountInHuf).taxBase(amountInHuf)

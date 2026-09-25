@@ -18,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -94,7 +95,7 @@ class AuditedEntityTest {
                 .bookingDate(LocalDate.of(2026, 2, 3))
                 .type("Utalas")
                 .memo("memo")
-                .amount(-1200.0)
+                .amount(new BigDecimal("-1200"))
                 .excluded(false)
                 .currency(huf)
                 .user(this.user)

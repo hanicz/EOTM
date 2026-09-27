@@ -88,6 +88,15 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
   private usExchange = false;
   private pendingStockRestore = false;
   volumeAxisMax = 0;
+  private bucketSize = 1;
+  private chartBuckets: number[][] = [];
+  chartType: 'candlestick' | 'line' = 'candlestick';
+  chartTypes = [
+    { label: 'Candles', value: 'candlestick' as const, icon: 'pi pi-chart-bar' },
+    { label: 'Line', value: 'line' as const, icon: 'pi pi-chart-line' }
+  ];
+  private priceAxisMin = 0;
+  private priceAxisMax = 0;
   periodHigh = 0;
   periodLow = 0;
   periodHighDate: Date | undefined;
@@ -150,19 +159,15 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
       chart: {
         type: 'candlestick',
         toolbar: {
-          show: true,
-          tools: {
-            download: false,
-            selection: false,
-            zoom: false,
-            zoomin: false,
-            zoomout: false,
-            pan: false,
-            reset: false,
-          },
+          show: false
         },
+        parentHeightOffset: 0,
         selection: {
           enabled: false
+        },
+        zoom: {
+          enabled: false,
+          allowMouseWheelZoom: false
         },
         animations: {
           enabled: false
@@ -178,7 +183,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
       colors: [this.getColor],
       stroke: { width: [2, 0] },
       title: {
-        text: 'Candlestick chart',
+        text: '',
         align: 'left',
         style: {
           fontSize: '13px',
@@ -189,6 +194,12 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
       grid: {
         borderColor: '#ece9df',
         strokeDashArray: 3,
+        padding: {
+          left: -6,
+          right: 4,
+          top: 0,
+          bottom: 0
+        }
       },
       xaxis: {
         type: 'category',
@@ -280,12 +291,12 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     this.stockSelectedSubscription?.unsubscribe();
   }
 
-  getTooltip({ series, seriesIndex, dataPointIndex, w }: any) {
-    const o = w.globals.seriesCandleO[0][dataPointIndex]
-    const h = w.globals.seriesCandleH[0][dataPointIndex]
-    const l = w.globals.seriesCandleL[0][dataPointIndex]
-    const c = w.globals.seriesCandleC[0][dataPointIndex]
-    const v = series[1][dataPointIndex];
+  getTooltip = ({ dataPointIndex }: any) => {
+    const bucket = this.chartBuckets[dataPointIndex];
+    if (!bucket) {
+      return '';
+    }
+    const [o, h, l, c, v] = bucket;
     return (
       '<div class="card p-2">' +
       '<div>Open: <span class="font-bold">' + o.toFixed(2) + '</span></div>' +
@@ -297,11 +308,20 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     )
   }
 
-  getColor({ series, seriesIndex, dataPointIndex, w }: any) {
-    if (w.globals.seriesCandleO[0][dataPointIndex] > w.globals.seriesCandleC[0][dataPointIndex]) {
+  getColor = ({ dataPointIndex }: any) => {
+    const bucket = this.chartBuckets[dataPointIndex];
+    if (bucket && bucket[0] > bucket[3]) {
       return "#ffc0c0";
     }
     return "#a8e0a8";
+  }
+
+  selectChartType(type: 'candlestick' | 'line') {
+    if (type === this.chartType) return;
+    this.chartType = type;
+    if (this.chartReady) {
+      this.createChart();
+    }
   }
 
   stockChanged(event: any) {
@@ -402,26 +422,63 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.chartReady) {
       return;
     }
-    this.chartOptions = { ...this.chartOptions, yaxis: this.buildYAxis() };
+    this.chartOptions = {
+      ...this.chartOptions,
+      title: { ...this.chartOptions.title, text: this.buildChartTitle() },
+      yaxis: this.buildYAxis()
+    };
+  }
+
+  buildChartTitle() {
+    return this.bucketSize > 1 && this.chartType === 'candlestick' ? this.displayCurrency + ' · ' + this.bucketSize + '-session candles' : this.displayCurrency;
+  }
+
+  buildPriceScale() {
+    const range = this.priceAxisMax - this.priceAxisMin;
+    if (!(this.priceAxisMax > 0) || !(range >= 0)) {
+      return {};
+    }
+    const rawStep = (range || this.priceAxisMax * 0.1) / 5;
+    const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
+    const step = [1, 2, 2.5, 5, 10].map(m => m * magnitude).find(s => s >= rawStep) ?? 10 * magnitude;
+    const min = Math.max(0, Math.floor((this.priceAxisMin - range * 0.3) / step) * step);
+    const max = Math.ceil(this.priceAxisMax / step) * step;
+    return { min, max, tickAmount: Math.max(1, Math.round((max - min) / step)) };
   }
 
   buildYAxis() {
-    const currency = this.displayCurrency;
     return [{
+      ...this.buildPriceScale(),
       labels: {
         show: true,
-        formatter: (value: any) => value + ' ' + currency
+        maxWidth: 44,
+        offsetX: -6,
+        style: {
+          colors: '#888780',
+          fontSize: '11px'
+        },
+        formatter: (value: number) => this.formatAxisPrice(value)
       }
     },
     {
       seriesName: 'Volume',
       opposite: true,
+      show: false,
       min: 0,
-      max: this.volumeAxisMax,
-      labels: {
-        show: false,
-      }
+      max: this.volumeAxisMax
     }];
+  }
+
+  formatAxisPrice(value: number) {
+    if (value == null || isNaN(value)) {
+      return '';
+    }
+    const abs = Math.abs(value);
+    if (abs >= 10000) {
+      return new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(value);
+    }
+    const digits = abs >= 100 || abs === 0 ? 0 : abs >= 1 ? 2 : 4;
+    return value.toFixed(digits);
   }
 
   getSignal(selectionId: number) {
@@ -517,7 +574,11 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     // close and total volume, so price extremes remain visible.
     const maxCandles = typeof window !== 'undefined' && window.innerWidth < 768 ? 150 : 450;
     const bucketSize = Math.ceil(this.candle.c.length / maxCandles);
+    this.bucketSize = bucketSize;
     let maxVolume = 0;
+    this.chartBuckets = [];
+    this.priceAxisMin = Math.min(...this.candle.l);
+    this.priceAxisMax = Math.max(...this.candle.h);
     for (let start = 0; start < this.candle.c.length; start += bucketSize) {
       const end = Math.min(start + bucketSize, this.candle.c.length) - 1;
       let high = this.candle.h[start];
@@ -529,18 +590,25 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         volume += this.candle.v[i];
       }
       const x = new Date(this.candle.t[end]).toLocaleDateString('en-US');
-      chartData.push({ x, y: [this.candle.o[start], high, low, this.candle.c[end]] });
       const volumeMillions = volume / 1000000;
+      this.chartBuckets.push([this.candle.o[start], high, low, this.candle.c[end], volumeMillions]);
+      chartData.push(this.chartType === 'line'
+        ? { x, y: this.candle.c[end] }
+        : { x, y: [this.candle.o[start], high, low, this.candle.c[end]] });
       volumeChartData.push({ x, y: volumeMillions });
       maxVolume = Math.max(maxVolume, volumeMillions);
     }
     this.volumeAxisMax = maxVolume * 4;
+    const isLine = this.chartType === 'line';
+    const rising = this.candle.c[this.candle.c.length - 1] >= this.candle.c[0];
     this.chartOptions = {
       ...this.chartOptions,
-      series: [{ name: 'Price', data: chartData, type: 'candlestick' }, { name: 'Volume', data: volumeChartData, type: 'column' }],
+      chart: { ...this.chartOptions.chart, type: isLine ? 'line' : 'candlestick' },
+      colors: isLine ? [rising ? '#00b746' : '#ef403c', this.getColor] : [this.getColor],
+      series: [{ name: 'Price', data: chartData, type: isLine ? 'line' : 'candlestick' }, { name: 'Volume', data: volumeChartData, type: 'column' }],
       title: {
         ...this.chartOptions.title,
-        text: bucketSize > 1 ? 'Candlestick chart (' + bucketSize + '-session candles)' : 'Candlestick chart'
+        text: this.buildChartTitle()
       },
       yaxis: this.buildYAxis()
     };

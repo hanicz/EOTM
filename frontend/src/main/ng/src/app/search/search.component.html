@@ -92,6 +92,15 @@
                   </button>
                 }
               </div>
+              <div class="period-picker chart-type-picker" role="group" aria-label="Chart type">
+                @for (type of chartTypes; track type.value) {
+                  <button type="button" class="period-option" [class.period-option-active]="chartType === type.value"
+                    [attr.aria-pressed]="chartType === type.value" [attr.aria-label]="type.label" [pTooltip]="type.label"
+                    tooltipPosition="top" (click)="selectChartType(type.value)">
+                    <i [class]="type.icon"></i>
+                  </button>
+                }
+              </div>
               @if (chartReady) {
                 <div class="chart-performance">
                   <span class="state-chip state-neutral">{{(startPrice | currency : displayCurrency : 'symbol' : '0.0-1') + ' - ' + (endPrice | currency : displayCurrency : 'symbol' : '0.0-1')}}</span>
@@ -106,7 +115,7 @@
                   [xaxis]="chartOptions.xaxis" [yaxis]="chartOptions.yaxis" [title]="chartOptions.title"
                   [noData]="chartOptions.noData" [tooltip]="chartOptions.tooltip"
                   [legend]="chartOptions.legend" [dataLabels]="chartOptions.dataLabels"
-                  [colors]="chartOptions.colors" [stroke]="chartOptions.stroke">
+                  [colors]="chartOptions.colors" [stroke]="chartOptions.stroke" [grid]="chartOptions.grid">
                 </apx-chart>
               } @else {
                 <div class="chart-status" role="status">{{chartLoading ? 'Loading price history…' : 'No price history available'}}</div>

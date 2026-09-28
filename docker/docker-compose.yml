@@ -15,17 +15,28 @@ x-app: &app
     - EOTM_TOTP_SALT=xx
     - SPRING_DATA_REDIS_HOST=redis
     - JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=35
+    - LOGS_PATH=/logs
+  volumes:
+    - ./logs:/logs
+
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "5"
 
 services:
   app_blue:
-    <<: *app
+    <<: [*app, *logging]
     container_name: app_blue
     profiles: ["blue"]
   app_green:
-    <<: *app
+    <<: [*app, *logging]
     container_name: app_green
     profiles: ["green"]
   db:
+    <<: *logging
     image: 'amd64/postgres:15-bullseye'
     container_name: db
     restart: unless-stopped
@@ -36,6 +47,7 @@ services:
     volumes:
        - ./postgres-data:/var/lib/postgresql/data
   redis:
+    <<: *logging
     image: redis:latest
     container_name: redis
     restart: unless-stopped
@@ -43,6 +55,7 @@ services:
     volumes:
       - ./redis-data:/data
   nginx:
+    <<: *logging
     image: nginx:latest
     container_name: nginx
     restart: unless-stopped
@@ -55,6 +68,7 @@ services:
       - 80:80
       - 443:443
   teamspeak:
+    <<: *logging
     image: teamspeak:latest
     environment:
       - TS3SERVER_LICENSE=accept

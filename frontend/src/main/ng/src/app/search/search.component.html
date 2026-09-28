@@ -288,11 +288,13 @@
           </div>
           <div class="col-12 lg:col-4">
             <div class="info-card p-2">
-              <apx-chart #recChart [series]=" recChartOptions.series" [chart]="recChartOptions.chart"
+              <apx-chart #recChart [series]="recChartOptions.series" [chart]="recChartOptions.chart"
                 [xaxis]="recChartOptions.xaxis" [yaxis]="recChartOptions.yaxis"
                 [title]="recChartOptions.title" [noData]="recChartOptions.noData"
                 [tooltip]="recChartOptions.tooltip" [plotOptions]="recChartOptions.plotOptions"
-                [dataLabels]="recChartOptions.dataLabels">
+                [dataLabels]="recChartOptions.dataLabels" [colors]="recChartOptions.colors"
+                [stroke]="recChartOptions.stroke" [legend]="recChartOptions.legend"
+                [grid]="recChartOptions.grid" [states]="recChartOptions.states">
               </apx-chart>
             </div>
           </div>

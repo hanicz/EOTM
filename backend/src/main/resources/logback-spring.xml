@@ -45,14 +45,13 @@
         </appender>
 
         <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <file>${LOGS}/spring-boot-logger.log</file>
+            <prudent>true</prudent>
             <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
                 <Pattern>%d{ISO8601} %-5level [%t] ${MDC_CONTEXT} %logger{36}: %msg%n%throwable</Pattern>
             </encoder>
-            <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-                <fileNamePattern>${LOGS}/archived/eotm-logs-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-                <maxFileSize>5MB</maxFileSize>
-                <maxHistory>30</maxHistory>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>${LOGS}/eotm-logs-%d{yyyy-MM}.log</fileNamePattern>
+                <maxHistory>6</maxHistory>
                 <totalSizeCap>1GB</totalSizeCap>
             </rollingPolicy>
         </appender>

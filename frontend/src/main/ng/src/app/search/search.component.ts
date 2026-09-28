@@ -232,37 +232,120 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
       },
       chart: {
         type: 'bar',
-        height: 220,
+        height: 240,
         stacked: true,
+        background: 'transparent',
+        fontFamily: 'inherit',
+        parentHeightOffset: 0,
         toolbar: {
-          show: true,
-          tools: {
-            download: false,
-            selection: false,
-            zoom: false,
-            zoomin: false,
-            zoomout: false,
-            pan: false,
-            reset: false,
-          },
+          show: false
+        },
+        zoom: {
+          enabled: false
+        },
+        animations: {
+          enabled: false
+        }
+      },
+      title: {
+        text: 'Analyst ratings',
+        align: 'left',
+        style: {
+          fontSize: '13px',
+          fontWeight: 700,
+          color: '#888780'
+        }
+      },
+      colors: ['#a32d2d', '#d9736a', '#dedbd2', '#7cb152', '#3b6d11'],
+      stroke: {
+        show: true,
+        width: 2,
+        colors: ['#fbfaf7']
+      },
+      states: {
+        hover: {
+          filter: { type: 'darken', value: 0.9 }
+        },
+        active: {
+          filter: { type: 'none' }
+        }
+      },
+      legend: {
+        show: true,
+        position: 'bottom',
+        horizontalAlign: 'center',
+        fontSize: '11px',
+        labels: {
+          colors: '#5f5e5a'
+        },
+        markers: {
+          size: 5,
+          shape: 'circle'
+        },
+        itemMargin: {
+          horizontal: 6,
+          vertical: 0
+        }
+      },
+      grid: {
+        show: false,
+        padding: {
+          left: 0,
+          right: 0,
+          top: -10,
+          bottom: 0
+        }
+      },
+      xaxis: {
+        type: 'category',
+        categories: [],
+        axisBorder: {
+          show: false
+        },
+        axisTicks: {
+          show: false
+        },
+        labels: {
+          style: {
+            colors: '#888780',
+            fontSize: '11px'
+          }
         }
       },
       yaxis: {
-        labels: {
-          show: false
-        }
+        show: false
       },
       plotOptions: {
         bar: {
           horizontal: false,
-          borderRadius: 10
-        },
+          columnWidth: '58%',
+          borderRadius: 4,
+          borderRadiusApplication: 'end',
+          borderRadiusWhenStacked: 'last'
+        }
       },
       dataLabels: {
+        enabled: true,
+        formatter: (value: number, { dataPointIndex, w }: any) => {
+          const total = w.globals.stackedSeriesTotals[dataPointIndex] || 0;
+          return value > 0 && value / total >= 0.08 ? value : '';
+        },
         style: {
-          // Text color per series (Strong Sell, Sell, Hold, Buy, Strong Buy) chosen for
-          // contrast against each bar color - the bright Hold/Buy colors are unreadable with white text.
-          colors: ['#ffffff', '#ffffff', '#000000', '#000000', '#ffffff']
+          fontSize: '10px',
+          fontWeight: 600,
+          colors: ['#ffffff', '#1b1b1b', '#1b1b1b', '#1b1b1b', '#ffffff']
+        },
+        dropShadow: {
+          enabled: false
+        }
+      },
+      tooltip: {
+        theme: 'dark',
+        shared: true,
+        intersect: false,
+        inverseOrder: true,
+        y: {
+          formatter: (value: number) => value + (value === 1 ? ' analyst' : ' analysts')
         }
       }
     };
@@ -691,14 +774,16 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     let holdArray: number[] = [];
     let buyArray: number[] = [];
     let strongBuyArray: number[] = [];
-    let categories: Date[] = [];
-    this.recommendations.forEach((recommendation) => {
+    let categories: string[] = [];
+    const ordered = [...this.recommendations]
+      .sort((a, b) => new Date(a.period).getTime() - new Date(b.period).getTime());
+    ordered.forEach((recommendation) => {
       sellArray.push(recommendation.sell);
       strongSellArray.push(recommendation.strongSell);
       holdArray.push(recommendation.hold);
       buyArray.push(recommendation.buy);
       strongBuyArray.push(recommendation.strongBuy);
-      categories.push(recommendation.period);
+      categories.push(this.datepipe.transform(recommendation.period, 'MMM yy') ?? '');
     });
 
     let chartData = [
@@ -725,14 +810,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     ];
 
     this.recChart.updateOptions({
-      colors: ["#c11f01", "#ff2700", "#f0ff00", "#36ff00", "#2ac600"],
       xaxis: {
-        type: 'category',
-        categories: categories,
-        labels: {
-          formatter: (value: number) => this.datepipe.transform(value, 'MMM y'),
-        }
-      },
+        ...this.recChartOptions.xaxis,
+        categories: categories
+      }
     });
     this.recChart.updateSeries(chartData, false);
   }

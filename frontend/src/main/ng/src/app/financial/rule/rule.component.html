@@ -30,7 +30,7 @@
       <th pSortableColumn="accountNumber">Account <p-sortIcon field="accountNumber"></p-sortIcon></th>
       <th>Matches on</th>
       <th>Status</th>
-      <th></th>
+      <th class="cell-actions"></th>
     </tr>
   </ng-template>
 
@@ -57,7 +57,7 @@
           <span class="state-chip state-neutral">Paused</span>
         }
       </td>
-      <td>
+      <td class="cell-actions">
         <button pButton pRipple type="button" icon="pi pi-pencil" pTooltip="Edit this rule"
           (click)="editRule(rule)" class="p-button-rounded p-button-text mr-1" severity="secondary"></button>
         <button pButton pRipple type="button" [icon]="rule.active ? 'pi pi-pause' : 'pi pi-play'"

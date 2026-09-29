@@ -37,7 +37,7 @@
       <th class="cell-num" pSortableColumn="netMonthly">Net monthly <p-sortIcon field="netMonthly"></p-sortIcon></th>
       <th class="cell-num" pSortableColumn="raiseAmount">Raise <p-sortIcon field="raiseAmount"></p-sortIcon></th>
       <th class="cell-num">Dependants</th>
-      <th></th>
+      <th class="cell-actions"></th>
     </tr>
   </ng-template>
 
@@ -93,7 +93,7 @@
           <span class="cell-none">&mdash;</span>
         }
       </td>
-      <td>
+      <td class="cell-actions">
         <button pButton pRipple type="button" icon="pi pi-pencil" pTooltip="Edit this salary"
           (click)="editSalary(salary)" class="p-button-rounded p-button-text mr-1" severity="secondary"></button>
         <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(salary.id)"

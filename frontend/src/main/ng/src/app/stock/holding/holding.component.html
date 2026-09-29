@@ -11,7 +11,7 @@
       <th class="cell-num">Price</th>
       <th class="cell-num" pSortableColumn="dayChange">Today <p-sortIcon field="dayChange"></p-sortIcon></th>
       <th class="cell-num" pSortableColumn="valueDiff">Profit <p-sortIcon field="valueDiff"></p-sortIcon></th>
-      <th>Alerts</th>
+      <th class="cell-actions">Alerts</th>
     </tr>
   </ng-template>
 
@@ -62,7 +62,7 @@
             [percent]="investment.liveValue != null ? (investment.valueDiff / investment.amount * 100) : null"
             [currency]="investment.currencyId"></app-delta>
         </td>
-        <td data-label="Alerts">
+        <td data-label="Alerts" class="cell-actions">
           <div class="alert-actions">
             @for (step of alertSteps; track step) {
               <button pButton pRipple type="button" size="small" severity="secondary" [outlined]="true"

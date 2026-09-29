@@ -45,13 +45,13 @@
       <ng-template pTemplate="header">
         <tr>
           <th>Year</th>
-          <th>Months</th>
-          <th>In</th>
-          <th>Out</th>
-          <th>Net</th>
-          <th pTooltip="What share of the year's income was left over.">Saved %</th>
-          <th>Avg monthly spending</th>
-          <th pTooltip="Change in average monthly spending against the year before, so a partial year stays fair.">
+          <th class="cell-num">Months</th>
+          <th class="cell-num">In</th>
+          <th class="cell-num">Out</th>
+          <th class="cell-num">Net</th>
+          <th class="cell-num" pTooltip="What share of the year's income was left over.">Saved %</th>
+          <th class="cell-num">Avg monthly spending</th>
+          <th class="cell-num" pTooltip="Change in average monthly spending against the year before, so a partial year stays fair.">
             vs previous year
           </th>
         </tr>
@@ -59,15 +59,15 @@
       <ng-template pTemplate="body" let-row>
         <tr>
           <td data-label="Year">{{row.year}}</td>
-          <td data-label="Months">
+          <td data-label="Months" class="cell-num">
             <span [class.muted]="row.monthsCounted < 12">{{row.monthsCounted}} of 12</span>
           </td>
-          <td data-label="In" class="amount-in">{{row.moneyIn | currency : row.currencyId : 'symbol' : '0.0-2'}}</td>
-          <td data-label="Out" class="amount-out">{{row.moneyOut | currency : row.currencyId : 'symbol' : '0.0-2'}}</td>
-          <td data-label="Net" [class.amount-in]="row.net > 0" [class.amount-out]="row.net < 0">
+          <td data-label="In" class="cell-num amount-in">{{row.moneyIn | currency : row.currencyId : 'symbol' : '0.0-2'}}</td>
+          <td data-label="Out" class="cell-num amount-out">{{row.moneyOut | currency : row.currencyId : 'symbol' : '0.0-2'}}</td>
+          <td data-label="Net" class="cell-num" [class.amount-in]="row.net > 0" [class.amount-out]="row.net < 0">
             {{row.net | currency : row.currencyId : 'symbol' : '0.0-2'}}
           </td>
-          <td data-label="Saved %">
+          <td data-label="Saved %" class="cell-num">
             @if (row.savedPercent === null) {
               <span class="muted" pTooltip="No income booked this year, so there is nothing to divide by.">
                 &ndash;
@@ -78,10 +78,10 @@
               </b>
             }
           </td>
-          <td data-label="Avg monthly spending" class="amount-out">
+          <td data-label="Avg monthly spending" class="cell-num amount-out">
             {{row.averageMonthlySpending | currency : row.currencyId : 'symbol' : '0.0-2'}}
           </td>
-          <td data-label="vs previous year">
+          <td data-label="vs previous year" class="cell-num">
             @if (row.spendingChange === null) {
               <span class="muted">&ndash;</span>
             } @else {
@@ -101,9 +101,9 @@
           <tr>
             <th>Category</th>
             @for (year of block.categoryYears; track year) {
-              <th>{{year}}</th>
+              <th class="cell-num">{{year}}</th>
             }
-            <th pTooltip="Latest year against the year before, compared per month so a partial year stays fair.">
+            <th class="cell-num" pTooltip="Latest year against the year before, compared per month so a partial year stays fair.">
               Change
             </th>
           </tr>
@@ -114,7 +114,7 @@
               <span class="state-chip" [ngClass]="chipClass(row.categoryColor)">{{row.categoryName}}</span>
             </td>
             @for (amount of row.amounts; track $index) {
-              <td [attr.data-label]="block.categoryYears[$index]">
+              <td class="cell-num" [attr.data-label]="block.categoryYears[$index]">
                 @if (amount === 0) {
                   <span class="muted">&ndash;</span>
                 } @else {
@@ -122,7 +122,7 @@
                 }
               </td>
             }
-            <td data-label="Change">
+            <td data-label="Change" class="cell-num">
               @if (row.change === null) {
                 <span class="muted">&ndash;</span>
               } @else {

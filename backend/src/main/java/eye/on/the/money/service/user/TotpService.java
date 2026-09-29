@@ -72,7 +72,10 @@ public class TotpService {
     }
 
     @Transactional
-    public void confirmEnrolment(Long userId, String code) {
+    public void confirmEnrolment(Long userId, String password, String code) {
+        User user = this.userService.loadUserById(userId);
+        this.checkPassword(user, password, "enabling");
+
         UserTotp totp = this.userTotpRepository.findByUserId(userId)
                 .orElseThrow(() -> new TotpException("Start the setup before confirming it"));
 
@@ -109,17 +112,30 @@ public class TotpService {
     }
 
     @Transactional
-    public void disable(Long userId, String password) {
+    public void disable(Long userId, String password, String code) {
         User user = this.userService.loadUserById(userId);
+        this.checkPassword(user, password, "disabling");
 
-        if (!this.passwordEncoder.matches(password, user.getPassword())) {
-            log.info("Incorrect password provided while disabling two-factor for {}",
-                    LogSanitizer.maskEmail(user.getEmail()));
-            throw new PasswordException("Invalid password provided");
+        UserTotp totp = this.userTotpRepository.findByUserId(userId)
+                .filter(UserTotp::isConfirmed)
+                .orElseThrow(() -> new TotpException("Two-factor authentication is not enabled"));
+
+        long step = this.matchingStep(totp, code);
+        if (step == TotpCodes.NO_MATCH || (totp.getLastTimeStep() != null && step <= totp.getLastTimeStep())) {
+            log.warn("Two-factor check failed while disabling for {}", LogSanitizer.maskEmail(user.getEmail()));
+            throw new TotpException("That code is not right");
         }
 
         this.userTotpRepository.deleteByUserId(userId);
         log.info("Two-factor authentication disabled for {}", LogSanitizer.maskEmail(user.getEmail()));
+    }
+
+    private void checkPassword(User user, String password, String action) {
+        if (!this.passwordEncoder.matches(password, user.getPassword())) {
+            log.info("Incorrect password provided while {} two-factor for {}", action,
+                    LogSanitizer.maskEmail(user.getEmail()));
+            throw new PasswordException("Invalid password provided");
+        }
     }
 
     private long matchingStep(UserTotp totp, String code) {

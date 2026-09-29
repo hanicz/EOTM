@@ -35,8 +35,8 @@
             </th>
             <th pSortableColumn="shortName">ETF Name <p-sortIcon field="shortName"></p-sortIcon></th>
             <th class="cell-num" pSortableColumn="amount">Amount <p-sortIcon field="amount"></p-sortIcon></th>
-            <th pSortableColumn="dividendDate">Date <p-sortIcon field="dividendDate"></p-sortIcon></th>
-            <th></th>
+            <th class="cell-num" pSortableColumn="dividendDate">Date <p-sortIcon field="dividendDate"></p-sortIcon></th>
+            <th class="cell-actions"></th>
         </tr>
     </ng-template>
     <ng-template pTemplate="body" let-dividend>
@@ -49,8 +49,8 @@
                         [name]="dividend.name"></app-ticker-identity>
             </td>
             <td data-label="Amount" class="cell-num">{{dividend.amount | currency : dividend.currencyId : 'symbol' : '0.0-2'}}</td>
-            <td data-label="Date">{{dividend.dividendDate | date:'mediumDate'}}</td>
-            <td>
+            <td data-label="Date" class="cell-num">{{dividend.dividendDate | date:'mediumDate'}}</td>
+            <td class="cell-actions">
                 <button pButton pRipple type="button" icon="pi pi-pencil" (click)="editDividend(dividend)"
                     class="p-button-rounded p-button-text mr-1" severity="info"></button>
                 <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(dividend.id)"

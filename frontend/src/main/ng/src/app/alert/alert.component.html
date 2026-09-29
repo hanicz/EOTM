@@ -26,8 +26,8 @@
                   <th>Ticker</th>
                   <th>Name</th>
                   <th>Type</th>
-                  <th>Value Point</th>
-                  <th class="alert-action-column"></th>
+                  <th class="cell-num">Value Point</th>
+                  <th class="cell-actions"></th>
                 </tr>
               </ng-template>
               <ng-template pTemplate="body">
@@ -55,8 +55,8 @@
                   <th>Ticker</th>
                   <th>Name</th>
                   <th>Type</th>
-                  <th>Value Point</th>
-                  <th class="alert-action-column"></th>
+                  <th class="cell-num">Value Point</th>
+                  <th class="cell-actions"></th>
                 </tr>
               </ng-template>
               <ng-template pTemplate="body" let-alert>
@@ -76,10 +76,10 @@
                       <i class="pi" [ngClass]="directionIcon(alert.type)"></i>{{alert.type | alertTypePipe}}
                     </span>
                   </td>
-                  <td data-label="Value Point">
+                  <td data-label="Value Point" class="cell-num">
                     <span class="alert-value">{{formatValuePoint(alert.type, alert.valuePoint)}}</span>
                   </td>
-                  <td class="alert-action-column">
+                  <td class="cell-actions">
                     <button pButton pRipple type="button" icon="pi pi-trash" severity="danger"
                       class="p-button-rounded p-button-text" pTooltip="Delete alert"
                       [attr.aria-label]="'Delete the ' + alert.shortName + ' alert'"
@@ -109,8 +109,8 @@
                   <th>Symbol</th>
                   <th>Name</th>
                   <th>Type</th>
-                  <th>Value Point</th>
-                  <th class="alert-action-column"></th>
+                  <th class="cell-num">Value Point</th>
+                  <th class="cell-actions"></th>
                 </tr>
               </ng-template>
               <ng-template pTemplate="body">
@@ -138,8 +138,8 @@
                   <th>Symbol</th>
                   <th>Name</th>
                   <th>Type</th>
-                  <th>Value Point</th>
-                  <th class="alert-action-column"></th>
+                  <th class="cell-num">Value Point</th>
+                  <th class="cell-actions"></th>
                 </tr>
               </ng-template>
               <ng-template pTemplate="body" let-alert>
@@ -157,10 +157,10 @@
                       <i class="pi" [ngClass]="directionIcon(alert.type)"></i>{{alert.type | alertTypePipe}}
                     </span>
                   </td>
-                  <td data-label="Value Point">
+                  <td data-label="Value Point" class="cell-num">
                     <span class="alert-value">{{formatValuePoint(alert.type, alert.valuePoint)}}</span>
                   </td>
-                  <td class="alert-action-column">
+                  <td class="cell-actions">
                     <button pButton pRipple type="button" icon="pi pi-trash" severity="danger"
                       class="p-button-rounded p-button-text" pTooltip="Delete alert"
                       [attr.aria-label]="'Delete the ' + alert.symbol + ' alert'"

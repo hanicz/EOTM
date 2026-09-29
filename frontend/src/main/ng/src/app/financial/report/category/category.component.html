@@ -40,9 +40,9 @@
       <ng-template pTemplate="header">
         <tr>
           <th>Category</th>
-          <th>Amount</th>
+          <th class="cell-num">Amount</th>
           <th pTooltip="What share of the month's spending went here.">Share</th>
-          <th>Transactions</th>
+          <th class="cell-num">Transactions</th>
         </tr>
       </ng-template>
 
@@ -64,7 +64,7 @@
           <td data-label="Category">
             <span class="state-chip" [ngClass]="chipClass(row.categoryColor)">{{row.categoryName}}</span>
           </td>
-          <td data-label="Amount" class="amount-out">
+          <td data-label="Amount" class="cell-num amount-out">
             {{row.amount | currency : row.currencyId : 'symbol' : '0.0-2'}}
           </td>
           <td data-label="Share">
@@ -74,7 +74,7 @@
               <span class="share-value">{{row.share | number : '1.0-1'}}%</span>
             </div>
           </td>
-          <td data-label="Transactions">{{row.transactionCount}}</td>
+          <td data-label="Transactions" class="cell-num">{{row.transactionCount}}</td>
         </tr>
       </ng-template>
     </p-table>

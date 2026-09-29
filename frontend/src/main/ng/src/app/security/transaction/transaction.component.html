@@ -36,12 +36,11 @@
       <th>Security Id</th>
       <th>Security Name</th>
       <th>Type</th>
-      <th>Quantity</th>
-      <th>Spent</th>
-      <th>Average</th>
-      <th>Date</th>
-      <th>Currency</th>
-      <th></th>
+      <th class="cell-num">Quantity</th>
+      <th class="cell-num">Spent</th>
+      <th class="cell-num">Average</th>
+      <th class="cell-num">Date</th>
+      <th class="cell-actions"></th>
     </tr>
   </ng-template>
   <ng-template pTemplate="body" let-transaction>
@@ -56,13 +55,12 @@
           {{transaction.buySell === 'B' ? 'BUY' : 'SELL'}}
         </span>
       </td>
-      <td data-label="Quantity">{{transaction.quantity}}</td>
-      <td data-label="Spent">{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</td>
-      <td data-label="Average">{{(transaction.amount / transaction.quantity) | currency : transaction.currencyId : 'symbol' : '0.0-3'}}
+      <td data-label="Quantity" class="cell-num">{{transaction.quantity}}</td>
+      <td data-label="Spent" class="cell-num">{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</td>
+      <td data-label="Average" class="cell-num">{{(transaction.amount / transaction.quantity) | currency : transaction.currencyId : 'symbol' : '0.0-3'}}
       </td>
-      <td data-label="Date">{{transaction.transactionDate | date:'mediumDate'}}</td>
-      <td data-label="Currency">{{transaction.currencyId}}</td>
-      <td>
+      <td data-label="Date" class="cell-num">{{transaction.transactionDate | date:'mediumDate'}}</td>
+      <td class="cell-actions">
         <button pButton pRipple type="button" icon="pi pi-pencil" (click)="editTransaction(transaction)"
         class="p-button-rounded p-button-text mr-1" severity="info"></button>
         <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(transaction.transactionId)"

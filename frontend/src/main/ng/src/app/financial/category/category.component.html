@@ -36,7 +36,7 @@
       </th>
       <th pSortableColumn="name">Name <p-sortIcon field="name"></p-sortIcon></th>
       <th>Colour</th>
-      <th></th>
+      <th class="cell-actions"></th>
     </tr>
   </ng-template>
 
@@ -49,7 +49,7 @@
         <span class="state-chip" [ngClass]="chipClass(category.color)">{{category.name}}</span>
       </td>
       <td data-label="Colour" class="cell-quiet">{{colorLabel(category.color)}}</td>
-      <td>
+      <td class="cell-actions">
         <button pButton pRipple type="button" icon="pi pi-pencil" pTooltip="Edit this category"
           (click)="editCategory(category)" class="p-button-rounded p-button-text mr-1" severity="secondary"></button>
         <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(category.id)"

@@ -4,12 +4,12 @@
       <tr>
         <th>From</th>
         <th>To</th>
-        <th>Spent</th>
-        <th>Worth</th>
-        <th>Rate</th>
-        <th>Live Rate</th>
-        <th>Profit</th>
-        <th>%</th>
+        <th class="cell-num">Spent</th>
+        <th class="cell-num">Worth</th>
+        <th class="cell-num">Rate</th>
+        <th class="cell-num">Live Rate</th>
+        <th class="cell-num">Profit</th>
+        <th class="cell-num">%</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-forexTransaction>
@@ -35,28 +35,28 @@
       <tr>
         <th>From</th>
         <th>To</th>
-        <th>Spent</th>
-        <th>Worth</th>
-        <th>Rate</th>
-        <th>Live Rate</th>
-        <th>Profit</th>
-        <th>%</th>
+        <th class="cell-num">Spent</th>
+        <th class="cell-num">Worth</th>
+        <th class="cell-num">Rate</th>
+        <th class="cell-num">Live Rate</th>
+        <th class="cell-num">Profit</th>
+        <th class="cell-num">%</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-forexTransaction>
       <tr>
         <td data-label="From">{{forexTransaction.fromCurrencyId}}</td>
         <td data-label="To">{{forexTransaction.toCurrencyId}}</td>
-        <td data-label="Spent">{{forexTransaction.fromAmount | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}</td>
-        <td data-label="Worth">{{forexTransaction.toAmount | currency : forexTransaction.toCurrencyId : 'symbol' : '0.0-2'}}</td>
-        <td data-label="Rate">{{forexTransaction.changeRate | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}</td>
-        <td data-label="Live Rate">
+        <td data-label="Spent" class="cell-num">{{forexTransaction.fromAmount | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}</td>
+        <td data-label="Worth" class="cell-num">{{forexTransaction.toAmount | currency : forexTransaction.toCurrencyId : 'symbol' : '0.0-2'}}</td>
+        <td data-label="Rate" class="cell-num">{{forexTransaction.changeRate | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}</td>
+        <td data-label="Live Rate" class="cell-num">
           {{forexTransaction.liveChangeRate != null ? (forexTransaction.liveChangeRate | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2') : 'N/A'}}
           @if (forexTransaction.stalePrice) {
             <i class="pi pi-clock stale-price" pTooltip="No live quote right now, valued at the previous close."></i>
           }
         </td>
-        <td data-label="Profit">
+        <td data-label="Profit" class="cell-num">
           @if (forexTransaction.liveValue > forexTransaction.fromAmount) {
             <span class="p-mr-2 state-chip state-buy">{{forexTransaction.liveValue - forexTransaction.fromAmount | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}</span>
           }
@@ -64,7 +64,7 @@
             <span class="p-mr-2 state-chip state-sell">{{forexTransaction.liveValue - forexTransaction.fromAmount | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}</span>
           }
         </td>
-        <td data-label="%">
+        <td data-label="%" class="cell-num">
           @if (forexTransaction.liveValue > forexTransaction.fromAmount) {
             <span class="p-mr-2 state-chip state-buy">{{(-100 + forexTransaction.liveValue / forexTransaction.fromAmount * 100 | number : '0.0-1') + '%'}}</span>
           }

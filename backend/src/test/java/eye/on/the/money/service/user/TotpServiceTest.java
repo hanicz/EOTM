@@ -128,12 +128,18 @@ class TotpServiceTest {
         verify(this.userTotpRepository, never()).save(ArgumentMatchers.any());
     }
 
+    private void passwordIs(String password, boolean right) {
+        when(this.userService.loadUserById(USER_ID)).thenReturn(this.user);
+        when(this.passwordEncoder.matches(password, "hashed")).thenReturn(right);
+    }
+
     @Test
     public void confirmEnrolmentEnablesOnACorrectCode() {
         UserTotp pending = this.enrolled(false);
+        this.passwordIs("right", true);
         when(this.userTotpRepository.findByUserId(USER_ID)).thenReturn(Optional.of(pending));
 
-        this.totpService.confirmEnrolment(USER_ID, this.currentCode());
+        this.totpService.confirmEnrolment(USER_ID, "right", this.currentCode());
 
         assertTrue(pending.isConfirmed());
         assertNotNull(pending.getConfirmedAt());
@@ -141,26 +147,40 @@ class TotpServiceTest {
     }
 
     @Test
+    public void confirmEnrolmentNeedsTheCurrentPassword() {
+        UserTotp pending = this.enrolled(false);
+        this.passwordIs("wrong", false);
+
+        assertThrows(PasswordException.class,
+                () -> this.totpService.confirmEnrolment(USER_ID, "wrong", this.currentCode()));
+        assertFalse(pending.isConfirmed());
+    }
+
+    @Test
     public void confirmEnrolmentRejectsAWrongCode() {
         UserTotp pending = this.enrolled(false);
+        this.passwordIs("right", true);
         when(this.userTotpRepository.findByUserId(USER_ID)).thenReturn(Optional.of(pending));
 
-        assertThrows(TotpException.class, () -> this.totpService.confirmEnrolment(USER_ID, "000000"));
+        assertThrows(TotpException.class, () -> this.totpService.confirmEnrolment(USER_ID, "right", "000000"));
         assertFalse(pending.isConfirmed());
     }
 
     @Test
     public void confirmEnrolmentNeedsASetupFirst() {
+        this.passwordIs("right", true);
         when(this.userTotpRepository.findByUserId(USER_ID)).thenReturn(Optional.empty());
 
-        assertThrows(TotpException.class, () -> this.totpService.confirmEnrolment(USER_ID, "000000"));
+        assertThrows(TotpException.class, () -> this.totpService.confirmEnrolment(USER_ID, "right", "000000"));
     }
 
     @Test
     public void confirmEnrolmentRefusesWhenAlreadyEnabled() {
+        this.passwordIs("right", true);
         when(this.userTotpRepository.findByUserId(USER_ID)).thenReturn(Optional.of(this.enrolled(true)));
 
-        assertThrows(TotpException.class, () -> this.totpService.confirmEnrolment(USER_ID, this.currentCode()));
+        assertThrows(TotpException.class,
+                () -> this.totpService.confirmEnrolment(USER_ID, "right", this.currentCode()));
     }
 
     @Test
@@ -217,19 +237,47 @@ class TotpServiceTest {
 
     @Test
     public void disableNeedsTheCurrentPassword() {
-        when(this.userService.loadUserById(USER_ID)).thenReturn(this.user);
-        when(this.passwordEncoder.matches("wrong", "hashed")).thenReturn(false);
+        this.passwordIs("wrong", false);
 
-        assertThrows(PasswordException.class, () -> this.totpService.disable(USER_ID, "wrong"));
+        assertThrows(PasswordException.class, () -> this.totpService.disable(USER_ID, "wrong", this.currentCode()));
+        verify(this.userTotpRepository, never()).deleteByUserId(USER_ID);
+    }
+
+    @Test
+    public void disableRejectsAWrongCode() {
+        this.passwordIs("right", true);
+        when(this.userTotpRepository.findByUserId(USER_ID)).thenReturn(Optional.of(this.enrolled(true)));
+
+        assertThrows(TotpException.class, () -> this.totpService.disable(USER_ID, "right", "000000"));
+        verify(this.userTotpRepository, never()).deleteByUserId(USER_ID);
+    }
+
+    @Test
+    public void disableRejectsAReplayedCode() {
+        UserTotp totp = this.enrolled(true);
+        totp.setLastTimeStep(TotpCodes.timeStep(Instant.now().getEpochSecond()) + 1);
+        this.passwordIs("right", true);
+        when(this.userTotpRepository.findByUserId(USER_ID)).thenReturn(Optional.of(totp));
+
+        assertThrows(TotpException.class, () -> this.totpService.disable(USER_ID, "right", this.currentCode()));
+        verify(this.userTotpRepository, never()).deleteByUserId(USER_ID);
+    }
+
+    @Test
+    public void disableRefusesWhenNotEnabled() {
+        this.passwordIs("right", true);
+        when(this.userTotpRepository.findByUserId(USER_ID)).thenReturn(Optional.of(this.enrolled(false)));
+
+        assertThrows(TotpException.class, () -> this.totpService.disable(USER_ID, "right", this.currentCode()));
         verify(this.userTotpRepository, never()).deleteByUserId(USER_ID);
     }
 
     @Test
     public void disableRemovesTheEnrolment() {
-        when(this.userService.loadUserById(USER_ID)).thenReturn(this.user);
-        when(this.passwordEncoder.matches("right", "hashed")).thenReturn(true);
+        this.passwordIs("right", true);
+        when(this.userTotpRepository.findByUserId(USER_ID)).thenReturn(Optional.of(this.enrolled(true)));
 
-        this.totpService.disable(USER_ID, "right");
+        this.totpService.disable(USER_ID, "right", this.currentCode());
 
         verify(this.userTotpRepository).deleteByUserId(USER_ID);
     }

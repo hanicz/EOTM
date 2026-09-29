@@ -42,11 +42,11 @@
       <th style="width: 3rem">
         <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
       </th>
-      <th pSortableColumn="priority">Order <p-sortIcon field="priority"></p-sortIcon></th>
+      <th class="cell-num" pSortableColumn="priority">Order <p-sortIcon field="priority"></p-sortIcon></th>
       <th pSortableColumn="pattern">Partner name contains <p-sortIcon field="pattern"></p-sortIcon></th>
       <th pSortableColumn="categoryName">Category <p-sortIcon field="categoryName"></p-sortIcon></th>
       <th>Status</th>
-      <th></th>
+      <th class="cell-actions"></th>
     </tr>
   </ng-template>
 
@@ -67,7 +67,7 @@
           <span class="state-chip state-neutral">Paused</span>
         }
       </td>
-      <td>
+      <td class="cell-actions">
         <button pButton pRipple type="button" icon="pi pi-pencil" pTooltip="Edit this rule"
           (click)="editRule(rule)" class="p-button-rounded p-button-text mr-1" severity="secondary"></button>
         <button pButton pRipple type="button" [icon]="rule.active ? 'pi pi-pause' : 'pi pi-play'"

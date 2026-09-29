@@ -38,11 +38,10 @@
       <th class="cell-num" pSortableColumn="quantity">Quantity <p-sortIcon field="quantity"></p-sortIcon></th>
       <th class="cell-num" pSortableColumn="amount">Spent <p-sortIcon field="amount"></p-sortIcon></th>
       <th class="cell-num">Average</th>
-      <th pSortableColumn="transactionDate">Date <p-sortIcon field="transactionDate"></p-sortIcon></th>
+      <th class="cell-num" pSortableColumn="transactionDate">Date <p-sortIcon field="transactionDate"></p-sortIcon></th>
       <th pSortableColumn="accountName">Account <p-sortIcon field="accountName"></p-sortIcon></th>
-      <th pSortableColumn="currencyId">Currency <p-sortIcon field="currencyId"></p-sortIcon></th>
       <th class="cell-num">Fee</th>
-      <th></th>
+      <th class="cell-actions"></th>
     </tr>
   </ng-template>
   <ng-template pTemplate="body" let-investment>
@@ -63,11 +62,10 @@
       <td data-label="Spent" class="cell-num">{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}</td>
       <td data-label="Average" class="cell-num cell-quiet">{{(investment.amount / investment.quantity) | currency : investment.currencyId : 'symbol' : '0.0-3'}}
       </td>
-      <td data-label="Date">{{investment.transactionDate | date:'mediumDate'}}</td>
+      <td data-label="Date" class="cell-num">{{investment.transactionDate | date:'mediumDate'}}</td>
       <td data-label="Account" class="cell-quiet">{{investment.accountName}}</td>
-      <td data-label="Currency" class="cell-quiet">{{investment.currencyId}}</td>
       <td data-label="Fee" class="cell-num cell-quiet">{{investment.fee | currency : investment.currencyId : 'symbol' : '0.0-2'}}</td>
-      <td>
+      <td class="cell-actions">
         <button pButton pRipple type="button" icon="pi pi-pencil" (click)="editInvestment(investment)"
         class="p-button-rounded p-button-text mr-1" severity="info"></button>
         <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(investment.id)"

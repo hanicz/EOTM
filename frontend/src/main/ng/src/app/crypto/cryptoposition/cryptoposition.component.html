@@ -3,11 +3,11 @@
   <ng-template pTemplate="header">
     <tr>
       <th>Symbol</th>
-      <th pSortableColumn="amount">Total Spent <p-sortIcon field="amount"></p-sortIcon>
+      <th class="cell-num" pSortableColumn="amount">Total Spent <p-sortIcon field="amount"></p-sortIcon>
     </th>
-    <th>Average</th>
-    <th>Position</th>
-    <th>Profit</th>
+    <th class="cell-num">Average</th>
+    <th class="cell-num">Position</th>
+    <th class="cell-num">Profit</th>
   </tr>
 </ng-template>
 <ng-template pTemplate="body" let-transaction>
@@ -19,20 +19,20 @@
         {{transaction.symbol}}
       </div>
     </td>
-    <td data-label="Total Spent">
+    <td data-label="Total Spent" class="cell-num">
       @if (transaction.quantity > 0) {
         <span>{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</span>
       }
     </td>
-    <td data-label="Average">
+    <td data-label="Average" class="cell-num">
       @if (transaction.quantity > 0) {
         <span>{{(transaction.amount / transaction.quantity) | currency : transaction.currencyId : 'symbol' : '0.0-3'}}</span>
       }
     </td>
-    <td data-label="Position">
+    <td data-label="Position" class="cell-num">
       <span class="p-mr-2 state-chip" [ngClass]="(transaction.quantity > 0) ? 'state-info' : 'state-accent'">{{(transaction.quantity > 0) ? (transaction.quantity | number: '0.0-4') : 'Closed'}}</span>
     </td>
-    <td data-label="Profit">
+    <td data-label="Profit" class="cell-num">
       @if (transaction.quantity == 0 && transaction.amount < 0) {
         <span class="p-mr-2 state-chip state-buy">{{myMath.abs(transaction.amount) | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</span>
       }

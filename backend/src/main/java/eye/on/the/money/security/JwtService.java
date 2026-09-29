@@ -4,20 +4,27 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.SecretKey;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 
 import static eye.on.the.money.security.SecurityConstants.EXPIRATION;
-import static eye.on.the.money.security.SecurityConstants.KEY;
 import static eye.on.the.money.security.SecurityConstants.MFA_EXPIRATION;
 import static eye.on.the.money.security.SecurityConstants.TOKEN_TYPE_CLAIM;
 
 @Service
 public class JwtService {
+
+    private final SecretKey key;
+
+    public JwtService(@Value("${EOTM_KEY}") String key) {
+        this.key = Keys.hmacShaKeyFor(key.getBytes());
+    }
 
     public String generateAccessToken(String email) {
         return this.generateToken(email, TokenType.ACCESS, EXPIRATION, ChronoUnit.HOURS);
@@ -38,21 +45,19 @@ public class JwtService {
 
     private String generateToken(String email, TokenType type, long amount, TemporalUnit unit) {
         var now = Instant.now();
-        var key = Keys.hmacShaKeyFor(KEY.getBytes());
 
         return Jwts.builder()
                 .subject(email)
                 .claim(TOKEN_TYPE_CLAIM, type.claimValue())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plus(amount, unit)))
-                .signWith(key)
+                .signWith(this.key)
                 .compact();
     }
 
     private Claims getTokenBody(String token) {
-        var key = Keys.hmacShaKeyFor(KEY.getBytes());
         return Jwts.parser()
-                .verifyWith(key)
+                .verifyWith(this.key)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();

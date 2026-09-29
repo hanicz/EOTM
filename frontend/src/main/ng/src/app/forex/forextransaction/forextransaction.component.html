@@ -36,11 +36,11 @@
       <th>From</th>
       <th>To</th>
       <th>Type</th>
-      <th>Spent</th>
-      <th>Got</th>
-      <th>Rate</th>
-      <th>Date</th>
-      <th></th>
+      <th class="cell-num">Spent</th>
+      <th class="cell-num">Got</th>
+      <th class="cell-num">Rate</th>
+      <th class="cell-num">Date</th>
+      <th class="cell-actions"></th>
     </tr>
   </ng-template>
   <ng-template pTemplate="body" let-forexTransaction>
@@ -58,12 +58,12 @@
           <span class="p-mr-2 state-chip state-accent">SELL</span>
         }
       </td>
-      <td data-label="Spent">{{forexTransaction.fromAmount | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}</td>
-      <td data-label="Got">{{forexTransaction.toAmount | currency : forexTransaction.toCurrencyId : 'symbol' : '0.0-2'}}</td>
-      <td data-label="Rate">{{forexTransaction.changeRate | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}
+      <td data-label="Spent" class="cell-num">{{forexTransaction.fromAmount | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}</td>
+      <td data-label="Got" class="cell-num">{{forexTransaction.toAmount | currency : forexTransaction.toCurrencyId : 'symbol' : '0.0-2'}}</td>
+      <td data-label="Rate" class="cell-num">{{forexTransaction.changeRate | currency : forexTransaction.fromCurrencyId : 'symbol' : '0.0-2'}}
       </td>
-      <td data-label="Date">{{forexTransaction.transactionDate | date:'mediumDate'}}</td>
-      <td>
+      <td data-label="Date" class="cell-num">{{forexTransaction.transactionDate | date:'mediumDate'}}</td>
+      <td class="cell-actions">
         <button pButton pRipple type="button" icon="pi pi-pencil" (click)="editForexTransaction(forexTransaction)"
         class="p-button-rounded p-button-text mr-1" severity="info"></button>
         <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(forexTransaction.forexTransactionId)"

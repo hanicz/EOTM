@@ -38,21 +38,21 @@
       <ng-template pTemplate="header">
         <tr>
           <th>Month</th>
-          <th>In</th>
-          <th>Out</th>
-          <th>Net</th>
-          <th pTooltip="What share of the month's income was left over.">Saved %</th>
+          <th class="cell-num">In</th>
+          <th class="cell-num">Out</th>
+          <th class="cell-num">Net</th>
+          <th class="cell-num" pTooltip="What share of the month's income was left over.">Saved %</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-row>
         <tr>
           <td data-label="Month">{{label(row)}}</td>
-          <td data-label="In" class="amount-in">{{row.moneyIn | currency : row.currencyId : 'symbol' : '0.0-2'}}</td>
-          <td data-label="Out" class="amount-out">{{row.moneyOut | currency : row.currencyId : 'symbol' : '0.0-2'}}</td>
-          <td data-label="Net" [class.amount-in]="row.net > 0" [class.amount-out]="row.net < 0">
+          <td data-label="In" class="cell-num amount-in">{{row.moneyIn | currency : row.currencyId : 'symbol' : '0.0-2'}}</td>
+          <td data-label="Out" class="cell-num amount-out">{{row.moneyOut | currency : row.currencyId : 'symbol' : '0.0-2'}}</td>
+          <td data-label="Net" class="cell-num" [class.amount-in]="row.net > 0" [class.amount-out]="row.net < 0">
             {{row.net | currency : row.currencyId : 'symbol' : '0.0-2'}}
           </td>
-          <td data-label="Saved %">
+          <td data-label="Saved %" class="cell-num">
             @if (row.savedPercent === null) {
               <span class="muted" pTooltip="No income booked this month, so there is nothing to divide by.">
                 &ndash;
@@ -72,14 +72,14 @@
       <ng-template pTemplate="header">
         <tr>
           <th>Period</th>
-          <th>Average per month</th>
-          <th pTooltip="Counted back from the most recent month with data, not from today.">Months counted</th>
+          <th class="cell-num">Average per month</th>
+          <th class="cell-num" pTooltip="Counted back from the most recent month with data, not from today.">Months counted</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-average>
         <tr>
           <td data-label="Period">{{average.label}}</td>
-          <td data-label="Average per month" class="average-cell">
+          <td data-label="Average per month" class="cell-num average-cell">
             @if (average.average === null) {
               <span class="muted">&ndash;</span>
             } @else {
@@ -89,7 +89,7 @@
               </b>
             }
           </td>
-          <td data-label="Months counted">
+          <td data-label="Months counted" class="cell-num">
             <span [class.muted]="average.monthsCounted < average.windowMonths">
               {{average.monthsCounted}} of {{average.windowMonths}}
             </span>
@@ -103,14 +103,14 @@
       <ng-template pTemplate="header">
         <tr>
           <th>Period</th>
-          <th>Average per month</th>
-          <th pTooltip="Counted back from the most recent month with data, not from today.">Months counted</th>
+          <th class="cell-num">Average per month</th>
+          <th class="cell-num" pTooltip="Counted back from the most recent month with data, not from today.">Months counted</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-average>
         <tr>
           <td data-label="Period">{{average.label}}</td>
-          <td data-label="Average per month" class="average-cell">
+          <td data-label="Average per month" class="cell-num average-cell">
             @if (average.average === null) {
               <span class="muted">&ndash;</span>
             } @else {
@@ -119,7 +119,7 @@
               </b>
             }
           </td>
-          <td data-label="Months counted">
+          <td data-label="Months counted" class="cell-num">
             <span [class.muted]="average.monthsCounted < average.windowMonths">
               {{average.monthsCounted}} of {{average.windowMonths}}
             </span>

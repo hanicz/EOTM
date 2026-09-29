@@ -277,3 +277,26 @@ mvn verify         # backend unit tests, the same command CI runs
 ## Deployment
 
 The app ships as a Docker image (`thanicz/eotm`) and is run via `docker/docker-compose.yml`, which wires up the app container together with PostgreSQL, Redis and an nginx reverse proxy (TLS via Let's Encrypt). See `docker/Hetzner.txt` for the current deployment notes.
+
+### Secrets
+
+Credentials are not in the compose file. They are Docker Compose secrets read from `docker/secrets/` (gitignored), mounted at `/run/secrets` and picked up by Spring through `spring.config.import=optional:configtree:/run/secrets/`.
+
+| File | Content |
+|---|---|
+| `db_user` | PostgreSQL user (app and db) |
+| `db_password` | PostgreSQL password (app and db) |
+| `jwt_key` | JWT signing key, at least 32 bytes |
+| `totp_key` | `EOTM_TOTP_KEY` |
+| `totp_salt` | `EOTM_TOTP_SALT` |
+| `redis_password` | password of the Redis user `eotm` |
+| `redis.acl` | Redis ACL file |
+
+`redis.acl` holds only the SHA-256 hash of the Redis password:
+
+```
+user default off
+user eotm on #<sha256 of redis_password> ~* &* +@all
+```
+
+Write the values without a trailing newline (`printf '%s' '...' > secrets/db_password`, hash with `printf '%s' "$(cat secrets/redis_password)" | sha256sum`). The directory is `chmod 700`, the files `chmod 644`: PostgreSQL and Redis read them as uid 999 inside their containers, while the directory keeps other users on the host out.

@@ -121,9 +121,23 @@ html, body {
     color: var(--p-text-muted-color);
 }
 
-.eotm-table .p-datatable-thead > tr > th.cell-num,
-.eotm-table .p-datatable-tbody > tr > td.cell-num {
+.p-datatable .p-datatable-thead > tr > th.cell-num,
+.p-datatable .p-datatable-tbody > tr > td.cell-num {
     text-align: right;
+}
+
+.cell-actions {
+    width: 1%;
+    white-space: nowrap;
+}
+
+.p-datatable .p-datatable-thead > tr > th.cell-actions,
+.p-datatable .p-datatable-tbody > tr > td.cell-actions {
+    text-align: right;
+}
+
+.cell-actions > div {
+    justify-content: flex-end;
 }
 
 .eotm-table .p-datatable-tbody > tr > td.cell-quiet {
@@ -746,6 +760,11 @@ menu {
 @media screen and (min-width: 768px) {
     .filter-input-wide {
         width: 16rem;
+    }
+
+    .p-datatable .p-datatable-thead > tr > th:is(.cell-num, .text-right) + th:not(.cell-num, .text-right, .cell-actions),
+    .p-datatable .p-datatable-tbody > tr > td:is(.cell-num, .text-right) + td:not(.cell-num, .text-right, .cell-actions) {
+        padding-left: 2rem;
     }
 }
 

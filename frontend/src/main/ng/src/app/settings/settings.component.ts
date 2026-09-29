@@ -48,7 +48,9 @@ export class SettingsComponent implements OnInit {
   newPassword: string = '';
   preferredCurrency: string = '';
   totpCode: string = '';
+  totpPassword: string = '';
   disablePassword: string = '';
+  disableCode: string = '';
 
   // Two-factor
   totpEnabled: boolean = false;
@@ -98,6 +100,7 @@ export class SettingsComponent implements OnInit {
       next: (setup) => {
         this.totpSetup = setup;
         this.totpCode = '';
+        this.totpPassword = '';
         this.totpDialog = true;
         this.totpLoading = false;
         this.cdr.markForCheck();
@@ -111,12 +114,12 @@ export class SettingsComponent implements OnInit {
   }
 
   confirmTwoFactor(): void {
-    if (!this.totpCode.trim()) {
+    if (!this.totpCode.trim() || !this.totpPassword) {
       return;
     }
 
     this.totpLoading = true;
-    this.userService.confirmTwoFactor(this.totpCode.trim()).subscribe({
+    this.userService.confirmTwoFactor(this.totpPassword, this.totpCode.trim()).subscribe({
       next: () => {
         this.totpEnabled = true;
         this.totpLoading = false;
@@ -137,25 +140,28 @@ export class SettingsComponent implements OnInit {
     this.totpDialog = false;
     this.totpSetup = null;
     this.totpCode = '';
+    this.totpPassword = '';
   }
 
   openTotpDisableDialog(): void {
     this.disablePassword = '';
+    this.disableCode = '';
     this.totpDisableDialog = true;
   }
 
   hideTotpDisableDialog(): void {
     this.totpDisableDialog = false;
     this.disablePassword = '';
+    this.disableCode = '';
   }
 
   disableTwoFactor(): void {
-    if (!this.disablePassword) {
+    if (!this.disablePassword || !this.disableCode.trim()) {
       return;
     }
 
     this.totpLoading = true;
-    this.userService.disableTwoFactor(this.disablePassword).subscribe({
+    this.userService.disableTwoFactor(this.disablePassword, this.disableCode.trim()).subscribe({
       next: () => {
         this.totpEnabled = false;
         this.totpLoading = false;
@@ -165,6 +171,7 @@ export class SettingsComponent implements OnInit {
       },
       error: (error) => {
         this.totpLoading = false;
+        this.disableCode = '';
         this.messageService.add({ severity: 'error', detail: error.error?.error ?? 'Could not turn it off.' });
         this.cdr.markForCheck();
       }

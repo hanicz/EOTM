@@ -8,17 +8,42 @@ x-app: &app
     - redis
   environment:
     - SPRING_DATASOURCE_URL=xx
-    - SPRING_DATASOURCE_USERNAME=xx
-    - SPRING_DATASOURCE_PASSWORD=xx
     - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-    - EOTM_KEY=xx
-    - EOTM_TOTP_KEY=xx
-    - EOTM_TOTP_SALT=xx
     - SPRING_DATA_REDIS_HOST=redis
+    - SPRING_DATA_REDIS_USERNAME=xx
     - JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=65
     - LOGS_PATH=/logs
+  secrets:
+    - source: db_user
+      target: spring.datasource.username
+    - source: db_password
+      target: spring.datasource.password
+    - source: jwt_key
+      target: EOTM_KEY
+    - source: totp_key
+      target: EOTM_TOTP_KEY
+    - source: totp_salt
+      target: EOTM_TOTP_SALT
+    - source: redis_password
+      target: spring.data.redis.password
   volumes:
     - ./logs:/logs
+
+secrets:
+  db_user:
+    file: ./secrets/db_user
+  db_password:
+    file: ./secrets/db_password
+  jwt_key:
+    file: ./secrets/jwt_key
+  totp_key:
+    file: ./secrets/totp_key
+  totp_salt:
+    file: ./secrets/totp_salt
+  redis_password:
+    file: ./secrets/redis_password
+  redis_acl:
+    file: ./secrets/redis.acl
 
 x-logging: &logging
   logging:
@@ -43,9 +68,12 @@ services:
     restart: unless-stopped
     mem_limit: 1g
     environment:
-      - POSTGRES_USER=xx
-      - POSTGRES_PASSWORD=xx
+      - POSTGRES_USER_FILE=/run/secrets/db_user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
       - POSTGRES_DB=xx
+    secrets:
+      - db_user
+      - db_password
     volumes:
        - ./postgres-data:/var/lib/postgresql/data
   redis:
@@ -54,7 +82,10 @@ services:
     container_name: redis
     restart: unless-stopped
     mem_limit: 512m
-    command: ["redis-server", "--appendonly", "yes", "--appendfsync", "everysec", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    command: ["redis-server", "--appendonly", "yes", "--appendfsync", "everysec", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru", "--aclfile", "/run/secrets/redis.acl"]
+    secrets:
+      - source: redis_acl
+        target: redis.acl
     volumes:
       - ./redis-data:/data
   nginx:

@@ -81,21 +81,21 @@
           <ng-template pTemplate="header">
             <tr>
               <th>Month</th>
-              <th>End worth</th>
-              <th>Change</th>
-              <th>Change %</th>
-              <th pTooltip="New money put in during the month.">Contributions</th>
-              <th pTooltip="Change that did not come from new money.">Market gain</th>
+              <th class="cell-num">End worth</th>
+              <th class="cell-num">Change</th>
+              <th class="cell-num">Change %</th>
+              <th class="cell-num" pTooltip="New money put in during the month.">Contributions</th>
+              <th class="cell-num" pTooltip="Change that did not come from new money.">Market gain</th>
             </tr>
           </ng-template>
           <ng-template pTemplate="body" let-month>
             <tr>
               <td data-label="Month">{{month.month}}</td>
-              <td data-label="End worth">{{month.endWorth | currency : currency() : 'symbol' : '0.0-0'}}</td>
-              <td data-label="Change" [class.amount-in]="month.change > 0" [class.amount-out]="month.change < 0">
+              <td data-label="End worth" class="cell-num">{{month.endWorth | currency : currency() : 'symbol' : '0.0-0'}}</td>
+              <td data-label="Change" class="cell-num" [class.amount-in]="month.change > 0" [class.amount-out]="month.change < 0">
                 {{month.change | currency : currency() : 'symbol' : '0.0-0'}}
               </td>
-              <td data-label="Change %">
+              <td data-label="Change %" class="cell-num">
                 @if (month.changePct === null) {
                   <span class="muted">&ndash;</span>
                 } @else {
@@ -104,8 +104,8 @@
                   </span>
                 }
               </td>
-              <td data-label="Contributions">{{month.contributions | currency : currency() : 'symbol' : '0.0-0'}}</td>
-              <td data-label="Market gain" [class.amount-in]="month.marketGain > 0" [class.amount-out]="month.marketGain < 0">
+              <td data-label="Contributions" class="cell-num">{{month.contributions | currency : currency() : 'symbol' : '0.0-0'}}</td>
+              <td data-label="Market gain" class="cell-num" [class.amount-in]="month.marketGain > 0" [class.amount-out]="month.marketGain < 0">
                 {{month.marketGain | currency : currency() : 'symbol' : '0.0-0'}}
               </td>
             </tr>

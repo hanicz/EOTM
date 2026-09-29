@@ -35,9 +35,9 @@
             </th>
             <th>Security Id</th>
             <th>Security Name</th>
-            <th>Amount</th>
-            <th>Date</th>
-            <th></th>
+            <th class="cell-num">Amount</th>
+            <th class="cell-num">Date</th>
+            <th class="cell-actions"></th>
         </tr>
     </ng-template>
     <ng-template pTemplate="body" let-interest>
@@ -47,9 +47,9 @@
             </td>
             <td data-label="Security Id">{{interest.securityId}}</td>
             <td data-label="Security Name">{{interest.securityName}}</td>
-            <td data-label="Amount">{{interest.amount | currency : interest.currencyId : 'symbol' : '0.0-2'}}</td>
-            <td data-label="Date">{{interest.interestDate | date:'mediumDate'}}</td>
-            <td>
+            <td data-label="Amount" class="cell-num">{{interest.amount | currency : interest.currencyId : 'symbol' : '0.0-2'}}</td>
+            <td data-label="Date" class="cell-num">{{interest.interestDate | date:'mediumDate'}}</td>
+            <td class="cell-actions">
                 <button pButton pRipple type="button" icon="pi pi-pencil" (click)="editInterest(interest)"
                     class="p-button-rounded p-button-text mr-1" severity="info"></button>
                 <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(interest.interestId)"

@@ -3,8 +3,7 @@ package eye.on.the.money.controller;
 import eye.on.the.money.dto.in.ChangePasswordDTO;
 import eye.on.the.money.dto.in.PreferencesUpdateDTO;
 import eye.on.the.money.dto.in.SignUpDTO;
-import eye.on.the.money.dto.in.TotpCodeDTO;
-import eye.on.the.money.dto.in.TotpDisableDTO;
+import eye.on.the.money.dto.in.TotpChangeDTO;
 import eye.on.the.money.dto.out.ExportDTO;
 import eye.on.the.money.dto.out.TotpSetupDTO;
 import eye.on.the.money.dto.out.TotpStatusDTO;
@@ -70,14 +69,14 @@ public class UserController {
     }
 
     @PostMapping("/2fa/confirm")
-    public ResponseEntity<Void> confirmTwoFactor(@RequestBody @Valid TotpCodeDTO codeDTO, @CurrentUserId Long userId) {
-        this.totpService.confirmEnrolment(userId, codeDTO.code());
+    public ResponseEntity<Void> confirmTwoFactor(@RequestBody @Valid TotpChangeDTO changeDTO, @CurrentUserId Long userId) {
+        this.totpService.confirmEnrolment(userId, changeDTO.password(), changeDTO.code());
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/2fa")
-    public ResponseEntity<Void> disableTwoFactor(@RequestBody @Valid TotpDisableDTO disableDTO, @CurrentUserId Long userId) {
-        this.totpService.disable(userId, disableDTO.password());
+    public ResponseEntity<Void> disableTwoFactor(@RequestBody @Valid TotpChangeDTO changeDTO, @CurrentUserId Long userId) {
+        this.totpService.disable(userId, changeDTO.password(), changeDTO.code());
         return ResponseEntity.noContent().build();
     }
 

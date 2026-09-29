@@ -39,9 +39,9 @@
       <ng-template pTemplate="header">
         <tr>
           <th>Source</th>
-          <th>Amount</th>
+          <th class="cell-num">Amount</th>
           <th>Share</th>
-          <th>Transactions</th>
+          <th class="cell-num">Transactions</th>
         </tr>
       </ng-template>
 
@@ -59,7 +59,7 @@
       <ng-template pTemplate="body" let-row>
         <tr>
           <td data-label="Source">{{row.source}}</td>
-          <td data-label="Amount" class="amount-in">
+          <td data-label="Amount" class="cell-num amount-in">
             {{row.amount | currency : row.currencyId : 'symbol' : '0.0-2'}}
           </td>
           <td data-label="Share">
@@ -68,7 +68,7 @@
               <span class="share-value">{{row.share | number : '1.0-1'}}%</span>
             </div>
           </td>
-          <td data-label="Transactions">{{row.transactionCount}}</td>
+          <td data-label="Transactions" class="cell-num">{{row.transactionCount}}</td>
         </tr>
       </ng-template>
     </p-table>

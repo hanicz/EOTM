@@ -94,7 +94,7 @@
         <th class="cell-num">Gross annual</th>
         <th class="cell-num">Net monthly</th>
         <th class="cell-num">Net annual</th>
-        <th></th>
+        <th class="cell-actions"></th>
       </tr>
     </ng-template>
 
@@ -143,7 +143,7 @@
         <td data-label="Net annual" class="cell-num">
           {{row.netAnnual | currency : current.currencyId : 'symbol' : '1.0-0'}}
         </td>
-        <td>
+        <td class="cell-actions">
           @if (!row.base) {
             <button pButton pRipple type="button" icon="pi pi-pencil" pTooltip="Edit this item"
               (click)="editItem(row)" class="p-button-rounded p-button-text mr-1" severity="secondary"></button>

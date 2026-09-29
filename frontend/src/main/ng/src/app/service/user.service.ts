@@ -52,12 +52,12 @@ export class UserService {
     return this.http.post<TotpSetup>(`${this.userUrl}/2fa/setup`, null);
   }
 
-  confirmTwoFactor(code: string) {
-    return this.http.post(`${this.userUrl}/2fa/confirm`, JSON.stringify({ code }));
+  confirmTwoFactor(password: string, code: string) {
+    return this.http.post(`${this.userUrl}/2fa/confirm`, JSON.stringify({ password, code }));
   }
 
-  disableTwoFactor(password: string) {
-    return this.http.delete(`${this.userUrl}/2fa`, { body: JSON.stringify({ password }) });
+  disableTwoFactor(password: string, code: string) {
+    return this.http.delete(`${this.userUrl}/2fa`, { body: JSON.stringify({ password, code }) });
   }
 
   getCurrentUser(): Observable<UserProfile> {

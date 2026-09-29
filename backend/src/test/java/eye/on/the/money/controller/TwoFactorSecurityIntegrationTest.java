@@ -53,7 +53,7 @@ public class TwoFactorSecurityIntegrationTest {
         this.userService.signUp(new SignUpDTO(email, PASSWORD));
         User user = this.userService.loadUserByEmail(email);
         TotpSetupDTO setup = this.totpService.startEnrolment(user.getId());
-        this.totpService.confirmEnrolment(user.getId(), codeFor(setup.secret(), 0));
+        this.totpService.confirmEnrolment(user.getId(), PASSWORD, codeFor(setup.secret(), 0));
         return setup.secret();
     }
 

@@ -83,11 +83,11 @@
       <th pSortableColumn="type">Type <p-sortIcon field="type"></p-sortIcon></th>
       <th>Partner</th>
       <th>Memo</th>
-      <th pSortableColumn="amount">Amount <p-sortIcon field="amount"></p-sortIcon></th>
+      <th class="cell-num" pSortableColumn="amount">Amount <p-sortIcon field="amount"></p-sortIcon></th>
       <th>Category</th>
       <th>In reports</th>
       <th>Tax</th>
-      <th></th>
+      <th class="cell-actions"></th>
     </tr>
   </ng-template>
 
@@ -129,7 +129,7 @@
           </ng-template>
         </p-cellEditor>
       </td>
-      <td data-label="Amount" [class.amount-in]="transaction.amount > 0"
+      <td data-label="Amount" class="cell-num" [class.amount-in]="transaction.amount > 0"
         [class.amount-out]="transaction.amount < 0">
         {{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}
       </td>
@@ -152,7 +152,7 @@
           <span class="state-chip state-accent">Taxable</span>
         }
       </td>
-      <td>
+      <td class="cell-actions">
         <button pButton pRipple type="button" [icon]="transaction.taxable ? 'pi pi-ban' : 'pi pi-percentage'"
           [pTooltip]="transaction.taxable ? 'Leave out of the tax report' : 'Flag as a taxable event'"
           (click)="setTaxable(transaction.id, !transaction.taxable)"

@@ -3,12 +3,12 @@
     <ng-template pTemplate="header">
       <tr>
         <th>Security Name</th>
-        <th>Quantity</th>
-        <th>Spent</th>
-        <th>Average</th>
-        <th>Rate</th>
-        <th>Next Payment</th>
-        <th>Next Payment Amount</th>
+        <th class="cell-num">Quantity</th>
+        <th class="cell-num">Spent</th>
+        <th class="cell-num">Average</th>
+        <th class="cell-num">Rate</th>
+        <th class="cell-num">Next Payment</th>
+        <th class="cell-num">Next Payment Amount</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body">
@@ -32,21 +32,21 @@
     <ng-template pTemplate="header">
       <tr>
         <th>Security Name</th>
-        <th>Quantity</th>
-        <th>Spent</th>
-        <th>Average</th>
-        <th>Rate</th>
-        <th>Next Payment</th>
-        <th>Next Payment Amount</th>
+        <th class="cell-num">Quantity</th>
+        <th class="cell-num">Spent</th>
+        <th class="cell-num">Average</th>
+        <th class="cell-num">Rate</th>
+        <th class="cell-num">Next Payment</th>
+        <th class="cell-num">Next Payment Amount</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-transaction>
       <tr>
         <td data-label="Security Name">{{transaction.securityName}}</td>
-        <td data-label="Quantity">{{transaction.quantity | number : '0.0-2'}} {{transaction.currencyId}}</td>
-        <td data-label="Spent">{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</td>
-        <td data-label="Average">{{(transaction.amount / transaction.quantity | number : '0.0-4') + '%'}}</td>
-        <td data-label="Rate">
+        <td data-label="Quantity" class="cell-num">{{transaction.quantity | number : '0.0-2'}} {{transaction.currencyId}}</td>
+        <td data-label="Spent" class="cell-num">{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</td>
+        <td data-label="Average" class="cell-num">{{(transaction.amount / transaction.quantity | number : '0.0-4') + '%'}}</td>
+        <td data-label="Rate" class="cell-num">
           @if (transaction.rate != null) {
             <span class="p-mr-2 state-chip" [ngClass]="transaction.zeroCoupon ? 'state-accent' : 'state-info'"
               [pTooltip]="transaction.zeroCoupon ? 'Discount bill: return over the whole holding period, not an annual rate.' : 'Annual rate for the current interest period.'">{{(transaction.rate | number : '0.2-2') + '%'}}</span>
@@ -54,14 +54,14 @@
             <span class="text-color-secondary">-</span>
           }
         </td>
-        <td data-label="Next Payment">
+        <td data-label="Next Payment" class="cell-num">
           @if (transaction.nextPaymentDate) {
             <span class="p-mr-2 state-chip" [ngClass]="isPaymentSoon(transaction) ? 'state-buy' : 'state-neutral'">{{transaction.nextPaymentDate | date : 'yyyy-MM-dd'}}</span>
           } @else {
             <span class="text-color-secondary">-</span>
           }
         </td>
-        <td data-label="Next Payment Amount">
+        <td data-label="Next Payment Amount" class="cell-num">
           @if (transaction.nextPaymentAmount != null) {
             <b class="amount">{{transaction.nextPaymentAmount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</b>
           } @else {
@@ -87,7 +87,7 @@
           <th>Date</th>
           <th>Due In</th>
           <th>Security Name</th>
-          <th>Amount</th>
+          <th class="cell-num">Amount</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-payment>
@@ -97,7 +97,7 @@
             <span class="p-mr-2 state-chip" [ngClass]="payment.daysUntil <= soonInDays ? 'state-buy' : 'state-neutral'">{{dueInLabel(payment.daysUntil)}}</span>
           </td>
           <td data-label="Security Name">{{payment.securityName}}</td>
-          <td data-label="Amount"><b class="amount">{{payment.nextPaymentAmount | currency : payment.currencyId : 'symbol' : '0.0-2'}}</b></td>
+          <td data-label="Amount" class="cell-num"><b class="amount">{{payment.nextPaymentAmount | currency : payment.currencyId : 'symbol' : '0.0-2'}}</b></td>
         </tr>
       </ng-template>
     </p-table>

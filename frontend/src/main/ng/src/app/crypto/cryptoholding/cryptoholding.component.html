@@ -3,14 +3,14 @@
     <ng-template pTemplate="header">
       <tr>
         <th>Symbol</th>
-        <th>Quantity</th>
-        <th>Spent</th>
-        <th>Worth</th>
-        <th>Average</th>
-        <th>Price</th>
-        <th>Profit</th>
-        <th>%</th>
-        <th>Alerts</th>
+        <th class="cell-num">Quantity</th>
+        <th class="cell-num">Spent</th>
+        <th class="cell-num">Worth</th>
+        <th class="cell-num">Average</th>
+        <th class="cell-num">Price</th>
+        <th class="cell-num">Profit</th>
+        <th class="cell-num">%</th>
+        <th class="cell-actions">Alerts</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-transaction>
@@ -36,14 +36,14 @@
     <ng-template pTemplate="header">
       <tr>
         <th>Symbol</th>
-        <th>Quantity</th>
-        <th>Spent</th>
-        <th>Worth</th>
-        <th>Average</th>
-        <th>Price</th>
-        <th>Profit</th>
-        <th>%</th>
-        <th>Alerts</th>
+        <th class="cell-num">Quantity</th>
+        <th class="cell-num">Spent</th>
+        <th class="cell-num">Worth</th>
+        <th class="cell-num">Average</th>
+        <th class="cell-num">Price</th>
+        <th class="cell-num">Profit</th>
+        <th class="cell-num">%</th>
+        <th class="cell-actions">Alerts</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-transaction>
@@ -55,35 +55,35 @@
             {{transaction.symbol}}
           </div>
         </td>
-        <td data-label="Quantity">{{transaction.quantity | number : '0.0-4'}}</td>
-        <td data-label="Spent">{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</td>
-        <td data-label="Worth">
+        <td data-label="Quantity" class="cell-num">{{transaction.quantity | number : '0.0-4'}}</td>
+        <td data-label="Spent" class="cell-num">{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</td>
+        <td data-label="Worth" class="cell-num">
           @if (transaction.liveValue != null) {
             {{transaction.liveValue | currency : transaction.currencyId : 'symbol' : '0.0-2'}}
           } @else {
             <span>N/A</span>
           }
         </td>
-        <td data-label="Average">{{transaction.amount / transaction.quantity | currency : transaction.currencyId : 'symbol' : '0.0-3'}}
+        <td data-label="Average" class="cell-num">{{transaction.amount / transaction.quantity | currency : transaction.currencyId : 'symbol' : '0.0-3'}}
         </td>
-        <td data-label="Price">
+        <td data-label="Price" class="cell-num">
           @if (transaction.liveValue != null) {
             {{transaction.liveValue / transaction.quantity | currency : transaction.currencyId : 'symbol' : '0.0-3'}}
           } @else {
             <span>N/A</span>
           }
         </td>
-        <td data-label="Profit">
+        <td data-label="Profit" class="cell-num">
           @if (transaction.liveValue != null) {
             <span class="p-mr-2 state-chip" [ngClass]="(transaction.valueDiff > 0) ? 'state-buy' : 'state-sell'">{{transaction.valueDiff | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</span>
           }
         </td>
-        <td data-label="%">
+        <td data-label="%" class="cell-num">
           @if (transaction.liveValue != null) {
             <span class="p-mr-2 state-chip" [ngClass]="(transaction.valueDiff > 0) ? 'state-buy' : 'state-sell'">{{(transaction.valueDiff / transaction.amount * 100 | number : '0.0-1') + '%'}}</span>
           }
         </td>
-        <td data-label="Alerts">
+        <td data-label="Alerts" class="cell-actions">
           <div class="alert-actions">
             @for (step of alertSteps; track step) {
               <button pButton pRipple type="button" size="small" severity="secondary" [outlined]="true"

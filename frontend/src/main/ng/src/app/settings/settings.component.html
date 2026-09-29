@@ -289,12 +289,17 @@
         <input id="totpCode" pInputText type="text" maxlength="6" inputmode="numeric" placeholder="000000"
             [(ngModel)]="totpCode">
     </div>
+    <div class="dialog-field">
+        <label for="totpPassword">Confirm with your password</label>
+        <p-password [toggleMask]="true" [feedback]="false" [(ngModel)]="totpPassword" id="totpPassword">
+        </p-password>
+    </div>
     }
     <ng-template pTemplate="footer">
         <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text"
             (click)="hideTotpDialog()"></button>
         <button pButton pRipple label="Confirm" icon="pi pi-check" [loading]="totpLoading"
-            [disabled]="!totpCode" (click)="confirmTwoFactor()"></button>
+            [disabled]="!totpCode || !totpPassword" (click)="confirmTwoFactor()"></button>
     </ng-template>
 </p-dialog>
 
@@ -305,10 +310,15 @@
         <p-password [toggleMask]="true" [feedback]="false" [(ngModel)]="disablePassword" id="disablePassword">
         </p-password>
     </div>
+    <div class="dialog-field">
+        <label for="disableCode">Code from the app</label>
+        <input id="disableCode" pInputText type="text" maxlength="6" inputmode="numeric" placeholder="000000"
+            [(ngModel)]="disableCode">
+    </div>
     <ng-template pTemplate="footer">
         <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text"
             (click)="hideTotpDisableDialog()"></button>
-        <button pButton pRipple label="Turn off" icon="pi pi-times" severity="danger" [loading]="totpLoading"
-            [disabled]="!disablePassword" (click)="disableTwoFactor()"></button>
+        <button pButton pRipple label="Turn off" icon="pi pi-times" severity="danger" [outlined]="true"
+            [loading]="totpLoading" [disabled]="!disablePassword || !disableCode" (click)="disableTwoFactor()"></button>
     </ng-template>
 </p-dialog>

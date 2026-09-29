@@ -11,7 +11,7 @@ public class JwtServiceTest {
 
     private static final String EMAIL = "tokenholder@mail.com";
 
-    private final JwtService jwtService = new JwtService();
+    private final JwtService jwtService = new JwtService("unit-test-signing-key-made-up-for-tests");
 
     @Test
     public void accessTokenCarriesTheSubject() {

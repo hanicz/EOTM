@@ -57,14 +57,14 @@
       </th>
       <th style="width: 3rem"></th>
       <th pSortableColumn="shortName">Ticker <p-sortIcon field="shortName"></p-sortIcon></th>
-      <th pSortableColumn="grantDate">Granted <p-sortIcon field="grantDate"></p-sortIcon></th>
+      <th class="cell-num" pSortableColumn="grantDate">Granted <p-sortIcon field="grantDate"></p-sortIcon></th>
       <th class="cell-num" pSortableColumn="quantity">Shares <p-sortIcon field="quantity"></p-sortIcon></th>
       <th class="cell-num">Vested</th>
       <th>Schedule</th>
       <th class="cell-num" pSortableColumn="totalAmountInHuf">Gross <p-sortIcon field="totalAmountInHuf"></p-sortIcon></th>
       <th class="cell-num">Tax</th>
       <th class="cell-num" pSortableColumn="totalNetInHuf">Net <p-sortIcon field="totalNetInHuf"></p-sortIcon></th>
-      <th></th>
+      <th class="cell-actions"></th>
     </tr>
   </ng-template>
 
@@ -90,7 +90,7 @@
           <span class="cell-sub equity-error">{{grant.error}}</span>
         }
       </td>
-      <td data-label="Granted">{{grant.grantDate | date:'mediumDate'}}</td>
+      <td data-label="Granted" class="cell-num">{{grant.grantDate | date:'mediumDate'}}</td>
       <td data-label="Shares" class="cell-num">{{grant.quantity | number}}</td>
       <td data-label="Vested" class="cell-num">
         {{vestedShares(grant) | number}}
@@ -114,7 +114,7 @@
         <span class="cell-sub">{{grant.vestedNetInHuf | number:'1.0-0'}} vested &middot;
           {{grant.upcomingNetInHuf | number:'1.0-0'}} to come</span>
       </td>
-      <td>
+      <td class="cell-actions">
         <button pButton pRipple type="button" icon="pi pi-pencil" pTooltip="Edit this grant"
           (click)="editGrant(grant)" class="p-button-rounded p-button-text mr-1" severity="secondary"></button>
         <button pButton pRipple type="button" icon="pi pi-times" (click)="deleteByIds(grant.id)"
@@ -130,7 +130,7 @@
           <ng-template pTemplate="header">
             <tr>
               <th class="cell-num">#</th>
-              <th>Vest date</th>
+              <th class="cell-num">Vest date</th>
               <th class="cell-num">Shares</th>
               <th class="cell-num">Price</th>
               <th class="cell-num">Value</th>
@@ -147,7 +147,7 @@
           <ng-template pTemplate="body" let-vest>
             <tr>
               <td data-label="#" class="cell-num">{{vest.sequence}}</td>
-              <td data-label="Vest date">{{vest.vestDate | date:'mediumDate'}}</td>
+              <td data-label="Vest date" class="cell-num">{{vest.vestDate | date:'mediumDate'}}</td>
               <td data-label="Shares" class="cell-num">{{vest.quantity | number}}</td>
               <td data-label="Price" class="cell-num">
                 @if (vest.price !== null) {

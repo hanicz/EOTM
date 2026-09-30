@@ -53,7 +53,7 @@ docker image prune -a -f
 
 #Flush Redis cache - required after a deploy that changes any cached DTO
 #(JDK serialization, no serialVersionUID: stale entries throw InvalidClassException)
-docker compose exec redis redis-cli FLUSHALL
+docker compose exec redis redis-cli --user xx --pass "$(cat secrets/redis_password)" --no-auth-warning FLUSHALL
 
 #Backup (daily 03:00, keeps 14 days in docker/backups)
 chmod +x /**/backup.sh
@@ -61,7 +61,7 @@ crontab -e
 0 3 * * * /**/backup.sh >> /**/logs/backup.log 2>&1
 
 #Restore
-gunzip -c backups/eotm-<timestamp>.sql.gz | docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" "$POSTGRES_DB"'
+gunzip -c backups/eotm-<timestamp>.sql.gz | docker compose exec -T db sh -c 'psql -v ON_ERROR_STOP=1 -U "$(cat /run/secrets/db_user)" "$POSTGRES_DB"'
 
 --Tailscale
 curl -fsSL https://tailscale.com/install.sh | sh

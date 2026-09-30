@@ -3,20 +3,25 @@ package eye.on.the.money.service.financial;
 import eye.on.the.money.dto.in.BankCategoryRuleEditDTO;
 import eye.on.the.money.dto.out.BankCategoryRuleDTO;
 import eye.on.the.money.dto.out.CategorizeResultDTO;
+import eye.on.the.money.dto.out.CategoryMatchDTO;
 import eye.on.the.money.exception.ValidationException;
 import eye.on.the.money.model.financial.BankCategoryRule;
 import eye.on.the.money.model.financial.BankTransaction;
 import eye.on.the.money.model.financial.SpendingCategory;
 import eye.on.the.money.repository.financial.BankCategoryRuleRepository;
 import eye.on.the.money.repository.financial.BankTransactionRepository;
+import eye.on.the.money.repository.financial.PartnerNameCategory;
 import eye.on.the.money.repository.financial.SpendingCategoryRepository;
 import eye.on.the.money.service.user.UserService;
+import eye.on.the.money.util.LikePatterns;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -41,6 +46,21 @@ public class BankCategoryRuleService {
     public CategoryRuleMatcher matcherFor(Long userId) {
         return CategoryRuleMatcher.of(
                 this.bankCategoryRuleRepository.findByUserIdAndActiveTrueOrderByPriorityAscPatternAsc(userId));
+    }
+
+    public CategoryMatchDTO countMatches(Long userId, String pattern) {
+        String normalized = CategoryRuleMatcher.normalize(pattern);
+        if (normalized.isEmpty()) {
+            return new CategoryMatchDTO(0, 0);
+        }
+        String longestWord = Arrays.stream(normalized.split(" "))
+                .max(Comparator.comparingInt(String::length)).orElse(normalized);
+        List<PartnerNameCategory> matching = this.bankTransactionRepository
+                .findPartnerNamesLike(userId, LikePatterns.contains(longestWord)).stream()
+                .filter(row -> CategoryRuleMatcher.normalize(row.getPartnerName()).contains(normalized))
+                .toList();
+        long uncategorized = matching.stream().filter(row -> row.getCategoryId() == null).count();
+        return new CategoryMatchDTO(matching.size(), uncategorized);
     }
 
     @Transactional
@@ -88,6 +108,7 @@ public class BankCategoryRuleService {
         this.bankCategoryRuleRepository.deleteByUserIdAndIdIn(userId, ids);
     }
 
+    @EvictBankReports
     @Transactional
     public CategorizeResultDTO applyRules(Long userId) {
         CategoryRuleMatcher matcher = this.matcherFor(userId);

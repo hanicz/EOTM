@@ -1,21 +1,29 @@
 package eye.on.the.money.repository.financial;
 
 import eye.on.the.money.EotmApplication;
+import eye.on.the.money.dto.in.BankTransactionFlag;
+import eye.on.the.money.dto.in.BankTransactionQuery;
 import eye.on.the.money.dto.out.MonthlyCashFlowDTO;
 import eye.on.the.money.dto.out.MonthlyIncomeDTO;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.financial.BankTransaction;
 import eye.on.the.money.model.financial.BankTransactionTax;
+import eye.on.the.money.model.financial.CategoryColor;
+import eye.on.the.money.model.financial.SpendingCategory;
 import eye.on.the.money.model.financial.TaxDetails;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.service.user.UserService;
+import eye.on.the.money.util.LikePatterns;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +49,9 @@ class BankTransactionRepositoryTest {
 
     @Autowired
     private BankTransactionTaxRepository bankTransactionTaxRepository;
+
+    @Autowired
+    private SpendingCategoryRepository spendingCategoryRepository;
 
     @Autowired
     private CurrencyRepository currencyRepository;
@@ -331,6 +342,132 @@ class BankTransactionRepositoryTest {
                 .findByUserIdAndIdIn(this.user.getId(), List.of(transaction.getId())).size());
         assertTrue(this.bankTransactionRepository
                 .findByUserIdAndIdIn(-1L, List.of(transaction.getId())).isEmpty());
+    }
+
+    private BankTransaction persistListed(LocalDate bookingDate, double amount, String partnerName, String memo) {
+        BankTransaction transaction = this.bankTransactionRepository.save(BankTransaction.builder()
+                .bankTransactionId("TX" + amount + bookingDate + partnerName)
+                .bookingDate(bookingDate)
+                .type("Kartyas vasarlas")
+                .partnerName(partnerName)
+                .memo(memo)
+                .amount(BigDecimal.valueOf(amount))
+                .currency(this.huf)
+                .user(this.user)
+                .build());
+        this.entityManager.flush();
+        return transaction;
+    }
+
+    private SpendingCategory persistCategory(String name) {
+        SpendingCategory category = this.spendingCategoryRepository.save(SpendingCategory.builder()
+                .name(name)
+                .normalizedName(name.toUpperCase())
+                .color(CategoryColor.GREEN)
+                .user(this.user)
+                .build());
+        this.entityManager.flush();
+        return category;
+    }
+
+    private List<Long> ids(BankTransactionQuery query) {
+        return this.bankTransactionRepository.findAll(BankTransactionSpecifications.matching(this.user.getId(), query),
+                        Sort.by(Sort.Direction.ASC, "id"))
+                .stream().map(BankTransaction::getId).toList();
+    }
+
+    private BankTransactionQuery search(String search) {
+        return new BankTransactionQuery(search, null, null, null, null);
+    }
+
+    @Test
+    void specification_searchesPartnerMemoAndAmountIgnoringCase() {
+        BankTransaction store = this.persistListed(LocalDate.of(2025, 12, 1), -4250.0, "BLUE MART 0042", "weekly shop");
+        BankTransaction cafe = this.persistListed(LocalDate.of(2025, 12, 2), -1275.5, "CORNER CAFE", "Coffee 50%");
+
+        assertEquals(List.of(store.getId()), this.ids(this.search("blue mart")));
+        assertEquals(List.of(cafe.getId()), this.ids(this.search("COFFEE")));
+        assertEquals(List.of(cafe.getId()), this.ids(this.search("1275.5")));
+        assertEquals(List.of(cafe.getId()), this.ids(this.search("50%")));
+        assertTrue(this.ids(this.search("_")).isEmpty());
+    }
+
+    @Test
+    void specification_filtersByFlag() {
+        BankTransaction counted = this.persist(LocalDate.of(2025, 12, 1), this.huf, 100.0, false);
+        BankTransaction excluded = this.persist(LocalDate.of(2025, 12, 2), this.huf, 200.0, true);
+        BankTransaction taxable = this.persistTaxable(LocalDate.of(2025, 12, 3), this.huf, 300.0);
+
+        assertEquals(List.of(taxable.getId()), this.ids(new BankTransactionQuery(null, BankTransactionFlag.TAXABLE, null, null, null)));
+        assertEquals(List.of(counted.getId(), excluded.getId()),
+                this.ids(new BankTransactionQuery(null, BankTransactionFlag.NOT_TAXABLE, null, null, null)));
+        assertEquals(List.of(excluded.getId()), this.ids(new BankTransactionQuery(null, BankTransactionFlag.EXCLUDED, null, null, null)));
+        assertEquals(List.of(counted.getId(), taxable.getId()),
+                this.ids(new BankTransactionQuery(null, BankTransactionFlag.COUNTED, null, null, null)));
+    }
+
+    @Test
+    void specification_filtersByCategoryOrUncategorized() {
+        SpendingCategory groceries = this.persistCategory("Groceries");
+        BankTransaction categorized = this.persistListed(LocalDate.of(2025, 12, 1), -100.0, "BLUE MART", "memo");
+        categorized.setCategory(groceries);
+        this.bankTransactionRepository.saveAndFlush(categorized);
+        BankTransaction uncategorized = this.persistListed(LocalDate.of(2025, 12, 2), -200.0, "CORNER CAFE", "memo");
+
+        assertEquals(List.of(categorized.getId()), this.ids(new BankTransactionQuery(null, null, groceries.getId(), null, null)));
+        assertEquals(List.of(uncategorized.getId()),
+                this.ids(new BankTransactionQuery(null, null, BankTransactionQuery.UNCATEGORIZED, null, null)));
+    }
+
+    @Test
+    void specification_filtersByInclusiveDateRange() {
+        this.persist(LocalDate.of(2025, 11, 30), this.huf, 100.0, false);
+        BankTransaction first = this.persist(LocalDate.of(2025, 12, 1), this.huf, 200.0, false);
+        BankTransaction last = this.persist(LocalDate.of(2025, 12, 31), this.huf, 300.0, false);
+        this.persist(LocalDate.of(2026, 1, 1), this.huf, 400.0, false);
+
+        assertEquals(List.of(first.getId(), last.getId()), this.ids(new BankTransactionQuery(null, null, null,
+                LocalDate.of(2025, 12, 1), LocalDate.of(2025, 12, 31))));
+    }
+
+    @Test
+    void specification_onlyReturnsTheRecordsOfTheGivenUser() {
+        this.persist(LocalDate.of(2025, 12, 1), this.huf, 100.0, false);
+
+        assertTrue(this.bankTransactionRepository
+                .findAll(BankTransactionSpecifications.matching(-1L, BankTransactionQuery.none())).isEmpty());
+    }
+
+    @Test
+    void specification_pagesAndCountsTheMatches() {
+        for (int day = 1; day <= 5; day++) {
+            this.persist(LocalDate.of(2025, 12, day), this.huf, day * 100.0, false);
+        }
+
+        Page<BankTransaction> page = this.bankTransactionRepository.findAll(
+                BankTransactionSpecifications.matching(this.user.getId(), BankTransactionQuery.none()),
+                PageRequest.of(1, 2, Sort.by(Sort.Direction.DESC, "bookingDate")));
+
+        assertEquals(5, page.getTotalElements());
+        assertEquals(List.of(LocalDate.of(2025, 12, 3), LocalDate.of(2025, 12, 2)),
+                page.getContent().stream().map(BankTransaction::getBookingDate).toList());
+    }
+
+    @Test
+    void findPartnerNamesLike_matchesIgnoringCaseAndReportsTheCategory() {
+        SpendingCategory groceries = this.persistCategory("Groceries");
+        BankTransaction categorized = this.persistListed(LocalDate.of(2025, 12, 1), -100.0, "Blue Mart 0042", "memo");
+        categorized.setCategory(groceries);
+        this.bankTransactionRepository.saveAndFlush(categorized);
+        this.persistListed(LocalDate.of(2025, 12, 2), -200.0, "BLUE MART 0043", "memo");
+        this.persistListed(LocalDate.of(2025, 12, 3), -300.0, "CORNER CAFE", "memo");
+
+        List<PartnerNameCategory> result = this.bankTransactionRepository
+                .findPartnerNamesLike(this.user.getId(), LikePatterns.contains("MART"));
+
+        assertEquals(2, result.size());
+        assertEquals(1, result.stream().filter(row -> groceries.getId().equals(row.getCategoryId())).count());
+        assertEquals(1, result.stream().filter(row -> row.getCategoryId() == null).count());
     }
 
     private static void assertDecimal(double expected, BigDecimal actual) {

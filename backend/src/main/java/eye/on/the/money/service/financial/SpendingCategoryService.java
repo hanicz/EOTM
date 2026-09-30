@@ -55,6 +55,7 @@ public class SpendingCategoryService {
         return this.convertToDTO(this.save(category));
     }
 
+    @EvictBankReports
     @Transactional
     public SpendingCategoryDTO updateCategory(Long userId, Long id, SpendingCategoryEditDTO editDTO) {
         SpendingCategory category = this.spendingCategoryRepository.findByIdAndUserId(id, userId)
@@ -74,6 +75,7 @@ public class SpendingCategoryService {
         return this.convertToDTO(this.save(category));
     }
 
+    @EvictBankReports
     @Transactional
     public void deleteCategoriesByIds(Long userId, List<Long> ids) {
         this.bankTransactionRepository.clearCategoryByUserIdAndCategoryIdIn(userId, ids);

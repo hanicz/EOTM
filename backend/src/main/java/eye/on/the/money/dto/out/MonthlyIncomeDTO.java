@@ -2,6 +2,7 @@ package eye.on.the.money.dto.out;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import eye.on.the.money.dto.CSVHelper;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import lombok.*;
@@ -13,7 +14,7 @@ import lombok.*;
 @AllArgsConstructor
 @EqualsAndHashCode
 @NoArgsConstructor
-public class MonthlyIncomeDTO implements CSVHelper {
+public class MonthlyIncomeDTO implements CSVHelper, Serializable {
 
     private Integer year;
     private Integer month;

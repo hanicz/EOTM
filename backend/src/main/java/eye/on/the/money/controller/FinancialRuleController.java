@@ -5,6 +5,7 @@ import eye.on.the.money.dto.in.BankExclusionRuleEditDTO;
 import eye.on.the.money.dto.out.BankCategoryRuleDTO;
 import eye.on.the.money.dto.out.BankExclusionRuleDTO;
 import eye.on.the.money.dto.out.CategorizeResultDTO;
+import eye.on.the.money.dto.out.CategoryMatchDTO;
 import eye.on.the.money.security.CurrentUserId;
 import eye.on.the.money.service.financial.BankCategoryRuleService;
 import eye.on.the.money.service.financial.BankExclusionRuleService;
@@ -51,6 +52,12 @@ public class FinancialRuleController {
     @GetMapping("/category")
     public ResponseEntity<List<BankCategoryRuleDTO>> getAllCategoryRules(@CurrentUserId Long userId) {
         return ResponseEntity.ok(this.bankCategoryRuleService.getRules(userId));
+    }
+
+    @GetMapping("/category/match")
+    public ResponseEntity<CategoryMatchDTO> countCategoryRuleMatches(@CurrentUserId Long userId,
+                                                                     @RequestParam String pattern) {
+        return ResponseEntity.ok(this.bankCategoryRuleService.countMatches(userId, pattern));
     }
 
     @PostMapping("/category")

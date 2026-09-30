@@ -17,6 +17,16 @@ export interface BankTransaction {
     categoryColor: CategoryColor | null;
 }
 
+export interface Page<T> {
+    content: T[];
+    totalElements: number;
+}
+
+export interface CategoryMatch {
+    matches: number;
+    uncategorized: number;
+}
+
 export interface MonthlyCashFlow {
     year: number;
     month: number;

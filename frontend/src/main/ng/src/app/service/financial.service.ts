@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BankTransaction, CategorizeResult, CategoryRule, ExclusionRule, MonthlyCashFlow, MonthlyCategorySpending, MonthlyIncome, SpendingCategory, YearlyCashFlow } from '../model/bankTransaction';
+import { BankTransaction, CategorizeResult, CategoryMatch, CategoryRule, ExclusionRule, MonthlyCashFlow, MonthlyCategorySpending, MonthlyIncome, Page, SpendingCategory, YearlyCashFlow } from '../model/bankTransaction';
 import { ImportResult } from '../model/importResult';
 import { environment } from '../../environments/environment';
 
@@ -15,8 +15,8 @@ export class FinancialService {
 
   constructor(private http: HttpClient) { }
 
-  getTransactions() {
-    return this.http.get<BankTransaction[]>(this.transactionUrl);
+  getTransactions(params: Record<string, string>) {
+    return this.http.get<Page<BankTransaction>>(this.transactionUrl, { params });
   }
 
   getMonthlyCashFlow() {
@@ -153,6 +153,11 @@ export class FinancialService {
   deleteCategoryRulesByIds(ids: string) {
     const url = `${this.ruleUrl}/category?ids=${ids}`;
     return this.http.delete(url);
+  }
+
+  getCategoryMatch(pattern: string) {
+    const url = `${this.ruleUrl}/category/match`;
+    return this.http.get<CategoryMatch>(url, { params: { pattern } });
   }
 
   applyCategoryRules() {

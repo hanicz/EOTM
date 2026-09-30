@@ -1,7 +1,8 @@
 import { Component, ChangeDetectorRef, ElementRef, EventEmitter, Output, ViewChild, inject } from '@angular/core';
-import { from, of } from 'rxjs';
-import { catchError, concatMap, map, toArray } from 'rxjs/operators';
-import { BankTransaction, CATEGORY_CHIP_CLASS, CATEGORY_CHIP_NONE, CategoryColor, CategoryRule, SpendingCategory } from '../../model/bankTransaction';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subject, Subscription, from, of } from 'rxjs';
+import { catchError, concatMap, debounceTime, distinctUntilChanged, map, switchMap, toArray } from 'rxjs/operators';
+import { BankTransaction, CATEGORY_CHIP_CLASS, CATEGORY_CHIP_NONE, CategoryColor, CategoryMatch, CategoryRule, SpendingCategory } from '../../model/bankTransaction';
 import { ImportResult } from '../../model/importResult';
 import { FinancialService } from '../../service/financial.service';
 import { Bind } from 'primeng/bind';
@@ -11,7 +12,7 @@ import { Toast } from 'primeng/toast';
 import { ButtonDirective } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { Tooltip } from 'primeng/tooltip';
-import { TableModule } from 'primeng/table';
+import { TableLazyLoadEvent, TableModule } from 'primeng/table';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { Dialog } from 'primeng/dialog';
@@ -19,6 +20,7 @@ import { Checkbox } from 'primeng/checkbox';
 import { FormsModule } from '@angular/forms';
 import { CurrencyPipe, DatePipe, NgClass } from '@angular/common';
 import { CsvDropDirective } from '../../util/csv-drop.directive';
+import { DEFAULT_PAGING, TransactionPaging, lastPageStart, transactionParams } from '../../util/transactionquery';
 
 interface TransactionEditEvent {
     field?: string;
@@ -51,14 +53,17 @@ export class FinancialTransactionComponent {
   @Output() categoryRulesChanged = new EventEmitter<void>();
 
   transactions: BankTransaction[] = [];
-  filteredTransactions: BankTransaction[] = [];
+  totalRecords: number = 0;
+  loading: boolean = false;
+  paging: TransactionPaging = { ...DEFAULT_PAGING };
   selectedTransactions: BankTransaction[] = [];
   readonly flags: { label: string, value: string }[] = [
-    { label: 'Taxable', value: 'taxable' },
-    { label: 'Not taxable', value: 'notTaxable' },
-    { label: 'Excluded', value: 'excluded' },
-    { label: 'Counted', value: 'counted' }
+    { label: 'Taxable', value: 'TAXABLE' },
+    { label: 'Not taxable', value: 'NOT_TAXABLE' },
+    { label: 'Excluded', value: 'EXCLUDED' },
+    { label: 'Counted', value: 'COUNTED' }
   ];
+  search: string = '';
   fromDate: string = '';
   toDate: string = '';
   flagFilter: string | null = null;
@@ -77,6 +82,9 @@ export class FinancialTransactionComponent {
   readonly memoMaxLength = 500;
   private readonly editableFields = ['bookingDate', 'memo'];
   private beforeEdit: TransactionEditValues | null = null;
+  private loadSubscription?: Subscription;
+  private readonly searchInput = new Subject<string>();
+  private readonly categoryRulePatternInput = new Subject<string>();
   @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
 
 
@@ -85,7 +93,19 @@ export class FinancialTransactionComponent {
     const csvDrop = inject(CsvDropDirective);
     csvDrop.multiple.set(true);
     csvDrop.csvDropped.subscribe(event => this.onUpload(event));
-    this.fetchData();
+    this.searchInput.pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed()).subscribe(search => {
+      this.search = search;
+      this.filterChanged();
+    });
+    this.categoryRulePatternInput.pipe(
+      debounceTime(250),
+      switchMap(pattern => this.countCategoryRuleMatches(pattern)),
+      takeUntilDestroyed()
+    ).subscribe(match => {
+      this.categoryRuleMatchCount = match.matches;
+      this.categoryRuleUncategorizedCount = match.uncategorized;
+      this.cdr.markForCheck();
+    });
     this.fetchCategories();
   }
 
@@ -106,14 +126,41 @@ export class FinancialTransactionComponent {
     });
   }
 
+  load(event: TableLazyLoadEvent): void {
+    this.paging = {
+      first: event.first ?? 0,
+      rows: event.rows ?? this.paging.rows,
+      sortField: typeof event.sortField === 'string' ? event.sortField : DEFAULT_PAGING.sortField,
+      sortOrder: event.sortOrder ?? DEFAULT_PAGING.sortOrder
+    };
+    this.fetchData();
+  }
+
   private fetchData(): void {
-    this.financialService.getTransactions().subscribe({
-      next: (data) => {
-        this.transactions = data;
-        this.applyFilters();
+    this.loadSubscription?.unsubscribe();
+    this.loading = true;
+    const params = transactionParams({
+      search: this.search,
+      flag: this.flagFilter,
+      categoryId: this.categoryFilter,
+      from: this.fromDate,
+      to: this.toDate
+    }, this.paging);
+    this.loadSubscription = this.financialService.getTransactions(params).subscribe({
+      next: (page) => {
+        if (!page.content.length && this.paging.first > 0 && page.totalElements > 0) {
+          this.paging = { ...this.paging, first: lastPageStart(page.totalElements, this.paging.rows) };
+          this.fetchData();
+          return;
+        }
+        this.transactions = page.content;
+        this.totalRecords = page.totalElements;
+        this.loading = false;
         this.cdr.markForCheck();
       },
       error: (error) => {
+        this.loading = false;
+        this.cdr.markForCheck();
         console.log(error);
       }
     });
@@ -123,9 +170,14 @@ export class FinancialTransactionComponent {
     return !!this.fromDate || !!this.toDate || !!this.flagFilter || this.categoryFilter !== null;
   }
 
+  searchChanged(value: string): void {
+    this.searchInput.next(value);
+  }
+
   filterChanged(): void {
     this.selectedTransactions = [];
-    this.applyFilters();
+    this.paging = { ...this.paging, first: 0 };
+    this.fetchData();
   }
 
   clearFilters(): void {
@@ -136,42 +188,12 @@ export class FinancialTransactionComponent {
     this.filterChanged();
   }
 
-  private applyFilters(): void {
-    this.filteredTransactions = this.transactions.filter(transaction => {
-      const booked = this.bookedOn(transaction);
-      return (!this.fromDate || booked >= this.fromDate)
-        && (!this.toDate || booked <= this.toDate)
-        && this.matchesFlag(transaction)
-        && this.matchesCategory(transaction);
-    });
-  }
-
-  private matchesFlag(transaction: BankTransaction): boolean {
-    switch (this.flagFilter) {
-      case 'taxable': return !!transaction.taxable;
-      case 'notTaxable': return !transaction.taxable;
-      case 'excluded': return !!transaction.excluded;
-      case 'counted': return !transaction.excluded;
-      default: return true;
-    }
-  }
-
   amountAlertClass(transaction: BankTransaction): string {
     if (transaction.excluded) return '';
     if (transaction.amount <= -500000) return 'amount-alert-3';
     if (transaction.amount <= -200000) return 'amount-alert-2';
     if (transaction.amount <= -100000) return 'amount-alert-1';
     return '';
-  }
-
-  private matchesCategory(transaction: BankTransaction): boolean {
-    if (this.categoryFilter === null) {
-      return true;
-    }
-    if (this.categoryFilter === 0) {
-      return transaction.categoryId === null;
-    }
-    return transaction.categoryId === this.categoryFilter;
   }
 
   chipClass(color: CategoryColor | null): string {
@@ -181,10 +203,6 @@ export class FinancialTransactionComponent {
   get categoryOptions(): { label: string, value: number }[] {
     return [{ label: 'Uncategorized', value: 0 }]
       .concat(this.categories.map(category => ({ label: category.name, value: category.id })));
-  }
-
-  private bookedOn(transaction: BankTransaction): string {
-    return transaction.bookingDate.substring(0, 10);
   }
 
   excludeClicked(excluded: boolean): void {
@@ -243,17 +261,21 @@ export class FinancialTransactionComponent {
     this.categoryRulePattern = partnerName.substring(0, this.patternMaxLength);
     this.categoryRuleCategoryId = transaction.categoryId ?? this.categories[0].id;
     this.categoryRuleApplyToOthers = true;
+    this.categoryRuleMatchCount = 0;
+    this.categoryRuleUncategorizedCount = 0;
     this.updateCategoryRuleMatches();
     this.categoryRuleDialog = true;
   }
 
   updateCategoryRuleMatches(): void {
-    const pattern = this.normalizeName(this.categoryRulePattern);
-    const matching = pattern
-      ? this.transactions.filter(transaction => this.normalizeName(transaction.partnerName).includes(pattern))
-      : [];
-    this.categoryRuleMatchCount = matching.length;
-    this.categoryRuleUncategorizedCount = matching.filter(transaction => transaction.categoryId === null).length;
+    this.categoryRulePatternInput.next(this.normalizeName(this.categoryRulePattern));
+  }
+
+  private countCategoryRuleMatches(pattern: string) {
+    const none: CategoryMatch = { matches: 0, uncategorized: 0 };
+    return pattern
+      ? this.financialService.getCategoryMatch(pattern).pipe(catchError(() => of(none)))
+      : of(none);
   }
 
   hideCategoryRuleDialog(): void {
@@ -354,7 +376,7 @@ export class FinancialTransactionComponent {
     this.financialService.updateTransaction(transaction.id, bookingDate, memo).subscribe({
       next: () => {
         if (bookingDate !== previous.bookingDate) {
-          this.applyFilters();
+          this.fetchData();
           this.dataChanged.emit();
         }
       },

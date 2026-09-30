@@ -1,9 +1,11 @@
 package eye.on.the.money.service.financial;
 
 import eye.on.the.money.dto.in.BankTransactionEditDTO;
+import eye.on.the.money.dto.in.BankTransactionQuery;
 import eye.on.the.money.dto.out.BankTransactionDTO;
 import eye.on.the.money.dto.out.ImportResultDTO;
 import eye.on.the.money.dto.out.MonthlyCashFlowDTO;
+import eye.on.the.money.dto.out.PageDTO;
 import eye.on.the.money.dto.out.YearlyCashFlowDTO;
 import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.Currency;
@@ -27,6 +29,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -333,16 +340,50 @@ class BankTransactionServiceTest {
     }
 
     @Test
-    void getTransactions_returnsMappedDTOs() {
+    @SuppressWarnings("unchecked")
+    void getTransactions_returnsAMappedPage() {
         BankTransaction transaction = BankTransaction.builder().id(1L).amount(new BigDecimal("-275")).build();
         BankTransactionDTO dto = BankTransactionDTO.builder().id(1L).amount(new BigDecimal("-275")).build();
-        when(this.bankTransactionRepository.findByUserIdOrderByBookingDateDesc(USER_ID)).thenReturn(List.of(transaction));
+        when(this.bankTransactionRepository.findAll(any(Specification.class), any(Pageable.class)))
+                .thenAnswer(invocation -> new PageImpl<>(List.of(transaction), invocation.getArgument(1), 41));
         when(this.modelMapper.map(transaction, BankTransactionDTO.class)).thenReturn(dto);
 
-        List<BankTransactionDTO> result = this.bankTransactionService.getTransactions(USER_ID);
+        PageDTO<BankTransactionDTO> result = this.bankTransactionService.getTransactions(USER_ID,
+                BankTransactionQuery.none(), 0, 25, "amount", "asc");
 
-        assertEquals(1, result.size());
-        assertDecimal("-275", result.getFirst().getAmount());
+        assertEquals(1, result.content().size());
+        assertEquals(41, result.totalElements());
+        assertDecimal("-275", result.content().getFirst().getAmount());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void getTransactions_sortsByAWhitelistedFieldThenId() {
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        when(this.bankTransactionRepository.findAll(any(Specification.class), captor.capture()))
+                .thenReturn(Page.empty());
+
+        this.bankTransactionService.getTransactions(USER_ID, BankTransactionQuery.none(), 2, 50, "amount", "asc");
+
+        Pageable pageable = captor.getValue();
+        assertEquals(2, pageable.getPageNumber());
+        assertEquals(50, pageable.getPageSize());
+        assertEquals(Sort.by(Sort.Direction.ASC, "amount").and(Sort.by(Sort.Direction.DESC, "id")), pageable.getSort());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void getTransactions_fallsBackToNewestFirstAndCapsThePageSize() {
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        when(this.bankTransactionRepository.findAll(any(Specification.class), captor.capture()))
+                .thenReturn(Page.empty());
+
+        this.bankTransactionService.getTransactions(USER_ID, BankTransactionQuery.none(), -3, 5000, "user.password", "sideways");
+
+        Pageable pageable = captor.getValue();
+        assertEquals(0, pageable.getPageNumber());
+        assertEquals(100, pageable.getPageSize());
+        assertEquals(Sort.by(Sort.Direction.DESC, "bookingDate").and(Sort.by(Sort.Direction.DESC, "id")), pageable.getSort());
     }
 
     @Test

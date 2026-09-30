@@ -1,11 +1,13 @@
 package eye.on.the.money.controller;
 
 import eye.on.the.money.dto.in.BankTransactionEditDTO;
+import eye.on.the.money.dto.in.BankTransactionQuery;
 import eye.on.the.money.dto.out.BankTransactionDTO;
 import eye.on.the.money.dto.out.ImportResultDTO;
 import eye.on.the.money.dto.out.MonthlyCashFlowDTO;
 import eye.on.the.money.dto.out.MonthlyCategorySpendingDTO;
 import eye.on.the.money.dto.out.MonthlyIncomeDTO;
+import eye.on.the.money.dto.out.PageDTO;
 import eye.on.the.money.dto.out.YearlyCashFlowDTO;
 import eye.on.the.money.security.CurrentUserId;
 import eye.on.the.money.service.financial.BankTransactionService;
@@ -32,8 +34,13 @@ public class FinancialController {
     private final TaxableEventService taxableEventService;
 
     @GetMapping()
-    public ResponseEntity<List<BankTransactionDTO>> getAllTransactions(@CurrentUserId Long userId) {
-        return ResponseEntity.ok(this.bankTransactionService.getTransactions(userId));
+    public ResponseEntity<PageDTO<BankTransactionDTO>> getTransactions(@CurrentUserId Long userId,
+                                                                       @ModelAttribute BankTransactionQuery query,
+                                                                       @RequestParam(defaultValue = "0") int page,
+                                                                       @RequestParam(defaultValue = "25") int size,
+                                                                       @RequestParam(defaultValue = "bookingDate") String sort,
+                                                                       @RequestParam(defaultValue = "desc") String dir) {
+        return ResponseEntity.ok(this.bankTransactionService.getTransactions(userId, query, page, size, sort, dir));
     }
 
     @GetMapping("/report/monthly")

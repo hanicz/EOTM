@@ -63,7 +63,7 @@ services:
     profiles: ["green"]
   db:
     <<: *logging
-    image: 'amd64/postgres:15-bullseye'
+    image: 'postgres:18-trixie'
     container_name: db
     restart: unless-stopped
     mem_limit: 1g
@@ -75,7 +75,7 @@ services:
       - db_user
       - db_password
     volumes:
-       - ./postgres-data:/var/lib/postgresql/data
+       - ./postgres-data:/var/lib/postgresql
   redis:
     <<: *logging
     image: redis:8.10

@@ -6,6 +6,7 @@ import eye.on.the.money.dto.out.MonthlyIncomeDTO;
 import eye.on.the.money.model.financial.BankTransaction;
 import eye.on.the.money.model.financial.SpendingCategory;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,11 +16,17 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public interface BankTransactionRepository extends JpaRepository<BankTransaction, Long> {
-
-    List<BankTransaction> findByUserIdOrderByBookingDateDesc(Long userId);
+public interface BankTransactionRepository extends JpaRepository<BankTransaction, Long>,
+        JpaSpecificationExecutor<BankTransaction> {
 
     List<BankTransaction> findByUserIdOrderByBookingDate(Long userId);
+
+    @Query("""
+            SELECT b.partnerName AS partnerName, c.id AS categoryId
+            FROM BankTransaction b LEFT JOIN b.category c
+            WHERE b.user.id = :userId AND UPPER(b.partnerName) LIKE :pattern ESCAPE '\\'
+            """)
+    List<PartnerNameCategory> findPartnerNamesLike(@Param("userId") Long userId, @Param("pattern") String pattern);
 
     List<BankTransaction> findByUserIdAndTaxableTrueOrderByBookingDateDesc(Long userId);
 

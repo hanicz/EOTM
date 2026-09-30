@@ -3,6 +3,7 @@ package eye.on.the.money.dto.out;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import eye.on.the.money.dto.CSVHelper;
 import eye.on.the.money.model.financial.CategoryColor;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import lombok.*;
@@ -14,7 +15,7 @@ import lombok.*;
 @AllArgsConstructor
 @EqualsAndHashCode
 @NoArgsConstructor
-public class MonthlyCategorySpendingDTO implements CSVHelper {
+public class MonthlyCategorySpendingDTO implements CSVHelper, Serializable {
 
     public static final String UNCATEGORIZED = "Uncategorized";
 

@@ -46,16 +46,16 @@
   </ng-template>
 </p-toolbar>
 
-<p-table #dt1 [value]="filteredTransactions" styleClass="p-datatable-striped table-stack"
-  [(selection)]="selectedTransactions" [paginator]="true" [rows]="25"
+<p-table [value]="transactions" dataKey="id" styleClass="p-datatable-striped table-stack"
+  [(selection)]="selectedTransactions" [lazy]="true" (onLazyLoad)="load($event)" [loading]="loading"
+  [totalRecords]="totalRecords" [paginator]="true" [first]="paging.first" [rows]="paging.rows"
   [rowsPerPageOptions]="[25, 50, 100]" sortField="bookingDate" [sortOrder]="-1"
-  [globalFilterFields]="['partnerName', 'partnerAccount', 'memo', 'amount', 'type', 'bankTransactionId']"
   (onEditInit)="onEditInit($event)" (onEditCancel)="onEditCancel($event)"
   (onEditComplete)="onEditComplete($event)">
 
   <ng-template pTemplate="caption">
     <div class="filter-bar">
-      <input pInputText type="text" (input)="dt1.filterGlobal($any($event.target)?.value, 'contains')"
+      <input pInputText type="text" (input)="searchChanged($any($event.target)?.value ?? '')"
         placeholder="Search partner, memo or amount" class="p-column-filter filter-input">
       <p-select [(ngModel)]="flagFilter" [options]="flags" optionLabel="label" optionValue="value"
         (onChange)="filterChanged()" [showClear]="true" placeholder="Any flag" styleClass="filter-type"
@@ -177,7 +177,7 @@
 
   <ng-template pTemplate="emptymessage">
     <tr>
-      @if (hasFilters) {
+      @if (hasFilters || search.trim()) {
         <td colspan="9">No bank transactions match the current filters.</td>
       } @else {
         <td colspan="9">No bank transactions yet. Import a K&amp;H account history export to get started.</td>

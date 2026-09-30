@@ -1,11 +1,13 @@
 package eye.on.the.money.service.financial;
 
 import eye.on.the.money.dto.in.BankTransactionEditDTO;
+import eye.on.the.money.dto.in.BankTransactionQuery;
 import eye.on.the.money.dto.out.BankTransactionDTO;
 import eye.on.the.money.dto.out.ImportResultDTO;
 import eye.on.the.money.dto.out.MonthlyCashFlowDTO;
 import eye.on.the.money.dto.out.MonthlyCategorySpendingDTO;
 import eye.on.the.money.dto.out.MonthlyIncomeDTO;
+import eye.on.the.money.dto.out.PageDTO;
 import eye.on.the.money.dto.out.YearlyCashFlowDTO;
 import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.Currency;
@@ -13,6 +15,7 @@ import eye.on.the.money.model.User;
 import eye.on.the.money.model.financial.BankTransaction;
 import eye.on.the.money.model.financial.SpendingCategory;
 import eye.on.the.money.repository.financial.BankTransactionRepository;
+import eye.on.the.money.repository.financial.BankTransactionSpecifications;
 import eye.on.the.money.repository.financial.SpendingCategoryRepository;
 import eye.on.the.money.repository.forex.CurrencyRepository;
 import eye.on.the.money.service.shared.ICSVService;
@@ -23,6 +26,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,7 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -52,6 +58,9 @@ public class BankTransactionService implements ICSVService {
 
     private static final char KH_DELIMITER = '\t';
     private static final Charset KH_FALLBACK_CHARSET = Charset.forName("ISO-8859-2");
+    private static final Set<String> SORTABLE_FIELDS = Set.of("bookingDate", "type", "amount");
+    private static final String DEFAULT_SORT = "bookingDate";
+    private static final int MAX_PAGE_SIZE = 100;
 
     private final BankTransactionRepository bankTransactionRepository;
     private final CurrencyRepository currencyRepository;
@@ -61,11 +70,21 @@ public class BankTransactionService implements ICSVService {
     private final UserService userService;
     private final ModelMapper modelMapper;
 
-    public List<BankTransactionDTO> getTransactions(Long userId) {
-        return this.bankTransactionRepository.findByUserIdOrderByBookingDateDesc(userId)
-                .stream().map(this::convertToDTO).collect(Collectors.toList());
+    public PageDTO<BankTransactionDTO> getTransactions(Long userId, BankTransactionQuery query,
+                                                       int page, int size, String sort, String direction) {
+        return PageDTO.of(this.bankTransactionRepository
+                .findAll(BankTransactionSpecifications.matching(userId, query), this.pageRequest(page, size, sort, direction))
+                .map(this::convertToDTO));
     }
 
+    private PageRequest pageRequest(int page, int size, String sort, String direction) {
+        String field = SORTABLE_FIELDS.contains(sort) ? sort : DEFAULT_SORT;
+        Sort.Direction order = Sort.Direction.fromOptionalString(direction).orElse(Sort.Direction.DESC);
+        return PageRequest.of(Math.max(page, 0), Math.clamp(size, 1, MAX_PAGE_SIZE),
+                Sort.by(order, field).and(Sort.by(Sort.Direction.DESC, "id")));
+    }
+
+    @Cacheable(cacheNames = BankReportCaches.MONTHLY, key = "#userId")
     public List<MonthlyCashFlowDTO> getMonthlyCashFlow(Long userId) {
         return this.bankTransactionRepository.findMonthlyCashFlow(userId);
     }
@@ -74,14 +93,17 @@ public class BankTransactionService implements ICSVService {
         return this.bankTransactionRepository.findCashFlowBetween(userId, from, to);
     }
 
+    @Cacheable(cacheNames = BankReportCaches.INCOME, key = "#userId")
     public List<MonthlyIncomeDTO> getMonthlyIncome(Long userId) {
         return this.bankTransactionRepository.findMonthlyIncome(userId);
     }
 
+    @Cacheable(cacheNames = BankReportCaches.CATEGORY, key = "#userId")
     public List<MonthlyCategorySpendingDTO> getMonthlyCategorySpending(Long userId) {
         return this.bankTransactionRepository.findMonthlyCategorySpending(userId);
     }
 
+    @Cacheable(cacheNames = BankReportCaches.YEARLY, key = "#userId")
     public List<YearlyCashFlowDTO> getYearlyCashFlow(Long userId) {
         Map<List<Object>, YearlyCashFlowDTO> years = new LinkedHashMap<>();
         for (MonthlyCashFlowDTO month : this.getMonthlyCashFlow(userId)) {
@@ -94,11 +116,13 @@ public class BankTransactionService implements ICSVService {
                 .toList();
     }
 
+    @EvictBankReports
     @Transactional
     public void setExcluded(Long userId, List<Long> ids, boolean excluded) {
         this.bankTransactionRepository.updateExcludedByUserIdAndIdIn(userId, ids, excluded);
     }
 
+    @EvictBankReports
     @Transactional
     public void setCategory(Long userId, List<Long> ids, Long categoryId) {
         SpendingCategory category = categoryId == null ? null
@@ -107,6 +131,7 @@ public class BankTransactionService implements ICSVService {
         this.bankTransactionRepository.updateCategoryByUserIdAndIdIn(userId, ids, category);
     }
 
+    @EvictBankReports
     @Transactional
     public void updateTransaction(Long userId, Long id, BankTransactionEditDTO editDTO) {
         BankTransaction transaction = this.bankTransactionRepository.findByIdAndUserId(id, userId)
@@ -116,6 +141,7 @@ public class BankTransactionService implements ICSVService {
         this.bankTransactionRepository.save(transaction);
     }
 
+    @EvictBankReports
     @Transactional
     public void deleteTransactionById(Long userId, List<Long> ids) {
         this.bankTransactionRepository.deleteByUserIdAndIdIn(userId, ids);
@@ -145,6 +171,7 @@ public class BankTransactionService implements ICSVService {
         this.printRecords(transactionList, writer);
     }
 
+    @EvictBankReports
     @Transactional
     public ImportResultDTO processCSV(Long userId, MultipartFile file) {
         User user = this.userService.getReference(userId);

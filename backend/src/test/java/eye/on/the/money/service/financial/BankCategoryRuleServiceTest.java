@@ -3,6 +3,7 @@ package eye.on.the.money.service.financial;
 import eye.on.the.money.dto.in.BankCategoryRuleEditDTO;
 import eye.on.the.money.dto.out.BankCategoryRuleDTO;
 import eye.on.the.money.dto.out.CategorizeResultDTO;
+import eye.on.the.money.dto.out.CategoryMatchDTO;
 import eye.on.the.money.exception.ValidationException;
 import eye.on.the.money.model.User;
 import eye.on.the.money.model.financial.BankCategoryRule;
@@ -11,6 +12,7 @@ import eye.on.the.money.model.financial.CategoryColor;
 import eye.on.the.money.model.financial.SpendingCategory;
 import eye.on.the.money.repository.financial.BankCategoryRuleRepository;
 import eye.on.the.money.repository.financial.BankTransactionRepository;
+import eye.on.the.money.repository.financial.PartnerNameCategory;
 import eye.on.the.money.repository.financial.SpendingCategoryRepository;
 import eye.on.the.money.service.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -96,6 +98,51 @@ class BankCategoryRuleServiceTest {
                 .category(category)
                 .categoryLocked(locked)
                 .build();
+    }
+
+    private PartnerNameCategory partner(String partnerName, Long categoryId) {
+        return new PartnerNameCategory() {
+            @Override
+            public String getPartnerName() {
+                return partnerName;
+            }
+
+            @Override
+            public Long getCategoryId() {
+                return categoryId;
+            }
+        };
+    }
+
+    @Test
+    void countMatches_narrowsByTheLongestWordAndChecksTheWholeNormalisedPattern() {
+        when(this.bankTransactionRepository.findPartnerNamesLike(USER_ID, "%SUPERMART%")).thenReturn(List.of(
+                this.partner("BLUE   SUPERMART 0042", null),
+                this.partner("blue supermart", 3L),
+                this.partner("GREEN SUPERMART", null)));
+
+        CategoryMatchDTO result = this.bankCategoryRuleService.countMatches(USER_ID, " blue  supermart ");
+
+        assertEquals(2, result.matches());
+        assertEquals(1, result.uncategorized());
+    }
+
+    @Test
+    void countMatches_escapesLikeWildcards() {
+        when(this.bankTransactionRepository.findPartnerNamesLike(USER_ID, "%100\\%%"))
+                .thenReturn(List.of(this.partner("SHOP 100%", null)));
+
+        CategoryMatchDTO result = this.bankCategoryRuleService.countMatches(USER_ID, "100%");
+
+        assertEquals(1, result.matches());
+    }
+
+    @Test
+    void countMatches_isEmptyForABlankPattern() {
+        CategoryMatchDTO result = this.bankCategoryRuleService.countMatches(USER_ID, "   ");
+
+        assertEquals(0, result.matches());
+        verify(this.bankTransactionRepository, never()).findPartnerNamesLike(anyLong(), anyString());
     }
 
     @Test

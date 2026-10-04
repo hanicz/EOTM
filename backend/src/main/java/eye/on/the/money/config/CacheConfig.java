@@ -34,6 +34,8 @@ public class CacheConfig implements CachingConfigurer {
                         RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofDays(7L)))
                 .withCacheConfiguration(BankReportCaches.YEARLY,
                         RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofDays(7L)))
+                .withCacheConfiguration("etf-profile",
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofDays(7L)))
                 .withCacheConfiguration("exchanges",
                         RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofDays(3L)))
                 .withCacheConfiguration("symbols",

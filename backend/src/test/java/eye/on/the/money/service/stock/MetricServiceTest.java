@@ -1,9 +1,11 @@
 package eye.on.the.money.service.stock;
 
 import eye.on.the.money.EotmApplication;
+import eye.on.the.money.dto.out.EtfProfileDTO;
 import eye.on.the.money.dto.out.MetricDTO;
 import eye.on.the.money.dto.out.ProfileDTO;
 import eye.on.the.money.dto.out.RecommendationDTO;
+import eye.on.the.money.service.api.EtfProfileAPIService;
 import eye.on.the.money.service.api.StockMetricAPIService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -17,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.Mockito.when;
 
@@ -27,6 +30,9 @@ class MetricServiceTest {
 
     @Mock
     private StockMetricAPIService stockMetricAPIService;
+
+    @Mock
+    private EtfProfileAPIService etfProfileAPIService;
 
     @InjectMocks
     private MetricService metricService;
@@ -42,6 +48,25 @@ class MetricServiceTest {
 
         ProfileDTO result = this.metricService.getProfileBySymbol("symbol");
         Assertions.assertEquals(profileDTO, result);
+    }
+
+    @Test
+    public void getEtfProfile() {
+        EtfProfileDTO profile = EtfProfileDTO.builder().isin("XX0000000017").provider("Sample Funds").totalHoldings(5).build();
+        when(this.etfProfileAPIService.getProfile("XX0000000017")).thenReturn(Optional.of(profile));
+
+        EtfProfileDTO result = this.metricService.getEtfProfile("XX0000000017");
+        Assertions.assertEquals(profile, result);
+    }
+
+    @Test
+    public void getEtfProfileReturnsEmptyProfileWhenNotFound() {
+        when(this.etfProfileAPIService.getProfile("XX0000000025")).thenReturn(Optional.empty());
+
+        EtfProfileDTO result = this.metricService.getEtfProfile("XX0000000025");
+        Assertions.assertEquals("XX0000000025", result.getIsin());
+        Assertions.assertEquals(0, result.getTotalHoldings());
+        Assertions.assertTrue(result.getHoldings().isEmpty());
     }
 
     @Test

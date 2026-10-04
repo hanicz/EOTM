@@ -138,6 +138,30 @@
               </div>
             } @else {
             <div class="info-card">
+              @if (isEtf && (etfLoading || fundInfoRows.length > 0)) {
+                <div class="info-card-title">Fund Info</div>
+                @if (etfLoading) {
+                  @for (row of [].constructor(8); track $index) {
+                    <div class="info-row">
+                      <p-skeleton width="7rem" height="0.8rem"></p-skeleton>
+                      <p-skeleton width="4rem" height="0.8rem"></p-skeleton>
+                    </div>
+                  }
+                } @else {
+                  @for (row of fundInfoRows; track row.label) {
+                    <div class="info-row">
+                      <div class="info-label"><i [class]="row.icon"></i>{{row.label}}<i class="pi pi-question-circle info-tooltip-icon" [pTooltip]="row.tooltip" tooltipPosition="top"></i></div>
+                      <div class="info-value fund-info-value">{{row.value}}</div>
+                    </div>
+                  }
+                  @if (displayIsin) {
+                    <div class="info-row info-row-last">
+                      <div class="info-label"><i class="pi pi-id-card"></i>ISIN<i class="pi pi-question-circle info-tooltip-icon" pTooltip="International Securities Identification Number, the globally unique id of this security." tooltipPosition="top"></i></div>
+                      <div class="info-value">{{displayIsin}}</div>
+                    </div>
+                  }
+                }
+              } @else {
               <div class="info-card-title">Company Info</div>
               @if (hasProfile) {
                 <div class="info-row">
@@ -196,6 +220,7 @@
                 <div class="info-note"><i class="pi pi-info-circle"></i>Industry, IPO and market cap
                   data is only published for US-listed tickers.</div>
               }
+              }
 
               <div class="info-card-title info-card-title-spaced">Trading Stats</div>
               <div class="info-row">
@@ -250,6 +275,44 @@
             }
           </div>
         </div>
+        @if (isEtf) {
+          <div class="grid search-gutter">
+            <div class="col-12 pb-0">
+              <p-divider></p-divider>
+            </div>
+            @if (etfLoading || hasEtfData) {
+              <div class="col-12 lg:col-8">
+                <div class="info-card">
+                  <div class="holdings-header">
+                    <div class="info-card-title">Top Holdings</div>
+                    @if (etfProfile?.totalHoldings) {
+                      <span class="holdings-caption">Top {{etfProfile!.holdings.length}} of {{etfProfile!.totalHoldings | number}} holdings</span>
+                    }
+                  </div>
+                  <app-weight-list [items]="etfProfile?.holdings ?? []" [ranked]="true"
+                    [loading]="etfLoading" [placeholderCount]="10"></app-weight-list>
+                </div>
+              </div>
+              <div class="col-12 lg:col-4">
+                <div class="info-card">
+                  @if (etfLoading || etfProfile!.countries.length > 0) {
+                    <div class="info-card-title">Countries</div>
+                    <app-weight-list [items]="etfProfile?.countries ?? []" [compact]="true"
+                      [loading]="etfLoading"></app-weight-list>
+                  }
+                  @if (!etfLoading && etfProfile!.sectors.length > 0) {
+                    <div class="info-card-title" [class.info-card-title-spaced]="etfProfile!.countries.length > 0">Sectors</div>
+                    <app-weight-list [items]="etfProfile!.sectors" [compact]="true"></app-weight-list>
+                  }
+                </div>
+              </div>
+            } @else {
+              <div class="col-12">
+                <div class="info-note"><i class="pi pi-info-circle"></i>Holdings data isn't available for this ETF.</div>
+              </div>
+            }
+          </div>
+        }
         <div class="grid search-gutter">
           <div class="col-12 pb-0">
             <p-divider></p-divider>

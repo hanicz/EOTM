@@ -1,10 +1,13 @@
 package eye.on.the.money.service.stock;
 
+import eye.on.the.money.dto.out.EtfProfileDTO;
 import eye.on.the.money.dto.out.MetricDTO;
 import eye.on.the.money.dto.out.ProfileDTO;
 import eye.on.the.money.dto.out.RecommendationDTO;
+import eye.on.the.money.service.api.EtfProfileAPIService;
 import eye.on.the.money.service.api.StockMetricAPIService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -16,6 +19,13 @@ import java.util.List;
 public class MetricService {
 
     private final StockMetricAPIService stockMetricAPIService;
+    private final EtfProfileAPIService etfProfileAPIService;
+
+    @Cacheable(cacheNames = "etf-profile", key = "#isin")
+    public EtfProfileDTO getEtfProfile(String isin) {
+        return this.etfProfileAPIService.getProfile(isin)
+                .orElseGet(() -> EtfProfileDTO.builder().isin(isin).totalHoldings(0).build());
+    }
 
     public ProfileDTO getProfileBySymbol(String symbol) {
         ProfileDTO profileDTO = this.stockMetricAPIService.getProfile(symbol);

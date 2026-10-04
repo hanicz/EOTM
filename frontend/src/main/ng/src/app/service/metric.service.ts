@@ -4,6 +4,7 @@ import { Profile } from '../model/profile';
 import { Metric } from '../model/metric';
 import { environment } from '../../environments/environment';
 import { Recommendation } from '../model/recommendation';
+import { EtfProfile } from '../model/etf-profile';
 
 @Injectable({
   providedIn: 'root'
@@ -23,6 +24,11 @@ export class MetricService {
     const url = `${this.newsUrl}/metric/${symbol}`;
     return this.http.get<Metric>(url);
   };
+
+  getEtfProfile(isin: string) {
+    const url = `${this.newsUrl}/etf/${encodeURIComponent(isin)}`;
+    return this.http.get<EtfProfile>(url);
+  }
 
   getRecommendations(symbol: string) {
     const url = `${this.newsUrl}/recommendation/${symbol}`;

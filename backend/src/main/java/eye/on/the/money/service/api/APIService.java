@@ -74,6 +74,11 @@ public abstract class APIService {
     }
 
     protected <T> ResponseEntity<T> callGetAPI(String URL, Class<T> cls) {
+        return this.callGetAPI(URL, cls, headers -> {
+        });
+    }
+
+    protected <T> ResponseEntity<T> callGetAPI(String URL, Class<T> cls, Consumer<HttpHeaders> headersConsumer) {
         log.trace("Call to {}", this.endpoint(URL));
         long start = System.nanoTime();
         ResponseEntity<T> responseEntity;
@@ -81,6 +86,7 @@ public abstract class APIService {
             responseEntity = this.webClient
                     .get()
                     .uri(URI.create(URL))
+                    .headers(headersConsumer)
                     .retrieve()
                     .onStatus(HttpStatusCode::isError, response -> {
                         log.error("GET call to {} failed with status {}", this.endpoint(URL), response.statusCode());

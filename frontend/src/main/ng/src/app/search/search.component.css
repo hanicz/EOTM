@@ -460,3 +460,21 @@
     color: #c7c6c0;
     margin-top: 2px;
 }
+
+.fund-info-value {
+    max-width: 60%;
+    overflow-wrap: anywhere;
+}
+
+.holdings-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.holdings-caption {
+    font-size: 11px;
+    color: var(--eotm-faint);
+}

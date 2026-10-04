@@ -37,6 +37,8 @@ import { PrimeTemplate } from 'primeng/api';
 import { Tooltip } from 'primeng/tooltip';
 import { NewsComponent } from '../news/news.component';
 import { SignalResult } from '../model/signal';
+import { EtfProfile } from '../model/etf-profile';
+import { WeightListComponent } from '../util/weight-list.component';
 import { Subscription } from 'rxjs';
 
 export type ChartOptions = {
@@ -51,7 +53,7 @@ export type ChartOptions = {
     selector: 'app-search',
     templateUrl: './search.component.html',
     styleUrls: ['./search.component.css'],
-    imports: [MenuComponent, Bind, Panel, PrimeTemplate, Select, FormsModule, ButtonDirective, Ripple, Divider, Skeleton, ChartComponent, NewsComponent, DecimalPipe, CurrencyPipe, DatePipe, NgClass, Tooltip, TickerLogoComponent, ExchangeOptionComponent, SymbolOptionComponent]
+    imports: [MenuComponent, Bind, Panel, PrimeTemplate, Select, FormsModule, ButtonDirective, Ripple, Divider, Skeleton, ChartComponent, NewsComponent, DecimalPipe, CurrencyPipe, DatePipe, NgClass, Tooltip, TickerLogoComponent, ExchangeOptionComponent, SymbolOptionComponent, WeightListComponent]
 })
 export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -82,6 +84,12 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
   displayCurrency = 'USD';
   displayIsin = '';
   displayType = '';
+  isEtf = false;
+  etfProfile: EtfProfile | undefined;
+  etfLoading = false;
+  fundInfoRows: { label: string; icon: string; tooltip: string; value: string }[] = [];
+  private etfRequestedIsin = '';
+  private symbolsExchange = '';
   hasProfile = false;
   hasMetric = false;
   private metricHasValues = false;
@@ -364,6 +372,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.stockSelectedSubscription = this.globals.stockSelectedEvent.subscribe(() => {
+      if (this.globals.selectedExchange !== this.symbolsExchange) {
+        this.symbols = [];
+        this.loadSymbols();
+      }
       this.stockChanged(undefined);
     });
   }
@@ -415,6 +427,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     this.signalResult = undefined;
     this.recommendations = [];
     this.metricHasValues = false;
+    this.etfProfile = undefined;
+    this.etfLoading = false;
+    this.etfRequestedIsin = '';
+    this.fundInfoRows = [];
     this.updateDisplayInfo();
     this.profileLoading = this.usExchange;
 
@@ -496,9 +512,62 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
       || (this.hasProfile ? this.profile.currency : '') || 'USD';
     this.displayIsin = symbol?.Isin ?? '';
     this.displayType = symbol?.Type ?? '';
+    this.isEtf = this.displayType.toUpperCase() === 'ETF';
+    if (this.isEtf && this.displayIsin && this.displayIsin !== this.etfRequestedIsin) {
+      this.loadEtfProfile();
+    }
 
     this.applyChartCurrency();
     this.createRecChart();
+  }
+
+  loadEtfProfile() {
+    const selectionId = this.selectionId;
+    const isin = this.displayIsin;
+    this.etfRequestedIsin = isin;
+    this.etfLoading = true;
+    this.etfProfile = undefined;
+    this.fundInfoRows = [];
+    this.metricService.getEtfProfile(isin).subscribe({
+      next: (data) => {
+        if (selectionId !== this.selectionId || isin !== this.etfRequestedIsin) return;
+        this.etfLoading = false;
+        this.etfProfile = data ?? undefined;
+        this.fundInfoRows = this.buildFundInfoRows(this.etfProfile);
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        if (selectionId !== this.selectionId || isin !== this.etfRequestedIsin) return;
+        this.etfLoading = false;
+        this.etfProfile = undefined;
+        this.fundInfoRows = [];
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  get hasEtfData(): boolean {
+    return !!this.etfProfile && (this.etfProfile.holdings?.length > 0
+      || this.etfProfile.countries?.length > 0 || this.etfProfile.sectors?.length > 0);
+  }
+
+  private buildFundInfoRows(profile: EtfProfile | undefined) {
+    if (!profile) return [];
+    const currency = [profile.fundCurrency, profile.currencyHedge].filter(v => !!v).join(' · ');
+    const rows = [
+      { label: 'Provider', icon: 'pi pi-building', tooltip: 'The company that issues and manages the fund.', value: profile.provider },
+      { label: 'Index', icon: 'pi pi-chart-line', tooltip: 'The benchmark index the fund tracks.', value: profile.indexName },
+      { label: 'Focus', icon: 'pi pi-compass', tooltip: 'Asset class, region and theme the fund invests in.', value: profile.investmentFocus },
+      { label: 'Fund Size', icon: 'pi pi-wallet', tooltip: 'Total assets under management, in millions.', value: profile.fundSize },
+      { label: 'TER', icon: 'pi pi-percentage', tooltip: 'Total expense ratio: the yearly cost of holding the fund, deducted from its assets.', value: profile.ter },
+      { label: 'Replication', icon: 'pi pi-clone', tooltip: 'How the fund reproduces its index, e.g. physically holding the stocks or via swaps.', value: profile.replication },
+      { label: 'Distribution', icon: 'pi pi-money-bill', tooltip: 'Whether dividends are paid out (distributing) or reinvested (accumulating).', value: profile.distributionPolicy },
+      { label: 'Currency', icon: 'pi pi-dollar', tooltip: 'The base currency of the fund and whether it is currency hedged.', value: currency },
+      { label: 'Inception', icon: 'pi pi-calendar', tooltip: 'Date the fund was launched.', value: profile.inceptionDate },
+      { label: 'Volatility (1Y)', icon: 'pi pi-wave-pulse', tooltip: 'Annualised volatility of the fund over the past year.', value: profile.volatility },
+      { label: 'Holdings', icon: 'pi pi-th-large', tooltip: 'Total number of positions held by the fund.', value: profile.totalHoldings ? profile.totalHoldings.toLocaleString() : null }
+    ];
+    return rows.filter((row): row is typeof row & { value: string } => !!row.value);
   }
 
   applyChartCurrency() {
@@ -589,15 +658,19 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadSymbols() {
+    const exchange = this.globals.selectedExchange;
+    this.symbolsExchange = exchange;
     this.stocksLoading = true;
-    this.stockService.getAllSymbols(this.globals.selectedExchange).subscribe({
+    this.stockService.getAllSymbols(exchange).subscribe({
       next: (data) => {
+        if (exchange !== this.symbolsExchange) return;
         this.stocksLoading = false;
         this.symbols = data;
         this.updateDisplayInfo();
         this.cdr.markForCheck();
       },
       error: () => {
+        if (exchange !== this.symbolsExchange) return;
         this.stocksLoading = false;
         this.symbols = [];
         this.cdr.markForCheck();

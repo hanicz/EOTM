@@ -1,8 +1,10 @@
 package eye.on.the.money.controller;
 
+import eye.on.the.money.dto.out.EtfProfileDTO;
 import eye.on.the.money.dto.out.MetricDTO;
 import eye.on.the.money.dto.out.ProfileDTO;
 import eye.on.the.money.dto.out.RecommendationDTO;
+import eye.on.the.money.exception.ValidationException;
 import eye.on.the.money.service.stock.MetricService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
@@ -65,6 +68,22 @@ class MetricControllerTest {
         ResponseEntity<MetricDTO> result = this.metricController.getMetricBySymbol("symbol");
 
         Assertions.assertEquals(metricDTO, result.getBody());
+    }
+
+    @Test
+    public void getEtfProfile() {
+        EtfProfileDTO profile = EtfProfileDTO.builder().isin("XX0000000017").totalHoldings(3).build();
+        when(this.metricService.getEtfProfile("XX0000000017")).thenReturn(profile);
+
+        ResponseEntity<EtfProfileDTO> result = this.metricController.getEtfProfile("XX0000000017");
+
+        Assertions.assertEquals(profile, result.getBody());
+    }
+
+    @Test
+    public void getEtfProfileRejectsInvalidIsin() {
+        Assertions.assertThrows(ValidationException.class, () -> this.metricController.getEtfProfile("not-an-isin"));
+        verifyNoInteractions(this.metricService);
     }
 
     @Test

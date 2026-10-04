@@ -9,12 +9,29 @@ import { MetricService } from '../service/metric.service';
 import { WatchlistService } from '../service/watchlist.service';
 import { Globals } from '../util/global';
 import { Candle } from '../model/candle';
+import { EtfProfile } from '../model/etf-profile';
+import { Symbol } from '../model/symbol';
 
 describe('SearchComponent', () => {
   let component: SearchComponent;
   let fixture: ComponentFixture<SearchComponent>;
   let globals: Globals;
   let requests: Subject<Candle>[];
+  let etfRequests: string[];
+  let symbolRequests: string[];
+  const symbolsByExchange: Record<string, Symbol[]> = {
+    EXA: [{ Code: 'CORP', Name: 'Sample Corp', Type: 'Common Stock', Isin: 'XX0000000025' }],
+    EXB: [{ Code: 'FUND', Name: 'Sample Fund', Type: 'ETF', Isin: 'XX0000000017' }]
+  };
+
+  const etfProfile: EtfProfile = {
+    isin: 'XX0000000017', provider: 'Sample Funds', indexName: 'Sample Index', investmentFocus: null,
+    fundSize: 'EUR 100 m', ter: '0.10% p.a.', replication: 'Physical', distributionPolicy: 'Accumulating',
+    fundCurrency: 'USD', currencyHedge: null, inceptionDate: '1 March 2020', volatility: null, totalHoldings: 250,
+    holdings: [{ name: 'Alpha Corp', isin: 'XX1111111111', weight: 8 }, { name: 'Beta Inc', isin: 'XX2222222222', weight: 2 }],
+    countries: [{ name: 'Atlantis', weight: 100 }],
+    sectors: []
+  };
 
   const candles = (close: number): Candle => ({
     o: [close - 1], h: [close + 1], l: [close - 2], c: [close],
@@ -23,6 +40,8 @@ describe('SearchComponent', () => {
 
   beforeEach(async () => {
     requests = [];
+    etfRequests = [];
+    symbolRequests = [];
     await TestBed.configureTestingModule({
       imports: [SearchComponent],
       providers: [
@@ -32,7 +51,10 @@ describe('SearchComponent', () => {
         { provide: StockService, useValue: {
           getAllStocks: () => of([]),
           getAllExchanges: () => of([]),
-          getAllSymbols: () => of([]),
+          getAllSymbols: (exchange: string) => {
+            symbolRequests.push(exchange);
+            return of(symbolsByExchange[exchange] ?? []);
+          },
           getSignal: () => of(undefined),
           getCandleData: () => {
             const request = new Subject<Candle>();
@@ -43,7 +65,11 @@ describe('SearchComponent', () => {
         { provide: MetricService, useValue: {
           getMetrics: () => of({}),
           getProfile: () => of({}),
-          getRecommendations: () => of([])
+          getRecommendations: () => of([]),
+          getEtfProfile: (isin: string) => {
+            etfRequests.push(isin);
+            return of(etfProfile);
+          }
         } },
         { provide: WatchlistService, useValue: {} }
       ]
@@ -74,6 +100,50 @@ describe('SearchComponent', () => {
     requests[1].next(candles(20));
     expect(component.chartReady).toBe(true);
     expect(component.endPrice).toBe(20);
+  });
+
+  it('loads the fund profile once for an ETF and skips it for stocks', () => {
+    component.symbols = [
+      { Code: 'FUND', Name: 'Sample Fund', Type: 'ETF', Isin: 'XX0000000017' },
+      { Code: 'CORP', Name: 'Sample Corp', Type: 'Common Stock', Isin: 'XX0000000025' }
+    ];
+
+    globals.selectedStock = 'FUND';
+    component.stockChanged(undefined);
+    component.updateDisplayInfo();
+
+    expect(etfRequests).toEqual(['XX0000000017']);
+    expect(component.isEtf).toBe(true);
+    expect(component.etfLoading).toBe(false);
+    expect(component.hasEtfData).toBe(true);
+    expect(component.fundInfoRows.map(row => row.label)).toEqual(
+      ['Provider', 'Index', 'Fund Size', 'TER', 'Replication', 'Distribution', 'Currency', 'Inception', 'Holdings']);
+
+    globals.selectedStock = 'CORP';
+    component.stockChanged(undefined);
+
+    expect(etfRequests).toEqual(['XX0000000017']);
+    expect(component.isEtf).toBe(false);
+    expect(component.etfProfile).toBeUndefined();
+  });
+
+  it('reloads the tickers when the watchlist picks a stock on another exchange', () => {
+    globals.selectedExchange = 'EXA';
+    component.ngOnInit();
+    component.loadSymbols();
+
+    globals.selectedExchange = 'EXB';
+    globals.selectedStock = 'FUND';
+    globals.stockSelectedEvent.emit();
+
+    expect(symbolRequests).toEqual(['EXA', 'EXB']);
+    expect(component.symbols.map(s => s.Code)).toEqual(['FUND']);
+    expect(component.isEtf).toBe(true);
+    expect(etfRequests).toEqual(['XX0000000017']);
+
+    globals.selectedStock = 'FUND';
+    globals.stockSelectedEvent.emit();
+    expect(symbolRequests).toEqual(['EXA', 'EXB']);
   });
 
   it('limits mobile chart points while retaining price extremes from the full history', () => {

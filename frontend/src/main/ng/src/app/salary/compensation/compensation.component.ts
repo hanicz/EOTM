@@ -48,7 +48,8 @@ export class SalaryCompensationComponent {
   readonly treatments: { label: string, value: CompensationTaxTreatment }[] = [
     { label: 'Taxed as salary', value: 'TAXED_AS_SALARY' },
     { label: 'Tax-free', value: 'TAX_FREE' },
-    { label: 'Received net', value: 'RECEIVED_NET' }
+    { label: 'Received net', value: 'RECEIVED_NET' },
+    { label: 'RSU', value: 'RSU' }
   ];
 
   readonly amountModes: { label: string, value: CompensationAmountMode }[] = [
@@ -96,7 +97,7 @@ export class SalaryCompensationComponent {
   }
 
   treatmentClass(treatment: CompensationTaxTreatment): string {
-    if (treatment === 'TAXED_AS_SALARY') {
+    if (treatment === 'TAXED_AS_SALARY' || treatment === 'RSU') {
       return 'state-neutral';
     }
     return treatment === 'TAX_FREE' ? 'state-buy' : 'state-info';

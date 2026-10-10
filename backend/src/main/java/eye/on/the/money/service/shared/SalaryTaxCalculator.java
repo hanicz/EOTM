@@ -13,6 +13,8 @@ public class SalaryTaxCalculator {
 
     private static final BigDecimal SZJA_RATE = new BigDecimal("0.15");
     private static final BigDecimal TB_RATE = new BigDecimal("0.185");
+    private static final BigDecimal SZOCHO_RATE = new BigDecimal("0.13");
+    private static final BigDecimal RSU_BASE_RATE = new BigDecimal("0.89");
 
     private static final BigDecimal ONE_DEPENDENT_BASE = new BigDecimal("133340");
     private static final BigDecimal TWO_DEPENDENTS_BASE = new BigDecimal("266660");
@@ -42,6 +44,18 @@ public class SalaryTaxCalculator {
                 .familyAllowanceMonthly(familyBase)
                 .familyAllowanceApplied(familyBase.signum() > 0)
                 .build();
+    }
+
+    public BigDecimal rsuNet(BigDecimal gross, String currencyId) {
+        if (gross == null || gross.signum() <= 0) {
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal taxBase = gross.multiply(RSU_BASE_RATE);
+        BigDecimal szja = this.round(taxBase.multiply(SZJA_RATE), currencyId);
+        BigDecimal szocho = this.round(taxBase.multiply(SZOCHO_RATE), currencyId);
+
+        return this.round(gross.subtract(szja).subtract(szocho), currencyId);
     }
 
     private BigDecimal familyAllowanceBase(String currencyId, int dependents) {

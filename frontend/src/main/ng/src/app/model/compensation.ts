@@ -1,6 +1,6 @@
 import { SalaryBasis } from './salary';
 
-export type CompensationTaxTreatment = 'TAXED_AS_SALARY' | 'TAX_FREE' | 'RECEIVED_NET';
+export type CompensationTaxTreatment = 'TAXED_AS_SALARY' | 'TAX_FREE' | 'RECEIVED_NET' | 'RSU';
 
 export type CompensationAmountMode = 'MONTHLY_AMOUNT' | 'PERCENT_OF_ANNUAL';
 

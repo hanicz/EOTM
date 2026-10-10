@@ -157,6 +157,7 @@ public class CompensationService {
         BigDecimal monthly = this.resolveMonthly(source, baseGrossAnnual);
         BigDecimal netMonthly = switch (source.taxTreatment()) {
             case TAXED_AS_SALARY -> this.salaryTaxCalculator.calculate(monthly, currencyId, 0).getNetMonthly();
+            case RSU -> this.salaryTaxCalculator.rsuNet(monthly, currencyId);
             case TAX_FREE, RECEIVED_NET -> this.salaryTaxCalculator.round(monthly, currencyId);
         };
         BigDecimal grossMonthly = CompensationTaxTreatment.RECEIVED_NET == source.taxTreatment()

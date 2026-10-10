@@ -140,6 +140,19 @@ class CompensationServiceTest {
     }
 
     @Test
+    void getCurrentPackage_taxesAnRsuItemOnAnEightyNinePercentBase() {
+        when(this.compensationRepository.findByUserIdOrderByNameAscIdAsc(USER_ID))
+                .thenReturn(List.of(this.stored("Stock units", "100000", CompensationTaxTreatment.RSU)));
+
+        CompensationItemDTO item = this.compensationService.getCurrentPackage(USER_ID).orElseThrow()
+                .getItems().get(0);
+
+        assertEquals(0, new BigDecimal("100000").compareTo(item.getGrossMonthly()));
+        assertEquals(0, new BigDecimal("75080").compareTo(item.getNetMonthly()));
+        assertEquals(0, new BigDecimal("900960").compareTo(item.getNetAnnual()));
+    }
+
+    @Test
     void getCurrentPackage_leavesATaxFreeItemWhole() {
         when(this.compensationRepository.findByUserIdOrderByNameAscIdAsc(USER_ID))
                 .thenReturn(List.of(this.stored("Phone", "8000", CompensationTaxTreatment.TAX_FREE)));

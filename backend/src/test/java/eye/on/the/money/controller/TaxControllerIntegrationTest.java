@@ -4,11 +4,14 @@ import eye.on.the.money.EotmApplication;
 import eye.on.the.money.dto.out.RSUTaxDTO;
 import eye.on.the.money.dto.out.RSUTaxEventDTO;
 import eye.on.the.money.dto.out.RSUTaxEventReportDTO;
+import eye.on.the.money.dto.out.RSUVestTaxEventDTO;
+import eye.on.the.money.dto.out.RSUVestTaxEventReportDTO;
 import eye.on.the.money.dto.out.TaxBreakdownDTO;
 import eye.on.the.money.dto.out.TaxReportDTO;
 import eye.on.the.money.service.financial.TaxableEventService;
 import eye.on.the.money.service.shared.TaxService;
 import eye.on.the.money.service.stock.RSUTaxService;
+import eye.on.the.money.service.stock.RSUVestTaxService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -49,6 +52,9 @@ class TaxControllerIntegrationTest {
 
     @MockitoBean
     private RSUTaxService rsuTaxService;
+
+    @MockitoBean
+    private RSUVestTaxService rsuVestTaxService;
 
     /**
      * Guards the wire format: a LocalDate has to reach the UI as "2026-08-04", not as [2026,8,4], which
@@ -117,6 +123,53 @@ class TaxControllerIntegrationTest {
                 .andExpect(status().isOk());
 
         verify(this.rsuTaxService).setTaxPaid(any(), eq(List.of(1L, 2L)), eq(true));
+    }
+
+    @Test
+    void serializesTheEquityVestReportWithIsoDates() throws Exception {
+        LocalDate date = LocalDate.of(2026, 8, 4);
+        when(this.rsuVestTaxService.getVestTaxEvents(any())).thenReturn(RSUVestTaxEventReportDTO.builder()
+                .items(List.of(RSUVestTaxEventDTO.builder()
+                        .id(1L).grantId(2L).shortName("ACME").exchange("US").grantDate(date).vestDate(date)
+                        .priceDate(date).rateDate(date).calculatedOn(date).quantity(10).currency("USD")
+                        .amountInHuf(new BigDecimal("1000")).paid(true).tax(TaxBreakdownDTO.zero()).build()))
+                .totalAmountInHuf(new BigDecimal("1000")).totalTax(TaxBreakdownDTO.zero()).build());
+
+        MvcResult response = this.mockMvc.perform(get("/api/v1/tax/equity"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String json = response.getResponse().getContentAsString();
+        assertTrue(json.contains("\"vestDate\":\"2026-08-04\""), "vestDate was not an ISO string: " + json);
+        assertTrue(json.contains("\"grantId\":2"), "grantId was missing: " + json);
+        assertTrue(json.contains("\"paid\":true"), "paid was missing: " + json);
+    }
+
+    @Test
+    void bindsTheIdListWhenMarkingEquityVestTaxAsPaid() throws Exception {
+        this.mockMvc.perform(put("/api/v1/tax/equity/paid")
+                        .param("ids", "1,2")
+                        .param("paid", "true"))
+                .andExpect(status().isOk());
+
+        verify(this.rsuVestTaxService).setTaxPaid(any(), eq(List.of(1L, 2L)), eq(true));
+    }
+
+    @Test
+    void bindsTheIdListWhenRecalculatingEquityVestTax() throws Exception {
+        this.mockMvc.perform(put("/api/v1/tax/equity/recalculate")
+                        .param("ids", "3,4"))
+                .andExpect(status().isOk());
+
+        verify(this.rsuVestTaxService).recalculate(any(), eq(List.of(3L, 4L)));
+    }
+
+    @Test
+    void streamsTheEquityVestReportAsCsv() throws Exception {
+        this.mockMvc.perform(get("/api/v1/tax/equity/csv"))
+                .andExpect(status().isOk());
+
+        verify(this.rsuVestTaxService).getCSV(any(), any());
     }
 
     @Test

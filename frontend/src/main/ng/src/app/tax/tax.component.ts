@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { MessageService, PrimeTemplate } from 'primeng/api';
-import { RSU, StockRSUTaxReport, TaxBreakdown, TaxReport, TaxableEventReport } from '../model/rsu';
+import { RSU, RSUVestTaxEvent, RSUVestTaxReport, StockRSUTaxReport, TaxBreakdown, TaxReport, TaxableEvent,
+  TaxableEventReport } from '../model/rsu';
 import { TaxService } from '../service/tax.service';
 import { StockService } from '../service/stock.service';
 import { Exchange } from '../model/exchange';
@@ -22,6 +23,8 @@ import { Toast } from 'primeng/toast';
 import { FormsModule } from '@angular/forms';
 import { DatePipe, DecimalPipe } from '@angular/common';
 
+type SelectedTotals = Omit<TaxBreakdown, 'amount'> & { amountInHuf: number };
+
 @Component({
     selector: 'app-tax',
     templateUrl: './tax.component.html',
@@ -34,6 +37,7 @@ export class TaxComponent {
 
   private static readonly TRANSACTION_TAB = '2';
   private static readonly STOCK_TAB = '3';
+  private static readonly EQUITY_TAB = '4';
 
   rsus: RSU[] = [];
   report: TaxReport | null = null;
@@ -55,9 +59,15 @@ export class TaxComponent {
 
   taxableReport: TaxableEventReport | null = null;
   taxableLoading: boolean = false;
+  selectedTaxableEvents: TaxableEvent[] = [];
 
   stockReport: StockRSUTaxReport | null = null;
   stockLoading: boolean = false;
+
+  equityReport: RSUVestTaxReport | null = null;
+  equityLoading: boolean = false;
+  equityRecalculating: boolean = false;
+  selectedEquityEvents: RSUVestTaxEvent[] = [];
 
   constructor(private taxService: TaxService, private stockService: StockService,
     private messageService: MessageService, private cdr: ChangeDetectorRef) {
@@ -86,6 +96,9 @@ export class TaxComponent {
     if (String(value) === TaxComponent.STOCK_TAB && this.stockReport === null) {
       this.loadStockRSUEvents();
     }
+    if (String(value) === TaxComponent.EQUITY_TAB && this.equityReport === null) {
+      this.loadEquityEvents();
+    }
   }
 
   loadTaxableEvents(): void {
@@ -94,15 +107,30 @@ export class TaxComponent {
       next: (data) => {
         this.taxableLoading = false;
         this.taxableReport = data;
+        const ids = new Set(this.selectedTaxableEvents.map(e => e.id));
+        this.selectedTaxableEvents = data.items.filter(e => ids.has(e.id));
         this.cdr.markForCheck();
       },
       error: (error) => {
         this.taxableLoading = false;
         this.taxableReport = null;
+        this.selectedTaxableEvents = [];
         this.showError(error);
         this.cdr.markForCheck();
       }
     });
+  }
+
+  get selectedTaxableTotals(): SelectedTotals {
+    return this.sumTaxes(this.selectedTaxableEvents);
+  }
+
+  selectUnpaidTaxableEvents(): void {
+    this.selectedTaxableEvents = this.taxableReport?.items.filter(e => !e.paid) ?? [];
+  }
+
+  clearTaxableSelection(): void {
+    this.selectedTaxableEvents = [];
   }
 
   setPaid(id: number, paid: boolean): void {
@@ -168,6 +196,89 @@ export class TaxComponent {
       },
       error: (error) => this.showError(error)
     });
+  }
+
+  loadEquityEvents(): void {
+    this.equityLoading = true;
+    this.taxService.getEquityEvents().subscribe({
+      next: (data) => {
+        this.equityLoading = false;
+        this.equityReport = data;
+        const ids = new Set(this.selectedEquityEvents.map(e => e.id));
+        this.selectedEquityEvents = data.items.filter(e => ids.has(e.id));
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        this.equityLoading = false;
+        this.equityReport = null;
+        this.selectedEquityEvents = [];
+        this.showError(error);
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  setEquityPaid(id: number, paid: boolean): void {
+    this.taxService.setEquityPaid(String(id), paid).subscribe({
+      next: () => this.loadEquityEvents(),
+      error: () => this.messageService.add({
+        severity: 'error',
+        summary: 'Could not update',
+        detail: 'Could not update the payment status.',
+        life: 8000
+      })
+    });
+  }
+
+  recalculateSelectedEquity(): void {
+    if (this.selectedEquityEvents.length === 0) return;
+
+    this.equityRecalculating = true;
+    this.taxService.recalculateEquity(this.selectedEquityEvents.map(e => e.id).join(',')).subscribe({
+      next: () => {
+        this.equityRecalculating = false;
+        this.loadEquityEvents();
+      },
+      error: (error) => {
+        this.equityRecalculating = false;
+        this.showError(error);
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  downloadEquityEvents(): void {
+    this.taxService.downloadEquityCsv().subscribe({
+      next: (data) => {
+        let a = document.createElement('a');
+        a.href = window.URL.createObjectURL(data as Blob);
+        a.download = 'rsu-vests.csv';
+        a.click();
+      },
+      error: (error) => this.showError(error)
+    });
+  }
+
+  get selectedEquityTotals(): SelectedTotals {
+    return this.sumTaxes(this.selectedEquityEvents);
+  }
+
+  selectUnpaidEquityEvents(): void {
+    this.selectedEquityEvents = this.equityReport?.items.filter(e => !e.paid) ?? [];
+  }
+
+  clearEquitySelection(): void {
+    this.selectedEquityEvents = [];
+  }
+
+  private sumTaxes(items: { amountInHuf: number; tax: TaxBreakdown }[]): SelectedTotals {
+    return items.reduce((sum, e) => ({
+      amountInHuf: sum.amountInHuf + e.amountInHuf,
+      taxBase: sum.taxBase + e.tax.taxBase,
+      szocho: sum.szocho + e.tax.szocho,
+      szja: sum.szja + e.tax.szja,
+      total: sum.total + e.tax.total
+    }), { amountInHuf: 0, taxBase: 0, szocho: 0, szja: 0, total: 0 });
   }
 
   exchangeChanged(event: any): void {

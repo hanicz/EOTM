@@ -80,3 +80,31 @@ export interface StockRSUTaxReport {
     totalAmountInHuf: number;
     totalTax: TaxBreakdown;
 }
+
+export interface RSUVestTaxEvent {
+    id: number;
+    grantId: number;
+    shortName: string;
+    exchange: string;
+    grantDate: string;
+    sequence: number;
+    vestDate: string;
+    quantity: number;
+    currency: string;
+    price: number;
+    priceDate: string;
+    amount: number;
+    rate: number;
+    rateDate: string;
+    amountInHuf: number;
+    calculatedOn: string;
+    tax: TaxBreakdown;
+    paid: boolean;
+}
+
+export interface RSUVestTaxReport {
+    items: RSUVestTaxEvent[];
+    totalAmountInHuf: number;
+    totalTax: TaxBreakdown;
+    error?: string | null;
+}

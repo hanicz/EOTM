@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { RSU, StockRSUTaxReport, TaxBreakdown, TaxReport, TaxableEventReport } from '../model/rsu';
+import { RSU, RSUVestTaxReport, StockRSUTaxReport, TaxBreakdown, TaxReport, TaxableEventReport } from '../model/rsu';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -52,6 +52,26 @@ export class TaxService {
 
   downloadStockRSUCsv() {
     return this.http.get(`${this.taxUrl}/stock/csv`, {
+      responseType: 'blob'
+    });
+  }
+
+  getEquityEvents() {
+    return this.http.get<RSUVestTaxReport>(`${this.taxUrl}/equity`);
+  }
+
+  setEquityPaid(ids: string, paid: boolean) {
+    const url = `${this.taxUrl}/equity/paid?ids=${ids}&paid=${paid}`;
+    return this.http.put(url, null);
+  }
+
+  recalculateEquity(ids: string) {
+    const url = `${this.taxUrl}/equity/recalculate?ids=${ids}`;
+    return this.http.put(url, null);
+  }
+
+  downloadEquityCsv() {
+    return this.http.get(`${this.taxUrl}/equity/csv`, {
       responseType: 'blob'
     });
   }

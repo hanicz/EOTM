@@ -6,8 +6,9 @@
       <p-tablist>
         <p-tab value="0">RSU</p-tab>
         <p-tab value="1">Amount</p-tab>
-        <p-tab value="2">Transactions</p-tab>
+        <p-tab value="2">Bank transactions</p-tab>
         <p-tab value="3">Stock transactions</p-tab>
+        <p-tab value="4">Equity transactions</p-tab>
       </p-tablist>
       <p-tabpanels>
 
@@ -118,19 +119,19 @@
                   <td data-label="Date" class="text-right">{{item.date}}</td>
                   <td data-label="Quantity" class="text-right">{{item.quantity | number}}</td>
                   <td data-label="Price" class="text-right">
-                    {{item.price | number:'1.2-2'}} {{item.currency}}
                     @if (isFallback(item.date, item.priceDate)) {
                       <i class="pi pi-info-circle tax-fallback"
                         pTooltip="No trading on {{item.date}}, using the close from {{item.priceDate}}"></i>
                     }
+                    {{item.price | number:'1.2-2'}} {{item.currency}}
                   </td>
                   <td data-label="Value" class="text-right">{{item.amount | number:'1.2-2'}} {{item.currency}}</td>
                   <td data-label="MNB rate" class="text-right">
-                    {{item.rate | number:'1.2-4'}}
                     @if (isFallback(item.date, item.rateDate)) {
                       <i class="pi pi-info-circle tax-fallback"
                         pTooltip="No MNB rate for {{item.date}}, using the one from {{item.rateDate}}"></i>
                     }
+                    {{item.rate | number:'1.2-4'}}
                   </td>
                   <td data-label="Value (Ft)" class="text-right">{{item.amountInHuf | number:'1.0-0'}} Ft</td>
                   <td data-label="Tax base (89%)" class="text-right">{{item.tax.taxBase | number:'1.0-0'}} Ft</td>
@@ -219,12 +220,21 @@
               [loading]="taxableLoading" (click)="loadTaxableEvents()"></button>
             <button pButton pRipple label="Download" icon="pi pi-download" class="p-button-rounded"
               severity="secondary" pTooltip="Export the report as CSV" (click)="downloadTaxableEvents()"></button>
+            <button pButton pRipple label="Select unpaid" icon="pi pi-filter" class="p-button-rounded"
+              severity="secondary" pTooltip="Select every unpaid row" [disabled]="!taxableReport?.items?.length"
+              (click)="selectUnpaidTaxableEvents()"></button>
+            <button pButton pRipple label="Clear selection" icon="pi pi-times" class="p-button-rounded p-button-text"
+              [disabled]="!selectedTaxableEvents.length" (click)="clearTaxableSelection()"></button>
           </div>
 
           @if (taxableReport) {
-            <p-table [value]="taxableReport.items" styleClass="p-datatable-striped p-datatable-sm table-stack">
+            <p-table [value]="taxableReport.items" dataKey="id" [(selection)]="selectedTaxableEvents"
+              styleClass="p-datatable-striped p-datatable-sm table-stack">
               <ng-template pTemplate="header">
                 <tr>
+                  <th style="width: 3rem">
+                    <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                  </th>
                   <th>Booked</th>
                   <th>Type</th>
                   <th>Partner</th>
@@ -242,6 +252,9 @@
               </ng-template>
               <ng-template pTemplate="body" let-item>
                 <tr>
+                  <td>
+                    <p-tableCheckbox [value]="item"></p-tableCheckbox>
+                  </td>
                   <td data-label="Booked">{{item.bookingDate | date:'mediumDate'}}</td>
                   <td data-label="Type">{{item.type}}</td>
                   <td data-label="Partner" [title]="item.memo">{{item.partnerName}}</td>
@@ -249,11 +262,11 @@
                     {{item.amount | number:'1.2-2'}} {{item.currencyId}}
                   </td>
                   <td data-label="MNB rate" class="text-right">
-                    {{item.rate | number:'1.2-4'}}
                     @if (isFallback(item.bookingDate, item.rateDate)) {
                       <i class="pi pi-info-circle tax-fallback"
                         pTooltip="No MNB rate for {{item.bookingDate}}, using the one from {{item.rateDate}}"></i>
                     }
+                    {{item.rate | number:'1.2-4'}}
                   </td>
                   <td data-label="Value (Ft)" class="text-right">{{item.amountInHuf | number:'1.0-0'}} Ft</td>
                   <td data-label="Tax base (89%)" class="text-right">{{item.tax.taxBase | number:'1.0-0'}} Ft</td>
@@ -280,7 +293,7 @@
               </ng-template>
               <ng-template pTemplate="emptymessage">
                 <tr>
-                  <td colspan="13">
+                  <td colspan="14">
                     No taxable events yet. Flag a bank transaction as taxable on the Financials page.
                   </td>
                 </tr>
@@ -308,6 +321,32 @@
                 <div class="stat-tile tax-tile-primary">
                   <div class="stat-tile-label">Total tax</div>
                   <div class="stat-tile-value">{{taxableReport.totalTax.total | number:'1.0-0'}} Ft</div>
+                </div>
+              </div>
+            }
+
+            @if (selectedTaxableEvents.length > 0) {
+              <h3 class="section-heading">Selected ({{selectedTaxableEvents.length}})</h3>
+              <div class="stat-tiles tax-summary">
+                <div class="stat-tile">
+                  <div class="stat-tile-label">Total value</div>
+                  <div class="stat-tile-value">{{selectedTaxableTotals.amountInHuf | number:'1.0-0'}} Ft</div>
+                </div>
+                <div class="stat-tile">
+                  <div class="stat-tile-label">Tax base (89%)</div>
+                  <div class="stat-tile-value">{{selectedTaxableTotals.taxBase | number:'1.0-0'}} Ft</div>
+                </div>
+                <div class="stat-tile">
+                  <div class="stat-tile-label">Szocho (13%)</div>
+                  <div class="stat-tile-value">{{selectedTaxableTotals.szocho | number:'1.0-0'}} Ft</div>
+                </div>
+                <div class="stat-tile">
+                  <div class="stat-tile-label">Szja (15%)</div>
+                  <div class="stat-tile-value">{{selectedTaxableTotals.szja | number:'1.0-0'}} Ft</div>
+                </div>
+                <div class="stat-tile tax-tile-primary">
+                  <div class="stat-tile-label">Total tax</div>
+                  <div class="stat-tile-value">{{selectedTaxableTotals.total | number:'1.0-0'}} Ft</div>
                 </div>
               </div>
             }
@@ -356,21 +395,21 @@
                   </td>
                   <td data-label="Quantity" class="text-right">{{item.quantity}}</td>
                   <td data-label="Price" class="text-right">
-                    {{item.price | number:'1.2-2'}} {{item.currency}}
                     @if (isFallback(item.transactionDate, item.priceDate)) {
                       <i class="pi pi-info-circle tax-fallback"
                         pTooltip="No close for {{item.transactionDate}}, using the one from {{item.priceDate}}"></i>
                     }
+                    {{item.price | number:'1.2-2'}} {{item.currency}}
                   </td>
                   <td data-label="Value" class="text-right">
                     {{item.amount | number:'1.2-2'}} {{item.currency}}
                   </td>
                   <td data-label="MNB rate" class="text-right">
-                    {{item.rate | number:'1.2-4'}}
                     @if (isFallback(item.transactionDate, item.rateDate)) {
                       <i class="pi pi-info-circle tax-fallback"
                         pTooltip="No MNB rate for {{item.transactionDate}}, using the one from {{item.rateDate}}"></i>
                     }
+                    {{item.rate | number:'1.2-4'}}
                   </td>
                   <td data-label="Value (Ft)" class="text-right">{{item.amountInHuf | number:'1.0-0'}} Ft</td>
                   <td data-label="Tax base (89%)" class="text-right">{{item.tax.taxBase | number:'1.0-0'}} Ft</td>
@@ -425,6 +464,171 @@
                 <div class="stat-tile tax-tile-primary">
                   <div class="stat-tile-label">Total tax</div>
                   <div class="stat-tile-value">{{stockReport.totalTax.total | number:'1.0-0'}} Ft</div>
+                </div>
+              </div>
+            }
+          }
+        </p-tabpanel>
+
+        <p-tabpanel value="4">
+          <p class="form-hint">
+            The RSU vests from your grants on the Equity page, once their vest date has passed. Each one is valued
+            once, at the closing price and the MNB rate of its vest date - select it and Recalculate to value it
+            again.
+          </p>
+
+          <div class="tax-actions">
+            <button pButton pRipple label="Refresh" icon="pi pi-refresh" class="p-button-rounded"
+              [loading]="equityLoading" (click)="loadEquityEvents()"></button>
+            <button pButton pRipple label="Download" icon="pi pi-download" class="p-button-rounded"
+              severity="secondary" pTooltip="Export the report as CSV" (click)="downloadEquityEvents()"></button>
+            <button pButton pRipple label="Select unpaid" icon="pi pi-filter" class="p-button-rounded"
+              severity="secondary" pTooltip="Select every unpaid row" [disabled]="!equityReport?.items?.length"
+              (click)="selectUnpaidEquityEvents()"></button>
+            <button pButton pRipple label="Recalculate" icon="pi pi-calculator" class="p-button-rounded"
+              severity="secondary" pTooltip="Value the selected vests again"
+              [loading]="equityRecalculating" [disabled]="!selectedEquityEvents.length"
+              (click)="recalculateSelectedEquity()"></button>
+            <button pButton pRipple label="Clear selection" icon="pi pi-times" class="p-button-rounded p-button-text"
+              [disabled]="!selectedEquityEvents.length" (click)="clearEquitySelection()"></button>
+          </div>
+
+          @if (equityReport?.error; as error) {
+            <p class="form-hint">{{error}}</p>
+          }
+
+          @if (equityReport) {
+            <p-table [value]="equityReport.items" dataKey="id" [(selection)]="selectedEquityEvents"
+              styleClass="p-datatable-striped p-datatable-sm table-stack">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th style="width: 3rem">
+                    <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                  </th>
+                  <th>Vested</th>
+                  <th>Ticker</th>
+                  <th>Granted</th>
+                  <th class="text-right">Quantity</th>
+                  <th class="text-right">Price</th>
+                  <th class="text-right">Value</th>
+                  <th class="text-right">MNB rate</th>
+                  <th class="text-right">Value (Ft)</th>
+                  <th class="text-right">Tax base (89%)</th>
+                  <th class="text-right">Szocho (13%)</th>
+                  <th class="text-right">Szja (15%)</th>
+                  <th class="text-right">Tax</th>
+                  <th>Paid</th>
+                  <th class="text-right">Calculated</th>
+                  <th class="cell-actions"></th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-item>
+                <tr>
+                  <td>
+                    <p-tableCheckbox [value]="item"></p-tableCheckbox>
+                  </td>
+                  <td data-label="Vested">{{item.vestDate | date:'mediumDate'}}</td>
+                  <td data-label="Ticker">
+                    <span class="state-chip state-info">{{item.shortName}}.{{item.exchange}}</span>
+                  </td>
+                  <td data-label="Granted">{{item.grantDate | date:'mediumDate'}}</td>
+                  <td data-label="Quantity" class="text-right">{{item.quantity | number}}</td>
+                  <td data-label="Price" class="text-right">
+                    @if (isFallback(item.vestDate, item.priceDate)) {
+                      <i class="pi pi-info-circle tax-fallback"
+                        pTooltip="No close for {{item.vestDate}}, using the one from {{item.priceDate}}"></i>
+                    }
+                    {{item.price | number:'1.2-2'}} {{item.currency}}
+                  </td>
+                  <td data-label="Value" class="text-right">
+                    {{item.amount | number:'1.2-2'}} {{item.currency}}
+                  </td>
+                  <td data-label="MNB rate" class="text-right">
+                    @if (isFallback(item.vestDate, item.rateDate)) {
+                      <i class="pi pi-info-circle tax-fallback"
+                        pTooltip="No MNB rate for {{item.vestDate}}, using the one from {{item.rateDate}}"></i>
+                    }
+                    {{item.rate | number:'1.2-4'}}
+                  </td>
+                  <td data-label="Value (Ft)" class="text-right">{{item.amountInHuf | number:'1.0-0'}} Ft</td>
+                  <td data-label="Tax base (89%)" class="text-right">{{item.tax.taxBase | number:'1.0-0'}} Ft</td>
+                  <td data-label="Szocho (13%)" class="text-right">{{item.tax.szocho | number:'1.0-0'}} Ft</td>
+                  <td data-label="Szja (15%)" class="text-right">{{item.tax.szja | number:'1.0-0'}} Ft</td>
+                  <td data-label="Tax" class="text-right tax-total-cell">{{item.tax.total | number:'1.0-0'}} Ft</td>
+                  <td data-label="Paid">
+                    @if (item.paid) {
+                      <span class="state-chip state-buy">Paid</span>
+                    } @else {
+                      <span class="state-chip state-accent">Unpaid</span>
+                    }
+                  </td>
+                  <td data-label="Calculated" class="text-right text-color-secondary text-sm">
+                    {{item.calculatedOn | date:'mediumDate'}}
+                  </td>
+                  <td class="cell-actions">
+                    <button pButton pRipple type="button" [icon]="item.paid ? 'pi pi-undo' : 'pi pi-check'"
+                      [pTooltip]="item.paid ? 'Mark as not paid' : 'Mark as paid'"
+                      (click)="setEquityPaid(item.id, !item.paid)"
+                      class="p-button-rounded p-button-text" severity="secondary"></button>
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="emptymessage">
+                <tr>
+                  <td colspan="16">
+                    No vested RSUs yet. Add a grant on the Equity page.
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+
+            @if (equityReport.items.length > 0) {
+              <div class="stat-tiles tax-summary">
+                <div class="stat-tile">
+                  <div class="stat-tile-label">Total value</div>
+                  <div class="stat-tile-value">{{equityReport.totalAmountInHuf | number:'1.0-0'}} Ft</div>
+                </div>
+                <div class="stat-tile">
+                  <div class="stat-tile-label">Tax base (89%)</div>
+                  <div class="stat-tile-value">{{equityReport.totalTax.taxBase | number:'1.0-0'}} Ft</div>
+                </div>
+                <div class="stat-tile">
+                  <div class="stat-tile-label">Szocho (13%)</div>
+                  <div class="stat-tile-value">{{equityReport.totalTax.szocho | number:'1.0-0'}} Ft</div>
+                </div>
+                <div class="stat-tile">
+                  <div class="stat-tile-label">Szja (15%)</div>
+                  <div class="stat-tile-value">{{equityReport.totalTax.szja | number:'1.0-0'}} Ft</div>
+                </div>
+                <div class="stat-tile tax-tile-primary">
+                  <div class="stat-tile-label">Total tax</div>
+                  <div class="stat-tile-value">{{equityReport.totalTax.total | number:'1.0-0'}} Ft</div>
+                </div>
+              </div>
+            }
+
+            @if (selectedEquityEvents.length > 0) {
+              <h3 class="section-heading">Selected ({{selectedEquityEvents.length}})</h3>
+              <div class="stat-tiles tax-summary">
+                <div class="stat-tile">
+                  <div class="stat-tile-label">Total value</div>
+                  <div class="stat-tile-value">{{selectedEquityTotals.amountInHuf | number:'1.0-0'}} Ft</div>
+                </div>
+                <div class="stat-tile">
+                  <div class="stat-tile-label">Tax base (89%)</div>
+                  <div class="stat-tile-value">{{selectedEquityTotals.taxBase | number:'1.0-0'}} Ft</div>
+                </div>
+                <div class="stat-tile">
+                  <div class="stat-tile-label">Szocho (13%)</div>
+                  <div class="stat-tile-value">{{selectedEquityTotals.szocho | number:'1.0-0'}} Ft</div>
+                </div>
+                <div class="stat-tile">
+                  <div class="stat-tile-label">Szja (15%)</div>
+                  <div class="stat-tile-value">{{selectedEquityTotals.szja | number:'1.0-0'}} Ft</div>
+                </div>
+                <div class="stat-tile tax-tile-primary">
+                  <div class="stat-tile-label">Total tax</div>
+                  <div class="stat-tile-value">{{selectedEquityTotals.total | number:'1.0-0'}} Ft</div>
                 </div>
               </div>
             }

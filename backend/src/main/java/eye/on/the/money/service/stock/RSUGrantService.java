@@ -10,7 +10,8 @@ import eye.on.the.money.dto.out.TaxBreakdownDTO;
 import eye.on.the.money.exception.APIException;
 import eye.on.the.money.exception.TaxException;
 import eye.on.the.money.model.stock.RSUGrant;
-import eye.on.the.money.model.stock.VestingFrequency;
+import eye.on.the.money.model.stock.RSUVestingSchedule;
+import eye.on.the.money.model.stock.RSUVestingSchedule.Tranche;
 import eye.on.the.money.repository.stock.RSUGrantRepository;
 import eye.on.the.money.service.shared.ICSVService;
 import eye.on.the.money.service.shared.TaxService;
@@ -158,20 +159,7 @@ public class RSUGrantService implements ICSVService {
     }
 
     private List<Tranche> schedule(RSUGrant grant) {
-        VestingFrequency frequency = grant.getVestingFrequency();
-        int count = frequency.vestCount(grant.getVestingYears());
-        long total = grant.getQuantity();
-
-        List<Tranche> tranches = new ArrayList<>();
-        long allocated = 0;
-        for (int sequence = 1; sequence <= count; sequence++) {
-            long cumulative = total * sequence / count;
-            tranches.add(new Tranche(sequence,
-                    grant.getGrantDate().plusMonths((long) sequence * frequency.getMonthsBetweenVests()),
-                    (int) (cumulative - allocated)));
-            allocated = cumulative;
-        }
-        return tranches;
+        return RSUVestingSchedule.tranches(grant);
     }
 
     private RSUDTO toRSUDTO(RSUGrant grant, Tranche tranche, LocalDate today) {
@@ -279,8 +267,5 @@ public class RSUGrantService implements ICSVService {
         }
         String trimmed = text.trim();
         return trimmed.isEmpty() ? null : trimmed;
-    }
-
-    private record Tranche(int sequence, LocalDate vestDate, int quantity) {
     }
 }

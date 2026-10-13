@@ -3,6 +3,7 @@ package eye.on.the.money.controller;
 import eye.on.the.money.dto.in.RSUDTO;
 import eye.on.the.money.dto.in.TaxAmountDTO;
 import eye.on.the.money.dto.out.RSUTaxEventReportDTO;
+import eye.on.the.money.dto.out.RSUVestTaxEventReportDTO;
 import eye.on.the.money.dto.out.TaxBreakdownDTO;
 import eye.on.the.money.dto.out.TaxReportDTO;
 import eye.on.the.money.dto.out.TaxableEventReportDTO;
@@ -10,6 +11,7 @@ import eye.on.the.money.security.CurrentUserId;
 import eye.on.the.money.service.financial.TaxableEventService;
 import eye.on.the.money.service.shared.TaxService;
 import eye.on.the.money.service.stock.RSUTaxService;
+import eye.on.the.money.service.stock.RSUVestTaxService;
 import eye.on.the.money.util.CsvResponseUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -36,6 +38,7 @@ public class TaxController {
     private final TaxService taxService;
     private final TaxableEventService taxableEventService;
     private final RSUTaxService rsuTaxService;
+    private final RSUVestTaxService rsuVestTaxService;
 
     @GetMapping("/transaction")
     public ResponseEntity<TaxableEventReportDTO> getTaxableEvents(@CurrentUserId Long userId) {
@@ -70,6 +73,30 @@ public class TaxController {
     public ResponseEntity<Void> setRSUTaxPaid(@CurrentUserId Long userId, @RequestParam List<Long> ids,
                                               @RequestParam boolean paid) {
         this.rsuTaxService.setTaxPaid(userId, ids, paid);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/equity")
+    public ResponseEntity<RSUVestTaxEventReportDTO> getRSUVestTaxEvents(@CurrentUserId Long userId) {
+        return ResponseEntity.ok(this.rsuVestTaxService.getVestTaxEvents(userId));
+    }
+
+    @GetMapping("/equity/csv")
+    public void getRSUVestTaxEventsCSV(@CurrentUserId Long userId, HttpServletResponse servletResponse)
+            throws IOException {
+        this.rsuVestTaxService.getCSV(userId, CsvResponseUtil.prepare(servletResponse, "rsu-vests.csv"));
+    }
+
+    @PutMapping("/equity/paid")
+    public ResponseEntity<Void> setRSUVestTaxPaid(@CurrentUserId Long userId, @RequestParam List<Long> ids,
+                                                  @RequestParam boolean paid) {
+        this.rsuVestTaxService.setTaxPaid(userId, ids, paid);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/equity/recalculate")
+    public ResponseEntity<Void> recalculateRSUVestTax(@CurrentUserId Long userId, @RequestParam List<Long> ids) {
+        this.rsuVestTaxService.recalculate(userId, ids);
         return ResponseEntity.ok().build();
     }
 

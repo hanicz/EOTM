@@ -1698,3 +1698,26 @@ menu {
         flex: 1 1 100%;
     }
 }
+
+.news-tabs {
+    display: flex;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.news-tabs .p-selectbutton {
+    flex-wrap: nowrap;
+    margin: 0 auto;
+}
+
+.news-tabs .p-togglebutton {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+@media screen and (max-width: 575px) {
+    .news-tabs .p-togglebutton {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+    }
+}

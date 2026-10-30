@@ -22,4 +22,7 @@ public interface SecurityTransactionRepository extends JpaRepository<SecurityTra
 
     List<SecurityTransaction> findByUserIdAndSecurity_IdAndTransactionDateAndBuySellAndQuantityAndAmountOrderById(
             Long userId, String securityId, LocalDate transactionDate, String buySell, Integer quantity, BigDecimal amount);
+
+    List<SecurityTransaction> findByUserIdAndSecurity_IdAndTransactionDateBeforeOrderByTransactionDate(
+            Long userId, String securityId, LocalDate transactionDate);
 }

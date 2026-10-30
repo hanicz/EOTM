@@ -48,6 +48,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -179,6 +180,7 @@ public class BankTransactionService implements ICSVService {
         CategoryRuleMatcher categoryMatcher = this.bankCategoryRuleService.matcherFor(userId);
         int created = 0;
         int updated = 0;
+        int unchanged = 0;
         long lineNumber = 0;
         try (CSVParser csvParser = this.getParser(file, BankTransactionDTO.KH_HEADERS, KH_DELIMITER, this.detectCharset(file))) {
             for (CSVRecord csvRecord : csvParser) {
@@ -187,20 +189,20 @@ public class BankTransactionService implements ICSVService {
                     continue;
                 }
                 BankTransactionDTO transaction = BankTransactionDTO.createFromKHRecord(csvRecord, DateFormats.YYYY_MM_DD_DOTTED);
-                if (this.upsert(transaction, user, matcher, categoryMatcher)) {
-                    created++;
-                } else {
-                    updated++;
+                switch (this.upsert(transaction, user, matcher, categoryMatcher)) {
+                    case CREATED -> created++;
+                    case UPDATED -> updated++;
+                    case UNCHANGED -> unchanged++;
                 }
             }
         } catch (IOException | DateTimeParseException | IllegalArgumentException e) {
             throw this.csvParseFailure(lineNumber, e);
         }
-        log.debug("Imported bank transactions, created {}, updated {}", created, updated);
-        return ImportResultDTO.builder().created(created).updated(updated).build();
+        log.debug("Imported bank transactions, created {}, updated {}, unchanged {}", created, updated, unchanged);
+        return ImportResultDTO.builder().created(created).updated(updated).unchanged(unchanged).build();
     }
 
-    private boolean upsert(BankTransactionDTO transactionDTO, User user, ExclusionRuleMatcher matcher,
+    private UpsertOutcome upsert(BankTransactionDTO transactionDTO, User user, ExclusionRuleMatcher matcher,
                            CategoryRuleMatcher categoryMatcher) {
         Currency currency = this.currencyRepository.findById(transactionDTO.getCurrencyId())
                 .orElseThrow(() -> new CSVException("Unknown currency: " + transactionDTO.getCurrencyId()));
@@ -212,12 +214,18 @@ public class BankTransactionService implements ICSVService {
 
         if (existing.isPresent()) {
             BankTransaction transaction = existing.get();
+            boolean changed = !Objects.equals(transaction.getAccountNumber(), transactionDTO.getAccountNumber())
+                    || !Objects.equals(transaction.getAccountName(), transactionDTO.getAccountName())
+                    || !Objects.equals(transaction.getPartnerAccount(), transactionDTO.getPartnerAccount())
+                    || !Objects.equals(transaction.getPartnerName(), transactionDTO.getPartnerName())
+                    || transaction.getCurrency() == null
+                    || !Objects.equals(transaction.getCurrency().getId(), currency.getId());
             transaction.setAccountNumber(transactionDTO.getAccountNumber());
             transaction.setAccountName(transactionDTO.getAccountName());
             transaction.setPartnerAccount(transactionDTO.getPartnerAccount());
             transaction.setPartnerName(transactionDTO.getPartnerName());
             transaction.setCurrency(currency);
-            return false;
+            return changed ? UpsertOutcome.UPDATED : UpsertOutcome.UNCHANGED;
         }
 
         this.bankTransactionRepository.save(BankTransaction.builder()
@@ -235,7 +243,7 @@ public class BankTransactionService implements ICSVService {
                 .currency(currency)
                 .user(user)
                 .build());
-        return true;
+        return UpsertOutcome.CREATED;
     }
 
     private boolean isBlankRecord(CSVRecord csvRecord) {
@@ -266,5 +274,9 @@ public class BankTransactionService implements ICSVService {
         dto.setCategoryName(category == null ? null : category.getName());
         dto.setCategoryColor(category == null ? null : category.getColor());
         return dto;
+    }
+
+    private enum UpsertOutcome {
+        CREATED, UPDATED, UNCHANGED
     }
 }

@@ -126,6 +126,40 @@ class SecurityTransactionServiceTest {
     }
 
     @Test
+    void getOpenPosition_returnsTheOpenLotAfterAClosedOne() {
+        LocalDate before = LocalDate.of(2025, 12, 31);
+        SecurityTransaction buy = this.buildTransaction(1L, "B", 10, 500.0);
+        SecurityTransaction sell = this.buildTransaction(2L, "S", 10, 650.0);
+        SecurityTransaction rebuy = this.buildTransaction(3L, "B", 5, 240.0);
+        when(this.securityTransactionRepository
+                .findByUserIdAndSecurity_IdAndTransactionDateBeforeOrderByTransactionDate(1L, "SEC1", before))
+                .thenReturn(List.of(buy, sell, rebuy));
+        when(this.modelMapper.map(buy, SecurityTransactionDTO.class)).thenReturn(this.buildDTO(1L, "B", 10, 500.0));
+        when(this.modelMapper.map(sell, SecurityTransactionDTO.class)).thenReturn(this.buildDTO(2L, "S", 10, 650.0));
+        when(this.modelMapper.map(rebuy, SecurityTransactionDTO.class)).thenReturn(this.buildDTO(3L, "B", 5, 240.0));
+
+        Optional<SecurityTransactionDTO> result = this.securityTransactionService.getOpenPosition(1L, "SEC1", before);
+
+        assertTrue(result.isPresent());
+        assertEquals(5, result.get().getQuantity());
+        assertEquals(0, BigDecimal.valueOf(240.0).compareTo(result.get().getAmount()));
+    }
+
+    @Test
+    void getOpenPosition_isEmptyWhenFullySold() {
+        LocalDate before = LocalDate.of(2025, 12, 31);
+        SecurityTransaction buy = this.buildTransaction(1L, "B", 10, 500.0);
+        SecurityTransaction sell = this.buildTransaction(2L, "S", 10, 500.0);
+        when(this.securityTransactionRepository
+                .findByUserIdAndSecurity_IdAndTransactionDateBeforeOrderByTransactionDate(1L, "SEC1", before))
+                .thenReturn(List.of(buy, sell));
+        when(this.modelMapper.map(buy, SecurityTransactionDTO.class)).thenReturn(this.buildDTO(1L, "B", 10, 500.0));
+        when(this.modelMapper.map(sell, SecurityTransactionDTO.class)).thenReturn(this.buildDTO(2L, "S", 10, 500.0));
+
+        assertTrue(this.securityTransactionService.getOpenPosition(1L, "SEC1", before).isEmpty());
+    }
+
+    @Test
     void getCurrentHoldings_reopenedPositionStartsAFreshCostBasis() {
         SecurityTransaction buy = this.buildTransaction(1L, "B", 10, 500.0);
         SecurityTransaction sell = this.buildTransaction(2L, "S", 10, 650.0);

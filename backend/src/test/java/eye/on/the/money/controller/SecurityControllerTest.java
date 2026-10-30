@@ -64,7 +64,7 @@ class SecurityControllerTest {
     void processXls() {
         MockMultipartFile file = new MockMultipartFile("file", "transaction.xls",
                 "application/vnd.ms-excel", new byte[]{1});
-        ImportResultDTO importResult = ImportResultDTO.builder().created(1).updated(44).build();
+        ImportResultDTO importResult = ImportResultDTO.builder().created(1).unchanged(44).build();
         when(this.webkincstarImportService.processXls(1L, file)).thenReturn(importResult);
 
         ResponseEntity<ImportResultDTO> response = this.securityController.processXls(1L, file);

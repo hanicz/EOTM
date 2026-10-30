@@ -4,6 +4,7 @@ import { InputText } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
 import { SecurityTransaction } from '../model/securityTransaction';
 import { Interest } from '../model/interest';
+import { describeImport } from '../util/importsummary';
 import { MenuComponent } from '../menu/menu.component';
 import { Bind } from 'primeng/bind';
 import { Panel } from 'primeng/panel';
@@ -109,7 +110,7 @@ export class SecurityComponent implements OnInit {
         this.messageService.add({
           key: 'security-import',
           severity: 'success',
-          detail: `Import finished. ${result.created} added, ${result.updated} updated.`
+          detail: describeImport(result)
         });
       },
       error: (error) => {

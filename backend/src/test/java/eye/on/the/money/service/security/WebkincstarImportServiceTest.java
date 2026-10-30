@@ -1,6 +1,7 @@
 package eye.on.the.money.service.security;
 
 import eye.on.the.money.dto.out.ImportResultDTO;
+import eye.on.the.money.dto.out.SecurityTransactionDTO;
 import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -39,6 +41,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -53,6 +56,9 @@ class WebkincstarImportServiceTest {
     private static final String ACCOUNT = "00000000";
     private static final String BOND_NAME = "Prémium Magyar Állampapír 2099/Z";
     private static final String BOND_ID = "PMÁP 2099/Z";
+    private static final String BILL_NAME = "Diszkont Kincstárjegy D991231";
+    private static final String BILL_ID = "DKJ D991231";
+    private static final LocalDate MATURITY = LocalDate.of(2099, 12, 31);
 
     private static final String[] HEADERS = {
             "Számlaszám", "Számla típusa", "Tranzakció típusa", "Tranzakció azonosítója", "Instrumentum",
@@ -60,6 +66,8 @@ class WebkincstarImportServiceTest {
 
     @Mock
     private SecurityTransactionRepository securityTransactionRepository;
+    @Mock
+    private SecurityTransactionService securityTransactionService;
     @Mock
     private InterestRepository interestRepository;
     @Mock
@@ -75,12 +83,14 @@ class WebkincstarImportServiceTest {
     private final User user = User.builder().id(USER_ID).email("test@email.com").build();
     private final Currency huf = new Currency("HUF", "forint");
     private final Security bond = Security.builder().id(BOND_ID).name(BOND_NAME).build();
+    private final Security bill = Security.builder().id(BILL_ID).name(BILL_NAME).build();
 
     @BeforeEach
     void setUp() {
         when(this.userService.getReference(USER_ID)).thenReturn(this.user);
         when(this.currencyRepository.findById("HUF")).thenReturn(Optional.of(this.huf));
         when(this.securityService.getOrCreateByName(BOND_NAME)).thenReturn(this.bond);
+        when(this.securityService.getOrCreateByName(BILL_NAME)).thenReturn(this.bill);
         when(this.securityTransactionRepository
                 .findByUserIdAndSecurity_IdAndTransactionDateAndBuySellAndQuantityAndAmountOrderById(
                         anyLong(), anyString(), any(), anyString(), anyInt(), any()))
@@ -94,6 +104,18 @@ class WebkincstarImportServiceTest {
     private Object[] row(String type, Object nominal, Object amount, String valueDate) {
         return new Object[]{ACCOUNT, "Értékpapír nyilvántartási-számla (" + ACCOUNT + ")", type,
                 "TST0000000000001", BOND_NAME, "Lezárt", nominal, amount, "HUF", valueDate};
+    }
+
+    private Object[] billRow(String type, Object nominal, Object amount, String valueDate) {
+        Object[] row = this.row(type, nominal, amount, valueDate);
+        row[4] = BILL_NAME;
+        return row;
+    }
+
+    private void openPosition(int quantity, String amount) {
+        when(this.securityTransactionService.getOpenPosition(USER_ID, BILL_ID, MATURITY))
+                .thenReturn(Optional.of(SecurityTransactionDTO.builder()
+                        .securityId(BILL_ID).quantity(quantity).amount(new BigDecimal(amount)).build()));
     }
 
     private MockMultipartFile file(Object[]... rows) {
@@ -142,7 +164,7 @@ class WebkincstarImportServiceTest {
         ImportResultDTO result = this.webkincstarImportService.processXls(USER_ID, file);
 
         assertEquals(3, result.getCreated());
-        assertEquals(0, result.getUpdated());
+        assertEquals(0, result.getUnchanged());
         verify(this.securityTransactionRepository, times(2)).save(any(SecurityTransaction.class));
         verify(this.interestRepository, times(1)).save(any(Interest.class));
     }
@@ -188,7 +210,7 @@ class WebkincstarImportServiceTest {
     }
 
     @Test
-    void processXls_updatesInsteadOfDuplicatingOnReimport() {
+    void processXls_reportsUnchangedOnReimport() {
         when(this.securityTransactionRepository
                 .findByUserIdAndSecurity_IdAndTransactionDateAndBuySellAndQuantityAndAmountOrderById(
                         anyLong(), anyString(), any(), anyString(), anyInt(), any()))
@@ -204,7 +226,8 @@ class WebkincstarImportServiceTest {
         ImportResultDTO result = this.webkincstarImportService.processXls(USER_ID, file);
 
         assertEquals(0, result.getCreated());
-        assertEquals(2, result.getUpdated());
+        assertEquals(0, result.getUpdated());
+        assertEquals(2, result.getUnchanged());
         verify(this.securityTransactionRepository, never()).save(any(SecurityTransaction.class));
         verify(this.interestRepository, never()).save(any(Interest.class));
     }
@@ -223,7 +246,7 @@ class WebkincstarImportServiceTest {
         ImportResultDTO result = this.webkincstarImportService.processXls(USER_ID, file);
 
         assertEquals(0, result.getCreated());
-        assertEquals(2, result.getUpdated());
+        assertEquals(2, result.getUnchanged());
         verify(this.securityTransactionRepository, never()).save(any(SecurityTransaction.class));
     }
 
@@ -240,7 +263,7 @@ class WebkincstarImportServiceTest {
         ImportResultDTO result = this.webkincstarImportService.processXls(USER_ID, file);
 
         assertEquals(1, result.getCreated());
-        assertEquals(1, result.getUpdated());
+        assertEquals(1, result.getUnchanged());
         verify(this.securityTransactionRepository, times(1)).save(any(SecurityTransaction.class));
     }
 
@@ -251,8 +274,70 @@ class WebkincstarImportServiceTest {
         ImportResultDTO result = this.webkincstarImportService.processXls(USER_ID, file);
 
         assertEquals(0, result.getCreated());
-        assertEquals(0, result.getUpdated());
+        assertEquals(0, result.getUnchanged());
         verify(this.securityTransactionRepository, never()).save(any(SecurityTransaction.class));
+    }
+
+    @Test
+    void processXls_discountBillMaturitySellsHoldingAndBooksDiscountAsInterest() {
+        this.openPosition(80000, "78000");
+        MockMultipartFile file = this.file(this.billRow("Esedékesség fizetés", "80 000", "80 000", "2099.12.31."));
+
+        ImportResultDTO result = this.webkincstarImportService.processXls(USER_ID, file);
+
+        assertEquals(2, result.getCreated());
+        ArgumentCaptor<SecurityTransaction> transactions = ArgumentCaptor.forClass(SecurityTransaction.class);
+        verify(this.securityTransactionRepository).save(transactions.capture());
+        SecurityTransaction sell = transactions.getValue();
+        assertEquals("S", sell.getBuySell());
+        assertEquals(80000, sell.getQuantity());
+        assertEquals(new BigDecimal("80000"), sell.getAmount());
+        assertEquals(MATURITY, sell.getTransactionDate());
+        assertEquals(BILL_ID, sell.getSecurity().getId());
+
+        ArgumentCaptor<Interest> interests = ArgumentCaptor.forClass(Interest.class);
+        verify(this.interestRepository).save(interests.capture());
+        assertEquals(0, new BigDecimal("2000").compareTo(interests.getValue().getAmount()));
+        assertEquals(MATURITY, interests.getValue().getInterestDate());
+        assertEquals(BILL_ID, interests.getValue().getSecurity().getId());
+    }
+
+    @Test
+    void processXls_discountBillMaturityListedFirstIsRedeemedAfterTheBuy() {
+        this.openPosition(80000, "78000");
+        MockMultipartFile file = this.file(
+                this.billRow("Esedékesség fizetés", "80 000", "80 000", "2099.12.31."),
+                this.billRow("Vétel", "80 000", "78 000", "2099.06.30."));
+
+        this.webkincstarImportService.processXls(USER_ID, file);
+
+        InOrder inOrder = inOrder(this.securityTransactionRepository, this.securityTransactionService);
+        inOrder.verify(this.securityTransactionRepository).save(any(SecurityTransaction.class));
+        inOrder.verify(this.securityTransactionService).getOpenPosition(USER_ID, BILL_ID, MATURITY);
+    }
+
+    @Test
+    void processXls_discountBillPartialRedemptionUsesProportionalCost() {
+        this.openPosition(100000, "96000");
+        MockMultipartFile file = this.file(this.billRow("Esedékesség fizetés", "25 000", "25 000", "2099.12.31."));
+
+        this.webkincstarImportService.processXls(USER_ID, file);
+
+        ArgumentCaptor<Interest> interests = ArgumentCaptor.forClass(Interest.class);
+        verify(this.interestRepository).save(interests.capture());
+        assertEquals(0, new BigDecimal("1000").compareTo(interests.getValue().getAmount()));
+    }
+
+    @Test
+    void processXls_discountBillMaturityWithoutOpenPositionThrows() {
+        when(this.securityTransactionService.getOpenPosition(USER_ID, BILL_ID, MATURITY)).thenReturn(Optional.empty());
+        MockMultipartFile file = this.file(this.billRow("Esedékesség fizetés", "80 000", "80 000", "2099.12.31."));
+
+        CSVException exception = assertThrows(CSVException.class,
+                () -> this.webkincstarImportService.processXls(USER_ID, file));
+
+        assertEquals("No open position for " + BILL_NAME + " to redeem", exception.getMessage());
+        verify(this.interestRepository, never()).save(any(Interest.class));
     }
 
     @Test

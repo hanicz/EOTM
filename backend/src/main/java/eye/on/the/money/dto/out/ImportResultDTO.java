@@ -12,4 +12,5 @@ import lombok.*;
 public class ImportResultDTO {
     private int created;
     private int updated;
+    private int unchanged;
 }

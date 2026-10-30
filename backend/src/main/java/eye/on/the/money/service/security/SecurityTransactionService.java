@@ -32,6 +32,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -66,6 +67,15 @@ public class SecurityTransactionService implements ICSVService {
                 .collect(Collectors.toList());
         this.enrichWithRates(holdings);
         return holdings;
+    }
+
+    public Optional<SecurityTransactionDTO> getOpenPosition(Long userId, String securityId, LocalDate before) {
+        List<SecurityTransactionDTO> transactions = this.securityTransactionRepository
+                .findByUserIdAndSecurity_IdAndTransactionDateBeforeOrderByTransactionDate(userId, securityId, before)
+                .stream().map(this::convertToDTO).toList();
+        return this.getCalculated(transactions).values().stream()
+                .filter(t -> t.getQuantity() > 0)
+                .findFirst();
     }
 
     private void enrichWithRates(List<SecurityTransactionDTO> holdings) {

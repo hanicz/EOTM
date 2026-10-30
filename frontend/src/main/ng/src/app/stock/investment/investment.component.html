@@ -46,7 +46,7 @@
       <th pSortableColumn="shortName">Stock Name <p-sortIcon field="shortName"></p-sortIcon></th>
       <th pSortableColumn="buySell">Type <p-sortIcon field="buySell"></p-sortIcon></th>
       <th class="cell-num" pSortableColumn="quantity">Quantity <p-sortIcon field="quantity"></p-sortIcon></th>
-      <th class="cell-num" pSortableColumn="amount">Spent <p-sortIcon field="amount"></p-sortIcon></th>
+      <th class="cell-num" pSortableColumn="amount">Amount <p-sortIcon field="amount"></p-sortIcon></th>
       <th class="cell-num">Average</th>
       <th class="cell-num" pSortableColumn="transactionDate">Date <p-sortIcon field="transactionDate"></p-sortIcon></th>
       <th pSortableColumn="accountName">Account <p-sortIcon field="accountName"></p-sortIcon></th>
@@ -70,7 +70,7 @@
         </span>
       </td>
       <td data-label="Quantity" class="cell-num">{{investment.quantity | number : '0.0-6'}}</td>
-      <td data-label="Spent" class="cell-num">{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}</td>
+      <td data-label="Amount" class="cell-num">{{investment.amount | currency : investment.currencyId : 'symbol' : '0.0-2'}}</td>
       <td data-label="Average" class="cell-num cell-quiet">{{(investment.amount / investment.quantity) | currency : investment.currencyId : 'symbol' : '0.0-3'}}
       </td>
       <td data-label="Date" class="cell-num">{{investment.transactionDate | date:'mediumDate'}}</td>

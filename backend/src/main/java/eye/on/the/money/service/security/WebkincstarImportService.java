@@ -1,6 +1,7 @@
 package eye.on.the.money.service.security;
 
 import eye.on.the.money.dto.out.ImportResultDTO;
+import eye.on.the.money.dto.out.SecurityTransactionDTO;
 import eye.on.the.money.exception.CSVException;
 import eye.on.the.money.model.Currency;
 import eye.on.the.money.model.User;
@@ -13,6 +14,7 @@ import eye.on.the.money.repository.security.SecurityTransactionRepository;
 import eye.on.the.money.service.shared.IExcelService;
 import eye.on.the.money.service.user.UserService;
 import eye.on.the.money.util.DateFormats;
+import eye.on.the.money.util.Numbers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
@@ -24,9 +26,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -46,8 +51,10 @@ public class WebkincstarImportService implements IExcelService {
     private static final String BUY = "Vétel";
     private static final String SELL = "Eladás";
     private static final Set<String> IMPORTED_TYPES = Set.of(INTEREST_PAYMENT, BUY, SELL);
+    private static final String DISCOUNT_BILL_PREFIX = "DKJ ";
 
     private final SecurityTransactionRepository securityTransactionRepository;
+    private final SecurityTransactionService securityTransactionService;
     private final InterestRepository interestRepository;
     private final CurrencyRepository currencyRepository;
     private final SecurityService securityService;
@@ -58,8 +65,9 @@ public class WebkincstarImportService implements IExcelService {
         User user = this.userService.getReference(userId);
         Set<Long> claimedTransactions = new HashSet<>();
         Set<Long> claimedInterests = new HashSet<>();
+        List<Redemption> redemptions = new ArrayList<>();
         int created = 0;
-        int updated = 0;
+        int unchanged = 0;
         int rowNumber = 0;
         try (Workbook workbook = this.getWorkbook(file)) {
             Sheet sheet = this.getFirstSheet(workbook);
@@ -84,6 +92,11 @@ public class WebkincstarImportService implements IExcelService {
                         DateFormats.YYYY_MM_DD_DOTTED_SUFFIX);
                 BigDecimal amount = this.numericValue(row, amountColumn);
 
+                if (INTEREST_PAYMENT.equals(type) && security.getId().startsWith(DISCOUNT_BILL_PREFIX)) {
+                    redemptions.add(new Redemption(rowNumber, security, currency, valueDate, amount,
+                            this.numericValue(row, nominalColumn).intValue()));
+                    continue;
+                }
                 boolean isNew;
                 if (INTEREST_PAYMENT.equals(type)) {
                     isNew = this.upsertInterest(userId, user, security, currency, valueDate, amount, claimedInterests);
@@ -98,14 +111,41 @@ public class WebkincstarImportService implements IExcelService {
                 if (isNew) {
                     created++;
                 } else {
-                    updated++;
+                    unchanged++;
+                }
+            }
+            for (Redemption redemption : redemptions) {
+                rowNumber = redemption.rowNumber();
+                for (boolean isNew : this.redeem(userId, user, redemption, claimedTransactions, claimedInterests)) {
+                    if (isNew) {
+                        created++;
+                    } else {
+                        unchanged++;
+                    }
                 }
             }
         } catch (IOException | DateTimeParseException | IllegalArgumentException e) {
             throw this.excelParseFailure(rowNumber, e);
         }
-        log.debug("Imported webkincstár export, created {}, updated {}", created, updated);
-        return ImportResultDTO.builder().created(created).updated(updated).build();
+        log.debug("Imported webkincstár export, created {}, unchanged {}", created, unchanged);
+        return ImportResultDTO.builder().created(created).unchanged(unchanged).build();
+    }
+
+    private boolean[] redeem(Long userId, User user, Redemption redemption, Set<Long> claimedTransactions,
+                             Set<Long> claimedInterests) {
+        Security security = redemption.security();
+        SecurityTransactionDTO position = this.securityTransactionService
+                .getOpenPosition(userId, security.getId(), redemption.valueDate())
+                .orElseThrow(() -> new CSVException("No open position for " + security.getName() + " to redeem"));
+        BigDecimal cost = Numbers.divide(
+                position.getAmount().multiply(BigDecimal.valueOf(redemption.quantity())),
+                BigDecimal.valueOf(position.getQuantity()));
+        BigDecimal interest = redemption.amount().subtract(cost).setScale(2, RoundingMode.HALF_UP);
+        return new boolean[]{
+                this.upsertTransaction(userId, user, security, redemption.currency(), redemption.valueDate(),
+                        redemption.amount(), redemption.quantity(), "S", claimedTransactions),
+                this.upsertInterest(userId, user, security, redemption.currency(), redemption.valueDate(),
+                        interest, claimedInterests)};
     }
 
     private boolean upsertTransaction(Long userId, User user, Security security, Currency currency,
@@ -152,5 +192,9 @@ public class WebkincstarImportService implements IExcelService {
     private Currency getCurrency(String currencyId) {
         return this.currencyRepository.findById(currencyId)
                 .orElseThrow(() -> new CSVException("Unknown currency: " + currencyId));
+    }
+
+    private record Redemption(int rowNumber, Security security, Currency currency, LocalDate valueDate,
+                              BigDecimal amount, int quantity) {
     }
 }

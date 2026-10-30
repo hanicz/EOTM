@@ -35,7 +35,7 @@
         <th>Symbol</th>
         <th>Type</th>
         <th class="cell-num">Quantity</th>
-        <th class="cell-num">Spent</th>
+        <th class="cell-num">Amount</th>
         <th class="cell-num">Average</th>
         <th class="cell-num">Date</th>
         <th class="cell-num">Fee</th>
@@ -69,7 +69,7 @@
           }
         </td>
         <td data-label="Quantity" class="cell-num">{{transaction.quantity | number : '0.0-4'}}</td>
-        <td data-label="Spent" class="cell-num">{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</td>
+        <td data-label="Amount" class="cell-num">{{transaction.amount | currency : transaction.currencyId : 'symbol' : '0.0-2'}}</td>
         <td data-label="Average" class="cell-num">{{(transaction.amount / transaction.quantity) | currency : transaction.currencyId : 'symbol' : '0.0-3'}}
         </td>
         <td data-label="Date" class="cell-num">{{transaction.transactionDate | date:'mediumDate'}}</td>

@@ -204,8 +204,30 @@ class BankTransactionServiceTest {
 
         assertEquals(0, result.getCreated());
         assertEquals(1, result.getUpdated());
+        assertEquals(0, result.getUnchanged());
         verify(this.bankTransactionRepository, never()).save(any());
         assertEquals(ACCOUNT, existing.getAccountNumber());
+    }
+
+    @Test
+    void processCSV_reportsUnchangedWhenTheReimportedRowIsIdentical() {
+        BankTransaction existing = BankTransaction.builder().id(7L).bankTransactionId(BANK_ID)
+                .bookingDate(BOOKING_DATE).type("Kamatado").amount(new BigDecimal("-5")).memo("Ref.")
+                .accountNumber(ACCOUNT).accountName("ACCOUNT HOLDER").partnerAccount("").partnerName("")
+                .user(this.user).currency(this.huf).build();
+
+        when(this.bankTransactionRepository
+                .findByUserIdAndBankTransactionIdAndBookingDateAndTypeAndAmountAndMemo(
+                        USER_ID, BANK_ID, BOOKING_DATE, "Kamatado", new BigDecimal("-5"), "Ref."))
+                .thenReturn(Optional.of(existing));
+
+        ImportResultDTO result = this.bankTransactionService.processCSV(USER_ID,
+                this.file(StandardCharsets.UTF_8, this.row("2025.12.31", BANK_ID, "Kamatado", "-5", "Ref.")));
+
+        assertEquals(0, result.getCreated());
+        assertEquals(0, result.getUpdated());
+        assertEquals(1, result.getUnchanged());
+        verify(this.bankTransactionRepository, never()).save(any());
     }
 
     @Test

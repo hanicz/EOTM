@@ -4,6 +4,7 @@ import { Subject, Subscription, from, of } from 'rxjs';
 import { catchError, concatMap, debounceTime, distinctUntilChanged, map, switchMap, toArray } from 'rxjs/operators';
 import { BankTransaction, CATEGORY_CHIP_CLASS, CATEGORY_CHIP_NONE, CategoryColor, CategoryMatch, CategoryRule, SpendingCategory } from '../../model/bankTransaction';
 import { ImportResult } from '../../model/importResult';
+import { describeImport } from '../../util/importsummary';
 import { FinancialService } from '../../service/financial.service';
 import { Bind } from 'primeng/bind';
 import { Toolbar } from 'primeng/toolbar';
@@ -454,12 +455,15 @@ export class FinancialTransactionComponent {
     if (imported.length) {
       this.fetchData();
       this.dataChanged.emit();
-      const created = imported.reduce((sum, outcome) => sum + outcome.result!.created, 0);
-      const updated = imported.reduce((sum, outcome) => sum + outcome.result!.updated, 0);
+      const total: ImportResult = {
+        created: imported.reduce((sum, outcome) => sum + outcome.result!.created, 0),
+        updated: imported.reduce((sum, outcome) => sum + outcome.result!.updated, 0),
+        unchanged: imported.reduce((sum, outcome) => sum + outcome.result!.unchanged, 0)
+      };
       const fileCount = imported.length > 1 ? ` from ${imported.length} files` : '';
       this.messageService.add({
         severity: 'success',
-        detail: `Import finished. ${created} added, ${updated} updated${fileCount}.`
+        detail: describeImport(total, fileCount)
       });
     }
 

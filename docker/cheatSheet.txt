@@ -63,6 +63,16 @@ crontab -e
 #Restore
 gunzip -c backups/eotm-<timestamp>.sql.gz | docker compose exec -T db sh -c 'psql -v ON_ERROR_STOP=1 -U "$(cat /run/secrets/db_user)" "$POSTGRES_DB"'
 
+#Offsite backup (encrypted with age, uploaded by backup.sh)
+sudo apt install -y age rclone
+rclone config
+echo 'BACKUP_REMOTE=<remote>:<bucket>' > backup.env
+echo '<age public key>' > backup-recipients.txt
+rclone ls <remote>:<bucket>
+
+#Restore from offsite (private key stays off the server)
+rclone cat <remote>:<bucket>/eotm-<timestamp>.sql.gz.age | age -d -i <private_key_file> | gunzip -c | docker compose exec -T db sh -c 'psql -v ON_ERROR_STOP=1 -U "$(cat /run/secrets/db_user)" "$POSTGRES_DB"'
+
 --Tailscale
 curl -fsSL https://tailscale.com/install.sh | sh
 sudo tailscale up

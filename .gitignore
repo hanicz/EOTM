@@ -1,6 +1,8 @@
 HELP.md
 docker/.env
 docker/secrets/
+docker/backup.env
+docker/backup-recipients.txt
 docker/.deploy.lock
 target/
 !.mvn/wrapper/maven-wrapper.jar

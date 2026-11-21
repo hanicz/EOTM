@@ -1,4 +1,4 @@
-FROM eclipse-temurin:25-jdk
+FROM eclipse-temurin:27-jdk
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*

@@ -223,7 +223,7 @@ plan what they add up to.
 
 ## Overview
 
-- **Backend**: Java 25 / Spring Boot, built with Maven (multi-module: `backend` + `frontend`).
+- **Backend**: Java 27 / Spring Boot, built with Maven (multi-module: `backend` + `frontend`).
 - **Frontend**: Angular 22 UI (`frontend/src/main/ng`), built and bundled into the Spring Boot app's static resources.
 - **Database**: PostgreSQL.
 - **Cache**: Redis.

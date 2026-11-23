@@ -224,7 +224,7 @@ plan what they add up to.
 ## Overview
 
 - **Backend**: Java 27 / Spring Boot, built with Maven (multi-module: `backend` + `frontend`).
-- **Frontend**: Angular 22 UI (`frontend/src/main/ng`), built and bundled into the Spring Boot app's static resources.
+- **Frontend**: Angular 22 UI (`frontend`), built and bundled into the Spring Boot app's static resources.
 - **Database**: PostgreSQL.
 - **Cache**: Redis.
 - **Deployment**: Docker Compose (app, db, nginx, redis) on a Hetzner Cloud instance.
@@ -243,8 +243,7 @@ The application requires the following API subscriptions/keys, configured in the
 
 ```
 backend/   Spring Boot application (REST API, persistence, business logic)
-frontend/  Spring Boot module that serves the Angular UI
-  src/main/ng/  Angular source (PrimeNG + ApexCharts)
+frontend/  Angular UI (PrimeNG + ApexCharts), built by Maven into the backend's static resources
 docker/    Dockerfile, docker-compose.yml, nginx config and deployment notes
 ```
 
@@ -259,7 +258,7 @@ This builds the Angular app and packages it together with the backend into `back
 ## Running locally
 
 ```
-cd frontend/src/main/ng
+cd frontend
 npm install
 npm start          # ng serve, for UI development
 ```

@@ -4,6 +4,8 @@ export interface TransactionFilters {
   categoryId: number | null;
   from: string;
   to: string;
+  minAmount: number | null;
+  maxAmount: number | null;
 }
 
 export interface TransactionPaging {
@@ -28,6 +30,8 @@ export function transactionParams(filters: TransactionFilters, paging: Transacti
   if (filters.categoryId !== null) params['categoryId'] = String(filters.categoryId);
   if (filters.from) params['from'] = filters.from;
   if (filters.to) params['to'] = filters.to;
+  if (filters.minAmount !== null) params['minAmount'] = String(filters.minAmount);
+  if (filters.maxAmount !== null) params['maxAmount'] = String(filters.maxAmount);
   return params;
 }
 

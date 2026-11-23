@@ -377,7 +377,20 @@ class BankTransactionRepositoryTest {
     }
 
     private BankTransactionQuery search(String search) {
-        return new BankTransactionQuery(search, null, null, null, null);
+        return new BankTransactionQuery(search, null, null, null, null, null, null);
+    }
+
+    private BankTransactionQuery flag(BankTransactionFlag flag) {
+        return new BankTransactionQuery(null, flag, null, null, null, null, null);
+    }
+
+    private BankTransactionQuery category(Long categoryId) {
+        return new BankTransactionQuery(null, null, categoryId, null, null, null, null);
+    }
+
+    private BankTransactionQuery amounts(String min, String max) {
+        return new BankTransactionQuery(null, null, null, null, null,
+                min == null ? null : new BigDecimal(min), max == null ? null : new BigDecimal(max));
     }
 
     @Test
@@ -398,12 +411,10 @@ class BankTransactionRepositoryTest {
         BankTransaction excluded = this.persist(LocalDate.of(2025, 12, 2), this.huf, 200.0, true);
         BankTransaction taxable = this.persistTaxable(LocalDate.of(2025, 12, 3), this.huf, 300.0);
 
-        assertEquals(List.of(taxable.getId()), this.ids(new BankTransactionQuery(null, BankTransactionFlag.TAXABLE, null, null, null)));
-        assertEquals(List.of(counted.getId(), excluded.getId()),
-                this.ids(new BankTransactionQuery(null, BankTransactionFlag.NOT_TAXABLE, null, null, null)));
-        assertEquals(List.of(excluded.getId()), this.ids(new BankTransactionQuery(null, BankTransactionFlag.EXCLUDED, null, null, null)));
-        assertEquals(List.of(counted.getId(), taxable.getId()),
-                this.ids(new BankTransactionQuery(null, BankTransactionFlag.COUNTED, null, null, null)));
+        assertEquals(List.of(taxable.getId()), this.ids(this.flag(BankTransactionFlag.TAXABLE)));
+        assertEquals(List.of(counted.getId(), excluded.getId()), this.ids(this.flag(BankTransactionFlag.NOT_TAXABLE)));
+        assertEquals(List.of(excluded.getId()), this.ids(this.flag(BankTransactionFlag.EXCLUDED)));
+        assertEquals(List.of(counted.getId(), taxable.getId()), this.ids(this.flag(BankTransactionFlag.COUNTED)));
     }
 
     @Test
@@ -414,9 +425,8 @@ class BankTransactionRepositoryTest {
         this.bankTransactionRepository.saveAndFlush(categorized);
         BankTransaction uncategorized = this.persistListed(LocalDate.of(2025, 12, 2), -200.0, "CORNER CAFE", "memo");
 
-        assertEquals(List.of(categorized.getId()), this.ids(new BankTransactionQuery(null, null, groceries.getId(), null, null)));
-        assertEquals(List.of(uncategorized.getId()),
-                this.ids(new BankTransactionQuery(null, null, BankTransactionQuery.UNCATEGORIZED, null, null)));
+        assertEquals(List.of(categorized.getId()), this.ids(this.category(groceries.getId())));
+        assertEquals(List.of(uncategorized.getId()), this.ids(this.category(BankTransactionQuery.UNCATEGORIZED)));
     }
 
     @Test
@@ -427,7 +437,20 @@ class BankTransactionRepositoryTest {
         this.persist(LocalDate.of(2026, 1, 1), this.huf, 400.0, false);
 
         assertEquals(List.of(first.getId(), last.getId()), this.ids(new BankTransactionQuery(null, null, null,
-                LocalDate.of(2025, 12, 1), LocalDate.of(2025, 12, 31))));
+                LocalDate.of(2025, 12, 1), LocalDate.of(2025, 12, 31), null, null)));
+    }
+
+    @Test
+    void specification_filtersByInclusiveSignedAmountRange() {
+        BankTransaction rent = this.persistListed(LocalDate.of(2025, 12, 1), -150000.0, "LANDLORD", "rent");
+        BankTransaction groceries = this.persistListed(LocalDate.of(2025, 12, 2), -12500.0, "BLUE MART", "weekly shop");
+        BankTransaction coffee = this.persistListed(LocalDate.of(2025, 12, 3), -900.0, "CORNER CAFE", "coffee");
+        BankTransaction salary = this.persistListed(LocalDate.of(2025, 12, 4), 450000.0, "ACME LTD", "salary");
+
+        assertEquals(List.of(rent.getId(), groceries.getId()), this.ids(this.amounts("-150000", "-12500")));
+        assertEquals(List.of(coffee.getId(), salary.getId()), this.ids(this.amounts("-900", null)));
+        assertEquals(List.of(rent.getId(), groceries.getId(), coffee.getId()), this.ids(this.amounts(null, "0")));
+        assertEquals(List.of(groceries.getId()), this.ids(this.amounts("-12500.5", "-12499.5")));
     }
 
     @Test

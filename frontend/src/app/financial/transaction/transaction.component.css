@@ -58,6 +58,10 @@
   min-width: 11rem;
 }
 
+.amount-input {
+  width: 9rem;
+}
+
 @media screen and (max-width: 991px) {
   .memo-cell {
     max-width: none;

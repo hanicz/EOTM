@@ -46,6 +46,12 @@ public final class BankTransactionSpecifications {
             if (query.to() != null) {
                 predicates.add(builder.lessThanOrEqualTo(root.get("bookingDate"), query.to()));
             }
+            if (query.minAmount() != null) {
+                predicates.add(builder.greaterThanOrEqualTo(root.get("amount"), query.minAmount()));
+            }
+            if (query.maxAmount() != null) {
+                predicates.add(builder.lessThanOrEqualTo(root.get("amount"), query.maxAmount()));
+            }
             return builder.and(predicates.toArray(Predicate[]::new));
         };
     }

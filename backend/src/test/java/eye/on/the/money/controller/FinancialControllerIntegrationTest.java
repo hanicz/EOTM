@@ -55,6 +55,8 @@ class FinancialControllerIntegrationTest {
                         .param("categoryId", "0")
                         .param("from", "2025-12-01")
                         .param("to", "2025-12-31")
+                        .param("minAmount", "-50000")
+                        .param("maxAmount", "-1000.5")
                         .param("page", "2")
                         .param("size", "50")
                         .param("sort", "amount")
@@ -64,7 +66,8 @@ class FinancialControllerIntegrationTest {
                 .andExpect(jsonPath("$.content[0].id").value(7));
 
         verify(this.bankTransactionService).getTransactions(any(), eq(new BankTransactionQuery("blue mart",
-                        BankTransactionFlag.COUNTED, 0L, LocalDate.of(2025, 12, 1), LocalDate.of(2025, 12, 31))),
+                        BankTransactionFlag.COUNTED, 0L, LocalDate.of(2025, 12, 1), LocalDate.of(2025, 12, 31),
+                        new BigDecimal("-50000"), new BigDecimal("-1000.5"))),
                 eq(2), eq(50), eq("amount"), eq("asc"));
     }
 

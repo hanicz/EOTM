@@ -67,9 +67,16 @@
         [max]="toDate || null" class="p-column-filter filter-input" aria-label="Booked from">
       <input pInputText type="date" [(ngModel)]="toDate" (ngModelChange)="filterChanged()"
         [min]="fromDate || null" class="p-column-filter filter-input" aria-label="Booked to">
+      <input pInputText type="number" step="any" [(ngModel)]="minAmount" (ngModelChange)="amountChanged()"
+        placeholder="Min amount" pTooltip="Signed amount, spending is negative" tooltipPosition="top"
+        class="p-column-filter filter-input amount-input" aria-label="Minimum amount">
+      <input pInputText type="number" step="any" [(ngModel)]="maxAmount" (ngModelChange)="amountChanged()"
+        placeholder="Max amount" pTooltip="Signed amount, spending is negative" tooltipPosition="top"
+        class="p-column-filter filter-input amount-input" aria-label="Maximum amount">
       @if (hasFilters) {
         <button pButton pRipple type="button" icon="pi pi-filter-slash" severity="secondary"
-          pTooltip="Clear the flag and date filters" class="p-button-text filter-clear" (click)="clearFilters()"></button>
+          pTooltip="Clear the flag, category, date and amount filters" class="p-button-text filter-clear"
+          (click)="clearFilters()"></button>
       }
     </div>
   </ng-template>

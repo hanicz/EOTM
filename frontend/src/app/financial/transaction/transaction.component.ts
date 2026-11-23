@@ -67,6 +67,8 @@ export class FinancialTransactionComponent {
   search: string = '';
   fromDate: string = '';
   toDate: string = '';
+  minAmount: number | null = null;
+  maxAmount: number | null = null;
   flagFilter: string | null = null;
   categoryFilter: number | null = null;
   categories: SpendingCategory[] = [];
@@ -85,6 +87,7 @@ export class FinancialTransactionComponent {
   private beforeEdit: TransactionEditValues | null = null;
   private loadSubscription?: Subscription;
   private readonly searchInput = new Subject<string>();
+  private readonly amountInput = new Subject<void>();
   private readonly categoryRulePatternInput = new Subject<string>();
   @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
 
@@ -98,6 +101,7 @@ export class FinancialTransactionComponent {
       this.search = search;
       this.filterChanged();
     });
+    this.amountInput.pipe(debounceTime(400), takeUntilDestroyed()).subscribe(() => this.filterChanged());
     this.categoryRulePatternInput.pipe(
       debounceTime(250),
       switchMap(pattern => this.countCategoryRuleMatches(pattern)),
@@ -145,7 +149,9 @@ export class FinancialTransactionComponent {
       flag: this.flagFilter,
       categoryId: this.categoryFilter,
       from: this.fromDate,
-      to: this.toDate
+      to: this.toDate,
+      minAmount: this.amountBound(this.minAmount),
+      maxAmount: this.amountBound(this.maxAmount)
     }, this.paging);
     this.loadSubscription = this.financialService.getTransactions(params).subscribe({
       next: (page) => {
@@ -168,11 +174,20 @@ export class FinancialTransactionComponent {
   }
 
   get hasFilters(): boolean {
-    return !!this.fromDate || !!this.toDate || !!this.flagFilter || this.categoryFilter !== null;
+    return !!this.fromDate || !!this.toDate || !!this.flagFilter || this.categoryFilter !== null
+      || this.amountBound(this.minAmount) !== null || this.amountBound(this.maxAmount) !== null;
   }
 
   searchChanged(value: string): void {
     this.searchInput.next(value);
+  }
+
+  amountChanged(): void {
+    this.amountInput.next();
+  }
+
+  private amountBound(value: number | null): number | null {
+    return typeof value === 'number' && Number.isFinite(value) ? value : null;
   }
 
   filterChanged(): void {
@@ -186,6 +201,8 @@ export class FinancialTransactionComponent {
     this.toDate = '';
     this.flagFilter = null;
     this.categoryFilter = null;
+    this.minAmount = null;
+    this.maxAmount = null;
     this.filterChanged();
   }
 

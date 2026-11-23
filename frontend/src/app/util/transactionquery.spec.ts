@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_PAGING, lastPageStart, TransactionFilters, transactionParams } from './transactionquery';
 
-const NO_FILTERS: TransactionFilters = { search: '', flag: null, categoryId: null, from: '', to: '' };
+const NO_FILTERS: TransactionFilters = {
+  search: '', flag: null, categoryId: null, from: '', to: '', minAmount: null, maxAmount: null
+};
 
 describe('transactionParams', () => {
 
@@ -21,12 +23,21 @@ describe('transactionParams', () => {
 
   it('adds every filter that is set and trims the search', () => {
     const filters: TransactionFilters = {
-      search: '  blue mart ', flag: 'COUNTED', categoryId: 3, from: '2025-12-01', to: '2025-12-31'
+      search: '  blue mart ', flag: 'COUNTED', categoryId: 3, from: '2025-12-01', to: '2025-12-31',
+      minAmount: -50000, maxAmount: -1000.5
     };
 
     expect(transactionParams(filters, DEFAULT_PAGING)).toMatchObject({
-      search: 'blue mart', flag: 'COUNTED', categoryId: '3', from: '2025-12-01', to: '2025-12-31'
+      search: 'blue mart', flag: 'COUNTED', categoryId: '3', from: '2025-12-01', to: '2025-12-31',
+      minAmount: '-50000', maxAmount: '-1000.5'
     });
+  });
+
+  it('keeps a zero amount bound', () => {
+    const params = transactionParams({ ...NO_FILTERS, minAmount: 0, maxAmount: 0 }, DEFAULT_PAGING);
+
+    expect(params['minAmount']).toBe('0');
+    expect(params['maxAmount']).toBe('0');
   });
 
   it('keeps the uncategorized category, which is zero', () => {
